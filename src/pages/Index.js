@@ -17,7 +17,7 @@ const Index = () => (
           </h2>
           <p>
             Sanket Tambare&apos;s personal portfolio site. Software engineer
-            speialiased in full stack development.
+            speialiased in the full stack development.
           </p>
         </div>
       </header>
