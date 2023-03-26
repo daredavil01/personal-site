@@ -1,19 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
-import Main from '../layouts/Main';
+import Main from "../layouts/Main";
 
-import Education from '../components/Resume/Education';
-import Experience from '../components/Resume/Experience';
-import Skills from '../components/Resume/Skills';
-import Certification from '../components/Resume/Ceritification';
+import Education from "../components/Resume/Education";
+import Experience from "../components/Resume/Experience";
+import Skills from "../components/Resume/Skills";
+import Certification from "../components/Resume/Ceritification";
 
-import degrees from '../data/resume/degrees';
-import positions from '../data/resume/positions';
-import certifications from '../data/resume/certifications';
-import { skills, categories } from '../data/resume/skills';
+import degrees from "../data/resume/degrees";
+import positions from "../data/resume/positions";
+import certifications from "../data/resume/certifications";
+import { skills, categories } from "../data/resume/skills";
 
-const sections = ['Education', 'Experience', 'Skills', 'Courses', 'References'];
+const sections = ["Education", "Experience", "Certification", "Skills"];
 
 const Resume = () => (
   <Main
