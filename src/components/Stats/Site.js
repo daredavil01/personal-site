@@ -10,8 +10,18 @@ const Stats = () => {
   // TODO think about persisting this somewhere
   const fetchData = useCallback(async () => {
     // request must be authenticated if private
-    const res = await fetch("https://github.com/daredavil01/personal-site");
+    const res = await fetch(
+      "https://api.github.com/repos/daredavil01/personal-site"
+    );
     const resData = await res.json();
+
+    const commits = await fetch(
+      "https://api.github.com/repos/daredavil01/personal-site/commits"
+    );
+    const commitsData = await commits.json();
+    if (commitsData.length > 0) {
+      resData.commits = commitsData.length;
+    }
     setResponseData(
       initialData.map((field) => ({
         ...field,
