@@ -11,7 +11,9 @@ And, here's  what I wish to do: critically engage in new developments across tec
 
 At [Emtec Inc.](https://www.linkedin.com/company/emtec-inc/mycompany/verification/), working as software development engineer learning stuff across variety of domains including full-stack development, data analytics, ci-cd and DevOps. Just developing things everyday. Besides that I am part of variety of social organizations like [Nirman](https://nirman.mkcl.org/).
 
-# SOme interesting facts about me:
+Research Fellow at Network for  Advanced Study of Technology Geopolitics [(NAST)](https://takshashila.org.in/network-for-advanced-study-of-technology-geopolitics) Fellowship.
+
+# Some interesting facts about me
 
 - As of now, I am trying to balance few things simultaneously in life, doing full time job as Software Developer (Focused on full stack development and Data Engineering), a research fellow at [NAST](https://takshashila.org.in/network-for-advanced-study-of-technology-geopolitics) (Network for  Advanced Study of Technology Geopolitics (NAST) Fellowship) and actively training for Marathons (5 Days a week)!  
 - Besides technical stuff, I am interested in blogging, designing, video editing and digital wellbeing. Checkout my [portfolio links](https://linktr.ee/daredavil).

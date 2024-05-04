@@ -38,11 +38,6 @@ const data = [
     label: "Email",
     icon: faEnvelope,
   },
-  {
-    link: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    label: "XXXXXXXXXXXXX",
-    icon: faEnvelope,
-  },
 ];
 
 export default data;

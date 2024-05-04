@@ -1,28 +1,36 @@
 const routes = [
   {
     index: true,
-    label: 'Sanket Tambare',
-    path: '/',
+    label: "Sanket Tambare",
+    path: "/",
   },
   {
-    label: 'About',
-    path: '/about',
+    label: "About",
+    path: "/about",
   },
   {
-    label: 'Resume',
-    path: '/resume',
+    label: "Instagram",
+    path: "/instagram",
   },
   {
-    label: 'Projects',
-    path: '/projects',
+    label: "Videos",
+    path: "/reels",
   },
   {
-    label: 'Stats',
-    path: '/stats',
+    label: "Resume",
+    path: "/resume",
   },
   {
-    label: 'Contact',
-    path: '/contact',
+    label: "Projects",
+    path: "/projects",
+  },
+  {
+    label: "Stats",
+    path: "/stats",
+  },
+  {
+    label: "Contact",
+    path: "/contact",
   },
 ];
 
