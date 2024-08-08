@@ -6,6 +6,7 @@ import Main from "../layouts/Main";
 import Personal from "../components/Stats/Personal";
 import ResumeStats from "../components/Stats/ResumeStats";
 import Site from "../components/Stats/Site";
+import StravaLatestRides from "../components/Stats/stravaLatestRides";
 
 import positions from "../data/resume/positions";
 import certifications from "../data/resume/certifications";
@@ -28,6 +29,7 @@ const Stats = () => {
             </h2>
           </div>
         </header>
+        <StravaLatestRides />
         <Personal />
         <ResumeStats resumeData={resumeStats} />
         <Site />
