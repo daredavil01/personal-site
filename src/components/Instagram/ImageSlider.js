@@ -13,7 +13,6 @@ const divStyle = {
 };
 
 const ImageSlider = ({ data }) => {
-  console.log(data);
   return (
     <div style={{ width: "800px" }}>
       <article className="slide-container">
