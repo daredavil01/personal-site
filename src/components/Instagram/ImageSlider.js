@@ -14,22 +14,20 @@ const divStyle = {
 
 const ImageSlider = ({ data }) => {
   return (
-    <div style={{ width: "800px" }}>
-      <article className="slide-container">
-        <Slide>
-          {data.map((image) => (
-            <div key={image.caption}>
-              <div
-                style={{
-                  ...divStyle,
-                  backgroundImage: `url(${image.url})`,
-                }}
-              />
-            </div>
-          ))}
-        </Slide>
-      </article>
-    </div>
+    <article className="slide-container" style={{ width: "800px" }}>
+      <Slide>
+        {data.map((image) => (
+          <div key={image.caption}>
+            <div
+              style={{
+                ...divStyle,
+                backgroundImage: `url(${image.url})`,
+              }}
+            />
+          </div>
+        ))}
+      </Slide>
+    </article>
   );
 };
 
