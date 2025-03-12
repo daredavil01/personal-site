@@ -2,14 +2,17 @@ import React from "react";
 import sportsData from "../../data/sports";
 import Sport from "./Sport";
 
+sportsData.sort((a, b) => b.id - a.id);
+
 const Sports = () => (
   <article className="Post">
     <text className="Post-title" style={{ fontSize: "50px" }}>
-      Till date, I have ran numerous marathons and here are some of them!
+      Marathons run till date!
     </text>
     <br />
     <text className="Post-subtitle" style={{ fontSize: "30px" }}>
-      Additional details can be found in the posts below.
+      Till date, I have run 1000+ Kms in runnning practive and participated in
+      <b>{sportsData.length}</b> marathons.
     </text>
     {sportsData.map((p) => (
       <Sport data={p} />
