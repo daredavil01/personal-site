@@ -29,6 +29,10 @@ const routes = [
     path: "/stats",
   },
   {
+    label: "Sports",
+    path: "/sports",
+  },
+  {
     label: "Contact",
     path: "/contact",
   },
