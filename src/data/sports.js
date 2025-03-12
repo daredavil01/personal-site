@@ -1,6 +1,6 @@
 const { PUBLIC_URL } = process.env; // set automatically from package.json:homepage
 
-export const sportsData = [
+const sportsData = [
   {
     id: 1,
     title: "NDA Marathon",
