@@ -55,7 +55,7 @@ const sportsData = [
     distance: "21K",
     time: "02:45:52",
     timeCertificateLink:
-      "https://www.sportstimingsolutions.in/share.php?event_id=78946&bib=22231",
+      "https://sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJQdW5lIENpdHkgTWFyYXRob24gMjAyNCIsImVfaWQiOjc4OTQ2LCJiaWJObyI6IjIyMjMxIn0%3D",
     slideImages: [
       {
         url: `${PUBLIC_URL}/images/sports/apala_pune_1.jpg`,
@@ -201,7 +201,7 @@ const sportsData = [
     distance: "21K",
     time: "02:12:19",
     timeCertificateLink:
-      "https://www.sportstimingsolutions.in/share.php?event_id=83015&bib=22136",
+      "https://sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJQdW5pdCBCYWxhbiBHcm91cCBBcGxhIFB1bmUgTWFyYXRob24gU2Vhc29uIDQiLCJlX2lkIjo4MzAxNSwiYmliTm8iOiIyMjEzNiJ9",
     slideImages: [
       {
         url: `${PUBLIC_URL}/images/sports/apala_1.jpeg`,
@@ -251,7 +251,7 @@ const sportsData = [
     distance: "42 Kms",
     time: "05:30:34",
     timeCertificateLink:
-      "https://beta.sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJUYXRhIE11bWJhaSBNYXJhdGhvbiAyMDI1IiwiZV9pZCI6ODQyOTYsImJpYk5vIjo5MTI1fQ%3D%3D",
+      "https://sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJUYXRhIE11bWJhaSBNYXJhdGhvbiAyMDI1IiwiZV9pZCI6ODQyOTYsImJpYk5vIjoiOTEyNSJ9",
     slideImages: [
       {
         url: `${PUBLIC_URL}/images/sports/tmm_1.jpg`,
@@ -301,7 +301,7 @@ const sportsData = [
     distance: "35 Kms",
     time: "04:54:39",
     timeCertificateLink:
-      "https://beta.sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJUYXRhIFVsdHJhIE1hcmF0aG9uIDIwMjUiLCJlX2lkIjo4NTA4MCwiYmliTm8iOjM2MDU2fQ%3D%3D",
+      "https://sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJUYXRhIFVsdHJhIE1hcmF0aG9uIDIwMjUiLCJlX2lkIjo4NTA4MCwiYmliTm8iOiIzNjA1NiJ9",
     slideImages: [
       {
         url: `${PUBLIC_URL}/images/sports/ultra_1.jpg`,
