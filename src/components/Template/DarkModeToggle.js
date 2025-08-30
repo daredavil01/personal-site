@@ -29,7 +29,7 @@ const DarkModeToggle = () => {
   const styles = {
     toggle: {
       position: 'fixed',
-      top: '20px',
+      bottom: '20px',
       right: '20px',
       zIndex: 10000,
       background: 'transparent',

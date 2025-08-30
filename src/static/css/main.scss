@@ -111,36 +111,49 @@
 // Dark mode overrides
 .dark-mode {
   body {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
     color: var(--text-secondary);
   }
 
+  #root {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  }
+
   #wrapper {
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   }
 
   #header {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-bottom: 1px solid var(--border-color);
     
     h1 a {
-      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     nav.links ul li a {
-      color: var(--text-secondary);
+      background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       
       &:hover {
-        color: var(--accent-color);
+        background: linear-gradient(135deg, var(--accent-color) 0%, #6bb3ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
     }
   }
 
   #main {
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     
     article {
-      background: var(--bg-secondary);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
       border: 1px solid var(--border-color);
       
       header {
@@ -148,30 +161,43 @@
       }
       
       .title h2 a {
-        color: var(--text-primary);
+        background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
       
       .subtitle {
-        color: var(--text-secondary);
+        background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
     }
   }
 
   #sidebar {
-    background: var(--bg-secondary);
-    border-left: 1px solid var(--border-color);
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border-right: 1px solid var(--border-color);
     
     .blurb h2 {
-      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .blurb p {
-      color: var(--text-secondary);
+      background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
 
   .post {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border: 1px solid var(--border-color);
     
     header {
@@ -179,24 +205,36 @@
     }
     
     .title h2 a {
-      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .subtitle {
-      color: var(--text-secondary);
+      background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
 
   .mini-post {
-    background: var(--bg-tertiary);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
     border: 1px solid var(--border-color);
     
     header h3 a {
-      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .published {
-      color: var(--text-muted);
+      background: linear-gradient(135deg, var(--text-muted) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
 
@@ -205,11 +243,17 @@
       border-bottom: 1px solid var(--border-color);
       
       header h3 a {
-        color: var(--text-primary);
+        background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
       
       .published {
-        color: var(--text-muted);
+        background: linear-gradient(135deg, var(--text-muted) 0%, var(--text-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
     }
   }
@@ -267,19 +311,25 @@
 
   // Markdown content
   .markdown {
-    color: var(--text-secondary);
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     
     h1, h2, h3, h4, h5, h6 {
-      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     code {
-      background: var(--bg-tertiary);
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
       color: var(--text-primary);
     }
     
     pre {
-      background: var(--bg-tertiary);
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
       border: 1px solid var(--border-color);
     }
   }
@@ -388,17 +438,25 @@
   }
 
   .sports-v2-title {
-    background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+    background: linear-gradient(135deg, #4a9eff 0%, #6bb3ff 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
   }
 
   .sports-v2-subtitle {
-    color: var(--text-secondary) !important;
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sports-v2-label {
-    color: var(--text-secondary) !important;
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sports-v2-select {
@@ -433,11 +491,17 @@
   }
 
   .sports-v2-results-count {
-    color: var(--text-secondary) !important;
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sports-v2-no-results {
-    color: var(--text-secondary) !important;
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   // SportV2 component specific dark mode styles
@@ -447,11 +511,17 @@
   }
 
   .sport-v2-title {
-    color: var(--text-primary) !important;
+    background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sport-v2-description {
-    color: var(--text-secondary) !important;
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sport-v2-stat {
@@ -460,11 +530,17 @@
   }
 
   .sport-v2-stat-label {
-    color: var(--text-secondary) !important;
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sport-v2-stat-value {
-    color: var(--text-primary) !important;
+    background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .sport-v2-progress-bar {
@@ -491,132 +567,975 @@
     color: white !important;
   }
 
-  .sport-v2-image-title {
-    color: var(--text-primary) !important;
-  }
-
-  // Additional dark mode overrides for specific color values
-  [style*="color: #2c3e50"] {
-    color: var(--text-primary) !important;
-  }
-
-  [style*="color: #555"] {
-    color: var(--text-secondary) !important;
-  }
-
-  [style*="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)"] {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
-  }
-
-  [style*="background: rgba(255,255,255,0.8)"] {
+  // Dark mode toggle specific styles
+  .dark-mode-toggle-header {
     background: rgba(255, 255, 255, 0.1) !important;
-  }
-
-  [style*="border: 1px solid #e0e0e0"] {
     border-color: var(--border-color) !important;
-  }
-
-  [style*="background: #e0e0e0"] {
-    background: var(--border-color) !important;
-  }
-
-  // Timeline view dark mode styles
-  .sports-v2-timeline-line {
-    background: linear-gradient(180deg, #4a9eff 0%, #2d5aa0 100%) !important;
-  }
-
-  .sports-v2-timeline-dot {
-    background: var(--accent-color) !important;
-    border-color: var(--bg-primary) !important;
-    box-shadow: 0 0 0 3px var(--accent-color) !important;
-  }
-
-  // ImageSlider dark mode styles
-  .slide-container {
-    background: var(--bg-secondary) !important;
-    border-radius: 8px !important;
-    overflow: hidden !important;
-  }
-
-  // Additional dark mode fixes for specific elements
-  [style*="color: #2e59ba"] {
-    color: var(--accent-color) !important;
-  }
-
-  [style*="background: #2e59ba"] {
-    background: var(--accent-color) !important;
-  }
-
-  // Fix for any remaining hardcoded colors
-  [style*="color: #3c3b3b"] {
-    color: var(--text-primary) !important;
-  }
-
-  [style*="color: #646464"] {
-    color: var(--text-secondary) !important;
-  }
-
-  [style*="color: #aaaaaa"] {
-    color: var(--text-muted) !important;
-  }
-
-  // Fix for any remaining background colors
-  [style*="background: #f4f4f4"] {
-    background: var(--bg-secondary) !important;
-  }
-
-  [style*="background: #ffffff"] {
-    background: var(--bg-primary) !important;
-  }
-
-  // Fix for any remaining border colors
-  [style*="border-color: rgba(160,160,160,0.3)"] {
-    border-color: var(--border-color) !important;
-  }
-
-  // Ensure all text is visible in dark mode
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--text-primary) !important;
-  }
-
-  p {
-    color: var(--text-secondary) !important;
-  }
-
-  // Fix for any remaining button styles
-  button {
-    &:not(.dark-mode-toggle) {
-      color: var(--text-primary) !important;
-      
-      &:hover {
-        color: var(--accent-color) !important;
-      }
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      border-color: var(--accent-color) !important;
+    }
+    
+    span {
+      filter: brightness(1.2);
     }
   }
 
-  // Fix for any remaining link styles
-  a {
-    color: var(--accent-color) !important;
+  .dark-mode-toggle-draggable {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--border-color) !important;
+    backdrop-filter: blur(10px) !important;
     
     &:hover {
-      color: lighten(#4a9eff, 10%) !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      border-color: var(--accent-color) !important;
+    }
+    
+    .slider {
+      background: var(--accent-color) !important;
+    }
+  }
+
+  // Enhanced dark mode for header
+  #header {
+    .header-controls {
+      border-left: 1px solid var(--border-color);
+      padding-left: 1rem;
+    }
+    
+    // Enhanced text gradients for better visibility
+    h1, h2, h3, h4, h5, h6 {
+      background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    p, span, div {
+      background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+
+  // Enhanced dark mode for hamburger menu
+  .bm-menu {
+    background: var(--bg-secondary) !important;
+    border-left: 1px solid var(--border-color) !important;
+  }
+
+  .bm-item-list {
+    color: var(--text-primary) !important;
+  }
+
+  // Enhanced dark mode for form elements
+  input, textarea, select, button {
+    &::placeholder {
+      color: var(--text-muted) !important;
+    }
+  }
+
+  // Enhanced dark mode for scrollbars
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+    
+    &:hover {
+      background: var(--accent-color);
+    }
+  }
+
+  // Enhanced dark mode for selection
+  ::selection {
+    background: var(--accent-color);
+    color: white;
+  }
+
+  ::-moz-selection {
+    background: var(--accent-color);
+    color: white;
+  }
+
+  // Enhanced dark mode for focus states
+  *:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+
+  // Enhanced dark mode for transitions
+  * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  // Additional gradient enhancements for better text visibility
+  .title, .subtitle, .author, .published, .meta {
+    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  // Enhanced contrast for important text elements
+  .important-text, .highlight, .emphasis {
+    background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+  
+  // Gradient backgrounds for better visual hierarchy
+  .card, .panel, .section {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border: 1px solid var(--border-color);
+  }
+  
+  // Enhanced link gradients
+  a:not(.button):not(.toggle-button) {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #6bb3ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
+    &:hover {
+      background: linear-gradient(135deg, #6bb3ff 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
 }
 
 // Dark mode toggle button styles
 .dark-mode-toggle {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  // z-index: 1000 !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+  
   &:hover {
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    transform: scale(1.1);
+    background-color: rgba(255, 255, 255, 1) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  &:active {
+    transform: scale(0.95) !important;
+  }
+  
+  // Icon styling
+  svg, i {
+    width: 20px !important;
+    height: 20px !important;
+    color: #333 !important;
+    transition: all 0.3s ease !important;
   }
 }
 
 .dark-mode .dark-mode-toggle {
-  background-color: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   
   &:hover {
-    background-color: rgba(0, 0, 0, 0.3) !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  // Icon styling in dark mode
+  svg, i {
+    color: #ffffff !important;
+  }
+}
+
+// Additional toggle button styles for better compatibility
+.sports-toggle-button,
+.resume-toggle-button {
+  padding: 0.8rem 1.5rem !important;
+  border-radius: 25px !important;
+  border: 2px solid #667eea !important;
+  background: transparent !important;
+  color: #667eea !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.3s ease !important;
+  min-width: 140px !important;
+  max-width: 200px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  line-height: 1.3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 48px !important;
+  
+  &:hover {
+    background: #667eea !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  }
+  
+  &.sports-toggle-button-active,
+  &.resume-toggle-button-active {
+    background: #667eea !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  }
+}
+
+.dark-mode {
+  .sports-toggle-button,
+  .resume-toggle-button {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      background: var(--accent-color) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3) !important;
+    }
+    
+    &.sports-toggle-button-active,
+    &.resume-toggle-button-active {
+      background: var(--accent-color) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3) !important;
+    }
+  }
+}
+
+// ============================================================================
+// RESPONSIVE STYLES FOR INTERACTIVE VIEWS
+// ============================================================================
+
+// Resume and Sports Interactive Views Responsive Styles
+.resume-v2-container,
+.sports-v2-container {
+  @media (max-width: 768px) {
+    padding: 0.5rem !important;
+    
+    .resume-v2-header,
+    .sports-v2-header {
+      padding: 1rem !important;
+      margin-bottom: 1.5rem !important;
+      
+      .resume-v2-title,
+      .sports-v2-title {
+        font-size: 1.8rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+      
+      .resume-v2-subtitle,
+      .sports-v2-subtitle {
+        font-size: 0.9rem !important;
+        margin-bottom: 1rem !important;
+      }
+    }
+    
+    .resume-v2-stats-container,
+    .sports-v2-stats-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 0.5rem !important;
+      margin-bottom: 1rem !important;
+      
+      .resume-v2-stat-card,
+      .sports-v2-stat-card {
+        padding: 0.75rem !important;
+        
+        .resume-v2-stat-value,
+        .sports-v2-stat-value {
+          font-size: 1.2rem !important;
+        }
+        
+        .resume-v2-stat-label,
+        .sports-v2-stat-label {
+          font-size: 0.7rem !important;
+        }
+      }
+    }
+    
+    .resume-v2-navigation,
+    .sports-v2-controls {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+      margin-bottom: 1.5rem !important;
+      
+      .resume-v2-nav-button,
+      .sports-v2-toggle-button {
+        padding: 0.6rem 1rem !important;
+        font-size: 0.8rem !important;
+        width: 100% !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+        line-height: 1.4 !important;
+        min-height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.25rem !important;
+    
+    .resume-v2-header,
+    .sports-v2-header {
+      padding: 0.75rem !important;
+      
+      .resume-v2-title,
+      .sports-v2-title {
+        font-size: 1.5rem !important;
+      }
+      
+      .resume-v2-subtitle,
+      .sports-v2-subtitle {
+        font-size: 0.8rem !important;
+      }
+    }
+    
+    .resume-v2-stats-container,
+    .sports-v2-stats-grid {
+      grid-template-columns: 1fr !important;
+      gap: 0.5rem !important;
+    }
+  }
+}
+
+// Toggle Button Container Responsive Styles
+.toggle-container {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 1rem !important;
+  margin-bottom: 2rem !important;
+  flex-wrap: wrap !important;
+  
+  .toggle-button {
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 25px !important;
+    border: 2px solid #667eea !important;
+    background: transparent !important;
+    color: #667eea !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+    text-align: center !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    line-height: 1.3 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 48px !important;
+    
+    &:hover {
+      background: #667eea !important;
+      color: white !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+    
+    &.toggle-button-active {
+      background: #667eea !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.5rem !important;
+    
+    .toggle-button {
+      padding: 0.75rem 1.2rem !important;
+      font-size: 0.9rem !important;
+      width: 100% !important;
+      max-width: 300px !important;
+      min-width: auto !important;
+      margin: 0 auto !important;
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      hyphens: auto !important;
+      line-height: 1.4 !important;
+      min-height: 52px !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem !important;
+    margin-bottom: 1rem !important;
+    
+    .toggle-button {
+      padding: 0.7rem 1rem !important;
+      font-size: 0.85rem !important;
+      max-width: 280px !important;
+      min-width: auto !important;
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      hyphens: auto !important;
+      line-height: 1.4 !important;
+      min-height: 56px !important;
+      text-align: center !important;
+    }
+  }
+}
+
+// ResumeV2 Component Specific Responsive Styles
+.resume-v2-content {
+  @media (max-width: 768px) {
+    padding: 0.5rem !important;
+    
+    .resume-v2-section {
+      margin-bottom: 1.5rem !important;
+      
+      .resume-v2-section-header {
+        text-align: center !important;
+        margin-bottom: 1rem !important;
+        
+        .resume-v2-section-title {
+          font-size: 1.5rem !important;
+          margin-bottom: 0.25rem !important;
+        }
+        
+        .resume-v2-section-subtitle {
+          font-size: 0.9rem !important;
+        }
+      }
+    }
+    
+    // Education Grid
+    .resume-v2-education-grid {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+      padding: 0.5rem !important;
+    }
+    
+    // Experience Timeline
+    .resume-v2-timeline {
+      padding-left: 1rem !important;
+      
+      .resume-v2-timeline-line {
+        left: 0.5rem !important;
+      }
+      
+      .resume-v2-timeline-dot {
+        left: -0.75rem !important;
+        width: 10px !important;
+        height: 10px !important;
+      }
+    }
+    
+    // Skills Controls
+    .resume-v2-skills-controls {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+      margin-bottom: 1rem !important;
+      
+      .resume-v2-category-button {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.8rem !important;
+        width: 100% !important;
+        text-align: center !important;
+      }
+    }
+    
+    // Certifications Grid
+    .resume-v2-certifications-grid {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+      padding: 0.5rem !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.25rem !important;
+    
+    .resume-v2-section {
+      margin-bottom: 1rem !important;
+      
+      .resume-v2-section-header {
+        .resume-v2-section-title {
+          font-size: 1.3rem !important;
+        }
+        
+        .resume-v2-section-subtitle {
+          font-size: 0.8rem !important;
+        }
+      }
+    }
+  }
+}
+
+// SportsV2 Component Specific Responsive Styles
+.sports-v2-content {
+  @media (max-width: 768px) {
+    padding: 0.5rem !important;
+    
+    .sports-v2-controls {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      margin-bottom: 1.5rem !important;
+      
+      .sports-v2-control-group {
+        width: 100% !important;
+        
+        .sports-v2-label {
+          font-size: 0.8rem !important;
+          font-weight: 600 !important;
+          color: #333 !important;
+          margin-bottom: 0.5rem !important;
+          display: block !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+        }
+        
+        .sports-v2-select,
+        .sports-v2-input {
+          padding: 0.75rem 1rem !important;
+          font-size: 0.9rem !important;
+          width: 100% !important;
+          border: 2px solid #e0e0e0 !important;
+          border-radius: 8px !important;
+          background: white !important;
+          color: #333 !important;
+          font-weight: 500 !important;
+          
+          &:focus {
+            border-color: #667eea !important;
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+          }
+          
+          &::placeholder {
+            color: #999 !important;
+            font-weight: 400 !important;
+          }
+        }
+        
+        .sports-v2-select {
+          cursor: pointer !important;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+          background-position: right 0.75rem center !important;
+          background-repeat: no-repeat !important;
+          background-size: 1.5em 1.5em !important;
+          padding-right: 2.5rem !important;
+          appearance: none !important;
+        }
+      }
+    }
+    
+    .sports-v2-view-toggle {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+      margin-bottom: 1rem !important;
+      
+      .sports-v2-toggle-button {
+        padding: 0.6rem 1rem !important;
+        font-size: 0.8rem !important;
+        width: 100% !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+        line-height: 1.4 !important;
+        min-height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+    
+    // Cards View
+    .sports-v2-cards-container {
+      gap: 1rem !important;
+      
+      .sport-v2-container {
+        padding: 0.75rem !important;
+        
+        .sport-v2-header {
+          flex-direction: column !important;
+          gap: 0.5rem !important;
+          text-align: center !important;
+          
+          .sport-v2-title {
+            font-size: 1.2rem !important;
+          }
+          
+          .sport-v2-date {
+            font-size: 0.8rem !important;
+          }
+        }
+        
+        .sport-v2-stats {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 0.5rem !important;
+          margin: 0.75rem 0 !important;
+          
+          .sport-v2-stat {
+            padding: 0.5rem !important;
+            
+            .sport-v2-stat-label {
+              font-size: 0.7rem !important;
+            }
+            
+            .sport-v2-stat-value {
+              font-size: 1rem !important;
+            }
+          }
+        }
+      }
+    }
+    
+    // Timeline View
+    .sports-v2-timeline-container {
+      padding-left: 1rem !important;
+      
+      .sports-v2-timeline-line {
+        left: 0.5rem !important;
+      }
+      
+      .sports-v2-timeline-dot {
+        left: -0.75rem !important;
+        width: 10px !important;
+        height: 10px !important;
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.25rem !important;
+    
+    .sports-v2-controls {
+      gap: 0.5rem !important;
+      
+      .sports-v2-control-group {
+        .sports-v2-label {
+          font-size: 0.7rem !important;
+          margin-bottom: 0.4rem !important;
+        }
+        
+        .sports-v2-select,
+        .sports-v2-input {
+          padding: 0.6rem 0.8rem !important;
+          font-size: 0.8rem !important;
+        }
+      }
+    }
+    
+    .sports-v2-cards-container {
+      gap: 0.75rem !important;
+      
+      .sport-v2-container {
+        padding: 0.5rem !important;
+        
+        .sport-v2-header {
+          .sport-v2-title {
+            font-size: 1.1rem !important;
+          }
+          
+          .sport-v2-date {
+            font-size: 0.7rem !important;
+          }
+        }
+        
+        .sport-v2-stats {
+          grid-template-columns: 1fr !important;
+          gap: 0.25rem !important;
+          
+          .sport-v2-stat {
+            padding: 0.4rem !important;
+            
+            .sport-v2-stat-label {
+              font-size: 0.6rem !important;
+            }
+            
+            .sport-v2-stat-value {
+              font-size: 0.9rem !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Welcome Popup Responsive Styles
+.welcome-overlay {
+  @media (max-width: 768px) {
+    padding: 1rem !important;
+    
+    .welcome-popup {
+      padding: 1.5rem !important;
+      max-width: 90vw !important;
+      
+      .welcome-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+      
+      .welcome-message {
+        font-size: 0.9rem !important;
+        margin-bottom: 1rem !important;
+        line-height: 1.4 !important;
+      }
+      
+      .welcome-button {
+        padding: 0.75rem 1.5rem !important;
+        font-size: 0.9rem !important;
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem !important;
+    
+    .welcome-popup {
+      padding: 1rem !important;
+      
+      .welcome-title {
+        font-size: 1.3rem !important;
+      }
+      
+      .welcome-message {
+        font-size: 0.8rem !important;
+      }
+      
+      .welcome-button {
+        padding: 0.6rem 1.2rem !important;
+        font-size: 0.8rem !important;
+      }
+    }
+  }
+}
+
+// Dark Mode Responsive Enhancements
+.dark-mode {
+  .resume-v2-container,
+  .sports-v2-container {
+    @media (max-width: 768px) {
+      .resume-v2-header,
+      .sports-v2-header {
+        background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+      }
+      
+      .resume-v2-stat-card,
+      .sports-v2-stat-card {
+        background: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+  }
+  
+  .toggle-container {
+    .toggle-button {
+      border-color: var(--accent-color) !important;
+      color: var(--accent-color) !important;
+      
+      &:hover {
+        background: var(--accent-color) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3) !important;
+      }
+      
+      &.toggle-button-active {
+        background: var(--accent-color) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3) !important;
+      }
+    }
+  }
+  
+  .sports-v2-content {
+    .sports-v2-controls {
+      .sports-v2-control-group {
+        .sports-v2-label {
+          color: var(--text-primary) !important;
+        }
+        
+        .sports-v2-select,
+        .sports-v2-input {
+          background: var(--bg-tertiary) !important;
+          border-color: var(--border-color) !important;
+          color: var(--text-primary) !important;
+          
+          &:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1) !important;
+          }
+          
+          &::placeholder {
+            color: var(--text-muted) !important;
+          }
+        }
+        
+        .sports-v2-select {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+        }
+      }
+    }
+  }
+  
+  .welcome-overlay {
+    @media (max-width: 768px) {
+      .welcome-popup {
+        background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+      }
+    }
+  }
+}
+
+// Animation and Transition Responsive Optimizations
+@media (max-width: 768px) {
+  .resume-v2-container,
+  .sports-v2-container {
+    * {
+      transition: all 0.2s ease !important;
+    }
+  }
+  
+  .welcome-overlay {
+    .welcome-popup {
+      animation: slideInMobile 0.3s ease-out !important;
+    }
+  }
+}
+
+@keyframes slideInMobile {
+  from {
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+// Touch-friendly interactions for mobile
+@media (max-width: 768px) {
+  .resume-v2-nav-button,
+  .sports-v2-toggle-button,
+  .toggle-button,
+  .welcome-button {
+    min-height: 44px !important; // iOS touch target minimum
+    touch-action: manipulation !important;
+    
+    &:active {
+      transform: scale(0.98) !important;
+    }
+  }
+  
+  // Dark mode toggle mobile adjustments
+  .dark-mode-toggle {
+    bottom: 15px !important;
+    right: 15px !important;
+    width: 55px !important;
+    height: 55px !important;
+    
+    svg, i {
+      width: 22px !important;
+      height: 22px !important;
+    }
+  }
+  
+  .resume-v2-select,
+  .sports-v2-select,
+  .sports-v2-input {
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+  }
+  
+  // Enhanced touch targets for toggle buttons
+  .toggle-container {
+    .toggle-button {
+      min-height: 48px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      hyphens: auto !important;
+      line-height: 1.3 !important;
+      
+      &:active {
+        transform: scale(0.95) !important;
+        transition: transform 0.1s ease !important;
+      }
+    }
+  }
+}
+
+// Print styles for interactive views
+@media print {
+  .resume-v2-container,
+  .sports-v2-container {
+    .resume-v2-header,
+    .sports-v2-header {
+      background: none !important;
+      color: black !important;
+      box-shadow: none !important;
+    }
+    
+    .resume-v2-stat-card,
+    .sports-v2-stat-card {
+      background: #f5f5f5 !important;
+      border: 1px solid #ddd !important;
+    }
+    
+    .resume-v2-nav-button,
+    .sports-v2-toggle-button,
+    .toggle-button {
+      display: none !important;
+    }
+  }
+  
+  .welcome-overlay {
+    display: none !important;
+  }
+  
+  // Hide dark mode toggle in print
+  .dark-mode-toggle {
+    display: none !important;
   }
 }

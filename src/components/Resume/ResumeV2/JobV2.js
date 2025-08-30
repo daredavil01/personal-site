@@ -142,7 +142,7 @@ const JobV2 = ({ data, index }) => {
       <div style={styles.expandedContent}>
         <ul style={styles.pointsList}>
           {data.points.map((point) => (
-            <li key={`${point.id}`} style={styles.point}>
+            <li key={`point-${point.id}-${point.substring(0, 10)}`} style={styles.point}>
               ✨ {point}
             </li>
           ))}

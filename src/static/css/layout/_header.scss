@@ -228,8 +228,80 @@
 	display: none;
 }
 
+// Header controls container
+.header-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	height: inherit;
+	line-height: inherit;
+}
+
+// Dark mode toggle in header
+.dark-mode-toggle-header {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5em;
+	height: 2.5em;
+	border-radius: 50%;
+	border: 1px solid _palette(border);
+	background: transparent;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	
+	&:hover {
+		background: rgba(255, 255, 255, 0.1);
+		transform: scale(1.1);
+	}
+	
+	span {
+		font-size: 1.2em;
+		transition: transform 0.3s ease;
+	}
+}
+
+// Dark mode toggle draggable
+.dark-mode-toggle-draggable {
+	&:hover {
+		transform: scale(1.05);
+	}
+	
+	&:active {
+		cursor: grabbing;
+	}
+}
+
 @include breakpoint(medium) {
 	.hamburger-container  {
 		display: initial;
+	}
+	
+	.header-controls {
+		gap: 0.3rem;
+	}
+	
+	.dark-mode-toggle-header {
+		width: 2.2em;
+		height: 2.2em;
+		
+		span {
+			font-size: 1em;
+		}
+	}
+}
+
+@include breakpoint(small) {
+	.header-controls {
+		gap: 0.2rem;
+	}
+	
+	.dark-mode-toggle-header {
+		width: 2em;
+		height: 2em;
+		
+		span {
+			font-size: 0.9em;
+		}
 	}
 }
