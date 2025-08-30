@@ -66,3 +66,557 @@
 	@import 'pages/resume';
 	@import 'pages/skills';
 	@import 'pages/stats';
+
+// Dark Mode Styles
+.dark-mode {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888888;
+  --border-color: #404040;
+  --border-light: #505050;
+  --accent-color: #4a9eff;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --overlay-color: rgba(0, 0, 0, 0.8);
+  
+  // Override existing palette colors
+  --palette-bg: var(--bg-primary);
+  --palette-bg-alt: var(--bg-secondary);
+  --palette-fg: var(--text-secondary);
+  --palette-fg-bold: var(--text-primary);
+  --palette-fg-light: var(--text-muted);
+  --palette-border: var(--border-color);
+  --palette-border-bg: var(--border-light);
+  --palette-border-alt: var(--border-color);
+  --palette-accent: var(--accent-color);
+}
+
+// Light mode variables (default)
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f4;
+  --bg-tertiary: #e8e8e8;
+  --text-primary: #3c3b3b;
+  --text-secondary: #646464;
+  --text-muted: #aaaaaa;
+  --border-color: rgba(160, 160, 160, 0.3);
+  --border-light: rgba(160, 160, 160, 0.075);
+  --accent-color: #2e59ba;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --overlay-color: rgba(0, 0, 0, 0.8);
+}
+
+// Dark mode overrides
+.dark-mode {
+  body {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+
+  #wrapper {
+    background: var(--bg-primary);
+  }
+
+  #header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    
+    h1 a {
+      color: var(--text-primary);
+    }
+    
+    nav.links ul li a {
+      color: var(--text-secondary);
+      
+      &:hover {
+        color: var(--accent-color);
+      }
+    }
+  }
+
+  #main {
+    background: var(--bg-primary);
+    
+    article {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      
+      header {
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .title h2 a {
+        color: var(--text-primary);
+      }
+      
+      .subtitle {
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  #sidebar {
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    
+    .blurb h2 {
+      color: var(--text-primary);
+    }
+    
+    .blurb p {
+      color: var(--text-secondary);
+    }
+  }
+
+  .post {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    
+    header {
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .title h2 a {
+      color: var(--text-primary);
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+    }
+  }
+
+  .mini-post {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    
+    header h3 a {
+      color: var(--text-primary);
+    }
+    
+    .published {
+      color: var(--text-muted);
+    }
+  }
+
+  .list {
+    .item {
+      border-bottom: 1px solid var(--border-color);
+      
+      header h3 a {
+        color: var(--text-primary);
+      }
+      
+      .published {
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  // Form elements
+  input, textarea, select {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    
+    &:focus {
+      border-color: var(--accent-color);
+    }
+  }
+
+  // Buttons
+  .button {
+    background: var(--accent-color);
+    color: white;
+    
+    &:hover {
+      background: lighten(#4a9eff, 10%);
+    }
+  }
+
+  // Links
+  a {
+    color: var(--accent-color);
+    
+    &:hover {
+      color: lighten(#4a9eff, 10%);
+    }
+  }
+
+  // Code blocks
+  pre, code {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  // Tables
+  table {
+    border: 1px solid var(--border-color);
+    
+    th, td {
+      border: 1px solid var(--border-color);
+    }
+    
+    th {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+  }
+
+  // Markdown content
+  .markdown {
+    color: var(--text-secondary);
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text-primary);
+    }
+    
+    code {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    pre {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+    }
+  }
+
+  // ResumeV2 component dark mode styles
+  .resume-v2-container {
+    background: var(--bg-primary) !important;
+  }
+
+  .resume-v2-header {
+    background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+    box-shadow: 0 10px 30px var(--shadow-color) !important;
+  }
+
+  .resume-v2-stat-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .resume-v2-nav-button {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      background: var(--accent-color) !important;
+      color: white !important;
+    }
+  }
+
+  .resume-v2-nav-button-active {
+    background: var(--accent-color) !important;
+    color: white !important;
+  }
+
+  .resume-v2-content {
+    background: var(--bg-primary) !important;
+    color: var(--text-secondary) !important;
+  }
+
+  // Sports component dark mode styles
+  .sports-container {
+    background: var(--bg-primary) !important;
+  }
+
+  .sports-toggle-button {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      background: var(--accent-color) !important;
+      color: white !important;
+    }
+  }
+
+  .sports-toggle-button-active {
+    background: var(--accent-color) !important;
+    color: white !important;
+  }
+
+  // Welcome popup dark mode styles
+  .welcome-overlay {
+    background: var(--overlay-color) !important;
+  }
+
+  .welcome-popup {
+    background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+    box-shadow: 0 20px 40px var(--shadow-color) !important;
+  }
+
+  .welcome-button {
+    background: var(--bg-primary) !important;
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      background: var(--bg-secondary) !important;
+    }
+  }
+
+  // General dark mode styles for inline styled components
+  [style*="background: linear-gradient"] {
+    background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+  }
+
+  [style*="color: #333"] {
+    color: var(--text-primary) !important;
+  }
+
+  [style*="color: #666"] {
+    color: var(--text-secondary) !important;
+  }
+
+  [style*="background: rgba(255,255,255,0.1)"] {
+    background: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  [style*="border: 2px solid #667eea"] {
+    border-color: var(--accent-color) !important;
+  }
+
+  [style*="color: #667eea"] {
+    color: var(--accent-color) !important;
+  }
+
+  // SportsV2 component specific dark mode styles
+  .sports-v2-container {
+    background: var(--bg-primary) !important;
+  }
+
+  .sports-v2-title {
+    background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  .sports-v2-subtitle {
+    color: var(--text-secondary) !important;
+  }
+
+  .sports-v2-label {
+    color: var(--text-secondary) !important;
+  }
+
+  .sports-v2-select {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .sports-v2-input {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .sports-v2-toggle-button {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      background: var(--accent-color) !important;
+      color: white !important;
+    }
+  }
+
+  .sports-v2-toggle-button-active {
+    background: var(--accent-color) !important;
+    color: white !important;
+  }
+
+  .sports-v2-stat-card {
+    background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
+  }
+
+  .sports-v2-results-count {
+    color: var(--text-secondary) !important;
+  }
+
+  .sports-v2-no-results {
+    color: var(--text-secondary) !important;
+  }
+
+  // SportV2 component specific dark mode styles
+  .sport-v2-container {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .sport-v2-title {
+    color: var(--text-primary) !important;
+  }
+
+  .sport-v2-description {
+    color: var(--text-secondary) !important;
+  }
+
+  .sport-v2-stat {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .sport-v2-stat-label {
+    color: var(--text-secondary) !important;
+  }
+
+  .sport-v2-stat-value {
+    color: var(--text-primary) !important;
+  }
+
+  .sport-v2-progress-bar {
+    background: var(--border-color) !important;
+  }
+
+  .sport-v2-expand-button {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      background: var(--accent-color) !important;
+      color: white !important;
+    }
+  }
+
+  .sport-v2-expand-button-active {
+    background: var(--accent-color) !important;
+    color: white !important;
+  }
+
+  .sport-v2-certificate-link {
+    background: var(--accent-color) !important;
+    color: white !important;
+  }
+
+  .sport-v2-image-title {
+    color: var(--text-primary) !important;
+  }
+
+  // Additional dark mode overrides for specific color values
+  [style*="color: #2c3e50"] {
+    color: var(--text-primary) !important;
+  }
+
+  [style*="color: #555"] {
+    color: var(--text-secondary) !important;
+  }
+
+  [style*="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)"] {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
+  }
+
+  [style*="background: rgba(255,255,255,0.8)"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  [style*="border: 1px solid #e0e0e0"] {
+    border-color: var(--border-color) !important;
+  }
+
+  [style*="background: #e0e0e0"] {
+    background: var(--border-color) !important;
+  }
+
+  // Timeline view dark mode styles
+  .sports-v2-timeline-line {
+    background: linear-gradient(180deg, #4a9eff 0%, #2d5aa0 100%) !important;
+  }
+
+  .sports-v2-timeline-dot {
+    background: var(--accent-color) !important;
+    border-color: var(--bg-primary) !important;
+    box-shadow: 0 0 0 3px var(--accent-color) !important;
+  }
+
+  // ImageSlider dark mode styles
+  .slide-container {
+    background: var(--bg-secondary) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+
+  // Additional dark mode fixes for specific elements
+  [style*="color: #2e59ba"] {
+    color: var(--accent-color) !important;
+  }
+
+  [style*="background: #2e59ba"] {
+    background: var(--accent-color) !important;
+  }
+
+  // Fix for any remaining hardcoded colors
+  [style*="color: #3c3b3b"] {
+    color: var(--text-primary) !important;
+  }
+
+  [style*="color: #646464"] {
+    color: var(--text-secondary) !important;
+  }
+
+  [style*="color: #aaaaaa"] {
+    color: var(--text-muted) !important;
+  }
+
+  // Fix for any remaining background colors
+  [style*="background: #f4f4f4"] {
+    background: var(--bg-secondary) !important;
+  }
+
+  [style*="background: #ffffff"] {
+    background: var(--bg-primary) !important;
+  }
+
+  // Fix for any remaining border colors
+  [style*="border-color: rgba(160,160,160,0.3)"] {
+    border-color: var(--border-color) !important;
+  }
+
+  // Ensure all text is visible in dark mode
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+  }
+
+  p {
+    color: var(--text-secondary) !important;
+  }
+
+  // Fix for any remaining button styles
+  button {
+    &:not(.dark-mode-toggle) {
+      color: var(--text-primary) !important;
+      
+      &:hover {
+        color: var(--accent-color) !important;
+      }
+    }
+  }
+
+  // Fix for any remaining link styles
+  a {
+    color: var(--accent-color) !important;
+    
+    &:hover {
+      color: lighten(#4a9eff, 10%) !important;
+    }
+  }
+}
+
+// Dark mode toggle button styles
+.dark-mode-toggle {
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1);
+  }
+}
+
+.dark-mode .dark-mode-toggle {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+  }
+}

@@ -321,6 +321,56 @@ const sportsData = [
       },
     ],
   },
+  {
+    id: 13,
+    title: "Vrukshathon 2025",
+    date: "June 1, 2025",
+    description: "Broke my best timing for Half Marathon to 2 hrs 6 mins!",
+    place: "Pune",
+    distance: "21 Kms",
+    time: "2:08:11",
+    timeCertificateLink:
+      "https://alpharacingsolution.com/event/bibres/68787d12-f9b2-4ae6-9509-d2f998f3d9d2/?bibno=21093",
+    slideImages: [
+      {
+        url: `${PUBLIC_URL}/images/sports/vrukshathon_2025_1.jpg`,
+        caption: "Slide 1",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/vrukshathon_2025_2.jpg`,
+        caption: "Slide 2",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/vrukshathon_2025_3.jpg`,
+        caption: "Slide 3",
+      }
+    ],
+  },
+  {
+    id: 14,
+    title: "NMDC Hyderabad Marathon 2025",
+    date: "August 24, 2025",
+    description: "My first sub-2 half-marathon, finished in 1:59:57!",
+    place: "Hyderabad",
+    distance: "21 Kms",
+    time: "1:59:57",
+    timeCertificateLink:
+      "https://ifinish.in/myresultdetail/H2YWFfmyN5Fzn9ie0HQ6vrSWBdVZotTiKxAOcGKM80YwhLNy2NFZpZMBqq5OPErhczPWIvvWvxyUGDhForMcPA",
+    slideImages: [
+      {
+        url: `${PUBLIC_URL}/images/sports/nmdc_2025_1.jpg`,
+        caption: "Slide 1",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/nmdc_2025_2.jpg`,
+        caption: "Slide 2",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/nmdc_2025_3.jpg`,
+        caption: "Slide 3",
+      }
+    ],
+  },
 ];
 
 export default sportsData;
