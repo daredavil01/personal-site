@@ -9,6 +9,10 @@ const routes = [
     path: "/about",
   },
   {
+    label: "Now",
+    path: "/now",
+  },
+  {
     label: "Instagram",
     path: "/instagram",
   },

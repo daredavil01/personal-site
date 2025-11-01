@@ -18,6 +18,7 @@ const Stats = lazy(() => import("./pages/Stats"));
 const Instagram = lazy(() => import("./pages/Instagram"));
 const Reels = lazy(() => import("./pages/Reels"));
 const SportsPage = lazy(() => import("./pages/Sports"));
+const Now = lazy(() => import("./pages/Now"));
 
 const App = () => (
   <BrowserRouter basename={PUBLIC_URL}>
@@ -32,6 +33,7 @@ const App = () => (
         <Route path="/instagram" element={<Instagram />} />
         <Route path="/reels" element={<Reels />} />
         <Route path="/sports" element={<SportsPage />} />
+        <Route path="/now" element={<Now />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
