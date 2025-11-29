@@ -238,7 +238,11 @@ const SportV2 = ({ data }) => {
         {isExpanded ? 'Hide Details' : 'Show Details'}
       </button>
 
-      <div style={cardStyles.expandedContent}>
+      <div
+        style={cardStyles.expandedContent}
+        onClick={(e) => e.stopPropagation()}
+        role="presentation"
+      >
         <a
           href={data.timeCertificateLink}
           target="_blank"
