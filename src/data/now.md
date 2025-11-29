@@ -18,16 +18,29 @@ So, this section will highlight what I was doing last month and what I am up to 
 
 ---
 
-## What am I up to this month (November 2025)
+## What am I up to this month (December 2025)
 
-- As of now, I am reading [book](https://amzn.in/d/2bpUh93) called `The Anxious Generation` by Jonathan Haidt. Will hopefully put out blog in the 1st half of the month.
-- Pune International Marathon is scheduled on 7th December, where I am a pacer for the 21 km run. I will run the PIM Super Sunday run on 9th November, 2025.
-- I intend to start another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
-- I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
+- _Pune International Marathon_: Pune International Marathon is scheduled on 7th December, where I am a pacer for the 21 km run.
+- _Book_: I intend to start another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
+- _Blog_: I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
 
 ---
 
-## What was I doing last month (October, 2025)
+## What was I doing last month (November, 2025)
+
+- _Vibe-coding_: Built **Get Me My Training Plan!** at the AI Study Group organized by `Aditya Kabra` and `Manasi Kabra`. It's a tool for runners to generate personalized Half/Full Marathon training plans based on recent race times. (Check it out [here](https://runningplan1.netlify.app/)!)
+- _Website Update_: Revamped my personal homepage and added this **Now** page to share "unknown unknowns" of my life! Check out my profile on [nownownow.com](https://nownownow.com/p/R521). Inspired by [Sai Rahul Poruri](https://nownownow.com/p/VXc2).
+- _Certificate_: Received the **Bharat AI Enthusiast/Expert Certificate** from NPCI for the Bharat AI Quest at IIT Bombay. It was a great experience connecting with folks like Rahul Vyas and Shraman Lahiri. (Check out the [post](https://www.linkedin.com/posts/sankettambare_bharat-ai-quest-certificat-sanket-tambare-activity-7394029638278258688-BzEH))
+- _Book Review_: Finished **The Anxious Generation** by Jonathan Haidt. It explains exactly why our focus is fragmenting as we shift from a "play-based" to a "phone-based" existence. (Read my full takeaway [here](https://sankettambare.substack.com/p/book-review-the-anxious-generation))
+- _Book Review_: Finished **Careless People: A Cautionary Tale of Power, Greed, and Lost Idealism** by Sarah Wynn-Williams. One fascinating thing about understanding different large scale technology mis-use is understanding way they are orchestrated! Be it Cambridge Analytica, Pegasus Spyware, Permanent Record by Edward Snowden or anything else! The book explores multiple situations including 2016 US elections, Myanmar Massacre, FB in China and many more! Definitely interesting one, detailed blog coming soon!
+
+
+---
+## Archives
+
+This will be a section of archival notes.
+
+## October 2025
 
 - _4th-5th October_: **Bharat AI Quest** at `IIT Bombay`, organised by `NPCI` and workshop supported by `Nvidia`
 
@@ -51,8 +64,3 @@ So, this section will highlight what I was doing last month and what I am up to 
 - _12th October_: PIM Super Sunday, 21 Kms Run: 12th October
   - Practice run for PIM scheduled on _7th December, 2025_
 
----
-
-## Archives
-
-This will be a section of archival notes.

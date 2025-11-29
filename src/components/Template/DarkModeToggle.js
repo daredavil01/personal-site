@@ -8,7 +8,7 @@ const DarkModeToggle = () => {
       return JSON.parse(saved);
     }
     // Check system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return false; // Default to light mode
   });
 
   useEffect(() => {
