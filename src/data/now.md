@@ -20,7 +20,7 @@ So, this section will highlight what I was doing last month and what I am up to 
 
 ## What am I up to this month (December 2025)
 
-- _Pune International Marathon_: Pune International Marathon is scheduled on 7th December, where I am a pacer for the 21 km run. I will run the PIM Super Sunday run on 9th November, 2025.
+- _Pune International Marathon_: Pune International Marathon is scheduled on 7th December, where I am a pacer for the 21 km run.
 - _Book_: I intend to start another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
 - _Blog_: I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
 
