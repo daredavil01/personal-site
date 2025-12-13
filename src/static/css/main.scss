@@ -14,58 +14,55 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
-	@include skel-breakpoints((
-		xlarge: '(max-width: 1680px)',
-		large: '(max-width: 1280px)',
-		medium: '(max-width: 980px)',
-		small: '(max-width: 736px)',
-		xsmall: '(max-width: 480px)'
-	));
+@include skel-breakpoints((xlarge: '(max-width: 1680px)',
+    large: '(max-width: 1280px)',
+    medium: '(max-width: 980px)',
+    small: '(max-width: 736px)',
+    xsmall: '(max-width: 480px)'
+  ));
 
-	@include skel-layout((
-		reset: 'full',
-		boxModel: 'border',
-		grid: ( gutters: 1em )
-	));
+@include skel-layout((reset: 'full',
+    boxModel: 'border',
+    grid: (gutters: 1em)));
 
 // Base.
 
-	@import 'base/page';
-	@import 'base/typography';
+@import 'base/page';
+@import 'base/typography';
 
 // Component.
 
-	@import 'components/author';
-	@import 'components/blurb';
-	@import 'components/box';
-	@import 'components/button';
-	@import 'components/form';
-	@import 'components/icon';
-	@import 'components/image';
-	@import 'components/list';
-	@import 'components/mini-post';
-	@import 'components/post';
-	@import 'components/section';
-	@import 'components/table';
-	@import 'components/hamburger';
-	@import 'components/markdown';
+@import 'components/author';
+@import 'components/blurb';
+@import 'components/box';
+@import 'components/button';
+@import 'components/form';
+@import 'components/icon';
+@import 'components/image';
+@import 'components/list';
+@import 'components/mini-post';
+@import 'components/post';
+@import 'components/section';
+@import 'components/table';
+@import 'components/hamburger';
+@import 'components/markdown';
 
 
 // Layout.
 
-	@import 'layout/header';
-	@import 'layout/wrapper';
-	@import 'layout/main';
-	@import 'layout/sidebar';
-	@import 'layout/intro';
-	@import 'layout/footer';
-	@import 'layout/menu';
+@import 'layout/header';
+@import 'layout/wrapper';
+@import 'layout/main';
+@import 'layout/sidebar';
+@import 'layout/intro';
+@import 'layout/footer';
+@import 'layout/menu';
 
-	@import 'pages/contact';
-	@import 'pages/notFound';
-	@import 'pages/resume';
-	@import 'pages/skills';
-	@import 'pages/stats';
+@import 'pages/contact';
+@import 'pages/notFound';
+@import 'pages/resume';
+@import 'pages/skills';
+@import 'pages/stats';
 
 // Dark Mode Styles
 .dark-mode {
@@ -80,7 +77,7 @@
   --accent-color: #4a9eff;
   --shadow-color: rgba(0, 0, 0, 0.3);
   --overlay-color: rgba(0, 0, 0, 0.8);
-  
+
   // Override existing palette colors
   --palette-bg: var(--bg-primary);
   --palette-bg-alt: var(--bg-secondary);
@@ -108,12 +105,15 @@
   --overlay-color: rgba(0, 0, 0, 0.8);
 }
 
+// Dark mode override for body (must be separate selector)
+body.dark-mode {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  color: var(--text-secondary);
+}
+
 // Dark mode overrides
 .dark-mode {
-  body {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    color: var(--text-secondary);
-  }
+  // body rule removed from here
 
   #root {
     background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
@@ -126,20 +126,20 @@
   #header {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-bottom: 1px solid var(--border-color);
-    
+
     h1 a {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     nav.links ul li a {
       background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      
+
       &:hover {
         background: linear-gradient(135deg, var(--accent-color) 0%, #6bb3ff 100%);
         -webkit-background-clip: text;
@@ -151,22 +151,22 @@
 
   #main {
     background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-    
+
     article {
       background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
       border: 1px solid var(--border-color);
-      
+
       header {
         border-bottom: 1px solid var(--border-color);
       }
-      
+
       .title h2 a {
         background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
-      
+
       .subtitle {
         background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
         -webkit-background-clip: text;
@@ -180,14 +180,14 @@
     padding: 1rem;
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-right: 1px solid var(--border-color);
-    
+
     .blurb h2 {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     .blurb p {
       background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
       -webkit-background-clip: text;
@@ -199,18 +199,18 @@
   .post {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border: 1px solid var(--border-color);
-    
+
     header {
       border-bottom: 1px solid var(--border-color);
     }
-    
+
     .title h2 a {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     .subtitle {
       background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
       -webkit-background-clip: text;
@@ -222,14 +222,14 @@
   .mini-post {
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
     border: 1px solid var(--border-color);
-    
+
     header h3 a {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     .published {
       background: linear-gradient(135deg, var(--text-muted) 0%, var(--text-secondary) 100%);
       -webkit-background-clip: text;
@@ -241,14 +241,14 @@
   .list {
     .item {
       border-bottom: 1px solid var(--border-color);
-      
+
       header h3 a {
         background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
-      
+
       .published {
         background: linear-gradient(135deg, var(--text-muted) 0%, var(--text-secondary) 100%);
         -webkit-background-clip: text;
@@ -259,11 +259,13 @@
   }
 
   // Form elements
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    
+
     &:focus {
       border-color: var(--accent-color);
     }
@@ -273,7 +275,7 @@
   .button {
     background: var(--accent-color);
     color: white;
-    
+
     &:hover {
       background: lighten(#4a9eff, 10%);
     }
@@ -282,14 +284,15 @@
   // Links
   a {
     color: var(--accent-color);
-    
+
     &:hover {
       color: lighten(#4a9eff, 10%);
     }
   }
 
   // Code blocks
-  pre, code {
+  pre,
+  code {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -298,11 +301,12 @@
   // Tables
   table {
     border: 1px solid var(--border-color);
-    
-    th, td {
+
+    th,
+    td {
       border: 1px solid var(--border-color);
     }
-    
+
     th {
       background: var(--bg-tertiary);
       color: var(--text-primary);
@@ -311,23 +315,32 @@
 
   // Markdown content
   .markdown {
-    background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    
-    h1, h2, h3, h4, h5, h6 {
+    color: var(--text-secondary);
+
+    p,
+    ul,
+    ol,
+    li {
+      color: var(--text-secondary);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     code {
       background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
       color: var(--text-primary);
     }
-    
+
     pre {
       background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
       border: 1px solid var(--border-color);
@@ -351,7 +364,7 @@
   .resume-v2-nav-button {
     border-color: var(--accent-color) !important;
     color: var(--accent-color) !important;
-    
+
     &:hover {
       background: var(--accent-color) !important;
       color: white !important;
@@ -376,7 +389,7 @@
   .sports-toggle-button {
     border-color: var(--accent-color) !important;
     color: var(--accent-color) !important;
-    
+
     &:hover {
       background: var(--accent-color) !important;
       color: white !important;
@@ -401,7 +414,7 @@
   .welcome-button {
     background: var(--bg-primary) !important;
     color: var(--accent-color) !important;
-    
+
     &:hover {
       background: var(--bg-secondary) !important;
     }
@@ -474,7 +487,7 @@
   .sports-v2-toggle-button {
     border-color: var(--accent-color) !important;
     color: var(--accent-color) !important;
-    
+
     &:hover {
       background: var(--accent-color) !important;
       color: white !important;
@@ -550,7 +563,7 @@
   .sport-v2-expand-button {
     border-color: var(--accent-color) !important;
     color: var(--accent-color) !important;
-    
+
     &:hover {
       background: var(--accent-color) !important;
       color: white !important;
@@ -571,12 +584,12 @@
   .dark-mode-toggle-header {
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: var(--border-color) !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.2) !important;
       border-color: var(--accent-color) !important;
     }
-    
+
     span {
       filter: brightness(1.2);
     }
@@ -586,12 +599,12 @@
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: var(--border-color) !important;
     backdrop-filter: blur(10px) !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.15) !important;
       border-color: var(--accent-color) !important;
     }
-    
+
     .slider {
       background: var(--accent-color) !important;
     }
@@ -603,16 +616,23 @@
       border-left: 1px solid var(--border-color);
       padding-left: 1rem;
     }
-    
+
     // Enhanced text gradients for better visibility
-    h1, h2, h3, h4, h5, h6 {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
-    p, span, div {
+
+    p,
+    span,
+    div {
       background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -631,7 +651,10 @@
   }
 
   // Enhanced dark mode for form elements
-  input, textarea, select, button {
+  input,
+  textarea,
+  select,
+  button {
     &::placeholder {
       color: var(--text-muted) !important;
     }
@@ -650,7 +673,7 @@
   ::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 4px;
-    
+
     &:hover {
       background: var(--accent-color);
     }
@@ -677,37 +700,45 @@
   * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
-  
+
   // Additional gradient enhancements for better text visibility
-  .title, .subtitle, .author, .published, .meta {
+  .title,
+  .subtitle,
+  .author,
+  .published,
+  .meta {
     background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   // Enhanced contrast for important text elements
-  .important-text, .highlight, .emphasis {
+  .important-text,
+  .highlight,
+  .emphasis {
     background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 600;
   }
-  
+
   // Gradient backgrounds for better visual hierarchy
-  .card, .panel, .section {
+  .card,
+  .panel,
+  .section {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border: 1px solid var(--border-color);
   }
-  
+
   // Enhanced link gradients
   a:not(.button):not(.toggle-button) {
     background: linear-gradient(135deg, var(--accent-color) 0%, #6bb3ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    
+
     &:hover {
       background: linear-gradient(135deg, #6bb3ff 0%, #ffffff 100%);
       -webkit-background-clip: text;
@@ -735,19 +766,20 @@
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   backdrop-filter: blur(10px) !important;
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1) !important;
     transform: scale(1.1) !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
   }
-  
+
   &:active {
     transform: scale(0.95) !important;
   }
-  
+
   // Icon styling
-  svg, i {
+  svg,
+  i {
     width: 20px !important;
     height: 20px !important;
     color: #333 !important;
@@ -759,15 +791,16 @@
   background: rgba(0, 0, 0, 0.8) !important;
   border: 2px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  
+
   &:hover {
     background: rgba(0, 0, 0, 0.9) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
   }
-  
+
   // Icon styling in dark mode
-  svg, i {
+  svg,
+  i {
     color: #ffffff !important;
   }
 }
@@ -796,14 +829,14 @@
   align-items: center !important;
   justify-content: center !important;
   min-height: 48px !important;
-  
+
   &:hover {
     background: #667eea !important;
     color: white !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
   }
-  
+
   &.sports-toggle-button-active,
   &.resume-toggle-button-active {
     background: #667eea !important;
@@ -813,17 +846,18 @@
 }
 
 .dark-mode {
+
   .sports-toggle-button,
   .resume-toggle-button {
     border-color: var(--accent-color) !important;
     color: var(--accent-color) !important;
-    
+
     &:hover {
       background: var(--accent-color) !important;
       color: white !important;
       box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3) !important;
     }
-    
+
     &.sports-toggle-button-active,
     &.resume-toggle-button-active {
       background: var(--accent-color) !important;
@@ -842,53 +876,53 @@
 .sports-v2-container {
   @media (max-width: 768px) {
     padding: 0.5rem !important;
-    
+
     .resume-v2-header,
     .sports-v2-header {
       padding: 1rem !important;
       margin-bottom: 1.5rem !important;
-      
+
       .resume-v2-title,
       .sports-v2-title {
         font-size: 1.8rem !important;
         margin-bottom: 0.5rem !important;
       }
-      
+
       .resume-v2-subtitle,
       .sports-v2-subtitle {
         font-size: 0.9rem !important;
         margin-bottom: 1rem !important;
       }
     }
-    
+
     .resume-v2-stats-container,
     .sports-v2-stats-grid {
       grid-template-columns: repeat(2, 1fr) !important;
       gap: 0.5rem !important;
       margin-bottom: 1rem !important;
-      
+
       .resume-v2-stat-card,
       .sports-v2-stat-card {
         padding: 0.75rem !important;
-        
+
         .resume-v2-stat-value,
         .sports-v2-stat-value {
           font-size: 1.2rem !important;
         }
-        
+
         .resume-v2-stat-label,
         .sports-v2-stat-label {
           font-size: 0.7rem !important;
         }
       }
     }
-    
+
     .resume-v2-navigation,
     .sports-v2-controls {
       flex-direction: column !important;
       gap: 0.5rem !important;
       margin-bottom: 1.5rem !important;
-      
+
       .resume-v2-nav-button,
       .sports-v2-toggle-button {
         padding: 0.6rem 1rem !important;
@@ -907,25 +941,25 @@
       }
     }
   }
-  
+
   @media (max-width: 480px) {
     padding: 0.25rem !important;
-    
+
     .resume-v2-header,
     .sports-v2-header {
       padding: 0.75rem !important;
-      
+
       .resume-v2-title,
       .sports-v2-title {
         font-size: 1.5rem !important;
       }
-      
+
       .resume-v2-subtitle,
       .sports-v2-subtitle {
         font-size: 0.8rem !important;
       }
     }
-    
+
     .resume-v2-stats-container,
     .sports-v2-stats-grid {
       grid-template-columns: 1fr !important;
@@ -941,7 +975,7 @@
   gap: 1rem !important;
   margin-bottom: 2rem !important;
   flex-wrap: wrap !important;
-  
+
   .toggle-button {
     padding: 0.8rem 1.5rem !important;
     border-radius: 25px !important;
@@ -964,26 +998,26 @@
     align-items: center !important;
     justify-content: center !important;
     min-height: 48px !important;
-    
+
     &:hover {
       background: #667eea !important;
       color: white !important;
       transform: translateY(-2px) !important;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
     }
-    
+
     &.toggle-button-active {
       background: #667eea !important;
       color: white !important;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
     }
   }
-  
+
   @media (max-width: 768px) {
     flex-direction: column !important;
     gap: 0.75rem !important;
     margin-bottom: 1.5rem !important;
-    
+
     .toggle-button {
       padding: 0.75rem 1.2rem !important;
       font-size: 0.9rem !important;
@@ -999,11 +1033,11 @@
       min-height: 52px !important;
     }
   }
-  
+
   @media (max-width: 480px) {
     gap: 0.5rem !important;
     margin-bottom: 1rem !important;
-    
+
     .toggle-button {
       padding: 0.7rem 1rem !important;
       font-size: 0.85rem !important;
@@ -1024,53 +1058,53 @@
 .resume-v2-content {
   @media (max-width: 768px) {
     padding: 0.5rem !important;
-    
+
     .resume-v2-section {
       margin-bottom: 1.5rem !important;
-      
+
       .resume-v2-section-header {
         text-align: center !important;
         margin-bottom: 1rem !important;
-        
+
         .resume-v2-section-title {
           font-size: 1.5rem !important;
           margin-bottom: 0.25rem !important;
         }
-        
+
         .resume-v2-section-subtitle {
           font-size: 0.9rem !important;
         }
       }
     }
-    
+
     // Education Grid
     .resume-v2-education-grid {
       grid-template-columns: 1fr !important;
       gap: 1rem !important;
       padding: 0.5rem !important;
     }
-    
+
     // Experience Timeline
     .resume-v2-timeline {
       padding-left: 1rem !important;
-      
+
       .resume-v2-timeline-line {
         left: 0.5rem !important;
       }
-      
+
       .resume-v2-timeline-dot {
         left: -0.75rem !important;
         width: 10px !important;
         height: 10px !important;
       }
     }
-    
+
     // Skills Controls
     .resume-v2-skills-controls {
       flex-direction: column !important;
       gap: 0.5rem !important;
       margin-bottom: 1rem !important;
-      
+
       .resume-v2-category-button {
         padding: 0.5rem 1rem !important;
         font-size: 0.8rem !important;
@@ -1078,7 +1112,7 @@
         text-align: center !important;
       }
     }
-    
+
     // Certifications Grid
     .resume-v2-certifications-grid {
       grid-template-columns: 1fr !important;
@@ -1086,18 +1120,18 @@
       padding: 0.5rem !important;
     }
   }
-  
+
   @media (max-width: 480px) {
     padding: 0.25rem !important;
-    
+
     .resume-v2-section {
       margin-bottom: 1rem !important;
-      
+
       .resume-v2-section-header {
         .resume-v2-section-title {
           font-size: 1.3rem !important;
         }
-        
+
         .resume-v2-section-subtitle {
           font-size: 0.8rem !important;
         }
@@ -1110,15 +1144,15 @@
 .sports-v2-content {
   @media (max-width: 768px) {
     padding: 0.5rem !important;
-    
+
     .sports-v2-controls {
       flex-direction: column !important;
       gap: 0.75rem !important;
       margin-bottom: 1.5rem !important;
-      
+
       .sports-v2-control-group {
         width: 100% !important;
-        
+
         .sports-v2-label {
           font-size: 0.8rem !important;
           font-weight: 600 !important;
@@ -1128,7 +1162,7 @@
           text-transform: uppercase !important;
           letter-spacing: 0.5px !important;
         }
-        
+
         .sports-v2-select,
         .sports-v2-input {
           padding: 0.75rem 1rem !important;
@@ -1139,19 +1173,19 @@
           background: white !important;
           color: #333 !important;
           font-weight: 500 !important;
-          
+
           &:focus {
             border-color: #667eea !important;
             outline: none !important;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
           }
-          
+
           &::placeholder {
             color: #999 !important;
             font-weight: 400 !important;
           }
         }
-        
+
         .sports-v2-select {
           cursor: pointer !important;
           background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
@@ -1163,12 +1197,12 @@
         }
       }
     }
-    
+
     .sports-v2-view-toggle {
       flex-direction: column !important;
       gap: 0.5rem !important;
       margin-bottom: 1rem !important;
-      
+
       .sports-v2-toggle-button {
         padding: 0.6rem 1rem !important;
         font-size: 0.8rem !important;
@@ -1185,40 +1219,40 @@
         justify-content: center !important;
       }
     }
-    
+
     // Cards View
     .sports-v2-cards-container {
       gap: 1rem !important;
-      
+
       .sport-v2-container {
         padding: 0.75rem !important;
-        
+
         .sport-v2-header {
           flex-direction: column !important;
           gap: 0.5rem !important;
           text-align: center !important;
-          
+
           .sport-v2-title {
             font-size: 1.2rem !important;
           }
-          
+
           .sport-v2-date {
             font-size: 0.8rem !important;
           }
         }
-        
+
         .sport-v2-stats {
           grid-template-columns: repeat(2, 1fr) !important;
           gap: 0.5rem !important;
           margin: 0.75rem 0 !important;
-          
+
           .sport-v2-stat {
             padding: 0.5rem !important;
-            
+
             .sport-v2-stat-label {
               font-size: 0.7rem !important;
             }
-            
+
             .sport-v2-stat-value {
               font-size: 1rem !important;
             }
@@ -1226,15 +1260,15 @@
         }
       }
     }
-    
+
     // Timeline View
     .sports-v2-timeline-container {
       padding-left: 1rem !important;
-      
+
       .sports-v2-timeline-line {
         left: 0.5rem !important;
       }
-      
+
       .sports-v2-timeline-dot {
         left: -0.75rem !important;
         width: 10px !important;
@@ -1242,19 +1276,19 @@
       }
     }
   }
-  
+
   @media (max-width: 480px) {
     padding: 0.25rem !important;
-    
+
     .sports-v2-controls {
       gap: 0.5rem !important;
-      
+
       .sports-v2-control-group {
         .sports-v2-label {
           font-size: 0.7rem !important;
           margin-bottom: 0.4rem !important;
         }
-        
+
         .sports-v2-select,
         .sports-v2-input {
           padding: 0.6rem 0.8rem !important;
@@ -1262,34 +1296,34 @@
         }
       }
     }
-    
+
     .sports-v2-cards-container {
       gap: 0.75rem !important;
-      
+
       .sport-v2-container {
         padding: 0.5rem !important;
-        
+
         .sport-v2-header {
           .sport-v2-title {
             font-size: 1.1rem !important;
           }
-          
+
           .sport-v2-date {
             font-size: 0.7rem !important;
           }
         }
-        
+
         .sport-v2-stats {
           grid-template-columns: 1fr !important;
           gap: 0.25rem !important;
-          
+
           .sport-v2-stat {
             padding: 0.4rem !important;
-            
+
             .sport-v2-stat-label {
               font-size: 0.6rem !important;
             }
-            
+
             .sport-v2-stat-value {
               font-size: 0.9rem !important;
             }
@@ -1304,43 +1338,43 @@
 .welcome-overlay {
   @media (max-width: 768px) {
     padding: 1rem !important;
-    
+
     .welcome-popup {
       padding: 1.5rem !important;
       max-width: 90vw !important;
-      
+
       .welcome-title {
         font-size: 1.5rem !important;
         margin-bottom: 0.5rem !important;
       }
-      
+
       .welcome-message {
         font-size: 0.9rem !important;
         margin-bottom: 1rem !important;
         line-height: 1.4 !important;
       }
-      
+
       .welcome-button {
         padding: 0.75rem 1.5rem !important;
         font-size: 0.9rem !important;
       }
     }
   }
-  
+
   @media (max-width: 480px) {
     padding: 0.5rem !important;
-    
+
     .welcome-popup {
       padding: 1rem !important;
-      
+
       .welcome-title {
         font-size: 1.3rem !important;
       }
-      
+
       .welcome-message {
         font-size: 0.8rem !important;
       }
-      
+
       .welcome-button {
         padding: 0.6rem 1.2rem !important;
         font-size: 0.8rem !important;
@@ -1351,32 +1385,34 @@
 
 // Dark Mode Responsive Enhancements
 .dark-mode {
+
   .resume-v2-container,
   .sports-v2-container {
     @media (max-width: 768px) {
+
       .resume-v2-header,
       .sports-v2-header {
         background: linear-gradient(135deg, #4a9eff 0%, #2d5aa0 100%) !important;
       }
-      
+
       .resume-v2-stat-card,
       .sports-v2-stat-card {
         background: rgba(255, 255, 255, 0.1) !important;
       }
     }
   }
-  
+
   .toggle-container {
     .toggle-button {
       border-color: var(--accent-color) !important;
       color: var(--accent-color) !important;
-      
+
       &:hover {
         background: var(--accent-color) !important;
         color: white !important;
         box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3) !important;
       }
-      
+
       &.toggle-button-active {
         background: var(--accent-color) !important;
         color: white !important;
@@ -1384,37 +1420,37 @@
       }
     }
   }
-  
+
   .sports-v2-content {
     .sports-v2-controls {
       .sports-v2-control-group {
         .sports-v2-label {
           color: var(--text-primary) !important;
         }
-        
+
         .sports-v2-select,
         .sports-v2-input {
           background: var(--bg-tertiary) !important;
           border-color: var(--border-color) !important;
           color: var(--text-primary) !important;
-          
+
           &:focus {
             border-color: var(--accent-color) !important;
             box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1) !important;
           }
-          
+
           &::placeholder {
             color: var(--text-muted) !important;
           }
         }
-        
+
         .sports-v2-select {
           background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
         }
       }
     }
   }
-  
+
   .welcome-overlay {
     @media (max-width: 768px) {
       .welcome-popup {
@@ -1426,13 +1462,14 @@
 
 // Animation and Transition Responsive Optimizations
 @media (max-width: 768px) {
+
   .resume-v2-container,
   .sports-v2-container {
     * {
       transition: all 0.2s ease !important;
     }
   }
-  
+
   .welcome-overlay {
     .welcome-popup {
       animation: slideInMobile 0.3s ease-out !important;
@@ -1445,6 +1482,7 @@
     transform: translateY(-20px) scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
@@ -1453,38 +1491,40 @@
 
 // Touch-friendly interactions for mobile
 @media (max-width: 768px) {
+
   .resume-v2-nav-button,
   .sports-v2-toggle-button,
   .toggle-button,
   .welcome-button {
     min-height: 44px !important; // iOS touch target minimum
     touch-action: manipulation !important;
-    
+
     &:active {
       transform: scale(0.98) !important;
     }
   }
-  
+
   // Dark mode toggle mobile adjustments
   .dark-mode-toggle {
     bottom: 15px !important;
     right: 15px !important;
     width: 55px !important;
     height: 55px !important;
-    
-    svg, i {
+
+    svg,
+    i {
       width: 22px !important;
       height: 22px !important;
     }
   }
-  
+
   .resume-v2-select,
   .sports-v2-select,
   .sports-v2-input {
     min-height: 44px !important;
     touch-action: manipulation !important;
   }
-  
+
   // Enhanced touch targets for toggle buttons
   .toggle-container {
     .toggle-button {
@@ -1497,7 +1537,7 @@
       overflow-wrap: break-word !important;
       hyphens: auto !important;
       line-height: 1.3 !important;
-      
+
       &:active {
         transform: scale(0.95) !important;
         transition: transform 0.1s ease !important;
@@ -1508,32 +1548,34 @@
 
 // Print styles for interactive views
 @media print {
+
   .resume-v2-container,
   .sports-v2-container {
+
     .resume-v2-header,
     .sports-v2-header {
       background: none !important;
       color: black !important;
       box-shadow: none !important;
     }
-    
+
     .resume-v2-stat-card,
     .sports-v2-stat-card {
       background: #f5f5f5 !important;
       border: 1px solid #ddd !important;
     }
-    
+
     .resume-v2-nav-button,
     .sports-v2-toggle-button,
     .toggle-button {
       display: none !important;
     }
   }
-  
+
   .welcome-overlay {
     display: none !important;
   }
-  
+
   // Hide dark mode toggle in print
   .dark-mode-toggle {
     display: none !important;

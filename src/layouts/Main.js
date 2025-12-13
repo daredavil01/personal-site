@@ -17,6 +17,23 @@ const Main = (props) => (
     >
       {props.title && <title>{props.title}</title>}
       <meta name="description" content={props.description} />
+      {/* Standard Meta Tags */}
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="keywords" content="Sanket Tambare, personal website, portfolio, AI, data science, developer" />
+      <meta name="author" content="Sanket Tambare" />
+      {/* Open Graph Tags */}
+      <meta property="og:title" content={props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare"} />
+      <meta property="og:description" content={props.description} />
+      <meta property="og:type" content="website" />
+      <meta property="og:image" content="/images/me.jpg" />
+      <meta property="og:site_name" content="Sanket Tambare" />
+      {/* Twitter Card Tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@i_daredavil" />
+      <meta name="twitter:creator" content="@i_daredavil" />
+      <meta name="twitter:title" content={props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare"} />
+      <meta name="twitter:description" content={props.description} />
+      <meta name="twitter:image" content="/images/me.jpg" />
     </Helmet>
     <div id="wrapper">
       <Navigation />
