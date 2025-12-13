@@ -97,6 +97,41 @@ const skills = [
     competency: 3,
     category: ['Data Engineering', 'Data Science', 'Python'],
   },
+  {
+    title: 'Snowflake',
+    competency: 4,
+    category: ['Data Engineering', 'Databases', 'Tools'],
+  },
+  {
+    title: 'Tableau',
+    competency: 3,
+    category: ['Data Science', 'Tools'],
+  },
+  {
+    title: 'Kafka',
+    competency: 3,
+    category: ['Data Engineering', 'Tools'],
+  },
+  {
+    title: 'DORA metrics',
+    competency: 4,
+    category: ['Data Science'],
+  },
+  {
+    title: 'SnowSQL',
+    competency: 4,
+    category: ['Data Engineering', 'Databases', 'Tools'],
+  },
+  {
+    title: 'Google Gemini',
+    competency: 3,
+    category: ['Tools', 'Data Science'],
+  },
+  {
+    title: 'Cursor',
+    competency: 4,
+    category: ['Tools'],
+  },
 ].map((skill) => ({ ...skill, category: skill.category.sort() }));
 
 // this is a list of colors that I like. The length should be == to the

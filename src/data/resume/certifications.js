@@ -1,7 +1,13 @@
 const certifications = [
   {
+    name: 'Politics and Policy of AI',
+    link: 'https://drive.google.com/file/d/1wssJ5QmZeBoKz1a1zGUIPAwr8GlRgMaq/view?usp=sharing',
+    source: 'The Takshashila Institute',
+    issuedDate: '2024',
+  },
+  {
     name: 'Relational Database',
-    link: '',
+    link: 'https://www.freecodecamp.org/certification/fccb39fb35f-0661-430c-a5f6-37c3ab719959/relational-database-v8',
     source: 'FreeCodeCamp',
     issuedDate: 'Nov 2022',
   },
@@ -26,13 +32,13 @@ const certifications = [
   {
     name: 'Python For Everybody Specialization',
     link: 'https://www.coursera.org/account/accomplishments/specialization/certificate/2HLUBLAFL9J6',
-    source: 'Coursea',
+    source: 'Coursera',
     issuedDate: 'Jun 2020',
   },
   {
     name: 'Machine Learning Andew NG',
     link: 'https://www.coursera.org/account/accomplishments/certificate/76C3JFVAYZY5',
-    source: 'Courseaa',
+    source: 'Coursera',
     issuedDate: 'May 2020',
   },
   {

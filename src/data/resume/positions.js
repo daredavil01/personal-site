@@ -1,10 +1,22 @@
 const positions = [
   {
+    company: 'Bridgenext',
+    position: 'Software Developer',
+    link: 'https://www.linkedin.com/company/98385537/',
+    daterange: 'Present',
+    points: [
+      'Specializing in DORA metrics, I manage ETL pipelines from Gitlab and events API using Snowflake, SQL, and Tableau.',
+      'My stack includes AWS Lambda, SnowSQL, Python, data analysis, and warehousing, utilizing Gemini, Cursor, and AI tools daily.',
+    ],
+  },
+  {
     company: 'Emtec Inc.',
-    position: 'Software Development Engineer',
-    link: 'https://arthena.com',
+    position: 'Software Engineer',
+    link: 'https://www.linkedin.com/company/emtec-inc/',
     daterange: 'January 2021 - Present',
     points: [
+      'As a full-stack developer, I contributed to an internal developer portal for resource allocation, monitoring, and previewing.',
+      'Utilizing NextJS, GraphQL, Spring Boot API, and FastAPI, I enhanced the technology stack for efficient operations.',
       'Skills: Front-End Development · React.js · Python (Programming Language) · Web Development · Java',
     ],
   },
