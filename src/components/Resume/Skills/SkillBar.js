@@ -27,6 +27,7 @@ const SkillBar = ({ data, categories, onSelect, isSelected }) => {
 
   const handleClick = (e) => {
     e.stopPropagation();
+    setShowModal(true);
     onSelect();
   };
 
