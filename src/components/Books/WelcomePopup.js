@@ -16,7 +16,7 @@ const WelcomePopup = ({ onClose }) => {
         y: -10 - Math.random() * 100,
         emoji: bookEmojis[Math.floor(Math.random() * bookEmojis.length)],
         size: Math.random() * 16 + 20, // 20-36px
-        speed: Math.random() * 2 + 1,
+        speed: Math.random() * 8 + 5, // Increased speed significantly (range 5-13)
         rotation: Math.random() * 360,
         rotationSpeed: Math.random() * 6 - 3,
         sway: Math.random() * 40 - 20, // -20 to 20 for horizontal sway

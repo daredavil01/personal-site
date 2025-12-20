@@ -898,6 +898,11 @@ $dark-gradients: (
             font-size: 0.875rem;
             font-style: italic;
             color: rgba(255, 255, 255, 0.9);
+            // Override global .author styles
+            display: block;
+            white-space: normal;
+            width: 100%;
+            text-align: left;
         }
     }
 
