@@ -13,6 +13,10 @@ const routes = [
     path: "/now",
   },
   {
+    label: "Books",
+    path: "/books",
+  },
+  {
     label: "Instagram",
     path: "/instagram",
   },

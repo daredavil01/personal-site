@@ -63,6 +63,7 @@
 @import 'pages/resume';
 @import 'pages/skills';
 @import 'pages/stats';
+@import 'pages/books';
 
 // Dark Mode Styles
 .dark-mode {
@@ -181,6 +182,36 @@ body.dark-mode {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-right: 1px solid var(--border-color);
 
+    #intro {
+      header {
+        h2 {
+          background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: white; // Fallback
+        }
+
+        p {
+          background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: #ccc; // Fallback
+
+          a {
+            background: none;
+            -webkit-text-fill-color: initial;
+            color: var(--text-secondary);
+
+            &:hover {
+              color: var(--accent-color);
+            }
+          }
+        }
+      }
+    }
+
     .blurb h2 {
       background: linear-gradient(135deg, var(--text-primary) 0%, #ffffff 100%);
       -webkit-background-clip: text;
@@ -193,6 +224,16 @@ body.dark-mode {
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+
+    #footer {
+      .copyright {
+        color: var(--text-muted);
+      }
+
+      .icons {
+        color: var(--text-secondary);
+      }
     }
   }
 
