@@ -9,8 +9,13 @@ import data from '../data/books';
 
 import BookModal from '../components/Books/BookModal';
 import BooksFeaturesBanner from '../components/Books/BooksFeaturesBanner';
-
 import FeaturedBook from '../components/Books/FeaturedBook';
+import AchievementBadge from '../components/Books/AchievementBadge';
+import TagBubbles from '../components/Books/TagBubbles';
+import WelcomePopup from '../components/Books/WelcomePopup';
+
+import { generateBubbles, extractUniqueTags } from '../utils/easterEggUtils';
+import './Books.module.css';
 
 const Books = () => {
   /* eslint-disable no-unused-vars */
@@ -24,6 +29,121 @@ const Books = () => {
 
   const [featuredBook, setFeaturedBook] = useState(null);
   const [discoveryBook, setDiscoveryBook] = useState(null);
+
+  // Welcome popup state
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  // 🎮 EASTER EGG: Speed Reader Mode
+  // Desktop: Type "speed" | Mobile: Triple-tap the page title
+  const [speedReaderMode, setSpeedReaderMode] = useState(false);
+  const [showAchievement, setShowAchievement] = useState(false);
+  const [keyBuffer, setKeyBuffer] = useState('');
+  const [tapCount, setTapCount] = useState(0);
+  const [tapTimeout, setTapTimeout] = useState(null);
+
+  // 🎮 EASTER EGG #2: Tag Rain Mode
+  // Desktop: Type "tag-rain"
+  const [tagRainMode, setTagRainMode] = useState(false);
+  const [showTagAchievement, setShowTagAchievement] = useState(false);
+  const [bubbles, setBubbles] = useState([]);
+
+  const activateSpeedReaderMode = () => {
+    setSpeedReaderMode(true);
+    setShowAchievement(true);
+
+    // Show achievement for 4 seconds
+    setTimeout(() => setShowAchievement(false), 4000);
+
+    // Deactivate speed reader mode after 10 seconds
+    setTimeout(() => setSpeedReaderMode(false), 10000);
+  };
+
+  const activateTagRainMode = () => {
+    setTagRainMode(true);
+    setShowTagAchievement(true);
+
+    // Generate random bubbles with tags from actual book data
+    const tagsList = extractUniqueTags(data);
+    const newBubbles = generateBubbles(tagsList, 20);
+    setBubbles(newBubbles);
+
+    // Show achievement for 4 seconds
+    setTimeout(() => setShowTagAchievement(false), 4000);
+
+    // Deactivate tag rain mode after 10 seconds
+    setTimeout(() => {
+      setTagRainMode(false);
+      setBubbles([]);
+    }, 10000);
+  };
+
+  const handleBubblePop = (bubbleId) => {
+    setBubbles((prev) => prev.map((bubble) => (
+      bubble.id === bubbleId ? { ...bubble, popped: true } : bubble
+    )));
+    setTimeout(() => {
+      setBubbles((prev) => prev.filter((bubble) => bubble.id !== bubbleId));
+    }, 500);
+  };
+
+  // Desktop trigger: Type "speed" or "tag-rain"
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      const newBuffer = (keyBuffer + e.key).slice(-8); // Keep last 8 characters for "tag-rain"
+      setKeyBuffer(newBuffer);
+
+      if (newBuffer.endsWith('speed')) {
+        activateSpeedReaderMode();
+        setKeyBuffer(''); // Reset
+      } else if (newBuffer === 'tag-rain') {
+        activateTagRainMode();
+        setKeyBuffer(''); // Reset
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [keyBuffer]);
+
+  const [longPressTimer, setLongPressTimer] = useState(null);
+
+  // Mobile trigger: Triple-tap handler
+  const handleTitleTap = () => {
+    // Clear existing timeout
+    if (tapTimeout) {
+      clearTimeout(tapTimeout);
+    }
+
+    const newTapCount = tapCount + 1;
+    setTapCount(newTapCount);
+
+    if (newTapCount === 3) {
+      activateSpeedReaderMode();
+      setTapCount(0);
+      setTapTimeout(null);
+    } else {
+      // Reset tap count after 1 second if not completed
+      const timeout = setTimeout(() => {
+        setTapCount(0);
+        setTapTimeout(null);
+      }, 1000);
+      setTapTimeout(timeout);
+    }
+  };
+
+  const handleTouchStart = () => {
+    const timer = setTimeout(() => {
+      activateTagRainMode();
+    }, 2000); // 2 second hold
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
 
   // Recommendation Logic
   const getRandomBook = (candidates) => candidates[Math.floor(Math.random() * candidates.length)];
@@ -114,15 +234,43 @@ const Books = () => {
     setShowOnlyWithBlog(false);
   };
 
+  const handleWelcomeClose = () => {
+    setShowWelcome(false);
+  };
+
   return (
     <Main
       title="Books"
       description="A list of books I've read, with some stats and mostly associated blogs."
     >
-      <article className="post" id="books">
+      {/* Welcome Popup with Confetti */}
+      {showWelcome && <WelcomePopup onClose={handleWelcomeClose} />}
+
+      <article className={`post ${tagRainMode ? 'tag-rain-active' : ''}`} id="books">
         <header>
           <div className="title">
-            <h2><Link to="/books">Books</Link></h2>
+            <div
+              onClick={handleTitleTap}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleTouchStart}
+              onMouseUp={handleTouchEnd}
+              onMouseLeave={handleTouchEnd}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleTitleTap();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-block' }}
+              title="Hint: Triple-tap for a surprise! 🎮"
+            >
+              <h2>
+                <Link to="/books">Books</Link>
+              </h2>
+            </div>
             <p>
               A list of books I&apos;ve read, with some stats and mostly associated blogs.
             </p>
@@ -172,7 +320,7 @@ const Books = () => {
           onClearTags={handleResetFilters}
         />
 
-        <div className="books-list" style={{ marginTop: '2em' }}>
+        <div className={`books-list ${speedReaderMode ? 'speed-reader-active' : ''}`} style={{ marginTop: '2em' }}>
           {filteredBooks.length > 0 ? filteredBooks.map((book) => (
             <BookCell
               data={book}
@@ -184,6 +332,15 @@ const Books = () => {
           )}
         </div>
 
+        {/* 🏆 Achievement Badge */}
+        {showAchievement && <AchievementBadge type="speed" />}
+
+        {/* 🏷️ Tag Rain Achievement Badge */}
+        {showTagAchievement && <AchievementBadge type="tagRain" />}
+
+        {/* 🫧 Floating Bubbles */}
+        <TagBubbles bubbles={bubbles} onBubblePop={handleBubblePop} />
+
         <BookModal
           book={selectedBook}
           onClose={() => setSelectedBook(null)}
@@ -191,6 +348,7 @@ const Books = () => {
           allBooks={data}
         />
       </article>
+
     </Main>
   );
 };
