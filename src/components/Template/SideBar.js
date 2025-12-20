@@ -27,8 +27,8 @@ const SideBar = () => (
         Hi, I&apos;m Sanket. I like to build things. I am a softwware developer
         specialized in full stack development and data analysis. Currently I am
         working as software developer at{" "}
-        <a href="https://www.linkedin.com/company/emtec-inc/mycompany/verification/">
-          Emtec Inc
+        <a href="https://www.linkedin.com/company/bridgenext/">
+          Bridgenext India Pvt Ltd
         </a>
         . Besides these I am interested in blogging, designing, video editing
         and digital wellbeing. Checkout my{" "}
