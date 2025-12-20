@@ -22,7 +22,12 @@ const BookCell = ({ data, onClick }) => {
           </div>
         )}
       </div>
-      <div className="card-actions">
+      <div className="card-actions" style={{ justifyContent: data.blog_link ? 'space-between' : 'flex-end' }}>
+        {data.blog_link && (
+          <span className="blog-indicator">
+            Blog
+          </span>
+        )}
         <button type="button" style={{ color: '#555' }}>Details</button>
       </div>
     </div>
@@ -36,6 +41,7 @@ BookCell.propTypes = {
     author: PropTypes.string,
     language: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string),
+    blog_link: PropTypes.string,
   }).isRequired,
   onClick: PropTypes.func.isRequired,
 };

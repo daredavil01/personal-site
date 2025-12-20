@@ -70,13 +70,12 @@ const FeaturedBook = ({
       <p className="description-preview">
         {data.description ? `${data.description.substring(0, 120)}...` : 'No description available.'}
       </p>
-      {data.tags && (
-        <div className="tags">
-          {data.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="tag">{tag}</span>
-          ))}
-        </div>
-      )}
+      <div className="tags">
+        {data.blog_link && <span className="tag blog-tag">Blog</span>}
+        {data.tags && data.tags.slice(0, 3).map((tag) => (
+          <span key={tag} className="tag">{tag}</span>
+        ))}
+      </div>
     </div>
   );
 };
@@ -87,6 +86,7 @@ FeaturedBook.propTypes = {
     author: PropTypes.string,
     description: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string),
+    blog_link: PropTypes.string,
   }),
   label: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,

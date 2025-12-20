@@ -328,6 +328,12 @@ $on-surface: #000000;
                 padding: 2px 8px;
                 border-radius: 12px;
                 font-size: 0.75rem;
+
+                &.blog-tag {
+                    background: $primary-color;
+                    color: white;
+                    font-weight: 600;
+                }
             }
         }
     }
@@ -945,6 +951,14 @@ $dark-gradients: (
         justify-content: flex-end;
         background: $surface-color;
 
+        .blog-indicator {
+            font-size: 0.75rem;
+            color: $primary-color;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
         button {
             background: transparent;
             color: $primary-color;
@@ -1110,6 +1124,12 @@ $dark-gradients: (
         .tags .tag {
             background: #333;
             color: #ddd;
+
+            &.blog-tag {
+                background: $primary-color !important;
+                color: white !important;
+                border-color: $primary-color;
+            }
         }
     }
 
@@ -1467,6 +1487,24 @@ $dark-gradients: (
             margin: 0;
             font-size: 1.5rem;
             color: rgba(0, 0, 0, 0.87);
+
+            .blog-badge {
+                font-size: 0.5em;
+                /* Smaller font to look like a tag */
+                background-color: $primary-color;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                /* More rounded like a tag */
+                margin-left: 10px;
+                /* Margin left instead of right */
+                vertical-align: middle;
+                display: inline-block;
+                transform: translateY(-4px);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 600;
+            }
         }
 
         .close-btn {

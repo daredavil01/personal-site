@@ -55,7 +55,14 @@ const BookModal = ({
         tabIndex="-1"
       >
         <div className="modal-header">
-          <h2>{book.title}</h2>
+          <h2>
+            {book.title}
+            {book.blog_link && (
+              <span className="blog-badge">
+                Blog
+              </span>
+            )}
+          </h2>
           <button type="button" className="close-btn" onClick={onClose} aria-label="Close modal">
             &times;
           </button>
