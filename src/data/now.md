@@ -18,15 +18,28 @@ So, this section will highlight what I was doing last month and what I am up to 
 
 ---
 
-## What am I up to this month (December 2025)
-
-- _Pune International Marathon_: Pune International Marathon is scheduled on 7th December, where I am a pacer for the 21 km run.
-- _Book_: I intend to start another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
+## What am I up to this month (January 2026)
+- _Book_: I intend to continue reading another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
 - _Blog_: I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
+- _PPPF 2025_: Pune Public Policy Festival is scheduuled on 9th-10th January, 2026, where I will be participating.
+- _TMM 2026_: Tata Mumbai Marathon 2026 is scheduled on 18th January, 2026, looking forward to conquering full marathon (42 Kms) in 4.30 Hours!
 
 ---
 
-## What was I doing last month (November, 2025)
+## What was I doing last month (December, 2025)
+
+- _Pune International Marathon_: Paced the 21 km run for the Pune International Marathon for 2 Hrs 15 Mins time, enjoyed the run!
+- _Books Section on Website_: Added a section on my website to highlight books I have read! Added functionality to filter books by genre, language and author. Added featured book tile to highlight book randomly.
+- _Book Review_: Book Review: Careless People (Sarah Wynn-Williams). Read detailed (blog)[https://sankettambare.substack.com/p/book-review-careless-people-sarah] here.
+- _AI Study Group Session_: Continued Google Antigravity exploration and validated website accessibility and dark mode assessment for personal website [https://daredavil.pages.dev/](https://daredavil.pages.dev/). Updated resume page with latest skills, you can now explore it interactively here: [https://daredavil.pages.dev/resume](https://daredavil.pages.dev/resume).
+- _Book Update_: Finished book, "मेळघाटातील मोहोर, डॉ. रवींद्र आणि डॉ. स्मिता कोल्हे, मृणालिनी चितळे." loved the book!
+
+---
+## Archives
+
+This will be a section of archival notes.
+
+## November 2025
 
 - _Vibe-coding_: Built **Get Me My Training Plan!** at the AI Study Group organized by `Aditya Kabra` and `Manasi Kabra`. It's a tool for runners to generate personalized Half/Full Marathon training plans based on recent race times. (Check it out [here](https://runningplan1.netlify.app/)!)
 - _Website Update_: Revamped my personal homepage and added this **Now** page to share "unknown unknowns" of my life! Check out my profile on [nownownow.com](https://nownownow.com/p/R521). Inspired by [Sai Rahul Poruri](https://nownownow.com/p/VXc2).
@@ -35,11 +48,6 @@ So, this section will highlight what I was doing last month and what I am up to 
 - _Book Review_: Finished **Careless People: A Cautionary Tale of Power, Greed, and Lost Idealism** by Sarah Wynn-Williams. One fascinating thing about understanding different large scale technology mis-use is understanding way they are orchestrated! Be it Cambridge Analytica, Pegasus Spyware, Permanent Record by Edward Snowden or anything else! The book explores multiple situations including 2016 US elections, Myanmar Massacre, FB in China and many more! Definitely interesting one, detailed blog coming soon!
 - _Certificate_: Completed the **Politics and Policy of AI** expert capsule course by **The Takshashila Institution**. The course covered "Demystifying AI", "The Politics, Policy and Governance of AI", and "Geopolitics of AI". It highlighted how AI's evolution differs from past industrial revolutions due to its unpredictable pace and impact. This course provided a new vision for navigating the rough terrain of AI policy.
 
-
----
-## Archives
-
-This will be a section of archival notes.
 
 ## October 2025
 

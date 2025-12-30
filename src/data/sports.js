@@ -348,6 +348,42 @@ const sportsData = [
   },
   {
     id: 14,
+    title: "Satara Half Hill Marathon 2025",
+    date: "September 14, 2025",
+    description: "My second SHHM attempt, finished the tough route in 2 Hrs & 7 Mins",
+    place: "Satara",
+    distance: "21 Kms",
+    time: "2:06:55",
+    timeCertificateLink: "https://sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJKQkcgU2F0YXJhIEhpbGwgSGFsZiBNYXJhdGhvbiAyMDI1IiwiZV9pZCI6ODgyNzYsImJpYk5vIjoiMjYwMDcifQ%3D%3D",
+    slideImages: [
+      {
+        url: `${PUBLIC_URL}/images/sports/shhm_2025_2.jpg`,
+        caption: "Slide 2",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/shhm_2025_3.jpg`,
+        caption: "Slide 3",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/shhm_2025_4.jpg`,
+        caption: "Slide 4",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/shhm_2025_5.jpg`,
+        caption: "Slide 5",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/shhm_2025_6.png`,
+        caption: "Slide 6",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/shhm_2025_1.jpg`,
+        caption: "Slide 1",
+      },
+    ],
+  },
+  {
+    id: 15,
     title: "NMDC Hyderabad Marathon 2025",
     date: "August 24, 2025",
     description: "My first sub-2 half-marathon, finished in 1:59:57!",
@@ -372,7 +408,7 @@ const sportsData = [
     ],
   },
   {
-    id: 15,
+    id: 16,
     title: "Pune International Marathon 2025",
     date: "December 7, 2025",
     description: "My first Half Marathon as a pacer, target 2.15 Hrs!",
