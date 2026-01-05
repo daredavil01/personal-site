@@ -139,7 +139,7 @@ const WelcomePopup = ({ onClose }) => {
           </h2>
           <p style={welcomeStyles.welcomeText}>
             Explore my reading journey with interactive filters, statistics,
-            blog posts, and personalized recommendations. Ready to discover some great reads?
+            blog posts, and personalized recommendations. Ready to find some great reads?
           </p>
           <button
             type="button"

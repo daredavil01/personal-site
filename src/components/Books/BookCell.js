@@ -12,7 +12,10 @@ const BookCell = ({ data, onClick }) => {
         <div className="author">by {data.author}</div>
       </div>
       <div className="card-content">
-        {data.language && <span className="language">{data.language}</span>}
+        <div className="stats-row">
+          {data.year && <span className="year">{data.year}</span>}
+          {data.language && <span className="language">{data.language}</span>}
+        </div>
         {data.tags && data.tags.length > 0 && (
           <div className="tags">
             {data.tags.slice(0, 3).map((tag) => (
@@ -42,6 +45,7 @@ BookCell.propTypes = {
     language: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string),
     blog_link: PropTypes.string,
+    year: PropTypes.string,
   }).isRequired,
   onClick: PropTypes.func.isRequired,
 };

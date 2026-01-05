@@ -11,12 +11,7 @@ const FeaturedBook = ({
 
   if (!data) return null;
 
-  const getTooltipText = () => {
-    if (label === 'Featured Read') {
-      return 'Books with blog posts I\'ve written. Click shuffle to see another!';
-    }
-    return 'Randomly selected book from my collection. Click shuffle to discover more!';
-  };
+  const tooltipText = 'Books with blog posts I\'ve written. Click shuffle to see another!';
 
   return (
     // eslint-disable-next-line
@@ -39,7 +34,7 @@ const FeaturedBook = ({
           </button>
           {showInfo && (
             <div className="featured-info-tooltip">
-              <strong>ℹ️ Info:</strong> {getTooltipText()}
+              <strong>ℹ️ Info:</strong> {tooltipText}
             </div>
           )}
         </div>

@@ -8,19 +8,25 @@ const BookFilters = ({
   authors,
   platforms,
   languages,
+  years,
   selectedTags,
   selectedAuthor,
   selectedPlatform,
   selectedLanguage,
+  selectedYear,
   showOnlyWithBlog, // Re-enabled
   onTagChange,
   onClearTags,
   onAuthorChange,
   onPlatformChange,
   onLanguageChange,
+  onYearChange,
   onBlogFilterChange, // Re-enabled
+  filteredCount,
+  totalCount,
 }) => {
-  const [activeFilter, setActiveFilter] = useState(null); // 'tags', 'authors', 'platforms'
+  const [activeFilter, setActiveFilter] = useState(null);
+  // 'tags', 'authors', 'platforms', 'languages', 'years'
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
 
   const toggleFilter = (filterName) => {
@@ -52,7 +58,7 @@ const BookFilters = ({
           {showInfoTooltip && (
             <div className="filter-info-tooltip">
               <strong>💡 Pro Tip:</strong> Use filters to narrow down books by tags,
-              authors, platforms, or language. Multi-select tags to find books matching
+              authors, platforms, year, or language. Multi-select tags to find books matching
               ANY of your selected topics!
             </div>
           )}
@@ -66,6 +72,14 @@ const BookFilters = ({
           title="Show only books with blogs"
         >
           Books with Blogs
+        </button>
+
+        <button
+          type="button"
+          className={`filter-btn ${isFilterActive(selectedYear) || activeFilter === 'years' ? 'active' : ''}`}
+          onClick={() => toggleFilter('years')}
+        >
+          Year
         </button>
 
         <button
@@ -102,19 +116,33 @@ const BookFilters = ({
           || selectedAuthor
           || selectedPlatform
           || selectedLanguage
+          || selectedYear
           || showOnlyWithBlog) && (
-          <button
-            type="button"
-            className="filter-btn clear-btn"
-            onClick={() => {
-              onClearTags();
-              // Triggering clear tags handles the reset of all states in parent,
-              // but we need to ensure the local activeFilter is cleared
-              setActiveFilter(null);
-            }}
-          >
-            &times; Clear
-          </button>
+            <>
+              <div
+                className="filter-count"
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#666',
+                  fontWeight: '500',
+                  marginRight: '8px',
+                }}
+              >
+                Found {filteredCount} of {totalCount}
+              </div>
+              <button
+                type="button"
+                className="filter-btn clear-btn"
+                onClick={() => {
+                  onClearTags();
+                  // Triggering clear tags handles the reset of all states in parent,
+                  // but we need to ensure the local activeFilter is cleared
+                  setActiveFilter(null);
+                }}
+              >
+                &times; Clear
+              </button>
+            </>
         )}
       </div>
 
@@ -220,6 +248,26 @@ const BookFilters = ({
                 ))}
               </>
             )}
+
+            {activeFilter === 'years' && (
+              <>
+                <div
+                  className={`option-pill ${selectedYear === '' ? 'selected' : ''}`}
+                  onClick={() => onYearChange('')}
+                >
+                  All
+                </div>
+                {years.map((y) => (
+                  <div
+                    key={y}
+                    className={`option-pill ${selectedYear === y ? 'selected' : ''}`}
+                    onClick={() => onYearChange(y)}
+                  >
+                    {y}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -232,17 +280,22 @@ BookFilters.propTypes = {
   authors: PropTypes.arrayOf(PropTypes.string).isRequired,
   platforms: PropTypes.arrayOf(PropTypes.string).isRequired,
   languages: PropTypes.arrayOf(PropTypes.string).isRequired,
+  years: PropTypes.arrayOf(PropTypes.number).isRequired,
   selectedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedAuthor: PropTypes.string.isRequired,
   selectedPlatform: PropTypes.string.isRequired,
   selectedLanguage: PropTypes.string.isRequired,
+  selectedYear: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   showOnlyWithBlog: PropTypes.bool.isRequired,
   onTagChange: PropTypes.func.isRequired,
   onAuthorChange: PropTypes.func.isRequired,
   onPlatformChange: PropTypes.func.isRequired,
   onLanguageChange: PropTypes.func.isRequired,
+  onYearChange: PropTypes.func.isRequired,
   onClearTags: PropTypes.func.isRequired,
   onBlogFilterChange: PropTypes.func.isRequired,
+  filteredCount: PropTypes.number.isRequired,
+  totalCount: PropTypes.number.isRequired,
 };
 
 export default BookFilters;

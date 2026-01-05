@@ -24,11 +24,11 @@ const Books = () => {
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
   const [showOnlyWithBlog, setShowOnlyWithBlog] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
 
   const [featuredBook, setFeaturedBook] = useState(null);
-  const [discoveryBook, setDiscoveryBook] = useState(null);
 
   // Welcome popup state
   const [showWelcome, setShowWelcome] = useState(true);
@@ -153,26 +153,15 @@ const Books = () => {
     return getRandomBook(withBlog);
   };
 
-  const getDiscovery = (excludeId) => {
-    const candidates = data.filter((b) => b.id !== excludeId);
-    return getRandomBook(candidates);
-  };
-
   // Initialize recommendations
   useEffect(() => {
     const featured = getFeatured();
     setFeaturedBook(featured);
-    setDiscoveryBook(getDiscovery(featured?.id));
   }, []);
 
   const handleShuffleFeatured = () => {
     const newFeatured = getFeatured();
     setFeaturedBook(newFeatured);
-  };
-
-  const handleShuffleDiscovery = () => {
-    const newDiscovery = getDiscovery(featuredBook?.id);
-    setDiscoveryBook(newDiscovery);
   };
 
   const handleTagToggle = (tag) => {
@@ -193,17 +182,22 @@ const Books = () => {
 
   const allAuthors = useMemo(
     () => [...new Set(data.map((book) => book.author).filter(Boolean))].sort(),
-    []
+    [],
   );
 
   const allPlatforms = useMemo(
     () => [...new Set(data.map((book) => book.blog_platform).filter(Boolean))].sort(),
-    []
+    [],
   );
 
   const allLanguages = useMemo(
     () => [...new Set(data.map((book) => book.language).filter(Boolean))].sort(),
-    []
+    [],
+  );
+
+  const allYears = useMemo(
+    () => [...new Set(data.map((book) => book.year).filter(Boolean))].sort((a, b) => b - a),
+    [],
   );
 
   // Filter Logic
@@ -221,9 +215,13 @@ const Books = () => {
     const matchesLanguage = selectedLanguage
       ? book.language === selectedLanguage
       : true;
+    const matchesYear = selectedYear
+      ? book.year === selectedYear
+      : true;
     const matchesBlog = showOnlyWithBlog ? !!book.blog_link : true;
 
-    return matchesTags && matchesAuthor && matchesPlatform && matchesLanguage && matchesBlog;
+    return matchesTags && matchesAuthor && matchesPlatform
+      && matchesLanguage && matchesYear && matchesBlog;
   });
 
   const handleResetFilters = () => {
@@ -231,6 +229,7 @@ const Books = () => {
     setSelectedAuthor('');
     setSelectedPlatform('');
     setSelectedLanguage('');
+    setSelectedYear('');
     setShowOnlyWithBlog(false);
   };
 
@@ -294,12 +293,6 @@ const Books = () => {
             onClick={(b) => setSelectedBook(b)}
             onShuffle={handleShuffleFeatured}
           />
-          <FeaturedBook
-            data={discoveryBook}
-            label="Discover"
-            onClick={(b) => setSelectedBook(b)}
-            onShuffle={handleShuffleDiscovery}
-          />
         </div>
 
         <BookFilters
@@ -307,17 +300,22 @@ const Books = () => {
           authors={allAuthors}
           platforms={allPlatforms}
           languages={allLanguages}
+          years={allYears}
           selectedTags={selectedTags}
           selectedAuthor={selectedAuthor}
           selectedPlatform={selectedPlatform}
           selectedLanguage={selectedLanguage}
+          selectedYear={selectedYear}
           showOnlyWithBlog={showOnlyWithBlog}
           onTagChange={handleTagToggle}
           onAuthorChange={setSelectedAuthor}
           onPlatformChange={setSelectedPlatform}
           onLanguageChange={setSelectedLanguage}
+          onYearChange={setSelectedYear}
           onBlogFilterChange={() => setShowOnlyWithBlog(!showOnlyWithBlog)}
           onClearTags={handleResetFilters}
+          filteredCount={filteredBooks.length}
+          totalCount={data.length}
         />
 
         <div className={`books-list ${speedReaderMode ? 'speed-reader-active' : ''}`} style={{ marginTop: '2em' }}>
