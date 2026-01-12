@@ -4,9 +4,12 @@ import React from "react";
 import first from "../../static/reels/1.mp4";
 import third from "../../static/reels/3.mp4";
 import fifth from "../../static/reels/5.mp4";
+import fourth from "../../static/reels/4.mp4";
 
 const Videos = () => {
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const videoRefs = React.useRef([]);
+  const videoSources = [fourth, first, third, fifth];
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -16,6 +19,14 @@ const Videos = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const handlePlay = (index) => {
+    videoRefs.current.forEach((video, i) => {
+      if (i !== index && video && !video.paused) {
+        video.pause();
+      }
+    });
+  };
 
   const styles = {
     container: {
@@ -46,9 +57,18 @@ const Videos = () => {
       <p className="Post-subtitle" style={styles.subtitle}>
         Adding Reels here since Instagram Account is now Deleted!
       </p>
-      <video src={first} style={styles.video} controls />
-      <video src={third} style={styles.video} controls />
-      <video src={fifth} style={styles.video} controls />
+      {videoSources.map((src, index) => (
+        <video
+          key={src}
+          ref={(el) => {
+            videoRefs.current[index] = el;
+          }}
+          src={src}
+          style={styles.video}
+          controls
+          onPlay={() => handlePlay(index)}
+        />
+      ))}
     </article>
   );
 };

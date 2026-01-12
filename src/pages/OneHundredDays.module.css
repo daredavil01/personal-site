@@ -1,0 +1,241 @@
+/* Day Cells (12x12px approx) */
+.dayActive {
+    width: 12px;
+    height: 12px;
+    background-color: #2ecc71;
+    /* GitHub Green / Success */
+    border: 1px solid #27ae60;
+    border-radius: 2px;
+}
+
+.dayEmpty {
+    width: 12px;
+    height: 12px;
+    background-color: var(--border-light);
+    /* Needs to be light generic bg */
+    border: 1px solid var(--border-color);
+    border-radius: 2px;
+}
+
+:global(.dark-mode) .dayEmpty {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Typewriter Cursor */
+.typewriterCursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background-color: var(--accent-color);
+    animation: blink 1s step-end infinite;
+    margin-left: 4px;
+    vertical-align: text-bottom;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Main Section Titles */
+.sectionTitle {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.sectionTitle::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 3px;
+    background-color: var(--accent-color);
+    margin-top: 5px;
+    border-radius: 2px;
+}
+
+/* Subtitles/Header */
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Paragraphs */
+.descriptionText {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Stats Container (Flex/Grid) */
+.statsFlexContainer {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.statsColumn {
+    flex: 1;
+    min-width: 250px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+:global(.dark-mode) .statsColumn {
+    background-color: var(--bg-tertiary);
+}
+
+.columnHeader {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 0.5rem;
+}
+
+/* Tag Cloud */
+.tagCloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tagChip {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-light);
+    transition: background-color 0.2s, color 0.2s;
+}
+
+:global(.dark-mode) .tagChip {
+    background-color: var(--bg-secondary);
+}
+
+.tagChip:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+/* Summary List */
+.summaryList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summaryItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-secondary);
+}
+
+.summaryItem:last-child {
+    border-bottom: none;
+}
+
+.summaryLabel {
+    font-weight: 500;
+}
+
+.summaryValue {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Recent Posts List */
+.recentPostsList {
+    list-style: none;
+    padding: 0;
+}
+
+.recentPostItem {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+:global(.dark-mode) .recentPostItem {
+    background-color: var(--bg-tertiary);
+}
+
+.recentPostItem:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+    border-left: 4px solid var(--accent-color);
+}
+
+.recentPostLink {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+
+.recentPostLink:hover {
+    color: var(--accent-color);
+}
+
+.recentPostDate {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* Dropdown styling updates for Dark Mode */
+.challengeSelect {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* SVG Text fill fix for dark mode */
+.svgText {
+    fill: var(--text-primary);
+}
+
+/* Calendar Container */
+.calendarContainer {
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+:global(.dark-mode) .calendarContainer {
+    background-color: var(--bg-tertiary);
+}

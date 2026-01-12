@@ -20,6 +20,8 @@ const Reels = lazy(() => import("./pages/Reels"));
 const SportsPage = lazy(() => import("./pages/Sports"));
 const Now = lazy(() => import("./pages/Now"));
 const Books = lazy(() => import("./pages/Books"));
+const Challenges = lazy(() => import("./pages/Challenges"));
+const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
 
 const App = () => (
   <BrowserRouter basename={PUBLIC_URL}>
@@ -36,6 +38,8 @@ const App = () => (
         <Route path="/sports" element={<SportsPage />} />
         <Route path="/now" element={<Now />} />
         <Route path="/books" element={<Books />} />
+        <Route path="/challenges" element={<Challenges />} />
+        <Route path="/100-days-to-offload" element={<OneHundredDays />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
