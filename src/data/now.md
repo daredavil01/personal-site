@@ -1,6 +1,6 @@
 # What I am currently doing
 
-Last updated on `1st November, 2025`. Page inspired by [nownownow.com](https://nownownow.com/about).
+Last updated on `31st January, 2026`. Page inspired by [nownownow.com](https://nownownow.com/about).
 
 ---
 
@@ -18,26 +18,49 @@ So, this section will highlight what I was doing last month and what I am up to 
 
 ---
 
-## What am I up to this month (January 2026)
-- _Book_: I intend to continue reading another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
+## What am I up to this month (February, 2026)
+-  _Book_: I intend to continue reading another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
 - _Blog_: I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
-- _PPPF 2025_: Pune Public Policy Festival is scheduuled on 9th-10th January, 2026, where I will be participating.
-- _TMM 2026_: Tata Mumbai Marathon 2026 is scheduled on 18th January, 2026, looking forward to conquering full marathon (42 Kms) in 4.30 Hours!
+- Books to Read:
+	- Atlas of AI
+	- AI Snake Oil
+	- Unmasking AI
 
 ---
 
-## What was I doing last month (December, 2025)
+## What was I doing last month (January, 2026)
+
+ - _PPPF 2025_: Pune Public Policy Festival is scheduled on 9th-10th January, 2026, where I participated. Details [here](https://www.linkedin.com/posts/sankettambare_pune-pppf-policy-activity-7416387760007159809-cFcq?utm_source=share&utm_medium=member_desktop&rcm=ACoAACWW-BABDw2ccOeO0r7HfLUq8J3FjF3o40k).
+
+- _Personal Website Updates_:
+	- Added Books Page
+	- Added Challenges Page
+- _Blogs published this month:_
+	- [The wanderer's narration of journey towards being digital nomad!](https://sankettambare.substack.com/p/digital-nomad) : Exploring what it takes to get out of the digital echo-chambers!
+	- [Digital Well-being: The Subtle Perspective](https://sankettambare.substack.com/p/digital-wellbeing-the-subtle-perspective) : How do I really navigate wide ocean of our entangled digital lives?
+	- [Tata Mumbai Marathon 2026](https://sankettambare.substack.com/p/tmm-2026): The story of endurance, training and conquering the challenge, tremendously huge one!
+	- [What's really worth the efforts?](https://sankettambare.substack.com/p/whats-really-worth-the-efforts): The continuous running, reading, learning, emotional attachments, scrolling, efforts; what's something that matters the most!
+	- [Challenges: How I vibe-coded something to help me achieve do stuff!](https://sankettambare.substack.com/p/challenges-page) : What it takes to balance that consistency and how easily can tech-enabled accountability boost your efforts!
+	- [Obsidian - The Enabler for Better Note-taking](https://sankettambare.substack.com/p/obsidian-the-enabler-for-better-note): Something to map your digital universe!
+	- [The Choices We Make!](https://sankettambare.substack.com/p/the-choices-we-make) : An attempt to overview what the life’s web looks like for the curious soul!
+	- [Pune International Marathon: What leading the marathon as Pacer for Half-Marathon taught me!](https://sankettambare.substack.com/p/pim-2025-pacing-experience): How it started, how it went and learnings from the overall journey!
+	- [Books that I have read: My Own Digital Catalog!](https://sankettambare.substack.com/p/books-page-personal-website): Why I thought of it and it's interactive features!
+	- [100 Days To Offload](https://sankettambare.substack.com/p/100-days-to-offload): Can I publish 100 posts on blog in a year?
+- _TMM 2026_: Tata Mumbai Marathon 2026, on 18th January, 2026, finished full marathon (42 Kms) in 5 Hours!
+- Event: Attended session of _Vivek Sawant_ around career challenges in front of gen-z in AI era
+
+---
+## Archives
+
+This will be a section of archival notes.
+
+## December, 2025
 
 - _Pune International Marathon_: Paced the 21 km run for the Pune International Marathon for 2 Hrs 15 Mins time, enjoyed the run!
 - _Books Section on Website_: Added a section on my website to highlight books I have read! Added functionality to filter books by genre, language and author. Added featured book tile to highlight book randomly.
 - _Book Review_: Book Review: Careless People (Sarah Wynn-Williams). Read detailed (blog)[https://sankettambare.substack.com/p/book-review-careless-people-sarah] here.
 - _AI Study Group Session_: Continued Google Antigravity exploration and validated website accessibility and dark mode assessment for personal website [https://daredavil.pages.dev/](https://daredavil.pages.dev/). Updated resume page with latest skills, you can now explore it interactively here: [https://daredavil.pages.dev/resume](https://daredavil.pages.dev/resume).
 - _Book Update_: Finished book, "मेळघाटातील मोहोर, डॉ. रवींद्र आणि डॉ. स्मिता कोल्हे, मृणालिनी चितळे." loved the book!
-
----
-## Archives
-
-This will be a section of archival notes.
 
 ## November 2025
 
