@@ -18,17 +18,36 @@ So, this section will highlight what I was doing last month and what I am up to 
 
 ---
 
-## What am I up to this month (February, 2026)
--  _Book_: I intend to continue reading another [book](https://amzn.in/d/3Iopa9p) `Make Time` by `John Knapp, Jake;Zeratsky`.
+## What am I up to this month (March, 2026)
 - _Blog_: I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
-- Books to Read:
-	- Atlas of AI
-	- AI Snake Oil
-	- Unmasking AI
+- Youth development camp at Shahada
 
 ---
 
-## What was I doing last month (January, 2026)
+## What was I doing last month (February, 2026)
+
+- _Project Updates_:
+  - Worked on project called [RunLog](https://run-folio.vercel.app/) where athletes can track their marathons
+- Marathons/ Training Runs:
+  - 14th February: Completed 25 Kms Training run on Sinhgad hills
+  - Tata Ultra Marathon: Successfully finished Tata Ultra Marathon 50 Kms challenge in around 7 hours. Detailed blog added [here](https://sankettambare.substack.com/p/tum-2026).
+  - IPA Neerathon 10 Kms Run: Finished 10 Kms in 55 Mins 28 secs
+- Events attended:
+  - Atish Dabholkar & Vivek Sawant: Talked about physics, life, scientific temparament and ANIS
+  - AI Study Group, Aeka's Cafe, Baner: Worked on RunLog project!
+- _Blogs Published in this month_:
+  - [The digital self in AI World!](https://sankettambare.substack.com/p/digital-self-in-ai-world) : What lies at the end of corridor where our digital identity and physical identity fuse together and start influencing each other, to extend that, there is no difference further!
+  - [The timidness of time!](https://sankettambare.substack.com/p/the-timidness-of-time) : What does it take to see beyond the axis of time!
+  - [Book Review: Make Time - How To Focus on What Matters Everyday](https://sankettambare.substack.com/p/book-review-make-time) : The guide to resolve our entangled digital lives!
+  - [Tata Ultra Marathon 50 Kms Challenge](https://sankettambare.substack.com/p/tum-2026) : The Human Endeavor of challenging The impossible!
+
+
+---
+## Archives
+
+This will be a section of archival notes.
+
+## January, 2026
 
  - _PPPF 2025_: Pune Public Policy Festival is scheduled on 9th-10th January, 2026, where I participated. Details [here](https://www.linkedin.com/posts/sankettambare_pune-pppf-policy-activity-7416387760007159809-cFcq?utm_source=share&utm_medium=member_desktop&rcm=ACoAACWW-BABDw2ccOeO0r7HfLUq8J3FjF3o40k).
 
@@ -48,11 +67,6 @@ So, this section will highlight what I was doing last month and what I am up to 
 	- [100 Days To Offload](https://sankettambare.substack.com/p/100-days-to-offload): Can I publish 100 posts on blog in a year?
 - _TMM 2026_: Tata Mumbai Marathon 2026, on 18th January, 2026, finished full marathon (42 Kms) in 5 Hours!
 - Event: Attended session of _Vivek Sawant_ around career challenges in front of gen-z in AI era
-
----
-## Archives
-
-This will be a section of archival notes.
 
 ## December, 2025
 

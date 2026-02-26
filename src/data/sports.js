@@ -462,6 +462,62 @@ const sportsData = [
         caption: "Slide 3",
       }
     ],
+  },
+  {
+    id: 17,
+    title: "IPA Neerathon 2026",
+    date: "February 15, 2026",
+    description: "10 Kms Time Trial Run!",
+    place: "Pune",
+    distance: "10 Kms",
+    time: "00:55:28",
+    timeCertificateLink: "https://alpharacingsolution.com/event/res/50b00af0-4c78-43cf-87d7-353c9a77b300/?bibno=10280",
+    slideImages: [
+      {
+        url: `${PUBLIC_URL}/images/sports/neerathon_1.jpeg`,
+        caption: "Slide 1",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/neerathon_2.jpeg`,
+        caption: "Slide 2",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/neerathon_3.jpeg`,
+        caption: "Slide 3",
+      }
+    ],
+  },
+  {
+    id: 17,
+    title: "Tata Ultra Marathon 2026",
+    date: "February 22, 2026",
+    description: "My First 50 kms Ultra Run!",
+    place: "Lonavala",
+    distance: "50 Kms",
+    time: "07:04:00",
+    timeCertificateLink: "https://sportstimingsolutions.in/results?q=eyJlX25hbWUiOiJUYXRhIFVsdHJhIE1hcmF0aG9uIDIwMjYiLCJlX2lkIjo5MDg5NSwiYmliTm8iOiI1MDA5NyJ9",
+    slideImages: [
+      {
+        url: `${PUBLIC_URL}/images/sports/tum_2026_1.jpeg`,
+        caption: "Slide 1",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/tum_2026_2.jpeg`,
+        caption: "Slide 2",
+      },
+      {
+        url: `${PUBLIC_URL}/images/sports/tum_2026_3.jpeg`,
+        caption: "Slide 3",
+      },
+      {
+        ulr: `${PUBLIC_URL}/images/sports/tum_2026_4.jpeg`,
+        caption: "Slide 4",
+      },
+      {
+        ulr: `${PUBLIC_URL}/images/sports/tum_2026_5.jpeg`,
+        caption: "Slide 5",
+      }
+    ],
   }
 ];
 

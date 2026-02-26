@@ -97,6 +97,33 @@ const data = [
     blog_tags: ['100_Days_to_Offload', "AI", "Digital Well-being"],
     blog_date: '2026-02-12',
     blog_link: 'https://sankettambare.substack.com/p/digital-self-in-ai-world',
+  },
+  {
+    id: 12,
+    blog_title: "The timidness of time!",
+    blog_description: "What does it take to see beyond the axis of time!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ['100_Days_to_Offload', 'Philosohical'],
+    blog_date: '2026-02-18',
+    blog_link: "https://sankettambare.substack.com/p/the-timidness-of-time"
+  },
+  {
+    id: 12,
+    blog_title: "Book Review: Make Time - How To Focus on What Matters Everyday",
+    blog_description: "The guide to resolve our entangled digital lives!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ['100_Days_to_Offload', 'BookReview'],
+    blog_date: '2026-02-21',
+    blog_link: "https://sankettambare.substack.com/p/book-review-make-time"
+  },
+  {
+    id: 13,
+    blog_title: "Tata Ultra Marathon 50 Kms Challenge",
+    blog_description: "The Human Endeavor of challenging The impossible!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ['100_Days_to_Offload', 'Running', 'Marathons'],
+    blog_date: '2026-02-24',
+    blog_link: "https://sankettambare.substack.com/p/tum-2026"
   }
 ];
 

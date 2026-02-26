@@ -564,8 +564,8 @@ const books = [
     category: "Technology, Self-Help",
     language: "English",
     translator: null,
-    blog_link: null,
-    blog_platform: null,
+    blog_link: 'https://sankettambare.substack.com/p/book-review-make-time',
+    blog_platform: 'Substack',
     description: "Make Time offers practical strategies to help you focus on what truly matters every day. Jake Knapp and John Zeretsky provide a four-step framework: Highlight, Laser, Energize, and Reflect. It is a guide to taking control of your time in a distracted world.",
     year: 2025,
     tags: [
