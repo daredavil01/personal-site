@@ -464,7 +464,7 @@ const sportsData = [
     ],
   },
   {
-    id: 17,
+    id: 18,
     title: "IPA Neerathon 2026",
     date: "February 15, 2026",
     description: "10 Kms Time Trial Run!",
@@ -488,7 +488,7 @@ const sportsData = [
     ],
   },
   {
-    id: 17,
+    id: 19,
     title: "Tata Ultra Marathon 2026",
     date: "February 22, 2026",
     description: "My First 50 kms Ultra Run!",
@@ -508,14 +508,6 @@ const sportsData = [
       {
         url: `${PUBLIC_URL}/images/sports/tum_2026_3.jpeg`,
         caption: "Slide 3",
-      },
-      {
-        ulr: `${PUBLIC_URL}/images/sports/tum_2026_4.jpeg`,
-        caption: "Slide 4",
-      },
-      {
-        ulr: `${PUBLIC_URL}/images/sports/tum_2026_5.jpeg`,
-        caption: "Slide 5",
       }
     ],
   }
