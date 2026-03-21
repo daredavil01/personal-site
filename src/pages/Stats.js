@@ -7,6 +7,10 @@ import Personal from "../components/Stats/Personal";
 import ResumeStats from "../components/Stats/ResumeStats";
 import Site from "../components/Stats/Site";
 import StravaLatestRides from "../components/Stats/stravaLatestRides";
+import BooksStats from "../components/Stats/BooksStats";
+import OffloadStats from "../components/Stats/OffloadStats";
+import SportsStats from "../components/Stats/SportsStats";
+import InstagramStats from "../components/Stats/InstagramStats";
 
 import positions from "../data/resume/positions";
 import certifications from "../data/resume/certifications";
@@ -32,6 +36,10 @@ const Stats = () => {
         <StravaLatestRides />
         <Personal />
         <ResumeStats resumeData={resumeStats} />
+        <BooksStats />
+        <OffloadStats />
+        <SportsStats />
+        <InstagramStats />
         <Site />
       </article>
     </Main>

@@ -17,21 +17,6 @@ const data = [
     link: "https://github.com/daredavil01/personal-site/commits",
   },
   {
-    label: "Number of people watching this repository",
-    key: "watchers_count",
-    link: "https://github.com/daredavil01/personal-site/stargazers",
-  },
-  {
-    label: "Number of forks",
-    key: "forks",
-    link: "https://github.com/daredavil01/personal-site/network",
-  },
-  {
-    label: "Open github issues",
-    key: "open_issues_count",
-    link: "https://github.com/daredavil01/personal-site/issues",
-  },
-  {
     label: "Last updated at",
     key: "pushed_at",
     link: "https://github.com/daredavil01/personal-site/commits",

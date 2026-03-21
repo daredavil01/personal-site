@@ -7,6 +7,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Blogging'],
     blog_date: '2026-01-02',
     blog_link: 'https://sankettambare.substack.com/p/100-days-to-offload',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 2,
@@ -16,6 +18,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Books', 'Reading'],
     blog_date: '2026-01-05',
     blog_link: 'https://sankettambare.substack.com/p/books-page-personal-website',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 3,
@@ -25,6 +29,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Marathon', 'Running'],
     blog_date: '2026-01-06',
     blog_link: 'https://sankettambare.substack.com/p/pim-2025-pacing-experience',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 4,
@@ -34,6 +40,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Life', 'Choices'],
     blog_date: '2026-01-08',
     blog_link: 'https://sankettambare.substack.com/p/the-choices-we-make',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 5,
@@ -43,6 +51,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Note-taking', 'Obsidian'],
     blog_date: '2026-01-13',
     blog_link: 'https://sankettambare.substack.com/p/obsidian-the-enabler-for-better-note',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 6,
@@ -52,6 +62,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Challenges', 'Personal-Website'],
     blog_date: '2026-01-15',
     blog_link: 'https://sankettambare.substack.com/p/challenges-page',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 7,
@@ -61,6 +73,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Self-reflection'],
     blog_date: '2026-01-20',
     blog_link: 'https://sankettambare.substack.com/p/whats-really-worth-the-efforts',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 8,
@@ -70,6 +84,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', 'Marathon', 'Running'],
     blog_date: '2026-01-21',
     blog_link: 'https://sankettambare.substack.com/p/tmm-2026',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 9,
@@ -79,6 +95,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', "Digital Well-being"],
     blog_date: '2026-01-27',
     blog_link: 'https://sankettambare.substack.com/p/digital-wellbeing-the-subtle-perspective',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 10,
@@ -88,6 +106,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', "Digital Well-being"],
     blog_date: '2026-01-30',
     blog_link: 'https://sankettambare.substack.com/p/digital-nomad',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 11,
@@ -97,6 +117,8 @@ const data = [
     blog_tags: ['100_Days_to_Offload', "AI", "Digital Well-being"],
     blog_date: '2026-02-12',
     blog_link: 'https://sankettambare.substack.com/p/digital-self-in-ai-world',
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
     id: 12,
@@ -105,25 +127,64 @@ const data = [
     challenge_id: "100_days_to_offload",
     blog_tags: ['100_Days_to_Offload', 'Philosohical'],
     blog_date: '2026-02-18',
-    blog_link: "https://sankettambare.substack.com/p/the-timidness-of-time"
+    blog_link: "https://sankettambare.substack.com/p/the-timidness-of-time",
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
-    id: 12,
+    id: 13,
     blog_title: "Book Review: Make Time - How To Focus on What Matters Everyday",
     blog_description: "The guide to resolve our entangled digital lives!",
     challenge_id: "100_days_to_offload",
     blog_tags: ['100_Days_to_Offload', 'BookReview'],
     blog_date: '2026-02-21',
-    blog_link: "https://sankettambare.substack.com/p/book-review-make-time"
+    blog_link: "https://sankettambare.substack.com/p/book-review-make-time",
+    blog_platform: 'Substack',
+    language: 'English'
   },
   {
-    id: 13,
+    id: 14,
     blog_title: "Tata Ultra Marathon 50 Kms Challenge",
     blog_description: "The Human Endeavor of challenging The impossible!",
     challenge_id: "100_days_to_offload",
     blog_tags: ['100_Days_to_Offload', 'Running', 'Marathons'],
     blog_date: '2026-02-24',
-    blog_link: "https://sankettambare.substack.com/p/tum-2026"
+    blog_link: "https://sankettambare.substack.com/p/tum-2026",
+    blog_platform: 'Substack',
+    language: 'English'
+  },
+  {
+    id: 15,
+    blog_title: "The Attention Crisis",
+    blog_description: "An attempt to illuminate the anecdotes and map the wide impact net!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ['100_Days_to_Offload', 'DigitalWellbeing'],
+    blog_date: '2026-03-19',
+    blog_link: "https://sankettambare.substack.com/p/the-attention-crisis",
+    blog_platform: 'Substack',
+    language: 'English'
+  },
+  {
+    id: 16,
+    blog_title: "The Digital Paradox",
+    blog_description: "What does it take to master one's digital lives!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ['100_Days_to_Offload', 'DigitalWellbeing'],
+    blog_date: '2026-03-21',
+    blog_link: "https://sankettambare.substack.com/p/the-digital-paradox",
+    blog_platform: 'Substack',
+    language: 'English'
+  },
+  {
+    id: 17,
+    blog_title: "युवा संवाद शिबीर: स्वभान ते समाजभान",
+    blog_description: "एक संवाद निसर्गाशी , एक संवाद स्वतःशी, एक संवाद समाजासोबत!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ['100_Days_to_Offload', 'Youth', 'Social'],
+    blog_date: '2026-03-09',
+    blog_link: "https://daredavil453624413.wordpress.com/2026/03/09/yuva-sanvad-shibir/",
+    blog_platform: 'WordPress',
+    language: 'Marathi'
   }
 ];
 

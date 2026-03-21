@@ -5,6 +5,7 @@ import styles from './OneHundredDays.module.css';
 
 const OneHundredDays = () => {
   const [titleText, setTitleText] = useState('');
+  const [selectedBlog, setSelectedBlog] = useState(null);
   const fullTitle = 'Can I publish 100 posts on blog in a year?';
 
   useEffect(() => {
@@ -34,6 +35,28 @@ const OneHundredDays = () => {
 
   // Sort tags by count
   const sortedTags = Object.entries(tagsDistribution).sort((a, b) => b[1] - a[1]);
+
+  const platformDistribution = useMemo(() => {
+    const dist = {};
+    blogsData.forEach((blog) => {
+      if (blog.blog_platform) {
+        dist[blog.blog_platform] = (dist[blog.blog_platform] || 0) + 1;
+      }
+    });
+    return dist;
+  }, []);
+  const sortedPlatforms = Object.entries(platformDistribution).sort((a, b) => b[1] - a[1]);
+
+  const languageDistribution = useMemo(() => {
+    const dist = {};
+    blogsData.forEach((blog) => {
+      if (blog.language) {
+        dist[blog.language] = (dist[blog.language] || 0) + 1;
+      }
+    });
+    return dist;
+  }, []);
+  const sortedLanguages = Object.entries(languageDistribution).sort((a, b) => b[1] - a[1]);
 
   // --- Calendar Generation ---
   const year = 2026;
@@ -282,6 +305,26 @@ const OneHundredDays = () => {
                 </li>
               </ul>
             </div>
+            <div className={styles.statsColumn}>
+              <h4 className={styles.columnHeader}>Platforms</h4>
+              <div className={styles.tagCloud}>
+                {sortedPlatforms.map(([platform, count]) => (
+                  <span key={platform} className={styles.tagChip}>
+                    {platform} ({count})
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={styles.statsColumn}>
+              <h4 className={styles.columnHeader}>Languages</h4>
+              <div className={styles.tagCloud}>
+                {sortedLanguages.map(([language, count]) => (
+                  <span key={language} className={styles.tagChip}>
+                    {language} ({count})
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -292,22 +335,65 @@ const OneHundredDays = () => {
               .slice()
               .reverse()
               .map((blog) => (
-                <li key={blog.id} className={styles.recentPostItem}>
-                  <a
-                    href={blog.blog_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.recentPostLink}
+                <li key={blog.id}>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className={styles.recentPostItem}
+                    onClick={() => setSelectedBlog(blog)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedBlog(blog);
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
                   >
-                    {blog.blog_title}
-                  </a>
-                  <span className={styles.recentPostDate}>
-                    {blog.blog_date}
-                  </span>
+                    <span className={styles.recentPostLink}>
+                      {blog.blog_title}
+                    </span>
+                    <span className={styles.recentPostDate}>
+                      {blog.blog_date}
+                    </span>
+                  </div>
                 </li>
               ))}
           </ul>
         </section>
+
+        {selectedBlog && (
+          <div className={styles.modalOverlay} onClick={() => setSelectedBlog(null)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <button type="button" className={styles.closeButton} onClick={() => setSelectedBlog(null)}>
+                &times;
+              </button>
+              <h3 className={styles.modalTitle}>{selectedBlog.blog_title}</h3>
+              {selectedBlog.blog_description && (
+                <p className={styles.descriptionText} style={{ marginBottom: '1.5rem' }}>
+                  {selectedBlog.blog_description}
+                </p>
+              )}
+              <div className={styles.tagCloud} style={{ marginBottom: '1.5rem' }}>
+                {selectedBlog.blog_tags.map((tag) => (
+                  <span key={tag} className={styles.tagChip}>{tag}</span>
+                ))}
+              </div>
+              <p style={{ marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                <strong>Platform:</strong> {selectedBlog.blog_platform} |{' '}
+                <strong>Language:</strong> {selectedBlog.language} |{' '}
+                <strong>Date:</strong> {selectedBlog.blog_date}
+              </p>
+              <a
+                href={selectedBlog.blog_link}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.modalLink}
+              >
+                Read Post
+              </a>
+            </div>
+          </div>
+        )}
       </article>
     </Main>
   );
