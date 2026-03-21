@@ -16,29 +16,22 @@ const Resume = () => {
       title="Technical Skills"
       description="A curated collection of frameworks, languages, and infrastructure tools leveraged to build high-performance digital experiences."
     >
-      <style>{`
-        .editorial-grid {
-          display: grid;
-          grid-template-columns: repeat(12, 1fr);
-          gap: 1.5rem;
-        }
-      `}</style>
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
           <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary mb-4">Expertise & Competencies</p>
-          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 leading-[0.9] tracking-tighter mb-8">
+          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-[0.9] tracking-tighter mb-8">
             Technical<br />Arsenal.
           </h1>
           <div className="max-w-2xl">
-            <p className="text-xl text-stone-500 font-light leading-relaxed">
+            <p className="text-xl text-stone-500 dark:text-stone-400 font-light leading-relaxed">
               A curated collection of frameworks, languages, and infrastructure tools leveraged to build high-performance digital experiences and resilient cloud architectures.
             </p>
           </div>
         </header>
 
         {/* Main Content Grid */}
-        <div className="editorial-grid w-full">
+        <div className="grid grid-cols-12 gap-6 w-full">
           {/* Primary Interests / Summary (Bento Large) */}
           <section className="col-span-12 md:col-span-7 bg-secondary/[0.03] p-10 rounded-xl relative overflow-hidden group border border-secondary/10">
             <div className="relative z-10">

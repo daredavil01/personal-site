@@ -1,11 +1,14 @@
 import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
+import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
 
 // See https://reactjs.org/docs/strict-mode.html
 const StrictApp = () => (
   <React.StrictMode>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </React.StrictMode>
 );
 

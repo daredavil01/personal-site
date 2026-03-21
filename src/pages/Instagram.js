@@ -8,15 +8,9 @@ const Instagram = () => {
       title="Instagram"
       description="Adding posts here since Instagram Account is now Deleted!"
     >
-      <article className="post" id="instagram">
-        <header>
-          <div className="title">
-            <h2 className="font-headline"><a href="/instagram">Instagram</a></h2>
-            <p>Here are archived Instagram posts...</p>
-          </div>
-        </header>
+      <div className="flex flex-col gap-12 w-full">
         <Posts />
-      </article>
+      </div>
     </Main>
   );
 };

@@ -6,6 +6,7 @@ import Navigation from '../components/Template/Navigation';
 import SideBar from '../components/Template/SideBar';
 import Footer from '../components/Template/Footer';
 import ScrollToTop from '../components/Template/ScrollToTop';
+import FloatingToggle from '../components/Template/FloatingToggle';
 
 const Main = (props) => {
   return (
@@ -20,7 +21,7 @@ const Main = (props) => {
         <meta name="description" content={props.description} />
       </Helmet>
       
-      <div className="flex flex-col min-h-screen bg-white text-stone-900 font-body transition-colors duration-300">
+      <div className="flex flex-col min-h-screen bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-body transition-colors duration-300">
         <Navigation />
         
         <div id="wrapper" className="flex flex-col md:flex-row pt-24 px-4 md:px-8 max-w-[1440px] mx-auto w-full gap-8">
@@ -31,6 +32,7 @@ const Main = (props) => {
         </div>
         
         <Footer />
+        <FloatingToggle />
       </div>
     </HelmetProvider>
   );

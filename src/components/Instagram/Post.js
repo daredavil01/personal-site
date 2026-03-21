@@ -4,74 +4,26 @@ import PropTypes from "prop-types";
 import ImageSlider from "./ImageSlider";
 
 const Post = ({ data }) => {
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const styles = {
-    article: {
-      border: "2px solid gray",
-      margin: isMobile ? "10px" : "20px",
-      padding: isMobile ? "10px" : "20px",
-      borderRadius: "8px",
-      backgroundColor: "white",
-    },
-    title: {
-      fontSize: isMobile ? "1.2rem" : "1.8rem",
-      fontWeight: "900",
-      marginBottom: isMobile ? "0.5rem" : "1rem",
-      textTransform: "uppercase",
-      letterSpacing: "0.1em",
-      color: "#333",
-    },
-    caption: {
-      fontSize: isMobile ? "0.9rem" : "1.1rem",
-      marginBottom: isMobile ? "0.5rem" : "1rem",
-      lineHeight: "1.6",
-      color: "#444",
-    },
-    tagsContainer: {
-      marginBottom: isMobile ? "0.5rem" : "1rem",
-      fontSize: "0.9rem",
-    },
-    tagsLabel: {
-      fontWeight: "bold",
-      color: "#555",
-    },
-    tag: {
-      fontStyle: "italic",
-      marginRight: "0.3rem",
-      color: "#3d94ff",
-    },
-  };
-
   return (
-    <article className="Post" style={styles.article}>
+    <article className="border-2 border-stone-200 dark:border-stone-800 m-2 md:m-5 p-4 md:p-8 rounded-xl bg-white dark:bg-stone-900 shadow-sm transition-colors">
       <header>
-        <h2 className="Post-title" style={styles.title}>
+        <h2 className="text-xl md:text-3xl font-black mb-2 md:mb-4 uppercase tracking-widest text-stone-800 dark:text-stone-100">
           {data.title}
         </h2>
       </header>
-      <div className="Post-caption" style={styles.caption}>
+      <div className="text-sm md:text-lg mb-2 md:mb-4 leading-relaxed text-stone-600 dark:text-stone-300">
         {data.caption}
       </div>
-      <div className="post-tags" style={styles.tagsContainer}>
-        <span style={styles.tagsLabel}>Tags: </span>
+      <div className="mb-2 md:mb-4 text-sm md:text-base font-body">
+        <span className="font-bold text-stone-500 dark:text-stone-400">Tags: </span>
         {data.tags.map((tag, index) => (
-          <span key={tag} className="tag" style={styles.tag}>
+          <span key={tag} className="italic mr-1 text-blue-500 dark:text-blue-400">
             {tag}
             {index !== data.tags.length - 1 && ","}
           </span>
         ))}
       </div>
-      <div className="Post-user">
+      <div className="w-full mt-6 rounded-lg overflow-hidden">
         <ImageSlider data={data.slideImages} />
       </div>
     </article>

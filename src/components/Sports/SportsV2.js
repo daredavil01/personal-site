@@ -48,26 +48,26 @@ const SportsV2 = () => {
 
   return (
     <section className="max-w-4xl mx-auto w-full">
-      <h4 className="font-headline text-4xl mb-12 text-center text-stone-800">Event Log ({filteredData.length})</h4>
+      <h4 className="font-headline text-4xl mb-12 text-center text-stone-800 dark:text-stone-200">Event Log ({filteredData.length})</h4>
       
       {/* Filters Container */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12 w-full bg-secondary/[0.03] p-4 rounded-xl border border-secondary/10 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12 w-full bg-secondary/[0.03] dark:bg-secondary/[0.05] p-4 rounded-xl border border-secondary/10 dark:border-secondary/20 items-center">
         <div className="relative col-span-1 md:col-span-4">
           <input 
             type="text" 
             placeholder="Search races..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-12 bg-white border border-stone-100 rounded-lg px-10 font-body text-sm text-stone-950 placeholder:text-stone-400 outline-none focus:border-secondary transition-colors"
+            className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg px-10 font-body text-sm text-stone-950 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 outline-none focus:border-secondary transition-colors"
           />
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none text-[18px]">search</span>
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 pointer-events-none text-[18px]">search</span>
         </div>
         
         <div className="col-span-1 md:col-span-3">
           <select 
             value={filterDistance}
             onChange={(e) => setFilterDistance(e.target.value)}
-            className="w-full h-12 bg-white border border-stone-200 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 outline-none cursor-pointer hover:border-secondary transition-colors"
+            className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors"
           >
             <option value="all">All Distances</option>
             <option value="10k">10K</option>
@@ -82,7 +82,7 @@ const SportsV2 = () => {
           <select 
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="w-full h-12 bg-white border border-stone-200 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 outline-none cursor-pointer hover:border-secondary transition-colors"
+            className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors"
           >
             <option value="all">All Years</option>
             {years.map((y) => <option key={y} value={y}>{y}</option>)}
@@ -93,7 +93,7 @@ const SportsV2 = () => {
           <select 
             value={filterLocation}
             onChange={(e) => setFilterLocation(e.target.value)}
-            className="w-full h-12 bg-white border border-stone-200 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 outline-none cursor-pointer hover:border-secondary transition-colors"
+            className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors"
           >
             <option value="all">All Locations</option>
             {locations.map((loc) => <option key={loc} value={loc}>{loc}</option>)}
@@ -111,7 +111,7 @@ const SportsV2 = () => {
               setFilterLocation("all");
               setSearchTerm("");
             }}
-            className="flex items-center gap-2 text-secondary font-label text-[10px] uppercase tracking-widest font-bold hover:text-stone-900 transition-colors"
+            className="flex items-center gap-2 text-secondary font-label text-[10px] uppercase tracking-widest font-bold hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
           >
             <span className="material-symbols-outlined text-sm">restart_alt</span>
             Clear Filters
@@ -123,7 +123,7 @@ const SportsV2 = () => {
         {filteredData.length > 0 ? filteredData.map((race) => (
           <SportV2 key={race.id} data={race} />
         )) : (
-          <div className="text-center py-12 text-stone-400 font-body border border-dashed border-secondary/20 rounded-xl bg-secondary/[0.03]">No races found matching your criteria.</div>
+          <div className="text-center py-12 text-stone-400 dark:text-stone-500 font-body border border-dashed border-secondary/20 dark:border-secondary/40 rounded-xl bg-secondary/[0.03] dark:bg-secondary/[0.05]">No races found matching your criteria.</div>
         )}
       </div>
     </section>

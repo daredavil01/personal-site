@@ -3,17 +3,27 @@ const positions = [
     company: 'Bridgenext',
     position: 'Software Developer',
     link: 'https://www.linkedin.com/company/98385537/',
-    daterange: 'Present',
+    daterange: 'February 2024 - Present',
     points: [
-      'Specializing in DORA metrics, I manage ETL pipelines from Gitlab and events API using Snowflake, SQL, and Tableau.',
-      'My stack includes AWS Lambda, SnowSQL, Python, data analysis, and warehousing, utilizing Gemini, Cursor, and AI tools daily.',
+      'Specializing in DORA metrics, I manage ETL pipelines from Gitlab and events API using SQL, and Tableau.',
+      'My stack includes AWS Lambda, Databricks, Python, data analysis, and warehousing, utilizing Gemini, Cursor, and AI tools daily.',
     ],
+  },
+  {
+    company: 'The Takshashila Institution',
+    position: 'NAST Fellow',
+    link: 'https://takshashila.org.in/',
+    daterange: 'April 2024 - May 2025',
+    points: [
+      'I was NAST Fellow for first cohort of NAST Fellowship (Network for Advanced Study of Technology & Geo-politics), an initiative by Takshashila Institution, think tank based in Benglore, India.',
+      'I researched on "Citizen Agency" in AI governance when AI systems are deployed in public domain.'
+    ]
   },
   {
     company: 'Emtec Inc.',
     position: 'Software Engineer',
     link: 'https://www.linkedin.com/company/emtec-inc/',
-    daterange: 'January 2021 - Present',
+    daterange: 'January 2021 - February 2024',
     points: [
       'As a full-stack developer, I contributed to an internal developer portal for resource allocation, monitoring, and previewing.',
       'Utilizing NextJS, GraphQL, Spring Boot API, and FastAPI, I enhanced the technology stack for efficient operations.',

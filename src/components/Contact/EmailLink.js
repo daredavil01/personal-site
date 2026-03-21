@@ -80,8 +80,7 @@ const EmailLink = ({ loopMessage }) => {
 
   return (
     <div
-      className="inline-container"
-      style={validateText(message) ? {} : { color: 'red' }}
+      className={`inline-flex items-center gap-0.5 font-body text-base transition-colors ${validateText(message) ? 'text-stone-900 dark:text-stone-100' : 'text-red-600 dark:text-red-400'}`}
       onMouseEnter={() => setIsActive(false)}
       onMouseLeave={() => idx < messages.length && setIsActive(true)}
     >
@@ -89,6 +88,7 @@ const EmailLink = ({ loopMessage }) => {
         href={
           validateText(message) ? `mailto:${message}@sankettambare.com` : ''
         }
+        className="hover:text-secondary transition-colors underline underline-offset-4 decoration-stone-200 dark:decoration-stone-700 hover:decoration-secondary"
       >
         <span>{message}</span>
         <span>@sankettambare.com</span>

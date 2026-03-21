@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import Main from '../layouts/Main';
 import blogsData from '../data/100DaysToOffload';
-import styles from './OneHundredDays.module.css';
 
 const OneHundredDays = () => {
   const [titleText, setTitleText] = useState('');
@@ -47,17 +46,6 @@ const OneHundredDays = () => {
   }, []);
   const sortedPlatforms = Object.entries(platformDistribution).sort((a, b) => b[1] - a[1]);
 
-  const languageDistribution = useMemo(() => {
-    const dist = {};
-    blogsData.forEach((blog) => {
-      if (blog.language) {
-        dist[blog.language] = (dist[blog.language] || 0) + 1;
-      }
-    });
-    return dist;
-  }, []);
-  const sortedLanguages = Object.entries(languageDistribution).sort((a, b) => b[1] - a[1]);
-
   // --- Calendar Generation ---
   const year = 2026;
   const calendarData = useMemo(() => {
@@ -85,11 +73,6 @@ const OneHundredDays = () => {
     return days;
   }, []);
 
-  const getDayClass = (day) => {
-    if (day.isPadding) return '';
-    return day.hasPost ? styles.dayActive : styles.dayEmpty;
-  };
-
   const getCompletionPercentage = () => ((totalPosts / 100) * 100).toFixed(1);
 
   return (
@@ -108,7 +91,7 @@ const OneHundredDays = () => {
                   viewBox="0 0 600 600"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  className="drop-shadow-sm"
+                  className="drop-shadow-sm dark:filter dark:invert dark:brightness-200"
                 >
                   <defs>
                     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -199,19 +182,19 @@ const OneHundredDays = () => {
                 </svg>
             </div>
             <div>
-              <h1 className="font-headline text-3xl font-bold text-stone-900 uppercase tracking-widest mb-2">100 Days To Offload</h1>
-              <p className="font-label text-xs uppercase tracking-[0.2em] text-stone-300 font-medium italic">
+              <h1 className="font-headline text-3xl font-bold text-stone-900 dark:text-stone-100 uppercase tracking-widest mb-2">100 Days To Offload</h1>
+              <p className="font-label text-xs uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 font-medium italic">
                 {titleText}
-                <span className={styles.typewriterCursor} />
+                <span className="inline-block w-[2px] h-[1em] bg-secondary ml-1 animate-pulse align-text-bottom" />
               </p>
             </div>
           </div>
-          <div className="h-px w-full bg-stone-100" />
+          <div className="h-px w-full bg-stone-100 dark:bg-stone-800" />
         </header>
 
-        <section>
-          <h3 className={styles.sectionTitle}>About the Challenge</h3>
-          <p className={styles.descriptionText}>
+        <section className="mb-12">
+          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-4 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">About the Challenge</h3>
+          <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
             The <strong>100 Days to Offload</strong> challenge is a commitment to
             publish 100 blog posts in a year. It is an experiment to ramp up
             writing efforts, moving from occasional posts to a consistent flow of
@@ -220,12 +203,13 @@ const OneHundredDays = () => {
             to deepen understanding through the consistent act of writing and
             sharing.
           </p>
-          <p className={styles.descriptionText}>
+          <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
             Originally inspired by the{' '}
             <a
               href="https://100daystooffload.com/"
               target="_blank"
               rel="noreferrer"
+              className="text-secondary hover:underline"
             >
               100DaysToOffload.com
             </a>{' '}
@@ -233,16 +217,15 @@ const OneHundredDays = () => {
           </p>
         </section>
 
-        <section>
-          <h3 className={styles.sectionTitle}>Progress Map ({year})</h3>
-          <div className={styles.calendarContainer}>
+        <section className="mb-12">
+          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-4 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">Progress Map ({year})</h3>
+          <div className="p-4 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg overflow-x-auto">
             <div
+              className="grid gap-1"
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(15px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(12px, 1fr))',
                 gridAutoFlow: 'column',
                 gridTemplateRows: 'repeat(7, 1fr)',
-                gap: '3px',
               }}
             >
               {calendarData.map((day) => (
@@ -255,66 +238,54 @@ const OneHundredDays = () => {
                       }`
                       : ''
                   }
-                  className={getDayClass(day)}
+                  className={`w-3 h-3 rounded-[2px] transition-colors ${
+                    day.isPadding ? 'bg-transparent' : (day.hasPost ? 'bg-secondary border border-secondary shadow-[0_0_8px_rgba(235,108,79,0.2)]' : 'bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700/50')
+                  }`}
                 />
               ))}
             </div>
           </div>
-          <p className={styles.descriptionText} style={{ marginTop: '0.5rem' }}>
-            <small>{totalPosts} posts completed out of 100.</small>
+          <p className="text-stone-500 dark:text-stone-500 text-sm mt-4 font-body italic">
+            {totalPosts} posts completed out of 100.
           </p>
         </section>
 
-        <section>
-          <h3 className={styles.sectionTitle}>Stats</h3>
-          <div className={styles.statsFlexContainer}>
-            <div className={styles.statsColumn}>
-              <h4 className={styles.columnHeader}>Tag Cloud</h4>
-              <div className={styles.tagCloud}>
+        <section className="mb-12">
+          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-6 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">Stats</h3>
+          <div className="flex flex-wrap gap-8">
+            <div className="flex-1 min-w-[250px] bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 shadow-sm">
+              <h4 className="text-stone-900 dark:text-stone-100 text-sm font-bold border-b border-stone-100 dark:border-stone-800 pb-2 mb-4">Tag Cloud</h4>
+              <div className="flex flex-wrap gap-2">
                 {sortedTags.map(([tag, count]) => (
-                  <span key={tag} className={styles.tagChip}>
+                  <span key={tag} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-100 dark:border-stone-800 rounded-full text-xs transition-colors hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white">
                     {tag} ({count})
                   </span>
                 ))}
               </div>
             </div>
-            <div className={styles.statsColumn}>
-              <h4 className={styles.columnHeader}>Summary</h4>
-              <ul className={styles.summaryList}>
-                <li className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Total Posts:</span>
-                  <span className={styles.summaryValue}>{totalPosts}</span>
+            <div className="flex-1 min-w-[250px] bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 shadow-sm">
+              <h4 className="text-stone-900 dark:text-stone-100 text-sm font-bold border-b border-stone-100 dark:border-stone-800 pb-2 mb-4">Summary</h4>
+              <ul className="space-y-3">
+                <li className="flex justify-between text-sm text-stone-600 dark:text-stone-400 border-b border-stone-50 dark:border-stone-800 pb-2 last:border-0">
+                  <span className="font-medium">Total Posts:</span>
+                  <span className="font-bold text-stone-900 dark:text-stone-100">{totalPosts}</span>
                 </li>
-                <li className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Completion:</span>
-                  <span className={styles.summaryValue}>
-                    {getCompletionPercentage()}%
-                  </span>
+                <li className="flex justify-between text-sm text-stone-600 dark:text-stone-400 border-b border-stone-50 dark:border-stone-800 pb-2 last:border-0">
+                  <span className="font-medium">Completion:</span>
+                  <span className="font-bold text-stone-900 dark:text-stone-100">{getCompletionPercentage()}%</span>
                 </li>
-                <li className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Remaining:</span>
-                  <span className={styles.summaryValue}>
-                    {100 - totalPosts}
-                  </span>
+                <li className="flex justify-between text-sm text-stone-600 dark:text-stone-400 border-b border-stone-50 dark:border-stone-800 pb-2 last:border-0">
+                  <span className="font-medium">Remaining:</span>
+                  <span className="font-bold text-stone-900 dark:text-stone-100">{100 - totalPosts}</span>
                 </li>
               </ul>
             </div>
-            <div className={styles.statsColumn}>
-              <h4 className={styles.columnHeader}>Platforms</h4>
-              <div className={styles.tagCloud}>
+            <div className="flex-1 min-w-[250px] bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 shadow-sm">
+              <h4 className="text-stone-900 dark:text-stone-100 text-sm font-bold border-b border-stone-100 dark:border-stone-800 pb-2 mb-4">Platforms</h4>
+              <div className="flex flex-wrap gap-2">
                 {sortedPlatforms.map(([platform, count]) => (
-                  <span key={platform} className={styles.tagChip}>
+                  <span key={platform} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-100 dark:border-stone-800 rounded-full text-xs hover:bg-secondary hover:text-white transition-colors">
                     {platform} ({count})
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className={styles.statsColumn}>
-              <h4 className={styles.columnHeader}>Languages</h4>
-              <div className={styles.tagCloud}>
-                {sortedLanguages.map(([language, count]) => (
-                  <span key={language} className={styles.tagChip}>
-                    {language} ({count})
                   </span>
                 ))}
               </div>
@@ -322,9 +293,9 @@ const OneHundredDays = () => {
           </div>
         </section>
 
-        <section>
-          <h3 className={styles.sectionTitle}>Recent Posts</h3>
-          <ul className={styles.recentPostsList}>
+        <section className="mb-12">
+          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-6 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">Recent Posts</h3>
+          <ul className="space-y-3">
             {blogsData
               .slice()
               .reverse()
@@ -333,7 +304,6 @@ const OneHundredDays = () => {
                   <div
                     role="button"
                     tabIndex={0}
-                    className={styles.recentPostItem}
                     onClick={() => setSelectedBlog(blog)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -341,12 +311,12 @@ const OneHundredDays = () => {
                         setSelectedBlog(blog);
                       }
                     }}
-                    style={{ cursor: 'pointer' }}
+                    className="flex justify-between items-center bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg p-4 cursor-pointer hover:border-l-4 hover:border-l-secondary hover:shadow-md transition-all group"
                   >
-                    <span className={styles.recentPostLink}>
+                    <span className="text-stone-800 dark:text-stone-200 font-medium group-hover:text-secondary transition-colors line-clamp-1 mr-4">
                       {blog.blog_title}
                     </span>
-                    <span className={styles.recentPostDate}>
+                    <span className="text-stone-400 dark:text-stone-500 text-xs font-mono whitespace-nowrap">
                       {blog.blog_date}
                     </span>
                   </div>
@@ -356,34 +326,44 @@ const OneHundredDays = () => {
         </section>
 
         {selectedBlog && (
-          <div className={styles.modalOverlay} onClick={() => setSelectedBlog(null)}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <button type="button" className={styles.closeButton} onClick={() => setSelectedBlog(null)}>
+          <div 
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setSelectedBlog(null)}
+          >
+            <div 
+              className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl max-w-2xl w-full p-8 relative shadow-2xl transition-transform"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                type="button" 
+                onClick={() => setSelectedBlog(null)}
+                className="absolute top-4 right-6 text-3xl text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors leading-none p-0 bg-transparent border-0 cursor-pointer"
+              >
                 &times;
               </button>
-              <h3 className={styles.modalTitle}>{selectedBlog.blog_title}</h3>
+              <h3 className="text-2xl font-headline font-bold text-stone-900 dark:text-stone-100 mb-4 pr-8">{selectedBlog.blog_title}</h3>
               {selectedBlog.blog_description && (
-                <p className={styles.descriptionText} style={{ marginBottom: '1.5rem' }}>
+                <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed bg-stone-50 dark:bg-stone-800 p-4 rounded-lg border-l-4 border-l-stone-200 dark:border-l-stone-700">
                   {selectedBlog.blog_description}
                 </p>
               )}
-              <div className={styles.tagCloud} style={{ marginBottom: '1.5rem' }}>
+              <div className="flex flex-wrap gap-2 mb-6">
                 {selectedBlog.blog_tags.map((tag) => (
-                  <span key={tag} className={styles.tagChip}>{tag}</span>
+                  <span key={tag} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-md text-xs border border-stone-100 dark:border-stone-800">#{tag}</span>
                 ))}
               </div>
-              <p style={{ marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <strong>Platform:</strong> {selectedBlog.blog_platform} |{' '}
-                <strong>Language:</strong> {selectedBlog.language} |{' '}
-                <strong>Date:</strong> {selectedBlog.blog_date}
+              <p className="mb-8 text-sm text-stone-500 dark:text-stone-500 font-label uppercase tracking-widest pb-4 border-b border-stone-100 dark:border-stone-800">
+                <span className="font-bold text-stone-400">Platform:</span> {selectedBlog.blog_platform} |{' '}
+                <span className="font-bold text-stone-400">Language:</span> {selectedBlog.language} |{' '}
+                <span className="font-bold text-stone-400">Date:</span> {selectedBlog.blog_date}
               </p>
               <a
                 href={selectedBlog.blog_link}
                 target="_blank"
                 rel="noreferrer"
-                className={styles.modalLink}
+                className="inline-block bg-secondary text-white px-8 py-4 rounded-xl font-label font-bold text-sm tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-secondary/20"
               >
-                Read Post
+                READ FULL POST
               </a>
             </div>
           </div>

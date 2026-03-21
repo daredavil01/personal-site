@@ -132,6 +132,26 @@ const skills = [
     competency: 4,
     category: ['Tools'],
   },
+  {
+    title: 'MCP (Model Context Protocol)',
+    competency: 3,
+    category: ['Tools', 'Data Science'],
+  },
+  {
+    title: 'Databricks',
+    competency: 3,
+    category: ['Data Engineering', 'Databases', 'Tools'],
+  },
+  {
+    title: 'FastAPI',
+    competency: 3,
+    category: ['Web Development', 'Python'],
+  },
+  {
+    title: 'Terraform',
+    competency: 3,
+    category: ['Tools', 'Data Engineering'],
+  },
 ].map((skill) => ({ ...skill, category: skill.category.sort() }));
 
 // this is a list of colors that I like. The length should be == to the

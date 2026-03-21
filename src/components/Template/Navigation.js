@@ -13,15 +13,15 @@ const Navigation = () => {
   const dropdownRoutes = routes.filter((l) => l.dropdown);
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white dark:bg-stone-950 border-b border-stone-100 dark:border-stone-900 shadow-sm transition-colors duration-300">
-      <div className="flex justify-between items-center px-6 py-4 max-w-[1400px] mx-auto">
-        <Link to={indexRoute ? indexRoute.path : "/"} className="text-lg font-headline font-bold text-stone-900 dark:text-stone-50 tracking-[0.2em] uppercase no-underline">
+    <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-stone-950/80 backdrop-blur-md border-b border-stone-100 dark:border-stone-900 shadow-sm transition-all duration-300">
+      <div className="flex justify-between items-center px-6 py-4 max-w-[1440px] mx-auto w-full">
+        <Link to={indexRoute ? indexRoute.path : "/"} className="text-lg font-headline font-bold text-stone-900 dark:text-stone-50 tracking-[0.2em] uppercase no-underline hover:text-secondary dark:hover:text-secondary transition-colors">
           {indexRoute ? indexRoute.label : "Sanket Tambare"}
         </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center">
-          {mainRoutes.map((l) => {
+          {mainRoutes.map((l, idx) => {
             const isActive = location.pathname.includes(l.path) && l.path !== "/";
             const hasSubRoutes = l.subRoutes && l.subRoutes.length > 0;
             
@@ -34,7 +34,7 @@ const Navigation = () => {
                 >
                   <Link
                     to={l.path}
-                    className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-colors flex items-center gap-1 ${
+                    className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
                       isActive
                         ? "text-secondary font-bold"
                         : "text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
@@ -42,13 +42,13 @@ const Navigation = () => {
                   >
                     {l.label}
                     {hasSubRoutes && (
-                      <span className={`material-symbols-outlined text-[12px] transition-transform duration-200 ${openDropdown === l.label ? 'rotate-180' : ''}`}>expand_more</span>
+                      <span className={`material-symbols-outlined text-[12px] transition-transform duration-300 ${openDropdown === l.label ? 'rotate-180' : ''}`}>expand_more</span>
                     )}
                   </Link>
 
                   {/* Nested Dropdown */}
                   {hasSubRoutes && (
-                    <div className={`absolute top-full left-0 mt-0 w-48 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-xl overflow-hidden transition-all duration-200 origin-top ${
+                    <div className={`absolute top-full left-0 mt-0 w-48 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-2xl overflow-hidden transition-all duration-300 origin-top rounded-b-xl ${
                       openDropdown === l.label ? "opacity-100 scale-y-100 visible" : "opacity-0 scale-y-95 invisible"
                     }`}
                     >
@@ -73,7 +73,7 @@ const Navigation = () => {
                     </div>
                   )}
                 </div>
-                <span className="text-stone-200 dark:text-stone-800 last:hidden">|</span>
+                {idx < mainRoutes.length - 1 && <span className="text-stone-100 dark:text-stone-800 pointer-events-none">|</span>}
               </React.Fragment>
             );
           })}
@@ -84,18 +84,18 @@ const Navigation = () => {
             onMouseEnter={() => setIsMoreDropdownOpen(true)}
             onMouseLeave={() => setIsMoreDropdownOpen(false)}
           >
-            <span className="text-stone-200 dark:text-stone-800 ml-4 mr-0">|</span>
+            <span className="text-stone-100 dark:text-stone-800 ml-4 pointer-events-none">|</span>
             <button
-              className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-colors flex items-center gap-1 ${
+              className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
                 isMoreDropdownOpen ? "text-stone-900 dark:text-stone-100" : "text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
               }`}
             >
               More
-              <span className={`material-symbols-outlined text-[12px] transition-transform duration-200 ${isMoreDropdownOpen ? 'rotate-180' : ''}`}>expand_more</span>
+              <span className={`material-symbols-outlined text-[12px] transition-transform duration-300 ${isMoreDropdownOpen ? 'rotate-180' : ''}`}>expand_more</span>
             </button>
 
             {/* Dropdown Menu */}
-            <div className={`absolute top-full right-0 mt-0 w-48 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-xl overflow-hidden transition-all duration-200 origin-top ${
+            <div className={`absolute top-full right-0 mt-0 w-48 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-2xl overflow-hidden transition-all duration-300 origin-top rounded-b-xl ${
               isMoreDropdownOpen ? "opacity-100 scale-y-100 visible" : "opacity-0 scale-y-95 invisible"
             }`}
             >
