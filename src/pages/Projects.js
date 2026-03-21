@@ -1,27 +1,49 @@
 import React from "react";
-import { Link } from "react-router-dom";
-
 import Main from "../layouts/Main";
+import ProjectGallery from "../components/Projects/ProjectGallery";
+import projectsData from "../data/projects";
 
-import Cell from "../components/Projects/Cell";
-import data from "../data/projects";
+const Projects = () => {
+  return (
+    <Main
+      title="Projects"
+      description="A selection of projects that define my creative trajectory."
+    >
+      <style>{`
+        .editorial-grid {
+          display: grid;
+          grid-template-columns: repeat(12, 1fr);
+          gap: 2rem;
+        }
+      `}</style>
+      <div className="flex flex-col gap-12 w-full">
+        {/* Hero Section */}
+        <header className="mb-12">
+          <p className="font-label text-xs uppercase tracking-widest text-secondary mb-4">Portfolio Exhibit</p>
+          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 leading-none tracking-tight mb-8">
+            Curated <br />Works.
+          </h1>
+          <div className="max-w-2xl">
+            <p className="text-xl text-stone-500 font-light leading-relaxed">
+              A selection of projects that define my creative trajectory. Each piece is treated as a singular exhibit, documenting the intersection of human intent and digital execution.
+            </p>
+          </div>
+        </header>
 
-const Projects = () => (
-  <Main title="Projects" description="Learn about Sanket Tambare's projects.">
-    <article className="post" id="projects">
-      <header>
-        <div className="title">
-          <h2>
-            <Link to="/projects">Projects</Link>
-          </h2>
-          <p>A selection of projects that I&apos;m not too ashamed of</p>
-        </div>
-      </header>
-      {data.map((project) => (
-        <Cell data={project} key={project.title} />
-      ))}
-    </article>
-  </Main>
-);
+        {/* Projects Gallery (Editorial Layout) */}
+        <ProjectGallery projects={projectsData} />
+
+        {/* Pagination / Call to action */}
+        <footer className="mt-16 border-t border-stone-100 pt-16 text-center w-full">
+          <h3 className="font-headline text-3xl font-bold mb-6 text-stone-800">Have a project in mind?</h3>
+          <button className="group inline-flex items-center gap-4 text-xl font-label uppercase tracking-widest text-secondary hover:text-stone-800 transition-colors">
+            Let&apos;s discuss the vision
+            <span className="material-symbols-outlined transition-transform group-hover:translate-x-2">arrow_forward</span>
+          </button>
+        </footer>
+      </div>
+    </Main>
+  );
+};
 
 export default Projects;

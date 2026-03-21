@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import Markdown from "markdown-to-jsx";
-
 import Main from "../layouts/Main";
+import AboutDocument from "../components/About/AboutDocument";
 
 const About = () => {
   const [markdown, setMarkdown] = useState("");
@@ -15,7 +13,7 @@ const About = () => {
           .then(setMarkdown);
       })
       .catch(console.error);
-  });
+  }, []);
 
   const count = markdown
     .split(/\s+/)
@@ -24,17 +22,7 @@ const About = () => {
 
   return (
     <Main title="About" description="Learn about Sanket Tambare">
-      <article className="post markdown" id="about">
-        <header>
-          <div className="title">
-            <h2>
-              <Link to="/about">About Me</Link>
-            </h2>
-            <p>(in about {count} words)</p>
-          </div>
-        </header>
-        <Markdown>{markdown}</Markdown>
-      </article>
+      <AboutDocument markdown={markdown} count={count} />
     </Main>
   );
 };

@@ -16,22 +16,16 @@ personal-site/
 └── package.json            # Dependencies and scripts
 ```
 
-## Key Components
+### Challenges Hub (`src/pages/Challenges.js`)
+The central landing page for all personal and professional challenges. It provides context on my growth journey and links to specific challenge implementations.
 
-### ResumeV2 (`src/components/Resume/ResumeV2.js`)
-This is the core component for the interactive resume page. It manages the state for different sections (Experience, Education, Skills, etc.) and handles the welcome animation.
+- **Sub-pages**: Located in `src/pages/` (e.g., `OneHundredDays.js`)
+- **Data Source**: `src/data/` (e.g., `100DaysToOffload.js`)
 
-- **Sub-components**: Located in `src/components/Resume/ResumeV2/`
-- **Data Source**: `src/data/resume/`
+### Sports Dashboard (`src/pages/Sports.js`)
+An interactive dashboard for displaying marathon and race achievements. It features filtering, sorting, and location-based views.
 
-### SportsV2 (`src/components/Sports/SportsV2.js`)
-The interactive dashboard for displaying marathon and race achievements.
-
-- **Features**: Filtering, Sorting, Search, Timeline View.
 - **Data Source**: `src/data/sports.js`
-
-### Dark Mode Toggle (`src/components/Template/DarkModeToggle.js`)
-Manages the application-wide theme state. It uses local storage to persist the user's preference.
 
 ## Data Management
 
@@ -48,7 +42,7 @@ The project uses SCSS for styling.
 
 - **Main Entry**: `src/static/css/main.scss`
 - **Structure**:
-    - `base/`: Reset, typography, variables.
+    - `base/`: Reset, typography, variables (Stone/Slate palette).
     - `components/`: Component-specific styles.
     - `layout/`: Grid and layout utilities.
-- **Dark Mode**: Implemented via CSS variables and the `.dark-mode` class on the body.
+- **Theme**: Unified light-mode design focused on readability and premium aesthetics, using Tailwind CSS and custom SCSS.

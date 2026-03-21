@@ -27,11 +27,20 @@ const Hamburger = () => {
         <Menu right isOpen={open}>
           <ul className="hamburger-ul">
             {routes.map((l) => (
-              <li key={l.label}>
-                <Link to={l.path} onClick={() => setOpen(!open)}>
-                  <h3 className={l.index && 'index-li'}>{l.label}</h3>
-                </Link>
-              </li>
+              <React.Fragment key={l.label}>
+                <li>
+                  <Link to={l.path} onClick={() => setOpen(false)}>
+                    <h3 className={l.index && 'index-li'}>{l.label}</h3>
+                  </Link>
+                </li>
+                {l.subRoutes && l.subRoutes.map((sub) => (
+                  <li key={sub.label} className="pl-6">
+                    <Link to={sub.path} onClick={() => setOpen(false)}>
+                      <p className="text-stone-400 text-xs py-2 uppercase tracking-widest">{sub.label}</p>
+                    </Link>
+                  </li>
+                ))}
+              </React.Fragment>
             ))}
           </ul>
         </Menu>

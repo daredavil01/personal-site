@@ -47,3 +47,6 @@ build/
 
 # Nohup
 nohup.out
+
+# stitch design related
+stitch/

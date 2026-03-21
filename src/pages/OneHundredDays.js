@@ -97,26 +97,18 @@ const OneHundredDays = () => {
       title="100 Days To Offload"
       description="Challenge: Publish 100 posts in a year"
     >
-      <article className="post" id="one-hundred-days">
-        <header>
-          <div className="title">
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <article className="max-w-4xl" id="one-hundred-days">
+        <header className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
+            <div className="flex-shrink-0">
                 {/* SVG Logo */}
                 <svg
-                  width="100"
-                  height="100"
+                  width="120"
+                  height="120"
                   viewBox="0 0 600 600"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="drop-shadow-sm"
                 >
                   <defs>
                     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -205,14 +197,16 @@ const OneHundredDays = () => {
                     <text x="50" y="-20" fontFamily="Arial, sans-serif" fontSize="12" fill="#FF0000" textAnchor="middle">@nky s Blog</text>
                   </g>
                 </svg>
-                <h2>100 Days To Offload</h2>
-              </div>
             </div>
-            <p className={styles.subtitle}>
-              {titleText}
-              <span className={styles.typewriterCursor} />
-            </p>
+            <div>
+              <h1 className="font-headline text-3xl font-bold text-stone-900 uppercase tracking-widest mb-2">100 Days To Offload</h1>
+              <p className="font-label text-xs uppercase tracking-[0.2em] text-stone-300 font-medium italic">
+                {titleText}
+                <span className={styles.typewriterCursor} />
+              </p>
+            </div>
           </div>
+          <div className="h-px w-full bg-stone-100" />
         </header>
 
         <section>

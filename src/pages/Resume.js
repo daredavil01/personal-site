@@ -1,284 +1,75 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-
+import React from "react";
 import Main from "../layouts/Main";
+import SkillsSection from "../components/Resume/SkillsSection";
+import ExperienceSection from "../components/Resume/ExperienceSection";
+import EducationSection from "../components/Resume/EducationSection";
+import CertificationsSection from "../components/Resume/CertificationsSection";
 
-import Education from "../components/Resume/Education";
-import Experience from "../components/Resume/Experience";
-import Skills from "../components/Resume/Skills";
-import Certification from "../components/Resume/Ceritification";
-import ResumeV2 from "../components/Resume/ResumeV2";
-
-import degrees from "../data/resume/degrees";
+import { skills } from "../data/resume/skills";
 import positions from "../data/resume/positions";
+import degrees from "../data/resume/degrees";
 import certifications from "../data/resume/certifications";
-import { skills, categories } from "../data/resume/skills";
-
-const sections = ["Education", "Experience", "Certification", "Skills"];
 
 const Resume = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [viewVersion, setViewVersion] = useState("v2"); // Changed default to v2
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [confetti, setConfetti] = useState([]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Confetti effect for interactive view
-  useEffect(() => {
-    if (showWelcome && viewVersion === "v2") {
-      const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
-      const newConfetti = [];
-
-      for (let i = 0; i < 150; i += 1) {
-        newConfetti.push({
-          id: i,
-          x: Math.random() * window.innerWidth,
-          y: -10,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          size: Math.random() * 10 + 5,
-          speed: Math.random() * 3 + 2,
-          rotation: Math.random() * 360,
-          rotationSpeed: Math.random() * 10 - 5,
-        });
-      }
-
-      setConfetti(newConfetti);
-
-      const interval = setInterval(() => {
-        setConfetti((prev) => prev
-          .map((particle) => ({
-            ...particle,
-            y: particle.y + particle.speed,
-            rotation: particle.rotation + particle.rotationSpeed,
-          }))
-          .filter((particle) => particle.y < window.innerHeight + 50));
-      }, 50);
-
-      return () => clearInterval(interval);
-    }
-    return undefined;
-  }, [showWelcome, viewVersion]);
-
-  const styles = {
-    container: {
-      padding: isMobile ? "0.5rem" : "1.5rem",
-    },
-    toggleContainer: {
-      display: "flex",
-      justifyContent: "center",
-      marginBottom: "2rem",
-      gap: "12px",
-    },
-    toggleButton: {
-      padding: "12px 24px",
-      borderRadius: "25px",
-      border: "2px solid #2e59ba",
-      background: "transparent",
-      color: "#2e59ba",
-      cursor: "pointer",
-      fontWeight: "600",
-      fontSize: "0.9rem",
-      transition: "all 0.3s ease",
-    },
-    toggleButtonActive: {
-      background: "#2e59ba",
-      color: "white",
-    },
-    welcomeOverlay: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(0, 0, 0, 0.8)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 1000,
-      animation: "fadeIn 0.5s ease-in",
-    },
-    welcomePopup: {
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      color: "white",
-      padding: "2rem",
-      borderRadius: "20px",
-      textAlign: "center",
-      maxWidth: "400px",
-      margin: "1rem",
-      boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-      animation: "slideIn 0.5s ease-out",
-    },
-    welcomeTitle: {
-      fontSize: "1.8rem",
-      fontWeight: "700",
-      marginBottom: "1rem",
-    },
-    welcomeText: {
-      fontSize: "1rem",
-      marginBottom: "1.5rem",
-      lineHeight: "1.5",
-    },
-    welcomeButton: {
-      background: "white",
-      color: "#667eea",
-      border: "none",
-      padding: "12px 24px",
-      borderRadius: "25px",
-      fontSize: "1rem",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-    },
-    confettiContainer: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      pointerEvents: "none",
-      zIndex: 999,
-    },
-    confettiPiece: {
-      position: "absolute",
-      width: "10px",
-      height: "10px",
-      borderRadius: "50%",
-    },
-  };
-
-  const handleWelcomeClose = () => {
-    setShowWelcome(false);
-    setConfetti([]);
-  };
-
   return (
     <Main
-      title="Resume"
-      description="Sanket Tambare's Resume. Arthena, Matroid, YC, Skeptical Investments, Stanford ICME, Planet Labs, and Facebook."
+      title="Technical Skills"
+      description="A curated collection of frameworks, languages, and infrastructure tools leveraged to build high-performance digital experiences."
     >
-      {/* Confetti for entire page */}
-      {showWelcome && viewVersion === "v2" && (
-        <div style={styles.confettiContainer}>
-          {confetti.map((particle) => (
-            <div
-              key={particle.id}
-              style={{
-                ...styles.confettiPiece,
-                left: `${particle.x}px`,
-                top: `${particle.y}px`,
-                backgroundColor: particle.color,
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
-                transform: `rotate(${particle.rotation}deg)`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Welcome Popup for interactive view */}
-      {showWelcome && viewVersion === "v2" && (
-        <div style={styles.welcomeOverlay}>
-          <div style={styles.welcomePopup}>
-            <h2 style={styles.welcomeTitle}>🎉 Welcome to My Professional Resume!</h2>
-            <p style={styles.welcomeText}>
-              Explore my professional journey through an interactive dashboard with detailed
-              experience, education, skills, and certifications. Ready to discover my career path?
-            </p>
-            <button
-              type="button"
-              style={styles.welcomeButton}
-              onClick={handleWelcomeClose}
-            >
-              Let&apos;s Explore! 💼
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div style={styles.container}>
-        {/* Toggle Buttons */}
-        <div style={styles.toggleContainer}>
-          <button
-            type="button"
-            style={{
-              ...styles.toggleButton,
-              ...(viewVersion === "v1" ? styles.toggleButtonActive : {})
-            }}
-            onClick={() => setViewVersion("v1")}
-          >
-            📋 Default View
-          </button>
-          <button
-            type="button"
-            style={{
-              ...styles.toggleButton,
-              ...(viewVersion === "v2" ? styles.toggleButtonActive : {})
-            }}
-            onClick={() => setViewVersion("v2")}
-          >
-            🚀 Interactive View
-          </button>
-        </div>
-
-        {viewVersion === "v1" ? (
-          <article className="post" id="resume">
-            <header>
-              <div className="title">
-                <h2>
-                  <Link to="resume">Resume</Link>
-                </h2>
-                <div className="link-container">
-                  {sections.map((sec) => (
-                    <h4 key={sec}>
-                      <a href={`#${sec.toLowerCase()}`}>{sec}</a>
-                    </h4>
-                  ))}
-                </div>
-              </div>
-            </header>
-            <Education data={degrees} />
-            <Experience data={positions} />
-            <Certification data={certifications} />
-            <Skills skills={skills} categories={categories} />
-          </article>
-        ) : (
-          <ResumeV2
-            degrees={degrees}
-            positions={positions}
-            certifications={certifications}
-            skills={skills}
-            categories={categories}
-          />
-        )}
-      </div>
-
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        .editorial-grid {
+          display: grid;
+          grid-template-columns: repeat(12, 1fr);
+          gap: 1.5rem;
         }
-        
-        @keyframes slideIn {
-          from { 
-            transform: translateY(-50px) scale(0.9);
-            opacity: 0;
-          }
-          to { 
-            transform: translateY(0) scale(1);
-            opacity: 1;
-          }
-        }
-      `}
-      </style>
+      `}</style>
+      <div className="flex flex-col gap-12 w-full">
+        {/* Hero Section */}
+        <header className="mb-12">
+          <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary mb-4">Expertise & Competencies</p>
+          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 leading-[0.9] tracking-tighter mb-8">
+            Technical<br />Arsenal.
+          </h1>
+          <div className="max-w-2xl">
+            <p className="text-xl text-stone-500 font-light leading-relaxed">
+              A curated collection of frameworks, languages, and infrastructure tools leveraged to build high-performance digital experiences and resilient cloud architectures.
+            </p>
+          </div>
+        </header>
+
+        {/* Main Content Grid */}
+        <div className="editorial-grid w-full">
+          {/* Primary Interests / Summary (Bento Large) */}
+          <section className="col-span-12 md:col-span-7 bg-secondary/[0.03] p-10 rounded-xl relative overflow-hidden group border border-secondary/10">
+            <div className="relative z-10">
+              <span className="font-label text-[10px] uppercase tracking-widest text-stone-400">Focus Area</span>
+              <h3 className="font-headline text-3xl mt-2 mb-6 text-stone-800">Human-AI Interface Design</h3>
+              <p className="text-stone-600 leading-relaxed text-lg mb-8">
+                Synthesizing complex computational logic into intuitive human experiences. My work focuses on bridging the gap between sophisticated LLM capabilities and seamless user interactions, prioritizing cognitive load reduction and aesthetic intentionality.
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="h-[1px] w-12 bg-secondary"></div>
+                <span className="font-label text-xs uppercase tracking-widest text-secondary">Work Experience Focus</span>
+              </div>
+            </div>
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <span className="material-symbols-outlined text-9xl text-stone-900" style={{ fontVariationSettings: "'FILL' 1" }}>neurology</span>
+            </div>
+          </section>
+
+          {/* Skill Cards Grid */}
+          <SkillsSection skills={skills} />
+
+          {/* Professional Experience */}
+          <ExperienceSection positions={positions} />
+
+          {/* Education */}
+          <EducationSection degrees={degrees} />
+
+          {/* Certifications (Glass Card) */}
+          <CertificationsSection certifications={certifications} />
+        </div>
+      </div>
     </Main>
   );
 };

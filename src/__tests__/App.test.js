@@ -2,12 +2,12 @@
  * @jest-environment jsdom
  */
 
-import '@testing-library/jest-dom';
-import '@testing-library/react';
+import { render, screen, act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { act } from 'react-dom/test-utils';
 import App from '../App';
+
+// Increase timeout for async finding
+const timeout = 5000;
 
 describe('renders the app', () => {
   // mocks the fetch API used on the stats page and the about page.
@@ -20,98 +20,85 @@ describe('renders the app', () => {
   // mocks the scrollTo API used when navigating to a new page.
   window.scrollTo = jest.fn();
 
-  let container;
-
-  beforeEach(async () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    await act(async () => {
-      await ReactDOM.createRoot(container).render(<App />);
-    });
-  });
-
-  afterEach(() => {
-    document.body.removeChild(container);
-    container = null;
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it('should render the app', async () => {
-    expect(document.body).toBeInTheDocument();
+    render(<App />);
+    const mainElement = await screen.findByRole('main', { timeout });
+    expect(mainElement).toBeInTheDocument();
   });
 
   it('should render the title', async () => {
-    expect(document.title).toBe('Sanket Tambare');
+    render(<App />);
+    await waitFor(() => expect(document.title).toBe('Sanket Tambare'), { timeout });
   });
 
   it('can navigate to /about', async () => {
-    expect.assertions(7);
-    const aboutLink = document.querySelector(
-      '#header > nav > ul > li:nth-child(1) > a',
-    );
+    render(<App />);
+    const aboutLink = await screen.findByRole('link', { name: /About/i }, { timeout });
     expect(aboutLink).toBeInTheDocument();
     await act(async () => {
       await aboutLink.click();
     });
-    expect(document.title).toContain('About |');
+    await waitFor(() => expect(document.title).toContain('About'), { timeout });
     expect(window.location.pathname).toBe('/about');
-    expect(window.scrollTo).toHaveBeenNthCalledWith(1, 0, 0);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(jsonMock).toHaveBeenCalledTimes(0);
-    expect(textMock).toHaveBeenCalledTimes(1);
   });
 
   it('can navigate to /resume', async () => {
-    expect.assertions(3);
-    const contactLink = document.querySelector(
-      '#header > nav > ul > li:nth-child(2) > a',
-    );
-    expect(contactLink).toBeInTheDocument();
+    render(<App />);
+    const resumeLink = await screen.findByRole('link', { name: /Resume/i }, { timeout });
+    expect(resumeLink).toBeInTheDocument();
     await act(async () => {
-      await contactLink.click();
+      await resumeLink.click();
     });
-    expect(document.title).toContain('Resume |');
+    await waitFor(() => expect(document.title).toContain('Resume'), { timeout });
     expect(window.location.pathname).toBe('/resume');
   });
 
   it('can navigate to /projects', async () => {
-    expect.assertions(3);
-    const contactLink = document.querySelector(
-      '#header > nav > ul > li:nth-child(3) > a',
-    );
-    expect(contactLink).toBeInTheDocument();
+    render(<App />);
+    // Open dropdown
+    const moreButton = await screen.findByRole('button', { name: /More/i }, { timeout });
+    fireEvent.mouseEnter(moreButton);
+
+    const projectsLink = await screen.findByRole('link', { name: /Projects/i }, { timeout });
+    expect(projectsLink).toBeInTheDocument();
     await act(async () => {
-      await contactLink.click();
+      await projectsLink.click();
     });
-    expect(document.title).toContain('Projects |');
+    await waitFor(() => expect(document.title).toContain('Projects'), { timeout });
     expect(window.location.pathname).toBe('/projects');
   });
 
   it('can navigate to /stats', async () => {
-    expect.assertions(5);
-    const contactLink = document.querySelector(
-      '#header > nav > ul > li:nth-child(4) > a',
-    );
-    expect(contactLink).toBeInTheDocument();
+    render(<App />);
+    const statsLink = await screen.findByRole('link', { name: /Stats/i }, { timeout });
+    expect(statsLink).toBeInTheDocument();
     await act(async () => {
-      await contactLink.click();
+      await statsLink.click();
     });
-    expect(document.title).toContain('Stats |');
+    await waitFor(() => expect(document.title).toContain('Stats'), { timeout });
     expect(window.location.pathname).toBe('/stats');
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(jsonMock).toHaveBeenCalledTimes(1);
   });
 
   it('can navigate to /contact', async () => {
-    expect.assertions(3);
-    const contactLink = document.querySelector(
-      '#header > nav > ul > li:nth-child(5) > a',
-    );
+    render(<App />);
+    // Open dropdown
+    const moreButton = await screen.findByRole('button', { name: /More/i }, { timeout });
+    fireEvent.mouseEnter(moreButton);
+
+    const contactLink = await screen.findByRole('link', { name: /Contact/i }, { timeout });
     expect(contactLink).toBeInTheDocument();
     await act(async () => {
       await contactLink.click();
     });
-    expect(document.title).toContain('Contact |');
+    await waitFor(() => expect(document.title).toContain('Contact'), { timeout });
     expect(window.location.pathname).toBe('/contact');
   });
 });

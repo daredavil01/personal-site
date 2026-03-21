@@ -1,0 +1,72 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: "class",
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html"
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "on-background": "#1a1c1c",
+        "on-primary-fixed-variant": "#474747",
+        "on-tertiary": "#ffffff",
+        "tertiary-fixed-dim": "#a7ccda",
+        "error": "#ba1a1a",
+        "tertiary-container": "#113843",
+        "surface-tint": "#5f5e5e",
+        "on-secondary-fixed": "#3d0600",
+        "surface-bright": "#f9f9f9",
+        "secondary-fixed": "#ffdad3",
+        "inverse-on-surface": "#f1f1f1",
+        "on-primary": "#ffffff",
+        "primary": "#1e1e1e",
+        "outline": "#747878",
+        "outline-variant": "#c4c7c7",
+        "on-tertiary-fixed": "#001f28",
+        "tertiary-fixed": "#c3e8f7",
+        "on-tertiary-fixed-variant": "#274c57",
+        "on-primary-fixed": "#1b1c1c",
+        "surface-dim": "#dadada",
+        "surface-container-high": "#e8e8e8",
+        "on-error": "#ffffff",
+        "surface-container-low": "#f3f3f3",
+        "on-secondary": "#ffffff",
+        "primary-fixed": "#e4e2e1",
+        "surface": "#f9f9f9",
+        "on-secondary-fixed-variant": "#8c1800",
+        "secondary": "#b22200",
+        "secondary-fixed-dim": "#ffb4a4",
+        "inverse-surface": "#2f3131",
+        "on-error-container": "#93000a",
+        "inverse-primary": "#c8c6c6",
+        "surface-container-highest": "#e2e2e2",
+        "background": "#f9f9f9",
+        "surface-variant": "#e2e2e2",
+        "on-surface-variant": "#444748",
+        "error-container": "#ffdad6",
+        "on-secondary-container": "#fffbff",
+        "on-surface": "#1a1c1c",
+        "tertiary": "#00222b",
+        "on-primary-container": "#9c9b9b",
+        "primary-container": "#333333",
+        "surface-container-lowest": "#ffffff",
+        "surface-container": "#eeeeee",
+        "secondary-container": "#d73b19",
+        "primary-fixed-dim": "#c8c6c6",
+        "on-tertiary-container": "#7da1af"
+      },
+      fontFamily: {
+        "headline": ["Noto Serif", "serif"],
+        "body": ["Inter", "sans-serif"],
+        "label": ["Plus Jakarta Sans", "sans-serif"]
+      },
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+    },
+  },
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/container-queries')
+  ],
+}

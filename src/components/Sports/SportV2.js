@@ -4,259 +4,59 @@ import ImageSlider from "../Instagram/ImageSlider";
 
 const SportV2 = ({ data }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
-  // Parse time to get minutes for progress calculation
-  const parseTime = (timeStr) => {
-    const parts = timeStr.split(':');
-    if (parts.length === 2) {
-      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-    }
-    if (parts.length === 3) {
-      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-    }
-    return 0;
-  };
-
-  // Calculate pace (minutes per km)
-  const calculatePace = (time, distance) => {
-    const timeInMinutes = parseTime(time);
-    const distanceInKm = parseFloat(distance.replace(/[^\d.]/g, ''));
-    // Avoid division by zero
-    if (distanceInKm === 0) return 'N/A';
-    return (timeInMinutes / distanceInKm).toFixed(2);
-  };
-
-  // Get distance category color
-  const getDistanceColor = (distance) => {
-    const dist = distance.toLowerCase();
-    if (dist.includes('10')) return '#4CAF50';
-    if (dist.includes('21')) return '#2196F3';
-    if (dist.includes('35')) return '#FF9800';
-    if (dist.includes('42')) return '#F44336';
-    return '#9E9E9E';
-  };
-
-  const pace = calculatePace(data.time, data.distance);
-  const distanceColor = getDistanceColor(data.distance);
-
-  const cardStyles = {
-    container: {
-      background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-      borderRadius: '16px',
-      boxShadow: isHovered
-        ? '0 8px 32px rgba(0,0,0,0.15)'
-        : '0 4px 16px rgba(0,0,0,0.1)',
-      margin: '20px 0',
-      padding: '24px',
-      transition: 'all 0.3s ease',
-      border: `3px solid ${distanceColor}`,
-      position: 'relative',
-      overflow: 'hidden',
-      cursor: 'pointer',
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: '16px',
-    },
-    title: {
-      fontSize: '1.4rem',
-      fontWeight: '700',
-      color: '#2c3e50',
-      margin: '0',
-      flex: '1',
-    },
-    badge: {
-      background: distanceColor,
-      color: 'white',
-      padding: '6px 12px',
-      borderRadius: '20px',
-      fontSize: '0.8rem',
-      fontWeight: '600',
-      marginLeft: '12px',
-    },
-    stats: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-      gap: '12px',
-      marginBottom: '16px',
-    },
-    stat: {
-      textAlign: 'center',
-      padding: '12px',
-      background: 'rgba(255,255,255,0.8)',
-      borderRadius: '8px',
-      border: '1px solid #e0e0e0',
-    },
-    // Updated Style: Added margin: 0
-    statLabel: {
-      fontSize: '0.75rem',
-      color: '#666',
-      fontWeight: '500',
-      marginBottom: '4px',
-      margin: 0,
-    },
-    // Updated Style: Added margin: 0
-    statValue: {
-      fontSize: '1rem',
-      fontWeight: '700',
-      color: '#2c3e50',
-      margin: 0,
-    },
-    description: {
-      color: '#555',
-      fontSize: '0.9rem',
-      lineHeight: '1.5',
-      marginBottom: '16px',
-      fontStyle: 'italic',
-    },
-    progressContainer: {
-      marginBottom: '16px',
-    },
-    progressBar: {
-      width: '100%',
-      height: '8px',
-      background: '#e0e0e0',
-      borderRadius: '4px',
-      overflow: 'hidden',
-    },
-    progressFill: {
-      height: '100%',
-      background: `linear-gradient(90deg, ${distanceColor} 0%, ${distanceColor}80 100%)`,
-      borderRadius: '4px',
-      transition: 'width 0.8s ease',
-    },
-    expandButton: {
-      background: 'transparent',
-      border: `2px solid ${distanceColor}`,
-      color: distanceColor,
-      padding: '8px 16px',
-      borderRadius: '20px',
-      cursor: 'pointer',
-      fontSize: '0.8rem',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
-      marginBottom: '16px',
-    },
-    expandedContent: {
-      maxHeight: isExpanded ? '1000px' : '0',
-      overflow: 'hidden',
-      transition: 'max-height 0.3s ease',
-    },
-    certificateLink: {
-      display: 'inline-block',
-      background: '#2e59ba',
-      color: 'white',
-      padding: '8px 16px',
-      borderRadius: '20px',
-      textDecoration: 'none',
-      fontSize: '0.8rem',
-      fontWeight: '600',
-      marginTop: '12px',
-      transition: 'all 0.3s ease',
-    },
-    imageSection: {
-      marginTop: '16px',
-    },
-    imageTitle: {
-      fontSize: '1rem',
-      fontWeight: '600',
-      color: '#2c3e50',
-      marginBottom: '12px',
-      textAlign: 'center',
-    },
-  };
-
-  const handleCardClick = () => {
-    setIsExpanded(!isExpanded);
-  };
+  const dateObj = new Date(data.date);
+  const month = dateObj.toLocaleString('default', { month: 'short' });
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const year = dateObj.getFullYear();
 
   return (
-    <div
-      style={cardStyles.container}
-      className="sport-v2-container"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
-      onKeyPress={(e) => (e.key === 'Enter' ? handleCardClick() : null)}
-      role="button"
-      tabIndex="0"
+    <div 
+      className={`group flex flex-col p-8 bg-secondary/[0.03] rounded-xl border border-secondary/10 transition-all duration-300 gap-6 cursor-pointer ${isExpanded ? 'bg-secondary/[0.06]' : 'hover:bg-secondary/[0.06]'}`}
+      onClick={() => setIsExpanded(!isExpanded)}
     >
-      <div style={cardStyles.header}>
-        <h3 style={cardStyles.title} className="sport-v2-title">{data.title}</h3>
-        <span style={cardStyles.badge}>{data.distance}</span>
-      </div>
-
-      <p style={cardStyles.description} className="sport-v2-description">&ldquo;{data.description}&rdquo;</p>
-
-      <div style={cardStyles.stats}>
-        {/* Changed divs to p tags below */}
-        <div style={cardStyles.stat} className="sport-v2-stat">
-          <p style={cardStyles.statLabel} className="sport-v2-stat-label">Date</p>
-          <p style={cardStyles.statValue} className="sport-v2-stat-value">{data.date}</p>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
+        <div className="flex items-center gap-8">
+          <div className="font-label text-center min-w-[3rem]">
+            <span className="text-xs text-stone-400 uppercase block">{month}</span>
+            <span className={`text-2xl font-black transition-colors ${isExpanded ? 'text-secondary' : 'text-stone-400 group-hover:text-stone-800'}`}>{day}</span>
+            <span className="text-[10px] text-stone-300 uppercase block mt-1">{year}</span>
+          </div>
+          <div>
+            <h5 className={`font-body font-bold text-xl transition-colors ${isExpanded ? 'text-stone-900' : 'text-stone-700 group-hover:text-stone-900'}`}>{data.title}</h5>
+            <p className="font-label text-xs text-stone-400 uppercase tracking-widest mt-1">{data.distance} • {data.place}</p>
+          </div>
         </div>
-        <div style={cardStyles.stat} className="sport-v2-stat">
-          <p style={cardStyles.statLabel} className="sport-v2-stat-label">Place</p>
-          <p style={cardStyles.statValue} className="sport-v2-stat-value">{data.place}</p>
-        </div>
-        <div style={cardStyles.stat} className="sport-v2-stat">
-          <p style={cardStyles.statLabel} className="sport-v2-stat-label">Time</p>
-          <p style={cardStyles.statValue} className="sport-v2-stat-value">{data.time}</p>
-        </div>
-        <div style={cardStyles.stat} className="sport-v2-stat">
-          <p style={cardStyles.statLabel} className="sport-v2-stat-label">Pace</p>
-          <p style={cardStyles.statValue} className="sport-v2-stat-value">{pace} min/km</p>
+        <div className="text-left md:text-right flex md:block items-center justify-between w-full md:w-auto">
+          <div className="font-label text-2xl font-black text-stone-800">{data.time}</div>
+          <span className="font-label text-[10px] text-stone-400 uppercase tracking-[0.2em] block mt-1 flex items-center justify-end gap-1">
+            {isExpanded ? 'Hide Details' : 'View Details'}
+            <span className={`material-symbols-outlined text-[10px] transition-transform duration-300 ${isExpanded ? 'rotate-180 text-secondary' : ''}`}>expand_more</span>
+          </span>
         </div>
       </div>
 
-      <div style={cardStyles.progressContainer}>
-        <div style={cardStyles.progressBar} className="sport-v2-progress-bar">
-          <div
-            style={{
-              ...cardStyles.progressFill,
-              width: `${Math.min((parseTime(data.time) / 180) * 100, 100)}%`,
-            }}
-          />
-        </div>
-      </div>
+      {/* Expanded Content */}
+      <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[2000px] opacity-100 mt-2 pt-6 border-t border-stone-200' : 'max-h-0 opacity-0 m-0 p-0 border-t-0 border-transparent hidden'}`}>
+        <div onClick={(e) => e.stopPropagation()} className="cursor-default">
+          <p className="font-body text-stone-600 text-lg leading-relaxed mb-8 italic">"{data.description}"</p>
+          
+          {data.slideImages && data.slideImages.length > 0 && (
+            <div className="mb-8 w-full">
+              <span className="font-label text-[10px] text-stone-400 uppercase tracking-widest mb-4 block">Event Documentation</span>
+              <div className="rounded-xl overflow-hidden border border-stone-200">
+                <ImageSlider data={data.slideImages} />
+              </div>
+            </div>
+          )}
 
-      <button
-        type="button"
-        className={`sport-v2-expand-button ${isExpanded ? 'sport-v2-expand-button-active' : ''}`}
-        style={{
-          ...cardStyles.expandButton,
-          background: isExpanded ? distanceColor : 'transparent',
-          color: isExpanded ? 'white' : distanceColor,
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsExpanded(!isExpanded);
-        }}
-      >
-        {isExpanded ? 'Hide Details' : 'Show Details'}
-      </button>
-
-      <div
-        style={cardStyles.expandedContent}
-        onClick={(e) => e.stopPropagation()}
-        role="presentation"
-      >
-        <a
-          href={data.timeCertificateLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={cardStyles.certificateLink}
-          className="sport-v2-certificate-link"
-          onClick={(e) => e.stopPropagation()}
-        >
-          📋 View Certificate
-        </a>
-
-        <div style={cardStyles.imageSection}>
-          <h4 style={cardStyles.imageTitle} className="sport-v2-image-title">🏃‍♂️ Event Highlights</h4>
-          <ImageSlider data={data.slideImages} />
+          {data.timeCertificateLink && (
+            <div className="flex gap-4">
+              <a href={data.timeCertificateLink} target="_blank" rel="noopener noreferrer" className="bg-stone-100 border border-stone-200 text-stone-800 px-6 py-3 rounded-lg font-label font-bold text-xs uppercase tracking-widest hover:bg-stone-200 active:scale-95 transition-all">
+                Official Certificate
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

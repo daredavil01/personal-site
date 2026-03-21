@@ -21,28 +21,34 @@ const Post = ({ data }) => {
       margin: isMobile ? "10px" : "20px",
       padding: isMobile ? "10px" : "20px",
       borderRadius: "8px",
+      backgroundColor: "white",
     },
     title: {
       fontSize: isMobile ? "1.2rem" : "1.8rem",
-      fontWeight: "600",
+      fontWeight: "900",
       marginBottom: isMobile ? "0.5rem" : "1rem",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#333",
     },
     caption: {
-      fontSize: isMobile ? "0.9rem" : "1.2rem",
+      fontSize: isMobile ? "0.9rem" : "1.1rem",
       marginBottom: isMobile ? "0.5rem" : "1rem",
-      lineHeight: "1.4",
+      lineHeight: "1.6",
+      color: "#444",
     },
     tagsContainer: {
       marginBottom: isMobile ? "0.5rem" : "1rem",
+      fontSize: "0.9rem",
     },
     tagsLabel: {
-      fontSize: isMobile ? "0.9rem" : "1.2rem",
       fontWeight: "bold",
+      color: "#555",
     },
     tag: {
-      fontSize: isMobile ? "0.9rem" : "1.2rem",
       fontStyle: "italic",
       marginRight: "0.3rem",
+      color: "#3d94ff",
     },
   };
 
@@ -73,7 +79,7 @@ const Post = ({ data }) => {
 };
 
 Post.propTypes = {
-  data: {
+  data: PropTypes.shape({
     title: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string),
     caption: PropTypes.string,
@@ -83,16 +89,7 @@ Post.propTypes = {
         caption: PropTypes.string,
       })
     ),
-  },
-};
-
-Post.defaultProps = {
-  data: {
-    title: "",
-    tags: [],
-    caption: "",
-    slideImages: [],
-  },
+  }).isRequired,
 };
 
 export default Post;

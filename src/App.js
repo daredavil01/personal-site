@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Main from "./layouts/Main"; // fallback for lazy pages
+import "./tailwind.css"; // Tailwind globals
 import "./static/css/main.scss"; // All of our styles
 
 const { PUBLIC_URL } = process.env;
@@ -16,7 +17,6 @@ const Projects = lazy(() => import("./pages/Projects"));
 const Resume = lazy(() => import("./pages/Resume"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Instagram = lazy(() => import("./pages/Instagram"));
-const Reels = lazy(() => import("./pages/Reels"));
 const SportsPage = lazy(() => import("./pages/Sports"));
 const Now = lazy(() => import("./pages/Now"));
 const Books = lazy(() => import("./pages/Books"));
@@ -34,7 +34,6 @@ const App = () => (
         <Route path="/contact" element={<Contact />} />
         <Route path="/resume" element={<Resume />} />
         <Route path="/instagram" element={<Instagram />} />
-        <Route path="/reels" element={<Reels />} />
         <Route path="/sports" element={<SportsPage />} />
         <Route path="/now" element={<Now />} />
         <Route path="/books" element={<Books />} />

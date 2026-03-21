@@ -15,6 +15,12 @@ const routes = [
   {
     label: "Challenges",
     path: "/challenges",
+    subRoutes: [
+      {
+        label: "100 Days To Offload",
+        path: "/100-days-to-offload",
+      },
+    ],
   },
   {
     label: "Books",
@@ -23,11 +29,6 @@ const routes = [
   {
     label: "Instagram",
     path: "/instagram",
-    dropdown: true,
-  },
-  {
-    label: "Videos",
-    path: "/reels",
     dropdown: true,
   },
   {
