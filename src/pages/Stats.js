@@ -8,6 +8,8 @@ import { skills } from "../data/resume/skills";
 import sportsData from "../data/sports";
 import certifications from "../data/resume/certifications";
 import instagramPosts from "../data/instagram";
+import degrees from "../data/resume/degrees";
+import projects from "../data/projects";
 
 const Stats = () => {
   const ageComponent = personalData.find((item) => item.key === 'age')?.value;
@@ -119,6 +121,46 @@ const Stats = () => {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map((entry) => entry[0]);
+
+  // Books: language split
+  const booksEnglish = books.filter((b) => b.language === 'English').length;
+  const booksMarathi = books.filter((b) => b.language === 'Marathi').length;
+
+  // Books: per year
+  const booksPerYear = {};
+  books.forEach((b) => {
+    if (b.year) booksPerYear[b.year] = (booksPerYear[b.year] || 0) + 1;
+  });
+  const booksPerYearSorted = Object.entries(booksPerYear).sort((a, b) => b[0] - a[0]);
+  const maxBooksInYear = Math.max(...Object.values(booksPerYear));
+
+  // Books: top tags
+  const bookTagCounts = {};
+  books.forEach((b) => {
+    (b.tags || []).forEach((t) => { bookTagCounts[t] = (bookTagCounts[t] || 0) + 1; });
+  });
+  const topBookTags = Object.entries(bookTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  // Books: with reviews
+  const booksWithReviews = books.filter((b) => b.blog_link).length;
+
+  // Blog: top tags
+  const blogTagCounts = {};
+  offloadData.forEach((post) => {
+    (post.blog_tags || []).forEach((t) => {
+      if (t !== '100_Days_to_Offload' && t !== '100_Days_To_Offload') {
+        blogTagCounts[t] = (blogTagCounts[t] || 0) + 1;
+      }
+    });
+  });
+  const topBlogTags = Object.entries(blogTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  // Blog: language split
+  const blogEnglish = offloadData.filter((p) => p.language === 'English').length;
+  const blogMarathi = offloadData.filter((p) => p.language === 'Marathi').length;
+
+  // Projects
+  const projectCount = projects.length;
 
   return (
     <Main title="Stats" description="Metrics of Intent: A quantitative deep-dive into a year of technical growth, artistic captures, and consistent physical output.">
@@ -319,6 +361,124 @@ const Stats = () => {
                   #{tag}
                 </span>
               ))}
+            </div>
+          </div>
+
+          {/* Books Language & Tag Intelligence */}
+          <div className="col-span-1 md:col-span-5 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
+            <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Reading Intelligence</span>
+            <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-6">Language & Interests</h3>
+            {/* Language split */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4 text-center">
+                <div className="font-headline text-4xl text-blue-600 dark:text-blue-400">{booksEnglish}</div>
+                <div className="font-label text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-widest mt-1">English Books</div>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-xl p-4 text-center">
+                <div className="font-headline text-4xl text-amber-600 dark:text-amber-400">{booksMarathi}</div>
+                <div className="font-label text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-widest mt-1">Marathi Books</div>
+              </div>
+            </div>
+            {/* Reviews */}
+            <div className="flex items-center justify-between border border-secondary/10 dark:border-secondary/20 rounded-lg px-4 py-3 mb-6">
+              <span className="font-label text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest">Books Reviewed / Written About</span>
+              <span className="font-headline text-xl text-secondary">{booksWithReviews}</span>
+            </div>
+            {/* Top tags */}
+            <div className="flex flex-wrap gap-2">
+              {topBookTags.map(([tag, count]) => (
+                <span key={tag} className="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-full font-label text-[10px] uppercase tracking-widest border border-stone-200 dark:border-stone-700">
+                  {tag} <span className="text-secondary font-bold">·{count}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Books Per Year */}
+          <div className="col-span-1 md:col-span-7 bg-secondary/[0.03] dark:bg-stone-900/50 p-8 rounded-xl border border-secondary/10 dark:border-stone-800 shadow-sm">
+            <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Reading Velocity</span>
+            <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-6">Books Per Year</h3>
+            <div className="space-y-3">
+              {booksPerYearSorted.map(([year, count]) => (
+                <div key={year}>
+                  <div className="flex justify-between text-xs font-label mb-1">
+                    <span className="text-stone-700 dark:text-stone-300">{year}</span>
+                    <span className="text-stone-400 dark:text-stone-500">{count} {count === 1 ? 'book' : 'books'}</span>
+                  </div>
+                  <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-secondary/70 to-secondary h-2 rounded-full transition-all"
+                      style={{ width: `${(count / maxBooksInYear) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Blog Intelligence */}
+          <div className="col-span-1 md:col-span-6 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
+            <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Writing Themes</span>
+            <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-4">Blog Intelligence</h3>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-800 text-center">
+                <div className="font-headline text-3xl text-stone-900 dark:text-stone-100">{blogEnglish}</div>
+                <div className="font-label text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mt-1">English Posts</div>
+              </div>
+              <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-800 text-center">
+                <div className="font-headline text-3xl text-stone-900 dark:text-stone-100">{blogMarathi}</div>
+                <div className="font-label text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mt-1">Marathi Posts</div>
+              </div>
+            </div>
+            <div className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-3">Top Topics Written About</div>
+            <div className="flex flex-wrap gap-2">
+              {topBlogTags.map(([tag, count]) => (
+                <span key={tag} className="px-3 py-1.5 bg-secondary/5 dark:bg-secondary/10 border border-secondary/15 dark:border-secondary/25 text-secondary rounded-full font-label text-[10px] uppercase tracking-widest">
+                  {tag.replace(/_/g, ' ')} <span className="font-bold">·{count}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Education + Projects */}
+          <div className="col-span-1 md:col-span-6 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
+            <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Background</span>
+            <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-6">Education & Projects</h3>
+            <div className="space-y-4 mb-6">
+              {degrees.map((d) => (
+                <a
+                  key={d.school}
+                  href={d.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 group border border-stone-100 dark:border-stone-800 rounded-xl p-4 hover:border-secondary/30 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-secondary mt-0.5">school</span>
+                  <div>
+                    <div className="font-body font-bold text-stone-800 dark:text-stone-200 group-hover:text-secondary transition-colors text-sm">{d.degree}</div>
+                    <div className="font-label text-xs text-stone-400 dark:text-stone-500 mt-0.5">{d.school} · {d.year}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+            <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-800 pt-5">
+              <div>
+                <div className="font-headline text-4xl text-stone-900 dark:text-stone-100">{projectCount}</div>
+                <div className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1">Projects Built</div>
+              </div>
+              <div className="flex gap-2 flex-wrap justify-end">
+                {projects.slice(0, 3).map((p) => (
+                  <a
+                    key={p.title}
+                    href={p.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-full font-label text-[10px] uppercase tracking-widest hover:border-secondary/40 transition-colors"
+                  >
+                    {p.title}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 

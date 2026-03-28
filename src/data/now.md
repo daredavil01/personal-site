@@ -18,13 +18,42 @@ So, this section will highlight what I was doing last month and what I am up to 
 
 ---
 
-## What am I up to this month (March, 2026)
+## What am I up to this month (April, 2026)
 - _Blog_: I have to develop a blog and presentation around the use of AI tools, how students and teachers can use them, and how to keep up with the developments!
-- Youth development camp at Shahada
+
 
 ---
 
-## What was I doing last month (February, 2026)
+## What was I doing last month (March, 2026)
+- _Youth Development Camp_: Attended a 6-day youth development camp at Shahada, where I experienced tribal life in the absence of basic amenities. Detailed blog added [here](https://daredavil453624413.wordpress.com/2026/03/09/yuva-sanvad-shibir/).
+- Revamped personal website, added new pages and updated existing pages:
+  - Re-designed homepage, now page, challenges tab and added coherancy in design
+  - Updated sprts page to show interactive view of marathons data.
+- _Blogs Published in this month_:
+  - [Coping with dopamine hits and what it means to be digital nomad!](https://sankettambare.substack.com/p/digital-nomad-dopamine-hits) : An introspective inspection!
+  - [Yuva Sanvad Shibir](https://daredavil453624413.wordpress.com/2026/03/09/yuva-sanvad-shibir/) : A 6-day youth development camp at Shahada, where I experienced tribal life in the absence of basic amenities.
+  - [The Attention Crisis](https://sankettambare.substack.com/p/the-attention-crisis) : An attempt to illuminate the anecdotes and map the wide impact net!
+  - [The Digital Paradox](https://sankettambar.substack.com/p/the-digital-paradox) : What does it take to master one's digital lives!
+- Reading Books:
+  - Is the internet changing the way you think? John Brockman
+  - The Age of Surveillance Capitalism by Shoshana Zuboff
+- Run Nanded City LSOM 15 Kms Run in 1 Hr 40 Mins with team United Enduros
+- Strava Updates:
+  - Completed 700 activities on strava
+  - Total distance: Around 130 Kms (Walking: ~45 Kms, Running: ~85 Kms)
+  - Total Activity TIme: ~37 Hours
+  - Total Elevation Gain: ~1648 Meters
+  - Total Activities: ~ 36
+- Substack Stats:
+  - Views: ~162+
+  - Total Subscribers: ~28+
+
+---
+## Archives
+
+This will be a section of archival notes.
+
+## February, 2026
 
 - _Project Updates_:
   - Worked on project called [RunLog](https://run-folio.vercel.app/) where athletes can track their marathons
@@ -40,12 +69,6 @@ So, this section will highlight what I was doing last month and what I am up to 
   - [The timidness of time!](https://sankettambare.substack.com/p/the-timidness-of-time) : What does it take to see beyond the axis of time!
   - [Book Review: Make Time - How To Focus on What Matters Everyday](https://sankettambare.substack.com/p/book-review-make-time) : The guide to resolve our entangled digital lives!
   - [Tata Ultra Marathon 50 Kms Challenge](https://sankettambare.substack.com/p/tum-2026) : The Human Endeavor of challenging The impossible!
-
-
----
-## Archives
-
-This will be a section of archival notes.
 
 ## January, 2026
 
