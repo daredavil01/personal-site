@@ -30,6 +30,18 @@ Detailed documentation is available in the `docs/` folder:
    npm start
    ```
 
+## 🛠️ Scripts
+
+| Command | Description |
+|---|---|
+| `npm start` | Start the development server (also syncs changelog automatically) |
+| `npm run build` | Build for production (also syncs changelog automatically) |
+| `npm run sync-changelog` | Manually copy `CHANGELOG.md` → `public/changelog.md` for the `/changelog` page |
+| `npm run lint` | Run ESLint across the project |
+| `npm run deploy` | Build and deploy to GitHub Pages |
+
+> **Note:** `sync-changelog` runs automatically via `prestart` and `prebuild` hooks, so `public/changelog.md` is always kept in sync with `CHANGELOG.md`.
+
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).

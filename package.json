@@ -14,6 +14,9 @@
     "predeploy": "npm run build && react-snap",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
+    "prestart": "npm run sync-changelog",
+    "prebuild": "npm run sync-changelog",
+    "sync-changelog": "node -e \"const fs=require('fs');fs.copyFileSync('CHANGELOG.md','public/changelog.md');console.log('✓ changelog synced to public/');\"",
     "lint": "eslint **/*.js",
     "test": "npx jest",
     "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js"
