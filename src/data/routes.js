@@ -53,6 +53,11 @@ const routes = [
     path: "/contact",
     dropdown: true,
   },
+  {
+    label: "Changelog",
+    path: "/changelog",
+    dropdown: true,
+  },
 ];
 
 export default routes;
