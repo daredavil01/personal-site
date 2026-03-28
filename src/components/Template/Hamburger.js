@@ -1,85 +1,113 @@
-import React, { Suspense, lazy, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import { Link, useLocation } from 'react-router-dom';
 import routes from '../../data/routes';
-
-const Menu = lazy(() => import('react-burger-menu/lib/menus/slide'));
 
 const Hamburger = () => {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
 
-  return (
-    <div className="relative">
-      <nav className="flex items-center">
-        <button 
-          onClick={() => setOpen(!open)}
-          className="p-2 text-stone-600 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary transition-colors"
-          aria-label="Toggle Menu"
-        >
-          <span className="material-symbols-outlined text-2xl">
-            {open ? 'close' : 'menu'}
-          </span>
-        </button>
-      </nav>
+  useEffect(() => { setOpen(false); }, [location]);
 
-      <Suspense fallback={<></>}>
-        <Menu 
-          right 
-          isOpen={open} 
-          onStateChange={({ isOpen }) => setOpen(isOpen)}
-          styles={{
-            bmMenuWrap: {
-              transition: 'all 0.4s cubic-bezier(0.7, 0, 0.3, 1)',
-              top: '0',
-            },
-            bmMenu: {
-              background: 'rgb(28, 25, 23)', // stone-900 match
-              padding: '2.5em 1.5em 0',
-              fontSize: '1.15em',
-            },
-            bmItemList: {
-              color: '#b8b7ad',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-            },
-            bmOverlay: {
-              background: 'rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(4px)',
-            }
-          }}
-        >
-          <div className="flex flex-col gap-6 py-8 outline-none">
-            {routes.map((l) => (
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  const allRoutes = routes.filter((r) => !r.index);
+
+  // Portal content — rendered directly into document.body to escape
+  // the header's backdrop-filter containing block which would otherwise
+  // trap fixed-position children within the header's bounds.
+  const drawerPortal = ReactDOM.createPortal(
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setOpen(false)}
+      />
+
+      {/* Slide-in drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-64 z-[201] bg-stone-950 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col overflow-y-auto ${
+          open ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-800 shrink-0">
+          <span className="font-headline text-white uppercase tracking-[0.2em] text-sm font-bold">Menu</span>
+          <button
+            onClick={() => setOpen(false)}
+            className="p-1 text-stone-400 hover:text-white transition-colors"
+            aria-label="Close"
+          >
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex flex-col px-4 py-4 gap-0.5">
+          {allRoutes.map((l) => {
+            const isActive = location.pathname === l.path
+              || (location.pathname.startsWith(l.path) && l.path !== '/');
+            return (
               <div key={l.label}>
-                <Link 
-                  to={l.path} 
+                <Link
+                  to={l.path}
                   onClick={() => setOpen(false)}
-                  className="block group"
+                  className={`flex items-center justify-between py-3 px-3 rounded-lg font-label text-sm uppercase tracking-widest font-bold transition-colors ${
+                    isActive
+                      ? 'text-secondary bg-secondary/10'
+                      : 'text-stone-200 hover:text-white hover:bg-stone-800'
+                  }`}
                 >
-                  <h3 className={`text-stone-100 font-headline font-bold text-lg uppercase tracking-widest group-hover:text-secondary transition-colors ${l.index ? '' : 'pt-4 border-t border-stone-800'}`}>
-                    {l.label}
-                  </h3>
+                  {l.label}
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-secondary" />}
                 </Link>
                 {l.subRoutes && (
-                  <div className="mt-2 flex flex-col gap-2">
-                    {l.subRoutes.map((sub) => (
-                      <Link 
-                        key={sub.label} 
-                        to={sub.path} 
-                        onClick={() => setOpen(false)}
-                        className="pl-4 block text-[10px] uppercase tracking-[0.2em] font-bold text-stone-500 hover:text-secondary transition-colors py-1"
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
+                  <div className="ml-4 mb-1 flex flex-col gap-0.5">
+                    {l.subRoutes.map((sub) => {
+                      const isSubActive = location.pathname === sub.path;
+                      return (
+                        <Link
+                          key={sub.label}
+                          to={sub.path}
+                          onClick={() => setOpen(false)}
+                          className={`block py-2 px-3 rounded font-label text-xs uppercase tracking-widest transition-colors ${
+                            isSubActive ? 'text-secondary' : 'text-stone-400 hover:text-white'
+                          }`}
+                        >
+                          ↳ {sub.label}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        </Menu>
-      </Suspense>
-    </div>
+            );
+          })}
+        </nav>
+      </div>
+    </>,
+    document.body,
+  );
+
+  return (
+    <>
+      {/* Hamburger button — stays inside the header */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="p-2 text-stone-600 dark:text-stone-400 hover:text-secondary transition-colors"
+        aria-label="Toggle Menu"
+      >
+        <span className="material-symbols-outlined text-2xl">
+          {open ? 'close' : 'menu'}
+        </span>
+      </button>
+
+      {/* Drawer + backdrop rendered into document.body via portal */}
+      {drawerPortal}
+    </>
   );
 };
 

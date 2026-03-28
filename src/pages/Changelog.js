@@ -6,9 +6,12 @@ const Changelog = () => {
   const [markdown, setMarkdown] = useState("");
 
   useEffect(() => {
-    fetch(`${process.env.PUBLIC_URL}/changelog.md`)
-      .then((r) => r.text())
-      .then(setMarkdown)
+    import("../data/changelog.md")
+      .then((res) => {
+        fetch(res.default)
+          .then((r) => r.text())
+          .then(setMarkdown);
+      })
       .catch(console.error);
   }, []);
 
