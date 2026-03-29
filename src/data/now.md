@@ -1,6 +1,6 @@
 # What I am currently doing
 
-Last updated on `31st January, 2026`. Page inspired by [nownownow.com](https://nownownow.com/about).
+Last updated on `29th March, 2026`. Page inspired by [nownownow.com](https://nownownow.com/about).
 
 ---
 
@@ -37,10 +37,10 @@ So, this section will highlight what I was doing last month and what I am up to 
 - Reading Books:
   - Is the internet changing the way you think? John Brockman
   - The Age of Surveillance Capitalism by Shoshana Zuboff
-- Run Nanded City LSOM 15 Kms Run in 1 Hr 40 Mins with team United Enduros
+- Run Nanded City LSOM 21 Kms Run in 2 Hr 20 Mins with team United Enduros
 - Strava Updates:
   - Completed 700 activities on strava
-  - Total distance: Around 130 Kms (Walking: ~45 Kms, Running: ~85 Kms)
+  - Total distance: Around 145 Kms (Walking: ~45 Kms, Running: ~100 Kms)
   - Total Activity TIme: ~37 Hours
   - Total Elevation Gain: ~1648 Meters
   - Total Activities: ~ 36
