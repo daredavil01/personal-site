@@ -31,10 +31,10 @@ const SportsPage = () => {
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-end">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
             <div>
               <span className="font-label text-secondary uppercase tracking-[0.3em] font-bold text-xs mb-4 block">Performance & Grit</span>
-              <h1 className="font-headline text-5xl md:text-7xl text-stone-900 dark:text-stone-100 leading-none tracking-tight">Physical <br />Endurance</h1>
+              <h1 className="font-headline text-5xl lg:text-7xl text-stone-900 dark:text-stone-100 leading-none tracking-tight">Physical <br />Endurance</h1>
             </div>
             <div className="max-w-md pb-4">
               <p className="font-body text-stone-500 dark:text-stone-400 text-lg leading-relaxed">

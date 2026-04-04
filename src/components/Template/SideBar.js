@@ -9,7 +9,7 @@ const SideBar = () => {
   const isResume = location.pathname.includes("/resume");
 
   return (
-    <section className="hidden md:flex md:w-80 md:min-w-80 flex-shrink-0 flex-col gap-8 md:sticky md:top-24 self-start">
+    <section className="hidden lg:flex lg:w-80 lg:min-w-80 flex-shrink-0 flex-col gap-8 lg:sticky lg:top-24 self-start">
       {/* Intro Section */}
       <section className="flex flex-col gap-4">
         <Link to="/" className="w-16 h-16 rounded-full overflow-hidden border-2 border-stone-200 dark:border-stone-800 hover:scale-105 transition-transform">
