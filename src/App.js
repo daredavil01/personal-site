@@ -23,6 +23,7 @@ const Books = lazy(() => import("./pages/Books"));
 const Challenges = lazy(() => import("./pages/Challenges"));
 const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
 const Changelog = lazy(() => import("./pages/Changelog"));
+const TreksPage = lazy(() => import("./pages/Treks"));
 
 const App = () => (
   <BrowserRouter basename={PUBLIC_URL}>
@@ -41,6 +42,7 @@ const App = () => (
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/100-days-to-offload" element={<OneHundredDays />} />
         <Route path="/changelog" element={<Changelog />} />
+        <Route path="/treks" element={<TreksPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

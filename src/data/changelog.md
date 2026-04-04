@@ -5,6 +5,24 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.0] — 2026-04-04
+
+### Added
+- **Treks Page** (`/treks`): New page documenting Maharashtra fort and mountain trek history with two views — *Statistics* and *Default View*.
+- **TreksStatistics Component**: Highlights total treks, years active, difficulty distribution (Easy/Medium/Hard), yearly breakdown bar chart, and an interactive animated trek timeline.
+- **TreksDefault Component**: Card grid of all treks with filters by difficulty, year, and blog presence, plus sort controls by date or trek duration.
+- **TrekDetailsModal Component**: Click-through modal with a photo slider and blog post link for each trek entry.
+- **TreksTimeline Component**: Animated vertical timeline — nodes stagger in on page load, clicking a node expands trek details inline (duration, photo count, blog link) with smooth transition.
+- **Stats Page — Trek Log Card**: New full-width bento card surfacing key trek metrics: total treks, hard treks, blog posts written, years active, and latest trek name.
+- **Treks Route**: Added `/treks` to `routes.js` and `App.js` with lazy loading.
+
+### Fixed
+- **Layout Overflow** (`Main.js`): Added `min-w-0` to the `<main>` flex item, preventing `flex-grow` content from overflowing into the sidebar when headings use large font sizes.
+- **`treks.js` Data File**: Added missing `const { PUBLIC_URL }`, `const` declaration, and `export default treks`.
+- **Difficulty Normalization** (`treks.js`): Standardized `endurance_level` to three values — `Easy`, `Medium`, `Hard` (removed `High` variant on Katraj To Sinhgad entry).
+
+---
+
 ## [v5.0.0] — 2026-03-28 🚀 Major Release
 
 ### Added

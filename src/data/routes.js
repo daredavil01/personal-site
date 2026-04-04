@@ -49,6 +49,10 @@ const routes = [
     path: "/sports",
   },
   {
+    label: "Treks",
+    path: "/treks",
+  },
+  {
     label: "Contact",
     path: "/contact",
     dropdown: true,

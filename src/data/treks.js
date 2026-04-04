@@ -1,4 +1,6 @@
-treks = [
+const { PUBLIC_URL } = process.env;
+
+const treks = [
   {
     id: 1,
     fort_name: "Tikona",
@@ -347,7 +349,7 @@ treks = [
     id: 15,
     fort_name: "Katraj To Sinhgad",
     trek_time: "6 Hrs",
-    endurance_level: "High",
+    endurance_level: "Hard",
     date: "30-12-2023",
     blog_link:
       "https://daredavil453624413.wordpress.com/2023/12/31/katraj-to-sinhgad-k2s/",
@@ -367,3 +369,5 @@ treks = [
     ],
   },
 ];
+
+export default treks;
