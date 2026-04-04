@@ -10,6 +10,7 @@ import certifications from "../data/resume/certifications";
 import instagramPosts from "../data/instagram";
 import degrees from "../data/resume/degrees";
 import projects from "../data/projects";
+import treksData from "../data/treks";
 
 const Stats = () => {
   const ageComponent = personalData.find((item) => item.key === 'age')?.value;
@@ -104,6 +105,18 @@ const Stats = () => {
       bestTenKTime = `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
     }
   }
+
+  // Treks
+  const parseTrekDate = (dateStr) => {
+    if (!dateStr) return new Date(0);
+    const [day, month, year] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+  const totalTreks = treksData.length;
+  const hardTreks = treksData.filter((t) => t.endurance_level === 'Hard').length;
+  const treksWithBlog = treksData.filter((t) => !!t.blog_link).length;
+  const trekYearsActive = new Set(treksData.map((t) => parseTrekDate(t.date).getFullYear())).size;
+  const latestTrek = [...treksData].sort((a, b) => parseTrekDate(b.date) - parseTrekDate(a.date))[0]?.fort_name || '-';
 
   // Instagram / Digital Capture
   const instaPostCount = instagramPosts.length;
@@ -361,6 +374,40 @@ const Stats = () => {
                   #{tag}
                 </span>
               ))}
+            </div>
+          </div>
+
+          {/* Trek Log */}
+          <div className="col-span-1 md:col-span-12 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 transition-colors shadow-sm">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <span className="font-label text-stone-500 dark:text-stone-600 font-bold mb-2 block uppercase tracking-[0.2em] text-[10px]">Mountain Adventures</span>
+                <h3 className="font-headline text-3xl text-stone-800 dark:text-stone-200 mb-1">Trek Log</h3>
+                <p className="text-stone-500 text-sm">Forts, trails, and elevation across Maharashtra.</p>
+              </div>
+              <span className="material-symbols-outlined text-4xl text-stone-200 dark:text-stone-800">hiking</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              <div>
+                <span className="block font-headline text-5xl text-stone-900 dark:text-stone-100 mb-1">{totalTreks}</span>
+                <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Total Treks</span>
+              </div>
+              <div>
+                <span className="block font-headline text-5xl text-red-600 dark:text-red-400 mb-1">{hardTreks}</span>
+                <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Hard Treks</span>
+              </div>
+              <div>
+                <span className="block font-headline text-5xl text-indigo-600 dark:text-indigo-400 mb-1">{treksWithBlog}</span>
+                <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Blog Posts</span>
+              </div>
+              <div>
+                <span className="block font-headline text-5xl text-teal-600 dark:text-teal-400 mb-1">{trekYearsActive}</span>
+                <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Years Active</span>
+              </div>
+              <div>
+                <span className="block font-headline text-xl text-stone-900 dark:text-stone-100 mb-1 leading-tight">{latestTrek}</span>
+                <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Latest Trek</span>
+              </div>
             </div>
           </div>
 
