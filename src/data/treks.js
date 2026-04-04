@@ -2,7 +2,7 @@ treks = [
   {
     id: 1,
     fort_name: "Tikona",
-    trek_time: "1 hrs",
+    trek_time: "1 Hrs",
     endurance_level: "Easy",
     date: "17-02-2019",
     photos: [
@@ -19,7 +19,7 @@ treks = [
   {
     id: 2,
     fort_name: "Panhala",
-    trek_time: "30 mins",
+    trek_time: "0.5 Hrs",
     endurance_level: "Easy",
     date: "25-06-2019",
     photos: [
@@ -311,7 +311,7 @@ treks = [
   {
     id: 14,
     fort_name: "Panhala to Pawankhind",
-    trek_time: "20 Hours (3 Days)",
+    trek_time: "22 Hours",
     endurance_level: "Hard",
     date: "02-08-2025",
     blog_link:
