@@ -5,6 +5,17 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.4] — 2026-04-05
+
+### Added
+- **Logo PNG** (`public/images/logo.png`): Rasterised 400×400 PNG exported from the illustrated SVG via cairosvg — used as the OG/Twitter card image for broad social crawler compatibility.
+
+### Changed
+- **Main layout** (`src/layouts/Main.js`): Default OG image updated from `logo.svg` to `logo.png`.
+- **Static OG tags** (`public/index.html`): Fallback `og:image` and `twitter:image` updated to `logo.png`.
+
+---
+
 ## [v5.1.3] — 2026-04-05
 
 ### Changed

@@ -10,7 +10,7 @@ import ScrollToTop from "../components/Template/ScrollToTop";
 import FloatingToggle from "../components/Template/FloatingToggle";
 
 const BASE_URL = "https://daredavil.pages.dev";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/images/logo.svg`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/images/logo.png`;
 
 const Main = (props) => {
   const { pathname } = useLocation();
