@@ -6,7 +6,7 @@ const Instagram = () => {
   return (
     <Main
       title="Instagram"
-      description="Adding posts here since Instagram Account is now Deleted!"
+      description="A curated visual archive of captured moments, textures, and stories — preserved from before the Instagram account was deleted."
     >
       <div className="flex flex-col gap-12 w-full">
         <Posts />

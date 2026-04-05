@@ -18,7 +18,7 @@ const Now = () => {
   return (
     <Main
       title="Now"
-      description="A snapshot of my current focus, projects, and the curiosities I'm chasing right now."
+      description="What Sanket Tambare is working on right now — current projects, daily rituals, books in progress, and ideas being explored. Updated monthly."
     >
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}

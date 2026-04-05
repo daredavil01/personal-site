@@ -21,7 +21,7 @@ const About = () => {
     .filter((s) => s.length).length;
 
   return (
-    <Main title="About" description="Learn about Sanket Tambare">
+    <Main title="About" description="Full-stack software engineer, marathoner, and digital thinker. Read about Sanket Tambare's background, interests, and what drives him.">
       <AboutDocument markdown={markdown} count={count} />
     </Main>
   );

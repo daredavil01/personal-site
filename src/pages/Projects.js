@@ -7,7 +7,7 @@ const Projects = () => {
   return (
     <Main
       title="Projects"
-      description="A selection of projects that define my creative trajectory."
+      description="Full-stack experiments and production apps — social platforms, AI-powered tools, and web applications built with modern tech stacks."
     >
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}

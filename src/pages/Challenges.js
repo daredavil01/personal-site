@@ -6,7 +6,7 @@ const Challenges = () => {
   return (
     <Main
       title="Challenges"
-      description="A public commitment to iterative improvement. Tracking creative production and technical mastery."
+      description="Tracking personal challenges like #100DaysToOffload — a public commitment to consistent creative output, technical growth, and pushing personal limits."
     >
       <article className="max-w-4xl">
         <header className="mb-12">

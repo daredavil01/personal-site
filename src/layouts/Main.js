@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Helmet, HelmetProvider } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 
 import Navigation from "../components/Template/Navigation";
 import SideBar from "../components/Template/SideBar";
@@ -9,6 +10,9 @@ import ScrollToTop from "../components/Template/ScrollToTop";
 import FloatingToggle from "../components/Template/FloatingToggle";
 
 const Main = (props) => {
+  const { pathname } = useLocation();
+  const canonicalUrl = `https://daredavil.pages.dev${pathname}`;
+
   return (
     <HelmetProvider>
       <ScrollToTop />
@@ -19,6 +23,15 @@ const Main = (props) => {
       >
         {props.title && <title>{props.title}</title>}
         <meta name="description" content={props.description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare"} />
+        <meta property="og:description" content={props.description} />
+        <meta property="og:image" content="https://daredavil.pages.dev/images/me.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare"} />
+        <meta name="twitter:description" content={props.description} />
+        <meta name="twitter:image" content="https://daredavil.pages.dev/images/me.jpg" />
       </Helmet>
 
       <div className="flex flex-col min-h-screen bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-body transition-colors duration-300">

@@ -21,7 +21,7 @@ const TreksPage = () => {
   return (
     <Main
       title="My Treks"
-      description="A log of hiking and trekking adventures across Maharashtra's historic forts and mountain trails."
+      description="Trek log across Maharashtra's historic forts and mountain trails — with statistics, difficulty breakdowns, yearly timelines, and detailed route stories."
     >
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
