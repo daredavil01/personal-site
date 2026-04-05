@@ -6,7 +6,7 @@ const PAGE_META = {
     title: "Sanket Tambare",
     description:
       "Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator.",
-    image: `${BASE_URL}/images/me.jpg`,
+    image: DEFAULT_IMAGE,
   },
   "/about": {
     title: "About | Sanket Tambare",
