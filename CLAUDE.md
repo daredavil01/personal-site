@@ -27,12 +27,14 @@ React 18 single-page application (personal portfolio). Key stack:
 - Add the entry to the **top** of the file following the versioning rules below.
 - Choose the version bump:
   - **Major** (e.g. `v5.0.0` → `v6.0.0`): new page addition, major code refactor, or full redesign.
-  - **Minor** (e.g. `v5.1.0` → `v5.2.0`): everything else — bug fixes, new features, new components, copy/style tweaks, metadata changes, data updates.
+  - **Minor** (e.g. `v5.1.0` → `v5.2.0`): new features, new components, data updates, content additions.
+  - **Patch** (e.g. `v5.1.0` → `v5.1.1`): bug fixes, copy/style tweaks, metadata changes, documentation updates.
 
 #### Weekly Minor Version Rule
 - Create **at most one minor version per calendar week** (Monday–Sunday).
 - If a minor change is made and a minor version already exists for the current week: **do not bump** — instead update the date on the existing version header to today and append the new change entries to that block.
 - Only create a new minor version if no minor version exists yet for the current week, or if the previous change was a major bump.
+- Patch versions are not subject to the weekly cap — create a new patch entry whenever a bug fix is needed.
 
 ### Changelog Format
 
