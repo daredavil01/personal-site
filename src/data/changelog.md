@@ -5,6 +5,14 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.1] — 2026-04-05
+
+### Changed
+- **CLAUDE.md**: Added update instructions for Now, Books, Sports, and Treks pages including data schemas, question prompts, image naming conventions, and image compression guidelines.
+- **CLAUDE.md** (versioning rules): Replaced patch/minor/major tiers with major-or-minor only; introduced weekly minor version cap — at most one minor bump per week, with same-week changes appended to the existing entry. Patch tier restored for bug fixes; patch versions exempt from the weekly cap.
+
+---
+
 ## [v5.1.0] — 2026-04-04
 
 ### Added
