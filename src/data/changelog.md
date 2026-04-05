@@ -5,6 +5,14 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.3] — 2026-04-05
+
+### Changed
+- **Main layout** (`src/layouts/Main.js`): Added optional `image` prop for per-page OG/Twitter card image. Defaults to the illustrated logo SVG (`/images/logo.svg`); homepage, About, and Resume override to `me.jpg` as they are person-centric pages.
+- **Static OG tags** (`public/index.html`): Updated `og:image` and `twitter:image` fallback from `me.jpg` to the illustrated logo SVG.
+
+---
+
 ## [v5.1.2] — 2026-04-05
 
 ### Changed

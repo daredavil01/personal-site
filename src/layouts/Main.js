@@ -9,9 +9,14 @@ import Footer from "../components/Template/Footer";
 import ScrollToTop from "../components/Template/ScrollToTop";
 import FloatingToggle from "../components/Template/FloatingToggle";
 
+const BASE_URL = "https://daredavil.pages.dev";
+const DEFAULT_OG_IMAGE = `${BASE_URL}/images/logo.svg`;
+
 const Main = (props) => {
   const { pathname } = useLocation();
-  const canonicalUrl = `https://daredavil.pages.dev${pathname}`;
+  const canonicalUrl = `${BASE_URL}${pathname}`;
+  const ogImage = props.image || DEFAULT_OG_IMAGE;
+  const ogTitle = props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare";
 
   return (
     <HelmetProvider>
@@ -25,13 +30,13 @@ const Main = (props) => {
         <meta name="description" content={props.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:title" content={props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare"} />
+        <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={props.description} />
-        <meta property="og:image" content="https://daredavil.pages.dev/images/me.jpg" />
+        <meta property="og:image" content={ogImage} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare"} />
+        <meta name="twitter:title" content={ogTitle} />
         <meta name="twitter:description" content={props.description} />
-        <meta name="twitter:image" content="https://daredavil.pages.dev/images/me.jpg" />
+        <meta name="twitter:image" content={ogImage} />
       </Helmet>
 
       <div className="flex flex-col min-h-screen bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-body transition-colors duration-300">
@@ -61,12 +66,14 @@ Main.propTypes = {
   ]),
   title: PropTypes.string,
   description: PropTypes.string,
+  image: PropTypes.string,
 };
 
 Main.defaultProps = {
   children: null,
   title: null,
   description: "Sanket Tambare's personal website.",
+  image: null,
 };
 
 export default Main;
