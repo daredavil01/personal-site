@@ -5,6 +5,14 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.2] — 2026-04-05
+
+### Changed
+- **Logo SVG** (`public/images/logo.svg`): Replaced the plain "ST" monogram with a full illustrated SVG logo — dark gradient background, open book, pen/quill with ink drop, film strip, running shoe, flowing wave ribbon, and teal curly braces, matching the personal-site visual identity.
+- **Logo component** (`src/components/Template/Logo.js`): Switched from inline SVG to an `<img>` element referencing the illustrated `logo.svg`, so the nav mark stays in sync with the standalone logo file.
+
+---
+
 ## [v5.1.1] — 2026-04-05
 
 ### Changed

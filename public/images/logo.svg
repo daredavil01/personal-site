@@ -1,13 +1,254 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="200" rx="24" fill="#b22200"/>
-  <text
-    x="100"
-    y="140"
-    text-anchor="middle"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-weight="900"
-    font-size="96"
-    fill="white"
-    letter-spacing="-3"
-  >ST</text>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bgGrad" cx="45%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#2a2642"/>
+      <stop offset="100%" stop-color="#13101e"/>
+    </radialGradient>
+
+    <!-- Wave ribbon gradient (purple → teal → blue) -->
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#5b21b6"/>
+      <stop offset="40%"  stop-color="#4338ca"/>
+      <stop offset="70%"  stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+
+    <!-- Laptop screen -->
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="5%" y2="100%">
+      <stop offset="0%"   stop-color="#172554"/>
+      <stop offset="100%" stop-color="#0c1a3d"/>
+    </linearGradient>
+
+    <!-- Book left page -->
+    <linearGradient id="bookLeft" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#93c5fd"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+
+    <!-- Book right page -->
+    <linearGradient id="bookRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#bfdbfe"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+
+    <!-- Film strip -->
+    <linearGradient id="filmGrad" x1="0%" y1="0%" x2="5%" y2="100%">
+      <stop offset="0%"   stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#3b0764"/>
+    </linearGradient>
+
+    <!-- Pen -->
+    <linearGradient id="penGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Shoe upper -->
+    <linearGradient id="shoeGrad" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%"   stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <!-- Glow / bloom filter -->
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── BACKGROUND ── -->
+  <rect width="400" height="400" rx="38" fill="url(#bgGrad)"/>
+
+  <!-- Ambient center glow -->
+  <ellipse cx="190" cy="215" rx="140" ry="110" fill="#3730a3" opacity="0.07"/>
+  <ellipse cx="285" cy="330" rx="90"  ry="55"  fill="#0d9488"  opacity="0.05"/>
+
+  <!-- ── FLOWING WAVE RIBBON ── -->
+  <!-- Wide outer ribbon -->
+  <path d="M 22 282 C 62 244, 104 308, 162 272 C 196 252, 218 268, 252 290
+           C 272 302, 286 328, 300 358"
+        stroke="url(#waveGrad)" stroke-width="36" fill="none"
+        stroke-linecap="round" opacity="0.45"/>
+  <!-- Mid teal ribbon -->
+  <path d="M 22 282 C 62 244, 104 308, 162 272 C 196 252, 218 268, 252 290
+           C 272 302, 286 328, 300 358"
+        stroke="#14b8a6" stroke-width="11" fill="none"
+        stroke-linecap="round" opacity="0.60"/>
+  <!-- Bright inner highlight -->
+  <path d="M 22 282 C 62 244, 104 308, 162 272 C 196 252, 218 268, 252 290
+           C 272 302, 286 328, 300 358"
+        stroke="#67e8f9" stroke-width="3" fill="none"
+        stroke-linecap="round" opacity="0.35"/>
+
+  <!-- ── CURLY BRACES ── -->
+  <!-- Left { -->
+  <path d="M 52 178 C 43 178, 36 182, 36 190 C 36 203, 23 207, 19 213
+           C 23 219, 36 223, 36 236 C 36 244, 43 248, 52 248"
+        stroke="#14b8a6" stroke-width="4.5" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right } -->
+  <path d="M 348 178 C 357 178, 364 182, 364 190 C 364 203, 377 207, 381 213
+           C 377 219, 364 223, 364 236 C 364 244, 357 248, 348 248"
+        stroke="#14b8a6" stroke-width="4.5" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ── OPEN BOOK (top-centre) ── -->
+  <!-- Soft halo -->
+  <ellipse cx="200" cy="84" rx="68" ry="28" fill="#3b82f6" opacity="0.13" filter="url(#softGlow)"/>
+  <!-- Left page -->
+  <path d="M 200 44 C 173 46, 143 56, 136 106 L 200 106 Z" fill="url(#bookLeft)" opacity="0.95"/>
+  <!-- Right page -->
+  <path d="M 200 44 C 227 46, 257 56, 264 106 L 200 106 Z" fill="url(#bookRight)" opacity="0.95"/>
+  <!-- Spine -->
+  <rect x="197" y="42" width="6" height="66" rx="2" fill="#1e3a8a"/>
+  <!-- Page lines – left -->
+  <line x1="150" y1="64"  x2="196" y2="59"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <line x1="146" y1="75"  x2="196" y2="71"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <line x1="143" y1="86"  x2="196" y2="83"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <line x1="142" y1="97"  x2="196" y2="96"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <!-- Page lines – right -->
+  <line x1="204" y1="59"  x2="250" y2="64"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <line x1="204" y1="71"  x2="254" y2="75"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <line x1="204" y1="83"  x2="257" y2="86"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <line x1="204" y1="96"  x2="258" y2="97"  stroke="#dbeafe" stroke-width="1.5" opacity="0.40"/>
+  <!-- Spine glow top -->
+  <ellipse cx="200" cy="44" rx="14" ry="5" fill="#93c5fd" opacity="0.70"/>
+
+  <!-- ── PEN / QUILL (top-left) ── -->
+  <!-- Pen body -->
+  <path d="M 62 134 L 108 54 L 122 68 L 76 148 Z" fill="url(#penGrad)"/>
+  <!-- Metal ferrule near cap -->
+  <path d="M 106 58 L 122 68 L 116 74 L 100 64 Z" fill="#92400e"/>
+  <!-- Nib -->
+  <path d="M 62 134 L 76 148 L 58 158 Z" fill="#b45309"/>
+  <!-- Point -->
+  <path d="M 58 158 L 50 173 L 65 165 Z" fill="#6b3a1f"/>
+  <!-- Pen body centre line -->
+  <line x1="110" y1="60" x2="66" y2="142" stroke="#92400e" stroke-width="2" opacity="0.55"/>
+
+  <!-- Ink / water drop -->
+  <path d="M 40 184 C 33 174, 25 162, 29 151 C 33 140, 46 144, 44 157
+           C 42 169, 40 184, 40 184 Z"
+        fill="#0891b2" opacity="0.90"/>
+  <!-- Drop shine -->
+  <ellipse cx="37" cy="157" rx="3.5" ry="5.5"
+           fill="#67e8f9" opacity="0.36"
+           transform="rotate(-20 37 157)"/>
+
+  <!-- ── FILM STRIP (top-right) ── -->
+  <!-- Body -->
+  <rect x="274" y="30" width="54" height="112" rx="6" fill="url(#filmGrad)" opacity="0.96"/>
+  <!-- Left perforations (6 rows) -->
+  <rect x="277" y="38"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="277" y="53"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="277" y="68"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="277" y="83"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="277" y="98"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="277" y="113" width="9" height="9" rx="2" fill="#13101e"/>
+  <!-- Right perforations -->
+  <rect x="316" y="38"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="316" y="53"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="316" y="68"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="316" y="83"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="316" y="98"  width="9" height="9" rx="2" fill="#13101e"/>
+  <rect x="316" y="113" width="9" height="9" rx="2" fill="#13101e"/>
+  <!-- Frames -->
+  <rect x="288" y="38"  width="26" height="32" rx="2" fill="#4c1d95" opacity="0.88"/>
+  <rect x="288" y="74"  width="26" height="32" rx="2" fill="#5b21b6" opacity="0.88"/>
+  <rect x="288" y="110" width="26" height="26" rx="2" fill="#6d28d9" opacity="0.70"/>
+  <!-- Frame dividers -->
+  <line x1="288" y1="72"  x2="314" y2="72"  stroke="#7c3aed" stroke-width="1" opacity="0.55"/>
+  <line x1="288" y1="108" x2="314" y2="108" stroke="#7c3aed" stroke-width="1" opacity="0.55"/>
+  <!-- Camera aperture on middle frame -->
+  <circle cx="301" cy="90" r="9"  stroke="#a78bfa" stroke-width="1.5" fill="none" opacity="0.72"/>
+  <circle cx="301" cy="90" r="4.5" fill="#7c3aed" opacity="0.85"/>
+
+  <!-- ── LAPTOP (centre) ── -->
+  <!-- Screen bezel -->
+  <rect x="104" y="150" width="192" height="130" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+  <!-- Display area -->
+  <rect x="112" y="157" width="176" height="114" rx="4" fill="url(#screenGrad)"/>
+  <!-- Mac-style dots -->
+  <circle cx="121" cy="163" r="3" fill="#ef4444" opacity="0.92"/>
+  <circle cx="131" cy="163" r="3" fill="#f59e0b" opacity="0.92"/>
+  <circle cx="141" cy="163" r="3" fill="#22c55e" opacity="0.92"/>
+  <!-- Title-bar line -->
+  <line x1="112" y1="170" x2="288" y2="170" stroke="#334155" stroke-width="1" opacity="0.55"/>
+  <!-- Code lines -->
+  <line x1="120" y1="181" x2="182" y2="181" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="120" y1="192" x2="156" y2="192" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="128" y1="203" x2="208" y2="203" stroke="#10b981" stroke-width="3"   stroke-linecap="round"/>
+  <line x1="128" y1="214" x2="186" y2="214" stroke="#f97316" stroke-width="3"   stroke-linecap="round"/>
+  <line x1="120" y1="225" x2="244" y2="225" stroke="#a78bfa" stroke-width="3"   stroke-linecap="round"/>
+  <line x1="128" y1="236" x2="214" y2="236" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="120" y1="247" x2="178" y2="247" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="120" y1="258" x2="252" y2="258" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Laptop base bar -->
+  <rect x="98"  y="280" width="204" height="15" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <!-- Keyboard strip -->
+  <rect x="118" y="283" width="164" height="8" rx="2" fill="#334155"/>
+  <!-- Trackpad -->
+  <rect x="162" y="282" width="76" height="10" rx="3" fill="#475569"/>
+  <!-- Base wedge -->
+  <path d="M 96 295 L 78 301 L 322 301 L 304 295 Z" fill="#0f172a"/>
+
+  <!-- ── RUNNING SHOE (bottom-right) ── -->
+  <!-- Drop shadow -->
+  <ellipse cx="272" cy="374" rx="74" ry="9" fill="#000000" opacity="0.22"/>
+  <!-- Sole -->
+  <path d="M 200 355 C 212 346, 260 342, 322 350 C 346 354, 352 365, 332 370
+           C 306 377, 218 373, 200 355 Z"
+        fill="#0f172a"/>
+  <!-- Upper rear (dark red) -->
+  <path d="M 204 353 C 213 336, 238 322, 274 326 C 298 330, 320 344, 322 350
+           C 292 345, 222 347, 204 353 Z"
+        fill="#dc2626"/>
+  <!-- Upper toe (bright orange) -->
+  <path d="M 204 353 C 207 342, 216 330, 236 324 C 253 318, 272 324, 274 326
+           C 256 322, 228 332, 218 347 C 212 350, 204 353, 204 353 Z"
+        fill="#f97316"/>
+  <!-- Tongue -->
+  <path d="M 260 320 C 262 328, 264 338, 262 348 C 261 353, 258 356, 256 356
+           C 254 356, 251 353, 252 348 C 252 338, 255 328, 260 320 Z"
+        fill="#fed7aa"/>
+  <!-- Laces -->
+  <line x1="252" y1="325" x2="267" y2="325" stroke="white" stroke-width="2" opacity="0.85"/>
+  <line x1="251" y1="332" x2="267" y2="332" stroke="white" stroke-width="2" opacity="0.85"/>
+  <line x1="251" y1="339" x2="267" y2="339" stroke="white" stroke-width="2" opacity="0.85"/>
+  <!-- Teal swoosh accent -->
+  <path d="M 214 349 C 237 334, 274 330, 314 341"
+        stroke="#14b8a6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <!-- Midsole stripe -->
+  <path d="M 203 356 C 242 352, 294 351, 324 355"
+        stroke="#475569" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <!-- Sole tread lines -->
+  <line x1="216" y1="360" x2="221" y2="369" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="230" y1="359" x2="233" y2="368" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="244" y1="358" x2="245" y2="367" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="258" y1="357" x2="258" y2="366" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="272" y1="357" x2="271" y2="365" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="286" y1="357" x2="284" y2="365" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="300" y1="358" x2="297" y2="365" stroke="#334155" stroke-width="2" opacity="0.45"/>
+  <line x1="314" y1="359" x2="310" y2="366" stroke="#334155" stroke-width="2" opacity="0.45"/>
+
+  <!-- ── DECORATIVE SPARKLES ── -->
+  <circle cx="90"  cy="38"  r="2.5" fill="#fbbf24" opacity="0.72"/>
+  <circle cx="85"  cy="29"  r="1.5" fill="#fbbf24" opacity="0.50"/>
+  <circle cx="97"  cy="33"  r="1.5" fill="#fbbf24" opacity="0.42"/>
+  <circle cx="360" cy="36"  r="2"   fill="#a78bfa"  opacity="0.58"/>
+  <circle cx="373" cy="158" r="2"   fill="#34d399"  opacity="0.50"/>
+  <circle cx="26"  cy="258" r="2"   fill="#60a5fa"  opacity="0.48"/>
+  <circle cx="376" cy="278" r="1.5" fill="#f97316"  opacity="0.42"/>
 </svg>
