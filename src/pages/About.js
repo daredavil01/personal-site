@@ -21,7 +21,11 @@ const About = () => {
     .filter((s) => s.length).length;
 
   return (
-    <Main title="About" description="Full-stack software engineer, marathoner, and digital thinker. Read about Sanket Tambare's background, interests, and what drives him.">
+    <Main
+      title="About"
+      description="Full-stack software engineer, marathoner, and digital thinker. Read about Sanket Tambare's background, interests, and what drives him."
+      image="https://daredavil.pages.dev/images/me.jpg"
+    >
       <AboutDocument markdown={markdown} count={count} />
     </Main>
   );

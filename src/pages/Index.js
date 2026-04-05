@@ -68,9 +68,8 @@ const features = [
 
 const Index = () => (
   <Main
-    description={
-      "Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator."
-    }
+    description="Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator."
+    image="https://daredavil.pages.dev/images/me.jpg"
   >
     <article className="w-full flex flex-col gap-12">
       <header className="mb-4">

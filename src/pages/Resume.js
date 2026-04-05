@@ -15,6 +15,7 @@ const Resume = () => {
     <Main
       title="Resume"
       description="Professional background of Sanket Tambare — full-stack engineer with experience in cloud infrastructure, AI integration, and enterprise software. Includes work history, education, and certifications."
+      image="https://daredavil.pages.dev/images/me.jpg"
     >
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
