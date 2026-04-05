@@ -13,8 +13,8 @@ import certifications from "../data/resume/certifications";
 const Resume = () => {
   return (
     <Main
-      title="Technical Skills"
-      description="A curated collection of frameworks, languages, and infrastructure tools leveraged to build high-performance digital experiences."
+      title="Resume"
+      description="Professional background of Sanket Tambare — full-stack engineer with experience in cloud infrastructure, AI integration, and enterprise software. Includes work history, education, and certifications."
     >
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}

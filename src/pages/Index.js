@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import LifeStats from "../components/Index/LifeStats";
 
 const features = [
   {
@@ -107,6 +108,8 @@ const Index = () => (
           </div>
         ))}
       </div>
+
+      <LifeStats />
 
       <section className="mt-4 p-12 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-2xl text-center">
         <h2 className="font-headline text-3xl font-black mb-6 text-stone-900 dark:text-stone-100">Let&apos;s build the future together.</h2>

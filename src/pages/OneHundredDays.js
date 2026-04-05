@@ -78,7 +78,7 @@ const OneHundredDays = () => {
   return (
     <Main
       title="100 Days To Offload"
-      description="Challenge: Publish 100 posts in a year"
+      description="Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking, tag cloud, platform breakdown, and full post history."
     >
       <article className="max-w-4xl" id="one-hundred-days">
         <header className="mb-12">

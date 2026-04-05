@@ -26,7 +26,7 @@ const SportsPage = () => {
   return (
     <Main
       title="Physical Endurance"
-      description="A dedicated record of athletic pursuits, where discipline meets the pavement."
+      description="Race logs, marathon results, and performance stats from 10K to Full Marathon — tracking every kilometer of the endurance journey from 2023 onwards."
     >
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}

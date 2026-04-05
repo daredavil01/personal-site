@@ -7,7 +7,7 @@ import ContactIcons from "../components/Contact/ContactIcons";
 const Contact = () => (
   <Main
     title="Contact"
-    description="Contact Sanket Tambare via email @ sanket.tambare01@gmail.com"
+    description="Get in touch with Sanket Tambare to discuss technology, endurance sports, or collaboration opportunities. Open to projects, research, and meaningful conversations."
   >
     <div className="flex flex-col gap-12 w-full max-w-2xl">
       <header>

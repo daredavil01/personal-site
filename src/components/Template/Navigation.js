@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import routes from "../../data/routes";
 import Hamburger from "./Hamburger";
+import Logo from "./Logo";
 
 const Navigation = () => {
   const location = useLocation();
@@ -15,8 +16,11 @@ const Navigation = () => {
   return (
     <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-stone-950/80 backdrop-blur-md border-b border-stone-100 dark:border-stone-900 shadow-sm transition-all duration-300">
       <div className="flex justify-between items-center px-6 py-4 max-w-[1440px] mx-auto w-full">
-        <Link to={indexRoute ? indexRoute.path : "/"} className="text-lg font-headline font-bold text-stone-900 dark:text-stone-50 tracking-[0.2em] uppercase no-underline hover:text-secondary dark:hover:text-secondary transition-colors">
-          {indexRoute ? indexRoute.label : "Sanket Tambare"}
+        <Link to={indexRoute ? indexRoute.path : "/"} className="flex items-center gap-3 no-underline group">
+          <Logo size={28} />
+          <span className="text-lg font-headline font-bold text-stone-900 dark:text-stone-50 tracking-[0.2em] uppercase group-hover:text-secondary dark:group-hover:text-secondary transition-colors">
+            {indexRoute ? indexRoute.label : "Sanket Tambare"}
+          </span>
         </Link>
 
         {/* Desktop Nav */}

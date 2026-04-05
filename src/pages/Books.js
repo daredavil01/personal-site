@@ -7,7 +7,7 @@ const Books = () => {
   return (
     <Main
       title="Books"
-      description="A curated selection of literature that shaped my perspective on design, philosophy, and technology."
+      description="An interactive catalog of 100+ books read, with reviews and ratings spanning design, philosophy, technology, and Marathi literature."
     >
       <DigitalLibrary books={booksData} />
     </Main>
