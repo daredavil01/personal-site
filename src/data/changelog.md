@@ -40,7 +40,7 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
-## [v5.1.0] — 2026-04-04
+## [v5.1.0] — 2026-04-05
 
 ### Added
 - **Treks Page** (`/treks`): New page documenting Maharashtra fort and mountain trek history with two views — *Statistics* and *Default View*.
@@ -68,6 +68,9 @@ This project does not use semantic versioning; entries are grouped by date and f
 - **`treks.js` Data File**: Added missing `const { PUBLIC_URL }`, `const` declaration, and `export default treks`.
 - **Difficulty Normalization** (`treks.js`): Standardized `endurance_level` to three values — `Easy`, `Medium`, `Hard` (removed `High` variant on Katraj To Sinhgad entry).
 - **LifeStats ESLint errors** (`src/components/Index/LifeStats.js`): Replaced `Math.pow` with `**` operator, fixed `consistent-return` in `useEffect`, and corrected JSX prop/bracket formatting.
+
+### Added (2026-04-05)
+- **100 Days to Offload — Entry #19** (`src/data/100DaysToOffload.js`): Added new blog post "Sadagi in the Digital World" — exploring oneness in the entangled digital world, published on Substack.
 
 ---
 
