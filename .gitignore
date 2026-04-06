@@ -50,3 +50,6 @@ nohup.out
 
 # stitch design related
 stitch/
+
+#claude
+.claude/
