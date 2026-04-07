@@ -5,6 +5,13 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.5] — 2026-04-07
+
+### Added
+- **Mermaid Repo Structure Diagram** (`README.md`): Added a `graph TD` Mermaid diagram under a new "Repository Structure" section, visualising the full directory tree — `src/` (components, pages, data, layouts, context, static), `public/`, `docs/`, `functions/`, `.github/workflows/`, and config files.
+
+---
+
 ## [v5.1.4] — 2026-04-05
 
 ### Added
