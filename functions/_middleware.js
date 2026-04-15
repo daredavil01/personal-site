@@ -131,15 +131,18 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/$/, "") || "/";
 
-  // Only process HTML navigation requests
-  const acceptHeader = request.headers.get("Accept") || "";
-  if (!acceptHeader.includes("text/html")) {
+  // Skip static asset requests (anything with a file extension).
+  // Do not use the Accept header as a gate — scrapers commonly send
+  // Accept: */* which does not contain "text/html" and would cause the
+  // middleware to bail before injecting any metadata.
+  const lastSegment = pathname.split("/").pop();
+  if (lastSegment.includes(".")) {
     return next();
   }
 
   const response = await next();
 
-  // Only rewrite HTML responses
+  // Only rewrite HTML responses (definitive gate on the actual content type).
   const contentType = response.headers.get("Content-Type") || "";
   if (!contentType.includes("text/html")) {
     return response;

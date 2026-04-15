@@ -5,6 +5,13 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.8] — 2026-04-15
+
+### Fixed
+- **Cloudflare middleware** (`functions/_middleware.js`): Removed the `Accept: text/html` request-header guard that caused the middleware to skip injection for every scraper or tool that sends `Accept: */*` (including opengraph.xyz). The response `Content-Type` check is the correct and sufficient gate; the request Accept header is unreliable for this purpose. Replaced the Accept guard with a file-extension check that skips static asset requests (`*.js`, `*.css`, `*.png`, etc.) before calling `next()`.
+
+---
+
 ## [v5.1.7] — 2026-04-15
 
 ### Fixed
