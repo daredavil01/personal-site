@@ -5,6 +5,16 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.2.0] — 2026-04-15
+
+### Added
+- **Floating AI Chat Widget** (`src/components/Chat/ChatWidget.js`): New fixed-position chat panel powered by Claude API that answers visitor questions about Sanket using full portfolio context (books, races, treks, blog posts, resume, projects). Streams responses via SSE using `fetch` + `ReadableStream`. Renders into `document.body` via React Portal to avoid stacking context issues. Supports dark/light mode via Tailwind `dark:` variants and Enter-to-send keyboard shortcut.
+- **Cloudflare Pages Function** (`functions/api/chat.js`): POST handler that proxies requests to Claude API with streaming enabled. Validates body size (32 KB max) and message count (20 max), injects the site-context system prompt, and passes the SSE stream body directly to the client.
+- **Context Build Script** (`scripts/build-context.mjs`): Node 18+ ES module script that dynamically imports all data files and reads `about.md` and `now.md`, then writes a consolidated system prompt to `functions/lib/site-context.js` for use by the Pages Function.
+- **`prebuild` / `prestart` npm scripts** (`package.json`): `node scripts/build-context.mjs` is wired to both lifecycle hooks to ensure the generated context file exists before build and local dev.
+
+---
+
 ## [v5.1.8] — 2026-04-15
 
 ### Fixed
