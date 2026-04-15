@@ -5,6 +5,13 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.9] — 2026-04-15
+
+### Fixed
+- **ESLint config** (`.eslintignore`): Added ignore file to exclude `functions/` (Cloudflare Workers — uses `HTMLRewriter` and other CF globals incompatible with airbnb rules), `postcss.config.js`, and `tailwind.config.js` (CommonJS config files) from the `eslint **/*.js` sweep. These files were causing 29 lint errors and breaking the Node.js CI build on every PR.
+
+---
+
 ## [v5.1.8] — 2026-04-15
 
 ### Fixed

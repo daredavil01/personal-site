@@ -1,0 +1,10 @@
+# Build output
+build/
+
+# Cloudflare Workers — uses CF-specific globals (HTMLRewriter, etc.) and
+# follows Workers module conventions incompatible with airbnb ESLint rules
+functions/
+
+# Tooling config files — CommonJS require() and different style conventions
+postcss.config.js
+tailwind.config.js
