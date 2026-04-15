@@ -5,6 +5,13 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.6] — 2026-04-15
+
+### Fixed
+- **Static HTML shell** (`public/index.html`): Removed all Helmet-managed meta tags (`description`, `og:type`, `og:url`, `og:title`, `og:description`, `og:image`, `twitter:*`, `canonical`) from the static shell. The OG spec uses first-match semantics — having hardcoded homepage values appear before Helmet's `data-rh="true"` tags meant every non-root route (e.g. `/now`, `/sports`) served the wrong social metadata to any parser. Helmet now exclusively owns these tags; only `og:site_name` (static, same for all pages) and the initial `<title>` fallback remain.
+
+---
+
 ## [v5.1.5] — 2026-04-15
 
 ### Fixed
