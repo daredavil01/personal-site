@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
 import Navigation from "../components/Template/Navigation";
@@ -19,7 +19,7 @@ const Main = (props) => {
   const ogTitle = props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare";
 
   return (
-    <HelmetProvider>
+    <>
       <ScrollToTop />
       <Helmet
         titleTemplate="%s | Sanket Tambare"
@@ -27,6 +27,7 @@ const Main = (props) => {
         defer={false}
       >
         {props.title && <title>{props.title}</title>}
+        <link rel="canonical" href={canonicalUrl} />
         <meta name="description" content={props.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
@@ -55,7 +56,7 @@ const Main = (props) => {
         <Footer />
         <FloatingToggle />
       </div>
-    </HelmetProvider>
+    </>
   );
 };
 

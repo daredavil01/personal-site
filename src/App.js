@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Main from "./layouts/Main"; // fallback for lazy pages
 import "./tailwind.css"; // Tailwind globals
 import "./static/css/main.scss"; // All of our styles
@@ -26,6 +27,7 @@ const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 
 const App = () => (
+  <HelmetProvider>
   <BrowserRouter basename={PUBLIC_URL}>
     <Suspense fallback={<Main />}>
       <Routes>
@@ -47,6 +49,7 @@ const App = () => (
       </Routes>
     </Suspense>
   </BrowserRouter>
+  </HelmetProvider>
 );
 
 export default App;
