@@ -1,18 +1,19 @@
 const BASE_URL = "https://daredavil.pages.dev";
 const DEFAULT_IMAGE = `${BASE_URL}/images/logo.png`;
+const PERSON_IMAGE = `${BASE_URL}/images/me.jpg`;
 
 const PAGE_META = {
   "/": {
     title: "Sanket Tambare",
     description:
       "Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator.",
-    image: DEFAULT_IMAGE,
+    image: PERSON_IMAGE,
   },
   "/about": {
     title: "About | Sanket Tambare",
     description:
       "Full-stack software engineer, marathoner, and digital thinker. Read about Sanket Tambare's background, interests, and what drives him.",
-    image: `${BASE_URL}/images/me.jpg`,
+    image: PERSON_IMAGE,
   },
   "/books": {
     title: "Books | Sanket Tambare",
@@ -66,7 +67,7 @@ const PAGE_META = {
     title: "Resume | Sanket Tambare",
     description:
       "Professional background of Sanket Tambare — full-stack engineer with experience in cloud infrastructure, AI integration, and enterprise software.",
-    image: `${BASE_URL}/images/me.jpg`,
+    image: PERSON_IMAGE,
   },
   "/sports": {
     title: "Physical Endurance | Sanket Tambare",
@@ -88,37 +89,39 @@ const PAGE_META = {
   },
 };
 
-class MetaRewriter {
-  constructor(meta, canonicalUrl) {
-    this.meta = meta;
-    this.canonicalUrl = canonicalUrl;
-    this.titleDone = false;
+const DEFAULT_META = {
+  title: "Sanket Tambare",
+  description: "Sanket Tambare's personal website.",
+  image: DEFAULT_IMAGE,
+};
+
+function escAttr(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+// Updates the text content of the existing <title> element.
+class TitleRewriter {
+  constructor(title) {
+    this.title = title;
   }
-
   element(element) {
-    const tag = element.tagName;
+    element.setInnerContent(this.title);
+  }
+}
 
-    if (tag === "title" && !this.titleDone) {
-      element.setInnerContent(this.meta.title);
-      this.titleDone = true;
-      return;
-    }
-
-    const property = element.getAttribute("property");
-    const name = element.getAttribute("name");
-
-    if (property === "og:title" || name === "twitter:title") {
-      element.setAttribute("content", this.meta.title);
-    } else if (
-      property === "og:description" ||
-      name === "twitter:description" ||
-      name === "description"
-    ) {
-      element.setAttribute("content", this.meta.description);
-    } else if (property === "og:image" || name === "twitter:image") {
-      element.setAttribute("content", this.meta.image);
-    } else if (property === "og:url") {
-      element.setAttribute("content", this.canonicalUrl);
+// Appends all per-page meta/link tags at the end of <head>.
+// index.html no longer carries static OG/Twitter/canonical tags (they were
+// removed to prevent first-match conflicts with Helmet's client-side tags),
+// so HTMLRewriter must INSERT rather than update.
+class HeadInjector {
+  constructor(html) {
+    this.html = html;
+    this.done = false;
+  }
+  element(element) {
+    if (!this.done) {
+      element.append(this.html, { html: true });
+      this.done = true;
     }
   }
 }
@@ -134,12 +137,6 @@ export async function onRequest(context) {
     return next();
   }
 
-  const meta = PAGE_META[pathname];
-  if (!meta) {
-    return next();
-  }
-
-  const canonicalUrl = `${BASE_URL}${pathname === "/" ? "" : pathname}`;
   const response = await next();
 
   // Only rewrite HTML responses
@@ -148,11 +145,24 @@ export async function onRequest(context) {
     return response;
   }
 
-  const rewriter = new MetaRewriter(meta, canonicalUrl);
+  const meta = PAGE_META[pathname] ?? DEFAULT_META;
+  const canonicalUrl = `${BASE_URL}${pathname === "/" ? "" : pathname}`;
+
+  const tags = `
+    <link rel="canonical" href="${escAttr(canonicalUrl)}">
+    <meta name="description" content="${escAttr(meta.description)}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="${escAttr(canonicalUrl)}">
+    <meta property="og:title" content="${escAttr(meta.title)}">
+    <meta property="og:description" content="${escAttr(meta.description)}">
+    <meta property="og:image" content="${escAttr(meta.image)}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escAttr(meta.title)}">
+    <meta name="twitter:description" content="${escAttr(meta.description)}">
+    <meta name="twitter:image" content="${escAttr(meta.image)}">`;
+
   return new HTMLRewriter()
-    .on("title", rewriter)
-    .on("meta[name='description']", rewriter)
-    .on("meta[property^='og:']", rewriter)
-    .on("meta[name^='twitter:']", rewriter)
+    .on("title", new TitleRewriter(meta.title))
+    .on("head", new HeadInjector(tags))
     .transform(response);
 }

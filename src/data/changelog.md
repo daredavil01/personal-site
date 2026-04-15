@@ -5,6 +5,13 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v5.1.7] — 2026-04-15
+
+### Fixed
+- **Cloudflare middleware** (`functions/_middleware.js`): Rewrote `HTMLRewriter` strategy from updating existing elements to appending tags into `<head>`. The previous commit removed all static OG/Twitter/canonical tags from `index.html` to prevent first-match conflicts — but the middleware was selecting those same elements to mutate them. With nothing to select, every route served identical bare metadata. The new approach uses a `HeadInjector` handler that appends the full per-route tag block to `<head>` and a `TitleRewriter` that updates the existing `<title>` element. Unknown paths now fall back to a generic `DEFAULT_META` rather than returning no metadata.
+
+---
+
 ## [v5.1.6] — 2026-04-15
 
 ### Fixed
