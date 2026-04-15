@@ -16,6 +16,7 @@
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "prestart": "node scripts/build-context.mjs",
+    "dev": "npx wrangler pages dev --proxy 3000 --port 8788",
     "lint": "eslint **/*.js",
     "test": "npx jest",
     "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js"
