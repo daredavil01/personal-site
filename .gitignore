@@ -55,5 +55,8 @@ stitch/
 # Generated chat context (rebuilt by prebuild/prestart)
 functions/lib/
 
+# Wrangler local state
+.wrangler/
+
 #claude
 .claude/
