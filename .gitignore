@@ -51,5 +51,8 @@ nohup.out
 # stitch design related
 stitch/
 
+# Generated chat context (rebuilt by prebuild/prestart)
+functions/lib/
+
 #claude
 .claude/

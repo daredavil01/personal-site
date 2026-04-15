@@ -8,6 +8,7 @@ import SideBar from "../components/Template/SideBar";
 import Footer from "../components/Template/Footer";
 import ScrollToTop from "../components/Template/ScrollToTop";
 import FloatingToggle from "../components/Template/FloatingToggle";
+import ChatWidget from "../components/Chat/ChatWidget";
 
 const BASE_URL = "https://daredavil.pages.dev";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/images/logo.png`;
@@ -55,6 +56,7 @@ const Main = (props) => {
 
         <Footer />
         <FloatingToggle />
+        <ChatWidget />
       </div>
     </>
   );
