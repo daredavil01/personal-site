@@ -25,6 +25,7 @@ const Challenges = lazy(() => import("./pages/Challenges"));
 const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 const App = () => (
   <HelmetProvider>
@@ -45,6 +46,7 @@ const App = () => (
         <Route path="/100-days-to-offload" element={<OneHundredDays />} />
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/treks" element={<TreksPage />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

@@ -1,0 +1,75 @@
+# Decap CMS Configuration
+# Docs: https://decapcms.org/docs/
+#
+# CURRENT BACKEND: test-repo (free, local browser storage only — no OAuth needed)
+# FOR PRODUCTION: change backend to 'github' and set up an OAuth proxy:
+#   backend:
+#     name: github
+#     repo: daredavil01/personal-site
+#     branch: main
+#     base_url: https://your-oauth-proxy.netlify.app
+#
+# After Decap commits changes, run: npm run cms:sync
+# This merges the markdown files back into src/data/*.js for deployment.
+
+backend:
+  name: test-repo
+
+# Where Decap CMS stores uploaded media
+media_folder: public/images/uploads
+public_folder: /images/uploads
+
+# Content collections
+collections:
+  - name: books
+    label: Books
+    label_singular: Book
+    folder: src/cms-content/books
+    create: true
+    slug: "{{fields.id}}-{{slug}}"
+    fields:
+      - { label: ID, name: id, widget: number, value_type: int }
+      - { label: Title, name: title, widget: string }
+      - { label: Author, name: author, widget: string }
+      - { label: Category, name: category, widget: string, hint: "Comma-separated, e.g. Non-Fiction,Technology" }
+      - label: Language
+        name: language
+        widget: select
+        options: [English, Marathi, Hindi, Other]
+      - { label: Translator, name: translator, widget: string, required: false }
+      - { label: Blog Link, name: blog_link, widget: string, required: false }
+      - label: Blog Platform
+        name: blog_platform
+        widget: select
+        required: false
+        options: [Substack, Medium, WordPress, Blogger, Canva]
+      - { label: Description, name: description, widget: text }
+      - { label: Year Read, name: year, widget: number, value_type: int }
+      - { label: Tags, name: tags, widget: list }
+
+  - name: 100days
+    label: "100 Days To Offload"
+    label_singular: Post
+    folder: src/cms-content/100days
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: ID, name: id, widget: number, value_type: int }
+      - { label: Blog Title, name: blog_title, widget: string }
+      - { label: Description, name: blog_description, widget: text }
+      - { label: Blog Link, name: blog_link, widget: string }
+      - label: Platform
+        name: blog_platform
+        widget: select
+        options: [Substack, Medium, Ghost, WordPress, Other]
+      - label: Date
+        name: blog_date
+        widget: datetime
+        date_format: YYYY-MM-DD
+        time_format: false
+      - label: Language
+        name: language
+        widget: select
+        options: [English, Marathi]
+      - { label: Tags, name: blog_tags, widget: list }
+      - { label: Challenge ID, name: challenge_id, widget: hidden, default: "100_days_to_offload" }

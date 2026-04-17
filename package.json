@@ -16,7 +16,8 @@
     "start": "react-scripts start",
     "lint": "eslint **/*.js",
     "test": "npx jest",
-    "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js"
+    "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js",
+    "cms:sync": "node scripts/sync-cms-to-data.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
