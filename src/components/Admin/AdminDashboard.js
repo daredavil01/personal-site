@@ -50,17 +50,17 @@ const AdminDashboard = ({ onNavigate }) => (
             key={key}
             type="button"
             onClick={() => onNavigate(key)}
-            className={`text-left bg-gradient-to-br ${color} border border-stone-200 dark:border-stone-800 rounded-xl p-5 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.99]`}
+            className={`text-left bg-gradient-to-br ${color} border border-stone-200 dark:border-stone-800 rounded-xl p-5 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.99] flex flex-col min-h-[110px]`}
           >
-            <div className="flex items-start justify-between mb-3">
-              <span className={`font-headline text-2xl font-black ${accent}`}>{count}</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`font-headline text-3xl font-black leading-none ${accent}`}>{count}</span>
               {hasDraft && (
                 <span className="text-xs font-label bg-secondary/10 text-secondary px-2 py-0.5 rounded-full">
                   Draft
                 </span>
               )}
             </div>
-            <p className="font-label text-sm font-bold text-stone-800 dark:text-stone-200">{label}</p>
+            <p className="font-label text-sm font-bold text-stone-800 dark:text-stone-200 mt-auto">{label}</p>
             <p className="font-body text-xs text-stone-500 dark:text-stone-400 mt-0.5">{description}</p>
           </button>
         );
@@ -70,12 +70,12 @@ const AdminDashboard = ({ onNavigate }) => (
       <button
         type="button"
         onClick={() => onNavigate('integrations')}
-        className="text-left bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-900 dark:to-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-5 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.99]"
+        className="text-left bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-900 dark:to-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-5 hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.99] flex flex-col min-h-[110px]"
       >
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-2xl">⚙</span>
+        <div className="mb-2">
+          <span className="text-2xl leading-none">⚙</span>
         </div>
-        <p className="font-label text-sm font-bold text-stone-800 dark:text-stone-200">Integrations</p>
+        <p className="font-label text-sm font-bold text-stone-800 dark:text-stone-200 mt-auto">Integrations</p>
         <p className="font-body text-xs text-stone-500 dark:text-stone-400 mt-0.5">Configure CMS providers</p>
       </button>
     </div>
