@@ -223,13 +223,19 @@ const CustomAPICard = ({ customApiEndpoint, setCustomApi }) => {
             placeholder="https://api.example.com/v1"
           />
           <div className="flex gap-2">
-            <button type="button" onClick={handleSave}
-              className="bg-secondary text-white text-xs font-label px-3 py-1.5 rounded-lg hover:bg-secondary/90 transition-colors">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="bg-secondary text-white text-xs font-label px-3 py-1.5 rounded-lg hover:bg-secondary/90 transition-colors"
+            >
               Save Endpoint
             </button>
             {editing && (
-              <button type="button" onClick={() => setEditing(false)}
-                className="text-xs font-label text-stone-400 hover:text-stone-600 transition-colors">
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="text-xs font-label text-stone-400 hover:text-stone-600 transition-colors"
+              >
                 Cancel
               </button>
             )}

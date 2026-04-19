@@ -51,7 +51,6 @@ const AuthGate = ({ onAuth }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            autoFocus
             className="w-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 font-body text-sm text-stone-900 dark:text-stone-100 focus:border-secondary focus:outline-none transition-colors"
           />
           {error && (

@@ -22,16 +22,16 @@ const emptyRace = (id) => ({
   slideImages: [],
 });
 
-const emptySlide = () => ({ url: '', caption: 'Slide 1' });
-
 const normalizeUrl = (url) => {
   if (!url) return '';
   // Strip the PUBLIC_URL prefix for storage; jsSerialize re-adds it on export
   return url.replace(/^.*\/images\//, '/images/');
 };
 
-const templateFn = (items) =>
-  `const { PUBLIC_URL } = process.env; // set automatically from package.json:homepage\n\nconst sportsData = ${jsSerialize(items)};\n\nexport default sportsData;\n`;
+const templateFn = (items) => {
+  const body = jsSerialize(items);
+  return `const { PUBLIC_URL } = process.env; // set automatically from package.json:homepage\n\nconst sportsData = ${body};\n\nexport default sportsData;\n`;
+};
 
 const SlideForm = ({ slide, onChange, onRemove }) => (
   <div className="flex flex-col gap-3">
@@ -102,7 +102,7 @@ const RaceForm = ({ race, onChange, onRemove }) => (
           const n = race.slideImages.length + 1;
           onChange({ slideImages: [...race.slideImages, { url: '', caption: `Slide ${n}` }] });
         }}
-        renderItem={(slide, getNext, index) => (
+        renderItem={(slide, _unused, index) => (
           <SlideForm
             slide={slide}
             onChange={(updated) => {
@@ -111,7 +111,7 @@ const RaceForm = ({ race, onChange, onRemove }) => (
               onChange({ slideImages: next });
             }}
             onRemove={() => {
-              onChange({ slideImages: race.slideImages.filter((_, i) => i !== index) });
+              onChange({ slideImages: race.slideImages.filter((_s, idx) => idx !== index) });
             }}
           />
         )}

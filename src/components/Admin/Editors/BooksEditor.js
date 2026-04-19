@@ -113,11 +113,10 @@ const BooksEditor = () => {
 
   const nextId = items.length > 0 ? Math.max(...items.map((b) => b.id)) + 1 : 1;
 
-  const filtered = items.filter(
-    (b) =>
-      b.title?.toLowerCase().includes(search.toLowerCase()) ||
-      b.author?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = items.filter((b) => {
+    const q = search.toLowerCase();
+    return b.title?.toLowerCase().includes(q) || b.author?.toLowerCase().includes(q);
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -145,7 +144,7 @@ const BooksEditor = () => {
       <TextInput value={search} onChange={setSearch} placeholder="Search by title or author…" />
 
       <div className="flex flex-col gap-3">
-        {filtered.map((book, i) => {
+        {filtered.map((book) => {
           const realIndex = items.indexOf(book);
           const isOpen = expandedId === book.id;
           return (

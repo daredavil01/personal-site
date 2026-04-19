@@ -8,8 +8,10 @@ import ExportPanel from '../ExportPanel';
 
 const emptySkill = () => ({ title: '', competency: 3, category: [] });
 
-const templateFn = (items) =>
-  `const skills = ${JSON.stringify(items, null, 2)};\n\nexport default skills;\n`;
+const templateFn = (items) => {
+  const json = JSON.stringify(items, null, 2);
+  return `const skills = ${json};\n\nexport default skills;\n`;
+};
 
 const DOTS = [1, 2, 3, 4, 5];
 
@@ -25,6 +27,7 @@ const SkillForm = ({ skill, onChange, onRemove }) => (
             <button
               key={n}
               type="button"
+              aria-label={`Set competency to ${n}`}
               onClick={() => onChange({ competency: n })}
               className={`w-6 h-6 rounded-full border-2 transition-colors ${n <= skill.competency ? 'bg-secondary border-secondary' : 'bg-transparent border-stone-300 dark:border-stone-600 hover:border-secondary'}`}
             />
@@ -49,10 +52,11 @@ const ResumeSkillsEditor = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [search, setSearch] = useState('');
 
-  const filtered = items.filter(
-    (s) => s.title?.toLowerCase().includes(search.toLowerCase()) ||
-      s.category?.some((c) => c.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = items.filter((s) => {
+    const q = search.toLowerCase();
+    return s.title?.toLowerCase().includes(q)
+      || s.category?.some((c) => c.toLowerCase().includes(q));
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,9 +66,20 @@ const ResumeSkillsEditor = () => {
           <p className="text-sm text-stone-500 dark:text-stone-400 font-body mt-0.5">{items.length} skills</p>
         </div>
         <div className="flex gap-3">
-          {isDirty && <button type="button" onClick={resetToOriginal} className="text-xs font-label text-stone-400 hover:text-red-400 transition-colors">Reset to original</button>}
-          <button type="button" onClick={() => { addItem(emptySkill()); setExpandedIndex(items.length); }}
-            className="bg-secondary text-white text-sm font-label px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors">
+          {isDirty && (
+            <button
+              type="button"
+              onClick={resetToOriginal}
+              className="text-xs font-label text-stone-400 hover:text-red-400 transition-colors"
+            >
+              Reset to original
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => { addItem(emptySkill()); setExpandedIndex(items.length); }}
+            className="bg-secondary text-white text-sm font-label px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors"
+          >
             + Add Skill
           </button>
         </div>
@@ -78,8 +93,11 @@ const ResumeSkillsEditor = () => {
           const isOpen = expandedIndex === realIndex;
           return (
             <div key={realIndex} className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
-              <button type="button" onClick={() => setExpandedIndex(isOpen ? null : realIndex)}
-                className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+              <button
+                type="button"
+                onClick={() => setExpandedIndex(isOpen ? null : realIndex)}
+                className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <span className="font-body text-sm text-stone-900 dark:text-stone-100">{skill.title || <em className="text-stone-400">Untitled</em>}</span>
                   <div className="flex gap-0.5">

@@ -18,8 +18,10 @@ const emptyTrek = (id) => ({
   photos: [],
 });
 
-const templateFn = (items) =>
-  `const { PUBLIC_URL } = process.env;\n\nconst treks = ${jsSerialize(items)};\n\nexport default treks;\n`;
+const templateFn = (items) => {
+  const body = jsSerialize(items);
+  return `const { PUBLIC_URL } = process.env;\n\nconst treks = ${body};\n\nexport default treks;\n`;
+};
 
 const PhotoForm = ({ photo, onChange, onRemove }) => (
   <div className="flex flex-col gap-3">
@@ -79,7 +81,7 @@ const TrekForm = ({ trek, onChange, onRemove }) => (
           const n = trek.photos.length + 1;
           onChange({ photos: [...trek.photos, { url: '', caption: `Slide ${n}` }] });
         }}
-        renderItem={(photo, _, index) => (
+        renderItem={(photo, _unused, index) => (
           <PhotoForm
             photo={photo}
             onChange={(updated) => {
@@ -87,7 +89,7 @@ const TrekForm = ({ trek, onChange, onRemove }) => (
               next[index] = updated;
               onChange({ photos: next });
             }}
-            onRemove={() => onChange({ photos: trek.photos.filter((_, i) => i !== index) })}
+            onRemove={() => onChange({ photos: trek.photos.filter((_p, idx) => idx !== index) })}
           />
         )}
       />

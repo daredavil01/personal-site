@@ -10,18 +10,9 @@ const ArrayItemEditor = ({ items = [], renderItem, onAdd, addLabel = 'Add Item',
         key={index}
         className="bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg p-4 flex flex-col gap-3"
       >
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-label uppercase tracking-widest text-stone-400">
-            Item {index + 1}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              /* handled via renderItem's onRemove */
-            }}
-            className="hidden"
-          />
-        </div>
+        <span className="text-xs font-label uppercase tracking-widest text-stone-400">
+          Item {index + 1}
+        </span>
         {renderItem(
           item,
           (updated) => {
@@ -29,7 +20,7 @@ const ArrayItemEditor = ({ items = [], renderItem, onAdd, addLabel = 'Add Item',
             next[index] = typeof updated === 'string' ? updated : { ...item, ...updated };
             return next;
           },
-          index
+          index,
         )}
       </div>
     ))}

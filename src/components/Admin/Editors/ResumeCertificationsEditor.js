@@ -7,8 +7,10 @@ import ExportPanel from '../ExportPanel';
 
 const emptyCert = () => ({ name: '', link: '', source: '', issuedDate: '' });
 
-const templateFn = (items) =>
-  `const certifications = ${JSON.stringify(items, null, 2)};\n\nexport default certifications;\n`;
+const templateFn = (items) => {
+  const json = JSON.stringify(items, null, 2);
+  return `const certifications = ${json};\n\nexport default certifications;\n`;
+};
 
 const CertForm = ({ cert, onChange, onRemove }) => (
   <div className="flex flex-col gap-4">
@@ -47,9 +49,20 @@ const ResumeCertificationsEditor = () => {
           <p className="text-sm text-stone-500 dark:text-stone-400 font-body mt-0.5">{items.length} certifications</p>
         </div>
         <div className="flex gap-3">
-          {isDirty && <button type="button" onClick={resetToOriginal} className="text-xs font-label text-stone-400 hover:text-red-400 transition-colors">Reset to original</button>}
-          <button type="button" onClick={() => { addItem(emptyCert()); setExpandedIndex(items.length); }}
-            className="bg-secondary text-white text-sm font-label px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors">
+          {isDirty && (
+            <button
+              type="button"
+              onClick={resetToOriginal}
+              className="text-xs font-label text-stone-400 hover:text-red-400 transition-colors"
+            >
+              Reset to original
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => { addItem(emptyCert()); setExpandedIndex(items.length); }}
+            className="bg-secondary text-white text-sm font-label px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors"
+          >
             + Add Certification
           </button>
         </div>
@@ -60,8 +73,11 @@ const ResumeCertificationsEditor = () => {
           const isOpen = expandedIndex === i;
           return (
             <div key={i} className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
-              <button type="button" onClick={() => setExpandedIndex(isOpen ? null : i)}
-                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+              <button
+                type="button"
+                onClick={() => setExpandedIndex(isOpen ? null : i)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              >
                 <div>
                   <span className="font-body text-sm text-stone-900 dark:text-stone-100">{cert.name || <em className="text-stone-400">Untitled</em>}</span>
                   {cert.source && <span className="ml-2 text-xs text-stone-400">— {cert.source}</span>}

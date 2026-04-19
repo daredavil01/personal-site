@@ -28,19 +28,22 @@ const useDraftStore = ({ storageKey, fallbackData }) => {
 
   const addItem = (item) => setItems((prev) => [...prev, item]);
 
-  const updateItem = (index, updated) =>
+  const updateItem = (index, updated) => {
     setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...updated } : item)));
+  };
 
-  const removeItem = (index) =>
+  const removeItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  const reorderItems = (fromIndex, toIndex) =>
+  const reorderItems = (fromIndex, toIndex) => {
     setItems((prev) => {
       const next = [...prev];
       const [moved] = next.splice(fromIndex, 1);
       next.splice(toIndex, 0, moved);
       return next;
     });
+  };
 
   const resetToOriginal = () => {
     localStorage.removeItem(storageKey);

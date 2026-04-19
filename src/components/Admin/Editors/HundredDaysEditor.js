@@ -21,8 +21,10 @@ const emptyPost = (id) => ({
   language: 'English',
 });
 
-const templateFn = (items) =>
-  `/* eslint-disable max-len */\nconst blogs = ${JSON.stringify(items, null, 2)};\n\nexport default blogs;\n`;
+const templateFn = (items) => {
+  const json = JSON.stringify(items, null, 2);
+  return `/* eslint-disable max-len */\nconst blogs = ${json};\n\nexport default blogs;\n`;
+};
 
 const PostForm = ({ post, onChange, onRemove }) => (
   <div className="flex flex-col gap-4">
@@ -37,8 +39,11 @@ const PostForm = ({ post, onChange, onRemove }) => (
         <TextInput value={post.blog_date} onChange={(v) => onChange({ blog_date: v })} placeholder="2024-01-15" />
       </FormField>
       <FormField label="Language">
-        <select value={post.language} onChange={(e) => onChange({ language: e.target.value })}
-          className="w-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm font-body text-stone-900 dark:text-stone-100 focus:border-secondary focus:outline-none">
+        <select
+          value={post.language}
+          onChange={(e) => onChange({ language: e.target.value })}
+          className="w-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm font-body text-stone-900 dark:text-stone-100 focus:border-secondary focus:outline-none"
+        >
           {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
         </select>
       </FormField>
@@ -48,8 +53,11 @@ const PostForm = ({ post, onChange, onRemove }) => (
         <TextInput value={post.blog_link} onChange={(v) => onChange({ blog_link: v })} placeholder="https://..." />
       </FormField>
       <FormField label="Platform">
-        <select value={post.blog_platform} onChange={(e) => onChange({ blog_platform: e.target.value })}
-          className="w-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm font-body text-stone-900 dark:text-stone-100 focus:border-secondary focus:outline-none">
+        <select
+          value={post.blog_platform}
+          onChange={(e) => onChange({ blog_platform: e.target.value })}
+          className="w-full bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm font-body text-stone-900 dark:text-stone-100 focus:border-secondary focus:outline-none"
+        >
           {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>
       </FormField>
@@ -80,9 +88,20 @@ const HundredDaysEditor = () => {
           <p className="text-sm text-stone-500 dark:text-stone-400 font-body mt-0.5">{items.length} posts</p>
         </div>
         <div className="flex gap-3">
-          {isDirty && <button type="button" onClick={resetToOriginal} className="text-xs font-label text-stone-400 hover:text-red-400 transition-colors">Reset to original</button>}
-          <button type="button" onClick={() => { addItem(emptyPost(nextId)); setExpandedId(nextId); }}
-            className="bg-secondary text-white text-sm font-label px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors">
+          {isDirty && (
+            <button
+              type="button"
+              onClick={resetToOriginal}
+              className="text-xs font-label text-stone-400 hover:text-red-400 transition-colors"
+            >
+              Reset to original
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => { addItem(emptyPost(nextId)); setExpandedId(nextId); }}
+            className="bg-secondary text-white text-sm font-label px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors"
+          >
             + Add Post
           </button>
         </div>
@@ -93,8 +112,11 @@ const HundredDaysEditor = () => {
           const isOpen = expandedId === post.id;
           return (
             <div key={post.id} className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
-              <button type="button" onClick={() => setExpandedId(isOpen ? null : post.id)}
-                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+              <button
+                type="button"
+                onClick={() => setExpandedId(isOpen ? null : post.id)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              >
                 <div>
                   <span className="font-body text-sm text-stone-900 dark:text-stone-100">{post.blog_title || <em className="text-stone-400">Untitled</em>}</span>
                   {post.blog_date && <span className="ml-2 text-xs text-stone-400">{post.blog_date}</span>}

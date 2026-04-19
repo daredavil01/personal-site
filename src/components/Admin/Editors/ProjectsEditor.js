@@ -14,8 +14,10 @@ const emptyProject = () => ({
   desc: '',
 });
 
-const templateFn = (items) =>
-  `const projects = ${JSON.stringify(items, null, 2)};\n\nexport default projects;\n`;
+const templateFn = (items) => {
+  const json = JSON.stringify(items, null, 2);
+  return `const projects = ${json};\n\nexport default projects;\n`;
+};
 
 const ProjectForm = ({ project, onChange, onRemove }) => (
   <div className="flex flex-col gap-4">
