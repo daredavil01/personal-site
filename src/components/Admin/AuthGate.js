@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 // To generate: open browser console → crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourpassword'))
 //              → Array.from(new Uint8Array(result)).map(b=>b.toString(16).padStart(2,'0')).join('')
 // Default password: admin123
-const ADMIN_HASH = 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae';
+const ADMIN_HASH = '045d05e68db419499062fb6471fa54d6024f79b58d7c11be371f72c6bac5718c';
 
 const hashPassword = async (password) => {
   const encoded = new TextEncoder().encode(password);
