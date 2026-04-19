@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import skillsData from '../../../data/resume/skills';
+import { skills as skillsData } from '../../../data/resume/skills';
 import useDraftStore from '../../../hooks/useDraftStore';
 import FormField from '../FormField';
 import TextInput from '../TextInput';

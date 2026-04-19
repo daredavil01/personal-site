@@ -7,7 +7,7 @@ import hundredDaysData from '../../data/100DaysToOffload';
 import instagramData from '../../data/instagram';
 import positionsData from '../../data/resume/positions';
 import degreesData from '../../data/resume/degrees';
-import skillsData from '../../data/resume/skills';
+import { skills as skillsData } from '../../data/resume/skills';
 import certificationsData from '../../data/resume/certifications';
 
 const getCount = (storageKey, fallback) => {
