@@ -5,6 +5,23 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.0.0] — 2026-04-17
+
+### Added
+- **Admin Panel** (`src/pages/Admin.js`): New password-protected `/admin` page providing a full CMS interface for managing all site data locally. Authentication uses SHA-256 password hashing via the browser's SubtleCrypto API with credentials stored in `localStorage`.
+- **AdminLayout + AdminNav** (`src/layouts/AdminLayout.js`, `src/components/Admin/AdminNav.js`): Standalone admin shell with top navigation bar, section breadcrumb, and logout button — separate from the site's `Main.js` layout.
+- **AuthGate** (`src/components/Admin/AuthGate.js`): Password gate component rendered before the admin panel; hashes input and compares against a hardcoded SHA-256 constant.
+- **AdminDashboard** (`src/components/Admin/AdminDashboard.js`): Overview grid showing entry counts for all 10 data types with draft indicators and quick-navigate cards.
+- **Data Editors** (`src/components/Admin/Editors/`): CRUD editors for all data types — Books, Sports, Treks, Projects, 100 Days To Offload, Instagram, Resume Positions, Degrees, Skills, and Certifications. Each editor loads from static data, persists drafts to `localStorage`, and exports valid JS via a copy-to-clipboard panel.
+- **Shared Admin UI Primitives** (`src/components/Admin/`): `FormField`, `TextInput`, `TagsInput` (pill-based), `ArrayItemEditor` (for nested arrays like `slideImages`), and `ExportPanel` (expandable code block with clipboard export).
+- **IntegrationsPanel** (`src/components/Admin/IntegrationsPanel.js`): CMS provider selection UI with cards for Decap CMS (recommended, free), Contentful (external), Sanity (external), and Custom API (DIY). Each card includes a collapsible setup guide and status indicator.
+- **Decap CMS** (`public/cms/index.html`, `public/cms/config.yml`): Free, open-source Git-based CMS available at `/cms/`. Uses `test-repo` backend by default (no OAuth needed locally). Configured for Books and 100 Days To Offload collections.
+- **CMS Sync Script** (`scripts/sync-cms-to-data.js`): Node.js script that reads Decap CMS markdown frontmatter from `src/cms-content/` and writes back to `src/data/*.js`. Run via `npm run cms:sync`.
+- **Hooks** (`src/hooks/useDraftStore.js`, `src/hooks/useExportGenerator.js`, `src/hooks/useCMSStatus.js`): Shared hooks for draft persistence, JS export generation, and CMS provider status checking.
+- **jsSerialize utility** (`src/components/Admin/utils/jsSerialize.js`): Custom serializer that correctly outputs `${process.env.PUBLIC_URL}/images/...` template literals for image URL fields in sports, treks, and instagram data exports.
+
+---
+
 ## [v5.1.8] — 2026-04-15
 
 ### Fixed
