@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import routes from '../../data/routes';
+import contactData from '../../data/contact';
 
 const Hamburger = () => {
   const [open, setOpen] = useState(false);
@@ -46,7 +48,7 @@ const Hamburger = () => {
         </div>
 
         {/* Nav links */}
-        <nav className="flex flex-col px-4 py-4 gap-0.5">
+        <nav className="flex flex-col px-4 py-4 gap-0.5 flex-grow">
           {allRoutes.map((l) => {
             const isActive = location.pathname === l.path
               || (location.pathname.startsWith(l.path) && l.path !== '/');
@@ -87,6 +89,34 @@ const Hamburger = () => {
             );
           })}
         </nav>
+
+        {/* Contact section */}
+        <div className="shrink-0 px-5 py-5 border-t border-stone-800">
+          <p className="font-label text-[10px] uppercase tracking-widest text-stone-500 mb-3">Connect</p>
+          <div className="flex flex-wrap gap-3 mb-4">
+            {contactData.map((s) => (
+              <a
+                key={s.label}
+                href={s.link}
+                aria-label={s.label}
+                title={s.label}
+                className="flex items-center justify-center w-9 h-9 rounded-full border border-stone-700 text-stone-400 hover:text-secondary hover:border-secondary transition-all"
+              >
+                <FontAwesomeIcon icon={s.icon} size="sm" />
+              </a>
+            ))}
+          </div>
+          <a
+            href={`${process.env.PUBLIC_URL || ''}/sanket-tambare-resume.pdf`}
+            target="_blank"
+            download
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-stone-200 rounded font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-700 transition-all"
+          >
+            <span className="material-symbols-outlined text-[13px]">download</span>
+            Resume PDF
+          </a>
+        </div>
       </div>
     </>,
     document.body,

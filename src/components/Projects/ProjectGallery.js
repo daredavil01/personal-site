@@ -1,4 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const ImageWithFallback = ({ src, alt, className }) => {
+  const [errored, setErrored] = useState(false);
+  if (errored) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="material-symbols-outlined text-stone-300 dark:text-stone-600 text-5xl">broken_image</span>
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setErrored(true)} />;
+};
 
 const ProjectGallery = ({ projects }) => {
   return (
@@ -10,11 +22,10 @@ const ProjectGallery = ({ projects }) => {
           return (
             <section key={index} className="col-span-12 md:col-span-8 group mt-8 md:mt-0">
               <div className="overflow-hidden rounded-lg mb-6 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 aspect-video relative">
-                <img 
-                  alt={project.title} 
-                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" 
+                <ImageWithFallback
+                  alt={project.title}
+                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                   src={project.image}
-                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
                 <div className="absolute top-6 right-6">
                   <span className="bg-stone-900/90 dark:bg-stone-950/90 backdrop-blur px-3 py-1 font-label text-[10px] uppercase tracking-tighter text-white border border-stone-700 dark:border-stone-800">Case Study 0{index + 1}</span>
@@ -40,11 +51,10 @@ const ProjectGallery = ({ projects }) => {
           return (
             <section key={index} className="col-span-12 md:col-span-4 mt-0 md:mt-24 group">
               <div className="overflow-hidden rounded-lg mb-6 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 aspect-[3/4] relative">
-                <img 
-                  alt={project.title} 
-                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" 
+                <ImageWithFallback
+                  alt={project.title}
+                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                   src={project.image}
-                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
               </div>
               <div className="pr-4">
@@ -85,11 +95,10 @@ const ProjectGallery = ({ projects }) => {
           return (
             <section key={index} className="col-span-12 md:col-span-7 group mt-4 md:mt-0">
               <div className="overflow-hidden rounded-lg mb-6 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 aspect-[16/10] relative">
-                <img 
-                  alt={project.title} 
-                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" 
+                <ImageWithFallback
+                  alt={project.title}
+                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                   src={project.image}
-                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
               </div>
               <div className="flex justify-between items-start">
@@ -108,11 +117,10 @@ const ProjectGallery = ({ projects }) => {
           return (
             <section key={index} className="col-span-12 md:col-span-4 group mt-4 md:mt-0">
               <div className="overflow-hidden rounded-lg mb-6 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 aspect-[4/5] relative">
-                <img 
-                  alt={project.title} 
-                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" 
+                <ImageWithFallback
+                  alt={project.title}
+                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                   src={project.image}
-                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
               </div>
               <h2 className="font-headline text-xl font-bold mb-2 text-stone-800 dark:text-stone-100">{project.title}</h2>
@@ -136,11 +144,10 @@ const ProjectGallery = ({ projects }) => {
                 )}
               </div>
               <div className="flex-1 order-1 md:order-2 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 aspect-square relative group w-full">
-                <img 
-                  alt={project.title} 
-                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" 
+                <ImageWithFallback
+                  alt={project.title}
+                  className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                   src={project.image}
-                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
               </div>
             </section>

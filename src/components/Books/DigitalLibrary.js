@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 
 const BookCard = ({ book, onClick }) => (
   <div className="group cursor-pointer border border-transparent flex flex-col h-full" onClick={onClick}>
@@ -30,11 +30,19 @@ const BookCard = ({ book, onClick }) => (
 );
 
 const DigitalLibrary = ({ books }) => {
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const debounceRef = useRef(null);
   const [filter, setFilter] = useState('All');
   const [filterLanguage, setFilterLanguage] = useState('All');
   const [filterReview, setFilterReview] = useState('All');
   const [selectedBook, setSelectedBook] = useState(null);
+
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearchTerm(searchInput), 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchInput]);
 
   // Get unique tags and languages
   const allTags = useMemo(() => {
@@ -162,8 +170,8 @@ const DigitalLibrary = ({ books }) => {
               <input 
                 type="text" 
                 placeholder="Search titles or authors..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg px-10 font-body text-sm text-stone-950 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600 outline-none focus:border-secondary transition-colors"
               />
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-600 pointer-events-none text-[18px]">search</span>
@@ -209,9 +217,10 @@ const DigitalLibrary = ({ books }) => {
 
           {/* Clear Filters Button */}
           <div className="flex justify-end mb-8 -mt-4 h-8 px-2">
-            {(searchTerm !== "" || filter !== "All" || filterLanguage !== "All" || filterReview !== "All") && (
-              <button 
+            {(searchInput !== "" || filter !== "All" || filterLanguage !== "All" || filterReview !== "All") && (
+              <button
                 onClick={() => {
+                  setSearchInput("");
                   setSearchTerm("");
                   setFilter("All");
                   setFilterLanguage("All");
@@ -228,7 +237,7 @@ const DigitalLibrary = ({ books }) => {
       </section>
 
       {/* Library Grid */}
-      <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-16 gap-x-8 w-full relative z-0">
+      <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-8 gap-x-8 w-full relative z-0">
         {filteredBooks.length > 0 ? filteredBooks.map((book) => (
           <BookCard 
             key={book.id} 
