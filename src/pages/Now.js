@@ -1,19 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Main from "../layouts/Main";
 import NowDocument from "../components/Now/NowDocument";
+import { nowData, nowMeta } from "../data/now-data";
 
 const Now = () => {
-  const [markdown, setMarkdown] = useState("");
-
-  useEffect(() => {
-    import("../data/now.md")
-      .then((res) => {
-        fetch(res.default)
-          .then((r) => r.text())
-          .then(setMarkdown);
-      })
-      .catch(console.error);
-  }, []);
+  const current = nowData.find((m) => m.isCurrent);
+  const lastUpdated = current ? `${current.month} ${current.year}` : "";
 
   return (
     <Main
@@ -24,54 +16,51 @@ const Now = () => {
         {/* Hero Section */}
         <section className="mb-12">
           <div className="max-w-3xl">
-            <span className="font-label text-xs uppercase tracking-[0.2em] text-secondary font-bold mb-4 block">Current Status</span>
-            <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-tight mb-8">Now.</h1>
+            <span className="font-label text-xs uppercase tracking-[0.2em] text-secondary font-bold mb-4 block">
+              Current Status
+            </span>
+            <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-tight mb-8">
+              Now.
+            </h1>
             <p className="font-body text-xl text-stone-500 dark:text-stone-400 leading-relaxed">
-              A snapshot of my current focus, projects, and the curiosities I'm chasing right now. Updated monthly to keep the narrative honest and intentional.
+              A snapshot of my current focus, projects, and the curiosities I'm
+              chasing right now. Updated monthly to keep the narrative honest
+              and intentional.
             </p>
             <div className="mt-8 flex items-center gap-4">
               <div className="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
-              <span className="font-label text-sm text-stone-400 dark:text-stone-500 italic">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+              <span className="font-label text-sm text-stone-400 dark:text-stone-500 italic">
+                Last updated: {lastUpdated}
+              </span>
             </div>
           </div>
         </section>
 
-          {/* Current Activities / Habits */}
-          <div className="col-span-12 md:col-span-12 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-12 rounded-xl mt-8">
-            <h3 className="font-headline text-3xl font-bold mb-12 text-center text-stone-800 dark:text-stone-200">Daily Rituals</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div className="text-center space-y-4">
+        {/* Daily Rituals */}
+        <div className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-12 rounded-xl">
+          <h3 className="font-headline text-3xl font-bold mb-12 text-center text-stone-800 dark:text-stone-200">
+            Daily Rituals
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {nowMeta.dailyRituals.map((ritual) => (
+              <div key={ritual.label} className="text-center space-y-4">
                 <div className="w-16 h-16 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full flex items-center justify-center mx-auto text-secondary">
-                  <span className="material-symbols-outlined text-2xl">potted_plant</span>
+                  <span className="material-symbols-outlined text-2xl">
+                    {ritual.icon}
+                  </span>
                 </div>
-                <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">Digital Detox</h4>
-                <p className="font-body text-sm text-stone-500 dark:text-stone-400">1 Hour of sunlight before screens.</p>
+                <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">
+                  {ritual.label}
+                </h4>
+                <p className="font-body text-sm text-stone-500 dark:text-stone-400">
+                  {ritual.description}
+                </p>
               </div>
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full flex items-center justify-center mx-auto text-secondary">
-                  <span className="material-symbols-outlined text-2xl">code</span>
-                </div>
-                <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">Creative Code</h4>
-                <p className="font-body text-sm text-stone-500 dark:text-stone-400">Refactoring one old project weekly.</p>
-              </div>
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full flex items-center justify-center mx-auto text-secondary">
-                  <span className="material-symbols-outlined text-2xl">directions_run</span>
-                </div>
-                <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">Movement</h4>
-                <p className="font-body text-sm text-stone-500 dark:text-stone-400">Training for a spring 10k race.</p>
-              </div>
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full flex items-center justify-center mx-auto text-secondary">
-                  <span className="material-symbols-outlined text-2xl">headphones</span>
-                </div>
-                <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">Audio Deep Dive</h4>
-                <p className="font-body text-sm text-stone-500 dark:text-stone-400">Exploring 70s Japanese Jazz Fusion.</p>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
 
-        {markdown && <NowDocument content={markdown} />}
+        <NowDocument months={nowData} />
       </div>
     </Main>
   );
