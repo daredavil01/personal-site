@@ -5,6 +5,15 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.1.0] — 2026-04-21
+
+### Changed
+- **SportsDefault** (`src/components/Sports/SportsDefault.js`): Redesigned DEFAULT VIEW cards to image-first. Cards now lead with the first `slideImages` entry in a 16:9 container with grayscale-to-color hover transition and overlay. Distance and BIB promoted to image corner badges; footer retains title, date, place, and finish time.
+- **TreksDefault** (`src/components/Treks/TreksDefault.js`): Redesigned DEFAULT VIEW cards to image-first. Cards lead with the first `photos` entry in a 4:3 container with same hover effect. Difficulty and photo count promoted to image corner badges; footer retains fort name, date, trek time, and blog link. Placeholder shown for entries with no images.
+- **SportsInteractive** (`src/components/Sports/SportsInteractive.js`): Redesigned INTERACTIVE VIEW cards to image-first. Cards now lead with the first `slideImages` entry using the same grayscale hover pattern. BIB badge overlaid on image; footer retains title, date, and place/time/distance stats row.
+
+---
+
 ## [v6.0.0] — 2026-04-17
 
 ### Added
