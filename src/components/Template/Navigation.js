@@ -31,17 +31,20 @@ const Navigation = () => {
             
             return (
               <React.Fragment key={l.label}>
-                <div 
+                <div
                   className="relative group"
                   onMouseEnter={() => hasSubRoutes && setOpenDropdown(l.label)}
                   onMouseLeave={() => hasSubRoutes && setOpenDropdown(null)}
+                  onFocus={() => hasSubRoutes && setOpenDropdown(l.label)}
+                  onBlur={(e) => { if (hasSubRoutes && !e.currentTarget.contains(e.relatedTarget)) setOpenDropdown(null); }}
+                  onKeyDown={(e) => { if (e.key === 'Escape') setOpenDropdown(null); }}
                 >
                   <Link
                     to={l.path}
                     className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
                       isActive
                         ? "text-secondary font-bold"
-                        : "text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
+                        : "text-stone-500 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
                     }`}
                   >
                     {l.label}
@@ -83,15 +86,20 @@ const Navigation = () => {
           })}
 
           {/* More Dropdown */}
-          <div 
+          <div
             className="relative"
             onMouseEnter={() => setIsMoreDropdownOpen(true)}
             onMouseLeave={() => setIsMoreDropdownOpen(false)}
+            onFocus={() => setIsMoreDropdownOpen(true)}
+            onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsMoreDropdownOpen(false); }}
+            onKeyDown={(e) => { if (e.key === 'Escape') setIsMoreDropdownOpen(false); }}
           >
             <span className="text-stone-100 dark:text-stone-800 ml-4 pointer-events-none">|</span>
             <button
+              aria-haspopup="true"
+              aria-expanded={isMoreDropdownOpen}
               className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
-                isMoreDropdownOpen ? "text-stone-900 dark:text-stone-100" : "text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
+                isMoreDropdownOpen ? "text-stone-900 dark:text-stone-100" : "text-stone-500 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
               }`}
             >
               More

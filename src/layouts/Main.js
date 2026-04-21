@@ -41,6 +41,7 @@ const Main = (props) => {
       </Helmet>
 
       <div className="flex flex-col min-h-screen bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-body transition-colors duration-300">
+        <a href="#main" className="skip-link">Skip to main content</a>
         <Navigation />
 
         <div

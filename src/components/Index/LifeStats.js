@@ -129,11 +129,17 @@ const LifeStats = () => {
                 className="font-headline font-black text-stone-900 dark:text-stone-100 leading-none tracking-tighter"
                 style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
               >
-                {stat.value.toLocaleString()}
-                {stat.suffix && (
-                  <span className="text-xl font-bold text-stone-400 dark:text-stone-500 ml-1">
-                    {stat.suffix}
-                  </span>
+                {animated ? (
+                  <>
+                    {stat.value.toLocaleString()}
+                    {stat.suffix && (
+                      <span className="text-xl font-bold text-stone-400 dark:text-stone-500 ml-1">
+                        {stat.suffix}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-stone-300 dark:text-stone-700">—</span>
                 )}
               </div>
               <p className="font-headline font-bold text-stone-700 dark:text-stone-300 text-sm mt-1 uppercase tracking-wider">

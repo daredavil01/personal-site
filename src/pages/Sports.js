@@ -49,15 +49,9 @@ const SportsPage = () => {
           <div className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
-              let activeColor = "text-stone-900 dark:text-stone-100 bg-white dark:bg-stone-700 shadow-sm";
-              if (isActive) {
-                if (tab === 'STATISTICS') activeColor = "text-green-600 dark:text-green-400 bg-white dark:bg-stone-700 shadow-sm";
-                if (tab === 'INTERACTIVE VIEW') activeColor = "text-purple-600 dark:text-purple-400 bg-white dark:bg-stone-700 shadow-sm";
-                if (tab === 'DEFAULT VIEW') activeColor = "text-blue-600 dark:text-blue-400 bg-white dark:bg-stone-700 shadow-sm";
-              } else {
-                activeColor = "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-200/50 dark:hover:bg-stone-800/50";
-              }
-              
+              const activeColor = isActive
+                ? "text-secondary bg-white dark:bg-stone-700 shadow-sm"
+                : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-200/50 dark:hover:bg-stone-800/50";
               return (
                 <button
                   key={tab}
@@ -69,10 +63,10 @@ const SportsPage = () => {
               );
             })}
           </div>
-          
+
           <button
             onClick={handleShare}
-            className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-label text-xs uppercase tracking-widest font-bold transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-950 px-5 py-2.5 rounded-lg font-label text-xs uppercase tracking-widest font-bold transition-colors shadow-sm"
           >
             <span className="material-symbols-outlined text-[16px]">{copied ? 'check' : 'share'}</span>
             {copied ? 'Copied!' : 'Share'}

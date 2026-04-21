@@ -6,4 +6,18 @@
   body {
     @apply font-body text-stone-300 antialiased bg-[#0c0c0c];
   }
+
+  /* Global keyboard focus ring */
+  *:focus-visible {
+    outline: 2px solid var(--tw-color-secondary, #16a34a);
+    outline-offset: 2px;
+  }
+
+  /* Skip-to-content link */
+  .skip-link {
+    @apply absolute -top-full left-4 z-[9999] bg-stone-900 text-white px-4 py-2 rounded-b font-label text-xs uppercase tracking-widest font-bold transition-all;
+  }
+  .skip-link:focus {
+    @apply top-0;
+  }
 }

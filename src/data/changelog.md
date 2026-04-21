@@ -7,6 +7,21 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ## [v6.1.0] — 2026-04-21
 
+### Added
+- **Skip-to-content link** (`src/layouts/Main.js`): Visible-on-focus skip link added as first focusable element for keyboard users.
+- **Global focus ring** (`src/tailwind.css`): `*:focus-visible` rule applies a 2px `secondary`-coloured outline site-wide so keyboard navigation is always visible.
+- **Mobile contact section** (`src/components/Template/Hamburger.js`): Social icon links and Resume PDF download button added to the bottom of the mobile drawer, closing the gap left by the desktop-only sidebar.
+
+### Changed
+- **Navigation** (`src/components/Template/Navigation.js`): Desktop dropdowns now respond to keyboard focus (`onFocus`/`onBlur`) and close on `Escape`; `aria-haspopup` + `aria-expanded` added to the More button. Inactive link contrast bumped from `stone-400` to `stone-500`.
+- **Footer** (`src/components/Template/Footer.js`): Hover colour changed from `orange-700` to `secondary` to match design system; body text contrast raised from `stone-500` to `stone-600` in light mode.
+- **Sports page** (`src/pages/Sports.js`): Active tab colour unified to `text-secondary` across all three tabs; share button changed from `indigo-500` to `stone-900/stone-100` to match primary button style.
+- **DigitalLibrary** (`src/components/Books/DigitalLibrary.js`): Search input debounced at 300 ms to prevent lag with large lists; book grid `gap-y-16` reduced to `gap-y-8`.
+- **LifeStats** (`src/components/Index/LifeStats.js`): Counters show `—` placeholder before the IntersectionObserver fires instead of "0", preventing a false empty-state appearance.
+- **ProjectGallery** (`src/components/Projects/ProjectGallery.js`): Broken images now render a `broken_image` icon placeholder via `ImageWithFallback` component instead of silently hiding.
+- **TopSummaryCards** (`src/components/Sports/TopSummaryCards.js`): Replaced blue/purple/green card colours with red/secondary/amber to reduce accent-colour sprawl.
+- **SportsStatistics** (`src/components/Sports/SportsStatistics.js`): Sub-summary cards unified to amber/red/secondary/stone; distance bar, personal records, pace, and city count highlights all consolidated to `secondary` and `red-400`.
+
 ### Changed
 - **SportsDefault** (`src/components/Sports/SportsDefault.js`): Redesigned DEFAULT VIEW cards to image-first. Cards now lead with the first `slideImages` entry in a 16:9 container with grayscale-to-color hover transition and overlay. Distance and BIB promoted to image corner badges; footer retains title, date, place, and finish time.
 - **TreksDefault** (`src/components/Treks/TreksDefault.js`): Redesigned DEFAULT VIEW cards to image-first. Cards lead with the first `photos` entry in a 4:3 container with same hover effect. Difficulty and photo count promoted to image corner badges; footer retains fort name, date, trek time, and blog link. Placeholder shown for entries with no images.
