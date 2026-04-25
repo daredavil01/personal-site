@@ -27,32 +27,24 @@
 #     Then commit the updated src/data/*.js files and push to redeploy.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── ACTIVE: local test backend (no login) ────────────────────────────────────
-backend:
-  name: test-repo
-
-# ── PRODUCTION: GitHub backend ────────────────────────────────────────────────
-# Uncomment this block and comment out the test-repo block above when deploying.
-#
+# ── LOCAL DEV: test backend (no login) — uncomment to use locally ─────────────
 # backend:
-#   name: github
-#   repo: daredavil01/personal-site
-#   branch: main
-#
-#   # OAuth proxy — replace with your Netlify deployment URL
-#   base_url: https://YOUR-OAUTH-PROXY.netlify.app
-#   auth_endpoint: auth
-#
-#   # Squash all CMS commits into one per save (keeps git history clean)
-#   squash_merges: true
-#
-#   # Commit message templates (variables: {{collection}}, {{slug}}, {{path}})
-#   commit_messages:
-#     create:      'cms: add {{collection}} "{{slug}}"'
-#     update:      'cms: update {{collection}} "{{slug}}"'
-#     delete:      'cms: delete {{collection}} "{{slug}}"'
-#     uploadMedia: '[skip ci] cms: upload "{{path}}"'
-#     deleteMedia: '[skip ci] cms: delete "{{path}}"'
+#   name: test-repo
+
+# ── ACTIVE: GitHub backend (production) ──────────────────────────────────────
+backend:
+  name: github
+  repo: daredavil01/personal-site
+  branch: main
+  base_url: https://personal-site-netlify-proxy.netlify.app
+  auth_endpoint: auth
+  squash_merges: true
+  commit_messages:
+    create:      'cms: add {{collection}} "{{slug}}"'
+    update:      'cms: update {{collection}} "{{slug}}"'
+    delete:      'cms: delete {{collection}} "{{slug}}"'
+    uploadMedia: '[skip ci] cms: upload "{{path}}"'
+    deleteMedia: '[skip ci] cms: delete "{{path}}"'
 
 # ── Media ─────────────────────────────────────────────────────────────────────
 # Default media folder for collections that don't specify their own.
