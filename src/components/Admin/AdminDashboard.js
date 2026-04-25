@@ -1,4 +1,5 @@
 import React from 'react';
+import { nowData } from '../../data/now-data';
 import booksData from '../../data/books';
 import sportsData from '../../data/sports';
 import treksData from '../../data/treks';
@@ -20,6 +21,7 @@ const getCount = (storageKey, fallback) => {
 };
 
 const DATA_TYPES = [
+  { key: 'now', label: 'Now Page', storageKey: 'admin_draft_now_data', fallback: nowData, description: 'Monthly updates', color: 'from-cyan-50 to-teal-50 dark:from-cyan-950/20 dark:to-teal-950/20', accent: 'text-cyan-600 dark:text-cyan-400' },
   { key: 'books', label: 'Books', storageKey: 'admin_draft_books', fallback: booksData, description: 'Reading list entries', color: 'from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20', accent: 'text-amber-600 dark:text-amber-400' },
   { key: 'sports', label: 'Sports', storageKey: 'admin_draft_sports', fallback: sportsData, description: 'Race & marathon records', color: 'from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20', accent: 'text-green-600 dark:text-green-400' },
   { key: 'treks', label: 'Treks', storageKey: 'admin_draft_treks', fallback: treksData, description: 'Fort & trek expeditions', color: 'from-blue-50 to-sky-50 dark:from-blue-950/20 dark:to-sky-950/20', accent: 'text-blue-600 dark:text-blue-400' },

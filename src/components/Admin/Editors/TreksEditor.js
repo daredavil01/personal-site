@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import treksData from '../../../data/treks';
 import useDraftStore from '../../../hooks/useDraftStore';
 import { jsSerialize } from '../utils/jsSerialize';
@@ -23,23 +23,83 @@ const templateFn = (items) => {
   return `const { PUBLIC_URL } = process.env;\n\nconst treks = ${body};\n\nexport default treks;\n`;
 };
 
-const PhotoForm = ({ photo, onChange, onRemove }) => (
-  <div className="flex flex-col gap-3">
-    <FormField label="Image path" hint="e.g. /images/treks/tikona_1.jpg">
-      <TextInput
-        value={photo.url?.replace(/^.*\/images\//, '/images/') ?? ''}
-        onChange={(v) => onChange({ ...photo, url: v.startsWith('/') ? v : `/${v}` })}
-        placeholder="/images/treks/fort_name_1.jpg"
-      />
-    </FormField>
-    <FormField label="Caption">
-      <TextInput value={photo.caption} onChange={(v) => onChange({ ...photo, caption: v })} placeholder="Slide 1" />
-    </FormField>
-    <button type="button" onClick={onRemove} className="self-start text-xs text-red-400 hover:text-red-500 font-label transition-colors">
-      Remove photo
-    </button>
-  </div>
-);
+const suggestTrekFilename = (fortName, photoIndex) => {
+  const name = (fortName || 'fort')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .join('_');
+  return `${name}_${photoIndex + 1}.jpg`;
+};
+
+const PhotoForm = ({ photo, onChange, onRemove, fortName, photoIndex }) => {
+  const fileRef = useRef(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [downloadHref, setDownloadHref] = useState(null);
+  const suggestedName = suggestTrekFilename(fortName || '', photoIndex);
+
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const objUrl = URL.createObjectURL(file);
+    setPreviewUrl(objUrl);
+    setDownloadHref(objUrl);
+    onChange({ ...photo, url: `/images/treks/${suggestedName}` });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <FormField label="Image" hint="Select a file, download with the suggested name, then move to public/images/treks/">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="text-xs font-label px-3 py-1.5 rounded bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors"
+            >
+              Choose File
+            </button>
+            <span className="text-xs text-stone-400 font-body">
+              Suggested name: <code className="text-secondary">{suggestedName}</code>
+            </span>
+            {downloadHref && (
+              <a
+                href={downloadHref}
+                download={suggestedName}
+                className="text-xs font-label px-3 py-1.5 rounded bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors"
+              >
+                ↓ Download as {suggestedName}
+              </a>
+            )}
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt="preview"
+              className="h-24 w-auto rounded object-cover border border-stone-200 dark:border-stone-700"
+            />
+          )}
+        </div>
+      </FormField>
+      <FormField label="Image path" hint="Auto-filled on file select; edit manually if needed">
+        <TextInput
+          value={photo.url?.replace(/^.*\/images\//, '/images/') ?? ''}
+          onChange={(v) => onChange({ ...photo, url: v.startsWith('/') ? v : `/${v}` })}
+          placeholder="/images/treks/fort_name_1.jpg"
+        />
+      </FormField>
+      <FormField label="Caption">
+        <TextInput value={photo.caption} onChange={(v) => onChange({ ...photo, caption: v })} placeholder="Slide 1" />
+      </FormField>
+      <button type="button" onClick={onRemove} className="self-start text-xs text-red-400 hover:text-red-500 font-label transition-colors">
+        Remove photo
+      </button>
+    </div>
+  );
+};
 
 const TrekForm = ({ trek, onChange, onRemove }) => (
   <div className="flex flex-col gap-4">
@@ -84,6 +144,8 @@ const TrekForm = ({ trek, onChange, onRemove }) => (
         renderItem={(photo, _unused, index) => (
           <PhotoForm
             photo={photo}
+            fortName={trek.fort_name}
+            photoIndex={index}
             onChange={(updated) => {
               const next = [...trek.photos];
               next[index] = updated;

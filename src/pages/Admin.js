@@ -5,6 +5,7 @@ import AdminDashboard from '../components/Admin/AdminDashboard';
 import IntegrationsPanel from '../components/Admin/IntegrationsPanel';
 
 // Lazy-import editors to keep the main bundle small
+const NowEditor = React.lazy(() => import('../components/Admin/Editors/NowEditor'));
 const BooksEditor = React.lazy(() => import('../components/Admin/Editors/BooksEditor'));
 const SportsEditor = React.lazy(() => import('../components/Admin/Editors/SportsEditor'));
 const TreksEditor = React.lazy(() => import('../components/Admin/Editors/TreksEditor'));
@@ -17,6 +18,7 @@ const ResumeSkillsEditor = React.lazy(() => import('../components/Admin/Editors/
 const ResumeCertificationsEditor = React.lazy(() => import('../components/Admin/Editors/ResumeCertificationsEditor'));
 
 const EDITORS = {
+  now: NowEditor,
   books: BooksEditor,
   sports: SportsEditor,
   treks: TreksEditor,
