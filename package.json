@@ -17,7 +17,8 @@
     "lint": "eslint **/*.js",
     "test": "npx jest",
     "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js",
-    "cms:sync": "node scripts/sync-cms-to-data.js"
+    "cms:sync": "node scripts/sync-cms-to-data.js",
+    "cms:seed": "node scripts/seed-cms-content.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.3.0",

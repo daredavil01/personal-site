@@ -5,6 +5,14 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.3.2] — 2026-04-25
+
+### Added
+
+- **CMS seed script** (`scripts/seed-cms-content.js`): One-time script (`npm run cms:seed`) that converts all existing `src/data/*.js` files into Decap CMS markdown files under `src/cms-content/`. Seeds all 12 CMS collections — Now Meta, Now Months, Books, 100 Days, Sports, Treks, Projects, Instagram, and all four Resume sub-collections. Populates CMS editors with existing data so records are visible immediately.
+
+---
+
 ## [v6.3.1] — 2026-04-25
 
 ### Fixed
