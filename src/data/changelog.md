@@ -5,6 +5,12 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.3.1] — 2026-04-25
+
+### Fixed
+
+- **Decap CMS backend config** (`public/cms/config.yml`): Uncommented `auth_endpoint: auth` (required for Sveltia CMS Auth Cloudflare Worker to handle the OAuth redirect) and removed `squash_merges: true` which requires `publish_mode: editorial_workflow` — without it Decap CMS v3 throws an initialization error that prevents the CMS page from loading.
+
 ## [v6.3.0] — 2026-04-25
 
 ### Added

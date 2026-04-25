@@ -37,8 +37,7 @@ backend:
   repo: daredavil01/personal-site
   branch: main
   base_url: https://sveltia-cms-auth.sanket-tambare01.workers.dev
-#   auth_endpoint: auth
-  squash_merges: true
+  auth_endpoint: auth
   commit_messages:
     create:      'cms: add {{collection}} "{{slug}}"'
     update:      'cms: update {{collection}} "{{slug}}"'
