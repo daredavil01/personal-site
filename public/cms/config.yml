@@ -36,7 +36,7 @@ backend:
   name: github
   repo: daredavil01/personal-site
   branch: main
-  base_url: https://personal-site-netlify-proxy.netlify.app
+  base_url: https://sveltia-cms-auth.sanket-tambare01.workers.dev
   auth_endpoint: auth
   squash_merges: true
   commit_messages:
