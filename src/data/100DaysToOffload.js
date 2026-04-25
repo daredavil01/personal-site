@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable max-len, quote-props */
 const data = [
   {
     "id": 1,

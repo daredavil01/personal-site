@@ -178,7 +178,7 @@ function syncHundredDays() {
   const sorted = entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   writeFile(
     path.join(ROOT, 'src/data/100DaysToOffload.js'),
-    `/* eslint-disable max-len */\nconst blogs = ${JSON.stringify(sorted, null, 2)};\n\nexport default blogs;\n`
+    `/* eslint-disable max-len, quote-props */\nconst blogs = ${JSON.stringify(sorted, null, 2)};\n\nexport default blogs;\n`
   );
   console.log(`     ${sorted.length} posts`);
 }

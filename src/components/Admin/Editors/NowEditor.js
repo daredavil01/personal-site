@@ -25,13 +25,11 @@ const emptyMonth = (month, year) => ({
   sections: {},
 });
 
-const btn = (extra = '') =>
-  `text-xs font-label px-3 py-1.5 rounded transition-colors ${extra}`;
+const btn = (extra = '') => `text-xs font-label px-3 py-1.5 rounded transition-colors ${extra}`;
 
 const addBtn = btn('bg-secondary/10 text-secondary hover:bg-secondary/20');
 const removeBtn = 'text-xs text-red-400 hover:text-red-500 font-label transition-colors';
-const sectionHeader =
-  'flex items-center justify-between mb-3';
+const sectionHeader = 'flex items-center justify-between mb-3';
 
 // ── tiny sub-components ──────────────────────────────────────────────────────
 
@@ -108,6 +106,7 @@ const BlogsEditor = ({ blogs = [], onChange }) => {
             <TextInput multiline rows={2} value={b.description ?? ''} onChange={(v) => update(i, { description: v })} />
           </FormField>
           <div className="flex items-center justify-between">
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -331,6 +330,7 @@ const StatsEditor = ({ stats = {}, onChange }) => {
               placeholder="1648"
             />
           </FormField>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label className="flex items-center gap-2 cursor-pointer col-span-2">
             <input
               type="checkbox"
@@ -359,6 +359,7 @@ const StatsEditor = ({ stats = {}, onChange }) => {
               placeholder="28"
             />
           </FormField>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label className="flex items-center gap-2 cursor-pointer col-span-2">
             <input
               type="checkbox"
@@ -428,10 +429,9 @@ const SECTION_CONFIG = [
 const SectionPanel = ({ sectionKey, sections, onSectionsChange }) => {
   const [open, setOpen] = useState(false);
   const val = sections[sectionKey];
-  const hasContent =
-    sectionKey === 'stats'
-      ? val && (val.strava || val.substack)
-      : Array.isArray(val) && val.length > 0;
+  const hasContent = sectionKey === 'stats'
+    ? val && (val.strava || val.substack)
+    : Array.isArray(val) && val.length > 0;
 
   const setSection = (next) => onSectionsChange({ ...sections, [sectionKey]: next });
   const label = SECTION_CONFIG.find((s) => s.key === sectionKey)?.label ?? sectionKey;
@@ -545,13 +545,10 @@ const MetaEditor = ({ meta, setMeta }) => {
     next[i] = { ...next[i], ...patch };
     setMeta({ ...meta, dailyRituals: next });
   };
-  const removeRitual = (i) =>
-    setMeta({ ...meta, dailyRituals: (meta.dailyRituals ?? []).filter((_, idx) => idx !== i) });
-  const addRitual = () =>
-    setMeta({
-      ...meta,
-      dailyRituals: [...(meta.dailyRituals ?? []), { icon: 'star', label: '', description: '' }],
-    });
+  const removeRitual = (i) => { setMeta({ ...meta, dailyRituals: (meta.dailyRituals ?? []).filter((_, idx) => idx !== i) }); };
+  const addRitual = () => {
+    setMeta({ ...meta, dailyRituals: [...(meta.dailyRituals ?? []), { icon: 'star', label: '', description: '' }] });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -759,7 +756,7 @@ const NowEditor = () => {
   // nowData — array of months
   const { items, setItems, isDirty, resetToOriginal } = useDraftStore({
     storageKey: 'admin_draft_now_data',
-    fallbackData: fallbackData,
+    fallbackData,
   });
 
   // nowMeta — single object
@@ -791,12 +788,10 @@ const NowEditor = () => {
   };
 
   const handleRotate = (month, year) => {
-    setItems((prev) =>
-      [
-        emptyMonth(month, year),
-        ...prev.map((m) => (m.isCurrent ? { ...m, isCurrent: false } : m)),
-      ]
-    );
+    setItems((prev) => [
+      emptyMonth(month, year),
+      ...prev.map((m) => (m.isCurrent ? { ...m, isCurrent: false } : m)),
+    ]);
     setShowRotate(false);
   };
 
@@ -808,12 +803,7 @@ const NowEditor = () => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const tabCls = (tab) =>
-    `font-label text-sm px-4 py-2 rounded-lg transition-colors ${
-      activeTab === tab
-        ? 'bg-secondary text-white'
-        : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
-    }`;
+  const tabCls = (tab) => `font-label text-sm px-4 py-2 rounded-lg transition-colors ${activeTab === tab ? 'bg-secondary text-white' : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'}`;
 
   return (
     <div className="flex flex-col gap-6">
