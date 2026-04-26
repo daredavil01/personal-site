@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import sportsData from '../../../data/sports';
 import useDraftStore from '../../../hooks/useDraftStore';
 import { jsSerialize } from '../utils/jsSerialize';
@@ -24,7 +24,6 @@ const emptyRace = (id) => ({
 
 const normalizeUrl = (url) => {
   if (!url) return '';
-  // Strip the PUBLIC_URL prefix for storage; jsSerialize re-adds it on export
   return url.replace(/^.*\/images\//, '/images/');
 };
 
@@ -33,23 +32,86 @@ const templateFn = (items) => {
   return `const { PUBLIC_URL } = process.env; // set automatically from package.json:homepage\n\nconst sportsData = ${body};\n\nexport default sportsData;\n`;
 };
 
-const SlideForm = ({ slide, onChange, onRemove }) => (
-  <div className="flex flex-col gap-3">
-    <FormField label="Image path" hint="e.g. /images/sports/nda_2023_1.jpeg">
-      <TextInput
-        value={normalizeUrl(slide.url)}
-        onChange={(v) => onChange({ ...slide, url: v.startsWith('/') ? v : `/${v}` })}
-        placeholder="/images/sports/event_year_1.jpeg"
-      />
-    </FormField>
-    <FormField label="Caption">
-      <TextInput value={slide.caption} onChange={(v) => onChange({ ...slide, caption: v })} placeholder="Slide 1" />
-    </FormField>
-    <button type="button" onClick={onRemove} className="self-start text-xs text-red-400 hover:text-red-500 font-label transition-colors">
-      Remove slide
-    </button>
-  </div>
-);
+const suggestSportsFilename = (raceTitle, slideIndex) => {
+  const year = raceTitle.match(/\b(20\d{2})\b/)?.[1] ?? new Date().getFullYear();
+  const abbr = raceTitle
+    .replace(/\b(20\d{2})\b/g, '')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join('');
+  return `${abbr || 'race'}_${year}_${slideIndex + 1}.jpeg`;
+};
+
+const SlideForm = ({ slide, onChange, onRemove, raceTitle, slideIndex }) => {
+  const fileRef = useRef(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [downloadHref, setDownloadHref] = useState(null);
+  const suggestedName = suggestSportsFilename(raceTitle || '', slideIndex);
+
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const objUrl = URL.createObjectURL(file);
+    setPreviewUrl(objUrl);
+    setDownloadHref(objUrl);
+    onChange({ ...slide, url: `/images/sports/${suggestedName}` });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <FormField label="Image" hint="Select a file to upload, then download it with the suggested name">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="text-xs font-label px-3 py-1.5 rounded bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors"
+            >
+              Choose File
+            </button>
+            <span className="text-xs text-stone-400 font-body">
+              Suggested name: <code className="text-secondary">{suggestedName}</code>
+            </span>
+            {downloadHref && (
+              <a
+                href={downloadHref}
+                download={suggestedName}
+                className="text-xs font-label px-3 py-1.5 rounded bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors"
+              >
+                ↓ Download as {suggestedName}
+              </a>
+            )}
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt="preview"
+              className="h-24 w-auto rounded object-cover border border-stone-200 dark:border-stone-700"
+            />
+          )}
+        </div>
+      </FormField>
+      <FormField label="Image path" hint="Auto-filled on file select; edit manually if needed">
+        <TextInput
+          value={normalizeUrl(slide.url)}
+          onChange={(v) => onChange({ ...slide, url: v.startsWith('/') ? v : `/${v}` })}
+          placeholder="/images/sports/event_year_1.jpeg"
+        />
+      </FormField>
+      <FormField label="Caption">
+        <TextInput value={slide.caption} onChange={(v) => onChange({ ...slide, caption: v })} placeholder="Slide 1" />
+      </FormField>
+      <button type="button" onClick={onRemove} className="self-start text-xs text-red-400 hover:text-red-500 font-label transition-colors">
+        Remove slide
+      </button>
+    </div>
+  );
+};
 
 const RaceForm = ({ race, onChange, onRemove }) => (
   <div className="flex flex-col gap-4">
@@ -105,6 +167,8 @@ const RaceForm = ({ race, onChange, onRemove }) => (
         renderItem={(slide, _unused, index) => (
           <SlideForm
             slide={slide}
+            raceTitle={race.title}
+            slideIndex={index}
             onChange={(updated) => {
               const next = [...race.slideImages];
               next[index] = updated;

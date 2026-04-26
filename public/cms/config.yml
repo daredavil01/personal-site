@@ -1,26 +1,208 @@
+# ─────────────────────────────────────────────────────────────────────────────
 # Decap CMS Configuration
 # Docs: https://decapcms.org/docs/
+# ─────────────────────────────────────────────────────────────────────────────
 #
-# CURRENT BACKEND: test-repo (free, local browser storage only — no OAuth needed)
-# FOR PRODUCTION: change backend to 'github' and set up an OAuth proxy:
-#   backend:
-#     name: github
-#     repo: daredavil01/personal-site
-#     branch: main
-#     base_url: https://your-oauth-proxy.netlify.app
+# LOCAL DEV  →  test-repo backend (browser-local, no login required)
+#   Start dev server, then navigate to /cms/
 #
-# After Decap commits changes, run: npm run cms:sync
-# This merges the markdown files back into src/data/*.js for deployment.
+# PRODUCTION  →  GitHub backend with OAuth proxy
+#   Step 1: Create a GitHub OAuth App
+#     Settings → Developer settings → OAuth Apps → New OAuth App
+#       Homepage URL:  https://YOUR-SITE.pages.dev
+#       Callback URL:  https://YOUR-OAUTH-PROXY.netlify.app/callback
+#     Note the Client ID and Client Secret.
+#
+#   Step 2: Deploy netlify-cms-oauth-provider to Netlify (free tier)
+#     Repo: https://github.com/vencax/netlify-cms-github-oauth-provider
+#     Set env vars: GITHUB_CLIENT_ID  and  GITHUB_CLIENT_SECRET
+#     Note the Netlify deployment URL.
+#
+#   Step 3: Swap the backend block below —
+#     Comment out `name: test-repo` and uncomment the github block.
+#     Replace placeholder values with your own.
+#
+#   Step 4: After Decap commits content, run locally:
+#       npm run cms:sync
+#     Then commit the updated src/data/*.js files and push to redeploy.
+# ─────────────────────────────────────────────────────────────────────────────
 
+# ── LOCAL DEV: test backend (no login) — uncomment to use locally ─────────────
+# backend:
+#   name: test-repo
+
+# ── ACTIVE: GitHub backend (production) ──────────────────────────────────────
 backend:
-  name: test-repo
+  name: github
+  repo: daredavil01/personal-site
+  branch: main
+  base_url: https://sveltia-cms-auth.sanket-tambare01.workers.dev
+  auth_endpoint: auth
+  commit_messages:
+    create:      'cms: add {{collection}} "{{slug}}"'
+    update:      'cms: update {{collection}} "{{slug}}"'
+    delete:      'cms: delete {{collection}} "{{slug}}"'
+    uploadMedia: '[skip ci] cms: upload "{{path}}"'
+    deleteMedia: '[skip ci] cms: delete "{{path}}"'
 
-# Where Decap CMS stores uploaded media
+# ── Media ─────────────────────────────────────────────────────────────────────
+# Default media folder for collections that don't specify their own.
 media_folder: public/images/uploads
 public_folder: /images/uploads
 
-# Content collections
+# ── Collections ───────────────────────────────────────────────────────────────
 collections:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # NOW PAGE
+  # ────────────────────────────────────────────────────────────────────────────
+
+  # Now — Page Meta (single file)
+  - name: now_meta
+    label: "Now — Page Meta"
+    files:
+      - name: meta
+        label: "Now Page Meta"
+        file: src/cms-content/now/meta.md
+        fields:
+          - { label: "Intro Story", name: introStory, widget: text }
+          - { label: "nownownow.com URL", name: nownownowUrl, widget: string }
+          - label: "Inspired By"
+            name: inspiredBy
+            widget: object
+            fields:
+              - { label: Name, name: name, widget: string }
+              - { label: "LinkedIn URL", name: url, widget: string }
+              - { label: "nownownow URL", name: nownownow, widget: string }
+          - label: "Category Labels"
+            name: categoryLabels
+            widget: list
+            field: { label: Label, name: label, widget: string }
+          - label: "Daily Rituals"
+            name: dailyRituals
+            widget: list
+            fields:
+              - { label: "Material Symbol icon name", name: icon, widget: string, hint: "e.g. directions_run" }
+              - { label: Label, name: label, widget: string }
+              - { label: Description, name: description, widget: string }
+
+  # Now — Monthly Entries (one file per month)
+  - name: now_months
+    label: "Now — Monthly Entries"
+    label_singular: "Month"
+    folder: src/cms-content/now/months
+    create: true
+    slug: "{{fields.year}}-{{fields.month}}"
+    summary: "{{fields.month}} {{fields.year}}"
+    fields:
+      - { label: Month, name: month, widget: string, hint: "e.g. April" }
+      - { label: Year, name: year, widget: number, value_type: int }
+      - { label: "Is Current Month", name: isCurrent, widget: boolean, default: false,
+          hint: "Only one month should be marked current at a time." }
+
+      - label: Blogs
+        name: blogs
+        widget: list
+        required: false
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: URL, name: url, widget: string, required: false }
+          - { label: Description, name: description, widget: text, required: false }
+          - label: Platform
+            name: platform
+            widget: select
+            options: [Substack, WordPress, Medium, Ghost, Blogger, Other]
+            default: Substack
+          - { label: "Work In Progress", name: wip, widget: boolean, required: false, default: false }
+
+      - label: Running
+        name: running
+        widget: list
+        required: false
+        fields:
+          - { label: "Event Name", name: event, widget: string }
+          - { label: Date, name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, required: false }
+          - { label: "Distance (km)", name: distance, widget: string, required: false }
+          - { label: "Time (H:MM:SS)", name: time, widget: string, required: false }
+          - { label: Note, name: note, widget: string, required: false }
+          - { label: Link, name: link, widget: string, required: false }
+
+      - label: Books
+        name: books
+        widget: list
+        required: false
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Author, name: author, widget: string, required: false }
+          - { label: "Review Link", name: link, widget: string, required: false }
+
+      - label: Events
+        name: events
+        widget: list
+        required: false
+        fields:
+          - { label: "Event Name", name: name, widget: string }
+          - { label: Date, name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, required: false }
+          - { label: Description, name: description, widget: text, required: false }
+          - { label: Link, name: link, widget: string, required: false }
+
+      - label: Projects
+        name: projects
+        widget: list
+        required: false
+        fields:
+          - { label: Name, name: name, widget: string }
+          - { label: URL, name: url, widget: string, required: false }
+          - { label: Description, name: description, widget: text, required: false }
+
+      - label: "Website Updates"
+        name: website
+        widget: list
+        required: false
+        field: { label: Update, name: update, widget: string }
+
+      - label: Stats
+        name: stats
+        widget: object
+        required: false
+        fields:
+          - label: Strava
+            name: strava
+            widget: object
+            required: false
+            fields:
+              - { label: Activities, name: activities, widget: number, required: false }
+              - { label: Km, name: km, widget: number, required: false }
+              - { label: Hours, name: hours, widget: number, required: false }
+              - { label: "Elevation (m)", name: elevationMeters, widget: number, required: false }
+              - { label: Approximate, name: approximate, widget: boolean, default: true }
+          - label: Substack
+            name: substack
+            widget: object
+            required: false
+            fields:
+              - { label: Views, name: views, widget: number, required: false }
+              - { label: Subscribers, name: subscribers, widget: number, required: false }
+              - { label: Approximate, name: approximate, widget: boolean, default: true }
+
+      - label: Certificates
+        name: certificates
+        widget: list
+        required: false
+        fields:
+          - { label: Name, name: name, widget: string }
+          - { label: Organisation, name: org, widget: string, required: false }
+          - { label: Link, name: link, widget: string, required: false }
+
+      - label: Misc
+        name: misc
+        widget: list
+        required: false
+        field: { label: Item, name: item, widget: string }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # BOOKS
+  # ────────────────────────────────────────────────────────────────────────────
   - name: books
     label: Books
     label_singular: Book
@@ -37,16 +219,19 @@ collections:
         widget: select
         options: [English, Marathi, Hindi, Other]
       - { label: Translator, name: translator, widget: string, required: false }
-      - { label: Blog Link, name: blog_link, widget: string, required: false }
-      - label: Blog Platform
+      - { label: "Blog Link", name: blog_link, widget: string, required: false }
+      - label: "Blog Platform"
         name: blog_platform
         widget: select
         required: false
         options: [Substack, Medium, WordPress, Blogger, Canva]
       - { label: Description, name: description, widget: text }
-      - { label: Year Read, name: year, widget: number, value_type: int }
+      - { label: "Year Read", name: year, widget: number, value_type: int }
       - { label: Tags, name: tags, widget: list }
 
+  # ────────────────────────────────────────────────────────────────────────────
+  # 100 DAYS TO OFFLOAD
+  # ────────────────────────────────────────────────────────────────────────────
   - name: 100days
     label: "100 Days To Offload"
     label_singular: Post
@@ -55,9 +240,9 @@ collections:
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: ID, name: id, widget: number, value_type: int }
-      - { label: Blog Title, name: blog_title, widget: string }
+      - { label: "Blog Title", name: blog_title, widget: string }
       - { label: Description, name: blog_description, widget: text }
-      - { label: Blog Link, name: blog_link, widget: string }
+      - { label: "Blog Link", name: blog_link, widget: string }
       - label: Platform
         name: blog_platform
         widget: select
@@ -72,4 +257,192 @@ collections:
         widget: select
         options: [English, Marathi]
       - { label: Tags, name: blog_tags, widget: list }
-      - { label: Challenge ID, name: challenge_id, widget: hidden, default: "100_days_to_offload" }
+      - { label: "Challenge ID", name: challenge_id, widget: hidden, default: "100_days_to_offload" }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # SPORTS
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: sports
+    label: Sports
+    label_singular: Race
+    folder: src/cms-content/sports
+    create: true
+    slug: "{{fields.id}}-{{slug}}"
+    media_folder: "/public/images/sports"
+    public_folder: "/images/sports"
+    fields:
+      - { label: ID, name: id, widget: number, value_type: int }
+      - { label: Title, name: title, widget: string }
+      - { label: Date, name: date, widget: string, hint: "Month DD, YYYY — e.g. February 22, 2026" }
+      - { label: Description, name: description, widget: text }
+      - { label: Place, name: place, widget: string, hint: "e.g. NDA, Pune" }
+      - label: Distance
+        name: distance
+        widget: select
+        options: ["5K", "10K", "21K", "21 Kms", "35 Kms", "42 Kms", "50 Kms"]
+      - { label: "Finish Time", name: time, widget: string, hint: "HH:MM:SS" }
+      - { label: "Certificate Link", name: timeCertificateLink, widget: string, required: false }
+      - { label: "Bib Number", name: bibNumber, widget: string, required: false }
+      - label: "Slide Images"
+        name: slideImages
+        widget: list
+        required: false
+        fields:
+          - label: Image
+            name: url
+            widget: image
+            media_folder: "/public/images/sports"
+            public_folder: "/images/sports"
+          - { label: Caption, name: caption, widget: string, default: "Slide 1" }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # TREKS
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: treks
+    label: Treks
+    label_singular: Trek
+    folder: src/cms-content/treks
+    create: true
+    slug: "{{fields.id}}-{{slug}}"
+    media_folder: "/public/images/treks"
+    public_folder: "/images/treks"
+    fields:
+      - { label: ID, name: id, widget: number, value_type: int }
+      - { label: "Fort / Location Name", name: fort_name, widget: string }
+      - { label: "Trek Duration", name: trek_time, widget: string, hint: "e.g. 2 Hrs" }
+      - label: "Endurance Level"
+        name: endurance_level
+        widget: select
+        options: [Easy, Medium, Hard]
+      - { label: Date, name: date, widget: string, hint: "DD-MM-YYYY — e.g. 17-02-2019" }
+      - { label: "Blog Link", name: blog_link, widget: string, required: false }
+      - label: Photos
+        name: photos
+        widget: list
+        required: false
+        fields:
+          - label: Image
+            name: url
+            widget: image
+            media_folder: "/public/images/treks"
+            public_folder: "/images/treks"
+          - { label: Caption, name: caption, widget: string, default: "Slide 1" }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # PROJECTS
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: projects
+    label: Projects
+    label_singular: Project
+    folder: src/cms-content/projects
+    create: true
+    slug: "{{slug}}"
+    media_folder: "/public/images/projects"
+    public_folder: "/images/projects"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Subtitle, name: subtitle, widget: string, required: false }
+      - { label: Link, name: link, widget: string }
+      - label: Image
+        name: image
+        widget: image
+        media_folder: "/public/images/projects"
+        public_folder: "/images/projects"
+        required: false
+      - { label: Date, name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { label: Description, name: desc, widget: text }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # INSTAGRAM
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: instagram
+    label: Instagram
+    label_singular: Post
+    folder: src/cms-content/instagram
+    create: true
+    slug: "{{fields.id}}-{{slug}}"
+    media_folder: "/public/images/insta_posts"
+    public_folder: "/images/insta_posts"
+    fields:
+      - { label: ID, name: id, widget: number, value_type: int }
+      - { label: Title, name: title, widget: string }
+      - { label: Caption, name: caption, widget: text }
+      - { label: Tags, name: tags, widget: list }
+      - label: "Slide Images"
+        name: slideImages
+        widget: list
+        required: false
+        fields:
+          - label: Image
+            name: url
+            widget: image
+            media_folder: "/public/images/insta_posts"
+            public_folder: "/images/insta_posts"
+          - { label: Caption, name: caption, widget: string, default: "Slide 1" }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # RESUME
+  # ────────────────────────────────────────────────────────────────────────────
+
+  # Resume — Positions
+  - name: resume_positions
+    label: "Resume — Positions"
+    label_singular: Position
+    folder: src/cms-content/resume/positions
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Company, name: company, widget: string }
+      - { label: Position, name: position, widget: string }
+      - { label: Link, name: link, widget: string, required: false }
+      - { label: "Date Range", name: daterange, widget: string, hint: "e.g. February 2024 - Present" }
+      - label: "Bullet Points"
+        name: points
+        widget: list
+        field: { label: Point, name: point, widget: text }
+
+  # Resume — Degrees
+  - name: resume_degrees
+    label: "Resume — Degrees"
+    label_singular: Degree
+    folder: src/cms-content/resume/degrees
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: School, name: school, widget: string }
+      - { label: Degree, name: degree, widget: string }
+      - { label: Link, name: link, widget: string, required: false }
+      - { label: Year, name: year, widget: number, value_type: int }
+
+  # Resume — Skills
+  - name: resume_skills
+    label: "Resume — Skills"
+    label_singular: Skill
+    folder: src/cms-content/resume/skills
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Competency
+        name: competency
+        widget: select
+        options:
+          - { label: "1 — Beginner", value: 1 }
+          - { label: "2 — Intermediate", value: 2 }
+          - { label: "3 — Proficient", value: 3 }
+          - { label: "4 — Advanced", value: 4 }
+          - { label: "5 — Expert", value: 5 }
+      - { label: Categories, name: category, widget: list, hint: "e.g. Web Development, Languages" }
+
+  # Resume — Certifications
+  - name: resume_certifications
+    label: "Resume — Certifications"
+    label_singular: Certification
+    folder: src/cms-content/resume/certifications
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Link, name: link, widget: string, required: false }
+      - { label: Source, name: source, widget: string }
+      - { label: "Issued Date", name: issuedDate, widget: string, hint: "e.g. Nov 2022 or 2024" }

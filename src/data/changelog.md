@@ -5,6 +5,42 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.3.2] — 2026-04-25
+
+### Added
+
+- **CMS seed script** (`scripts/seed-cms-content.js`): One-time script (`npm run cms:seed`) that converts all existing `src/data/*.js` files into Decap CMS markdown files under `src/cms-content/`. Seeds all 12 CMS collections — Now Meta, Now Months, Books, 100 Days, Sports, Treks, Projects, Instagram, and all four Resume sub-collections. Populates CMS editors with existing data so records are visible immediately.
+
+---
+
+## [v6.3.1] — 2026-04-25
+
+### Fixed
+
+- **Decap CMS backend config** (`public/cms/config.yml`): Uncommented `auth_endpoint: auth` (required for Sveltia CMS Auth Cloudflare Worker to handle the OAuth redirect) and removed `squash_merges: true` which requires `publish_mode: editorial_workflow` — without it Decap CMS v3 throws an initialization error that prevents the CMS page from loading.
+
+## [v6.3.0] — 2026-04-25
+
+### Added
+
+- **NowEditor** (`src/components/Admin/Editors/NowEditor.js`): Full admin editor for the Now page with all 9 section types (Blogs, Running, Books, Events, Projects, Website Updates, Stats, Certificates, Misc). Includes a "Page Meta" tab for editing introStory, dailyRituals, categoryLabels, and inspiredBy. Enforced monthly rotation via "Rotate Month →" button — promotes the previous current month to archive and prepends a new blank current month. Custom export panel generates the full `now-data.js` with both named exports.
+- **Image upload — Sports** (`src/components/Admin/Editors/SportsEditor.js`): File picker with live thumbnail preview on each slide. Auto-suggests a filename following the `initials_YYYY_N.jpeg` naming convention and provides a download button that saves the file with the correct name. Auto-fills the image path field on selection.
+- **Image upload — Treks** (`src/components/Admin/Editors/TreksEditor.js`): Same image upload capability for trek photos following the `fort_name_N.jpg` convention.
+- **Decap CMS — Now Meta** (`public/cms/config.yml`): New `now_meta` collection (single-file) for editing Now page metadata.
+- **Decap CMS — Now Months** (`public/cms/config.yml`): New `now_months` collection (one file per month) covering all 9 section types as nested lists.
+- **Decap CMS — Sports, Treks** (`public/cms/config.yml`): New collections with native `image` widget for slideImages/photos — uploads go directly to `public/images/sports/` and `public/images/treks/`.
+- **Decap CMS — Projects, Instagram, Resume** (`public/cms/config.yml`): Added collections for all remaining data types (Projects, Instagram, Resume Positions, Degrees, Skills, Certifications).
+- **GitHub backend instructions** (`public/cms/config.yml`): Detailed step-by-step comments for switching from `test-repo` to the GitHub backend with Netlify OAuth proxy, including OAuth App setup and commit message templates.
+- **CMS sync — all collections** (`scripts/sync-cms-to-data.js`): Extended sync script to handle all 12 data sources. Now page sync re-nests section fields under `sections`, sorts months newest-first, and enforces a single `isCurrent: true` entry. Sports and Treks use the custom JS serializer to preserve `PUBLIC_URL` template literals for image paths.
+
+### Changed
+
+- **Admin Dashboard** (`src/components/Admin/AdminDashboard.js`): Added "Now Page" card (cyan) showing the count of monthly entries with draft indicator.
+- **Admin Nav** (`src/components/Admin/AdminNav.js`): Added `now → 'Now Page'` label.
+- **Admin page** (`src/pages/Admin.js`): Registered `NowEditor` under the `now` key with lazy loading.
+
+---
+
 ## [v6.2.0] — 2026-04-22
 
 ### Added

@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 const SECTION_LABELS = {
   dashboard: 'Dashboard',
+  now: 'Now Page',
   books: 'Books',
   sports: 'Sports',
   treks: 'Treks',
