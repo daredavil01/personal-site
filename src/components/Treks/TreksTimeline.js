@@ -158,7 +158,7 @@ const TreksTimeline = () => {
                         <span className={`material-symbols-outlined text-[16px] ${config.text}`}>photo_library</span>
                         <div>
                           <div className="text-[10px] text-stone-400 uppercase tracking-widest mb-0.5">Photos</div>
-                          {trek.photos?.length || 0} images
+                          {trek.slideImages?.length || 0} images
                         </div>
                       </div>
                     </div>
