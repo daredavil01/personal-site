@@ -7,6 +7,24 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.4.3] — 2026-04-26
+
+### Fixed
+
+- **parseNowCms** (`src/utils/parseNowCms.js`): Updated `parseFrontMatter` regex from `/^---\n/` to `/^---\r?\n/` so it matches Windows-style CRLF line endings; previously returned `{}` on Windows, causing `nowMeta.dailyRituals` to be undefined.
+- **Now** (`src/pages/Now.js`): Guarded Daily Rituals section with `nowMeta?.dailyRituals?.length > 0` to prevent crash if meta parse fails or `dailyRituals` is absent.
+
+---
+
+## [v6.4.2] — 2026-04-26
+
+### Fixed
+
+- **Now CMS data** (`src/cms-content/now/months/2026-April.md`): Fixed invalid YAML — list items missing 2-space indent before `-`, sub-properties mis-indented causing parse failure, and URLs wrapped in `< >` angle brackets. Also quoted values with colons to prevent parse errors.
+- **Now CMS data** (`src/cms-content/now/months/2026-May.md`): Fixed wrong `month: April` value and missing closing `---`, both of which caused YAML parse errors that silently broke the entire Now page data load.
+
+---
+
 ## [v6.4.1] — 2026-04-26
 
 ### Fixed

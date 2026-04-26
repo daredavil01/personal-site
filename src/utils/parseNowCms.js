@@ -28,7 +28,7 @@ const MONTH_ORDER = [
 ];
 
 function parseFrontMatter(text) {
-  const match = text.match(/^---\n([\s\S]*?)\n---/);
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   return match ? parse(match[1]) : {};
 }
 

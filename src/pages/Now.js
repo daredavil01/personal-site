@@ -47,7 +47,7 @@ const Now = () => {
         </section>
 
         {/* Daily Rituals */}
-        {nowMeta && (
+        {nowMeta?.dailyRituals?.length > 0 && (
           <div className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-12 rounded-xl">
             <h3 className="font-headline text-3xl font-bold mb-12 text-center text-stone-800 dark:text-stone-200">
               Daily Rituals
