@@ -14,9 +14,11 @@
     "predeploy": "npm run build && react-snap",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
+    "dev": "react-scripts start",
     "lint": "eslint **/*.js",
     "test": "npx jest",
     "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js",
+    "cms:server": "npx netlify-cms-proxy-server",
     "cms:sync": "node scripts/sync-cms-to-data.js",
     "cms:seed": "node scripts/seed-cms-content.js"
   },

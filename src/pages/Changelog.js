@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Markdown from "markdown-to-jsx";
 import Main from "../layouts/Main";
-import NowDocument from "../components/Now/NowDocument";
 
 const Changelog = () => {
   const [markdown, setMarkdown] = useState("");
@@ -10,7 +10,9 @@ const Changelog = () => {
       .then((res) => {
         fetch(res.default)
           .then((r) => r.text())
-          .then(setMarkdown);
+          .then((text) =>
+            setMarkdown(text.replace(/^---[\s\S]*?---\s*\n/, "")),
+          );
       })
       .catch(console.error);
   }, []);
@@ -31,8 +33,9 @@ const Changelog = () => {
               Changelog.
             </h1>
             <p className="font-body text-xl text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl">
-              A transparent, human-readable record of every meaningful change made to this website.
-              Features added, improvements shipped, bugs fixed, and design decisions documented — version by version.
+              A transparent, human-readable record of every meaningful change
+              made to this website. Features added, improvements shipped, bugs
+              fixed, and design decisions documented — version by version.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-6">
               <div className="flex items-center gap-3">
@@ -42,8 +45,14 @@ const Changelog = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-stone-400 dark:text-stone-500 font-label text-xs uppercase tracking-widest">
-                <span className="material-symbols-outlined text-sm">calendar_today</span>
-                {new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}
+                <span className="material-symbols-outlined text-sm">
+                  calendar_today
+                </span>
+                {new Date().toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
               </div>
               <a
                 href="https://github.com/daredavil01/personal-site/commits/main"
@@ -51,7 +60,9 @@ const Changelog = () => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors font-label text-xs uppercase tracking-widest"
               >
-                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                <span className="material-symbols-outlined text-sm">
+                  open_in_new
+                </span>
                 Full Git History
               </a>
             </div>
@@ -60,7 +71,15 @@ const Changelog = () => {
 
         {/* Quick nav badges */}
         <div className="flex flex-wrap gap-2 -mt-4">
-          {["v5.0.0", "v4.0.0", "v3.5.0", "v3.0.0", "v2.5.0", "v2.0.0", "v1.0.0"].map((v) => (
+          {[
+            "v5.0.0",
+            "v4.0.0",
+            "v3.5.0",
+            "v3.0.0",
+            "v2.5.0",
+            "v2.0.0",
+            "v1.0.0",
+          ].map((v) => (
             <a
               key={v}
               href={`#${v}`}
@@ -72,7 +91,11 @@ const Changelog = () => {
         </div>
 
         {/* Markdown content */}
-        {markdown && <NowDocument content={markdown} />}
+        {markdown && (
+          <article className="prose prose-stone dark:prose-invert prose-lg font-body leading-relaxed text-stone-600 dark:text-stone-300 w-full max-w-none">
+            <Markdown>{markdown}</Markdown>
+          </article>
+        )}
       </div>
     </Main>
   );

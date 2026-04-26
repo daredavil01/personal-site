@@ -1,3 +1,6 @@
+// DEPRECATED — Now.js reads directly from src/cms-content/now/ via parseNowCms.js.
+// This file is no longer the source of truth and can be deleted once you've
+// verified the CMS-driven page works correctly.
 export const nowMeta = {
   introStory:
     "One day, I was scrolling through LinkedIn and found a post by Rahul, stating that he had started a new page on his website called Now. I thought, 'I have a website, let's add this to the website!' So, this section will highlight what I was doing last month and what I am up to this month!",

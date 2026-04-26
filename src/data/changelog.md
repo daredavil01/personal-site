@@ -1,7 +1,49 @@
+---
+---
 # Changelog
 
 All notable changes to this project are documented here, grouped by release period.
 This project does not use semantic versioning; entries are grouped by date and feature area.
+
+---
+
+## [v6.4.0] — 2026-04-26
+
+### Added
+
+- **parseNowCms** (`src/utils/parseNowCms.js`): New utility that reads `src/cms-content/now/meta.md` and all `src/cms-content/now/months/*.md` files directly, parses YAML front matter via the `yaml` package, re-nests flat CMS section fields under the `sections` key that components expect, and sorts months (current first, then newest-first). This makes the CMS files the single source of truth for the Now page — no sync step needed.
+
+### Changed
+
+- **Now page** (`src/pages/Now.js`): Replaced synchronous `import { nowData, nowMeta } from 'now-data'` with async loading via `parseNowCms`. Now uses `useState`/`useEffect` to fetch and parse CMS markdown files at runtime. Daily Rituals section renders conditionally after meta loads.
+
+### Deprecated
+
+- **`now-data.js`** (`src/data/now-data.js`): No longer imported by any page. Retained as a fallback reference until CMS-driven page is verified; safe to delete afterwards.
+- **`now.md`** (`src/data/now.md`): Archival file, never imported. Safe to delete.
+
+---
+
+## [v6.3.4] — 2026-04-26
+
+### Added
+
+- **Decap CMS — Changelog** (`public/cms/config.yml`): Added `changelog` files collection pointing to `src/data/changelog.md` with a `markdown` body widget, making the changelog editable through the CMS editor.
+- **`changelog.md`** (`src/data/changelog.md`): Added empty YAML front matter (`---\n---`) so Decap CMS's parser can identify the body field; without it the editor rendered empty.
+- **`cms:server` script** (`package.json`): Added `npx netlify-cms-proxy-server` script; run it alongside `npm run dev` so Decap CMS reads real seeded data from `src/cms-content/` instead of starting empty.
+
+### Fixed
+
+- **Decap CMS backend** (`public/cms/config.yml`): Switched default local backend from `test-repo` (in-memory, always empty) to `proxy` (`http://localhost:8081/api/v1`) so all seeded collections are visible in the editor. `test-repo` is retained as a commented fallback.
+- **Changelog page** (`src/pages/Changelog.js`): Strips front matter (`/^---[\s\S]*?---\s*\n/`) before passing text to `<Markdown>` so the added front matter block does not appear in the rendered page.
+
+---
+
+## [v6.3.3] — 2026-04-26
+
+### Fixed
+
+- **Changelog page** (`src/pages/Changelog.js`): Replaced incorrect `NowDocument` usage (which expects a `months` array) with a direct `markdown-to-jsx` render inside a `prose` article wrapper — the same pattern used by `AboutDocument`. Markdown was loading correctly but rendering nothing due to the component mismatch.
 
 ---
 

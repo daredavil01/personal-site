@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Main from "../layouts/Main";
 import NowDocument from "../components/Now/NowDocument";
-import { nowData, nowMeta } from "../data/now-data";
+import { loadNowMeta, loadNowMonths } from "../utils/parseNowCms";
 
 const Now = () => {
+  const [nowMeta, setNowMeta] = useState(null);
+  const [nowData, setNowData] = useState([]);
+
+  useEffect(() => {
+    Promise.all([loadNowMeta(), loadNowMonths()]).then(([meta, months]) => {
+      setNowMeta(meta);
+      setNowData(months);
+    });
+  }, []);
+
   const current = nowData.find((m) => m.isCurrent);
   const lastUpdated = current ? `${current.month} ${current.year}` : "";
 
@@ -37,28 +47,30 @@ const Now = () => {
         </section>
 
         {/* Daily Rituals */}
-        <div className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-12 rounded-xl">
-          <h3 className="font-headline text-3xl font-bold mb-12 text-center text-stone-800 dark:text-stone-200">
-            Daily Rituals
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {nowMeta.dailyRituals.map((ritual) => (
-              <div key={ritual.label} className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full flex items-center justify-center mx-auto text-secondary">
-                  <span className="material-symbols-outlined text-2xl">
-                    {ritual.icon}
-                  </span>
+        {nowMeta && (
+          <div className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-12 rounded-xl">
+            <h3 className="font-headline text-3xl font-bold mb-12 text-center text-stone-800 dark:text-stone-200">
+              Daily Rituals
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {nowMeta.dailyRituals.map((ritual) => (
+                <div key={ritual.label} className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full flex items-center justify-center mx-auto text-secondary">
+                    <span className="material-symbols-outlined text-2xl">
+                      {ritual.icon}
+                    </span>
+                  </div>
+                  <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">
+                    {ritual.label}
+                  </h4>
+                  <p className="font-body text-sm text-stone-500 dark:text-stone-400">
+                    {ritual.description}
+                  </p>
                 </div>
-                <h4 className="font-label font-bold text-sm uppercase tracking-widest text-stone-700 dark:text-stone-300">
-                  {ritual.label}
-                </h4>
-                <p className="font-body text-sm text-stone-500 dark:text-stone-400">
-                  {ritual.description}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <NowDocument months={nowData} />
       </div>
