@@ -35,10 +35,10 @@ function parseFrontMatter(text) {
 // CMS files store sections flat; components expect them nested under `sections`
 function nestSections(flat) {
   const { month, year, isCurrent, ...rest } = flat;
-  const sections = {};
-  for (const key of SECTION_KEYS) {
-    if (rest[key] !== undefined) sections[key] = rest[key];
-  }
+  const sections = SECTION_KEYS.reduce((acc, key) => {
+    if (rest[key] !== undefined) acc[key] = rest[key];
+    return acc;
+  }, {});
   return { month, year, isCurrent: !!isCurrent, sections };
 }
 
@@ -47,7 +47,7 @@ function urlOf(mod) {
 }
 
 export async function loadNowMeta() {
-  // eslint-disable-next-line import/no-webpack-loader-syntax
+  // eslint-disable-next-line import/no-webpack-loader-syntax,global-require
   const url = urlOf(require("../cms-content/now/meta.md"));
   const text = await fetch(url).then((r) => r.text());
   return parseFrontMatter(text);

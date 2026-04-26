@@ -10,9 +10,9 @@ const Changelog = () => {
       .then((res) => {
         fetch(res.default)
           .then((r) => r.text())
-          .then((text) =>
-            setMarkdown(text.replace(/^---[\s\S]*?---\s*\n/, "")),
-          );
+          .then((text) => {
+            setMarkdown(text.replace(/^---[\s\S]*?---\s*\n/, ""));
+          });
       })
       .catch(console.error);
   }, []);

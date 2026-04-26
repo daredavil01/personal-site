@@ -7,6 +7,15 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.4.1] — 2026-04-26
+
+### Fixed
+
+- **Changelog** (`src/pages/Changelog.js`): Collapsed multi-line arrow function in `.then()` chain to satisfy `implicit-arrow-linebreak` and `function-paren-newline` ESLint rules that blocked the production build.
+- **parseNowCms** (`src/utils/parseNowCms.js`): Replaced `for...of` loop with `Array.reduce` to satisfy `no-restricted-syntax` rule; added `global-require` disable comment on the webpack `require()` call inside `loadNowMeta`.
+
+---
+
 ## [v6.4.0] — 2026-04-26
 
 ### Added
