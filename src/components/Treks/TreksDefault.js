@@ -168,9 +168,9 @@ const TreksDefault = ({ onTrekClick }) => {
             >
               {/* Image block */}
               <div className="relative w-full aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-800">
-                {trek.photos?.length > 0 ? (
+                {trek.slideImages?.length > 0 ? (
                   <img
-                    src={trek.photos[0].url}
+                    src={trek.slideImages[0].url}
                     alt={trek.fort_name}
                     className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -192,7 +192,7 @@ const TreksDefault = ({ onTrekClick }) => {
                 {/* Photo count badge — top-right */}
                 <div className="absolute top-3 right-3 bg-stone-900/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg font-label text-[10px] font-bold flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">photo_library</span>
-                  {trek.photos?.length || 0}
+                  {trek.slideImages?.length || 0}
                 </div>
               </div>
 

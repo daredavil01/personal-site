@@ -76,13 +76,13 @@ const TrekDetailsModal = ({ isOpen, onClose, trek }) => {
           </div>
 
           {/* Photos */}
-          {trek.photos && trek.photos.length > 0 && (
+          {trek.slideImages && trek.slideImages.length > 0 && (
             <div className="w-full">
               <span className="font-label text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-4 block">
-                Trek Photos ({trek.photos.length})
+                Trek Photos ({trek.slideImages.length})
               </span>
               <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 aspect-square md:aspect-[4/3]">
-                <ImageSlider data={trek.photos} />
+                <ImageSlider data={trek.slideImages} />
               </div>
             </div>
           )}

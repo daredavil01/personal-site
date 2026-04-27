@@ -1,460 +1,148 @@
 # Features Documentation
 
-This document provides a comprehensive overview of all features available across the personal portfolio website.
+Comprehensive overview of all features across the personal portfolio site.
 
-## Table of Contents
-- [Global Features](#global-features)
-- [Page-Specific Features](#page-specific-features)
-  - [Home Page](#home-page)
-  - [About Page](#about-page)
-  - [Now Page](#now-page)
-  - [Books Page](#books-page)
-  - [Instagram Page](#instagram-page)
-  - [Resume Page](#resume-page)
-  - [Projects Page](#projects-page)
-  - [Stats Page](#stats-page)
-  - [Sports Page](#sports-page)
-  - [Contact Page](#contact-page)
+**Version:** 6.4.x  
+**Last Updated:** April 2026
 
 ---
 
----
+## Global Features
 
-### 🧭 Navigation System
-**Location:** Header (Desktop) / Hamburger Menu (Mobile)  
-**Description:** Responsive navigation menu with route highlighting and sub-menu support.
+### Navigation System
+**Location:** Header (Desktop) / Hamburger drawer (Mobile)
 
-**Key Features:**
-- **Dynamic Routing**: Active route highlighting with case-insensitive matching.
-- **Nested Dropdowns**: "Challenges" menu item features a hover-triggered dropdown for specific sub-challenges.
-- **Mobile-First Hamburger**: A sliding sidebar menu for mobile devices, supporting nested sub-routes.
-- **"More" Menu**: Secondary routes like Projects, Instagram, and Contact are grouped in a persistent "More" dropdown.
+- Active route highlighting
+- "More" dropdown for secondary routes (Projects, Instagram, Contact)
+- Challenges dropdown with sub-route link (100 Days To Offload)
+- Mobile hamburger: sliding drawer with full route tree
 
 **Routes:**
-1. **Home** (`/`)
-2. **About** (`/about`)
-3. **Now** (`/now`)
-4. **Challenges Hub** (`/challenges`)
-    - Sub-route: **100 Days To Offload** (`/100-days-to-offload`)
-5. **Digital Library** (`/books`)
-6. **Sports Log** (`/sports`)
-7. **Projects Archive** (`/projects`)
-8. **Visual Narrative (Instagram)** (`/instagram`)
-9. **Professional Resume** (`/resume`)
-10. **Vital Stats** (`/stats`)
-11. **Get In Touch (Contact)** (`/contact`)
+| Route | Page |
+|---|---|
+| `/` | Home |
+| `/about` | About |
+| `/now` | Now |
+| `/challenges` → `/100-days-to-offload` | Challenges |
+| `/books` | Digital Library |
+| `/sports` | Sports Log |
+| `/treks` | Treks Log |
+| `/instagram` | Instagram Gallery |
+| `/resume` | Resume |
+| `/stats` | Stats |
+| `/changelog` | Changelog |
+| `/contact` | Contact |
+| `/admin` | Admin CMS (auth-gated) |
+
+### Dark Mode
+A floating toggle (bottom-right corner) switches between light and dark themes site-wide. State is persisted via `ThemeContext`.
+
+### Responsive Design
+Mobile-first layouts with Tailwind CSS breakpoints. Navigation collapses to hamburger drawer on mobile. All pages are readable and functional at any viewport width.
+
+### Performance
+- All route components are lazy-loaded via `React.lazy` + `Suspense`
+- Code splitting per route
+- Images use `object-cover` with aspect-ratio containers to avoid layout shift
+
+### SEO / Head Management
+`react-helmet-async` sets per-page `<title>`, `<meta description>`, and Open Graph tags. OG image and base tags are set in `public/index.html`.
 
 ---
 
-### 📱 Responsive Design
-**Location:** All pages  
-**Description:** Mobile-first responsive design approach.
+## Pages
+
+### Home (`/`)
+Landing page linking out to all major sections. Features a `LifeStats` component that displays aggregate personal metrics (age, books read, races run, etc.).
+
+### About (`/about`)
+Markdown-rendered personal biography sourced from `src/data/about.md`.
+
+### Now (`/now`)
+Monthly activity log. Data comes from Decap CMS markdown files (`src/cms-content/now/`) parsed at runtime by `parseNowCms.js`.
 
 **Features:**
-- Breakpoint-based responsive layouts
-- Touch-optimized interactions
-- Adaptive images and media
-- Collapsible navigation on mobile
-- Optimized font sizes and spacing
+- Hero section with last-updated date
+- Daily Rituals cards (from CMS `meta.md`)
+- Tabbed monthly entries — one tab per month
+- Subsections per month: Blogs, Running, Books, Events, Projects, Stats, Website, Certificates, Misc
+- Current month is automatically highlighted
 
-**Breakpoints:**
-- Mobile: < 600px
-- Tablet: 600px - 1024px
-- Desktop: > 1024px
-
----
-
-### ⚡ Performance Optimizations
-**Location:** Application-wide  
-**Description:** Various performance enhancements.
+### Books (`/books`)
+Digital library of 44+ books read since 2019, sourced from `src/data/books.js`.
 
 **Features:**
-- Lazy loading for all route components
-- Code splitting by route
-- Optimized bundle sizes
-- Efficient re-renders with React.memo
-- CSS animations using GPU-accelerated transforms
+- Featured book hero with random-shuffle (books with reviews)
+- Quick stats: total books, Marathi count, reviews written
+- Search across title + author
+- Filter by tag, language, review status
+- Clear-filters button
+- Book detail modal with metadata and blog links
+
+### Sports (`/sports`)
+Marathon and race log of 20+ events since 2023, sourced from `src/data/sports.js`.
+
+**Tabs:**
+1. **Statistics** — Distance breakdown, PR bars, cumulative metrics, top summary cards
+2. **Interactive** — Filter/sort table view of all races
+3. **Cards** — Default card grid with image sliders and cert links
+
+### Treks (`/treks`)
+Fort and trail trek log of 15 treks since 2019, sourced from `src/data/treks.js`.
+
+**Tabs:**
+1. **Statistics** — Difficulty distribution, yearly timeline, total hours
+2. **Cards** — Filterable card grid (difficulty, year, blog presence); detail modal with image slider
+
+### Instagram (`/instagram`)
+Archived Instagram posts displayed as a card gallery with image sliders, sourced from `src/data/instagram.js`.
+
+### Resume (`/resume`)
+Professional resume sourced from four files in `src/data/resume/`:
+- Work experience (positions.js)
+- Education (degrees.js)
+- Skills with competency levels (skills.js)
+- Certifications (certifications.js)
+
+Also links to a downloadable PDF (`public/sanket-tambare-resume.pdf`).
+
+### Projects (`/projects`)
+Portfolio project gallery sourced from `src/data/projects.js`. Cards include screenshot, description, tech stack, and live/GitHub links.
+
+### Challenges (`/challenges`)
+Hub page explaining the personal challenges initiative. Links out to active challenges.
+
+### 100 Days To Offload (`/100-days-to-offload`)
+Blog challenge tracker sourced from `src/data/100DaysToOffload.js`. Lists all posts with title, date, platform, tags, and direct links.
+
+### Stats (`/stats`)
+Aggregate stats dashboard pulling from multiple data files (sports, treks, books, resume, etc.) to display life-level metrics.
+
+### Changelog (`/changelog`)
+Markdown-rendered version history sourced from `src/data/changelog.md`. Displays the full release history of the site.
+
+### Contact (`/contact`)
+Social links and email contact, sourced from `src/data/contact.js`.
+
+### Admin (`/admin`)
+Password-protected (SHA-256 hash in `AuthGate`) local CMS panel. Provides form-based editors for all data types:
+
+- Books, Sports, Treks, Instagram, Projects
+- 100 Days To Offload posts
+- Now page (meta + monthly entries)
+- Resume: Positions, Skills, Degrees, Certifications
+
+Each editor persists drafts to `localStorage` and exports ready-to-paste JS code. Editors do **not** write to disk directly — the export is copy-pasted into the source file and committed.
 
 ---
 
-## Page-Specific Features
+## Technical Notes
 
-## Home Page
+### Data Storage
+All content is stored as static JS arrays/objects in `src/data/` except the Now page, which uses Decap CMS markdown files in `src/cms-content/now/`. All image arrays use the `slideImages` field name consistently across Sports, Treks, and Instagram.
 
-**Route:** `/`  
-**Purpose:** Landing page with site introduction
+### Styling
+Tailwind CSS is the primary styling system. Supplementary SCSS lives in `src/static/css/`. Component styles use Tailwind utility classes inline; base typography and resets are in SCSS.
 
-### Features:
-1. **Welcome Message**
-   - Brief introduction
-   - Quick navigation links to key sections
-
-2. **Site Overview**
-   - Description of portfolio purpose
-   - Technologies highlighted
-
-3. **Quick Links**
-   - Direct links to About, Resume, Projects, Stats, and Contact pages
-   - GitHub repository link
-
----
-
-## About Page
-
-**Route:** `/about`  
-**Purpose:** Personal introduction and background
-
-### Features:
-1. **Personal Bio**
-   - Markdown-rendered content
-   - Professional background
-   - Interests and hobbies
-
-2. **Skills Overview**
-   - Technical skills listing
-   - Professional expertise areas
-
-3. **Quick Facts**
-   - Personal highlights
-   - Career milestones
-
----
-
-## Now Page
-
-**Route:** `/now`  
-**Purpose:** Current activities and focus areas
-
-### Features:
-1. **Current Activities**
-   - What I'm working on now
-   - Current learning focus
-   - Recent interests
-
-2. **Regular Updates**
-   - Markdown-based content
-   - Timestamped updates
-   - Project highlights
-
-3. **Life Updates**
-   - Personal developments
-   - Professional updates
-   - Reading/learning activities
-
----
-
-## Books Page
-
-**Route:** `/books`  
-**Purpose:** Showcase reading history with editorial-style curation and filtering.
-
-### 📚 Features:
-
-1. **Featured Review (Hero Section)**
-   - A spotlight on a specific book with a blog review.
-   - **Shuffle Capability**: Randomly cycle through books with written reviews.
-   - Premium layout with abstract book cover generation.
-
-2. **Reading Quick-Stats**
-   - High-level metrics: Total Books Read, Marathi Literature count, and Reviews Written.
-
-3. **Advanced Filtering & SEARCH**
-   - **Search Box**: Instant search across titles and authors.
-   - **Tag Filter**: Narrow down by categories (e.g., Design, Philosophy, Technology).
-   - **Language Filter**: Specific toggle for regional or global literature.
-   - **Review Status**: Filter to show only books with detailed blog posts.
-   - **Clear Filters**: One-click reset for all criteria.
-
-4. **Editorial Library Grid**
-   - Interactive book cards with "Editorial Shadow" aesthetics.
-   - Visual indicators for books with associated blog reviews.
-
-5. **Book Detail Modal**
-   - Comprehensive information overlay for each book.
-   - Summary and metadata (Year, Language, Tags).
-   - Direct links to detailed blog posts or Goodreads.
-
----
-
-## Instagram Page
-
-**Route:** `/instagram`  
-**Purpose:** Showcase Instagram content and photography
-
-### Features:
-1. **Gallery View**
-   - Grid layout of Instagram posts
-   - Responsive masonry design
-   - High-quality images
-
-2. **Post Details**
-   - Caption display
-   - Engagement metrics
-   - Post timestamp
-
-3. **Interactive Gallery**
-   - Lightbox for full-size viewing
-   - Swipe navigation
-   - Zoom capabilities
-
----
-
-## Resume Page
-
-**Route:** `/resume`  
-**Purpose:** Professional resume and career history.
-
-### 📄 Features:
-1. **Professional Summary**
-   - High-level overview of expertise and career goals.
-2. **Work Experience**
-   - Chronological job history with detailed role descriptions and key achievements.
-3. **Education**
-   - Academic credentials and certifications.
-4. **Skills Section**
-   - Categorized technical skills (Languages, Frameworks, Tools).
-
----
-
-## Projects Page
-
-**Route:** `/projects`  
-**Purpose:** Portfolio of software projects
-
-### Features:
-1. **Project Grid**
-   - Card-based layout
-   - Project thumbnails
-   - Technology tags
-
-2. **Project Details**
-   - Detailed descriptions
-   - GitHub links
-   - Live demo links
-   - Technology stack
-
-3. **Filtering**
-   - Filter by technology
-   - Search functionality
-   - Category sorting
-
-4. **Project Highlights**
-   - Featured projects
-   - Recent work
-   - Personal favorites
-
----
-
-## Stats Page
-
-**Route:** `/stats`  
-**Purpose:** Data-driven snapshot of personal and professional activities.
-
-### 📊 Features:
-1. **Activity Metrics**
-   - Real-time (simulated or static) counters for books read, kilometers run, and code written.
-2. **Tabular Data**
-   - Detailed breakdown of specific metrics using unified table components.
-
----
-
-## Challenges Section
-
-**Route:** `/challenges`  
-**Purpose:** A public commitment to iterative improvement and accountability.
-
-### 🏆 Hub Features:
-1. **About the Journey**: Context on the motivation behind personal challenges.
-2. **Accountability Ledger**: Explanation of why these goals are shared publicly.
-3. **Active Challenges**: Interactive cards linking to dedicated tracking pages.
-
-### 🏁 Featured Challenge: #100DaysToOffload
-**Route:** `/100-days-to-offload`
-- **SVG Logo Integration**: Custom-branded challenge identity.
-- **Progress Map**: Interactive calendar grid visualizing daily/weekly consistency.
-- **Tag Cloud**: Heatmap of topics covered in the challenge.
-- **Recent Activity**: List of latest entries with deep links.
-
----
-
-## Sports Page
-
-## Contact Page
-
-**Route:** `/contact`  
-**Purpose:** Contact information and social media links
-
-### Features:
-1. **Contact Information**
-   - Email address
-   - Professional social media links
-   - GitHub profile
-
-2. **Social Media Integration**
-   - LinkedIn profile link
-   - Twitter/X handle
-   - Instagram connection
-   - Medium blog link
-
-3. **Direct Links**
-   - Clickable email (mailto)
-   - Social media icons
-   - External link indicators
-
-4. **Contact Methods**
-   - Multiple ways to connect
-   - Professional networking options
-   - Content platform links
-
----
-
-## Technical Features
-
-### 🔧 Development Features
-
-1. **React Router v6**
-   - Client-side routing
-   - Lazy loading
-   - Code splitting
-
-2. **SCSS Styling**
-   - Modular CSS architecture
-   - Page-specific stylesheets
-   - Global theme variables
-   - Mixin and function helpers
-
-3. **Data Management**
-   - Centralized data files
-   - Markdown support for content
-   - JSON data structures
-   - Easy content updates
-
-4. **Component Architecture**
-   - Reusable components
-   - Template system
-   - Prop validation
-   - Functional components with hooks
-
-5. **Build Optimization**
-   - Production builds
-   - Asset minification
-   - Tree shaking
-   - Bundle optimization
-
----
-
-## Accessibility Features
-
-### ♿ A11y Compliance
-
-1. **Keyboard Navigation**
-   - All interactive elements accessible
-   - Proper tab order
-   - Focus indicators
-
-2. **Screen Reader Support**
-   - ARIA labels
-   - Semantic HTML
-   - Alt text for images
-   - Descriptive link text
-
-3. **Color Contrast**
-   - WCAG AA compliance
-   - High contrast ratios
-   - Dark mode optimization
-
-4. **Text Alternatives**
-   - Image alt attributes
-   - Descriptive tooltips
-   - Link context
-
----
-
-## Animation Features
-
-### 🎬 Transition Effects
-
-1. **Page Transitions**
-   - Smooth route changes
-   - Fade in/out effects
-
-2. **Component Animations**
-   - Modal slide-in
-   - Tooltip fade
-   - Card hover elevation
-   - Button interactions
-
-3. **CSS Animations**
-   - `@keyframes` animations
-   - GPU-accelerated transforms
-   - Optimized performance
-
-**Named Animations:**
-- `fadeIn` - Opacity transition
-- `fadeInDown` - Vertical slide + fade
-- `bounceIn` - Elastic scale entrance
-- `slideInRight` - Horizontal slide + fade
-- `scaleIn` - Scale-up transition
-
----
-
-## User Experience (UX) Features
-
-### 🎯 Enhanced Interactions
-
-1. **Hover States**
-   - Visual feedback on all interactive elements
-   - Smooth transitions
-   - Color changes
-   - Elevation effects
-
-2. **Loading States**
-   - Suspense fallbacks
-   - Lazy loading indicators
-   - Progressive enhancement
-
-3. **Error Handling**
-   - 404 page for invalid routes
-   - Graceful error boundaries
-   - User-friendly error messages
-
-4. **Responsive Images**
-   - Adaptive sizing
-   - Lazy loading
-   - Optimized formats
-
----
-
-## Content Features
-
-### 📝 Content Management
-
-1. **Markdown Support**
-   - About page content
-   - Now page updates
-   - Blog post rendering
-
-2. **Data-Driven Content**
-   - JSON data structures
-   - Easy content updates
-   - Centralized data file
-
-## Footer Features
-
-**Location:** All pages  
-**Description:** Consistent footer across site
-
-**Features:**
-- Copyright notice
-- "Created with ❤️ By Sanket Tambare"
-- Social media icons
-- Responsive design
-- Dark mode compatible
-
-## License & Attribution
-
-This personal portfolio website is open source and available under the MIT License. All features are custom-built with React.js and modern web technologies.
-
-**Version:** 4.1  
-**Last Updated:** March 2026  
-**Maintained By:** Sanket Tambare
+### Deployment
+Hosted on Cloudflare Pages. Pushes to `main` trigger automatic builds (`npm run build`, output: `build/`). See `docs/deployment.md` for full details.
