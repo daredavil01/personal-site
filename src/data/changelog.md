@@ -7,6 +7,18 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.4.4] — 2026-04-27
+
+### Added
+
+- **CMS seed script** (`scripts/seed-cms-content.js`): One-time script (`npm run cms:seed`) that reads all existing `src/data/*.js` files and writes them as Decap CMS YAML frontmatter markdown files into `src/cms-content/`. Seeds all 12 collections — Now Meta, Now Months (7 months), Books (43), 100 Days (24), Sports (20), Treks (15), Projects (5), Instagram (11), Resume Positions (6), Degrees (2), Skills (30), Certifications (11) — so all existing records are immediately visible in the CMS editors without manual re-entry.
+
+### Fixed
+
+- **Decap CMS backend config** (`public/cms/config.yml`): Uncommented `auth_endpoint: auth` so the Sveltia CMS Auth Cloudflare Worker correctly receives and routes the OAuth popup to `/auth`; removed `squash_merges: true` which requires `publish_mode: editorial_workflow` and caused Decap CMS v3 to throw an initialization error preventing the CMS page from loading.
+
+---
+
 ## [v6.4.3] — 2026-04-26
 
 ### Fixed
