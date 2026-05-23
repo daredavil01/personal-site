@@ -294,6 +294,40 @@ const data = [
     blog_platform: "Substack",
     language: "English",
   },
+  {
+    id: 25,
+    blog_title: "Vibe-Coding Digital Well-being accountability game!",
+    blog_description: "Illustrating the way I did it!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["Vibe-coding", "AI"],
+    blog_date: "2026-05-04",
+    blog_link:
+      "https://sankettambare.substack.com/p/vibe-coding-digital-wellbeing-game",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 26,
+    blog_title: "Bharat Ek Khoj",
+    blog_description: "The wanderer's narration of the life till date!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["BharEkKhoj"],
+    blog_date: "2026-05-07",
+    blog_link: "https://sankettambare.substack.com/p/bharat-ek-khoj",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 27,
+    blog_title: "Life: a marathon of chaos, choices and destiny!",
+    blog_description: "What does it take to detach from the chaos!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["Life", "Marathon"],
+    blog_date: "2026-05-12",
+    blog_link: "https://sankettambare.substack.com/p/life-a-marathon",
+    blog_platform: "Substack",
+    language: "English",
+  },
 ];
 
 export default data;

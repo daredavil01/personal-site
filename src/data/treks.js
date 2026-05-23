@@ -368,6 +368,31 @@ const treks = [
       },
     ],
   },
+  {
+    id: 16,
+    fort_name: "Talgad",
+    trek_time: "1 hrs",
+    endurance_level: "Easy",
+    date: "16-05-2026",
+    photos: [
+      {
+        url: `${PUBLIC_URL}/images/treks/talgad_1.jpg`,
+        caption: "Slide 1",
+      },
+      {
+        url: `${PUBLIC_URL}/images/treks/talgad_2.jpg`,
+        caption: "Slide 2",
+      },
+      {
+        url: `${PUBLIC_URL}/images/treks/talgad_3.JPG`,
+        caption: "Slide 3",
+      },
+      {
+        url: `${PUBLIC_URL}/images/treks/talgad_4.JPG`,
+        caption: "Slide 4",
+      },
+    ],
+  },
 ];
 
 export default treks;
