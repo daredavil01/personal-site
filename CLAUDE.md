@@ -181,7 +181,7 @@ Ask the user these questions, then append a new object to the bottom of the arra
 
 **Mechanical steps:**
 - `id` = last `id` in the array + 1
-- Build `photos` array with one entry per photo; captions are `"Slide 1"`, `"Slide 2"`, etc.
+- Build `slideImages` array with one entry per photo; captions are `"Slide 1"`, `"Slide 2"`, etc.
 - Path template: `` { url: `${process.env.PUBLIC_URL}/images/treks/[filename]`, caption: "Slide N" } ``
 - Include `blog_link` only if the user provided one — omit the key entirely otherwise
 - Append the new object at the bottom of the array in `treks.js`

@@ -7,7 +7,7 @@ const treks = [
     trek_time: "1 Hrs",
     endurance_level: "Easy",
     date: "17-02-2019",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/tikona_1.jpg`,
         caption: "Slide 1",
@@ -24,7 +24,7 @@ const treks = [
     trek_time: "0.5 Hrs",
     endurance_level: "Easy",
     date: "25-06-2019",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/panhala_1.jpeg`,
         caption: "Slide 1",
@@ -43,7 +43,7 @@ const treks = [
     date: "13-12-2019",
     blog_link:
       "https://daredavil453624413.wordpress.com/2020/08/18/%e0%a4%b5%e0%a4%be%e0%a4%b8%e0%a5%8b%e0%a4%9f%e0%a4%be-%e0%a4%98%e0%a4%a8%e0%a4%a6%e0%a4%be%e0%a4%9f-%e0%a4%9c%e0%a4%82%e0%a4%97%e0%a4%b2%e0%a4%be%e0%a4%82%e0%a4%a8%e0%a5%80-%e0%a4%b5%e0%a5%87/",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/vasota_1.jpg`,
         caption: "Slide 1",
@@ -68,7 +68,7 @@ const treks = [
     trek_time: "2 hrs",
     endurance_level: "Medium",
     date: "01-01-2023",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/dhak_bahiri_1.jpg`,
         caption: "Slide 1",
@@ -89,7 +89,7 @@ const treks = [
     trek_time: "3 hrs",
     endurance_level: "Medium",
     date: "02-07-2023",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/kalavantin_durga_1.jpg`,
         caption: "Slide 1",
@@ -114,7 +114,7 @@ const treks = [
     trek_time: "3 hrs",
     endurance_level: "Medium",
     date: "23-07-2023",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/hadsar_1.jpg`,
         caption: "Slide 1",
@@ -135,7 +135,7 @@ const treks = [
     trek_time: "4 hrs",
     endurance_level: "Hard",
     date: "13-08-2023",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/bhimashankar_1.jpg`,
         caption: "Slide 1",
@@ -164,7 +164,7 @@ const treks = [
     trek_time: "3 hrs",
     endurance_level: "Medium",
     date: "03-09-2023",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/kailasgad_1.jpg`,
         caption: "Slide 1",
@@ -193,7 +193,7 @@ const treks = [
     trek_time: "3 hrs",
     endurance_level: "Medium",
     date: "14-01-2024",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/raigad_1.jpg`,
         caption: "Slide 1",
@@ -218,7 +218,7 @@ const treks = [
     trek_time: "2 hrs",
     endurance_level: "Medium",
     date: "07-09-2024",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/sinhgad_1.jpg`,
         caption: "Slide 1",
@@ -245,7 +245,7 @@ const treks = [
     date: "06-10-2024",
     blog_link:
       "https://daredavil453624413.wordpress.com/2024/10/07/jivdhan-fort-trek/",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/jivdhan_1.jpg`,
         caption: "Slide 1",
@@ -272,7 +272,7 @@ const treks = [
     date: "05-01-2025",
     blog_link:
       "https://daredavil453624413.wordpress.com/2025/01/08/padmadurga-visit/",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/padmadurga_1.jpg`,
         caption: "Slide 1",
@@ -291,7 +291,7 @@ const treks = [
     date: "20-07-2025",
     blog_link:
       "https://daredavil453624413.wordpress.com/2025/07/29/bhimashankar-padarwadi-trek/",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/bhimashankar_padarwadi_1.jpg`,
         caption: "Slide 1",
@@ -318,7 +318,7 @@ const treks = [
     date: "02-08-2025",
     blog_link:
       "https://daredavil453624413.wordpress.com/2025/08/04/panhala-to-pawankhind/",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_1.jpg`,
         caption: "Slide 1",
@@ -353,7 +353,7 @@ const treks = [
     date: "30-12-2023",
     blog_link:
       "https://daredavil453624413.wordpress.com/2023/12/31/katraj-to-sinhgad-k2s/",
-    photos: [
+    slideImages: [
       {
         url: `${PUBLIC_URL}/images/treks/k2s_1.png`,
         caption: "Slide 1",

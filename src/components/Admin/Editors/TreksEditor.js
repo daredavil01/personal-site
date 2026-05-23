@@ -15,7 +15,7 @@ const emptyTrek = (id) => ({
   trek_time: '2 Hrs',
   endurance_level: 'Medium',
   date: '',
-  photos: [],
+  slideImages: [],
 });
 
 const templateFn = (items) => {
@@ -134,12 +134,12 @@ const TrekForm = ({ trek, onChange, onRemove }) => (
     </FormField>
     <FormField label="Photos">
       <ArrayItemEditor
-        items={trek.photos}
+        items={trek.slideImages}
         addLabel="Add Photo"
         emptyMessage="No photos yet."
         onAdd={() => {
-          const n = trek.photos.length + 1;
-          onChange({ photos: [...trek.photos, { url: '', caption: `Slide ${n}` }] });
+          const n = trek.slideImages.length + 1;
+          onChange({ slideImages: [...trek.slideImages, { url: '', caption: `Slide ${n}` }] });
         }}
         renderItem={(photo, _unused, index) => (
           <PhotoForm
@@ -147,11 +147,11 @@ const TrekForm = ({ trek, onChange, onRemove }) => (
             fortName={trek.fort_name}
             photoIndex={index}
             onChange={(updated) => {
-              const next = [...trek.photos];
+              const next = [...trek.slideImages];
               next[index] = updated;
-              onChange({ photos: next });
+              onChange({ slideImages: next });
             }}
-            onRemove={() => onChange({ photos: trek.photos.filter((_p, idx) => idx !== index) })}
+            onRemove={() => onChange({ slideImages: trek.slideImages.filter((_p, idx) => idx !== index) })}
           />
         )}
       />

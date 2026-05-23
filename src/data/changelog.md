@@ -7,6 +7,31 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.4.4] — 2026-04-26
+
+### Changed
+- **CI workflow** (`.github/workflows/node.js.yml`): Updated build step from `npm run predeploy` to `npm run build`; renamed step label from "Build and Statically Render" to "Build".
+- **docs/deployment.md**: Full rewrite to document Cloudflare Pages deployment (build command, output dir, dashboard settings, env vars). Removed outdated GitHub Pages / `gh-pages` instructions.
+- **docs/architecture.md**: Major rewrite to reflect current codebase — updated directory structure (added `hooks/`, `context/`, `utils/`, `cms-content/`), all 16 routes, CMS data flow, and known data inconsistencies table.
+- **docs/features.md**: Full rewrite covering all current pages (Treks, Books, Admin CMS, Changelog, dark mode, etc.) and accurate technical notes.
+- **CLAUDE.md**: Updated Treks Page instructions to use `slideImages` field name (was `photos`).
+
+### Removed
+- **GitHub Pages workflow** (`.github/workflows/github-pages.yml`): Deleted — site is on Cloudflare Pages; this workflow was deploying to a `gh-pages` branch that is no longer used.
+- **`predeploy` / `deploy` scripts** (`package.json`): Removed — both scripts depend on `gh-pages` and `react-snap`, neither of which applies to Cloudflare Pages.
+- **`gh-pages`** (`package.json` dependency): Removed unused GitHub Pages deploy package.
+- **`react-snap`** (`package.json` devDependency): Removed — pre-rendering step only used in the now-deleted `predeploy` script.
+- **`react-ga`** (`package.json` dependency): Removed — Google Analytics package with zero imports anywhere in `src/`.
+- **`react-burger-menu`** (`package.json` dependency): Removed — replaced by a custom hamburger drawer component; package was never imported.
+- **`yaml`** (`package.json` dependency): Removed — no imports found across `src/`.
+- **`src/components/Sports/SportsV2.js`**: Deleted dead component — replaced by the tabbed Sports interface (SportsStatistics + SportsInteractive + SportsDefault).
+- **`src/components/Sports/SportV2.js`**: Deleted dead component — only referenced by the deleted SportsV2.js.
+- **`src/components/Challenges/Dashboard.js`**: Deleted dead component — built but never imported by `Challenges.js`.
+- **`src/data/now.md`**: Deleted orphaned file — the original flat-markdown Now page, superseded by the Decap CMS approach in v6.4.0; had zero imports anywhere.
+- **`photos` field** (`src/data/treks.js` and Treks components): Renamed to `slideImages` to match the field name used in Sports and Instagram. Updated `TreksDefault.js`, `TrekDetailsModal.js`, `TreksTimeline.js`, and `TreksEditor.js`.
+
+---
+
 ## [v6.4.3] — 2026-04-26
 
 ### Fixed
