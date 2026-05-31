@@ -172,7 +172,7 @@ const TreksDefault = ({ onTrekClick }) => {
                   <img
                     src={trek.slideImages[0].url}
                     alt={trek.fort_name}
-                    className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 ) : (

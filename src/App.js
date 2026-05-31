@@ -26,31 +26,33 @@ const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const Admin = lazy(() => import("./pages/Admin"));
+const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 
 const App = () => (
   <HelmetProvider>
-  <BrowserRouter basename={PUBLIC_URL}>
-    <Suspense fallback={<Main />}>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/stats" element={<Stats />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/resume" element={<Resume />} />
-        <Route path="/instagram" element={<Instagram />} />
-        <Route path="/sports" element={<SportsPage />} />
-        <Route path="/now" element={<Now />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/challenges" element={<Challenges />} />
-        <Route path="/100-days-to-offload" element={<OneHundredDays />} />
-        <Route path="/changelog" element={<Changelog />} />
-        <Route path="/treks" element={<TreksPage />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
-  </BrowserRouter>
+    <BrowserRouter basename={PUBLIC_URL}>
+      <Suspense fallback={<Main />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/stats" element={<Stats />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/resume" element={<Resume />} />
+          <Route path="/instagram" element={<Instagram />} />
+          <Route path="/sports" element={<SportsPage />} />
+          <Route path="/now" element={<Now />} />
+          <Route path="/books" element={<Books />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/100-days-to-offload" element={<OneHundredDays />} />
+          <Route path="/changelog" element={<Changelog />} />
+          <Route path="/treks" element={<TreksPage />} />
+          <Route path="/interactive-me" element={<InteractiveMePage />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   </HelmetProvider>
 );
 

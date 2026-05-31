@@ -41,6 +41,12 @@ const features = [
     icon: "fitness_center",
   },
   {
+    title: "Interactive Me",
+    desc: "A shuffled, image-first visual timeline of every marathon and mountain trek — cards connected by curves, auto-scrolling through the moments.",
+    path: "/interactive-me",
+    icon: "timeline",
+  },
+  {
     title: "Vital Stats",
     desc: "A data-driven snapshot of my activities: from the number of books read and kilometers run to the lines of code written.",
     path: "/stats",
