@@ -633,6 +633,50 @@ const books = [
     year: 2026,
     tags: ["Social", "Biography", "Marathi"],
   },
+  {
+    id: 44,
+    title: "मुक्तांगणाची गोष्ट",
+    author: "अनिल अवचट",
+    category: "Social",
+    language: "Marathi",
+    translator: null,
+    blog_link:
+      "https://www.canva.com/design/DAGq0rZf2fk/Hu3_IoARZzL-MggGgszADA/view?utlId=hdf65690648#9",
+    blog_platform: "Canva",
+    description:
+      "मुक्तांगणाची गोष्ट हे व्यसनाच्या अंधारातून बाहेर पडून पुन्हा नव्याने आनंदी आयुष्य कसं जगायचं, याचा मार्ग दाखवणाऱ्या 'मुक्तांगण' संस्थेच्या उभारणीची आणि तिथल्या माणसांच्या जिद्दीची हृदयस्पर्शी कहाणी सांगणारं पुस्तक आहे.",
+    year: 2026,
+    tags: ["Social", "History", "Marathi"],
+  },
+  {
+    id: 45,
+    title: "कर के देखो",
+    author: "सदा डुंबरे ",
+    category: "Social",
+    language: "Marathi",
+    translator: null,
+    blog_link:
+      "https://www.canva.com/design/DAGq0rZf2fk/Hu3_IoARZzL-MggGgszADA/view?utlId=hdf65690648#10",
+    blog_platform: "Canva",
+    description:
+      "कर के देखो हे सदा डुंबरे यांनी संपादन केलेले, राष्ट्रीय व आंतरराष्ट्रीय स्तरावरील तज्ज्ञांच्या वैचारिक आणि कृतीप्रवण भाषणांचा संग्रह असणारे एक प्रेरणादायी पुस्तक आहे.",
+    year: 2026,
+    tags: ["Social", "Biography", "Marathi"],
+  },
+  {
+    id: 46,
+    title: "Usain Bolt: Faster Than Lightning",
+    author: "Matt Allen",
+    category: "Sports",
+    language: "English",
+    translator: null,
+    blog_link: "https://sankettambare.substack.com/p/usain-bolt-book-review",
+    blog_platform: "Substack",
+    description:
+      "Usain Bolt: Faster Than Lightning is a biography of the legendary Jamaican sprinter Usain Bolt, detailing his rise to fame and his record-breaking performances.",
+    year: 2026,
+    tags: ["Sports", "Biography", "Athletics"],
+  },
 ];
 
 export default books;

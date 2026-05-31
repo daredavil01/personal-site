@@ -328,6 +328,42 @@ const data = [
     blog_platform: "Substack",
     language: "English",
   },
+  {
+    id: 28,
+    blog_title: "Bharat Ek Khoj: The Magnificent Satpuda",
+    blog_description:
+      "The time traveler`s narration of people still living the pre-independence life!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["DigitalWellbeing", "BharatEkKhoj"],
+    blog_date: "2026-05-23",
+    blog_link:
+      "https://sankettambare.substack.com/p/bharat-ek-khoj-the-magnificent-satpuda",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 29,
+    blog_title: "Reflections on Digital Life",
+    blog_description: "Gauging the overall impact of the good decisions!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["DigitalWellbeing", "Reflections"],
+    blog_date: "2026-05-24",
+    blog_link:
+      "https://sankettambare.substack.com/p/reflections-on-digital-life",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 30,
+    blog_title: "The Digital Echo-Chamber",
+    blog_description: "Deciphering the champion's journey!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["BookReview", "Running"],
+    blog_date: "2026-05-30",
+    blog_link: "https://sankettambare.substack.com/p/usain-bolt-book-review",
+    blog_platform: "Substack",
+    language: "English",
+  },
 ];
 
 export default data;

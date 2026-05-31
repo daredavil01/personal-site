@@ -7,6 +7,13 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.4.5] — 2026-05-31
+
+### Changed
+- **Now Page Data** (`src/data/now-data.js`): Filled in May 2026 blogs (6 entries) and books (3 entries) for the current month section.
+
+---
+
 ## [v6.4.4] — 2026-04-26
 
 ### Changed
