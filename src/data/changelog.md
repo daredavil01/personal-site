@@ -7,6 +7,20 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.5.0] — 2026-05-31
+
+### Added
+- **Interactive Me Page** (`src/pages/InteractiveMe.js`, `src/components/InteractiveMe/`): New `/interactive-me` page with image-first vertical timeline. Images from Sports and Treks data are shuffled on mount, displayed as alternating left/right cards connected by SVG bezier curves, and the page auto-scrolls (pauses on hover). Includes SPORTS and TREKS sub-tabs. Added to navbar "More" dropdown (`src/data/routes.js`) and homepage feature grid (`src/pages/Index.js`).
+
+---
+
+## [v6.4.6] — 2026-05-31
+
+### Fixed
+- **SportsDefault, SportsInteractive, TreksDefault** (`src/components/Sports/`, `src/components/Treks/`): Removed default `grayscale` filter from card images so photos display in full colour.
+
+---
+
 ## [v6.4.5] — 2026-05-31
 
 ### Changed

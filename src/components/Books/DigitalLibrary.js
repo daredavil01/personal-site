@@ -78,7 +78,7 @@ const DigitalLibrary = ({ books }) => {
                          || (filterReview === 'No Review' && !book.blog_link);
     
     return matchesSearch && matchesTag && matchesLanguage && matchesReview;
-  });
+  }).sort((a, b) => b.id - a.id);
 
   return (
     <div className="flex flex-col gap-12 w-full">

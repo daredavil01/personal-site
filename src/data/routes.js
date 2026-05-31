@@ -53,6 +53,11 @@ const routes = [
     path: "/treks",
   },
   {
+    label: "Interactive Me",
+    path: "/interactive-me",
+    dropdown: true,
+  },
+  {
     label: "Contact",
     path: "/contact",
     dropdown: true,
