@@ -364,6 +364,81 @@ const data = [
     blog_platform: "Substack",
     language: "English",
   },
+  {
+    id: 31,
+    blog_title: "कोकणातील भ्रमंती आणि त्याने समृद्ध केलेले माझे भाव-विश्व",
+    blog_description:
+      "कोकणाच्या किनाऱ्यांनी दिलेली समृद्धी आणि भाव-विश्वाचा शोध!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["BharatEkKhoj", "Konkan", "Travel"],
+    blog_date: "2026-06-01",
+    blog_link:
+      "https://daredavil453624413.wordpress.com/2026/06/01/bharat-ek-khoj-konkan/",
+    blog_platform: "WordPress",
+    language: "Marathi",
+  },
+  {
+    id: 32,
+    blog_title: "Maintaining rhythm in the chaos!",
+    blog_description: "Tracing the way forward to calm future!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["DigitalWellbeing", "Mindfulness"],
+    blog_date: "2026-06-02",
+    blog_link:
+      "https://sankettambare.substack.com/p/maintaining-rhythm-in-the-chaos",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 33,
+    blog_title: "Life: An Odyssey of Purpose!",
+    blog_description:
+      "Decoding, deciphering and engineering your own meaningful path!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["Life", "Purpose", "PersonalDevelopment"],
+    blog_date: "2026-06-03",
+    blog_link:
+      "https://sankettambare.substack.com/p/life-an-odyssey-of-purpose",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 34,
+    blog_title: "What's with all this exploration?",
+    blog_description: "Decoding the abundance of energy in us!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["PersonalDevelopment", "Curiosity", "Habits"],
+    blog_date: "2026-06-04",
+    blog_link:
+      "https://sankettambare.substack.com/p/whats-with-all-this-exploration",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 35,
+    blog_title: "Chronicles of Wandering Mind: S2-E02",
+    blog_description: "Another edition of the wanderers' archive!",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["Newsletter", "DigitalWellbeing"],
+    blog_date: "2026-06-05",
+    blog_link:
+      "https://sankettambare.substack.com/p/chronicles-of-wandering-mund-s2-e02",
+    blog_platform: "Substack",
+    language: "English",
+  },
+  {
+    id: 36,
+    blog_title: "Digital Nomad's hustling trails!",
+    blog_description:
+      "Decoding opportunities in the hustle around us and why they matter.",
+    challenge_id: "100_days_to_offload",
+    blog_tags: ["DigitalNomad", "AI", "CareerDevelopment"],
+    blog_date: "2026-06-06",
+    blog_link:
+      "https://sankettambare.substack.com/p/digital-nomads-hustling-trails",
+    blog_platform: "Substack",
+    language: "English",
+  },
 ];
 
 export default data;
