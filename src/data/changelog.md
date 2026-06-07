@@ -7,6 +7,14 @@ This project does not use semantic versioning; entries are grouped by date and f
 
 ---
 
+## [v6.6.0] — 2026-06-07
+
+### Added
+- **Sports Page URL params** (`src/pages/Sports.js`): Active tab is now synced to a `?view=` URL query parameter (`statistics`, `interactive`, `default`). Navigating directly to a URL with a `?view=` param opens the correct tab on load; switching tabs updates the URL in place via `replaceState`. The Share button automatically copies the param-inclusive URL.
+- **100 Days to Offload entries** (`src/data/100DaysToOffload.js`): Added 6 new posts (ids 31–36) from June 2026 — Bharat Ek Khoj Konkan (Marathi, WordPress), Maintaining rhythm in the chaos, Life: An Odyssey of Purpose, What's with all this exploration?, Chronicles of Wandering Mind S2-E02, and Digital Nomad's hustling trails.
+
+---
+
 ## [v6.5.0] — 2026-05-31
 
 ### Added
