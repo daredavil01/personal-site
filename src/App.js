@@ -27,6 +27,7 @@ const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const Admin = lazy(() => import("./pages/Admin"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
+const MindMap = lazy(() => import("./pages/MindMap"));
 
 const App = () => (
   <HelmetProvider>
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/changelog" element={<Changelog />} />
           <Route path="/treks" element={<TreksPage />} />
           <Route path="/interactive-me" element={<InteractiveMePage />} />
+          <Route path="/mindmap" element={<MindMap />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
