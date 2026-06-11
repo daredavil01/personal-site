@@ -47,6 +47,12 @@ const features = [
     icon: "timeline",
   },
   {
+    title: "Mind Map",
+    desc: "Everything on this site visualised in one place — an interactive radial map of books, marathons, treks, projects, and blogs. Click any bubble to explore.",
+    path: "/mindmap",
+    icon: "account_tree",
+  },
+  {
     title: "Vital Stats",
     desc: "A data-driven snapshot of my activities: from the number of books read and kilometers run to the lines of code written.",
     path: "/stats",

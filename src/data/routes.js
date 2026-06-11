@@ -58,6 +58,11 @@ const routes = [
     dropdown: true,
   },
   {
+    label: "Mind Map",
+    path: "/mindmap",
+    dropdown: true,
+  },
+  {
     label: "Contact",
     path: "/contact",
     dropdown: true,
