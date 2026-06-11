@@ -65,11 +65,11 @@ const MindMap = () => (
           Mind Map
         </h1>
         <p className="font-body text-stone-500 dark:text-stone-400 text-base md:text-lg max-w-xl">
-          Everything on this site, visualised. Click a category bubble to explore its items, then click any item to see details.
+          Everything on this site, visualised as one explorable map. Click a category bubble to zoom into its items, then click any bubble for details.
         </p>
         <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 text-xs font-label">
           <span className="material-symbols-outlined text-sm">touch_app</span>
-          Tap a category to expand · Tap any item for details · Scroll to pan on mobile
+          Click a category to zoom in · Drag to pan · Scroll or pinch to zoom
         </div>
       </div>
 
