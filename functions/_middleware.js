@@ -104,6 +104,7 @@ class TitleRewriter {
   constructor(title) {
     this.title = title;
   }
+
   element(element) {
     element.setInnerContent(this.title);
   }
@@ -118,6 +119,7 @@ class HeadInjector {
     this.html = html;
     this.done = false;
   }
+
   element(element) {
     if (!this.done) {
       element.append(this.html, { html: true });

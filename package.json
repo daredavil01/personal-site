@@ -13,7 +13,7 @@
     "build": "rimraf ./build && react-scripts build",
     "start": "react-scripts start",
     "dev": "react-scripts start",
-    "lint": "eslint **/*.js",
+    "lint": "eslint src scripts functions --ext .js",
     "test": "npx jest",
     "analyze": "npm run build && source-map-explorer build/static/js/*.chunk.js",
     "cms:server": "npx netlify-cms-proxy-server",

@@ -148,10 +148,9 @@ function syncNow() {
     return m;
   });
 
-  const content =
-    `/* eslint-disable max-len */\n` +
-    `export const nowMeta = ${jsSerialize(nowMeta)};\n\n` +
-    `export const nowData = ${jsSerialize(deduped)};\n`;
+  const content =    `/* eslint-disable max-len */\n`
+    + `export const nowMeta = ${jsSerialize(nowMeta)};\n\n`
+    + `export const nowData = ${jsSerialize(deduped)};\n`;
 
   writeFile(outPath, content);
   console.log(`     nowMeta + nowData (${deduped.length} months)`);
@@ -241,9 +240,9 @@ function syncResume() {
   const outBase = path.join(ROOT, 'src/data/resume');
 
   const collections = [
-    { dir: 'positions',      out: 'positions.js',      varName: 'positions',      sort: false },
-    { dir: 'degrees',        out: 'degrees.js',         varName: 'degrees',        sort: false },
-    { dir: 'certifications', out: 'certifications.js',  varName: 'certifications', sort: false },
+    { dir: 'positions', out: 'positions.js', varName: 'positions', sort: false },
+    { dir: 'degrees', out: 'degrees.js', varName: 'degrees', sort: false },
+    { dir: 'certifications', out: 'certifications.js', varName: 'certifications', sort: false },
   ];
 
   for (const { dir, out, varName, sort } of collections) {
@@ -274,13 +273,13 @@ function syncResume() {
 
 console.log('\nCMS Sync: markdown → JS data files\n');
 
-console.log('Now Page:');     syncNow();
-console.log('\nBooks:');       syncBooks();
-console.log('\n100 Days:');    syncHundredDays();
-console.log('\nSports:');      syncSports();
-console.log('\nTreks:');       syncTreks();
-console.log('\nProjects:');    syncProjects();
-console.log('\nInstagram:');   syncInstagram();
-console.log('\nResume:');      syncResume();
+console.log('Now Page:'); syncNow();
+console.log('\nBooks:'); syncBooks();
+console.log('\n100 Days:'); syncHundredDays();
+console.log('\nSports:'); syncSports();
+console.log('\nTreks:'); syncTreks();
+console.log('\nProjects:'); syncProjects();
+console.log('\nInstagram:'); syncInstagram();
+console.log('\nResume:'); syncResume();
 
 console.log('\nDone. Commit updated data files and push to redeploy.\n');

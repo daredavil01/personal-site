@@ -59,5 +59,26 @@
     "react/prop-types": 0,
     "react/require-default-props": 0
   },
-  "plugins": ["react"]
+  "plugins": ["react"],
+  "overrides": [
+    {
+      "files": ["scripts/**/*.js"],
+      "rules": {
+        "no-console": "off",
+        "no-restricted-syntax": "off",
+        "no-continue": "off",
+        "no-multi-spaces": ["error", { "ignoreEOLComments": false, "exceptions": { "Property": true, "VariableDeclarator": true, "ImportDeclaration": true, "CallExpression": true } }]
+      }
+    },
+    {
+      "files": ["functions/**/*.js"],
+      "globals": {
+        "HTMLRewriter": "readonly"
+      },
+      "rules": {
+        "max-classes-per-file": "off",
+        "import/prefer-default-export": "off"
+      }
+    }
+  ]
 }

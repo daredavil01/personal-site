@@ -67,16 +67,14 @@ function loadESModule(relPath) {
   src = src.replace(/\bexport default (\w+);/g, 'exports.default = $1;');
 
   // `export { X, Y }` → `exports.X = X; exports.Y = Y;`
-  src = src.replace(/\bexport\s*\{([^}]+)\}/g, (_, names) =>
-    names.split(',').map(n => {
-      const t = n.trim();
-      return `exports.${t} = ${t};`;
-    }).join('\n')
-  );
+  src = src.replace(/\bexport\s*\{([^}]+)\}/g, (_, names) => names.split(',').map((n) => {
+    const t = n.trim();
+    return `exports.${t} = ${t};`;
+  }).join('\n'));
 
   // Append named export assignments
   if (namedExports.length > 0) {
-    src += '\n' + namedExports.map(n => `exports.${n} = ${n};`).join('\n');
+    src += `\n${namedExports.map((n) => `exports.${n} = ${n};`).join('\n')}`;
   }
 
   const exportsObj = {};
@@ -235,17 +233,17 @@ function seedResumeCertifications() {
 
 console.log('\nCMS Seed: src/data/*.js → src/cms-content/\n');
 
-console.log('Now — Meta:');    seedNowMeta();
+console.log('Now — Meta:'); seedNowMeta();
 console.log('\nNow — Months:'); seedNowMonths();
-console.log('\nBooks:');        seedBooks();
-console.log('\n100 Days:');     seedHundredDays();
-console.log('\nSports:');       seedSports();
-console.log('\nTreks:');        seedTreks();
-console.log('\nProjects:');     seedProjects();
-console.log('\nInstagram:');    seedInstagram();
-console.log('\nResume — Positions:');      seedResumePositions();
-console.log('\nResume — Degrees:');        seedResumeDegrees();
-console.log('\nResume — Skills:');         seedResumeSkills();
+console.log('\nBooks:'); seedBooks();
+console.log('\n100 Days:'); seedHundredDays();
+console.log('\nSports:'); seedSports();
+console.log('\nTreks:'); seedTreks();
+console.log('\nProjects:'); seedProjects();
+console.log('\nInstagram:'); seedInstagram();
+console.log('\nResume — Positions:'); seedResumePositions();
+console.log('\nResume — Degrees:'); seedResumeDegrees();
+console.log('\nResume — Skills:'); seedResumeSkills();
 console.log('\nResume — Certifications:'); seedResumeCertifications();
 
 console.log('\nDone. Commit src/cms-content/ and push to redeploy.\n');
