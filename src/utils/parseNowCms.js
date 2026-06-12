@@ -42,22 +42,31 @@ function nestSections(flat) {
   return { month, year, isCurrent: !!isCurrent, sections };
 }
 
-function urlOf(mod) {
-  return mod?.default ?? mod;
-}
+// import.meta.glob is a Vite compile-time macro: each match resolves to the
+// served URL of the markdown file, fetched and parsed at runtime. Jest maps
+// this module to parseNowCms.jest-stub.js (see jest.config.js) because the
+// CommonJS test runtime cannot evaluate import.meta.
+const MONTH_URLS = import.meta.glob("../cms-content/now/months/*.md", {
+  query: "?url",
+  import: "default",
+  eager: true,
+});
+
+const META_URLS = import.meta.glob("../cms-content/now/meta.md", {
+  query: "?url",
+  import: "default",
+  eager: true,
+});
 
 export async function loadNowMeta() {
-  // eslint-disable-next-line import/no-webpack-loader-syntax,global-require
-  const url = urlOf(require("../cms-content/now/meta.md"));
+  const url = Object.values(META_URLS)[0];
   const text = await fetch(url).then((r) => r.text());
   return parseFrontMatter(text);
 }
 
 export async function loadNowMonths() {
-  const ctx = require.context("../cms-content/now/months", false, /\.md$/);
   const months = await Promise.all(
-    ctx.keys().map(async (key) => {
-      const url = urlOf(ctx(key));
+    Object.values(MONTH_URLS).map(async (url) => {
       const text = await fetch(url).then((r) => r.text());
       return nestSections(parseFrontMatter(text));
     }),

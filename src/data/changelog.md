@@ -9,6 +9,16 @@ patch for fixes and tweaks.
 
 ---
 
+## [v8.0.0] — 2026-06-13
+
+### Changed
+- **Build system: Create React App → Vite** (`vite.config.js`, `package.json`, `index.html`): `react-scripts` (EOL, unmaintained) replaced with Vite 6. `index.html` moved to the project root with `%PUBLIC_URL%` placeholders resolved; `process.env.PUBLIC_URL` shimmed via `define` so the generated data files keep working unmodified; an esbuild loader shim lets JSX stay in `.js` files; build output remains `build/` so the Cloudflare Pages config is untouched. Production build now completes in ~4s and `npm audit` drops from 67 findings to 19 (0 critical).
+- **Now page data loading** (`src/utils/parseNowCms.js`): webpack's `require.context` replaced with Vite's `import.meta.glob` for the month/meta markdown files; jest maps the module to a stub (`parseNowCms.jest-stub.js`) since the CJS test runtime cannot evaluate `import.meta`.
+- **Changelog page** (`src/pages/Changelog.js`): markdown fetched via Vite's `?url` import suffix.
+- **Tooling** (`package.json`, `jest.config.js`, `.eslintrc`): `jest` and `jest-environment-jsdom` became explicit devDependencies (previously transitive via react-scripts); `import/no-unresolved` taught to ignore Vite's `?url` suffix.
+
+---
+
 ## [v7.1.0] — 2026-06-13
 
 ### Added
