@@ -48,7 +48,7 @@ const Hamburger = () => {
         </div>
 
         {/* Nav links */}
-        <nav className="flex flex-col px-4 py-4 gap-0.5 flex-grow">
+        <nav aria-label="Mobile" className="flex flex-col px-4 py-4 gap-0.5 flex-grow">
           {allRoutes.map((l) => {
             const isActive = location.pathname === l.path
               || (location.pathname.startsWith(l.path) && l.path !== '/');

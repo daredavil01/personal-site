@@ -79,10 +79,7 @@ const features = [
 ];
 
 const Index = () => (
-  <Main
-    description="Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator."
-    image="https://daredavil.pages.dev/images/me.jpg"
-  >
+  <Main>
     <article className="w-full flex flex-col gap-12">
       <header className="mb-4">
         <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4">Sanket Tambare</p>
@@ -125,11 +122,11 @@ const Index = () => (
       <section className="mt-4 p-12 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-2xl text-center">
         <h2 className="font-headline text-3xl font-black mb-6 text-stone-900 dark:text-stone-100">Let&apos;s build the future together.</h2>
         <p className="max-w-xl mx-auto text-stone-500 dark:text-stone-400 font-body mb-8">
-          Whether it&apos;s a technical challenge, a research collaboration, or sharing a mile 
+          Whether it&apos;s a technical challenge, a research collaboration, or sharing a mile
           on the road, I&apos;m always open to meaningful engagement.
         </p>
-        <Link 
-          to="/contact" 
+        <Link
+          to="/contact"
           className="inline-block px-8 py-3 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-900 hover:text-white dark:hover:bg-stone-100 dark:hover:text-stone-950 transition-all rounded-sm no-underline"
         >
           Start a Conversation

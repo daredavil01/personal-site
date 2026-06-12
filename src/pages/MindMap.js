@@ -1,5 +1,4 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import Main from '../layouts/Main';
 import MindMapCanvas from '../components/MindMap/MindMapCanvas';
 
@@ -54,10 +53,6 @@ const categories = [
 
 const MindMap = () => (
   <Main>
-    <Helmet>
-      <title>Mind Map — Sanket Tambare</title>
-      <meta name="description" content="An interactive mindmap of everything on Sanket's personal site — books, marathons, treks, projects, and blogs." />
-    </Helmet>
 
     <div className="px-4 md:px-8 py-10 max-w-7xl mx-auto w-full">
       <div className="mb-8">

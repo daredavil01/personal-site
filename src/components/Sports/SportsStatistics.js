@@ -19,16 +19,16 @@ const SportsStatistics = () => {
     const cityCounts = {};
     const yearCounts = {};
     const dCounts = {};
-    const distTimes = {}; 
-    const best = {}; 
+    const distTimes = {};
+    const best = {};
 
     sportsData.forEach((race) => {
       const city = race.place.split(',').pop().trim();
       cityCounts[city] = (cityCounts[city] || 0) + 1;
-      
+
       const year = new Date(race.date).getFullYear();
       yearCounts[year] = (yearCounts[year] || 0) + 1;
-      
+
       const d = parseDistance(race.distance);
       if (d > 0) {
         dCounts[d] = (dCounts[d] || 0) + 1;
@@ -36,7 +36,7 @@ const SportsStatistics = () => {
         if (timeSec > 0) {
           if (!distTimes[d]) distTimes[d] = [];
           distTimes[d].push(timeSec);
-          
+
           if (!best[d] || timeSec < best[d].timeSec) {
             best[d] = { race, timeSec };
           }
@@ -129,7 +129,7 @@ const SportsStatistics = () => {
                   <span className="text-stone-500 dark:text-stone-400">{count} races ({pct}%)</span>
                 </div>
                 <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
-                  <div className="bg-secondary h-1.5 rounded-full" style={{ width: `${pct}%` }}></div>
+                  <div className="bg-secondary h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             );
@@ -220,7 +220,7 @@ const SportsStatistics = () => {
                   <span className="text-stone-500 dark:text-stone-400">{year.count} races</span>
                 </div>
                 <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
-                  <div className="bg-red-400 h-1.5 rounded-full" style={{ width: `${pct}%` }}></div>
+                  <div className="bg-red-400 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             );

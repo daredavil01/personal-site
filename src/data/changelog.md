@@ -2,8 +2,58 @@
 ---
 # Changelog
 
-All notable changes to this project are documented here, grouped by release period.
-This project does not use semantic versioning; entries are grouped by date and feature area.
+All notable changes to this project are documented here.
+Versioning follows the semver-style rules in CLAUDE.md: major for new pages/refactors/redesigns,
+minor for features and content additions (at most one minor version per calendar week),
+patch for fixes and tweaks.
+
+---
+
+## [v8.0.0] — 2026-06-13
+
+### Changed
+- **Build system: Create React App → Vite** (`vite.config.js`, `package.json`, `index.html`): `react-scripts` (EOL, unmaintained) replaced with Vite 6. `index.html` moved to the project root with `%PUBLIC_URL%` placeholders resolved; `process.env.PUBLIC_URL` shimmed via `define` so the generated data files keep working unmodified; an esbuild loader shim lets JSX stay in `.js` files; build output remains `build/` so the Cloudflare Pages config is untouched. Production build now completes in ~4s and `npm audit` drops from 67 findings to 19 (0 critical).
+- **Now page data loading** (`src/utils/parseNowCms.js`): webpack's `require.context` replaced with Vite's `import.meta.glob` for the month/meta markdown files; jest maps the module to a stub (`parseNowCms.jest-stub.js`) since the CJS test runtime cannot evaluate `import.meta`.
+- **Changelog page** (`src/pages/Changelog.js`): markdown fetched via Vite's `?url` import suffix.
+- **Tooling** (`package.json`, `jest.config.js`, `.eslintrc`): `jest` and `jest-environment-jsdom` became explicit devDependencies (previously transitive via react-scripts); `import/no-unresolved` taught to ignore Vite's `?url` suffix.
+
+---
+
+## [v7.1.0] — 2026-06-13
+
+### Added
+- **Race stats util** (`src/utils/raceStats.js`): Personal-best selection and race-time parsing/formatting extracted from the Stats page into pure, unit-tested helpers (11 jest tests).
+- **Shared page meta module** (`src/data/pageMeta.js`): Single source of truth for per-route title, description, and OG image — consumed by both the client layout (Helmet) and the Cloudflare crawler middleware. Adds previously missing `/interactive-me` and `/mindmap` entries.
+
+### Changed
+- **Meta tags** (`src/layouts/Main.js`, `functions/_middleware.js`, `src/pages/*`): Helmet and the crawler middleware now read the same `PAGE_META` by pathname; pages no longer pass duplicated title/description props, and drifted copies (About, Resume, 100 Days) were reconciled.
+- **Image loading** (`src/components/Instagram/ImageSlider.js` and gallery/timeline components): Slider slides are real `<img>` elements with `object-fit: contain` instead of CSS `background-image`, so the browser can lazy-load and async-decode them; Sports/Treks cards, Interactive Me timeline, and Projects gallery images now use `loading="lazy"` + `decoding="async"`.
+- **ESLint** (`.eslintrc`): Re-enabled `no-trailing-spaces`, `react/self-closing-comp`, `no-nested-ternary`, `react/no-unused-prop-types`, and `react/jsx-no-useless-fragment`; fixed all remaining violations so lint stays clean.
+- **About Page** (`src/components/About/AboutDocument.js`, `src/pages/About.js`): Replaced static markdown render with a structured three-section layout — "In 1 Minute" (bio + animated stat grid), "More Details" (six activity pillar cards with concise data-driven chips), and "Connect with me" (social links). Stats computed dynamically from data files.
+- **About Page** (`src/components/About/AboutDocument.js`): Enriched bio and pillar chips with researched details — Substack newsletter name (*The Wanderer's Technical Anecdotes*), *Dare Write's* podcast, Chronicles of Wandering Mind series, education (B.Tech CS RIT Sangli 2021, Tech & Policy Takshashila 2024), and design tools.
+- **Now Page** (`src/pages/Now.js`, `src/components/Now/NowDocument.js`, `src/components/Now/MonthSection.js`): Complete redesign — an interactive month-timeline pill switcher replaces the long scroll of stacked month cards; each month renders as a bento grid of section cards; daily rituals restyled as compact icon cards.
+- **100 Days To Offload Page** (`src/pages/OneHundredDays.js`): Interactive redesign — animated progress ring with pace tracking (target vs. ahead/behind), clickable calendar heatmap that opens posts, posts-per-month bar chart that filters the list, search plus tag/platform filter chips, and a responsive post-card grid. Removed the decorative SVG logo.
+
+---
+
+## [v7.0.0] — 2026-06-12
+
+### Added
+- **CI drift gate** (`.github/workflows/node.js.yml`): CI now runs `cms:sync` and fails if `src/data/*.js` disagrees with the CMS markdown, making `src/cms-content/` the enforced single source of truth.
+- **Prebuild sync** (`package.json`): `npm run build` regenerates `src/data/*.js` from markdown via a `prebuild` hook, so deploys always reflect CMS content.
+- **Improvement Plan** (`docs/improvement-plan.md`): Full repository audit, owner decisions, and milestone-based task plan with statuses.
+
+### Changed
+- **Content pipeline**: Removed the `/admin` panel (pages, editors, hooks, layouts) and the deprecated `src/data/now-data.js`; Decap CMS at `/cms/` is now the only editing UI and markdown the only content source.
+- **Images** (`public/images/`): Compressed the entire library from 114MB to 37MB with a 300KB-per-file hard cap; converted PNG photos to JPEG and updated all references.
+- **Docs**: README, CLAUDE.md, and architecture/data-flow docs aligned with the markdown-first pipeline; changelog header now states the semver rules; `package.json` version and Node engine requirement brought up to date.
+
+### Fixed
+- **CI** (`.github/workflows/node.js.yml`): Workflow targeted the retired `ubuntu-20.04` runner, so no run had completed since March; now runs on `ubuntu-latest` with actions v4 and npm caching.
+- **Test suite** (`src/__tests__/App.test.js`, `jest.setup.js`, `jest.config.js`): All 7 tests failed after dark mode shipped — renders now wrap in `ThemeProvider`, jsdom gets `matchMedia`/`IntersectionObserver` stubs, and jest-dom matchers are registered.
+- **Lint** (`package.json`): `eslint **/*.js` only matched ~5 files; the script now lints `src`, `scripts`, and `functions` entirely.
+- **Content drift**: 12 blog posts, 4 books, and 1 trek that existed only in `src/data/*.js` were backfilled into `src/cms-content/`, so syncing no longer deletes them.
+- **Broken images**: 53 `.heic` files (invisible in Chrome/Firefox/Edge) converted to JPEG with all references updated, restoring the Instagram gallery and the first Sports slideshow.
 
 ---
 

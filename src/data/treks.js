@@ -1,5 +1,4 @@
-const { PUBLIC_URL } = process.env;
-
+/* eslint-disable max-len */
 const treks = [
   {
     id: 1,
@@ -9,11 +8,11 @@ const treks = [
     date: "17-02-2019",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/tikona_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/tikona_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/tikona_2.jpeg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/tikona_2.jpeg`,
         caption: "Slide 2",
       },
     ],
@@ -26,11 +25,11 @@ const treks = [
     date: "25-06-2019",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_1.jpeg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_2.jpg`,
         caption: "Slide 2",
       },
     ],
@@ -41,23 +40,22 @@ const treks = [
     trek_time: "2 hrs",
     endurance_level: "Medium",
     date: "13-12-2019",
-    blog_link:
-      "https://daredavil453624413.wordpress.com/2020/08/18/%e0%a4%b5%e0%a4%be%e0%a4%b8%e0%a5%8b%e0%a4%9f%e0%a4%be-%e0%a4%98%e0%a4%a8%e0%a4%a6%e0%a4%be%e0%a4%9f-%e0%a4%9c%e0%a4%82%e0%a4%97%e0%a4%b2%e0%a4%be%e0%a4%82%e0%a4%a8%e0%a5%80-%e0%a4%b5%e0%a5%87/",
+    blog_link: "https://daredavil453624413.wordpress.com/2020/08/18/%e0%a4%b5%e0%a4%be%e0%a4%b8%e0%a5%8b%e0%a4%9f%e0%a4%be-%e0%a4%98%e0%a4%a8%e0%a4%a6%e0%a4%be%e0%a4%9f-%e0%a4%9c%e0%a4%82%e0%a4%97%e0%a4%b2%e0%a4%be%e0%a4%82%e0%a4%a8%e0%a5%80-%e0%a4%b5%e0%a5%87/",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/vasota_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/vasota_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/vasota_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/vasota_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/vasota_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/vasota_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/vasota_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/vasota_4.jpg`,
         caption: "Slide 4",
       },
     ],
@@ -70,15 +68,15 @@ const treks = [
     date: "01-01-2023",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/dhak_bahiri_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/dhak_bahiri_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/dhak_bahiri_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/dhak_bahiri_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/dhak_bahiri_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/dhak_bahiri_3.jpg`,
         caption: "Slide 3",
       },
     ],
@@ -91,19 +89,19 @@ const treks = [
     date: "02-07-2023",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/kalavantin_durga_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kalavantin_durga_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kalavatin_durga_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kalavatin_durga_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kalavatin_durga_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kalavatin_durga_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kalavatin_durga_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kalavatin_durga_4.jpg`,
         caption: "Slide 4",
       },
     ],
@@ -116,15 +114,15 @@ const treks = [
     date: "23-07-2023",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/hadsar_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/hadsar_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/hadsar_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/hadsar_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/hadsar_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/hadsar_3.jpg`,
         caption: "Slide 3",
       },
     ],
@@ -137,23 +135,23 @@ const treks = [
     date: "13-08-2023",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_4.jpg`,
         caption: "Slide 4",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_5.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_5.jpg`,
         caption: "Slide 5",
       },
     ],
@@ -166,23 +164,23 @@ const treks = [
     date: "03-09-2023",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/kailasgad_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kailasgad_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kailasgad_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kailasgad_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kailasgad_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kailasgad_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kailasgad_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kailasgad_4.jpg`,
         caption: "Slide 4",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/kailasgad_5.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/kailasgad_5.jpg`,
         caption: "Slide 5",
       },
     ],
@@ -195,19 +193,19 @@ const treks = [
     date: "14-01-2024",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/raigad_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/raigad_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/raigad_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/raigad_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/raigad_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/raigad_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/raigad_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/raigad_4.jpg`,
         caption: "Slide 4",
       },
     ],
@@ -220,19 +218,19 @@ const treks = [
     date: "07-09-2024",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/sinhgad_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/sinhgad_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/sinhgad_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/sinhgad_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/sinhgad_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/sinhgad_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/sinhgad_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/sinhgad_4.jpg`,
         caption: "Slide 4",
       },
     ],
@@ -243,23 +241,22 @@ const treks = [
     trek_time: "3 hrs",
     endurance_level: "Medium",
     date: "06-10-2024",
-    blog_link:
-      "https://daredavil453624413.wordpress.com/2024/10/07/jivdhan-fort-trek/",
+    blog_link: "https://daredavil453624413.wordpress.com/2024/10/07/jivdhan-fort-trek/",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/jivdhan_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/jivdhan_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/jivdhan_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/jivdhan_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/jivdhan_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/jivdhan_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/jivdhan_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/jivdhan_4.jpg`,
         caption: "Slide 4",
       },
     ],
@@ -270,15 +267,14 @@ const treks = [
     trek_time: "1 hrs",
     endurance_level: "Medium",
     date: "05-01-2025",
-    blog_link:
-      "https://daredavil453624413.wordpress.com/2025/01/08/padmadurga-visit/",
+    blog_link: "https://daredavil453624413.wordpress.com/2025/01/08/padmadurga-visit/",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/padmadurga_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/padmadurga_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/padmadurga_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/padmadurga_2.jpg`,
         caption: "Slide 2",
       },
     ],
@@ -289,23 +285,22 @@ const treks = [
     trek_time: "3 hrs",
     endurance_level: "Medium",
     date: "20-07-2025",
-    blog_link:
-      "https://daredavil453624413.wordpress.com/2025/07/29/bhimashankar-padarwadi-trek/",
+    blog_link: "https://daredavil453624413.wordpress.com/2025/07/29/bhimashankar-padarwadi-trek/",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_padarwadi_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_padarwadi_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_padarwadi_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_padarwadi_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_padarwadi_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_padarwadi_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/bhimashankar_padarwadi_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/bhimashankar_padarwadi_4.jpg`,
         caption: "Slide 4",
       },
     ],
@@ -316,31 +311,30 @@ const treks = [
     trek_time: "22 Hours",
     endurance_level: "Hard",
     date: "02-08-2025",
-    blog_link:
-      "https://daredavil453624413.wordpress.com/2025/08/04/panhala-to-pawankhind/",
+    blog_link: "https://daredavil453624413.wordpress.com/2025/08/04/panhala-to-pawankhind/",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_pawankhind_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_pawankhind_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_3.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_pawankhind_3.jpg`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_4.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_pawankhind_4.jpg`,
         caption: "Slide 4",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_5.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_pawankhind_5.jpg`,
         caption: "Slide 5",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/panhala_pawankhind_6.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/panhala_pawankhind_6.jpg`,
         caption: "Slide 6",
       },
     ],
@@ -351,19 +345,18 @@ const treks = [
     trek_time: "6 Hrs",
     endurance_level: "Hard",
     date: "30-12-2023",
-    blog_link:
-      "https://daredavil453624413.wordpress.com/2023/12/31/katraj-to-sinhgad-k2s/",
+    blog_link: "https://daredavil453624413.wordpress.com/2023/12/31/katraj-to-sinhgad-k2s/",
     slideImages: [
       {
-        url: `${PUBLIC_URL}/images/treks/k2s_1.png`,
+        url: `${process.env.PUBLIC_URL}/images/treks/k2s_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/k2s_2.png`,
+        url: `${process.env.PUBLIC_URL}/images/treks/k2s_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/k2s_3.png`,
+        url: `${process.env.PUBLIC_URL}/images/treks/k2s_3.jpg`,
         caption: "Slide 3",
       },
     ],
@@ -376,19 +369,19 @@ const treks = [
     date: "16-05-2026",
     photos: [
       {
-        url: `${PUBLIC_URL}/images/treks/talgad_1.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/talgad_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/talgad_2.jpg`,
+        url: `${process.env.PUBLIC_URL}/images/treks/talgad_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/talgad_3.JPG`,
+        url: `${process.env.PUBLIC_URL}/images/treks/talgad_3.JPG`,
         caption: "Slide 3",
       },
       {
-        url: `${PUBLIC_URL}/images/treks/talgad_4.JPG`,
+        url: `${process.env.PUBLIC_URL}/images/treks/talgad_4.JPG`,
         caption: "Slide 4",
       },
     ],

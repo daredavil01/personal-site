@@ -5,8 +5,6 @@
  * Run after Decap commits new content:  npm run cms:sync
  *
  * Reads:
- *   src/cms-content/now/meta.md             → nowMeta in src/data/now-data.js
- *   src/cms-content/now/months/*.md         → nowData in src/data/now-data.js
  *   src/cms-content/books/*.md              → src/data/books.js
  *   src/cms-content/100days/*.md            → src/data/100DaysToOffload.js
  *   src/cms-content/sports/*.md             → src/data/sports.js
@@ -32,6 +30,7 @@ function readMarkdownFiles(dir) {
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith('.md'))
+    .sort() // readdir order is filesystem-dependent; keep output deterministic
     .map((file) => {
       const raw = fs.readFileSync(path.join(dir, file), 'utf8');
       const match = raw.match(/^---\n([\s\S]*?)\n---/);
@@ -39,14 +38,6 @@ function readMarkdownFiles(dir) {
       return YAML.parse(match[1]);
     })
     .filter(Boolean);
-}
-
-function readSingleMarkdownFile(filePath) {
-  if (!fs.existsSync(filePath)) return null;
-  const raw = fs.readFileSync(filePath, 'utf8');
-  const match = raw.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return null;
-  return YAML.parse(match[1]);
 }
 
 function ensureDir(dir) {
@@ -91,72 +82,6 @@ function writeFile(filePath, content) {
   console.log(`  ✓ Written: ${path.relative(ROOT, filePath)}`);
 }
 
-// ── MONTH ORDER for sorting nowData ──────────────────────────────────────────
-
-const MONTH_ORDER = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
-function compareMonths(a, b) {
-  if (b.year !== a.year) return b.year - a.year;
-  return MONTH_ORDER.indexOf(b.month) - MONTH_ORDER.indexOf(a.month);
-}
-
-// ── sync now-data.js ──────────────────────────────────────────────────────────
-
-function syncNow() {
-  const metaPath = path.join(ROOT, 'src/cms-content/now/meta.md');
-  const monthsDir = path.join(ROOT, 'src/cms-content/now/months');
-  const outPath = path.join(ROOT, 'src/data/now-data.js');
-
-  const metaRaw = readSingleMarkdownFile(metaPath);
-  const monthFiles = readMarkdownFiles(monthsDir);
-
-  if (!metaRaw && monthFiles.length === 0) {
-    console.log('  – No Now CMS content found. Skipping.');
-    return;
-  }
-
-  // nowMeta: use CMS file if present
-  const nowMeta = metaRaw ?? {};
-
-  // nowData: each month file has top-level fields + section arrays/objects
-  // Re-nest them under `sections` to match the app's data shape
-  const nowData = monthFiles
-    .map(({ month, year, isCurrent, ...sections }) => ({
-      month,
-      year,
-      isCurrent: !!isCurrent,
-      sections: Object.fromEntries(
-        Object.entries(sections).filter(([, v]) => {
-          if (Array.isArray(v)) return v.length > 0;
-          if (v && typeof v === 'object') return Object.keys(v).length > 0;
-          return false;
-        })
-      ),
-    }))
-    .sort(compareMonths);
-
-  // Ensure only one month is marked current
-  let foundCurrent = false;
-  const deduped = nowData.map((m) => {
-    if (m.isCurrent) {
-      if (foundCurrent) return { ...m, isCurrent: false };
-      foundCurrent = true;
-    }
-    return m;
-  });
-
-  const content =
-    `/* eslint-disable max-len */\n` +
-    `export const nowMeta = ${jsSerialize(nowMeta)};\n\n` +
-    `export const nowData = ${jsSerialize(deduped)};\n`;
-
-  writeFile(outPath, content);
-  console.log(`     nowMeta + nowData (${deduped.length} months)`);
-}
-
 // ── sync books ────────────────────────────────────────────────────────────────
 
 function syncBooks() {
@@ -165,7 +90,7 @@ function syncBooks() {
   const sorted = entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   writeFile(
     path.join(ROOT, 'src/data/books.js'),
-    `/* eslint-disable max-len */\nconst books = ${JSON.stringify(sorted, null, 2)};\n\nexport default books;\n`
+    `/* eslint-disable max-len */\nconst books = ${jsSerialize(sorted)};\n\nexport default books;\n`
   );
   console.log(`     ${sorted.length} books`);
 }
@@ -178,7 +103,7 @@ function syncHundredDays() {
   const sorted = entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   writeFile(
     path.join(ROOT, 'src/data/100DaysToOffload.js'),
-    `/* eslint-disable max-len, quote-props */\nconst blogs = ${JSON.stringify(sorted, null, 2)};\n\nexport default blogs;\n`
+    `/* eslint-disable max-len */\nconst blogs = ${jsSerialize(sorted)};\n\nexport default blogs;\n`
   );
   console.log(`     ${sorted.length} posts`);
 }
@@ -191,7 +116,7 @@ function syncSports() {
   const sorted = entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   writeFile(
     path.join(ROOT, 'src/data/sports.js'),
-    `/* eslint-disable max-len */\nconst { PUBLIC_URL } = process.env;\n\nconst sportsData = ${jsSerialize(sorted)};\n\nexport default sportsData;\n`
+    `/* eslint-disable max-len */\nconst sportsData = ${jsSerialize(sorted)};\n\nexport default sportsData;\n`
   );
   console.log(`     ${sorted.length} races`);
 }
@@ -204,7 +129,7 @@ function syncTreks() {
   const sorted = entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   writeFile(
     path.join(ROOT, 'src/data/treks.js'),
-    `/* eslint-disable max-len */\nconst { PUBLIC_URL } = process.env;\n\nconst treks = ${jsSerialize(sorted)};\n\nexport default treks;\n`
+    `/* eslint-disable max-len */\nconst treks = ${jsSerialize(sorted)};\n\nexport default treks;\n`
   );
   console.log(`     ${sorted.length} treks`);
 }
@@ -216,7 +141,7 @@ function syncProjects() {
   if (entries.length === 0) { console.log('  – No projects files. Skipping.'); return; }
   writeFile(
     path.join(ROOT, 'src/data/projects.js'),
-    `/* eslint-disable max-len */\nconst { PUBLIC_URL } = process.env;\n\nconst data = ${jsSerialize(entries)};\n\nexport default data;\n`
+    `/* eslint-disable max-len */\nconst data = ${jsSerialize(entries)};\n\nexport default data;\n`
   );
   console.log(`     ${entries.length} projects`);
 }
@@ -229,7 +154,7 @@ function syncInstagram() {
   const sorted = entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
   writeFile(
     path.join(ROOT, 'src/data/instagram.js'),
-    `/* eslint-disable max-len */\nconst { PUBLIC_URL } = process.env;\n\nconst posts = ${jsSerialize(sorted)};\n\nexport default posts;\n`
+    `/* eslint-disable max-len */\nconst posts = ${jsSerialize(sorted)};\n\nexport default posts;\n`
   );
   console.log(`     ${sorted.length} posts`);
 }
@@ -241,9 +166,9 @@ function syncResume() {
   const outBase = path.join(ROOT, 'src/data/resume');
 
   const collections = [
-    { dir: 'positions',      out: 'positions.js',      varName: 'positions',      sort: false },
-    { dir: 'degrees',        out: 'degrees.js',         varName: 'degrees',        sort: false },
-    { dir: 'certifications', out: 'certifications.js',  varName: 'certifications', sort: false },
+    { dir: 'positions', out: 'positions.js', varName: 'positions', sort: false },
+    { dir: 'degrees', out: 'degrees.js', varName: 'degrees', sort: false },
+    { dir: 'certifications', out: 'certifications.js', varName: 'certifications', sort: false },
   ];
 
   for (const { dir, out, varName, sort } of collections) {
@@ -252,7 +177,7 @@ function syncResume() {
     const data = sort ? entries.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0)) : entries;
     writeFile(
       path.join(outBase, out),
-      `/* eslint-disable max-len */\nconst ${varName} = ${JSON.stringify(data, null, 2)};\n\nexport default ${varName};\n`
+      `/* eslint-disable max-len */\nconst ${varName} = ${jsSerialize(data)};\n\nexport default ${varName};\n`
     );
     console.log(`     ${data.length} ${dir}`);
   }
@@ -262,7 +187,7 @@ function syncResume() {
   if (skills.length > 0) {
     writeFile(
       path.join(outBase, 'skills.js'),
-      `/* eslint-disable max-len */\nexport const skills = ${JSON.stringify(skills, null, 2)};\n`
+      `/* eslint-disable max-len, import/prefer-default-export */\nexport const skills = ${jsSerialize(skills)};\n`
     );
     console.log(`     ${skills.length} skills`);
   } else {
@@ -274,13 +199,12 @@ function syncResume() {
 
 console.log('\nCMS Sync: markdown → JS data files\n');
 
-console.log('Now Page:');     syncNow();
-console.log('\nBooks:');       syncBooks();
-console.log('\n100 Days:');    syncHundredDays();
-console.log('\nSports:');      syncSports();
-console.log('\nTreks:');       syncTreks();
-console.log('\nProjects:');    syncProjects();
-console.log('\nInstagram:');   syncInstagram();
-console.log('\nResume:');      syncResume();
+console.log('Books:'); syncBooks();
+console.log('\n100 Days:'); syncHundredDays();
+console.log('\nSports:'); syncSports();
+console.log('\nTreks:'); syncTreks();
+console.log('\nProjects:'); syncProjects();
+console.log('\nInstagram:'); syncInstagram();
+console.log('\nResume:'); syncResume();
 
 console.log('\nDone. Commit updated data files and push to redeploy.\n');

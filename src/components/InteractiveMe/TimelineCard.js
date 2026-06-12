@@ -16,6 +16,8 @@ const TimelineCard = React.forwardRef(({ entry, side, onImageLoad, onClick }, re
         <img
           src={entry.imageUrl}
           alt={entry.title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-auto block"
           onLoad={onImageLoad}
           onError={(e) => { e.currentTarget.style.display = 'none'; }}

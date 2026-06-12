@@ -2,9 +2,97 @@ import React, { useMemo, useState, useEffect } from 'react';
 import Main from '../layouts/Main';
 import blogsData from '../data/100DaysToOffload';
 
+const YEAR = 2026;
+const GOAL = 100;
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// Every post carries the challenge tag — filtering by it is a no-op, so hide it
+const CHALLENGE_TAG = '100_Days_to_Offload';
+
+// Legacy theme CSS (static/css/components/_button.scss) force-styles bare
+// <button> elements (fixed height, nowrap, uppercase, !important color), so
+// interactive elements here use div[role="button"] like the rest of the site.
+const keyActivate = (fn) => (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fn();
+  }
+};
+
+const barColorClass = (isActive, count) => {
+  if (isActive) return 'bg-secondary shadow-lg shadow-secondary/30';
+  return count > 0
+    ? 'bg-secondary/40 group-hover:bg-secondary/70'
+    : 'bg-stone-100 dark:bg-stone-800';
+};
+
+const platformColors = {
+  Substack: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
+  WordPress: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+  Canva: 'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400',
+};
+
+const ProgressRing = ({ value }) => {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setProgress(value));
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - progress / 100);
+
+  return (
+    <div className="relative w-[180px] h-[180px] shrink-0">
+      <svg width="180" height="180" viewBox="0 0 180 180" className="-rotate-90">
+        <circle
+          cx="90"
+          cy="90"
+          r={radius}
+          fill="none"
+          strokeWidth="12"
+          className="stroke-stone-100 dark:stroke-stone-800"
+        />
+        <circle
+          cx="90"
+          cy="90"
+          r={radius}
+          fill="none"
+          strokeWidth="12"
+          strokeLinecap="round"
+          stroke="currentColor"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="text-secondary"
+          style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.33, 1, 0.68, 1)' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-headline text-4xl font-black text-stone-900 dark:text-stone-100 leading-none">
+          {value}%
+        </span>
+        <span className="font-label text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1">
+          of {GOAL} posts
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const StatTile = ({ value, label, valueClass = 'text-stone-900 dark:text-stone-100' }) => (
+  <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg p-4 text-center">
+    <p className={`font-headline text-2xl font-black m-0 ${valueClass}`}>{value}</p>
+    <p className="font-label text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1 mb-0">{label}</p>
+  </div>
+);
+
 const OneHundredDays = () => {
   const [titleText, setTitleText] = useState('');
   const [selectedBlog, setSelectedBlog] = useState(null);
+  const [query, setQuery] = useState('');
+  const [activeTag, setActiveTag] = useState(null);
+  const [activePlatform, setActivePlatform] = useState(null);
+  const [activeMonth, setActiveMonth] = useState(null);
   const fullTitle = 'Can I publish 100 posts on blog in a year?';
 
   useEffect(() => {
@@ -12,214 +100,152 @@ const OneHundredDays = () => {
     const timer = setInterval(() => {
       setTitleText(fullTitle.slice(0, index + 1));
       index += 1;
-      if (index === fullTitle.length) {
-        clearInterval(timer);
-      }
+      if (index === fullTitle.length) clearInterval(timer);
     }, 50);
     return () => clearInterval(timer);
   }, []);
 
-  // --- Stats Calculation ---
   const totalPosts = blogsData.length;
+  const completion = Math.round((totalPosts / GOAL) * 100);
 
-  const tagsDistribution = useMemo(() => {
+  // Pace: where the post count should be if spread evenly over the year
+  const pace = useMemo(() => {
+    const now = new Date();
+    const start = new Date(YEAR, 0, 1);
+    const dayOfYear = Math.min(365, Math.max(1, Math.floor((now - start) / 86400000) + 1));
+    const expected = Math.round((dayOfYear / 365) * GOAL);
+    return { dayOfYear, expected, delta: totalPosts - expected };
+  }, [totalPosts]);
+
+  const tagCounts = useMemo(() => {
     const dist = {};
     blogsData.forEach((blog) => {
       blog.blog_tags.forEach((tag) => {
-        dist[tag] = (dist[tag] || 0) + 1;
+        if (tag !== CHALLENGE_TAG) dist[tag] = (dist[tag] || 0) + 1;
       });
     });
-    return dist;
+    return Object.entries(dist).sort((a, b) => b[1] - a[1]);
   }, []);
 
-  // Sort tags by count
-  const sortedTags = Object.entries(tagsDistribution).sort((a, b) => b[1] - a[1]);
-
-  const platformDistribution = useMemo(() => {
+  const platformCounts = useMemo(() => {
     const dist = {};
     blogsData.forEach((blog) => {
-      if (blog.blog_platform) {
-        dist[blog.blog_platform] = (dist[blog.blog_platform] || 0) + 1;
-      }
+      if (blog.blog_platform) dist[blog.blog_platform] = (dist[blog.blog_platform] || 0) + 1;
     });
-    return dist;
+    return Object.entries(dist).sort((a, b) => b[1] - a[1]);
   }, []);
-  const sortedPlatforms = Object.entries(platformDistribution).sort((a, b) => b[1] - a[1]);
 
-  // --- Calendar Generation ---
-  const year = 2026;
+  const monthCounts = useMemo(() => {
+    const counts = Array(12).fill(0);
+    blogsData.forEach((blog) => {
+      const d = new Date(blog.blog_date);
+      if (d.getFullYear() === YEAR) counts[d.getMonth()] += 1;
+    });
+    return counts;
+  }, []);
+  const maxMonthCount = Math.max(...monthCounts, 1);
+
   const calendarData = useMemo(() => {
     const days = [];
-    const startDate = new Date(year, 0, 1);
-
-    // Add padding for start of week (assuming Sunday start)
-    const startDayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday...
+    const startDayOfWeek = new Date(YEAR, 0, 1).getDay();
     for (let i = 0; i < startDayOfWeek; i += 1) {
       days.push({ date: `padding-${i}`, isPadding: true });
     }
-
-    const date = new Date(year, 0, 1);
-    while (date.getFullYear() === year) {
+    const date = new Date(YEAR, 0, 1);
+    while (date.getFullYear() === YEAR) {
       const dateString = date.toISOString().split('T')[0];
       const blog = blogsData.find((b) => b.blog_date === dateString);
-      days.push({
-        date: dateString,
-        hasPost: !!blog,
-        blog,
-        isPadding: false,
-      });
+      days.push({ date: dateString, hasPost: !!blog, blog, isPadding: false });
       date.setDate(date.getDate() + 1);
     }
     return days;
   }, []);
 
-  const getCompletionPercentage = () => ((totalPosts / 100) * 100).toFixed(1);
+  const filteredPosts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return blogsData
+      .slice()
+      .reverse()
+      .filter((blog) => {
+        if (activeTag && !blog.blog_tags.includes(activeTag)) return false;
+        if (activePlatform && blog.blog_platform !== activePlatform) return false;
+        if (activeMonth !== null && new Date(blog.blog_date).getMonth() !== activeMonth) return false;
+        if (q && !`${blog.blog_title} ${blog.blog_description || ''}`.toLowerCase().includes(q)) return false;
+        return true;
+      });
+  }, [query, activeTag, activePlatform, activeMonth]);
+
+  const hasFilters = query || activeTag || activePlatform || activeMonth !== null;
+  const clearFilters = () => {
+    setQuery('');
+    setActiveTag(null);
+    setActivePlatform(null);
+    setActiveMonth(null);
+  };
 
   return (
     <Main
       title="100 Days To Offload"
-      description="Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking, tag cloud, platform breakdown, and full post history."
+      description="Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking, pace status, and interactive filtering of every post."
     >
-      <article className="max-w-4xl" id="one-hundred-days">
-        <header className="mb-12">
-          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-            <div className="flex-shrink-0">
-                {/* SVG Logo */}
-                <svg
-                  width="120"
-                  height="120"
-                  viewBox="0 0 600 600"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="drop-shadow-sm dark:filter dark:invert dark:brightness-200"
-                >
-                  <defs>
-                    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#fff7c0', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#d0f0c0', stopOpacity: 1 }} />
-                    </linearGradient>
-                    <filter id="paperTexture">
-                      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise" />
-                      <feDiffuseLighting in="noise" lightingColor="#fff" surfaceScale="2">
-                        <feDistantLight azimuth="45" elevation="60" />
-                      </feDiffuseLighting>
-                    </filter>
-                  </defs>
-
-                  <g>
-                    <circle cx="300" cy="300" r="280" fill="url(#bgGradient)" filter="url(#paperTexture)" opacity="0.9" />
-                    <text x="300" y="300" fontFamily="monospace" fontSize="10" fill="#a0c0a0" opacity="0.2" textAnchor="middle">
-                      <tspan x="300" dy="-250">010101010101010101010101</tspan>
-                      <tspan x="300" dy="20">101010101010101010101010</tspan>
-                      <tspan x="300" dy="20">010101010101010101010101</tspan>
-                      <tspan x="300" dy="400">010101010101010101010101</tspan>
-                    </text>
-                  </g>
-
-                  <g transform="translate(270, 50)">
-                    <circle cx="30" cy="20" r="15" fill="none" stroke="#000" strokeWidth="2" />
-                    <line x1="30" y1="35" x2="30" y2="70" stroke="#000" strokeWidth="2" />
-                    <line x1="30" y1="45" x2="10" y2="30" stroke="#000" strokeWidth="2" />
-                    <line x1="30" y1="45" x2="50" y2="30" stroke="#000" strokeWidth="2" />
-                    <line x1="30" y1="70" x2="15" y2="90" stroke="#000" strokeWidth="2" />
-                    <line x1="30" y1="70" x2="45" y2="90" stroke="#000" strokeWidth="2" />
-                    <path d="M10,30 L10,5 L50,5 L50,30" fill="none" stroke="#000" strokeWidth="2" />
-                    <text x="30" y="22" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="12" fill="#000" textAnchor="middle">GOAL!</text>
-                  </g>
-
-                  <g fontFamily="Arial Black, sans-serif" fontWeight="bold" textAnchor="middle">
-                    <text x="300" y="200" fontSize="100">
-                      <tspan fill="#FF0000">1</tspan>
-                      <tspan fill="#FF7F00">0</tspan>
-                      <tspan fill="#FFFF00">0</tspan>
-                      <tspan fill="#00FF00"> </tspan>
-                      <tspan fill="#00FF00">D</tspan>
-                      <tspan fill="#0000FF">A</tspan>
-                      <tspan fill="#4B0082">Y</tspan>
-                      <tspan fill="#8B00FF">S</tspan>
-                    </text>
-                    <text x="300" y="290" fontSize="80" fill="#0000FF">TO</text>
-                    <text x="300" y="400" fontSize="90" fill="#FF0000">OFFLOAD</text>
-                  </g>
-
-                  <text x="300" y="450" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="30" fill="#FF0000" textAnchor="middle">WRITE 100 POSTS IN A YEAR!</text>
-
-                  <g transform="translate(220, 250)">
-                    <g transform="rotate(-10)">
-                      <rect x="0" y="0" width="80" height="15" fill="#fff" stroke="#000" strokeWidth="1" />
-                      <rect x="5" y="-15" width="80" height="15" fill="#fff" stroke="#000" strokeWidth="1" />
-                      <rect x="10" y="-30" width="80" height="15" fill="#fff" stroke="#000" strokeWidth="1" />
-                      <path d="M15,-30 L55,-30 L55,-60 Q35,-70 15,-60 Z" fill="#fff" stroke="#000" strokeWidth="1" />
-                      <path d="M55,-30 L95,-30 L95,-60 Q75,-70 55,-60 Z" fill="#fff" stroke="#000" strokeWidth="1" />
-                    </g>
-                    <g transform="translate(100, 0)">
-                      <path d="M0,0 Q-5,5 0,15 L20,15 Q25,5 20,0 Z" fill="#000" />
-                      <path d="M10,0 Q10,-30 30,-50 Q20,-40 10,-20" fill="none" stroke="#000" strokeWidth="2" />
-                      <path d="M30,-50 Q35,-60 45,-55 Q40,-45 30,-50" fill="#fff" stroke="#000" strokeWidth="1" />
-                    </g>
-                    <g transform="translate(20, 40)">
-                      <rect x="0" y="0" width="140" height="20" fill="#fff" stroke="#000" strokeWidth="2" rx="5" />
-                      <rect x="2" y="2" width="136" height="16" fill="#00FF00" rx="3" />
-                      <text x="70" y="15" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="12" fill="#000" textAnchor="middle">100/100</text>
-                    </g>
-                  </g>
-
-                  <g transform="translate(450, 280)">
-                    <g>
-                      <rect x="0" y="0" width="80" height="60" fill="none" stroke="#FF0000" strokeWidth="2" />
-                      <text x="10" y="20" fontFamily="Arial, sans-serif" fontSize="14" fill="#FF0000">T</text>
-                      <text x="25" y="20" fontFamily="Arial, sans-serif" fontSize="10" fill="#FF0000">for</text>
-                      <text x="10" y="45" fontFamily="Arial, sans-serif" fontSize="14" fill="#FF0000">&quot;TRACK&quot;</text>
-                    </g>
-                    <g transform="translate(0, 70)">
-                      <rect x="0" y="0" width="100" height="60" fill="none" stroke="#FF0000" strokeWidth="2" />
-                      <text x="10" y="20" fontFamily="Arial, sans-serif" fontSize="14" fill="#FF0000">C</text>
-                      <text x="25" y="20" fontFamily="Arial, sans-serif" fontSize="10" fill="#FF0000">for</text>
-                      <text x="10" y="45" fontFamily="Arial, sans-serif" fontSize="14" fill="#FF0000">&quot;CHALLENGE&quot;</text>
-                    </g>
-                    <text x="50" y="-20" fontFamily="Arial, sans-serif" fontSize="12" fill="#FF0000" textAnchor="middle">@nky s Blog</text>
-                  </g>
-                </svg>
-            </div>
-            <div>
-              <h1 className="font-headline text-3xl font-bold text-stone-900 dark:text-stone-100 uppercase tracking-widest mb-2">100 Days To Offload</h1>
-              <p className="font-label text-xs uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 font-medium italic">
-                {titleText}
-                <span className="inline-block w-[2px] h-[1em] bg-secondary ml-1 animate-pulse align-text-bottom" />
-              </p>
-            </div>
-          </div>
-          <div className="h-px w-full bg-stone-100 dark:bg-stone-800" />
+      <div className="flex flex-col gap-10 w-full max-w-4xl" id="one-hundred-days">
+        {/* Hero */}
+        <header>
+          <span className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4 block">
+            Challenge
+          </span>
+          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-[0.9] tracking-tighter mb-4">
+            100 Days To Offload.
+          </h1>
+          <p className="font-label text-sm uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 font-medium italic mb-0">
+            {titleText}
+            <span className="inline-block w-[2px] h-[1em] bg-secondary ml-1 animate-pulse align-text-bottom" />
+          </p>
         </header>
 
-        <section className="mb-12">
-          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-4 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">About the Challenge</h3>
-          <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
-            The <strong>100 Days to Offload</strong> challenge is a commitment to
-            publish 100 blog posts in a year. It is an experiment to ramp up
-            writing efforts, moving from occasional posts to a consistent flow of
-            thoughts on technology, policy, digital well-being, and life. The goal
-            is not just quantity, but to create an archive of diverse thoughts and
-            to deepen understanding through the consistent act of writing and
-            sharing.
-          </p>
-          <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
-            Originally inspired by the{' '}
-            <a
-              href="https://100daystooffload.com/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-secondary hover:underline"
-            >
-              100DaysToOffload.com
-            </a>{' '}
-            movement.
-          </p>
+        {/* Progress ring + pace stats */}
+        <section className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <ProgressRing value={completion} />
+            <div className="flex-1 w-full">
+              <p className="font-body text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
+                Publish <strong>100 posts in a year</strong> — an experiment in consistent
+                writing on technology, policy, digital well-being, and life. Inspired by{' '}
+                <a
+                  href="https://100daystooffload.com/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-secondary hover:underline"
+                >
+                  100DaysToOffload.com
+                </a>.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <StatTile value={totalPosts} label="Published" />
+                <StatTile value={GOAL - totalPosts} label="Remaining" />
+                <StatTile value={pace.expected} label="Pace Target" />
+                <StatTile
+                  value={pace.delta >= 0 ? `+${pace.delta}` : pace.delta}
+                  label={pace.delta >= 0 ? 'Ahead' : 'Behind'}
+                  valueClass={pace.delta >= 0 ? 'text-emerald-600 dark:text-emerald-500' : 'text-secondary'}
+                />
+              </div>
+            </div>
+          </div>
         </section>
 
-        <section className="mb-12">
-          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-4 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">Progress Map ({year})</h3>
-          <div className="p-4 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg overflow-x-auto">
+        {/* Calendar heatmap — cells with posts are clickable */}
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
+              Progress Map ({YEAR})
+            </p>
+            <div className="flex-1 h-px bg-stone-100 dark:bg-stone-800" />
+            <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
+              Click a square to open the post
+            </p>
+          </div>
+          <div className="p-4 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto">
             <div
               className="grid gap-1"
               style={{
@@ -228,114 +254,209 @@ const OneHundredDays = () => {
                 gridTemplateRows: 'repeat(7, 1fr)',
               }}
             >
-              {calendarData.map((day) => (
+              {calendarData.map((day) => (day.hasPost ? (
                 <div
                   key={day.date}
-                  title={
-                    !day.isPadding
-                      ? `${day.date}${
-                        day.hasPost ? `: ${day.blog.blog_title}` : ''
-                      }`
-                      : ''
-                  }
-                  className={`w-3 h-3 rounded-[2px] transition-colors ${
-                    day.isPadding ? 'bg-transparent' : (day.hasPost ? 'bg-secondary border border-secondary shadow-[0_0_8px_rgba(235,108,79,0.2)]' : 'bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700/50')
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedBlog(day.blog)}
+                  onKeyDown={keyActivate(() => setSelectedBlog(day.blog))}
+                  aria-label={`${day.date}: ${day.blog.blog_title}`}
+                  title={`${day.date}: ${day.blog.blog_title}`}
+                  className="w-3 h-3 rounded-[2px] bg-secondary border border-secondary shadow-[0_0_8px_rgba(235,108,79,0.2)] cursor-pointer hover:scale-150 transition-transform"
+                />
+              ) : (
+                <div
+                  key={day.date}
+                  title={day.isPadding ? '' : day.date}
+                  className={`w-3 h-3 rounded-[2px] ${
+                    day.isPadding
+                      ? 'bg-transparent'
+                      : 'bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700/50'
                   }`}
                 />
+              )))}
+            </div>
+          </div>
+        </section>
+
+        {/* Posts per month bar chart — click to filter */}
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
+              Posts Per Month
+            </p>
+            <div className="flex-1 h-px bg-stone-100 dark:bg-stone-800" />
+            <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
+              Click a bar to filter
+            </p>
+          </div>
+          <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6">
+            <div className="flex items-end justify-between gap-2 h-32">
+              {monthCounts.map((count, i) => (
+                <div
+                  key={MONTH_LABELS[i]}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setActiveMonth(activeMonth === i ? null : i)}
+                  onKeyDown={keyActivate(() => setActiveMonth(activeMonth === i ? null : i))}
+                  aria-label={`${MONTH_LABELS[i]}: ${count} posts`}
+                  className="flex-1 flex flex-col items-center justify-end gap-2 h-full cursor-pointer group"
+                >
+                  <span className={`font-label text-[10px] font-bold transition-colors ${
+                    activeMonth === i ? 'text-secondary' : 'text-stone-400 dark:text-stone-500 group-hover:text-secondary'
+                  }`}
+                  >
+                    {count > 0 ? count : ''}
+                  </span>
+                  <div
+                    className={`w-full max-w-[28px] rounded-t-md transition-all ${barColorClass(activeMonth === i, count)}`}
+                    style={{ height: count > 0 ? `${Math.max(8, (count / maxMonthCount) * 80)}px` : '4px' }}
+                  />
+                  <span className={`font-label text-[9px] uppercase tracking-wider transition-colors ${
+                    activeMonth === i ? 'text-secondary font-bold' : 'text-stone-400 dark:text-stone-500'
+                  }`}
+                  >
+                    {MONTH_LABELS[i]}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
-          <p className="text-stone-500 dark:text-stone-500 text-sm mt-4 font-body italic">
-            {totalPosts} posts completed out of 100.
-          </p>
         </section>
 
-        <section className="mb-12">
-          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-6 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">Stats</h3>
-          <div className="flex flex-wrap gap-8">
-            <div className="flex-1 min-w-[250px] bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 shadow-sm">
-              <h4 className="text-stone-900 dark:text-stone-100 text-sm font-bold border-b border-stone-100 dark:border-stone-800 pb-2 mb-4">Tag Cloud</h4>
-              <div className="flex flex-wrap gap-2">
-                {sortedTags.map(([tag, count]) => (
-                  <span key={tag} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-100 dark:border-stone-800 rounded-full text-xs transition-colors hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white">
-                    {tag} ({count})
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="flex-1 min-w-[250px] bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 shadow-sm">
-              <h4 className="text-stone-900 dark:text-stone-100 text-sm font-bold border-b border-stone-100 dark:border-stone-800 pb-2 mb-4">Summary</h4>
-              <ul className="space-y-3">
-                <li className="flex justify-between text-sm text-stone-600 dark:text-stone-400 border-b border-stone-50 dark:border-stone-800 pb-2 last:border-0">
-                  <span className="font-medium">Total Posts:</span>
-                  <span className="font-bold text-stone-900 dark:text-stone-100">{totalPosts}</span>
-                </li>
-                <li className="flex justify-between text-sm text-stone-600 dark:text-stone-400 border-b border-stone-50 dark:border-stone-800 pb-2 last:border-0">
-                  <span className="font-medium">Completion:</span>
-                  <span className="font-bold text-stone-900 dark:text-stone-100">{getCompletionPercentage()}%</span>
-                </li>
-                <li className="flex justify-between text-sm text-stone-600 dark:text-stone-400 border-b border-stone-50 dark:border-stone-800 pb-2 last:border-0">
-                  <span className="font-medium">Remaining:</span>
-                  <span className="font-bold text-stone-900 dark:text-stone-100">{100 - totalPosts}</span>
-                </li>
-              </ul>
-            </div>
-            <div className="flex-1 min-w-[250px] bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 shadow-sm">
-              <h4 className="text-stone-900 dark:text-stone-100 text-sm font-bold border-b border-stone-100 dark:border-stone-800 pb-2 mb-4">Platforms</h4>
-              <div className="flex flex-wrap gap-2">
-                {sortedPlatforms.map(([platform, count]) => (
-                  <span key={platform} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-100 dark:border-stone-800 rounded-full text-xs hover:bg-secondary hover:text-white transition-colors">
-                    {platform} ({count})
-                  </span>
-                ))}
-              </div>
-            </div>
+        {/* Explorer: search + filters + post cards */}
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
+              Explore Posts
+            </p>
+            <div className="flex-1 h-px bg-stone-100 dark:bg-stone-800" />
+            <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
+              {filteredPosts.length} of {totalPosts}
+            </p>
           </div>
-        </section>
 
-        <section className="mb-12">
-          <h3 className="text-stone-900 dark:text-stone-100 text-lg font-bold uppercase tracking-widest mb-6 inline-block after:content-[''] after:block after:w-10 after:h-[2px] after:bg-secondary after:mt-1">Recent Posts</h3>
-          <ul className="space-y-3">
-            {blogsData
-              .slice()
-              .reverse()
-              .map((blog) => (
-                <li key={blog.id}>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelectedBlog(blog)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedBlog(blog);
-                      }
-                    }}
-                    className="flex justify-between items-center bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg p-4 cursor-pointer hover:border-l-4 hover:border-l-secondary hover:shadow-md transition-all group"
-                  >
-                    <span className="text-stone-800 dark:text-stone-200 font-medium group-hover:text-secondary transition-colors line-clamp-1 mr-4">
-                      {blog.blog_title}
-                    </span>
-                    <span className="text-stone-400 dark:text-stone-500 text-xs font-mono whitespace-nowrap">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search posts by title or description…"
+            className="w-full mb-4 px-4 py-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-body text-sm text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-secondary transition-colors"
+          />
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            {platformCounts.map(([platform, count]) => (
+              <div
+                key={platform}
+                role="button"
+                tabIndex={0}
+                onClick={() => setActivePlatform(activePlatform === platform ? null : platform)}
+                onKeyDown={keyActivate(() => setActivePlatform(activePlatform === platform ? null : platform))}
+                className={`inline-flex px-3 py-1 rounded-full text-xs font-label font-bold border cursor-pointer transition-all ${
+                  activePlatform === platform
+                    ? 'bg-secondary text-white border-secondary'
+                    : 'bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-secondary hover:text-secondary'
+                }`}
+              >
+                {platform} ({count})
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-6">
+            {tagCounts.map(([tag, count]) => (
+              <div
+                key={tag}
+                role="button"
+                tabIndex={0}
+                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                onKeyDown={keyActivate(() => setActiveTag(activeTag === tag ? null : tag))}
+                className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-label border cursor-pointer transition-all ${
+                  activeTag === tag
+                    ? 'bg-secondary text-white border-secondary'
+                    : 'bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-100 dark:border-stone-700 hover:border-secondary hover:text-secondary'
+                }`}
+              >
+                #{tag} {count}
+              </div>
+            ))}
+          </div>
+
+          {hasFilters && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={clearFilters}
+              onKeyDown={keyActivate(clearFilters)}
+              className="mb-6 inline-flex items-center gap-1 font-label text-xs font-bold text-secondary cursor-pointer hover:underline"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+              Clear all filters
+            </div>
+          )}
+
+          {filteredPosts.length === 0 ? (
+            <p className="text-stone-500 dark:text-stone-400 font-body italic text-center py-12">
+              No posts match these filters.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredPosts.map((blog) => (
+                <div
+                  key={blog.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedBlog(blog)}
+                  onKeyDown={keyActivate(() => setSelectedBlog(blog))}
+                  className="text-left bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-5 cursor-pointer hover:border-secondary/40 hover:shadow-md transition-all group flex flex-col gap-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] text-stone-400 dark:text-stone-500">
                       {blog.blog_date}
                     </span>
+                    {blog.blog_platform && (
+                      <span className={`font-label text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                        platformColors[blog.blog_platform] || 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400'
+                      }`}
+                      >
+                        {blog.blog_platform}
+                      </span>
+                    )}
                   </div>
-                </li>
+                  <p className="font-body font-semibold text-sm text-stone-800 dark:text-stone-200 group-hover:text-secondary transition-colors leading-snug mb-0">
+                    {blog.blog_title}
+                  </p>
+                  {blog.blog_description && (
+                    <p className="font-body text-xs text-stone-500 dark:text-stone-400 leading-relaxed line-clamp-2 mb-0">
+                      {blog.blog_description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-1 mt-auto pt-1">
+                    {blog.blog_tags.filter((t) => t !== CHALLENGE_TAG).map((tag) => (
+                      <span key={tag} className="font-label text-[9px] text-stone-400 dark:text-stone-500">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               ))}
-          </ul>
+            </div>
+          )}
         </section>
 
+        {/* Post detail modal */}
         {selectedBlog && (
-          <div 
+          <div
             className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm transition-opacity"
             onClick={() => setSelectedBlog(null)}
           >
-            <div 
+            <div
               className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl max-w-2xl w-full p-8 relative shadow-2xl transition-transform"
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setSelectedBlog(null)}
                 className="absolute top-4 right-6 text-3xl text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors leading-none p-0 bg-transparent border-0 cursor-pointer"
               >
@@ -368,7 +489,7 @@ const OneHundredDays = () => {
             </div>
           </div>
         )}
-      </article>
+      </div>
     </Main>
   );
 };

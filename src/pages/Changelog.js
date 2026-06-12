@@ -6,7 +6,8 @@ const Changelog = () => {
   const [markdown, setMarkdown] = useState("");
 
   useEffect(() => {
-    import("../data/changelog.md")
+    // The ?url suffix makes Vite resolve the markdown to its served URL.
+    import("../data/changelog.md?url")
       .then((res) => {
         fetch(res.default)
           .then((r) => r.text())
@@ -18,10 +19,7 @@ const Changelog = () => {
   }, []);
 
   return (
-    <Main
-      title="Changelog"
-      description="A transparent record of every meaningful change made to this website — features added, improvements shipped, and decisions documented."
-    >
+    <Main>
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <section className="mb-4">

@@ -49,22 +49,24 @@ const SportsInteractive = ({ onRaceClick }) => {
             <span className="material-symbols-outlined text-yellow-500">emoji_events</span>
             {dist} km Races ({races.length})
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
             {races.map((race) => {
               const bib = race.bibNumber || 'N/A';
               return (
                 <div
                   key={race.id}
                   onClick={() => onRaceClick(race)}
-                  className="group relative cursor-pointer rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:shadow-lg transition-all duration-300 flex flex-col"
+                  className="group relative cursor-pointer rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:shadow-lg transition-all duration-300 flex flex-col break-inside-avoid mb-6"
                 >
-                  {/* Image block */}
-                  <div className="relative w-full aspect-video overflow-hidden bg-stone-100 dark:bg-stone-800">
+                  {/* Image block — natural aspect ratio, masonry-style */}
+                  <div className={`relative w-full overflow-hidden bg-stone-100 dark:bg-stone-800 ${race.slideImages?.length > 0 ? '' : 'aspect-video'}`}>
                     {race.slideImages?.length > 0 ? (
                       <img
                         src={race.slideImages[0].url}
                         alt={race.title}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-auto block transition-all duration-700 group-hover:scale-105"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (

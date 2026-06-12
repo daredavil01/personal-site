@@ -32,7 +32,8 @@ Comprehensive overview of all features across the personal portfolio site.
 | `/stats` | Stats |
 | `/changelog` | Changelog |
 | `/contact` | Contact |
-| `/admin` | Admin CMS (auth-gated) |
+| `/interactive-me` | Interactive Me (image timeline) |
+| `/mindmap` | Mind Map |
 
 ### Dark Mode
 A floating toggle (bottom-right corner) switches between light and dark themes site-wide. State is persisted via `ThemeContext`.
@@ -124,15 +125,8 @@ Markdown-rendered version history sourced from `src/data/changelog.md`. Displays
 ### Contact (`/contact`)
 Social links and email contact, sourced from `src/data/contact.js`.
 
-### Admin (`/admin`)
-Password-protected (SHA-256 hash in `AuthGate`) local CMS panel. Provides form-based editors for all data types:
-
-- Books, Sports, Treks, Instagram, Projects
-- 100 Days To Offload posts
-- Now page (meta + monthly entries)
-- Resume: Positions, Skills, Degrees, Certifications
-
-Each editor persists drafts to `localStorage` and exports ready-to-paste JS code. Editors do **not** write to disk directly — the export is copy-pasted into the source file and committed.
+### Content Management (`/cms/`)
+Decap CMS with a GitHub backend (OAuth via a Sveltia auth worker). Provides form-based editors for all content collections — Books, Sports, Treks, Instagram, Projects, 100 Days To Offload, Now page, and Resume — writing YAML-frontmatter markdown to `src/cms-content/` and committing directly to the repository. See [cms-data-flow.md](cms-data-flow.md).
 
 ---
 

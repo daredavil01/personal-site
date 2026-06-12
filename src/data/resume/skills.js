@@ -1,182 +1,249 @@
-// TODO: Add Athletic Skills, Office Skills,
-// Data Engineering, Data Science, ML Engineering, ... ?
-
-const skills = [
+/* eslint-disable max-len, import/prefer-default-export */
+export const skills = [
   {
-    title: 'Javascript',
+    title: "Amazon Web Services",
     competency: 4,
-    category: ['Web Development', 'Languages', 'Javascript'],
+    category: [
+      "Tools",
+      "Web Development",
+    ],
   },
   {
-    title: 'Node.JS',
-    competency: 3,
-    category: ['Web Development', 'Javascript'],
-  },
-  {
-    title: 'React',
-    competency: 3,
-    category: ['Web Development', 'Javascript'],
-  },
-  {
-    title: 'Bash',
+    title: "Bash",
     competency: 2,
-    category: ['Tools', 'Languages'],
+    category: [
+      "Languages",
+      "Tools",
+    ],
   },
   {
-    title: 'Amazon Web Services',
+    title: "C",
+    competency: 3,
+    category: [
+      "C",
+      "Languages",
+    ],
+  },
+  {
+    title: "Cursor",
     competency: 4,
-    category: ['Web Development', 'Tools'],
+    category: [
+      "Tools",
+    ],
   },
   {
-    title: 'PostgreSQL/SQLite3/SQL/MySQL',
+    title: "Databricks",
+    competency: 3,
+    category: [
+      "Data Engineering",
+      "Databases",
+      "Tools",
+    ],
+  },
+  {
+    title: "DORA metrics",
     competency: 4,
-    category: ['Web Development', 'Databases', 'Languages'],
+    category: [
+      "Data Science",
+    ],
   },
   {
-    title: 'Express.JS',
+    title: "Express.JS",
     competency: 2,
-    category: ['Web Development', 'Javascript'],
+    category: [
+      "Javascript",
+      "Web Development",
+    ],
   },
   {
-    title: 'Git',
+    title: "FastAPI",
     competency: 3,
-    category: ['Tools'],
+    category: [
+      "Python",
+      "Web Development",
+    ],
   },
   {
-    title: 'Kubernetes',
+    title: "Git",
+    competency: 3,
+    category: [
+      "Tools",
+    ],
+  },
+  {
+    title: "Google Gemini",
+    competency: 3,
+    category: [
+      "Data Science",
+      "Tools",
+    ],
+  },
+  {
+    title: "GraphQL",
     competency: 2,
-    category: ['Tools', 'Data Engineering'],
+    category: [
+      "Databases",
+      "Web Development",
+    ],
   },
   {
-    title: 'Numpy',
+    title: "HTML + SASS/SCSS/CSS",
     competency: 3,
-    category: ['Data Science', 'Data Engineering', 'Python'],
+    category: [
+      "Languages",
+      "Web Development",
+    ],
   },
   {
-    title: 'Jupyter',
+    title: "Java",
     competency: 3,
-    category: ['Data Science', 'Python'],
+    category: [
+      "Java",
+      "Languages",
+    ],
   },
   {
-    title: 'Typescript',
+    title: "Javascript",
+    competency: 4,
+    category: [
+      "Javascript",
+      "Languages",
+      "Web Development",
+    ],
+  },
+  {
+    title: "Jupyter",
+    competency: 3,
+    category: [
+      "Data Science",
+      "Python",
+    ],
+  },
+  {
+    title: "Kafka",
+    competency: 3,
+    category: [
+      "Data Engineering",
+      "Tools",
+    ],
+  },
+  {
+    title: "Kubernetes",
     competency: 2,
-    category: ['Web Development', 'Languages', 'Javascript'],
+    category: [
+      "Data Engineering",
+      "Tools",
+    ],
   },
   {
-    title: 'HTML + SASS/SCSS/CSS',
+    title: "Matplotlib",
     competency: 3,
-    category: ['Web Development', 'Languages'],
+    category: [
+      "Data Engineering",
+      "Data Science",
+      "Python",
+    ],
   },
   {
-    title: 'Python',
+    title: "MCP (Model Context Protocol)",
+    competency: 3,
+    category: [
+      "Data Science",
+      "Tools",
+    ],
+  },
+  {
+    title: "Node.JS",
+    competency: 3,
+    category: [
+      "Javascript",
+      "Web Development",
+    ],
+  },
+  {
+    title: "Numpy",
+    competency: 3,
+    category: [
+      "Data Engineering",
+      "Data Science",
+      "Python",
+    ],
+  },
+  {
+    title: "Pandas",
     competency: 5,
-    category: ['Languages', 'Python'],
+    category: [
+      "Data Engineering",
+      "Data Science",
+      "Python",
+    ],
   },
   {
-    title: 'Java',
-    competency: 3,
-    category: ['Languages', 'Java'],
+    title: "PostgreSQL/SQLite3/SQL/MySQL",
+    competency: 4,
+    category: [
+      "Databases",
+      "Languages",
+      "Web Development",
+    ],
   },
   {
-    title: 'C',
-    competency: 3,
-    category: ['Languages', 'C'],
-  },
-  {
-    title: 'GraphQL',
-    competency: 2,
-    category: ['Web Development', 'Databases'],
-  },
-  {
-    title: 'Pandas',
+    title: "Python",
     competency: 5,
-    category: ['Data Engineering', 'Data Science', 'Python'],
+    category: [
+      "Languages",
+      "Python",
+    ],
   },
   {
-    title: 'Matplotlib',
+    title: "React",
     competency: 3,
-    category: ['Data Engineering', 'Data Science', 'Python'],
+    category: [
+      "Javascript",
+      "Web Development",
+    ],
   },
   {
-    title: 'Snowflake',
+    title: "Snowflake",
     competency: 4,
-    category: ['Data Engineering', 'Databases', 'Tools'],
+    category: [
+      "Data Engineering",
+      "Databases",
+      "Tools",
+    ],
   },
   {
-    title: 'Tableau',
-    competency: 3,
-    category: ['Data Science', 'Tools'],
-  },
-  {
-    title: 'Kafka',
-    competency: 3,
-    category: ['Data Engineering', 'Tools'],
-  },
-  {
-    title: 'DORA metrics',
+    title: "SnowSQL",
     competency: 4,
-    category: ['Data Science'],
+    category: [
+      "Data Engineering",
+      "Databases",
+      "Tools",
+    ],
   },
   {
-    title: 'SnowSQL',
-    competency: 4,
-    category: ['Data Engineering', 'Databases', 'Tools'],
-  },
-  {
-    title: 'Google Gemini',
+    title: "Tableau",
     competency: 3,
-    category: ['Tools', 'Data Science'],
+    category: [
+      "Data Science",
+      "Tools",
+    ],
   },
   {
-    title: 'Cursor',
-    competency: 4,
-    category: ['Tools'],
-  },
-  {
-    title: 'MCP (Model Context Protocol)',
+    title: "Terraform",
     competency: 3,
-    category: ['Tools', 'Data Science'],
+    category: [
+      "Data Engineering",
+      "Tools",
+    ],
   },
   {
-    title: 'Databricks',
-    competency: 3,
-    category: ['Data Engineering', 'Databases', 'Tools'],
+    title: "Typescript",
+    competency: 2,
+    category: [
+      "Javascript",
+      "Languages",
+      "Web Development",
+    ],
   },
-  {
-    title: 'FastAPI',
-    competency: 3,
-    category: ['Web Development', 'Python'],
-  },
-  {
-    title: 'Terraform',
-    competency: 3,
-    category: ['Tools', 'Data Engineering'],
-  },
-].map((skill) => ({ ...skill, category: skill.category.sort() }));
-
-// this is a list of colors that I like. The length should be == to the
-// number of categories. Re-arrange this list until you find a pattern you like.
-const colors = [
-  '#6968b3',
-  '#37b1f5',
-  '#40494e',
-  '#515dd4',
-  '#e47272',
-  '#cc7b94',
-  '#3896e2',
-  '#c3423f',
-  '#d75858',
-  '#747fff',
-  '#64cb7b',
 ];
-
-const categories = [
-  ...new Set(skills.reduce((acc, { category }) => acc.concat(category), [])),
-]
-  .sort()
-  .map((category, index) => ({
-    name: category,
-    color: colors[index],
-  }));
-
-export { categories, skills };

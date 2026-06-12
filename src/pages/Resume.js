@@ -12,11 +12,7 @@ import certifications from "../data/resume/certifications";
 
 const Resume = () => {
   return (
-    <Main
-      title="Resume"
-      description="Professional background of Sanket Tambare — full-stack engineer with experience in cloud infrastructure, AI integration, and enterprise software. Includes work history, education, and certifications."
-      image="https://daredavil.pages.dev/images/me.jpg"
-    >
+    <Main>
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
@@ -42,7 +38,7 @@ const Resume = () => {
                 Synthesizing complex computational logic into intuitive human experiences. My work focuses on bridging the gap between sophisticated LLM capabilities and seamless user interactions, prioritizing cognitive load reduction and aesthetic intentionality.
               </p>
               <div className="flex items-center gap-4">
-                <div className="h-[1px] w-12 bg-secondary"></div>
+                <div className="h-[1px] w-12 bg-secondary" />
                 <span className="font-label text-xs uppercase tracking-widest text-secondary">Work Experience Focus</span>
               </div>
             </div>

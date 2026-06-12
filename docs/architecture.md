@@ -34,15 +34,14 @@ personal-site/
 ├── src/
 │   ├── App.js                  # Route definitions (all lazy-loaded)
 │   ├── index.js                # React bootstrap (ThemeProvider + HelmetProvider)
-│   ├── cms-content/
-│   │   └── now/                # Decap CMS markdown files (primary Now data source)
-│   │       ├── meta.md         # Daily rituals, site meta
-│   │       └── months/         # One .md file per month
+│   ├── cms-content/            # CANONICAL content store (Decap CMS markdown)
+│   │   ├── now/                # Now page (read at runtime by parseNowCms.js)
+│   │   │   ├── meta.md         # Daily rituals, site meta
+│   │   │   └── months/         # One .md file per month
+│   │   ├── books/, sports/, treks/, projects/, instagram/, 100days/
+│   │   └── resume/             # positions/, degrees/, skills/, certifications/
 │   ├── components/
 │   │   ├── Template/           # Layout chrome (Navigation, SideBar, Hamburger, Footer, etc.)
-│   │   ├── Admin/              # CMS admin panel components
-│   │   │   ├── Editors/        # One editor per data type (lazy-loaded)
-│   │   │   └── utils/
 │   │   ├── Books/
 │   │   ├── Challenges/
 │   │   ├── Contact/
@@ -55,16 +54,11 @@ personal-site/
 │   │   └── Treks/
 │   ├── context/
 │   │   └── ThemeContext.js     # Dark/light mode state
-│   ├── data/
-│   │   ├── treks.js            # 15 fort trek entries
-│   │   ├── sports.js           # 20 marathon/race entries
-│   │   ├── books.js            # 44 book entries
-│   │   ├── instagram.js        # Instagram post entries
-│   │   ├── 100DaysToOffload.js # Blog challenge post log
-│   │   ├── projects.js         # Portfolio project entries
-│   │   ├── contact.js          # Social links for footer/sidebar
-│   │   ├── now-data.js         # Fallback/seed data for the Now CMS editor
-│   │   ├── routes.js           # Navigation route config
+│   ├── data/                   # GENERATED from cms-content (do not edit by hand)
+│   │   ├── treks.js, sports.js, books.js, instagram.js,
+│   │   ├── 100DaysToOffload.js, projects.js, resume/*.js
+│   │   ├── contact.js          # Hand-maintained: social links
+│   │   ├── routes.js           # Hand-maintained: navigation route config
 │   │   ├── about.md            # Personal bio (markdown)
 │   │   ├── changelog.md        # Versioned changelog (markdown)
 │   │   └── resume/
@@ -72,13 +66,8 @@ personal-site/
 │   │       ├── skills.js
 │   │       ├── degrees.js
 │   │       └── certifications.js
-│   ├── hooks/
-│   │   ├── useCMSStatus.js     # CMS connectivity check
-│   │   ├── useDraftStore.js    # localStorage draft persistence for admin editors
-│   │   └── useExportGenerator.js
 │   ├── layouts/
-│   │   ├── Main.js             # Standard page wrapper (Helmet + Navigation + Footer)
-│   │   └── AdminLayout.js      # Admin panel layout
+│   │   └── Main.js             # Standard page wrapper (Helmet + Navigation + Footer)
 │   ├── pages/
 │   │   ├── Index.js, About.js, Resume.js, Contact.js, Projects.js
 │   │   ├── Stats.js            # Aggregate life stats
@@ -90,7 +79,8 @@ personal-site/
 │   │   ├── Challenges.js       # Challenges hub
 │   │   ├── OneHundredDays.js   # 100 Days To Offload tracker
 │   │   ├── Changelog.js        # Markdown-rendered changelog
-│   │   ├── Admin.js            # CMS admin dashboard (auth-gated)
+│   │   ├── InteractiveMe.js    # Shuffled image timeline (sports + treks)
+│   │   ├── MindMap.js          # Interactive radial SVG mind map
 │   │   └── NotFound.js
 │   ├── static/
 │   │   └── css/                # SCSS (supplementary to Tailwind)
@@ -98,8 +88,8 @@ personal-site/
 │       └── parseNowCms.js      # Async parser: reads CMS markdown → structured Now data
 ├── docs/                       # Project documentation
 ├── scripts/
-│   ├── sync-cms-to-data.js     # Bi-directional CMS ↔ JS data sync
-│   └── seed-cms-content.js     # Seeds CMS markdown from now-data.js
+│   ├── sync-cms-to-data.js     # One-way sync: cms-content markdown → src/data/*.js
+│   └── seed-cms-content.js     # Recovery tool: regenerates markdown FROM JS files
 └── package.json
 ```
 
@@ -125,16 +115,17 @@ All routes are lazy-loaded via `React.lazy` + `Suspense` in `App.js`:
 | `/challenges` | Challenges |
 | `/100-days-to-offload` | OneHundredDays |
 | `/changelog` | Changelog |
-| `/admin` | Admin (auth-gated) |
+| `/interactive-me` | InteractiveMe |
+| `/mindmap` | MindMap |
 | `*` | NotFound |
 
 ---
 
 ## Data Layer
 
-### Static JS data files (`src/data/`)
+### Generated JS data files (`src/data/`)
 
-All content pages (Sports, Treks, Books, Resume, Projects, Instagram, Challenges) import directly from static JS arrays/objects. No API calls. Data is updated by editing the files and committing.
+All content pages (Sports, Treks, Books, Resume, Projects, Instagram, Challenges) import static JS arrays/objects. These files are **generated** from `src/cms-content/` markdown by `npm run cms:sync` (run automatically by the `prebuild` hook and verified by CI). Content is updated by editing markdown — via Decap CMS at `/cms/` or directly — never by editing the JS files.
 
 **Image arrays** in sports, treks, and instagram all use the `slideImages` field:
 ```js
@@ -143,24 +134,13 @@ slideImages: [
 ]
 ```
 
-### CMS-backed Now page (`src/cms-content/now/`)
+### Runtime-loaded Now page (`src/cms-content/now/`)
 
-The Now page (`/now`) is the only data source backed by Decap CMS. Data lives in:
+The Now page (`/now`) reads its markdown directly at runtime — there is no generated JS file for it:
 - `src/cms-content/now/meta.md` — daily rituals and site meta
 - `src/cms-content/now/months/*.md` — one file per month
 
 `src/utils/parseNowCms.js` reads these files asynchronously at runtime and converts them to the structured format consumed by `NowDocument` and its subsection components.
-
-`src/data/now-data.js` provides fallback/seed data used by the Admin CMS editor when CMS files aren't available locally.
-
-### Admin panel (`/admin`)
-
-Password-protected (SHA-256 hash) local admin UI for editing all data types. Each editor:
-1. Loads the current data file as initial state
-2. Persists drafts to `localStorage` via `useDraftStore`
-3. Exports ready-to-paste JS code via `ExportPanel`
-
-The admin panel does **not** write files directly — it generates code to copy-paste into the data files and commit.
 
 ---
 

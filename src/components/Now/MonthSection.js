@@ -9,23 +9,27 @@ import NowWebsiteSection from "./NowWebsiteSection";
 import NowCertificatesSection from "./NowCertificatesSection";
 import NowMiscSection from "./NowMiscSection";
 
+const Card = ({ children, full = false }) => (
+  <div
+    className={`bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-6 hover:border-secondary/30 dark:hover:border-secondary/30 transition-colors ${
+      full ? "md:col-span-2" : ""
+    }`}
+  >
+    {children}
+  </div>
+);
+
 const MonthSection = ({ month }) => {
   const { sections = {} } = month;
   const heading = `${month.month} ${month.year}`;
 
   return (
-    <div className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
-      <div className="flex items-center gap-3 mb-8">
+    <div>
+      <div className="flex items-center gap-3 mb-6">
         {month.isCurrent && (
           <div className="w-2 h-2 rounded-full bg-secondary animate-pulse shrink-0" />
         )}
-        <h2
-          className={`font-headline text-2xl font-bold ${
-            month.isCurrent
-              ? "text-stone-900 dark:text-stone-100"
-              : "text-stone-700 dark:text-stone-300"
-          }`}
-        >
+        <h2 className="font-headline text-3xl font-black text-stone-900 dark:text-stone-100 tracking-tight mb-0">
           {heading}
         </h2>
         {month.isCurrent && (
@@ -35,51 +39,51 @@ const MonthSection = ({ month }) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-8 divide-y divide-stone-100 dark:divide-stone-800">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {sections.blogs?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card full>
             <NowBlogsSection blogs={sections.blogs} />
-          </div>
+          </Card>
         )}
         {sections.running?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card>
             <NowRunningSection running={sections.running} />
-          </div>
+          </Card>
         )}
         {sections.books?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card>
             <NowBooksSection books={sections.books} />
-          </div>
+          </Card>
         )}
         {sections.events?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card full>
             <NowEventsSection events={sections.events} />
-          </div>
+          </Card>
         )}
         {sections.projects?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card>
             <NowProjectsSection projects={sections.projects} />
-          </div>
-        )}
-        {sections.stats && (
-          <div className="pt-8 first:pt-0">
-            <NowStatsSection stats={sections.stats} />
-          </div>
+          </Card>
         )}
         {sections.website?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card>
             <NowWebsiteSection website={sections.website} />
-          </div>
+          </Card>
         )}
         {sections.certificates?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card>
             <NowCertificatesSection certificates={sections.certificates} />
-          </div>
+          </Card>
         )}
         {sections.misc?.length > 0 && (
-          <div className="pt-8 first:pt-0">
+          <Card>
             <NowMiscSection misc={sections.misc} />
-          </div>
+          </Card>
+        )}
+        {sections.stats && (
+          <Card full>
+            <NowStatsSection stats={sections.stats} />
+          </Card>
         )}
       </div>
     </div>

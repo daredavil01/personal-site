@@ -1,5 +1,21 @@
-// TODO Add a couple lines about each project
+/* eslint-disable max-len */
 const data = [
+  {
+    title: "Expense Management Web-App using firebase",
+    subtitle: "Web-app",
+    link: "https://github.com/daredavil01/expense-mgmt-webapp",
+    image: "/images/projects/expense.jpg",
+    date: "2020-10-20",
+    desc: "Expense management webapp for the construction firm",
+  },
+  {
+    title: "Personal Website",
+    link: "https://github.com/daredavil01/personal-website",
+    image: "/images/projects/personal-website.png",
+    date: "2020-10-20",
+    desc: "Personal website for my portfolio",
+    subtitle: "Personal Website",
+  },
   {
     title: "RunLog",
     subtitle: "Your digital wall of medals.",
@@ -17,14 +33,6 @@ const data = [
     desc: "Tool to get FM and HM traning plan based on time trials!",
   },
   {
-    title: "Personal Website",
-    subTitle: "Personal Website",
-    link: "https://github.com/daredavil01/personal-website",
-    image: "/images/projects/personal-website.png",
-    date: "2020-10-20",
-    desc: "Personal website for my portfolio",
-  },
-  {
     title: "Social-Ape",
     subtitle: "Social Media App For Human Apes",
     link: "https://github.com/daredavil01/social-explorers-client",
@@ -32,14 +40,6 @@ const data = [
     date: "2020-11-20",
     desc: "A social media platform for geeky freaky geeks!",
   },
-  {
-    title: "Expense Management Web-App using firebase",
-    subtitle: "Web-app",
-    link: "https://github.com/daredavil01/expense-mgmt-webapp",
-    image: "/images/projects/expense.jpg",
-    date: "2020-10-20",
-    desc: "Expense management webapp for the construction firm",
-  }
 ];
 
 export default data;

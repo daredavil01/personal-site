@@ -21,6 +21,7 @@
         "allow": ["warn", "error", "info"]
       }
     ],
+    "import/no-unresolved": [2, { "ignore": ["\\?url$"] }],
     "no-underscore-dangle": 0,
     "react/destructuring-assignment": 0,
     "react/function-component-definition": [
@@ -33,7 +34,7 @@
         "extensions": [".js", ".jsx"]
       }
     ],
-    "react/jsx-no-useless-fragment": 0,
+    "react/jsx-no-useless-fragment": 2,
     "react/jsx-one-expression-per-line": 0,
     "react/jsx-props-no-spreading": 0,
     "react/jsx-wrap-multilines": [
@@ -45,19 +46,40 @@
       }
     ],
     "max-len": 0,
-    "no-trailing-spaces": 0,
+    "no-trailing-spaces": 2,
     "react/no-unescaped-entities": 0,
-    "react/self-closing-comp": 0,
+    "react/self-closing-comp": 2,
     "react/button-has-type": 0,
     "react/jsx-indent": 0,
     "react/jsx-closing-tag-location": 0,
     "arrow-body-style": 0,
     "react/no-array-index-key": 0,
-    "no-nested-ternary": 0,
+    "no-nested-ternary": 2,
     "react/jsx-curly-newline": 0,
-    "react/no-unused-prop-types": 0,
+    "react/no-unused-prop-types": 2,
     "react/prop-types": 0,
     "react/require-default-props": 0
   },
-  "plugins": ["react"]
+  "plugins": ["react"],
+  "overrides": [
+    {
+      "files": ["scripts/**/*.js"],
+      "rules": {
+        "no-console": "off",
+        "no-restricted-syntax": "off",
+        "no-continue": "off",
+        "no-multi-spaces": ["error", { "ignoreEOLComments": false, "exceptions": { "Property": true, "VariableDeclarator": true, "ImportDeclaration": true, "CallExpression": true } }]
+      }
+    },
+    {
+      "files": ["functions/**/*.js"],
+      "globals": {
+        "HTMLRewriter": "readonly"
+      },
+      "rules": {
+        "max-classes-per-file": "off",
+        "import/prefer-default-export": "off"
+      }
+    }
+  ]
 }

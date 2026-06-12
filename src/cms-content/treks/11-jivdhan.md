@@ -5,7 +5,7 @@ trek_time: 3 hrs
 endurance_level: Medium
 date: 06-10-2024
 blog_link: https://daredavil453624413.wordpress.com/2024/10/07/jivdhan-fort-trek/
-photos:
+slideImages:
   - url: /images/treks/jivdhan_1.jpg
     caption: Slide 1
   - url: /images/treks/jivdhan_2.jpg

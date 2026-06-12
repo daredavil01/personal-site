@@ -6,6 +6,6 @@ tags:
   - Technology Policy
 caption: "Beautiful, isn't it?😀 That's how things evolve, right?🤠 And, ultimately you need to get into that delicate equilibrium of yourself!❣️ Another step towards it!✌️ A click at Pune Public Policy Festival!🤩 #pppf"
 slideImages:
-  - url: /images/insta_posts/3_1.heic
+  - url: /images/insta_posts/3_1.jpeg
     caption: Slide 9
 ---

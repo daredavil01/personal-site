@@ -1,7 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import sportsData from "../../data/sports";
 import TopSummaryCards from "./TopSummaryCards";
 import { parseDistance, parseTimeToSeconds } from "./utils";
+
+const ORDER_KEYS = ["time", "distance", "date"];
 
 const PlaceholderImage = ({ icon, label }) => (
   <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-stone-100 dark:bg-stone-800">
@@ -15,11 +18,31 @@ const PlaceholderImage = ({ icon, label }) => (
 );
 
 const SportsDefault = ({ onRaceClick }) => {
-  const [filterYear, setFilterYear] = useState("all");
-  const [filterPlace, setFilterPlace] = useState("all");
-  const [filterDistance, setFilterDistance] = useState("all");
-  const [orderBy, setOrderBy] = useState("time");
-  const [orderAsc, setOrderAsc] = useState(true);
+  // Filters and ordering live in the URL (?year=&place=&distance=&order=&dir=)
+  // so a filtered view can be shared; defaults are omitted to keep URLs clean,
+  // and updates merge with existing params (e.g. ?view=default) via replace.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterYear = searchParams.get("year") || "all";
+  const filterPlace = searchParams.get("place") || "all";
+  const filterDistance = searchParams.get("distance") || "all";
+  const orderParam = searchParams.get("order");
+  const orderBy = ORDER_KEYS.includes(orderParam) ? orderParam : "time";
+  const orderAsc = searchParams.get("dir") !== "desc";
+
+  const updateParams = (patch) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(patch).forEach(([key, value]) => {
+      if (value === null) next.delete(key);
+      else next.set(key, value);
+    });
+    setSearchParams(next, { replace: true });
+  };
+
+  const setFilterYear = (v) => updateParams({ year: v === "all" ? null : v });
+  const setFilterPlace = (v) => updateParams({ place: v === "all" ? null : v });
+  const setFilterDistance = (v) => updateParams({ distance: v === "all" ? null : v });
+  const setOrderBy = (v) => updateParams({ order: v === "time" ? null : v });
+  const toggleOrderDir = () => updateParams({ dir: orderAsc ? "desc" : null });
 
   const years = useMemo(() => {
     const s = new Set(
@@ -43,9 +66,7 @@ const SportsDefault = ({ onRaceClick }) => {
   const hasFilters = filterYear !== "all" || filterPlace !== "all" || filterDistance !== "all";
 
   const clearFilters = () => {
-    setFilterYear("all");
-    setFilterPlace("all");
-    setFilterDistance("all");
+    updateParams({ year: null, place: null, distance: null });
   };
 
   const filtered = useMemo(() => {
@@ -159,7 +180,7 @@ const SportsDefault = ({ onRaceClick }) => {
             </button>
           ))}
           <button
-            onClick={() => setOrderAsc((v) => !v)}
+            onClick={toggleOrderDir}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg font-label text-xs uppercase tracking-widest font-bold bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700 transition-all"
             title={orderAsc ? "Ascending" : "Descending"}
           >
@@ -181,20 +202,22 @@ const SportsDefault = ({ onRaceClick }) => {
           No races match your filters.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
           {filtered.map((race) => (
             <div
               key={race.id}
               onClick={() => onRaceClick(race)}
-              className="group relative cursor-pointer rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:shadow-lg transition-all duration-300 flex flex-col"
+              className="group relative cursor-pointer rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:shadow-lg transition-all duration-300 flex flex-col break-inside-avoid mb-6"
             >
-              {/* Image block */}
-              <div className="relative w-full aspect-video overflow-hidden bg-stone-100 dark:bg-stone-800">
+              {/* Image block — natural aspect ratio, masonry-style */}
+              <div className={`relative w-full overflow-hidden bg-stone-100 dark:bg-stone-800 ${race.slideImages?.length > 0 ? "" : "aspect-video"}`}>
                 {race.slideImages?.length > 0 ? (
                   <img
                     src={race.slideImages[0].url}
                     alt={race.title}
-                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-auto block transition-all duration-700 group-hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                     }}
