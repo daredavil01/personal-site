@@ -2,8 +2,10 @@
 ---
 # Changelog
 
-All notable changes to this project are documented here, grouped by release period.
-This project does not use semantic versioning; entries are grouped by date and feature area.
+All notable changes to this project are documented here.
+Versioning follows the semver-style rules in CLAUDE.md: major for new pages/refactors/redesigns,
+minor for features and content additions (at most one minor version per calendar week),
+patch for fixes and tweaks.
 
 ---
 

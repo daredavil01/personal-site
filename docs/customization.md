@@ -4,30 +4,25 @@ This guide explains how to update content and customize the look of the website.
 
 ## Updating Content
 
-### Resume
-To update your resume information, navigate to `src/data/resume/`.
+**Content lives as markdown in `src/cms-content/` — the JS files in `src/data/` are
+generated and must not be edited by hand.** There are two ways to edit:
 
-- **Experience**: Edit `positions.js`.
-- **Education**: Edit `degrees.js`.
-- **Skills**: Edit `skills.js`.
-- **Certifications**: Edit `certifications.js`.
+1. **Decap CMS** — open `/cms/`, log in with GitHub, and use the form editors.
+   Edits are committed straight to the repository.
+2. **Direct markdown edits** — add or edit a file under the matching collection
+   folder (`src/cms-content/books/`, `sports/`, `treks/`, `projects/`,
+   `instagram/`, `100days/`, `resume/`, `now/`), then run:
 
-### Sports/Races
-To add a new race, open `src/data/sports.js` and add a new object to the array:
+   ```bash
+   npm run cms:sync   # regenerates src/data/*.js
+   ```
 
-```javascript
-{
-  title: "New Marathon Name",
-  distance: "42.2 km",
-  time: "3:45:00",
-  date: "2025-10-15",
-  image: "/images/sports/new-race.jpg", // Add image to public/images/sports/
-  link: "https://strava.com/activity/..."
-}
-```
+   and commit both the markdown and the regenerated JS. CI rejects commits where
+   the two are out of sync.
 
-### Projects
-To add a new project, edit `src/data/projects.js`.
+Field shapes for each collection are defined in `public/cms/config.yml`, with
+step-by-step recipes (including image conventions) in [CLAUDE.md](../CLAUDE.md)
+and the full pipeline described in [cms-data-flow.md](cms-data-flow.md).
 
 ## Adding Images
 
