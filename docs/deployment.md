@@ -17,7 +17,7 @@ The site is connected directly to the GitHub repository via the Cloudflare Pages
 **Dashboard settings:**
 | Setting | Value |
 |---|---|
-| Framework preset | Create React App |
+| Framework preset | None (Vite — build command and output dir are set explicitly below) |
 | Build command | `npm run build` |
 | Build output directory | `build` |
 | Node.js version | 20 (set via `.nvmrc`) |

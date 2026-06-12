@@ -7,7 +7,8 @@ React 18 single-page application (personal portfolio). Key stack:
 - **react-helmet-async** for per-page `<head>` metadata
 - **Tailwind CSS** for styling
 - **Decap CMS** (`/cms/`, GitHub backend) for content editing
-- **Deployed on Cloudflare Pages** — build command is `npm run build` (`react-scripts build`). A `prebuild` hook runs `npm run cms:sync` so the build always regenerates `src/data/*.js` from the CMS markdown.
+- **Built with Vite** (`vite.config.js`) — JSX lives in `.js` files via an esbuild loader shim; `process.env.PUBLIC_URL` is shimmed to `""` with `define` (the generated data files embed it — do not regenerate them to remove it).
+- **Deployed on Cloudflare Pages** — build command is `npm run build` (`vite build`, output in `build/`). A `prebuild` hook runs `npm run cms:sync` so the build always regenerates `src/data/*.js` from the CMS markdown.
 
 ## Content Pipeline (Single Source of Truth)
 

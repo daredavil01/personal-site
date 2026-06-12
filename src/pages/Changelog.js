@@ -6,7 +6,8 @@ const Changelog = () => {
   const [markdown, setMarkdown] = useState("");
 
   useEffect(() => {
-    import("../data/changelog.md")
+    // The ?url suffix makes Vite resolve the markdown to its served URL.
+    import("../data/changelog.md?url")
       .then((res) => {
         fetch(res.default)
           .then((r) => r.text())

@@ -62,7 +62,7 @@ Status legend: ✅ done (committed on this branch) · ⬜ open · 🔶 partially
 | T8 | Single content pipeline: `/admin` deleted (pages, components, hooks, layouts), `now-data.js` deleted, `prebuild` runs `cms:sync` so every build regenerates `src/data` from markdown | ✅ |
 | T9a | Image compression: full pass over `public/images` — 114MB → 37MB, zero files over the 300KB cap; PNG→JPG renames with all refs updated | ✅ |
 | T9b | Image loading: add `loading="lazy"` to gallery/timeline `<img>`s; replace `ImageSlider`'s CSS `background-image` slides with real `<img>` so lazy/decode semantics apply | ✅ |
-| T10 | CRA → Vite migration: `define` shim for `process.env.PUBLIC_URL`, `import.meta.glob` replaces `require.context` in `parseNowCms.js`, output to `build/` so Cloudflare config is untouched; jest stays (already standalone via `babel.config.js`) | ⬜ |
+| T10 | CRA → Vite migration: `define` shim for `process.env.PUBLIC_URL`, `import.meta.glob` replaces `require.context` in `parseNowCms.js`, output to `build/` so Cloudflare config is untouched; jest stays (now an explicit dep + `parseNowCms` stub for `import.meta`) | ✅ (isolated branch `claude/vite-migration`) |
 | T11 | Single meta-tag source: shared `src/data/pageMeta.js` consumed by `functions/_middleware.js` and `src/layouts/Main.js` (pages no longer pass duplicated props); `/interactive-me` and `/mindmap` entries added | ✅ |
 
 ### Milestone 3 — Polish
@@ -76,12 +76,14 @@ Status legend: ✅ done (committed on this branch) · ⬜ open · 🔶 partially
 
 ## Remaining-work notes
 
-- **T10 (Vite)** — do in an isolated PR on green CI. Gotchas: generated data files
-  embed `process.env.PUBLIC_URL` template literals (solve with a Vite `define`,
-  not by regenerating); `.md` runtime fetches in `parseNowCms.js` and
-  `Changelog.js` need `?url` imports / `import.meta.glob` (`About.js` no longer
-  fetches markdown after the structured-About revamp);
-  check for CRA-only `ReactComponent` SVG imports before flipping.
+- **T10 (Vite)** — done on the isolated branch `claude/vite-migration` (stacked on
+  the T9b/T11/T14/T15 branch). All planned gotchas handled: `define` shim for
+  `process.env.PUBLIC_URL`, `import.meta.glob`/`?url` for the markdown fetches,
+  no `ReactComponent` SVG imports existed. Extra findings: jest had to become an
+  explicit devDependency (it was transitive via react-scripts) and `parseNowCms`
+  needs a jest stub because CJS cannot evaluate `import.meta`. After merge, the
+  Cloudflare Pages "framework preset" dashboard setting should be flipped from
+  Create React App to None/Vite (build command and output dir are unchanged).
 - **Not doing** (deliberate): server-side auth for admin (deleted instead);
   chasing individual CRA CVEs (superseded by T10); TypeScript or broad
   unit-test coverage (wrong maturity); git-history rewrite for repo size.
@@ -92,4 +94,5 @@ Status legend: ✅ done (committed on this branch) · ⬜ open · 🔶 partially
 - Content: one documented way to add content (markdown → sync); direct `src/data` edits impossible-by-convention. ✅
 - Images: every referenced image renders cross-browser; nothing over 300KB. ✅
 - Performance: Lighthouse mobile LCP < 3s on `/sports` and `/instagram` (re-measure after T9b).
-- Platform: `npm audit` criticals ≈ 0 (after T10).
+- Platform: `npm audit` criticals ≈ 0 (after T10). ✅ 0 critical after the Vite
+  migration (67 findings → 19: 9 moderate, 10 high — all build-time/transitive)

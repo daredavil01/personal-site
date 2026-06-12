@@ -109,7 +109,7 @@ git add src/cms-content src/data && git commit && git push
 │                                                 │
 │  src/cms-content/*.md → cms:sync (prebuild)     │
 │                       → src/data/*.js           │
-│                       → react-scripts build     │
+│                       → vite build              │
 │                       → static JS bundles (CDN) │
 └─────────────────────────────────────────────────┘
 ```
