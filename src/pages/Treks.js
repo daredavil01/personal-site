@@ -1,15 +1,34 @@
 import React, { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Main from "../layouts/Main";
 import TreksStatistics from "../components/Treks/TreksStatistics";
 import TreksDefault from "../components/Treks/TreksDefault";
 import TrekDetailsModal from "../components/Treks/TrekDetailsModal";
 
+const TAB_TO_PARAM = {
+  STATISTICS: "statistics",
+  "DEFAULT VIEW": "default",
+};
+
+const PARAM_TO_TAB = Object.fromEntries(
+  Object.entries(TAB_TO_PARAM).map(([tab, param]) => [param, tab]),
+);
+
 const TreksPage = () => {
-  const [activeTab, setActiveTab] = useState('STATISTICS');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get("view");
+  const initialTab = PARAM_TO_TAB[viewParam] || "STATISTICS";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedTrek, setSelectedTrek] = useState(null);
   const [copied, setCopied] = useState(false);
 
   const tabs = ['STATISTICS', 'DEFAULT VIEW'];
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ view: TAB_TO_PARAM[tab] }, { replace: true });
+  };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -51,7 +70,7 @@ const TreksPage = () => {
               return (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => handleTabChange(tab)}
                   className={`px-6 py-2.5 rounded-lg font-label text-xs uppercase tracking-widest font-bold transition-all ${activeColor}`}
                 >
                   {tab}
