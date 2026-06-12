@@ -4,7 +4,7 @@ fort_name: Dhak_Bahiri
 trek_time: 2 hrs
 endurance_level: Medium
 date: 01-01-2023
-photos:
+slideImages:
   - url: /images/treks/dhak_bahiri_1.jpg
     caption: Slide 1
   - url: /images/treks/dhak_bahiri_2.jpg

@@ -4,7 +4,7 @@ fort_name: Kailasgad
 trek_time: 3 hrs
 endurance_level: Medium
 date: 03-09-2023
-photos:
+slideImages:
   - url: /images/treks/kailasgad_1.jpg
     caption: Slide 1
   - url: /images/treks/kailasgad_2.jpg

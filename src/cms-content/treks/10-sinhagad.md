@@ -4,7 +4,7 @@ fort_name: Sinhagad
 trek_time: 2 hrs
 endurance_level: Medium
 date: 07-09-2024
-photos:
+slideImages:
   - url: /images/treks/sinhgad_1.jpg
     caption: Slide 1
   - url: /images/treks/sinhgad_2.jpg

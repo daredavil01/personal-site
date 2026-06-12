@@ -2,7 +2,14 @@
 /**
  * Seeds src/cms-content/ from existing src/data/*.js files.
  * Run once to populate Decap CMS editors with existing data.
- * Usage: node scripts/seed-cms-content.js
+ *
+ * Usage: node scripts/seed-cms-content.js [collection ...]
+ *   collections: now, books, 100days, sports, treks, projects, instagram, resume
+ *   With no arguments, all collections are seeded.
+ *
+ * WARNING: seeding overwrites src/cms-content markdown from the JS data
+ * files. Markdown is the source of truth — only seed a collection when the
+ * JS file is known to be ahead (e.g. entries were added to it directly).
  */
 const fs = require('fs');
 const path = require('path');
@@ -231,19 +238,39 @@ function seedResumeCertifications() {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-console.log('\nCMS Seed: src/data/*.js → src/cms-content/\n');
+const COLLECTIONS = {
+  now: () => {
+    console.log('Now — Meta:'); seedNowMeta();
+    console.log('\nNow — Months:'); seedNowMonths();
+  },
+  books: () => { console.log('Books:'); seedBooks(); },
+  '100days': () => { console.log('100 Days:'); seedHundredDays(); },
+  sports: () => { console.log('Sports:'); seedSports(); },
+  treks: () => { console.log('Treks:'); seedTreks(); },
+  projects: () => { console.log('Projects:'); seedProjects(); },
+  instagram: () => { console.log('Instagram:'); seedInstagram(); },
+  resume: () => {
+    console.log('Resume — Positions:'); seedResumePositions();
+    console.log('\nResume — Degrees:'); seedResumeDegrees();
+    console.log('\nResume — Skills:'); seedResumeSkills();
+    console.log('\nResume — Certifications:'); seedResumeCertifications();
+  },
+};
 
-console.log('Now — Meta:'); seedNowMeta();
-console.log('\nNow — Months:'); seedNowMonths();
-console.log('\nBooks:'); seedBooks();
-console.log('\n100 Days:'); seedHundredDays();
-console.log('\nSports:'); seedSports();
-console.log('\nTreks:'); seedTreks();
-console.log('\nProjects:'); seedProjects();
-console.log('\nInstagram:'); seedInstagram();
-console.log('\nResume — Positions:'); seedResumePositions();
-console.log('\nResume — Degrees:'); seedResumeDegrees();
-console.log('\nResume — Skills:'); seedResumeSkills();
-console.log('\nResume — Certifications:'); seedResumeCertifications();
+const requested = process.argv.slice(2);
+const unknown = requested.filter((name) => !COLLECTIONS[name]);
+if (unknown.length > 0) {
+  console.error(`Unknown collection(s): ${unknown.join(', ')}`);
+  console.error(`Valid collections: ${Object.keys(COLLECTIONS).join(', ')}`);
+  process.exit(1);
+}
+
+const toSeed = requested.length > 0 ? requested : Object.keys(COLLECTIONS);
+
+console.log('\nCMS Seed: src/data/*.js → src/cms-content/\n');
+toSeed.forEach((name, i) => {
+  if (i > 0) console.log('');
+  COLLECTIONS[name]();
+});
 
 console.log('\nDone. Commit src/cms-content/ and push to redeploy.\n');

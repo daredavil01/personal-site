@@ -4,7 +4,7 @@ fort_name: Bhimashankar To Bhorgiri
 trek_time: 4 hrs
 endurance_level: Hard
 date: 13-08-2023
-photos:
+slideImages:
   - url: /images/treks/bhimashankar_1.jpg
     caption: Slide 1
   - url: /images/treks/bhimashankar_2.jpg

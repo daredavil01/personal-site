@@ -452,8 +452,8 @@ collections:
           hint: "DD-MM-YYYY — e.g. 17-02-2019",
         }
       - { label: "Blog Link", name: blog_link, widget: string, required: false }
-      - label: Photos
-        name: photos
+      - label: "Slide Images"
+        name: slideImages
         widget: list
         required: false
         fields:

@@ -5,7 +5,7 @@ trek_time: 22 Hours
 endurance_level: Hard
 date: 02-08-2025
 blog_link: https://daredavil453624413.wordpress.com/2025/08/04/panhala-to-pawankhind/
-photos:
+slideImages:
   - url: /images/treks/panhala_pawankhind_1.jpg
     caption: Slide 1
   - url: /images/treks/panhala_pawankhind_2.jpg
