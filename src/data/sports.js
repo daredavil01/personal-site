@@ -12,35 +12,35 @@ const sportsData = [
     bibNumber: "10214",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_4.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_6.jpeg`,
         caption: "Slide 6",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_7.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_7.jpeg`,
         caption: "Slide 7",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_8.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_8.jpeg`,
         caption: "Slide 8",
       },
     ],

@@ -12,39 +12,39 @@ const posts = [
     caption: "For the one last time, some glimpses from the last 3 months! 1. Bankot Fort, Ratnagiri 2. Takshashila Convocation, Banglore 3. Amity Marathon: Completed 10km's run in 74 mins 4. Sagareshwar, Islampur, Sangali 5. Gitai mandir, Wardha 6. Pune City Marathon: Completed 21km's in 2 hours 45 mins 7. Raigad Fort 8. Taking scroll at Takshashila convocation 9. The MOON, captured by me! 10. Velas Beach, Ratnagiri Enoy!",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_4.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_6.jpeg`,
         caption: "Slide 6",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_7.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_7.jpeg`,
         caption: "Slide 7",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_8.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_8.jpeg`,
         caption: "Slide 8",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_9.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/1_9.jpeg`,
         caption: "Slide 9",
       },
     ],
@@ -60,27 +60,27 @@ const posts = [
     caption: "Doing something beyond 9-5 is to get out of that infinite loop of mundane life, that's something I aspire to do. As a part of this pursuit, I choose to volunteer for @nirmanforyouth . For the last 4 years, I have been associated with the team. It was a rejuvenating experience and here is my story of \"Why do I do, what I choose to do?\" I'd love to know your feedback about the same! #volunteering #ngo #socialsector #NirmanForYouth",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/nirman_story/1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/nirman_story/1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/nirman_story/2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/nirman_story/2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/nirman_story/3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/nirman_story/3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/nirman_story/6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/nirman_story/6.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/nirman_story/4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/nirman_story/4.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/nirman_story/5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/nirman_story/5.jpeg`,
         caption: "Slide 6",
       },
     ],
@@ -95,7 +95,7 @@ const posts = [
     caption: "Beautiful, isn't it?😀 That's how things evolve, right?🤠 And, ultimately you need to get into that delicate equilibrium of yourself!❣️ Another step towards it!✌️ A click at Pune Public Policy Festival!🤩 #pppf",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/3_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/3_1.jpeg`,
         caption: "Slide 9",
       },
     ],
@@ -110,27 +110,27 @@ const posts = [
     caption: "गडांचा राजा रायगड! आज रौप्य महोत्सवी गडकिल्ले सत्यशोधक मोहिमे अंतर्गत रायगडाची भ्रमंती केली. त्यातीलच काही क्षण!",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_4.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/4_6.jpeg`,
         caption: "Slide 6",
       },
     ],
@@ -144,7 +144,7 @@ const posts = [
     caption: "You know, it's all about that smile!❣️ #latepost",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_1.jpeg`,
         caption: "Slide 1",
       },
       {
@@ -160,11 +160,11 @@ const posts = [
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_6.jpeg`,
         caption: "Slide 6",
       },
       {
@@ -172,11 +172,11 @@ const posts = [
         caption: "Slide 7",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_8.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_8.jpeg`,
         caption: "Slide 8",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_9.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/6_9.jpeg`,
         caption: "Slide 9",
       },
       {
@@ -199,43 +199,43 @@ const posts = [
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_4.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_6.jpeg`,
         caption: "Slide 6",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_8.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_8.jpeg`,
         caption: "Slide 8",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_9.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_9.jpeg`,
         caption: "Slide 9",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_10.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_10.jpeg`,
         caption: "Slide 10",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_11.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_11.jpeg`,
         caption: "Slide 11",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_12.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/7_12.jpeg`,
         caption: "Slide 12",
       },
     ],
@@ -251,35 +251,35 @@ const posts = [
     caption: "This smile, matters!❣️ These moments, matter!❤️‍🔥 Especially the ones after the intense efforts that stretch the self to the largest extent!🤍 Some moments from the beautiful day!🤩 #NDA_Marathon🎉 #running🏃",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_4.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_6.jpeg`,
         caption: "Slide 6",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_7.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_7.jpeg`,
         caption: "Slide 7",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_8.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/8_8.jpeg`,
         caption: "Slide 8",
       },
     ],
@@ -310,39 +310,39 @@ const posts = [
     caption: "📍 कैलासगड...!🤩 निमित्त: गडकिल्ले सत्यशोधक मोहीम ❣️ अतिशय सुंदर, अदभुत, अंकावर काटा आणणाऱ्या ट्रेल नंतर कारवी सदृश्य फुलाने व्यापलेल्या पठारावरील काही दृश्य!🥳 Some glimpses from beautiful Karvi terrain after some exciting beautiful, marvellous, thrilling hike trails!🤩 #KailasgadFort #trekking #Trails",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_1.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_1.jpeg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_2.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_2.jpeg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_3.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_3.jpeg`,
         caption: "Slide 3",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_4.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_4.jpeg`,
         caption: "Slide 4",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_5.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_5.jpeg`,
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_6.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_6.jpeg`,
         caption: "Slide 6",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_7.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_7.jpeg`,
         caption: "Slide 7",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_8.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_8.jpeg`,
         caption: "Slide 8",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_9.heic`,
+        url: `${process.env.PUBLIC_URL}/images/insta_posts/10_9.jpeg`,
         caption: "Slide 9",
       },
     ],
