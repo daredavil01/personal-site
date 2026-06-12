@@ -9,6 +9,16 @@ patch for fixes and tweaks.
 
 ---
 
+## [v7.1.0] — 2026-06-12
+
+### Changed
+- **About Page** (`src/components/About/AboutDocument.js`, `src/pages/About.js`): Replaced static markdown render with a structured three-section layout — "In 1 Minute" (bio + animated stat grid), "More Details" (six activity pillar cards with concise data-driven chips), and "Connect with me" (social links). Stats computed dynamically from data files.
+- **About Page** (`src/components/About/AboutDocument.js`): Enriched bio and pillar chips with researched details — Substack newsletter name (*The Wanderer's Technical Anecdotes*), *Dare Write's* podcast, Chronicles of Wandering Mind series, education (B.Tech CS RIT Sangli 2021, Tech & Policy Takshashila 2024), and design tools.
+- **Now Page** (`src/pages/Now.js`, `src/components/Now/NowDocument.js`, `src/components/Now/MonthSection.js`): Complete redesign — an interactive month-timeline pill switcher replaces the long scroll of stacked month cards; each month renders as a bento grid of section cards; daily rituals restyled as compact icon cards.
+- **100 Days To Offload Page** (`src/pages/OneHundredDays.js`): Interactive redesign — animated progress ring with pace tracking (target vs. ahead/behind), clickable calendar heatmap that opens posts, posts-per-month bar chart that filters the list, search plus tag/platform filter chips, and a responsive post-card grid. Removed the decorative SVG logo.
+
+---
+
 ## [v7.0.0] — 2026-06-12
 
 ### Added

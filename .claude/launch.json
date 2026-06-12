@@ -5,7 +5,8 @@
       "name": "React Dev Server",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
-      "port": 3000
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

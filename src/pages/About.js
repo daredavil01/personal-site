@@ -1,34 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Main from "../layouts/Main";
 import AboutDocument from "../components/About/AboutDocument";
 
-const About = () => {
-  const [markdown, setMarkdown] = useState("");
-
-  useEffect(() => {
-    import("../data/about.md")
-      .then((res) => {
-        fetch(res.default)
-          .then((r) => r.text())
-          .then(setMarkdown);
-      })
-      .catch(console.error);
-  }, []);
-
-  const count = markdown
-    .split(/\s+/)
-    .map((s) => s.replace(/\W/g, ""))
-    .filter((s) => s.length).length;
-
-  return (
-    <Main
-      title="About"
-      description="Full-stack software engineer, marathoner, and digital thinker. Read about Sanket Tambare's background, interests, and what drives him."
-      image="https://daredavil.pages.dev/images/me.jpg"
-    >
-      <AboutDocument markdown={markdown} count={count} />
-    </Main>
-  );
-};
+const About = () => (
+  <Main
+    title="About"
+    description="Full-stack software developer, ultra-marathoner, fort-trekker, and writer. Read about Sanket Tambare's background, interests, and what drives him."
+    image="https://daredavil.pages.dev/images/me.jpg"
+  >
+    <AboutDocument />
+  </Main>
+);
 
 export default About;
