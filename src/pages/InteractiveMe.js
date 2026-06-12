@@ -23,10 +23,7 @@ const InteractiveMePage = () => {
   };
 
   return (
-    <Main
-      title="Interactive Me"
-      description="A shuffled, image-first visual timeline of every marathon run and mountain trek — connected by curves and auto-scrolling through the moments."
-    >
+    <Main>
       <div className="flex flex-col gap-12 w-full">
         <header>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">

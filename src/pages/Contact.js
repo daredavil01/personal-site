@@ -5,10 +5,7 @@ import EmailLink from "../components/Contact/EmailLink";
 import ContactIcons from "../components/Contact/ContactIcons";
 
 const Contact = () => (
-  <Main
-    title="Contact"
-    description="Get in touch with Sanket Tambare to discuss technology, endurance sports, or collaboration opportunities. Open to projects, research, and meaningful conversations."
-  >
+  <Main>
     <div className="flex flex-col gap-12 w-full max-w-2xl">
       <header>
         <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary mb-4 font-bold">Let&apos;s Talk</p>

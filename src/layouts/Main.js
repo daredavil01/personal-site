@@ -8,15 +8,19 @@ import SideBar from "../components/Template/SideBar";
 import Footer from "../components/Template/Footer";
 import ScrollToTop from "../components/Template/ScrollToTop";
 import FloatingToggle from "../components/Template/FloatingToggle";
-
-const BASE_URL = "https://daredavil.pages.dev";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/images/logo.png`;
+import { BASE_URL, PAGE_META, DEFAULT_META, composeTitle } from "../data/pageMeta";
 
 const Main = (props) => {
   const { pathname } = useLocation();
-  const canonicalUrl = `${BASE_URL}${pathname}`;
-  const ogImage = props.image || DEFAULT_OG_IMAGE;
-  const ogTitle = props.title ? `${props.title} | Sanket Tambare` : "Sanket Tambare";
+  const pathKey = pathname.replace(/\/$/, "") || "/";
+  // Route meta comes from the shared PAGE_META module (also used by the
+  // Cloudflare middleware); props act as overrides for unrouted pages (404).
+  const pageMeta = PAGE_META[pathKey] || DEFAULT_META;
+  const title = props.title || pageMeta.title;
+  const description = props.description || pageMeta.description;
+  const canonicalUrl = `${BASE_URL}${pathKey === "/" ? "" : pathKey}`;
+  const ogImage = props.image || pageMeta.image;
+  const ogTitle = composeTitle(title);
 
   return (
     <>
@@ -26,17 +30,17 @@ const Main = (props) => {
         defaultTitle="Sanket Tambare"
         defer={false}
       >
-        {props.title && <title>{props.title}</title>}
+        {title && <title>{title}</title>}
         <link rel="canonical" href={canonicalUrl} />
-        <meta name="description" content={props.description} />
+        <meta name="description" content={description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={ogTitle} />
-        <meta property="og:description" content={props.description} />
+        <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImage} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={ogTitle} />
-        <meta name="twitter:description" content={props.description} />
+        <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={ogImage} />
       </Helmet>
 
@@ -74,7 +78,7 @@ Main.propTypes = {
 Main.defaultProps = {
   children: null,
   title: null,
-  description: "Sanket Tambare's personal website.",
+  description: null,
   image: null,
 };
 

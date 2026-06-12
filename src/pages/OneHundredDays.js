@@ -18,6 +18,13 @@ const keyActivate = (fn) => (e) => {
   }
 };
 
+const barColorClass = (isActive, count) => {
+  if (isActive) return 'bg-secondary shadow-lg shadow-secondary/30';
+  return count > 0
+    ? 'bg-secondary/40 group-hover:bg-secondary/70'
+    : 'bg-stone-100 dark:bg-stone-800';
+};
+
 const platformColors = {
   Substack: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
   WordPress: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
@@ -303,13 +310,7 @@ const OneHundredDays = () => {
                     {count > 0 ? count : ''}
                   </span>
                   <div
-                    className={`w-full max-w-[28px] rounded-t-md transition-all ${
-                      activeMonth === i
-                        ? 'bg-secondary shadow-lg shadow-secondary/30'
-                        : count > 0
-                          ? 'bg-secondary/40 group-hover:bg-secondary/70'
-                          : 'bg-stone-100 dark:bg-stone-800'
-                    }`}
+                    className={`w-full max-w-[28px] rounded-t-md transition-all ${barColorClass(activeMonth === i, count)}`}
                     style={{ height: count > 0 ? `${Math.max(8, (count / maxMonthCount) * 80)}px` : '4px' }}
                   />
                   <span className={`font-label text-[9px] uppercase tracking-wider transition-colors ${

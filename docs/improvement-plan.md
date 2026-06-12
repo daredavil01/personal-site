@@ -61,9 +61,9 @@ Status legend: ✅ done (committed on this branch) · ⬜ open · 🔶 partially
 |---|---|---|
 | T8 | Single content pipeline: `/admin` deleted (pages, components, hooks, layouts), `now-data.js` deleted, `prebuild` runs `cms:sync` so every build regenerates `src/data` from markdown | ✅ |
 | T9a | Image compression: full pass over `public/images` — 114MB → 37MB, zero files over the 300KB cap; PNG→JPG renames with all refs updated | ✅ |
-| T9b | Image loading: add `loading="lazy"` to gallery/timeline `<img>`s; replace `ImageSlider`'s CSS `background-image` slides with real `<img>` so lazy/decode semantics apply | ⬜ |
+| T9b | Image loading: add `loading="lazy"` to gallery/timeline `<img>`s; replace `ImageSlider`'s CSS `background-image` slides with real `<img>` so lazy/decode semantics apply | ✅ |
 | T10 | CRA → Vite migration: `define` shim for `process.env.PUBLIC_URL`, `import.meta.glob` replaces `require.context` in `parseNowCms.js`, output to `build/` so Cloudflare config is untouched; jest stays (already standalone via `babel.config.js`) | ⬜ |
-| T11 | Single meta-tag source: shared PAGE_META module consumed by `functions/_middleware.js` and pages; add missing `/interactive-me` and `/mindmap` entries | ⬜ |
+| T11 | Single meta-tag source: shared `src/data/pageMeta.js` consumed by `functions/_middleware.js` and `src/layouts/Main.js` (pages no longer pass duplicated props); `/interactive-me` and `/mindmap` entries added | ✅ |
 
 ### Milestone 3 — Polish
 
@@ -71,21 +71,17 @@ Status legend: ✅ done (committed on this branch) · ⬜ open · 🔶 partially
 |---|---|---|
 | T12 | De-duplicate `jsSerialize` | ✅ (admin copy deleted; single copy lives in `scripts/sync-cms-to-data.js`) |
 | T13 | Version hygiene: `package.json` version matches changelog; `engines` reflects Node 20 | ✅ |
-| T14 | Extract Stats.js calculation helpers (`getPBRaw`, time parsing) into a tested util | ⬜ |
-| T15 | ESLint ratchet: re-enable a handful of high-value disabled rules | ⬜ |
+| T14 | Extract Stats.js calculation helpers (`getPBRaw`, time parsing) into a tested util | ✅ (`src/utils/raceStats.js` + 11 jest tests) |
+| T15 | ESLint ratchet: re-enable a handful of high-value disabled rules | ✅ (`no-trailing-spaces`, `react/self-closing-comp`, `no-nested-ternary`, `react/no-unused-prop-types`, `react/jsx-no-useless-fragment`; `button-has-type` and `no-array-index-key` deferred — 33/21 violations) |
 
 ## Remaining-work notes
 
-- **T9b (lazy images)** — biggest user-visible win left. Gotcha: background-image
-  slides can't lazy-load; the `ImageSlider` refactor to `<img>` with
-  `object-fit: contain` must preserve the contain/center behavior.
 - **T10 (Vite)** — do in an isolated PR on green CI. Gotchas: generated data files
   embed `process.env.PUBLIC_URL` template literals (solve with a Vite `define`,
-  not by regenerating); `.md` runtime fetches in `parseNowCms.js`,
-  `About.js`, `Changelog.js` need `?url` imports / `import.meta.glob`;
+  not by regenerating); `.md` runtime fetches in `parseNowCms.js` and
+  `Changelog.js` need `?url` imports / `import.meta.glob` (`About.js` no longer
+  fetches markdown after the structured-About revamp);
   check for CRA-only `ReactComponent` SVG imports before flipping.
-- **T11 (meta tags)** — Cloudflare Pages Functions bundle with esbuild and may
-  import from `src/`; keep the shared module dependency-free (no `process.env`).
 - **Not doing** (deliberate): server-side auth for admin (deleted instead);
   chasing individual CRA CVEs (superseded by T10); TypeScript or broad
   unit-test coverage (wrong maturity); git-history rewrite for repo size.

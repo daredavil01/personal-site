@@ -194,6 +194,8 @@ const SportsDefault = ({ onRaceClick }) => {
                   <img
                     src={race.slideImages[0].url}
                     alt={race.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";

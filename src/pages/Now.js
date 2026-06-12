@@ -18,10 +18,7 @@ const Now = () => {
   const lastUpdated = current ? `${current.month} ${current.year}` : "";
 
   return (
-    <Main
-      title="Now"
-      description="What Sanket Tambare is working on right now — current projects, daily rituals, books in progress, and ideas being explored. Updated monthly."
-    >
+    <Main>
       <div className="flex flex-col gap-10 w-full">
         {/* Hero Section */}
         <section>

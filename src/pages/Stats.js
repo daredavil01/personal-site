@@ -11,15 +11,16 @@ import instagramPosts from "../data/instagram";
 import degrees from "../data/resume/degrees";
 import projects from "../data/projects";
 import treksData from "../data/treks";
+import { getPBRaw, formatHoursMinutes, formatMinutesSeconds } from "../utils/raceStats";
 
 const Stats = () => {
   const ageComponent = personalData.find((item) => item.key === 'age')?.value;
   const location = personalData.find((item) => item.key === 'location')?.value || 'Pune, MH';
-  
+
   const booksCount = books.length;
   // Approximation of pages based on an average of 330 pages per book
   const pagesTurned = `${((booksCount * 330) / 1000).toFixed(1)}k`;
-  
+
   const genreCounts = {};
   books.forEach((b) => {
     if (b.category) {
@@ -33,7 +34,7 @@ const Stats = () => {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map((entry) => entry[0]);
-  
+
   const offloadCount = offloadData.length;
   const offloadPercentage = Math.round((offloadCount / 100) * 100);
 
@@ -57,54 +58,10 @@ const Stats = () => {
   // Sports / Endurance
   const totalRaces = sportsData.length;
   const totalKmRun = sportsData.reduce((acc, curr) => acc + (parseFloat(curr.distance.replace(/[^\d.]/g, '')) || 0), 0);
-  
-  const getPBRaw = (distancePattern) => {
-    let best = null;
-    let bestSecs = Infinity;
-    sportsData.forEach((race) => {
-      if (race.distance.toLowerCase().includes(distancePattern)) {
-        const parts = race.time.split(':');
-        let secs = 0;
-        if (parts.length === 2) {
-          secs = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        } else if (parts.length === 3) {
-          secs = parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseInt(parts[2], 10);
-        }
-        if (secs < bestSecs && secs > 0) {
-          bestSecs = secs;
-          best = race;
-        }
-      }
-    });
-    return best;
-  };
-  
-  const marathonPBData = getPBRaw('42');
-  let bestMarathonTime = "00:00";
-  if (marathonPBData) {
-    const parts = marathonPBData.time.split(':');
-    bestMarathonTime = parts.length === 3 ? `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}` : marathonPBData.time;
-  }
 
-  const hmPBData = getPBRaw('21');
-  let bestHmTime = "00:00";
-  if (hmPBData) {
-    const parts = hmPBData.time.split(':');
-    bestHmTime = hmPBData.time;
-    if (parts.length === 3) bestHmTime = `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
-  }
-
-  const tenKPBData = getPBRaw('10');
-  let bestTenKTime = "00:00";
-  if (tenKPBData) {
-    const parts = tenKPBData.time.split(':');
-    bestTenKTime = tenKPBData.time;
-    if (parts.length === 3 && parts[0] === "0") {
-      bestTenKTime = `${parts[1].padStart(2, '0')}:${parts[2].padStart(2, '0')}`;
-    } else if (parts.length === 3) {
-      bestTenKTime = `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
-    }
-  }
+  const bestMarathonTime = formatHoursMinutes(getPBRaw(sportsData, '42')?.time);
+  const bestHmTime = formatHoursMinutes(getPBRaw(sportsData, '21')?.time);
+  const bestTenKTime = formatMinutesSeconds(getPBRaw(sportsData, '10')?.time);
 
   // Treks
   const parseTrekDate = (dateStr) => {
@@ -176,7 +133,7 @@ const Stats = () => {
   const projectCount = projects.length;
 
   return (
-    <Main title="Stats" description="Metrics of Intent: A quantitative deep-dive into a year of technical growth, artistic captures, and consistent physical output.">
+    <Main>
       <div className="flex flex-col gap-16 w-full">
         {/* Hero Title Section */}
         <section>
@@ -189,7 +146,7 @@ const Stats = () => {
 
         {/* Bento Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
-          
+
           {/* Quick Profile Card */}
           <div className="col-span-1 md:col-span-4 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-between transition-colors shadow-sm">
             <div>
@@ -211,9 +168,11 @@ const Stats = () => {
               </div>
             </div>
             <div className="mt-8 rounded-lg overflow-hidden border border-stone-100 dark:border-stone-800">
-              <img 
-                className="w-full h-32 object-cover grayscale hover:grayscale-0 transition-all duration-700 opacity-90" 
-                alt="Pune Architecture" 
+              <img
+                className="w-full h-32 object-cover grayscale hover:grayscale-0 transition-all duration-700 opacity-90"
+                alt="Pune Architecture"
+                loading="lazy"
+                decoding="async"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrBXPT3I2M0DNU6wyAE6pn7KCVSB3rqa6TPGidOrb3XKbkbZ4cXwKcDVWbe77kwlxZTK2HYglbsxFteB0UCO5a4CyhsbAmulSJvkm_xd8VyWfzr8MC0ApZlCKxbzk0SkhfFVQxQM5snPYNfbFGHAsfHXgoVM-G52J-JO5NuZhQaA1xbKh9KGDN5fzbmwp7CgHz9Fmno2DWhSZVT5VROsE8ckws47_mPrG69EeOz5SjB_ZBiZFaOn7bfiTQzHgTzEIIuLsWLyXbyhM"
               />
             </div>
@@ -261,8 +220,8 @@ const Stats = () => {
                 <span
                   key={i}
                   className={`px-4 py-2 rounded-full font-label text-xs border transition-all ${
-                    i === 2 || i === 5 
-                      ? 'bg-secondary/10 dark:bg-secondary/20 text-secondary border-secondary/20 dark:border-secondary/40 font-bold scale-110 mx-1' 
+                    i === 2 || i === 5
+                      ? 'bg-secondary/10 dark:bg-secondary/20 text-secondary border-secondary/20 dark:border-secondary/40 font-bold scale-110 mx-1'
                       : 'bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-100 dark:border-stone-700 shadow-sm'
                   }`}
                 >
@@ -302,7 +261,7 @@ const Stats = () => {
             <div className="grid grid-cols-10 gap-2 mb-8">
               {/* Progress Grid visualization */}
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className={`h-3 rounded-sm transition-all duration-500 ${i < offloadPercentage / 10 ? 'bg-secondary ring-2 ring-secondary/20' : 'bg-secondary/20 dark:bg-secondary/10'}`}></div>
+                <div key={i} className={`h-3 rounded-sm transition-all duration-500 ${i < offloadPercentage / 10 ? 'bg-secondary ring-2 ring-secondary/20' : 'bg-secondary/20 dark:bg-secondary/10'}`} />
               ))}
             </div>
             <div className="flex justify-between items-center text-stone-500 dark:text-stone-600 font-label text-[10px] tracking-widest font-bold">
@@ -344,7 +303,7 @@ const Stats = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Digital Capture (Instagram) */}
           <div className="col-span-1 md:col-span-5 bg-secondary/[0.03] dark:bg-secondary/[0.05] p-8 rounded-xl border border-secondary/10 dark:border-secondary/20 transition-colors shadow-sm flex flex-col justify-between">
             <div className="mb-8 flex justify-between items-start">

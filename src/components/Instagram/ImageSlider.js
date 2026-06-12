@@ -34,11 +34,16 @@ const ImageSlider = ({ data }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundSize: "contain",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
         height: isMobile ? "300px" : "600px",
         width: "100%",
+      },
+      // Real <img> instead of a CSS background so the browser can lazy-load
+      // and async-decode slides; contain + center matches the old behavior.
+      image: {
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+        objectPosition: "center",
       },
     };
   };
@@ -49,12 +54,13 @@ const ImageSlider = ({ data }) => {
     <article className="slide-container" style={styles.container}>
       <Slide autoplay={false} transitionDuration={500} indicators arrows>
         {data.map((image) => (
-          <div key={image.caption}>
-            <div
-              style={{
-                ...styles.slide,
-                backgroundImage: `url(${image.url})`,
-              }}
+          <div key={image.caption} style={styles.slide}>
+            <img
+              src={image.url}
+              alt={image.caption || "Slide"}
+              loading="lazy"
+              decoding="async"
+              style={styles.image}
             />
           </div>
         ))}

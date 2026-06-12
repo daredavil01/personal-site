@@ -8,7 +8,7 @@ const Navigation = () => {
   const location = useLocation();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null); // Track which item's dropdown is open
-  
+
   const indexRoute = routes.find((l) => l.index);
   const mainRoutes = routes.filter((l) => !l.index && !l.dropdown);
   const dropdownRoutes = routes.filter((l) => l.dropdown);
@@ -28,7 +28,7 @@ const Navigation = () => {
           {mainRoutes.map((l, idx) => {
             const isActive = location.pathname.includes(l.path) && l.path !== "/";
             const hasSubRoutes = l.subRoutes && l.subRoutes.length > 0;
-            
+
             return (
               <React.Fragment key={l.label}>
                 <div
@@ -132,7 +132,7 @@ const Navigation = () => {
             </div>
           </div>
         </nav>
-        
+
         {/* Mobile Hamburger Wrapper */}
         <div className="md:hidden block">
             <Hamburger />

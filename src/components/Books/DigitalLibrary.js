@@ -76,7 +76,7 @@ const DigitalLibrary = ({ books }) => {
     const matchesReview = filterReview === 'All'
                          || (filterReview === 'Reviewed' && book.blog_link)
                          || (filterReview === 'No Review' && !book.blog_link);
-    
+
     return matchesSearch && matchesTag && matchesLanguage && matchesReview;
   }).sort((a, b) => b.id - a.id);
 
@@ -91,15 +91,15 @@ const DigitalLibrary = ({ books }) => {
           <div className="relative z-10 max-w-4xl">
             <div className="flex items-center justify-between mb-8">
               <span className="font-label text-xs uppercase tracking-widest text-secondary font-bold block">Featured Review</span>
-              <button 
-                onClick={shuffleFeatured} 
-                className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors flex items-center justify-center p-2 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 active:scale-95 group border border-transparent hover:border-stone-300 dark:hover:border-stone-700" 
+              <button
+                onClick={shuffleFeatured}
+                className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors flex items-center justify-center p-2 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 active:scale-95 group border border-transparent hover:border-stone-300 dark:hover:border-stone-700"
                 title="Shuffle Book"
               >
                 <span className="material-symbols-outlined transition-transform duration-300 group-active:rotate-180">shuffle</span>
               </button>
             </div>
-            
+
             <h1 className="font-headline text-5xl md:text-7xl font-black mb-6 tracking-tight text-stone-900 dark:text-stone-100">{featuredBook?.title || "Book Title"}</h1>
             <p className="font-headline text-xl text-stone-500 dark:text-stone-400 italic mb-8">{featuredBook?.author || "Author"}</p>
 
@@ -113,8 +113,8 @@ const DigitalLibrary = ({ books }) => {
               </div>
               <div className="p-6 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl border-l-4 border-l-secondary">
                 <p className="text-stone-500 dark:text-stone-400 font-body leading-relaxed text-sm">
-                  {featuredBook?.language === "Marathi" 
-                    ? "A highly recommended piece of regional literature exploring deep cultural, social, or philosophical themes translated for global reflection." 
+                  {featuredBook?.language === "Marathi"
+                    ? "A highly recommended piece of regional literature exploring deep cultural, social, or philosophical themes translated for global reflection."
                     : "An exploration into the depths of literature that fundamentally shifted my perspective on design, history, or philosophy."}
                 </p>
               </div>
@@ -163,23 +163,23 @@ const DigitalLibrary = ({ books }) => {
             <h2 className="font-headline text-4xl font-black mb-2 tracking-tight text-stone-900 dark:text-stone-100">Personal Library</h2>
             <p className="font-body text-stone-500 dark:text-stone-400 max-w-md">A curated selection of literature that shaped my perspective on design, philosophy, and technology.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 w-full bg-secondary/[0.03] dark:bg-secondary/[0.05] p-4 rounded-xl border border-secondary/10 dark:border-secondary/20 items-center">
             {/* Search Box */}
             <div className="relative col-span-1 md:col-span-5">
-              <input 
-                type="text" 
-                placeholder="Search titles or authors..." 
+              <input
+                type="text"
+                placeholder="Search titles or authors..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg px-10 font-body text-sm text-stone-950 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600 outline-none focus:border-secondary transition-colors"
               />
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-600 pointer-events-none text-[18px]">search</span>
             </div>
-            
+
             {/* Tag Filter */}
             <div className="col-span-1 md:col-span-3">
-              <select 
+              <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors"
@@ -188,10 +188,10 @@ const DigitalLibrary = ({ books }) => {
                 {allTags.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
               </select>
             </div>
-            
+
             {/* Language Filter */}
             <div className="col-span-1 md:col-span-2">
-              <select 
+              <select
                 value={filterLanguage}
                 onChange={(e) => setFilterLanguage(e.target.value)}
                 className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors"
@@ -203,7 +203,7 @@ const DigitalLibrary = ({ books }) => {
 
             {/* Review Status Filter */}
             <div className="col-span-1 md:col-span-2">
-              <select 
+              <select
                 value={filterReview}
                 onChange={(e) => setFilterReview(e.target.value)}
                 className="w-full h-12 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg px-4 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors"
@@ -239,9 +239,9 @@ const DigitalLibrary = ({ books }) => {
       {/* Library Grid */}
       <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-8 gap-x-8 w-full relative z-0">
         {filteredBooks.length > 0 ? filteredBooks.map((book) => (
-          <BookCard 
-            key={book.id} 
-            book={book} 
+          <BookCard
+            key={book.id}
+            book={book}
             onClick={() => setSelectedBook(book)}
           />
         )) : (
@@ -251,25 +251,25 @@ const DigitalLibrary = ({ books }) => {
 
       {/* Book details Modal */}
       {selectedBook && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" 
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setSelectedBook(null)}
         >
-          <div 
-            className="bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative" 
+          <div
+            className="bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               onClick={() => setSelectedBook(null)}
               className="absolute top-6 right-6 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors z-20"
             >
               <span className="material-symbols-outlined">close</span>
             </button>
-            
+
             <div className="p-8 md:p-12">
               <div className="flex flex-col md:flex-row gap-8 mb-4">
                 <div className="hidden md:flex w-1/3 aspect-[2/3] bg-stone-50 dark:bg-stone-900 rounded-lg border border-stone-100 dark:border-stone-800 relative overflow-hidden flex-shrink-0 flex-col justify-end p-6">
-                  <div className="absolute inset-0 bg-stone-200/20 dark:bg-stone-700/20 mix-blend-multiply pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-stone-200/20 dark:bg-stone-700/20 mix-blend-multiply pointer-events-none" />
                   <span className="material-symbols-outlined text-stone-200 dark:text-stone-700 text-[10rem] absolute -top-8 -right-8 rotate-12 pointer-events-none" style={{ fontVariationSettings: "'FILL' 1" }}>auto_stories</span>
                   {selectedBook?.year && (
                     <span className="relative z-10 font-headline text-2xl font-black text-stone-300 dark:text-stone-600 tracking-widest leading-none">{selectedBook.year}</span>
@@ -280,14 +280,14 @@ const DigitalLibrary = ({ books }) => {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="flex-1 flex flex-col">
                   <span className="font-label text-[10px] bg-stone-50 dark:bg-stone-900 border border-stone-100 dark:border-stone-800 px-3 py-1 rounded uppercase tracking-widest text-secondary w-fit mb-4">
                     Documented Archive
                   </span>
                   <h2 className="font-headline text-3xl md:text-4xl font-black text-stone-900 dark:text-stone-100 mb-2 leading-none">{selectedBook?.title}</h2>
                   <p className="font-headline text-xl italic text-stone-500 dark:text-stone-400 mb-6">{selectedBook?.author}</p>
-                  
+
                   <div className="flex flex-wrap gap-2 mb-8">
                     {selectedBook?.tags?.map((tag) => (
                       <span key={tag} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-full font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-400">
@@ -295,13 +295,13 @@ const DigitalLibrary = ({ books }) => {
                       </span>
                     ))}
                   </div>
-                  
+
                   <p className="font-body text-stone-600 dark:text-stone-300 leading-relaxed mb-auto bg-stone-50 dark:bg-stone-900 border-l-2 border-l-stone-200 dark:border-l-stone-700 p-4 text-sm rounded-r-lg">
                     {selectedBook?.description || "A curated piece of literature from my personal library that shaped my perspectives on interaction design, architectural philosophy, and digital intent."}
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-4 border-t border-stone-100 dark:border-stone-800 pt-8 mt-6">
                 {selectedBook?.blog_link && (
                   <a href={selectedBook.blog_link} target="_blank" rel="noopener noreferrer">

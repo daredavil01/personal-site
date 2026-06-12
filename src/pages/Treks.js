@@ -19,10 +19,7 @@ const TreksPage = () => {
   };
 
   return (
-    <Main
-      title="My Treks"
-      description="Trek log across Maharashtra's historic forts and mountain trails — with statistics, difficulty breakdowns, yearly timelines, and detailed route stories."
-    >
+    <Main>
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header>

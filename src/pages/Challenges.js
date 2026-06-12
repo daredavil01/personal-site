@@ -4,10 +4,7 @@ import Main from "../layouts/Main";
 
 const Challenges = () => {
   return (
-    <Main
-      title="Challenges"
-      description="Tracking personal challenges like #100DaysToOffload — a public commitment to consistent creative output, technical growth, and pushing personal limits."
-    >
+    <Main>
       <article className="max-w-4xl">
         <header className="mb-12">
           <h1 className="font-headline text-4xl font-bold text-stone-900 dark:text-stone-100 mb-4 uppercase tracking-tighter">Challenges</h1>
@@ -22,8 +19,8 @@ const Challenges = () => {
           <section>
             <h2 className="font-label text-[10px] uppercase tracking-[0.2em] text-stone-900 dark:text-stone-300 font-bold mb-6">About Me</h2>
             <p className="text-stone-500 dark:text-stone-400 leading-relaxed text-xs md:text-sm max-w-2xl">
-              I have always been inclined towards pushing my boundaries. From software development to marathon running, 
-              I find joy in challenging myself to learn, grow, and explore new horizons. This drive to better myself 
+              I have always been inclined towards pushing my boundaries. From software development to marathon running,
+              I find joy in challenging myself to learn, grow, and explore new horizons. This drive to better myself
               everyday is what fuels my journey across technology, writing, and physical endurance.
             </p>
           </section>
@@ -32,9 +29,9 @@ const Challenges = () => {
           <section>
             <h2 className="font-label text-[10px] uppercase tracking-[0.2em] text-stone-900 dark:text-stone-300 font-bold mb-6">Why This Page?</h2>
             <p className="text-stone-500 leading-relaxed text-xs md:text-sm max-w-2xl">
-              In the pursuit of growth, consistency is key, but often the hardest part. This page serves as my public 
-              accountability ledger. By documenting my challenges here, I am not just tracking progress, but making 
-              a commitment to myself and the world. It is a space to visualize my efforts, celebrate small wins, 
+              In the pursuit of growth, consistency is key, but often the hardest part. This page serves as my public
+              accountability ledger. By documenting my challenges here, I am not just tracking progress, but making
+              a commitment to myself and the world. It is a space to visualize my efforts, celebrate small wins,
               and stay true to the goals I set, ensuring that my ambitions translate into tangible actions.
             </p>
           </section>
@@ -43,7 +40,7 @@ const Challenges = () => {
           <section>
             <h2 className="font-label text-[10px] uppercase tracking-[0.2em] text-stone-900 dark:text-stone-300 font-bold mb-6">Active Challenges</h2>
             <div className="grid grid-cols-1 gap-6">
-              <Link 
+              <Link
                 to="/100-days-to-offload"
                 className="group block bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 hover:border-secondary dark:hover:border-secondary transition-all duration-300 shadow-sm hover:shadow-md"
               >

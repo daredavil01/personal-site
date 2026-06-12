@@ -22,7 +22,8 @@ const ImageModal = ({ entry, onClose }) => {
     else setImgSize('square');
   };
 
-  const modalWidth = imgSize === 'portrait' ? 'max-w-sm' : imgSize === 'square' ? 'max-w-lg' : 'max-w-4xl';
+  const widthBySize = { portrait: 'max-w-sm', square: 'max-w-lg', landscape: 'max-w-4xl' };
+  const modalWidth = widthBySize[imgSize] || 'max-w-4xl';
 
   return (
     <div

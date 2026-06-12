@@ -25,7 +25,7 @@ const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-sm" onClick={onClose}>
-      <div 
+      <div
         className="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200 dark:border-stone-800 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -35,7 +35,7 @@ const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        
+
         <div className="p-6 space-y-8 flex-1">
           {/* Metadata */}
           <div className="flex flex-wrap gap-6 text-sm">
@@ -70,7 +70,7 @@ const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
             </div>
           )}
         </div>
-        
+
         {raceDetails.timeCertificateLink && (
           <div className="p-6 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 sticky bottom-0 z-10">
              <a href={raceDetails.timeCertificateLink} target="_blank" rel="noopener noreferrer" className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-label font-bold text-sm uppercase tracking-widest transition-all">

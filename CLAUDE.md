@@ -21,7 +21,7 @@ React 18 single-page application (personal portfolio). Key stack:
 - CI fails if `src/data/` drifts from the markdown (`cms:sync` + `git diff --exit-code`).
 - Hand-maintained files that are NOT generated: `src/data/changelog.md`,
   `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js`,
-  `src/data/stats/personal.js`.
+  `src/data/stats/personal.js`, `src/data/pageMeta.js`.
 - `scripts/seed-cms-content.js` regenerates markdown FROM the JS files — only for
   recovery when a JS file is known to be ahead. Normal flow never needs it.
 
@@ -37,6 +37,7 @@ React 18 single-page application (personal portfolio). Key stack:
 | CMS config (collections) | `public/cms/config.yml` |
 | Markdown → JS sync | `scripts/sync-cms-to-data.js` |
 | Static HTML (favicons) | `public/index.html` |
+| Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |

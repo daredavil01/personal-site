@@ -9,7 +9,7 @@ const ImageWithFallback = ({ src, alt, className }) => {
       </div>
     );
   }
-  return <img src={src} alt={alt} className={className} onError={() => setErrored(true)} />;
+  return <img src={src} alt={alt} loading="lazy" decoding="async" className={className} onError={() => setErrored(true)} />;
 };
 
 const ProjectGallery = ({ projects }) => {
@@ -45,7 +45,7 @@ const ProjectGallery = ({ projects }) => {
             </section>
           );
         }
-        
+
         if (index % 6 === 1) {
           // Exhibit 02: Vertical Staggered
           return (
@@ -69,7 +69,7 @@ const ProjectGallery = ({ projects }) => {
             </section>
           );
         }
-        
+
         if (index % 6 === 2) {
           // Exhibit 03: Text Heavy Intervention
           return (
@@ -89,7 +89,7 @@ const ProjectGallery = ({ projects }) => {
             </section>
           );
         }
-        
+
         if (index % 6 === 3) {
           // Exhibit 04: Wide Content
           return (
@@ -111,7 +111,7 @@ const ProjectGallery = ({ projects }) => {
             </section>
           );
         }
-        
+
         if (index % 6 === 4) {
           // Exhibit 05: Portrait Focus
           return (
@@ -127,7 +127,7 @@ const ProjectGallery = ({ projects }) => {
               <p className="font-label text-xs text-stone-400 dark:text-stone-500 uppercase">{project.subtitle}</p>
             </section>
           );
-        } 
+        }
 
         // Exhibit 06: Experimental Layout
         return (

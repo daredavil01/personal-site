@@ -5,10 +5,7 @@ import projectsData from "../data/projects";
 
 const Projects = () => {
   return (
-    <Main
-      title="Projects"
-      description="Full-stack experiments and production apps — social platforms, AI-powered tools, and web applications built with modern tech stacks."
-    >
+    <Main>
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
