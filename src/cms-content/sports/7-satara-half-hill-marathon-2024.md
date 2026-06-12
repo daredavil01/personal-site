@@ -11,7 +11,7 @@ bibNumber: "25026"
 slideImages:
   - url: /images/sports/shhm_1.jpg
     caption: Slide 1
-  - url: /images/sports/shhm_2.png
+  - url: /images/sports/shhm_2.jpg
     caption: Slide 2
   - url: /images/sports/shhm_3.jpg
     caption: Slide 3

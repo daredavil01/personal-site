@@ -182,7 +182,7 @@ const sportsData = [
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/sports/shhm_2.png`,
+        url: `${process.env.PUBLIC_URL}/images/sports/shhm_2.jpg`,
         caption: "Slide 2",
       },
       {
@@ -373,7 +373,7 @@ const sportsData = [
         caption: "Slide 5",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/sports/shhm_2025_6.png`,
+        url: `${process.env.PUBLIC_URL}/images/sports/shhm_2025_6.jpg`,
         caption: "Slide 6",
       },
       {

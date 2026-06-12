@@ -17,7 +17,7 @@ slideImages:
     caption: Slide 4
   - url: /images/sports/shhm_2025_5.jpg
     caption: Slide 5
-  - url: /images/sports/shhm_2025_6.png
+  - url: /images/sports/shhm_2025_6.jpg
     caption: Slide 6
   - url: /images/sports/shhm_2025_1.jpg
     caption: Slide 1

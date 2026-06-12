@@ -348,15 +348,15 @@ const treks = [
     blog_link: "https://daredavil453624413.wordpress.com/2023/12/31/katraj-to-sinhgad-k2s/",
     slideImages: [
       {
-        url: `${process.env.PUBLIC_URL}/images/treks/k2s_1.png`,
+        url: `${process.env.PUBLIC_URL}/images/treks/k2s_1.jpg`,
         caption: "Slide 1",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/treks/k2s_2.png`,
+        url: `${process.env.PUBLIC_URL}/images/treks/k2s_2.jpg`,
         caption: "Slide 2",
       },
       {
-        url: `${process.env.PUBLIC_URL}/images/treks/k2s_3.png`,
+        url: `${process.env.PUBLIC_URL}/images/treks/k2s_3.jpg`,
         caption: "Slide 3",
       },
     ],
