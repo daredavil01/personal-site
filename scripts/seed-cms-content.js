@@ -4,7 +4,7 @@
  * Run once to populate Decap CMS editors with existing data.
  *
  * Usage: node scripts/seed-cms-content.js [collection ...]
- *   collections: now, books, 100days, sports, treks, projects, instagram, resume
+ *   collections: books, 100days, sports, treks, projects, instagram, resume
  *   With no arguments, all collections are seeded.
  *
  * WARNING: seeding overwrites src/cms-content markdown from the JS data
@@ -94,25 +94,6 @@ function loadESModule(relPath) {
     throw new Error(`Failed to load ${relPath}: ${e.message}\n${src.slice(0, 300)}`);
   }
   return exportsObj;
-}
-
-// ── Now ───────────────────────────────────────────────────────────────────────
-
-function seedNowMeta() {
-  const { nowMeta } = loadESModule('src/data/now-data.js');
-  writeMd(path.join(ROOT, 'src/cms-content/now/meta.md'), omitNulls(nowMeta));
-}
-
-function seedNowMonths() {
-  const { nowData } = loadESModule('src/data/now-data.js');
-  const dir = path.join(ROOT, 'src/cms-content/now/months');
-  for (const entry of nowData) {
-    const { month, year, isCurrent, sections } = entry;
-    // Flatten sections to top-level (CMS stores them without a `sections` wrapper)
-    const frontmatter = { month, year, isCurrent: !!isCurrent, ...(sections || {}) };
-    writeMd(path.join(dir, `${year}-${month}.md`), omitNulls(frontmatter));
-  }
-  console.log(`  ${nowData.length} months`);
 }
 
 // ── Books ─────────────────────────────────────────────────────────────────────
@@ -239,10 +220,6 @@ function seedResumeCertifications() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 const COLLECTIONS = {
-  now: () => {
-    console.log('Now — Meta:'); seedNowMeta();
-    console.log('\nNow — Months:'); seedNowMonths();
-  },
   books: () => { console.log('Books:'); seedBooks(); },
   '100days': () => { console.log('100 Days:'); seedHundredDays(); },
   sports: () => { console.log('Sports:'); seedSports(); },

@@ -5,8 +5,6 @@
  * Run after Decap commits new content:  npm run cms:sync
  *
  * Reads:
- *   src/cms-content/now/meta.md             → nowMeta in src/data/now-data.js
- *   src/cms-content/now/months/*.md         → nowData in src/data/now-data.js
  *   src/cms-content/books/*.md              → src/data/books.js
  *   src/cms-content/100days/*.md            → src/data/100DaysToOffload.js
  *   src/cms-content/sports/*.md             → src/data/sports.js
@@ -40,14 +38,6 @@ function readMarkdownFiles(dir) {
       return YAML.parse(match[1]);
     })
     .filter(Boolean);
-}
-
-function readSingleMarkdownFile(filePath) {
-  if (!fs.existsSync(filePath)) return null;
-  const raw = fs.readFileSync(filePath, 'utf8');
-  const match = raw.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return null;
-  return YAML.parse(match[1]);
 }
 
 function ensureDir(dir) {
@@ -90,71 +80,6 @@ function writeFile(filePath, content) {
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, content, 'utf8');
   console.log(`  ✓ Written: ${path.relative(ROOT, filePath)}`);
-}
-
-// ── MONTH ORDER for sorting nowData ──────────────────────────────────────────
-
-const MONTH_ORDER = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
-function compareMonths(a, b) {
-  if (b.year !== a.year) return b.year - a.year;
-  return MONTH_ORDER.indexOf(b.month) - MONTH_ORDER.indexOf(a.month);
-}
-
-// ── sync now-data.js ──────────────────────────────────────────────────────────
-
-function syncNow() {
-  const metaPath = path.join(ROOT, 'src/cms-content/now/meta.md');
-  const monthsDir = path.join(ROOT, 'src/cms-content/now/months');
-  const outPath = path.join(ROOT, 'src/data/now-data.js');
-
-  const metaRaw = readSingleMarkdownFile(metaPath);
-  const monthFiles = readMarkdownFiles(monthsDir);
-
-  if (!metaRaw && monthFiles.length === 0) {
-    console.log('  – No Now CMS content found. Skipping.');
-    return;
-  }
-
-  // nowMeta: use CMS file if present
-  const nowMeta = metaRaw ?? {};
-
-  // nowData: each month file has top-level fields + section arrays/objects
-  // Re-nest them under `sections` to match the app's data shape
-  const nowData = monthFiles
-    .map(({ month, year, isCurrent, ...sections }) => ({
-      month,
-      year,
-      isCurrent: !!isCurrent,
-      sections: Object.fromEntries(
-        Object.entries(sections).filter(([, v]) => {
-          if (Array.isArray(v)) return v.length > 0;
-          if (v && typeof v === 'object') return Object.keys(v).length > 0;
-          return false;
-        })
-      ),
-    }))
-    .sort(compareMonths);
-
-  // Ensure only one month is marked current
-  let foundCurrent = false;
-  const deduped = nowData.map((m) => {
-    if (m.isCurrent) {
-      if (foundCurrent) return { ...m, isCurrent: false };
-      foundCurrent = true;
-    }
-    return m;
-  });
-
-  const content =    `/* eslint-disable max-len */\n`
-    + `export const nowMeta = ${jsSerialize(nowMeta)};\n\n`
-    + `export const nowData = ${jsSerialize(deduped)};\n`;
-
-  writeFile(outPath, content);
-  console.log(`     nowMeta + nowData (${deduped.length} months)`);
 }
 
 // ── sync books ────────────────────────────────────────────────────────────────
@@ -274,8 +199,7 @@ function syncResume() {
 
 console.log('\nCMS Sync: markdown → JS data files\n');
 
-console.log('Now Page:'); syncNow();
-console.log('\nBooks:'); syncBooks();
+console.log('Books:'); syncBooks();
 console.log('\n100 Days:'); syncHundredDays();
 console.log('\nSports:'); syncSports();
 console.log('\nTreks:'); syncTreks();
