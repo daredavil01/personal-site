@@ -2,12 +2,20 @@
  * @jest-environment jsdom
  */
 
-import { render, screen, act, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, within, act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { ThemeProvider } from '../context/ThemeContext';
 import App from '../App';
+
+// Render with the same providers as src/index.js
+const render = (ui) => rtlRender(<ThemeProvider>{ui}</ThemeProvider>);
 
 // Increase timeout for async finding
 const timeout = 5000;
+
+// Several menus (desktop nav, hamburger drawer, sidebar) render the same link
+// labels, so all queries are scoped to the desktop nav landmark.
+const findPrimaryNav = async () => screen.findByRole('navigation', { name: 'Primary' }, { timeout });
 
 describe('renders the app', () => {
   // mocks the fetch API used on the stats page and the about page.
@@ -41,7 +49,8 @@ describe('renders the app', () => {
 
   it('can navigate to /about', async () => {
     render(<App />);
-    const aboutLink = await screen.findByRole('link', { name: /About/i }, { timeout });
+    const nav = await findPrimaryNav();
+    const aboutLink = await within(nav).findByRole('link', { name: /About/i }, { timeout });
     expect(aboutLink).toBeInTheDocument();
     await act(async () => {
       await aboutLink.click();
@@ -52,7 +61,8 @@ describe('renders the app', () => {
 
   it('can navigate to /resume', async () => {
     render(<App />);
-    const resumeLink = await screen.findByRole('link', { name: /Resume/i }, { timeout });
+    const nav = await findPrimaryNav();
+    const resumeLink = await within(nav).findByRole('link', { name: /Resume/i }, { timeout });
     expect(resumeLink).toBeInTheDocument();
     await act(async () => {
       await resumeLink.click();
@@ -63,11 +73,12 @@ describe('renders the app', () => {
 
   it('can navigate to /projects', async () => {
     render(<App />);
+    const nav = await findPrimaryNav();
     // Open dropdown
-    const moreButton = await screen.findByRole('button', { name: /More/i }, { timeout });
+    const moreButton = await within(nav).findByRole('button', { name: /More/i }, { timeout });
     fireEvent.mouseEnter(moreButton);
 
-    const projectsLink = await screen.findByRole('link', { name: /Projects/i }, { timeout });
+    const projectsLink = await within(nav).findByRole('link', { name: /Projects/i }, { timeout });
     expect(projectsLink).toBeInTheDocument();
     await act(async () => {
       await projectsLink.click();
@@ -78,7 +89,8 @@ describe('renders the app', () => {
 
   it('can navigate to /stats', async () => {
     render(<App />);
-    const statsLink = await screen.findByRole('link', { name: /Stats/i }, { timeout });
+    const nav = await findPrimaryNav();
+    const statsLink = await within(nav).findByRole('link', { name: /Stats/i }, { timeout });
     expect(statsLink).toBeInTheDocument();
     await act(async () => {
       await statsLink.click();
@@ -89,11 +101,12 @@ describe('renders the app', () => {
 
   it('can navigate to /contact', async () => {
     render(<App />);
+    const nav = await findPrimaryNav();
     // Open dropdown
-    const moreButton = await screen.findByRole('button', { name: /More/i }, { timeout });
+    const moreButton = await within(nav).findByRole('button', { name: /More/i }, { timeout });
     fireEvent.mouseEnter(moreButton);
 
-    const contactLink = await screen.findByRole('link', { name: /Contact/i }, { timeout });
+    const contactLink = await within(nav).findByRole('link', { name: /Contact/i }, { timeout });
     expect(contactLink).toBeInTheDocument();
     await act(async () => {
       await contactLink.click();

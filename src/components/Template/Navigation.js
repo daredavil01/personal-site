@@ -24,7 +24,7 @@ const Navigation = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center">
+        <nav aria-label="Primary" className="hidden md:flex items-center">
           {mainRoutes.map((l, idx) => {
             const isActive = location.pathname.includes(l.path) && l.path !== "/";
             const hasSubRoutes = l.subRoutes && l.subRoutes.length > 0;
