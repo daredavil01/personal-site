@@ -27,6 +27,10 @@ const routes = [
     path: "/books",
   },
   {
+    label: "Micro Blog",
+    path: "/micro-blog",
+  },
+  {
     label: "Instagram",
     path: "/instagram",
     dropdown: true,

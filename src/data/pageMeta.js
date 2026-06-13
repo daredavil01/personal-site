@@ -61,6 +61,12 @@ export const PAGE_META = {
       "A shuffled, image-first visual timeline of every marathon run and mountain trek — connected by curves and auto-scrolling through the moments.",
     image: DEFAULT_IMAGE,
   },
+  "/micro-blog": {
+    title: "Micro Blog",
+    description:
+      "A searchable archive of short posts, quotes, and captures imported from Tumblr — years of thoughts, one micro-post at a time.",
+    image: DEFAULT_IMAGE,
+  },
   "/mindmap": {
     title: "Mind Map",
     description:

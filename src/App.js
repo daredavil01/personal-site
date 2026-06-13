@@ -24,6 +24,7 @@ const Now = lazy(() => import("./pages/Now"));
 const Books = lazy(() => import("./pages/Books"));
 const Challenges = lazy(() => import("./pages/Challenges"));
 const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
+const MicroBlog = lazy(() => import("./pages/MicroBlog"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/books" element={<Books />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/100-days-to-offload" element={<OneHundredDays />} />
+            <Route path="/micro-blog" element={<MicroBlog />} />
             <Route path="/changelog" element={<Changelog />} />
             <Route path="/treks" element={<TreksPage />} />
             <Route path="/interactive-me" element={<InteractiveMePage />} />

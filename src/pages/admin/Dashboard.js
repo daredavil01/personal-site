@@ -2,14 +2,22 @@ import React, { useState } from "react";
 import resources from "./resources";
 import ResourceManager from "./ResourceManager";
 import NowMetaEditor from "./NowMetaEditor";
+import MicroblogManager from "./MicroblogManager";
 import FloatingToggle from "../../components/Template/FloatingToggle";
 import { supabase } from "../../lib/supabaseClient";
 
 const NOW_META_KEY = "__nowmeta";
+const MICROBLOG_KEY = "__microblog";
 
 const Dashboard = ({ session }) => {
   const [activeKey, setActiveKey] = useState(resources[0].key);
   const active = resources.find((r) => r.key === activeKey);
+
+  const renderPanel = () => {
+    if (activeKey === NOW_META_KEY) return <NowMetaEditor />;
+    if (activeKey === MICROBLOG_KEY) return <MicroblogManager />;
+    return <ResourceManager key={active.key} resource={active} />;
+  };
 
   const navBtn = (key, label) => (
     <button
@@ -35,6 +43,7 @@ const Dashboard = ({ session }) => {
         </div>
         <nav className="flex flex-col gap-1">
           {resources.map((r) => navBtn(r.key, r.label))}
+          {navBtn(MICROBLOG_KEY, "Micro Blog")}
           {navBtn(NOW_META_KEY, "Now · Meta")}
         </nav>
         <div className="mt-auto pt-4 border-t border-stone-200 dark:border-stone-800 flex flex-col gap-2">
@@ -50,9 +59,7 @@ const Dashboard = ({ session }) => {
       </aside>
 
       <main className="flex-1 p-6 md:p-10">
-        {activeKey === NOW_META_KEY
-          ? <NowMetaEditor />
-          : <ResourceManager key={active.key} resource={active} />}
+        {renderPanel()}
       </main>
       <FloatingToggle />
     </div>

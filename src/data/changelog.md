@@ -9,6 +9,18 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.0.0] — 2026-06-13
+
+### Added
+
+- **Micro Blog page** (`src/pages/MicroBlog.js`, `src/components/MicroBlog/`): New `/micro-blog` page — a searchable, paginated archive of short posts imported from Tumblr (1,600+ posts). Server-side full-text search (Postgres `tsvector`), tag/source/type filters, load-more pagination, and a detail modal. Added to the main nav (`src/data/routes.js`) and per-route meta (`src/data/pageMeta.js`).
+- **`microblog` table** (`supabase/migrations/0002_microblog.sql`): New Supabase table with a generated `search_tsv` full-text index (GIN), tags/date indexes, RLS (public read / owner write), and a `microblog_tag_facets()` RPC for the filter UI. Carries a `source` column so Instagram can be added later.
+- **Tumblr importer** (`scripts/import-tumblr-microblog.mjs`, `npm run microblog:import`): Re-runnable script that cleans the Tumblr export (`knowledge_base/tumblr_posts.json`) and upserts on `(source, source_id)` — idempotent and non-destructive to admin-authored posts.
+- **Micro Blog data API** (`src/lib/api/microblog.js`): `searchMicroblog()` (server-side full-text search + tag/source/type filters + pagination), `getMicroblogTagFacets()`, and CRUD via the shared `createResource` factory.
+- **Admin Micro Blog manager** (`src/pages/admin/MicroblogManager.js`, `src/pages/admin/Dashboard.js`): New admin tab with a server-side searched/paginated list and a create/edit/delete form for adding posts manually.
+
+---
+
 ## [v9.1.6] — 2026-06-13
 
 ### Fixed
