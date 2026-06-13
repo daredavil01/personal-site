@@ -5,8 +5,8 @@ pages_build_output_dir = "build"
 # VITE_* variables are safe to commit here — the publishable key is designed to
 # be exposed in the browser; RLS on Supabase guards all writes.
 [vars]
-VITE_SUPABASE_URL = ""
-VITE_SUPABASE_PUBLISHABLE_KEY = ""
+VITE_SUPABASE_URL = "https://xjqbvvurlmbslikiukdm.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8FUmeJKKuTHvy3JFNPLfnQ_9TY6P2GG"
 
 # SUPABASE_SERVICE_ROLE_KEY is a secret — never put it here.
 # Set it once via the CLI:
