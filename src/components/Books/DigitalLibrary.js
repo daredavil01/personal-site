@@ -47,11 +47,28 @@ const DigitalLibrary = ({ books }) => {
   const [filterReview, setFilterReview] = useState('All');
   const [selectedBook, setSelectedBook] = useState(null);
   const [bookCopyState, setBookCopyState] = useState('idle');
+  const [bookShareState, setBookShareState] = useState('idle');
 
   const handleBookCopy = (book) => {
     navigator.clipboard.writeText(`${window.location.origin}/books/${book.id}`);
     setBookCopyState('copied');
     setTimeout(() => setBookCopyState('idle'), 2000);
+  };
+
+  const handleBookShare = async (book) => {
+    const url = `${window.location.origin}/books/${book.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: book.title, url });
+        setBookShareState('shared');
+      } else {
+        await navigator.clipboard.writeText(url);
+        setBookShareState('copied');
+      }
+    } catch (_) {
+      // Ignored
+    }
+    setTimeout(() => setBookShareState('idle'), 2000);
   };
 
   useEffect(() => {
@@ -334,6 +351,17 @@ const DigitalLibrary = ({ books }) => {
                   </a>
                 )}
                 <div className="ml-auto flex items-center gap-3 shrink-0">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleBookShare(selectedBook)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBookShare(selectedBook); } }}
+                    className="flex items-center gap-1 font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors cursor-pointer"
+                    title="Share"
+                  >
+                    <span className="material-symbols-outlined text-sm">{bookShareState === 'idle' ? 'share' : 'check'}</span>
+                    { { shared: 'Shared!', copied: 'Copied!' }[bookShareState] || 'Share' }
+                  </div>
                   <div
                     role="button"
                     tabIndex={0}

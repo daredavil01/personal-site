@@ -17,7 +17,7 @@ patch for fixes and tweaks.
 
 ### Added
 
-- **Permalink + Copy Link in detail modals** (`src/components/Treks/TrekDetailsModal.js`, `src/components/Sports/MarathonDetailsModal.js`, `src/components/Books/DigitalLibrary.js`, `src/pages/OneHundredDays.js`): Each detail modal footer now shows a "Copy" button (copies the permalink URL to clipboard with a 2-second "Copied!" confirmation) and a "Permalink ↗" link to open the dedicated detail page.
+- **Share, Copy, and Permalink in detail modals** (`src/components/Treks/TrekDetailsModal.js`, `src/components/Sports/MarathonDetailsModal.js`, `src/components/Books/DigitalLibrary.js`, `src/pages/OneHundredDays.js`, `src/components/MicroBlog/PostModal.js`): Every detail modal footer now has three actions — **Share** (Web Share API on mobile, clipboard fallback on desktop), **Copy** (always clipboard), and **Permalink ↗** (opens the dedicated detail page). All show a 2-second confirmation on success.
 
 ---
 

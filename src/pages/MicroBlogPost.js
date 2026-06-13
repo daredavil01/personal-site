@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import Main from "../layouts/Main";
+import { getMicroblogPost } from "../lib/api/microblog";
+import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
 };
-import Main from "../layouts/Main";
-import { getMicroblogPost } from "../lib/api/microblog";
-import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const sourceLabels = { tumblr: "Tumblr", instagram: "Instagram", manual: "Manual" };
 
@@ -42,7 +42,9 @@ const MicroBlogPost = () => {
         await navigator.clipboard.writeText(url);
         setShareState("copied");
       }
-    } catch (_) {}
+    } catch (_) {
+      // Ignored
+    }
     setTimeout(() => setShareState("idle"), 2000);
   };
 
@@ -71,7 +73,7 @@ const MicroBlogPost = () => {
             <span className="material-symbols-outlined text-sm">
               {shareState === "idle" ? "share" : "check"}
             </span>
-            {shareState === "copied" ? "Copied!" : shareState === "shared" ? "Shared!" : "Share"}
+            { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
           </div>
         </div>
 

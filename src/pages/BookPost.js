@@ -25,7 +25,9 @@ const BookPost = () => {
         await navigator.clipboard.writeText(url);
         setShareState("copied");
       }
-    } catch (_) {}
+    } catch (_) {
+      // Ignored
+    }
     setTimeout(() => setShareState("idle"), 2000);
   };
 
@@ -62,7 +64,7 @@ const BookPost = () => {
             className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">{shareState === "idle" ? "share" : "check"}</span>
-            {shareState === "copied" ? "Copied!" : shareState === "shared" ? "Shared!" : "Share"}
+            { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
           </div>
         </div>
 

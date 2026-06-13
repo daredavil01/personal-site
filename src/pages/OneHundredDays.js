@@ -92,11 +92,28 @@ const OneHundredDays = () => {
   const [titleText, setTitleText] = useState('');
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [blogCopyState, setBlogCopyState] = useState('idle');
+  const [blogShareState, setBlogShareState] = useState('idle');
 
   const handleBlogCopy = (blog) => {
     navigator.clipboard.writeText(`${window.location.origin}/100-days-to-offload/${blog.id}`);
     setBlogCopyState('copied');
     setTimeout(() => setBlogCopyState('idle'), 2000);
+  };
+
+  const handleBlogShare = async (blog) => {
+    const url = `${window.location.origin}/100-days-to-offload/${blog.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: blog.blog_title, url });
+        setBlogShareState('shared');
+      } else {
+        await navigator.clipboard.writeText(url);
+        setBlogShareState('copied');
+      }
+    } catch (_) {
+      // Ignored
+    }
+    setTimeout(() => setBlogShareState('idle'), 2000);
   };
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState(null);
@@ -507,6 +524,17 @@ const OneHundredDays = () => {
                   READ FULL POST
                 </a>
                 <div className="flex items-center gap-3">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleBlogShare(selectedBlog)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBlogShare(selectedBlog); } }}
+                    className="flex items-center gap-1 font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors cursor-pointer"
+                    title="Share"
+                  >
+                    <span className="material-symbols-outlined text-sm">{blogShareState === 'idle' ? 'share' : 'check'}</span>
+                    { { shared: 'Shared!', copied: 'Copied!' }[blogShareState] || 'Share' }
+                  </div>
                   <div
                     role="button"
                     tabIndex={0}

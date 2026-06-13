@@ -13,11 +13,28 @@ const difficultyBadgeClass = (level) => {
 
 const TrekDetailsModal = ({ isOpen, onClose, trek }) => {
   const [copyState, setCopyState] = useState('idle');
+  const [shareState, setShareState] = useState('idle');
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`${window.location.origin}/treks/${trek.id}`);
     setCopyState('copied');
     setTimeout(() => setCopyState('idle'), 2000);
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/treks/${trek.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: trek.fort_name, url });
+        setShareState('shared');
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareState('copied');
+      }
+    } catch (_) {
+      // Ignored
+    }
+    setTimeout(() => setShareState('idle'), 2000);
   };
 
   useEffect(() => {
@@ -110,6 +127,17 @@ const TrekDetailsModal = ({ isOpen, onClose, trek }) => {
             </a>
           ) : <span />}
           <div className="flex items-center gap-3 shrink-0">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleShare}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleShare(); } }}
+              className="flex items-center gap-1 font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors cursor-pointer"
+              title="Share"
+            >
+              <span className="material-symbols-outlined text-sm">{shareState === 'idle' ? 'share' : 'check'}</span>
+              { { shared: 'Shared!', copied: 'Copied!' }[shareState] || 'Share' }
+            </div>
             <div
               role="button"
               tabIndex={0}
