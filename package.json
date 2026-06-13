@@ -10,17 +10,13 @@
     "node": ">=20"
   },
   "scripts": {
-    "prebuild": "npm run cms:sync",
     "build": "rimraf ./build && vite build",
     "start": "vite",
     "dev": "vite",
     "preview": "vite preview",
-    "lint": "eslint src scripts functions --ext .js",
+    "lint": "eslint src functions --ext .js",
     "test": "jest",
     "analyze": "npm run build && source-map-explorer build/assets/*.js",
-    "cms:server": "npx netlify-cms-proxy-server",
-    "cms:sync": "node scripts/sync-cms-to-data.js",
-    "cms:seed": "node scripts/seed-cms-content.js",
     "data:import": "node scripts/import-to-supabase.mjs",
     "images:upload": "node scripts/upload-images-to-supabase.mjs"
   },
