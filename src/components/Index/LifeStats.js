@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import booksData from "../../data/books";
-import sportsData from "../../data/sports";
-import treksData from "../../data/treks";
-import blogsData from "../../data/100DaysToOffload";
+import { useBooks, useSports, useTreks, useBlogs } from "../../context/ContentContext";
 
 const useCountUp = (target, duration, active) => {
   const [count, setCount] = useState(0);
@@ -28,6 +25,11 @@ const useCountUp = (target, duration, active) => {
 const LifeStats = () => {
   const [animated, setAnimated] = useState(false);
   const ref = useRef(null);
+
+  const { data: booksData } = useBooks();
+  const { data: sportsData } = useSports();
+  const { data: treksData } = useTreks();
+  const { data: blogsData } = useBlogs();
 
   const totalBooks = booksData.length;
   const totalRaces = sportsData.length;

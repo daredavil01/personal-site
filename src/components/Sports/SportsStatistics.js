@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import sportsData from '../../data/sports';
 import { parseDistance, parseTimeToSeconds, formatSecondsToPace } from './utils';
 import TopSummaryCards from './TopSummaryCards';
+import { useSports } from '../../context/ContentContext';
 
 const SportsStatistics = () => {
+  const { data: sportsData } = useSports();
   const {
     mostActiveCity,
     mostActiveYear,
@@ -75,7 +76,7 @@ const SportsStatistics = () => {
       yearlyBreakdown: yb,
       totalRaces: sportsData.length
     };
-  }, []);
+  }, [sportsData]);
 
   const distances = useMemo(() => {
     const distSet = new Set();
@@ -84,7 +85,7 @@ const SportsStatistics = () => {
       if (d > 0) distSet.add(d);
     });
     return Array.from(distSet).sort((a, b) => b - a);
-  }, []);
+  }, [sportsData]);
 
   return (
     <div className="w-full flex flex-col gap-6">

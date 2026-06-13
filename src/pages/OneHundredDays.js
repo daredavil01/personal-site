@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import Main from '../layouts/Main';
-import blogsData from '../data/100DaysToOffload';
+import { useBlogs } from '../context/ContentContext';
 
 const YEAR = 2026;
 const GOAL = 100;
@@ -87,6 +87,7 @@ const StatTile = ({ value, label, valueClass = 'text-stone-900 dark:text-stone-1
 );
 
 const OneHundredDays = () => {
+  const { data: blogsData } = useBlogs();
   const [titleText, setTitleText] = useState('');
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [query, setQuery] = useState('');
@@ -125,7 +126,7 @@ const OneHundredDays = () => {
       });
     });
     return Object.entries(dist).sort((a, b) => b[1] - a[1]);
-  }, []);
+  }, [blogsData]);
 
   const platformCounts = useMemo(() => {
     const dist = {};
@@ -133,7 +134,7 @@ const OneHundredDays = () => {
       if (blog.blog_platform) dist[blog.blog_platform] = (dist[blog.blog_platform] || 0) + 1;
     });
     return Object.entries(dist).sort((a, b) => b[1] - a[1]);
-  }, []);
+  }, [blogsData]);
 
   const monthCounts = useMemo(() => {
     const counts = Array(12).fill(0);
@@ -142,7 +143,7 @@ const OneHundredDays = () => {
       if (d.getFullYear() === YEAR) counts[d.getMonth()] += 1;
     });
     return counts;
-  }, []);
+  }, [blogsData]);
   const maxMonthCount = Math.max(...monthCounts, 1);
 
   const calendarData = useMemo(() => {
@@ -159,7 +160,7 @@ const OneHundredDays = () => {
       date.setDate(date.getDate() + 1);
     }
     return days;
-  }, []);
+  }, [blogsData]);
 
   const filteredPosts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -173,7 +174,7 @@ const OneHundredDays = () => {
         if (q && !`${blog.blog_title} ${blog.blog_description || ''}`.toLowerCase().includes(q)) return false;
         return true;
       });
-  }, [query, activeTag, activePlatform, activeMonth]);
+  }, [blogsData, query, activeTag, activePlatform, activeMonth]);
 
   const hasFilters = query || activeTag || activePlatform || activeMonth !== null;
   const clearFilters = () => {

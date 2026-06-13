@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import sportsData from '../../data/sports';
 import { parseDistance } from './utils';
+import { useSports } from '../../context/ContentContext';
 
 const TopSummaryCards = () => {
+  const { data: sportsData } = useSports();
   const { totalRaces, totalDistance } = useMemo(() => {
     let distanceSum = 0;
     sportsData.forEach((race) => {
@@ -12,7 +13,7 @@ const TopSummaryCards = () => {
       totalRaces: sportsData.length,
       totalDistance: distanceSum
     };
-  }, []);
+  }, [sportsData]);
 
   const avgPerRace = totalRaces > 0 ? (totalDistance / totalRaces).toFixed(2) : "0.00";
 

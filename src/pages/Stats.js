@@ -1,19 +1,27 @@
 import React from "react";
 import Main from "../layouts/Main";
-import positions from "../data/resume/positions";
 import personalData from "../data/stats/personal";
-import books from "../data/books";
-import offloadData from "../data/100DaysToOffload";
-import { skills } from "../data/resume/skills";
-import sportsData from "../data/sports";
-import certifications from "../data/resume/certifications";
-import instagramPosts from "../data/instagram";
-import degrees from "../data/resume/degrees";
-import projects from "../data/projects";
-import treksData from "../data/treks";
 import { getPBRaw, formatHoursMinutes, formatMinutesSeconds } from "../utils/raceStats";
+import {
+  useBooks, useBlogs, useSports, useInstagram, useTreks, useProjects, useResume,
+} from "../context/ContentContext";
+import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const Stats = () => {
+  const { data: books, loading: booksLoading, error: booksError } = useBooks();
+  const { data: offloadData, loading: blogsLoading, error: blogsError } = useBlogs();
+  const { data: sportsData, loading: sportsLoading, error: sportsError } = useSports();
+  const { data: instagramPosts, loading: instaLoading, error: instaError } = useInstagram();
+  const { data: treksData, loading: treksLoading, error: treksError } = useTreks();
+  const { data: projects, loading: projectsLoading, error: projectsError } = useProjects();
+  const { data: resume, loading: resumeLoading, error: resumeError } = useResume();
+  const { positions, degrees, certifications, skills } = resume;
+
+  const isLoading = booksLoading || blogsLoading || sportsLoading || instaLoading
+    || treksLoading || projectsLoading || resumeLoading;
+  const hasError = booksError || blogsError || sportsError || instaError
+    || treksError || projectsError || resumeError;
+
   const ageComponent = personalData.find((item) => item.key === 'age')?.value;
   const location = personalData.find((item) => item.key === 'location')?.value || 'Pune, MH';
 
@@ -49,7 +57,7 @@ const Stats = () => {
     .slice(0, 3);
 
   // Take top 9 skills for the arsenal tags
-  const topSkills = skills.sort((a, b) => b.competency - a.competency).slice(0, 9).map((s) => s.title);
+  const topSkills = [...skills].sort((a, b) => b.competency - a.competency).slice(0, 9).map((s) => s.title);
 
   // Certifications
   const certCount = certifications.length;
@@ -131,6 +139,9 @@ const Stats = () => {
 
   // Projects
   const projectCount = projects.length;
+
+  if (isLoading) return <Main><LoadingBlock label="Loading stats…" /></Main>;
+  if (hasError) return <Main><ErrorBlock /></Main>;
 
   return (
     <Main>

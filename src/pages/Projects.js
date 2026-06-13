@@ -1,9 +1,12 @@
 import React from "react";
 import Main from "../layouts/Main";
 import ProjectGallery from "../components/Projects/ProjectGallery";
-import projectsData from "../data/projects";
+import { useProjects } from "../context/ContentContext";
+import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const Projects = () => {
+  const { data: projectsData, loading, error } = useProjects();
+
   return (
     <Main>
       <div className="flex flex-col gap-12 w-full">
@@ -21,7 +24,9 @@ const Projects = () => {
         </header>
 
         {/* Projects Gallery (Editorial Layout) */}
-        <ProjectGallery projects={projectsData} />
+        {loading && <LoadingBlock label="Loading projects…" />}
+        {error && <ErrorBlock />}
+        {!loading && !error && <ProjectGallery projects={projectsData} />}
 
         {/* Pagination / Call to action */}
         <footer className="mt-16 border-t border-stone-100 dark:border-stone-900 pt-16 text-center w-full">

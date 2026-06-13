@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import treksData from "../../data/treks";
+import { useTreks } from "../../context/ContentContext";
 
 const parseDate = (dateStr) => {
   if (!dateStr) return new Date(0);
@@ -50,6 +50,7 @@ const PlaceholderImage = ({ icon, label }) => (
 );
 
 const TreksDefault = ({ onTrekClick }) => {
+  const { data: treksData } = useTreks();
   const [filterDifficulty, setFilterDifficulty] = useState("all");
   const [filterYear, setFilterYear] = useState("all");
   const [filterBlog, setFilterBlog] = useState("all");
@@ -61,12 +62,12 @@ const TreksDefault = ({ onTrekClick }) => {
       treksData.map((t) => parseDate(t.date).getFullYear().toString()),
     );
     return [...s].sort((a, b) => b - a);
-  }, []);
+  }, [treksData]);
 
   const difficulties = useMemo(() => {
     const s = new Set(treksData.map((t) => t.endurance_level).filter(Boolean));
     return [...s].sort();
-  }, []);
+  }, [treksData]);
 
   const hasFilters = filterDifficulty !== "all" || filterYear !== "all" || filterBlog !== "all";
 
@@ -104,7 +105,7 @@ const TreksDefault = ({ onTrekClick }) => {
     });
 
     return result;
-  }, [filterDifficulty, filterYear, filterBlog, orderBy, orderAsc]);
+  }, [treksData, filterDifficulty, filterYear, filterBlog, orderBy, orderAsc]);
 
   const selectClass = "h-10 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg px-3 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors";
 

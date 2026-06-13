@@ -2,8 +2,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import ContactIcons from "../Contact/ContactIcons";
 
-const { PUBLIC_URL } = process.env;
-
 const SideBar = () => {
   const location = useLocation();
   const isResume = location.pathname.includes("/resume");
@@ -13,7 +11,7 @@ const SideBar = () => {
       {/* Intro Section */}
       <section className="flex flex-col gap-4">
         <Link to="/" className="w-16 h-16 rounded-full overflow-hidden border-2 border-stone-200 dark:border-stone-800 hover:scale-105 transition-transform">
-          <img src={`${PUBLIC_URL}/images/me.jpg`} alt="Sanket Tambare" className="w-full h-full object-cover" />
+          <img src="/images/me.jpg" alt="Sanket Tambare" className="w-full h-full object-cover" />
         </Link>
         <header>
           <h2 className="text-2xl font-headline font-bold text-stone-900 dark:text-stone-100">Sanket Tambare</h2>
@@ -54,9 +52,8 @@ const SideBar = () => {
             </Link>
           )}
           <a
-            href={`${process.env.PUBLIC_URL || ''}/sanket-tambare-resume.pdf`}
+            href="https://flowcv.com/resume/4wn6onnkg9"
             target="_blank"
-            download
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-2 bg-stone-900 dark:bg-stone-200 text-white dark:text-stone-950 border border-stone-900 dark:border-stone-200 font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-800 dark:hover:bg-stone-300 transition-all rounded-sm"
           >

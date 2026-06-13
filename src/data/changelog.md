@@ -9,9 +9,101 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.6] — 2026-06-13
+
+### Fixed
+
+- **SideBar** (`src/components/Template/SideBar.js`): Profile photo was broken on the deployed site because `const { PUBLIC_URL } = process.env` is not replaced by Vite's `define` (only the literal `process.env.PUBLIC_URL` token is). Replaced with a plain `/images/me.jpg` root-relative path.
+
+---
+
+## [v9.1.5] — 2026-06-13
+
+### Added
+
+- **Admin dark mode toggle** (`src/pages/admin/Dashboard.js`): Added `FloatingToggle` to the admin dashboard so the dark/light mode toggle is available on `/admin` pages, consistent with the rest of the site.
+
+---
+
+## [v9.1.4] — 2026-06-13
+
+### Changed
+
+- **Sports admin form** (`src/pages/admin/resources.js`, `src/pages/admin/FormField.js`): Date field now uses a native date picker (`input[type="date"]`) with automatic conversion between the stored `"Month DD, YYYY"` format and the browser's `YYYY-MM-DD` input format. Distance field replaced with a select dropdown (10 Kms, 21 Kms, 35 Kms, 42 Kms, 50 Kms) plus an "Other" option that reveals a free-text input for custom values.
+
+---
+
+## [v9.1.3] — 2026-06-13
+
+### Added
+
+- **Wrangler config** (`wrangler.toml`): Added Cloudflare Pages wrangler config with `[vars]` for `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Service role key stays out of the file and must be set as a secret via `wrangler pages secret put`.
+
+---
+
+## [v9.1.2] — 2026-06-13
+
+### Changed
+
+- **Docs** (`docs/`): Removed 6 obsolete documents (`cms-data-flow.md`, `cms-github-oauth-setup.md`, `customization.md`, `improvement-plan.md`, `supabase-migration-plan.md`, `features.md`). Rewrote `architecture.md`, `deployment.md`, and `setup_guide.md` to reflect the current Supabase-backed stack. Kept `contributing.md` unchanged.
+
+---
+
+## [v9.1.1] — 2026-06-13
+
+### Changed
+
+- **Static image assets** (`public/images/`): Deleted `sports/`, `treks/`, `insta_posts/`, `projects/`, and `nirman_story/` subdirectories (205 files). All images are now served from Supabase Storage via `toStorageUrl`; the local copies were redundant. Kept `favicon/`, `me.jpg`, `logo.png`, and `logo.svg` which are still referenced in static code.
+
+---
+
+## [v9.1.0] — 2026-06-13
+
+### Added
+
+- **Supabase Storage URL helper** (`src/lib/supabaseClient.js`): `toStorageUrl(path)` and `toStorageImages(slideImages)` convert relative `/images/…` paths stored in the DB to full Supabase Storage public URLs at read time. Paths that already begin with `http` are returned unchanged, keeping admin-uploaded images and legacy paths coexistent.
+- **Bulk image upload script** (`scripts/upload-images-to-supabase.mjs`, `npm run images:upload`): Walks `public/images/` (skipping `favicon/`) and uploads all 205 images to the `media` Storage bucket, preserving the existing subfolder structure. Re-runnable via upsert.
+
+### Changed
+
+- **Image API mappers** (`src/lib/api/sports.js`, `treks.js`, `instagram.js`, `projects.js`): `fromRow` now applies `toStorageImages` / `toStorageUrl` so every image served by these APIs resolves to the Supabase Storage CDN URL automatically.
+- **Interactive Me tab synced to URL query param** (`src/pages/InteractiveMe.js`): Active tab (Sports / Treks) is now reflected in `?tab=sports` / `?tab=treks`. Navigating directly to either URL pre-selects the correct tab; the Share button copies the full URL so recipients land on the same view. Invalid or missing `tab` param defaults to Sports.
+- **CMS pipeline removed** (`public/cms/`, `src/cms-content/`, `src/data/{books,sports,treks,projects,instagram,100DaysToOffload}.js`, `src/data/resume/`, `scripts/sync-cms-to-data.js`, `scripts/seed-cms-content.js`): Decap CMS config, all canonical markdown, and generated JS data files deleted now that Supabase is the source of truth. Removed `prebuild`/`cms:sync`/`cms:seed`/`cms:server` npm scripts, the CI data-drift check, and `scripts` from the ESLint pattern (remaining scripts are `.mjs`).
+- **Aggregation pages fully migrated to Supabase** (`src/pages/Stats.js`, `src/pages/MindMap.js`, `src/components/About/AboutDocument.js`, `src/components/Index/LifeStats.js`, `src/components/InteractiveMe/InteractiveMeTimeline.js`): Removed all remaining static `src/data/*.js` imports from these consumers; switched to `useBooks`/`useSports`/`useTreks`/`useBlogs`/`useProjects`/`useInstagram`/`useResume` hooks. Stats shows a full-page loading state until all 6 collections resolve; About, LifeStats, and InteractiveMe degrade gracefully (zeros/empty) while loading. MindMap `categories` array moved inside component as a `useMemo`. All `useMemo` dep arrays updated to include the data variables.
+
+---
+
+## [v9.0.0] — 2026-06-13
+
+### Added
+
+- **Supabase backend integration** (`supabase/migrations/0001_initial_schema.sql`, `src/lib/supabaseClient.js`, `src/lib/api/*`): Postgres schema for all dynamic content (books, sports, treks, projects, blogs, instagram, resume sub-collections, now months + meta) with `updated_at` triggers, Row-Level Security (public read, owner-only writes via `is_owner()`), and a public `media` storage bucket. Added `@supabase/supabase-js` and a per-entity data-access layer that maps DB rows to existing component shapes.
+- **Content provider + live data hooks** (`src/context/ContentContext.js`, `src/hooks/useCollection.js`): Lazy, cached per-collection fetching exposed via `useBooks`/`useSports`/`useTreks`/`useProjects`/`useBlogs`/`useInstagram`/`useResume`/`useNowMeta`/`useNowMonths`; shared loading/error/empty UI in `src/components/common/AsyncStates.js`.
+- **Admin editor** (`src/pages/admin/*`, route `/admin`): Email+password login (Supabase Auth), session guard, and a schema-driven CRUD dashboard for every content type with image upload to Supabase Storage and a dedicated Now-meta editor.
+- **One-time import script** (`scripts/import-to-supabase.mjs`, `npm run data:import`): Seeds the canonical `src/cms-content/**` markdown into Supabase using the service-role key (run locally once).
+
+### Changed
+
+- **Public content pages now fetch live from Supabase** (`src/pages/{Books,Projects,Resume,Now,OneHundredDays,Sports,Treks}.js`, `src/components/{Instagram/Posts,Sports/*,Treks/*}.js`): Switched from static `src/data/*.js` imports to the content hooks, with loading/error states and corrected `useMemo` dependencies. Aggregation/visualization pages (Stats, About, Index, MindMap, InteractiveMe) still read the static data files and will migrate in a follow-up before those files are removed.
+
+### Notes
+
+- Requires provisioning a Supabase project and setting `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (see `.env.example`). Without them the public pages render a graceful error state and `/admin` shows a configuration notice. See [docs/supabase-migration-plan.md](../../docs/supabase-migration-plan.md) for setup steps.
+
+---
+
+## [v8.0.1] — 2026-06-13
+
+### Added
+
+- **Supabase migration plan** (`docs/supabase-migration-plan.md`): Design document for moving dynamic content (books, sports, treks, projects, 100-days blogs, instagram, resume, now-page) from the static markdown pipeline to a Supabase/Postgres backend with a custom in-app `/admin` editor. Recommends a single repository, live runtime fetch via `@supabase/supabase-js` with Row-Level Security, email+password auth, and a phased migration with verification steps. Planning only — no app code or dependencies changed.
+
+---
+
 ## [v8.0.0] — 2026-06-13
 
 ### Changed
+
 - **Build system: Create React App → Vite** (`vite.config.js`, `package.json`, `index.html`): `react-scripts` (EOL, unmaintained) replaced with Vite 6. `index.html` moved to the project root with `%PUBLIC_URL%` placeholders resolved; `process.env.PUBLIC_URL` shimmed via `define` so the generated data files keep working unmodified; an esbuild loader shim lets JSX stay in `.js` files; build output remains `build/` so the Cloudflare Pages config is untouched. Production build now completes in ~4s and `npm audit` drops from 67 findings to 19 (0 critical).
 - **Now page data loading** (`src/utils/parseNowCms.js`): webpack's `require.context` replaced with Vite's `import.meta.glob` for the month/meta markdown files; jest maps the module to a stub (`parseNowCms.jest-stub.js`) since the CJS test runtime cannot evaluate `import.meta`.
 - **Changelog page** (`src/pages/Changelog.js`): markdown fetched via Vite's `?url` import suffix.
@@ -22,10 +114,12 @@ patch for fixes and tweaks.
 ## [v7.1.0] — 2026-06-13
 
 ### Added
+
 - **Race stats util** (`src/utils/raceStats.js`): Personal-best selection and race-time parsing/formatting extracted from the Stats page into pure, unit-tested helpers (11 jest tests).
 - **Shared page meta module** (`src/data/pageMeta.js`): Single source of truth for per-route title, description, and OG image — consumed by both the client layout (Helmet) and the Cloudflare crawler middleware. Adds previously missing `/interactive-me` and `/mindmap` entries.
 
 ### Changed
+
 - **Meta tags** (`src/layouts/Main.js`, `functions/_middleware.js`, `src/pages/*`): Helmet and the crawler middleware now read the same `PAGE_META` by pathname; pages no longer pass duplicated title/description props, and drifted copies (About, Resume, 100 Days) were reconciled.
 - **Image loading** (`src/components/Instagram/ImageSlider.js` and gallery/timeline components): Slider slides are real `<img>` elements with `object-fit: contain` instead of CSS `background-image`, so the browser can lazy-load and async-decode them; Sports/Treks cards, Interactive Me timeline, and Projects gallery images now use `loading="lazy"` + `decoding="async"`.
 - **ESLint** (`.eslintrc`): Re-enabled `no-trailing-spaces`, `react/self-closing-comp`, `no-nested-ternary`, `react/no-unused-prop-types`, and `react/jsx-no-useless-fragment`; fixed all remaining violations so lint stays clean.
@@ -39,16 +133,19 @@ patch for fixes and tweaks.
 ## [v7.0.0] — 2026-06-12
 
 ### Added
+
 - **CI drift gate** (`.github/workflows/node.js.yml`): CI now runs `cms:sync` and fails if `src/data/*.js` disagrees with the CMS markdown, making `src/cms-content/` the enforced single source of truth.
 - **Prebuild sync** (`package.json`): `npm run build` regenerates `src/data/*.js` from markdown via a `prebuild` hook, so deploys always reflect CMS content.
 - **Improvement Plan** (`docs/improvement-plan.md`): Full repository audit, owner decisions, and milestone-based task plan with statuses.
 
 ### Changed
+
 - **Content pipeline**: Removed the `/admin` panel (pages, editors, hooks, layouts) and the deprecated `src/data/now-data.js`; Decap CMS at `/cms/` is now the only editing UI and markdown the only content source.
 - **Images** (`public/images/`): Compressed the entire library from 114MB to 37MB with a 300KB-per-file hard cap; converted PNG photos to JPEG and updated all references.
 - **Docs**: README, CLAUDE.md, and architecture/data-flow docs aligned with the markdown-first pipeline; changelog header now states the semver rules; `package.json` version and Node engine requirement brought up to date.
 
 ### Fixed
+
 - **CI** (`.github/workflows/node.js.yml`): Workflow targeted the retired `ubuntu-20.04` runner, so no run had completed since March; now runs on `ubuntu-latest` with actions v4 and npm caching.
 - **Test suite** (`src/__tests__/App.test.js`, `jest.setup.js`, `jest.config.js`): All 7 tests failed after dark mode shipped — renders now wrap in `ThemeProvider`, jsdom gets `matchMedia`/`IntersectionObserver` stubs, and jest-dom matchers are registered.
 - **Lint** (`package.json`): `eslint **/*.js` only matched ~5 files; the script now lints `src`, `scripts`, and `functions` entirely.
@@ -60,6 +157,7 @@ patch for fixes and tweaks.
 ## [v6.6.0] — 2026-06-11
 
 ### Added
+
 - **Mind Map Page** (`src/pages/MindMap.js`, `src/components/MindMap/`): New `/mindmap` route with an interactive radial SVG mindmap. A central "Me" bubble has five category branches (Books, Marathons, Treks, Projects, Blogs); clicking a category animates a zoom into it and fans out all of its items in collision-free concentric rings with staggered entrance animations; clicking any item opens a detail panel reusing the existing modal pattern. The canvas supports drag-to-pan, scroll-wheel and pinch zoom (`usePanZoom.js`), hover effects, native tooltips, a category legend, and zoom/reset controls. Built with pure React + SVG (no external graph library). Added to navbar dropdown (`src/data/routes.js`).
 - **Sports Page URL params** (`src/pages/Sports.js`): Active tab is now synced to a `?view=` URL query parameter (`statistics`, `interactive`, `default`). Navigating directly to a URL with a `?view=` param opens the correct tab on load; switching tabs updates the URL in place via `replaceState`. The Share button automatically copies the param-inclusive URL.
 - **100 Days to Offload entries** (`src/data/100DaysToOffload.js`): Added 6 new posts (ids 31–36) from June 2026 — Bharat Ek Khoj Konkan (Marathi, WordPress), Maintaining rhythm in the chaos, Life: An Odyssey of Purpose, What's with all this exploration?, Chronicles of Wandering Mind S2-E02, and Digital Nomad's hustling trails.
@@ -70,6 +168,7 @@ patch for fixes and tweaks.
 ## [v6.5.0] — 2026-05-31
 
 ### Added
+
 - **Interactive Me Page** (`src/pages/InteractiveMe.js`, `src/components/InteractiveMe/`): New `/interactive-me` page with image-first vertical timeline. Images from Sports and Treks data are shuffled on mount, displayed as alternating left/right cards connected by SVG bezier curves, and the page auto-scrolls (pauses on hover). Includes SPORTS and TREKS sub-tabs. Added to navbar "More" dropdown (`src/data/routes.js`) and homepage feature grid (`src/pages/Index.js`).
 
 ---
@@ -77,6 +176,7 @@ patch for fixes and tweaks.
 ## [v6.4.6] — 2026-05-31
 
 ### Fixed
+
 - **SportsDefault, SportsInteractive, TreksDefault** (`src/components/Sports/`, `src/components/Treks/`): Removed default `grayscale` filter from card images so photos display in full colour.
 
 ---
@@ -84,6 +184,7 @@ patch for fixes and tweaks.
 ## [v6.4.5] — 2026-05-31
 
 ### Changed
+
 - **Now Page Data** (`src/data/now-data.js`): Filled in May 2026 blogs (6 entries) and books (3 entries) for the current month section.
 
 ---
@@ -91,6 +192,7 @@ patch for fixes and tweaks.
 ## [v6.4.4] — 2026-04-26
 
 ### Changed
+
 - **CI workflow** (`.github/workflows/node.js.yml`): Updated build step from `npm run predeploy` to `npm run build`; renamed step label from "Build and Statically Render" to "Build".
 - **docs/deployment.md**: Full rewrite to document Cloudflare Pages deployment (build command, output dir, dashboard settings, env vars). Removed outdated GitHub Pages / `gh-pages` instructions.
 - **docs/architecture.md**: Major rewrite to reflect current codebase — updated directory structure (added `hooks/`, `context/`, `utils/`, `cms-content/`), all 16 routes, CMS data flow, and known data inconsistencies table.
@@ -98,6 +200,7 @@ patch for fixes and tweaks.
 - **CLAUDE.md**: Updated Treks Page instructions to use `slideImages` field name (was `photos`).
 
 ### Removed
+
 - **GitHub Pages workflow** (`.github/workflows/github-pages.yml`): Deleted — site is on Cloudflare Pages; this workflow was deploying to a `gh-pages` branch that is no longer used.
 - **`predeploy` / `deploy` scripts** (`package.json`): Removed — both scripts depend on `gh-pages` and `react-snap`, neither of which applies to Cloudflare Pages.
 - **`gh-pages`** (`package.json` dependency): Removed unused GitHub Pages deploy package.
@@ -359,7 +462,7 @@ patch for fixes and tweaks.
 
 ### Added
 
-- **Treks Page** (`/treks`): New page documenting Maharashtra fort and mountain trek history with two views — _Statistics_ and _Default View_.
+- **Treks Page** (`/treks`): New page documenting Maharashtra fort and mountain trek history with two views — *Statistics* and *Default View*.
 - **TreksStatistics Component**: Highlights total treks, years active, difficulty distribution (Easy/Medium/Hard), yearly breakdown bar chart, and an interactive animated trek timeline.
 - **TreksDefault Component**: Card grid of all treks with filters by difficulty, year, and blog presence, plus sort controls by date or trek duration.
 - **TrekDetailsModal Component**: Click-through modal with a photo slider and blog post link for each trek entry.
@@ -399,17 +502,17 @@ patch for fixes and tweaks.
 ### Added
 
 - **Changelog Page** (`/changelog`): New website page that renders this `CHANGELOG.md` file with a hero section, version quick-nav badges, and full markdown rendering. Added to the "More" dropdown in the nav bar.
-- **Sports Page — Tabbed Interface**: Restructured the Sports page with three distinct tabs — _Statistics_, _Interactive View_, and _Default View_ — inspired by the run-folio reference design.
+- **Sports Page — Tabbed Interface**: Restructured the Sports page with three distinct tabs — *Statistics*, *Interactive View*, and *Default View* — inspired by the run-folio reference design.
 - **SportsStatistics Component**: New component showing total races, total distance, average pace/race, distance distribution, personal records, city/year breakdowns, and yearly progress bars.
 - **SportsInteractive Component**: Groups races by distance category with BIB number prominently displayed; races sorted by fastest time.
 - **SportsDefault Component**: Chronological grid of all races with full filter & sort controls (by Year, City, Distance) and a toggle for ascending/descending order.
 - **MarathonDetailsModal Component**: Reusable modal displaying race description, image slider, and a link to the official timing certificate, triggered on card click.
 - **Share Button**: Clicking the Share button on the Sports page copies the current URL to clipboard and shows a "Copied!" confirmation.
 - **Stats Page Enhancements**: Added five new bento grid cards:
-  - _Reading Intelligence_ — English vs Marathi book split, books with reviews count, and top interest tag cloud.
-  - _Books Per Year_ — bar chart of reading velocity from 2019–2026.
-  - _Blog Intelligence_ — English/Marathi post split with top writing topics derived from 100DaysToOffload tags.
-  - _Education & Projects_ — clickable education timeline (degrees) and project count with quick links.
+  - *Reading Intelligence* — English vs Marathi book split, books with reviews count, and top interest tag cloud.
+  - *Books Per Year* — bar chart of reading velocity from 2019–2026.
+  - *Blog Intelligence* — English/Marathi post split with top writing topics derived from 100DaysToOffload tags.
+  - *Education & Projects* — clickable education timeline (degrees) and project count with quick links.
 - **Sports Data (sports.js)**: Added explicit `bibNumber` field to all 19 race entries (IDs 1–19).
 - **Dynamic Distance Grouping**: Both `SportsStatistics` and `SportsInteractive` now derive unique distances dynamically from the data (no hardcoded list), supporting future distances automatically.
 - **Dark Mode Fixes**: Added missing `dark:` Tailwind variants across `SportsStatistics`, `SportsDefault`, `SportsInteractive`, `TopSummaryCards`, and `MarathonDetailsModal`.
@@ -437,7 +540,7 @@ patch for fixes and tweaks.
 - New **Challenges** page tab.
 - Revamped **Now** page with timeline-style content.
 - **100 Days to Offload** challenge tracking system with blog data (`100DaysToOffload.js`).
-- Added books reading data for 2025–2026 batch (IDs ≥ 36, including _टाटायन_, _एका तेलियाने_).
+- Added books reading data for 2025–2026 batch (IDs ≥ 36, including *टाटायन*, *एका तेलियाने*).
 - Added blog entries (posts 15–18) for March 2026 including Marathi blog posts.
 
 ### Changed
@@ -546,4 +649,4 @@ patch for fixes and tweaks.
 
 ---
 
-_This changelog is maintained manually. For the full commit history, run `git log --oneline`._
+*This changelog is maintained manually. For the full commit history, run `git log --oneline`.*

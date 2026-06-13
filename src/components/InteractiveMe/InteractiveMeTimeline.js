@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import sportsData from "../../data/sports";
-import treksData from "../../data/treks";
+import { useSports, useTreks } from "../../context/ContentContext";
 import { normalizeEntry } from "./utils";
 import TimelineCard from "./TimelineCard";
 import ImageModal from "./ImageModal";
@@ -8,6 +7,9 @@ import ImageModal from "./ImageModal";
 const DURATION = { slow: 20, fast: 5 }; // seconds to scroll full page
 
 const InteractiveMeTimeline = ({ dataType, scrollEnabled, scrollSpeed }) => {
+  const { data: sportsData } = useSports();
+  const { data: treksData } = useTreks();
+
   const entries = useMemo(() => {
     const source = dataType === 'sports' ? sportsData : treksData;
     const type = dataType === 'sports' ? 'sport' : 'trek';
@@ -15,7 +17,7 @@ const InteractiveMeTimeline = ({ dataType, scrollEnabled, scrollSpeed }) => {
       .map((e) => normalizeEntry(e, type))
       .filter(Boolean)
       .sort((a, b) => b.dateMs - a.dateMs);
-  }, [dataType]);
+  }, [dataType, sportsData, treksData]);
 
   const containerRef = useRef(null);
   const cardRefs = useRef([]);

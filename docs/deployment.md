@@ -15,26 +15,29 @@ Produces a `build/` directory of static assets ready for any CDN or static host.
 The site is connected directly to the GitHub repository via the Cloudflare Pages dashboard. No manual deploy step is needed — Cloudflare pulls from `main` on every push and builds automatically.
 
 **Dashboard settings:**
+
 | Setting | Value |
 |---|---|
-| Framework preset | None (Vite — build command and output dir are set explicitly below) |
+| Framework preset | None (Vite — set build command and output dir explicitly) |
 | Build command | `npm run build` |
 | Build output directory | `build` |
-| Node.js version | 20 (set via `.nvmrc`) |
+| Node.js version | 20 |
 
 ## Environment Variables
 
-Set these in the Cloudflare Pages dashboard under **Settings → Environment Variables**:
+Set these in the Cloudflare Pages dashboard under **Settings → Environment Variables**. These are baked into the bundle at build time by Vite (they are **not** available at runtime).
 
 | Variable | Purpose | Required |
 |---|---|---|
-| `REACT_APP_GA_TRACKING_ID` | Google Analytics tracking ID | Optional |
-| `NODE_ENV` | Set to `production` for production builds | Automatic |
-| `PUBLIC_URL` | Override asset base path (e.g. for CDN subpath) | Optional |
+| `VITE_SUPABASE_URL` | Supabase project URL (e.g. `https://xxx.supabase.co`) | Yes |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key — safe to expose in the browser when RLS is enabled | Yes |
+
+> After adding or changing these variables in the Cloudflare dashboard, clear the build cache (**Settings → Builds → Clear cache**) and trigger a new deployment so Vite re-bakes the updated values into the bundle.
 
 ## CI/CD (GitHub Actions)
 
 The `.github/workflows/node.js.yml` workflow runs on every push and pull request to `main`:
+
 1. Installs dependencies (`npm ci`)
 2. Lints (`npm run lint`)
 3. Builds (`npm run build`)
@@ -46,18 +49,20 @@ This is a **validation-only** workflow — it does not deploy. Cloudflare Pages 
 
 ```bash
 npm install
-npm start        # dev server at http://localhost:3000
-npm run build    # production build
-npm test         # run tests
+cp .env.example .env   # fill in VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY
+npm start              # dev server at http://localhost:3000
+npm run build          # production build
+npm test               # run tests
 ```
 
-## CMS (Decap CMS)
+## Supabase Auth — Redirect URL Allowlist
 
-The Now page is managed via Decap CMS at `/cms`. To run the CMS locally against your git repo:
+After deploying, add your Cloudflare Pages domain to the Supabase Auth URL allowlist:
 
-```bash
-npm run cms:server    # starts netlify-cms-proxy-server on port 8081
-npm start             # dev server, then visit http://localhost:3000/cms/
-```
+**Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**
 
-See `docs/cms-github-oauth-setup.md` for the full Cloudflare Pages production CMS setup.
+Add both:
+- `https://<your-project>.pages.dev/**`
+- Your custom domain if configured (e.g. `https://yourdomain.com/**`)
+
+This is required for the `/admin` login flow to complete successfully.

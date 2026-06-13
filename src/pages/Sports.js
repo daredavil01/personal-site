@@ -5,6 +5,8 @@ import SportsStatistics from "../components/Sports/SportsStatistics";
 import SportsInteractive from "../components/Sports/SportsInteractive";
 import SportsDefault from "../components/Sports/SportsDefault";
 import MarathonDetailsModal from "../components/Sports/MarathonDetailsModal";
+import { useSports } from "../context/ContentContext";
+import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const TAB_TO_PARAM = {
   STATISTICS: "statistics",
@@ -17,6 +19,7 @@ const PARAM_TO_TAB = Object.fromEntries(
 );
 
 const SportsPage = () => {
+  const { loading, error } = useSports();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("view");
   const initialTab = PARAM_TO_TAB[viewParam] || "STATISTICS";
@@ -101,12 +104,18 @@ const SportsPage = () => {
 
         {/* Tab Content */}
         <div className="w-full">
-          {activeTab === "STATISTICS" && <SportsStatistics />}
-          {activeTab === "INTERACTIVE VIEW" && (
-            <SportsInteractive onRaceClick={handleRaceClick} />
-          )}
-          {activeTab === "DEFAULT VIEW" && (
-            <SportsDefault onRaceClick={handleRaceClick} />
+          {loading && <LoadingBlock label="Loading races…" />}
+          {error && <ErrorBlock />}
+          {!loading && !error && (
+            <>
+              {activeTab === "STATISTICS" && <SportsStatistics />}
+              {activeTab === "INTERACTIVE VIEW" && (
+                <SportsInteractive onRaceClick={handleRaceClick} />
+              )}
+              {activeTab === "DEFAULT VIEW" && (
+                <SportsDefault onRaceClick={handleRaceClick} />
+              )}
+            </>
           )}
         </div>
       </div>

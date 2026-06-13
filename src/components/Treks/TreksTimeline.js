@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import treksData from '../../data/treks';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useTreks } from '../../context/ContentContext';
 
 const parseDate = (dateStr) => {
   if (!dateStr) return new Date(0);
@@ -43,11 +43,15 @@ const defaultConfig = {
   glow: 'shadow-stone-400/20',
 };
 
-const sortedTreks = [...treksData].sort((a, b) => parseDate(b.date) - parseDate(a.date));
-
 const TreksTimeline = () => {
+  const { data: treksData } = useTreks();
   const [selectedId, setSelectedId] = useState(null);
   const [visibleSet, setVisibleSet] = useState(new Set());
+
+  const sortedTreks = useMemo(
+    () => [...treksData].sort((a, b) => parseDate(b.date) - parseDate(a.date)),
+    [treksData],
+  );
 
   useEffect(() => {
     const timers = sortedTreks.map((trek, i) => {
@@ -56,7 +60,7 @@ const TreksTimeline = () => {
       }, i * 70);
     });
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [sortedTreks]);
 
   const handleClick = (id) => {
     setSelectedId((prev) => (prev === id ? null : id));
