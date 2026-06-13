@@ -98,6 +98,56 @@ const JsonField = ({ value, onChange }) => {
   );
 };
 
+// "February 22, 2026" → "2026-02-22"  (for input[type=date])
+function toDateInput(str) {
+  if (!str) return "";
+  const d = new Date(str);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// "2026-02-22" → "February 22, 2026"  (stored format)
+function fromDateInput(str) {
+  if (!str) return "";
+  const [year, month, day] = str.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    year: "numeric", month: "long", day: "numeric",
+  });
+}
+
+const SelectOrOther = ({ options, value, onChange }) => {
+  const isOther = value && !options.includes(value);
+  const selectVal = isOther ? "Other" : (value ?? "");
+  return (
+    <div className="flex flex-col gap-2">
+      <select
+        className={inputClass}
+        value={selectVal}
+        onChange={(e) => {
+          if (e.target.value === "Other") onChange("");
+          else onChange(e.target.value);
+        }}
+      >
+        <option value="">—</option>
+        {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+        <option value="Other">Other</option>
+      </select>
+      {(selectVal === "Other" || isOther) && (
+        <input
+          type="text"
+          className={inputClass}
+          placeholder="Enter custom distance"
+          value={isOther ? value : ""}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    </div>
+  );
+};
+
 const FormField = ({ field, value, folder, onChange }) => {
   const set = (v) => onChange(field.name, v);
 
@@ -150,6 +200,17 @@ const FormField = ({ field, value, folder, onChange }) => {
           <UploadButton folder={folder} onUploaded={set} />
         </div>
       );
+    case "date":
+      return (
+        <input
+          type="date"
+          className={inputClass}
+          value={toDateInput(value)}
+          onChange={(e) => set(fromDateInput(e.target.value))}
+        />
+      );
+    case "selectOrOther":
+      return <SelectOrOther options={field.options} value={value} onChange={set} />;
     case "slideImages":
       return <SlideImages value={value} folder={folder} onChange={set} />;
     case "json":

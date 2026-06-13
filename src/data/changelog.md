@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.4] — 2026-06-13
+
+### Changed
+
+- **Sports admin form** (`src/pages/admin/resources.js`, `src/pages/admin/FormField.js`): Date field now uses a native date picker (`input[type="date"]`) with automatic conversion between the stored `"Month DD, YYYY"` format and the browser's `YYYY-MM-DD` input format. Distance field replaced with a select dropdown (10 Kms, 21 Kms, 35 Kms, 42 Kms, 50 Kms) plus an "Other" option that reveals a free-text input for custom values.
+
+---
+
 ## [v9.1.3] — 2026-06-13
 
 ### Added

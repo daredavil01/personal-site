@@ -40,10 +40,16 @@ const resources = [
     title: (r) => r.title,
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
-      { name: "date", label: "Date", type: "text", required: true },
+      { name: "date", label: "Date", type: "date", required: true },
       { name: "description", label: "Description", type: "textarea", required: true },
       { name: "place", label: "Place", type: "text", required: true },
-      { name: "distance", label: "Distance", type: "text", required: true },
+      {
+        name: "distance",
+        label: "Distance",
+        type: "selectOrOther",
+        options: ["10 Kms", "21 Kms", "35 Kms", "42 Kms", "50 Kms"],
+        required: true,
+      },
       { name: "time", label: "Finish time", type: "text", required: true },
       { name: "timeCertificateLink", label: "Certificate link", type: "url" },
       { name: "bibNumber", label: "Bib number" },
