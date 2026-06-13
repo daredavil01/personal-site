@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import TopSummaryCards from "./TopSummaryCards";
 import { parseDistance, parseTimeToSeconds } from "./utils";
 import { useSports } from "../../context/ContentContext";
@@ -255,18 +255,28 @@ const SportsDefault = ({ onRaceClick }) => {
                   <h4 className="font-body font-bold text-stone-900 dark:text-stone-100 leading-snug line-clamp-2 flex-1">
                     {race.title}
                   </h4>
-                  <a
-                    href={race.timeCertificateLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="shrink-0 p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors text-blue-500"
-                    title="View certificate"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">
-                      open_in_new
-                    </span>
-                  </a>
+                  <div className="flex items-center gap-1">
+                    <a
+                      href={race.timeCertificateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors text-blue-500"
+                      title="View certificate"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">
+                        open_in_new
+                      </span>
+                    </a>
+                    <Link
+                      to={`/sports/${race.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary"
+                      title="Permalink"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">link</span>
+                    </Link>
+                  </div>
                 </div>
                 {/* Date + Place */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-label text-stone-500 dark:text-stone-400">

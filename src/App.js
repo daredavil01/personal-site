@@ -25,6 +25,12 @@ const Books = lazy(() => import("./pages/Books"));
 const Challenges = lazy(() => import("./pages/Challenges"));
 const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
 const MicroBlog = lazy(() => import("./pages/MicroBlog"));
+const MicroBlogPost = lazy(() => import("./pages/MicroBlogPost"));
+const TrekPost = lazy(() => import("./pages/TrekPost"));
+const SportPost = lazy(() => import("./pages/SportPost"));
+const BookPost = lazy(() => import("./pages/BookPost"));
+const ProjectPost = lazy(() => import("./pages/ProjectPost"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
@@ -50,6 +56,12 @@ const App = () => (
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/100-days-to-offload" element={<OneHundredDays />} />
             <Route path="/micro-blog" element={<MicroBlog />} />
+            <Route path="/micro-blog/:id" element={<MicroBlogPost />} />
+            <Route path="/treks/:id" element={<TrekPost />} />
+            <Route path="/sports/:id" element={<SportPost />} />
+            <Route path="/books/:id" element={<BookPost />} />
+            <Route path="/projects/:id" element={<ProjectPost />} />
+            <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
             <Route path="/changelog" element={<Changelog />} />
             <Route path="/treks" element={<TreksPage />} />
             <Route path="/interactive-me" element={<InteractiveMePage />} />

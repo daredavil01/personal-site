@@ -1,7 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import ImageSlider from '../Instagram/ImageSlider';
 
 const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
+  const [copyState, setCopyState] = useState('idle');
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/sports/${raceDetails.id}`);
+    setCopyState('copied');
+    setTimeout(() => setCopyState('idle'), 2000);
+  };
+
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') onClose();
@@ -71,13 +80,32 @@ const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
           )}
         </div>
 
-        {raceDetails.timeCertificateLink && (
-          <div className="p-6 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 sticky bottom-0 z-10">
-             <a href={raceDetails.timeCertificateLink} target="_blank" rel="noopener noreferrer" className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-label font-bold text-sm uppercase tracking-widest transition-all">
-                View Official Certificate
-             </a>
+        <div className="p-6 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 sticky bottom-0 z-10 flex items-center justify-between gap-4">
+          {raceDetails.timeCertificateLink ? (
+            <a href={raceDetails.timeCertificateLink} target="_blank" rel="noopener noreferrer" className="block flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-label font-bold text-sm uppercase tracking-widest transition-all">
+              View Official Certificate
+            </a>
+          ) : <span />}
+          <div className="flex items-center gap-3 shrink-0">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleCopy}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(); } }}
+              className="flex items-center gap-1 font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors cursor-pointer"
+              title="Copy link"
+            >
+              <span className="material-symbols-outlined text-sm">{copyState === 'copied' ? 'check' : 'content_copy'}</span>
+              {copyState === 'copied' ? 'Copied!' : 'Copy'}
+            </div>
+            <Link
+              to={`/sports/${raceDetails.id}`}
+              className="font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors"
+            >
+              Permalink ↗
+            </Link>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 const BookCard = ({ book, onClick }) => (
   <div className="group cursor-pointer border border-transparent flex flex-col h-full" onClick={onClick}>
@@ -20,10 +21,18 @@ const BookCard = ({ book, onClick }) => (
         </a>
       )}
     </div>
-    <div className="flex justify-between items-start mb-1 flex-grow">
+    <div className="flex justify-between items-start mb-1 flex-grow gap-2">
       <h3 className="font-headline text-lg font-bold leading-tight group-hover:text-secondary transition-colors text-stone-800 dark:text-stone-100 line-clamp-2" title={book.title}>
         {book.title}
       </h3>
+      <Link
+        to={`/books/${book.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="shrink-0 font-label text-[10px] text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary transition-colors mt-1"
+        title="Permalink"
+      >
+        ↗
+      </Link>
     </div>
     <p className="font-label text-xs text-stone-500 dark:text-stone-500 uppercase tracking-widest mt-auto truncate" title={book.author}>{book.author}</p>
   </div>
@@ -37,6 +46,13 @@ const DigitalLibrary = ({ books }) => {
   const [filterLanguage, setFilterLanguage] = useState('All');
   const [filterReview, setFilterReview] = useState('All');
   const [selectedBook, setSelectedBook] = useState(null);
+  const [bookCopyState, setBookCopyState] = useState('idle');
+
+  const handleBookCopy = (book) => {
+    navigator.clipboard.writeText(`${window.location.origin}/books/${book.id}`);
+    setBookCopyState('copied');
+    setTimeout(() => setBookCopyState('idle'), 2000);
+  };
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
@@ -302,7 +318,7 @@ const DigitalLibrary = ({ books }) => {
                 </div>
               </div>
 
-              <div className="flex gap-4 border-t border-stone-100 dark:border-stone-800 pt-8 mt-6">
+              <div className="flex items-center gap-4 border-t border-stone-100 dark:border-stone-800 pt-8 mt-6">
                 {selectedBook?.blog_link && (
                   <a href={selectedBook.blog_link} target="_blank" rel="noopener noreferrer">
                     <button className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-950 px-6 py-3 rounded-xl font-label font-bold text-xs uppercase tracking-widest active:scale-95 duration-200 hover:opacity-90">
@@ -317,6 +333,25 @@ const DigitalLibrary = ({ books }) => {
                     </button>
                   </a>
                 )}
+                <div className="ml-auto flex items-center gap-3 shrink-0">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleBookCopy(selectedBook)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBookCopy(selectedBook); } }}
+                    className="flex items-center gap-1 font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors cursor-pointer"
+                    title="Copy link"
+                  >
+                    <span className="material-symbols-outlined text-sm">{bookCopyState === 'copied' ? 'check' : 'content_copy'}</span>
+                    {bookCopyState === 'copied' ? 'Copied!' : 'Copy'}
+                  </div>
+                  <Link
+                    to={`/books/${selectedBook?.id}`}
+                    className="font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors"
+                  >
+                    Permalink ↗
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

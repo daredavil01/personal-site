@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
 import resources from "./resources";
 import ResourceManager from "./ResourceManager";
 import NowMetaEditor from "./NowMetaEditor";
@@ -9,8 +10,12 @@ import { supabase } from "../../lib/supabaseClient";
 const NOW_META_KEY = "__nowmeta";
 const MICROBLOG_KEY = "__microblog";
 
+const ALL_KEYS = new Set([...resources.map((r) => r.key), MICROBLOG_KEY, NOW_META_KEY]);
+
 const Dashboard = ({ session }) => {
-  const [activeKey, setActiveKey] = useState(resources[0].key);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramTab = searchParams.get("tab");
+  const activeKey = ALL_KEYS.has(paramTab) ? paramTab : resources[0].key;
   const active = resources.find((r) => r.key === activeKey);
 
   const renderPanel = () => {
@@ -23,7 +28,7 @@ const Dashboard = ({ session }) => {
     <button
       key={key}
       type="button"
-      onClick={() => setActiveKey(key)}
+      onClick={() => setSearchParams({ tab: key })}
       className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         activeKey === key
           ? "bg-secondary text-white"

@@ -6,6 +6,7 @@ import {
   BASE_URL,
   PAGE_META,
   DEFAULT_META,
+  DEFAULT_IMAGE,
   composeTitle,
 } from "../src/data/pageMeta";
 
@@ -43,7 +44,7 @@ class HeadInjector {
 }
 
 export async function onRequest(context) {
-  const { request, next } = context;
+  const { request, next, env } = context;
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/$/, "") || "/";
 
@@ -64,7 +65,51 @@ export async function onRequest(context) {
     return response;
   }
 
-  const meta = PAGE_META[pathname] ?? DEFAULT_META;
+  // Dynamic routes — resolve per-item OG meta.
+  let dynamicMeta = null;
+
+  // Static-data child routes: map to parent page meta (data is JS-bundled, not queryable at edge).
+  const staticChildParents = [
+    [/^\/treks\/\d+$/, "/treks"],
+    [/^\/sports\/\d+$/, "/sports"],
+    [/^\/books\/\d+$/, "/books"],
+    [/^\/projects\/\d+$/, "/projects"],
+    [/^\/100-days-to-offload\/\d+$/, "/100-days-to-offload"],
+  ];
+  const parentPath = staticChildParents.find(([rx]) => rx.test(pathname))?.[1];
+  if (parentPath) dynamicMeta = PAGE_META[parentPath] ?? null;
+
+  // Supabase-backed route: /micro-blog/:id — fetch live post for per-post OG tags.
+  const mbMatch = pathname.match(/^\/micro-blog\/(\d+)$/);
+  if (mbMatch && env.SUPABASE_URL && env.SUPABASE_ANON_KEY) {
+    try {
+      const postRes = await fetch(
+        `${env.SUPABASE_URL}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date,post_type&limit=1`,
+        {
+          headers: {
+            apikey: env.SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
+            Accept: "application/json",
+          },
+        },
+      );
+      const posts = await postRes.json();
+      const post = posts?.[0];
+      if (post) {
+        const raw = (post.text || post.title || "").replace(/\s+/g, " ").trim();
+        const snippet = raw.length > 160 ? `${raw.slice(0, 157)}…` : raw;
+        dynamicMeta = {
+          title: `Post · ${post.date}`,
+          description: snippet || "A micro-blog post.",
+          image: DEFAULT_IMAGE,
+        };
+      }
+    } catch (_) {
+      // fall through to static meta
+    }
+  }
+
+  const meta = dynamicMeta ?? PAGE_META[pathname] ?? DEFAULT_META;
   const fullTitle = composeTitle(meta.title);
   const canonicalUrl = `${BASE_URL}${pathname === "/" ? "" : pathname}`;
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 // Legacy theme CSS force-styles bare <button> elements, so clickable cards use
 // div[role="button"] like the rest of the site (see OneHundredDays.js).
@@ -27,13 +28,23 @@ const PostCard = ({ post, onOpen }) => {
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-[10px] text-stone-400 dark:text-stone-500">{post.date}</span>
-        <span
-          className={`font-label text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
-            typeColors[post.postType] || "bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400"
-          }`}
-        >
-          {post.postType}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`font-label text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
+              typeColors[post.postType] || "bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400"
+            }`}
+          >
+            {post.postType}
+          </span>
+          <Link
+            to={`/micro-blog/${post.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="font-label text-[10px] text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary transition-colors leading-none"
+            title="Permalink"
+          >
+            ↗
+          </Link>
+        </div>
       </div>
 
       {post.imageUrl && (

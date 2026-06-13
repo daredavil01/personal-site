@@ -9,6 +9,18 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.1.1] — 2026-06-13
+
+### Changed
+
+- **Admin Dashboard** (`src/pages/admin/Dashboard.js`): Active tab is now synced to the URL via `?tab=<key>` query param using `useSearchParams`. Deep-linking to a specific tab (e.g. `/admin?tab=__microblog`) now works correctly, and the browser back/forward buttons navigate between tabs.
+
+### Added
+
+- **Permalink + Copy Link in detail modals** (`src/components/Treks/TrekDetailsModal.js`, `src/components/Sports/MarathonDetailsModal.js`, `src/components/Books/DigitalLibrary.js`, `src/pages/OneHundredDays.js`): Each detail modal footer now shows a "Copy" button (copies the permalink URL to clipboard with a 2-second "Copied!" confirmation) and a "Permalink ↗" link to open the dedicated detail page.
+
+---
+
 ## [v10.1.0] — 2026-06-13
 
 ### Added
@@ -16,6 +28,12 @@ patch for fixes and tweaks.
 - **Micro Blog tabs** (`src/pages/MicroBlog.js`): Split the page into a **Posts** tab (existing search/filter UI) and a **Stats** tab showing total post count, date range, unique tag count, post-type breakdown (text/quote/photo) with percentage bars, source breakdown, and top 15 tags ranked by post count.
 - **Sort controls** (`src/pages/MicroBlog.js`, `src/lib/api/microblog.js`): Added **Newest / Oldest / Shuffle** sort options to the Posts tab. Date sorts are server-side (Postgres `ORDER BY date`); Shuffle does a client-side Fisher-Yates randomisation — clicking Shuffle again re-shuffles without a new network request.
 - **`getMicroblogStats()`** (`src/lib/api/microblog.js`): New API function that fires 8 parallel Supabase queries to build the Stats panel data.
+- **Micro Blog post permalinks** (`src/pages/MicroBlogPost.js`, `src/App.js`): Added `/micro-blog/:id` as a dedicated page for individual posts — full text, all tags, source info, and a back link to the archive.
+- **Per-post OG meta** (`functions/_middleware.js`): The Cloudflare Pages middleware now detects `/micro-blog/:id`, fetches the post from Supabase REST at the edge (using `SUPABASE_URL` + `SUPABASE_ANON_KEY` env vars set in the CF Pages dashboard), and injects per-post title and description into OG/Twitter meta tags for correct social-share previews.
+- **Permalink links** (`src/components/MicroBlog/PostCard.js`, `src/components/MicroBlog/PostModal.js`): Each post card now shows a subtle ↗ permalink; the detail modal shows a "Permalink ↗" link in the footer.
+- **Detail pages for all content types** (`src/pages/TrekPost.js`, `SportPost.js`, `BookPost.js`, `ProjectPost.js`, `BlogPost.js`): Added individual permalink pages for treks (`/treks/:id`), races (`/sports/:id`), books (`/books/:id`), projects (`/projects/:id`), and 100-days posts (`/100-days-to-offload/:id`). Each page has a share button (Web Share API / clipboard fallback), full item details, and a back link. Permalink ↗ links added to all corresponding card/list components.
+- **Share button** (`src/pages/MicroBlogPost.js`, and all new detail pages): Share button in the top-right of every detail page — uses `navigator.share()` on mobile, falls back to clipboard copy with "Copied!" confirmation.
+- **Content Tags section** (`src/pages/Stats.js`): New full-width bento card on the Stats page showing all book tags, all 100-days blog tags, and top-40 microblog tags — each with post counts, loaded from their respective data sources.
 
 ---
 

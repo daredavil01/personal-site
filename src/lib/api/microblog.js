@@ -72,6 +72,17 @@ export async function searchMicroblog({
   return { rows: (data ?? []).map(fromRow), count: count ?? 0 };
 }
 
+/** Fetch a single post by numeric id. Throws if not found. */
+export async function getMicroblogPost(id) {
+  const { data, error } = await supabase
+    .from("microblog")
+    .select(COLUMNS)
+    .eq("id", Number(id))
+    .single();
+  if (error) throw error;
+  return fromRow(data);
+}
+
 /** Distinct tags with post counts, for the filter UI. */
 export async function getMicroblogTagFacets() {
   const { data, error } = await supabase.rpc("microblog_tag_facets");

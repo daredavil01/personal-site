@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTreks } from "../../context/ContentContext";
 
 const parseDate = (dateStr) => {
@@ -271,7 +272,7 @@ const TreksDefault = ({ onTrekClick }) => {
                     {trek.trek_time}
                   </span>
                 </div>
-                <div className="border-t border-stone-100 dark:border-stone-800 pt-2 mt-auto">
+                <div className="border-t border-stone-100 dark:border-stone-800 pt-2 mt-auto flex items-center justify-between">
                   {trek.blog_link ? (
                     <a
                       href={trek.blog_link}
@@ -290,6 +291,14 @@ const TreksDefault = ({ onTrekClick }) => {
                       No blog
                     </span>
                   )}
+                  <Link
+                    to={`/treks/${trek.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-label text-[10px] text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary transition-colors"
+                    title="Permalink"
+                  >
+                    ↗
+                  </Link>
                 </div>
               </div>
             </div>

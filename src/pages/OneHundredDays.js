@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Main from '../layouts/Main';
 import { useBlogs } from '../context/ContentContext';
 
@@ -90,6 +91,13 @@ const OneHundredDays = () => {
   const { data: blogsData } = useBlogs();
   const [titleText, setTitleText] = useState('');
   const [selectedBlog, setSelectedBlog] = useState(null);
+  const [blogCopyState, setBlogCopyState] = useState('idle');
+
+  const handleBlogCopy = (blog) => {
+    navigator.clipboard.writeText(`${window.location.origin}/100-days-to-offload/${blog.id}`);
+    setBlogCopyState('copied');
+    setTimeout(() => setBlogCopyState('idle'), 2000);
+  };
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState(null);
   const [activePlatform, setActivePlatform] = useState(null);
@@ -416,14 +424,24 @@ const OneHundredDays = () => {
                     <span className="font-mono text-[10px] text-stone-400 dark:text-stone-500">
                       {blog.blog_date}
                     </span>
-                    {blog.blog_platform && (
-                      <span className={`font-label text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
-                        platformColors[blog.blog_platform] || 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400'
-                      }`}
+                    <div className="flex items-center gap-2">
+                      {blog.blog_platform && (
+                        <span className={`font-label text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                          platformColors[blog.blog_platform] || 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400'
+                        }`}
+                        >
+                          {blog.blog_platform}
+                        </span>
+                      )}
+                      <Link
+                        to={`/100-days-to-offload/${blog.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-label text-[10px] text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary transition-colors leading-none"
+                        title="Permalink"
                       >
-                        {blog.blog_platform}
-                      </span>
-                    )}
+                        ↗
+                      </Link>
+                    </div>
                   </div>
                   <p className="font-body font-semibold text-sm text-stone-800 dark:text-stone-200 group-hover:text-secondary transition-colors leading-snug mb-0">
                     {blog.blog_title}
@@ -479,14 +497,35 @@ const OneHundredDays = () => {
                 <span className="font-bold text-stone-400">Language:</span> {selectedBlog.language} |{' '}
                 <span className="font-bold text-stone-400">Date:</span> {selectedBlog.blog_date}
               </p>
-              <a
-                href={selectedBlog.blog_link}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-block bg-secondary text-white px-8 py-4 rounded-xl font-label font-bold text-sm tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-secondary/20"
-              >
-                READ FULL POST
-              </a>
+              <div className="flex items-center gap-6">
+                <a
+                  href={selectedBlog.blog_link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-block bg-secondary text-white px-8 py-4 rounded-xl font-label font-bold text-sm tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-secondary/20"
+                >
+                  READ FULL POST
+                </a>
+                <div className="flex items-center gap-3">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleBlogCopy(selectedBlog)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBlogCopy(selectedBlog); } }}
+                    className="flex items-center gap-1 font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors cursor-pointer"
+                    title="Copy link"
+                  >
+                    <span className="material-symbols-outlined text-sm">{blogCopyState === 'copied' ? 'check' : 'content_copy'}</span>
+                    {blogCopyState === 'copied' ? 'Copied!' : 'Copy'}
+                  </div>
+                  <Link
+                    to={`/100-days-to-offload/${selectedBlog.id}`}
+                    className="font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors"
+                  >
+                    Permalink ↗
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const sourceLabels = { tumblr: "Tumblr", instagram: "Instagram", manual: "Manual" };
 
@@ -73,6 +74,10 @@ const PostModal = ({ post, onClose }) => {
               </a>
             </>
           )}
+          {" | "}
+          <Link to={`/micro-blog/${post.id}`} className="text-secondary hover:underline">
+            Permalink ↗
+          </Link>
         </p>
       </div>
     </div>
