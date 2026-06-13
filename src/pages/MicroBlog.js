@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Main from "../layouts/Main";
 import { searchMicroblog, getMicroblogTagFacets } from "../lib/api/microblog";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
@@ -31,12 +32,17 @@ const keyActivate = (fn) => (e) => {
   }
 };
 
+const parseTags = (raw) => (raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : []);
+
 const MicroBlog = () => {
-  const [searchInput, setSearchInput] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTags, setActiveTags] = useState([]);
-  const [source, setSource] = useState("");
-  const [type, setType] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Filters initialise from the URL query so links are shareable/bookmarkable.
+  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") || "");
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get("q") || "");
+  const [activeTags, setActiveTags] = useState(() => parseTags(searchParams.get("tags")));
+  const [source, setSource] = useState(() => searchParams.get("source") || "");
+  const [type, setType] = useState(() => searchParams.get("type") || "");
 
   const [rows, setRows] = useState([]);
   const [count, setCount] = useState(0);
@@ -55,6 +61,17 @@ const MicroBlog = () => {
     const t = setTimeout(() => setSearchTerm(searchInput.trim()), 300);
     return () => clearTimeout(t);
   }, [searchInput]);
+
+  // Mirror the active filters into the URL query (replace, so typing doesn't
+  // spam history). Empty filters → clean URL.
+  useEffect(() => {
+    const next = {};
+    if (searchTerm) next.q = searchTerm;
+    if (activeTags.length) next.tags = activeTags.join(",");
+    if (source) next.source = source;
+    if (type) next.type = type;
+    setSearchParams(next, { replace: true });
+  }, [searchTerm, activeTagsKey, source, type, setSearchParams]);
 
   // Tag facets load once.
   useEffect(() => {

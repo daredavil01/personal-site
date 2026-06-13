@@ -18,6 +18,7 @@ patch for fixes and tweaks.
 - **Tumblr importer** (`scripts/import-tumblr-microblog.mjs`, `npm run microblog:import`): Re-runnable script that cleans the Tumblr export (`knowledge_base/tumblr_posts.json`) and upserts on `(source, source_id)` — idempotent and non-destructive to admin-authored posts.
 - **Micro Blog data API** (`src/lib/api/microblog.js`): `searchMicroblog()` (server-side full-text search + tag/source/type filters + pagination), `getMicroblogTagFacets()`, and CRUD via the shared `createResource` factory.
 - **Admin Micro Blog manager** (`src/pages/admin/MicroblogManager.js`, `src/pages/admin/Dashboard.js`): New admin tab with a server-side searched/paginated list and a create/edit/delete form for adding posts manually.
+- **Shareable filters** (`src/pages/MicroBlog.js`): The search query, tags, source, and type filters are mirrored into the URL query string (`?q=&tags=&source=&type=`) and initialise from it, so filtered views are bookmarkable and survive a reload.
 
 ---
 
