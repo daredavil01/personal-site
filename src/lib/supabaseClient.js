@@ -11,7 +11,7 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 if (!isSupabaseConfigured) {
   // eslint-disable-next-line no-console
   console.warn(
-    "[supabase] VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY are not set — "
+    "[supabase] VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY are not set  — "
       + "content fetches will fail. Copy .env.example to .env and fill them in.",
   );
 }
