@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.3] — 2026-06-13
+
+### Added
+
+- **Wrangler config** (`wrangler.toml`): Added Cloudflare Pages wrangler config with `[vars]` for `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Service role key stays out of the file and must be set as a secret via `wrangler pages secret put`.
+
+---
+
 ## [v9.1.2] — 2026-06-13
 
 ### Changed

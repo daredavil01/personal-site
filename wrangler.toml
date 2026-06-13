@@ -1,0 +1,14 @@
+name = "personal-site"
+pages_build_output_dir = "build"
+
+# Build-time environment variables (baked into the Vite bundle at deploy time).
+# VITE_* variables are safe to commit here — the publishable key is designed to
+# be exposed in the browser; RLS on Supabase guards all writes.
+[vars]
+VITE_SUPABASE_URL = ""
+VITE_SUPABASE_PUBLISHABLE_KEY = ""
+
+# SUPABASE_SERVICE_ROLE_KEY is a secret — never put it here.
+# Set it once via the CLI:
+#   wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY
+# or via the Cloudflare dashboard: Settings → Environment Variables → Add secret.
