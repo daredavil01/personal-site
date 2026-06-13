@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.6] — 2026-06-13
+
+### Fixed
+
+- **SideBar** (`src/components/Template/SideBar.js`): Profile photo was broken on the deployed site because `const { PUBLIC_URL } = process.env` is not replaced by Vite's `define` (only the literal `process.env.PUBLIC_URL` token is). Replaced with a plain `/images/me.jpg` root-relative path.
+
+---
+
 ## [v9.1.5] — 2026-06-13
 
 ### Added
