@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.5] — 2026-06-13
+
+### Added
+
+- **Admin dark mode toggle** (`src/pages/admin/Dashboard.js`): Added `FloatingToggle` to the admin dashboard so the dark/light mode toggle is available on `/admin` pages, consistent with the rest of the site.
+
+---
+
 ## [v9.1.4] — 2026-06-13
 
 ### Changed

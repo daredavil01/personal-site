@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import resources from "./resources";
 import ResourceManager from "./ResourceManager";
 import NowMetaEditor from "./NowMetaEditor";
+import FloatingToggle from "../../components/Template/FloatingToggle";
 import { supabase } from "../../lib/supabaseClient";
 
 const NOW_META_KEY = "__nowmeta";
@@ -53,6 +54,7 @@ const Dashboard = ({ session }) => {
           ? <NowMetaEditor />
           : <ResourceManager key={active.key} resource={active} />}
       </main>
+      <FloatingToggle />
     </div>
   );
 };
