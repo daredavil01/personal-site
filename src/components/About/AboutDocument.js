@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import sportsData from '../../data/sports';
-import treksData from '../../data/treks';
-import booksData from '../../data/books';
-import blogsData from '../../data/100DaysToOffload';
-import projectsData from '../../data/projects';
+import { useSports, useTreks, useBooks, useBlogs, useProjects } from '../../context/ContentContext';
 import ContactIcons from '../Contact/ContactIcons';
 
 const useCountUp = (target, duration, active) => {
@@ -37,6 +33,12 @@ const SectionHeader = ({ label }) => (
 const AboutDocument = () => {
   const statsRef = useRef(null);
   const [animated, setAnimated] = useState(false);
+
+  const { data: sportsData } = useSports();
+  const { data: treksData } = useTreks();
+  const { data: booksData } = useBooks();
+  const { data: blogsData } = useBlogs();
+  const { data: projectsData } = useProjects();
 
   const racesCount = sportsData.length;
   const treksCount = treksData.length;

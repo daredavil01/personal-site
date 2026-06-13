@@ -1,18 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Main from "../layouts/Main";
 import NowDocument from "../components/Now/NowDocument";
-import { loadNowMeta, loadNowMonths } from "../utils/parseNowCms";
+import { useNowMeta, useNowMonths } from "../context/ContentContext";
 
 const Now = () => {
-  const [nowMeta, setNowMeta] = useState(null);
-  const [nowData, setNowData] = useState([]);
-
-  useEffect(() => {
-    Promise.all([loadNowMeta(), loadNowMonths()]).then(([meta, months]) => {
-      setNowMeta(meta);
-      setNowData(months);
-    });
-  }, []);
+  const { data: nowMeta } = useNowMeta();
+  const { data: nowData } = useNowMonths();
 
   const current = nowData.find((m) => m.isCurrent);
   const lastUpdated = current ? `${current.month} ${current.year}` : "";

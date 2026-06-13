@@ -5,12 +5,15 @@ import ExperienceSection from "../components/Resume/ExperienceSection";
 import EducationSection from "../components/Resume/EducationSection";
 import CertificationsSection from "../components/Resume/CertificationsSection";
 
-import { skills } from "../data/resume/skills";
-import positions from "../data/resume/positions";
-import degrees from "../data/resume/degrees";
-import certifications from "../data/resume/certifications";
+import { useResume } from "../context/ContentContext";
+import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const Resume = () => {
+  const { data: resume, loading, error } = useResume();
+  const {
+    skills, positions, degrees, certifications,
+  } = resume;
+
   return (
     <Main>
       <div className="flex flex-col gap-12 w-full">
@@ -47,17 +50,32 @@ const Resume = () => {
             </div>
           </section>
 
-          {/* Skill Cards Grid */}
-          <SkillsSection skills={skills} />
+          {loading && (
+            <div className="col-span-12">
+              <LoadingBlock label="Loading resume…" />
+            </div>
+          )}
+          {error && (
+            <div className="col-span-12">
+              <ErrorBlock />
+            </div>
+          )}
 
-          {/* Professional Experience */}
-          <ExperienceSection positions={positions} />
+          {!loading && !error && (
+            <>
+              {/* Skill Cards Grid */}
+              <SkillsSection skills={skills} />
 
-          {/* Education */}
-          <EducationSection degrees={degrees} />
+              {/* Professional Experience */}
+              <ExperienceSection positions={positions} />
 
-          {/* Certifications (Glass Card) */}
-          <CertificationsSection certifications={certifications} />
+              {/* Education */}
+              <EducationSection degrees={degrees} />
+
+              {/* Certifications (Glass Card) */}
+              <CertificationsSection certifications={certifications} />
+            </>
+          )}
         </div>
       </div>
     </Main>

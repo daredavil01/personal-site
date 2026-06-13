@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import treksData from "../../data/treks";
 import TreksTimeline from "./TreksTimeline";
+import { useTreks } from "../../context/ContentContext";
 
 const parseDate = (dateStr) => {
   if (!dateStr) return new Date(0);
@@ -9,6 +9,7 @@ const parseDate = (dateStr) => {
 };
 
 const TreksStatistics = () => {
+  const { data: treksData } = useTreks();
   const stats = useMemo(() => {
     const yearCounts = {};
     const difficultyCounts = {};
@@ -48,7 +49,7 @@ const TreksStatistics = () => {
       difficultyBreakdown,
       difficultyCounts,
     };
-  }, []);
+  }, [treksData]);
 
   const difficultyColors = {
     Easy: {

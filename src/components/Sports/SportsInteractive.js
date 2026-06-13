@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import sportsData from '../../data/sports';
 import { parseDistance } from './utils';
 import TopSummaryCards from './TopSummaryCards';
+import { useSports } from '../../context/ContentContext';
 
 const PlaceholderImage = ({ icon, label }) => (
   <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-stone-100 dark:bg-stone-800">
@@ -11,6 +11,7 @@ const PlaceholderImage = ({ icon, label }) => (
 );
 
 const SportsInteractive = ({ onRaceClick }) => {
+  const { data: sportsData } = useSports();
   const groupedData = useMemo(() => {
     const grouped = {};
 
@@ -37,7 +38,7 @@ const SportsInteractive = ({ onRaceClick }) => {
     return Object.entries(grouped)
       .filter(([, list]) => list.length > 0)
       .sort((a, b) => parseInt(b[0], 10) - parseInt(a[0], 10));
-  }, []);
+  }, [sportsData]);
 
   return (
     <div className="w-full flex flex-col gap-6">

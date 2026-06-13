@@ -1,18 +1,23 @@
 import React, { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Main from "../layouts/Main";
 import InteractiveMeTimeline from "../components/InteractiveMe/InteractiveMeTimeline";
 
 const tabs = ["SPORTS", "TREKS"];
+const VALID_TABS = new Set(tabs.map((t) => t.toLowerCase()));
 
 const InteractiveMePage = () => {
-  const [activeTab, setActiveTab] = useState("SPORTS");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTab = searchParams.get("tab")?.toLowerCase();
+  const activeTab = VALID_TABS.has(rawTab) ? rawTab.toUpperCase() : "SPORTS";
+
   const [copied, setCopied] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState("slow");
 
   const handleTabChange = (tab) => {
     window.scrollTo({ top: 0 });
-    setActiveTab(tab);
+    setSearchParams({ tab: tab.toLowerCase() });
   };
 
   const handleShare = () => {

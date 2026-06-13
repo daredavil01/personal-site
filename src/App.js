@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { ContentProvider } from "./context/ContentContext";
 import Main from "./layouts/Main"; // fallback for lazy pages
 import "./tailwind.css"; // Tailwind globals
 import "./static/css/main.scss"; // All of our styles
@@ -27,32 +28,36 @@ const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
+const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
 
 const App = () => (
   <HelmetProvider>
-    <BrowserRouter basename={PUBLIC_URL}>
-      <Suspense fallback={<Main />}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/stats" element={<Stats />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/resume" element={<Resume />} />
-          <Route path="/instagram" element={<Instagram />} />
-          <Route path="/sports" element={<SportsPage />} />
-          <Route path="/now" element={<Now />} />
-          <Route path="/books" element={<Books />} />
-          <Route path="/challenges" element={<Challenges />} />
-          <Route path="/100-days-to-offload" element={<OneHundredDays />} />
-          <Route path="/changelog" element={<Changelog />} />
-          <Route path="/treks" element={<TreksPage />} />
-          <Route path="/interactive-me" element={<InteractiveMePage />} />
-          <Route path="/mindmap" element={<MindMap />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+    <ContentProvider>
+      <BrowserRouter basename={PUBLIC_URL}>
+        <Suspense fallback={<Main />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/stats" element={<Stats />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/resume" element={<Resume />} />
+            <Route path="/instagram" element={<Instagram />} />
+            <Route path="/sports" element={<SportsPage />} />
+            <Route path="/now" element={<Now />} />
+            <Route path="/books" element={<Books />} />
+            <Route path="/challenges" element={<Challenges />} />
+            <Route path="/100-days-to-offload" element={<OneHundredDays />} />
+            <Route path="/changelog" element={<Changelog />} />
+            <Route path="/treks" element={<TreksPage />} />
+            <Route path="/interactive-me" element={<InteractiveMePage />} />
+            <Route path="/mindmap" element={<MindMap />} />
+            <Route path="/admin/*" element={<AdminApp />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </ContentProvider>
   </HelmetProvider>
 );
 

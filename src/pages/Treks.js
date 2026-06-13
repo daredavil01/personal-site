@@ -4,6 +4,8 @@ import Main from "../layouts/Main";
 import TreksStatistics from "../components/Treks/TreksStatistics";
 import TreksDefault from "../components/Treks/TreksDefault";
 import TrekDetailsModal from "../components/Treks/TrekDetailsModal";
+import { useTreks } from "../context/ContentContext";
+import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 
 const TAB_TO_PARAM = {
   STATISTICS: "statistics",
@@ -15,6 +17,7 @@ const PARAM_TO_TAB = Object.fromEntries(
 );
 
 const TreksPage = () => {
+  const { loading, error } = useTreks();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("view");
   const initialTab = PARAM_TO_TAB[viewParam] || "STATISTICS";
@@ -90,8 +93,14 @@ const TreksPage = () => {
 
         {/* Tab Content */}
         <div className="w-full">
-          {activeTab === 'STATISTICS' && <TreksStatistics />}
-          {activeTab === 'DEFAULT VIEW' && <TreksDefault onTrekClick={setSelectedTrek} />}
+          {loading && <LoadingBlock label="Loading treks…" />}
+          {error && <ErrorBlock />}
+          {!loading && !error && (
+            <>
+              {activeTab === 'STATISTICS' && <TreksStatistics />}
+              {activeTab === 'DEFAULT VIEW' && <TreksDefault onTrekClick={setSelectedTrek} />}
+            </>
+          )}
         </div>
       </div>
 

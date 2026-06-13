@@ -9,6 +9,42 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.0] — 2026-06-13
+
+### Added
+- **Supabase Storage URL helper** (`src/lib/supabaseClient.js`): `toStorageUrl(path)` and `toStorageImages(slideImages)` convert relative `/images/…` paths stored in the DB to full Supabase Storage public URLs at read time. Paths that already begin with `http` are returned unchanged, keeping admin-uploaded images and legacy paths coexistent.
+- **Bulk image upload script** (`scripts/upload-images-to-supabase.mjs`, `npm run images:upload`): Walks `public/images/` (skipping `favicon/`) and uploads all 205 images to the `media` Storage bucket, preserving the existing subfolder structure. Re-runnable via upsert.
+
+### Changed
+- **Image API mappers** (`src/lib/api/sports.js`, `treks.js`, `instagram.js`, `projects.js`): `fromRow` now applies `toStorageImages` / `toStorageUrl` so every image served by these APIs resolves to the Supabase Storage CDN URL automatically.
+- **Interactive Me tab synced to URL query param** (`src/pages/InteractiveMe.js`): Active tab (Sports / Treks) is now reflected in `?tab=sports` / `?tab=treks`. Navigating directly to either URL pre-selects the correct tab; the Share button copies the full URL so recipients land on the same view. Invalid or missing `tab` param defaults to Sports.
+- **Aggregation pages fully migrated to Supabase** (`src/pages/Stats.js`, `src/pages/MindMap.js`, `src/components/About/AboutDocument.js`, `src/components/Index/LifeStats.js`, `src/components/InteractiveMe/InteractiveMeTimeline.js`): Removed all remaining static `src/data/*.js` imports from these consumers; switched to `useBooks`/`useSports`/`useTreks`/`useBlogs`/`useProjects`/`useInstagram`/`useResume` hooks. Stats shows a full-page loading state until all 6 collections resolve; About, LifeStats, and InteractiveMe degrade gracefully (zeros/empty) while loading. MindMap `categories` array moved inside component as a `useMemo`. All `useMemo` dep arrays updated to include the data variables.
+
+---
+
+## [v9.0.0] — 2026-06-13
+
+### Added
+- **Supabase backend integration** (`supabase/migrations/0001_initial_schema.sql`, `src/lib/supabaseClient.js`, `src/lib/api/*`): Postgres schema for all dynamic content (books, sports, treks, projects, blogs, instagram, resume sub-collections, now months + meta) with `updated_at` triggers, Row-Level Security (public read, owner-only writes via `is_owner()`), and a public `media` storage bucket. Added `@supabase/supabase-js` and a per-entity data-access layer that maps DB rows to existing component shapes.
+- **Content provider + live data hooks** (`src/context/ContentContext.js`, `src/hooks/useCollection.js`): Lazy, cached per-collection fetching exposed via `useBooks`/`useSports`/`useTreks`/`useProjects`/`useBlogs`/`useInstagram`/`useResume`/`useNowMeta`/`useNowMonths`; shared loading/error/empty UI in `src/components/common/AsyncStates.js`.
+- **Admin editor** (`src/pages/admin/*`, route `/admin`): Email+password login (Supabase Auth), session guard, and a schema-driven CRUD dashboard for every content type with image upload to Supabase Storage and a dedicated Now-meta editor.
+- **One-time import script** (`scripts/import-to-supabase.mjs`, `npm run data:import`): Seeds the canonical `src/cms-content/**` markdown into Supabase using the service-role key (run locally once).
+
+### Changed
+- **Public content pages now fetch live from Supabase** (`src/pages/{Books,Projects,Resume,Now,OneHundredDays,Sports,Treks}.js`, `src/components/{Instagram/Posts,Sports/*,Treks/*}.js`): Switched from static `src/data/*.js` imports to the content hooks, with loading/error states and corrected `useMemo` dependencies. Aggregation/visualization pages (Stats, About, Index, MindMap, InteractiveMe) still read the static data files and will migrate in a follow-up before those files are removed.
+
+### Notes
+- Requires provisioning a Supabase project and setting `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (see `.env.example`). Without them the public pages render a graceful error state and `/admin` shows a configuration notice. See [docs/supabase-migration-plan.md](../../docs/supabase-migration-plan.md) for setup steps.
+
+---
+
+## [v8.0.1] — 2026-06-13
+
+### Added
+- **Supabase migration plan** (`docs/supabase-migration-plan.md`): Design document for moving dynamic content (books, sports, treks, projects, 100-days blogs, instagram, resume, now-page) from the static markdown pipeline to a Supabase/Postgres backend with a custom in-app `/admin` editor. Recommends a single repository, live runtime fetch via `@supabase/supabase-js` with Row-Level Security, email+password auth, and a phased migration with verification steps. Planning only — no app code or dependencies changed.
+
+---
+
 ## [v8.0.0] — 2026-06-13
 
 ### Changed

@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import sportsData from "../../data/sports";
 import TopSummaryCards from "./TopSummaryCards";
 import { parseDistance, parseTimeToSeconds } from "./utils";
+import { useSports } from "../../context/ContentContext";
 
 const ORDER_KEYS = ["time", "distance", "date"];
 
@@ -18,6 +18,7 @@ const PlaceholderImage = ({ icon, label }) => (
 );
 
 const SportsDefault = ({ onRaceClick }) => {
+  const { data: sportsData } = useSports();
   // Filters and ordering live in the URL (?year=&place=&distance=&order=&dir=)
   // so a filtered view can be shared; defaults are omitted to keep URLs clean,
   // and updates merge with existing params (e.g. ?view=default) via replace.
@@ -49,19 +50,19 @@ const SportsDefault = ({ onRaceClick }) => {
       sportsData.map((r) => new Date(r.date).getFullYear().toString()),
     );
     return [...s].sort((a, b) => b - a);
-  }, []);
+  }, [sportsData]);
 
   const places = useMemo(() => {
     const s = new Set(sportsData.map((r) => r.place.split(",").pop().trim()));
     return [...s].sort();
-  }, []);
+  }, [sportsData]);
 
   const distances = useMemo(() => {
     const s = new Set(
       sportsData.map((r) => parseDistance(r.distance)).filter((d) => d > 0),
     );
     return [...s].sort((a, b) => a - b);
-  }, []);
+  }, [sportsData]);
 
   const hasFilters = filterYear !== "all" || filterPlace !== "all" || filterDistance !== "all";
 
@@ -101,7 +102,7 @@ const SportsDefault = ({ onRaceClick }) => {
     });
 
     return result;
-  }, [filterYear, filterPlace, filterDistance, orderBy, orderAsc]);
+  }, [sportsData, filterYear, filterPlace, filterDistance, orderBy, orderAsc]);
 
   const selectClass = "h-10 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg px-3 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors";
 
