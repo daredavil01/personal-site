@@ -8,11 +8,11 @@
 | Routing | react-router-dom v6 (lazy-loaded routes) |
 | Styling | Tailwind CSS (primary) + SCSS (`src/static/css/`) |
 | Head/SEO | react-helmet-async |
+| Backend | Supabase (Postgres + Auth + Storage + RLS) |
 | Icons | FontAwesome (brands, regular, solid SVG) |
 | Image slider | react-slideshow-image |
 | Markdown | markdown-to-jsx |
 | Dates | dayjs |
-| CMS | Decap CMS (git-based, no backend) |
 | Hosting | Cloudflare Pages |
 
 ---
@@ -21,53 +21,53 @@
 
 ```
 personal-site/
+├── index.html                  # Static shell (OG tags, favicons)
 ├── public/
-│   ├── index.html              # Static shell (OG tags, favicons)
-│   ├── cms/                    # Decap CMS UI + config
-│   │   ├── index.html
-│   │   └── config.yml          # CMS collection definitions
 │   └── images/
-│       ├── sports/             # Race photos (named: abbrev_YYYY_N.jpeg)
-│       ├── treks/              # Fort trek photos (named: fort_name_N.jpg)
-│       ├── insta_posts/        # Instagram gallery images
-│       └── projects/           # Project screenshots
+│       ├── favicon/            # Favicons referenced in index.html
+│       ├── me.jpg              # Profile photo (sidebar + OG)
+│       ├── logo.png            # OG/Twitter card image
+│       └── logo.svg            # Nav logo mark
 ├── src/
 │   ├── App.js                  # Route definitions (all lazy-loaded)
 │   ├── index.js                # React bootstrap (ThemeProvider + HelmetProvider)
-│   ├── cms-content/            # CANONICAL content store (Decap CMS markdown)
-│   │   ├── now/                # Now page (read at runtime by parseNowCms.js)
-│   │   │   ├── meta.md         # Daily rituals, site meta
-│   │   │   └── months/         # One .md file per month
-│   │   ├── books/, sports/, treks/, projects/, instagram/, 100days/
-│   │   └── resume/             # positions/, degrees/, skills/, certifications/
 │   ├── components/
-│   │   ├── Template/           # Layout chrome (Navigation, SideBar, Hamburger, Footer, etc.)
+│   │   ├── Template/           # Layout chrome (Navigation, SideBar, Hamburger, Footer)
 │   │   ├── Books/
 │   │   ├── Challenges/
 │   │   ├── Contact/
 │   │   ├── Index/
 │   │   ├── Instagram/
-│   │   ├── Now/                # 12 subsection components (blogs, books, running, etc.)
+│   │   ├── Now/                # Subsection components (blogs, books, running, etc.)
 │   │   ├── Projects/
 │   │   ├── Resume/
 │   │   ├── Sports/
 │   │   └── Treks/
 │   ├── context/
-│   │   └── ThemeContext.js     # Dark/light mode state
-│   ├── data/                   # GENERATED from cms-content (do not edit by hand)
-│   │   ├── treks.js, sports.js, books.js, instagram.js,
-│   │   ├── 100DaysToOffload.js, projects.js, resume/*.js
-│   │   ├── contact.js          # Hand-maintained: social links
-│   │   ├── routes.js           # Hand-maintained: navigation route config
+│   │   ├── ThemeContext.js     # Dark/light mode state
+│   │   └── ContentContext.js   # Shared data-fetching context (all collections)
+│   ├── data/                   # Hand-maintained static config (not generated)
+│   │   ├── contact.js          # Social links
+│   │   ├── routes.js           # Navigation route config
 │   │   ├── about.md            # Personal bio (markdown)
-│   │   ├── changelog.md        # Versioned changelog (markdown)
-│   │   └── resume/
-│   │       ├── positions.js
-│   │       ├── skills.js
-│   │       ├── degrees.js
-│   │       └── certifications.js
+│   │   ├── changelog.md        # Versioned changelog
+│   │   ├── pageMeta.js         # Per-route OG/Twitter metadata
+│   │   └── stats/
+│   │       └── personal.js     # Hand-curated personal stats
 │   ├── layouts/
 │   │   └── Main.js             # Standard page wrapper (Helmet + Navigation + Footer)
+│   ├── lib/
+│   │   ├── supabaseClient.js   # Supabase client + toStorageUrl / toStorageImages helpers
+│   │   └── api/                # Per-entity fetchers (snake_case → camelCase mapping)
+│   │       ├── books.js
+│   │       ├── sports.js
+│   │       ├── treks.js
+│   │       ├── projects.js
+│   │       ├── instagram.js
+│   │       ├── blogs.js
+│   │       ├── resume.js
+│   │       └── now.js
+│   ├── hooks/                  # useBooks, useSports, useTreks, useProjects, etc.
 │   ├── pages/
 │   │   ├── Index.js, About.js, Resume.js, Contact.js, Projects.js
 │   │   ├── Stats.js            # Aggregate life stats
@@ -75,21 +75,24 @@ personal-site/
 │   │   ├── Sports.js           # Marathon log (tabbed: Statistics / Interactive / Cards)
 │   │   ├── Treks.js            # Fort trek log (tabbed: Statistics / Cards)
 │   │   ├── Instagram.js        # Archived Instagram gallery
-│   │   ├── Now.js              # Monthly activity log (CMS-backed)
+│   │   ├── Now.js              # Monthly activity log (Supabase-backed)
 │   │   ├── Challenges.js       # Challenges hub
 │   │   ├── OneHundredDays.js   # 100 Days To Offload tracker
 │   │   ├── Changelog.js        # Markdown-rendered changelog
 │   │   ├── InteractiveMe.js    # Shuffled image timeline (sports + treks)
 │   │   ├── MindMap.js          # Interactive radial SVG mind map
-│   │   └── NotFound.js
+│   │   ├── NotFound.js
+│   │   └── admin/              # Protected admin CRUD editor
 │   ├── static/
 │   │   └── css/                # SCSS (supplementary to Tailwind)
 │   └── utils/
-│       └── parseNowCms.js      # Async parser: reads CMS markdown → structured Now data
-├── docs/                       # Project documentation
+├── functions/
+│   └── _middleware.js          # Cloudflare Pages Function: injects route-level OG meta
+├── supabase/
+│   └── migrations/             # SQL schema + RLS policies
 ├── scripts/
-│   ├── sync-cms-to-data.js     # One-way sync: cms-content markdown → src/data/*.js
-│   └── seed-cms-content.js     # Recovery tool: regenerates markdown FROM JS files
+│   ├── import-to-supabase.mjs  # One-time seed: imports data into Supabase (service-role)
+│   └── upload-images-to-supabase.mjs  # One-time bulk image upload to Storage media bucket
 └── package.json
 ```
 
@@ -117,45 +120,57 @@ All routes are lazy-loaded via `React.lazy` + `Suspense` in `App.js`:
 | `/changelog` | Changelog |
 | `/interactive-me` | InteractiveMe |
 | `/mindmap` | MindMap |
+| `/admin/*` | Admin (protected) |
 | `*` | NotFound |
 
 ---
 
 ## Data Layer
 
-### Generated JS data files (`src/data/`)
+### Supabase (canonical content store)
 
-All content pages (Sports, Treks, Books, Resume, Projects, Instagram, Challenges) import static JS arrays/objects. These files are **generated** from `src/cms-content/` markdown by `npm run cms:sync` (run automatically by the `prebuild` hook and verified by CI). Content is updated by editing markdown — via Decap CMS at `/cms/` or directly — never by editing the JS files.
+All dynamic content lives in Supabase Postgres. The browser fetches live data on every page visit via `@supabase/supabase-js` using the publishable key. Row-Level Security (RLS) is enabled on every table:
 
-**Image arrays** in sports, treks, and instagram all use the `slideImages` field:
-```js
-slideImages: [
-  { url: `${process.env.PUBLIC_URL}/images/treks/fort_1.jpg`, caption: "Slide 1" },
-]
-```
+- `SELECT` is open to `anon` + `authenticated` (public reads).
+- `INSERT / UPDATE / DELETE` require the owner `auth.uid()` (admin only).
 
-### Runtime-loaded Now page (`src/cms-content/now/`)
+Tables: `books`, `sports`, `treks`, `projects`, `instagram`, `blogs` (100 Days), `resume_positions`, `resume_degrees`, `resume_certifications`, `resume_skills`, `now_meta`, `now_months`.
 
-The Now page (`/now`) reads its markdown directly at runtime — there is no generated JS file for it:
-- `src/cms-content/now/meta.md` — daily rituals and site meta
-- `src/cms-content/now/months/*.md` — one file per month
+### Data-access layer (`src/lib/api/*.js`)
 
-`src/utils/parseNowCms.js` reads these files asynchronously at runtime and converts them to the structured format consumed by `NowDocument` and its subsection components.
+Each fetcher maps Postgres `snake_case` columns → the camelCase shape presentational components expect. Image paths stored in the DB as `/images/…` are resolved to full Supabase Storage CDN URLs via `toStorageUrl()` / `toStorageImages()` in `src/lib/supabaseClient.js`.
+
+### Hooks (`src/hooks/`)
+
+`useBooks`, `useSports`, `useTreks`, `useProjects`, `useInstagram`, `useBlogs`, `useResume`, `useNow` — each returns `{ data, loading, error }`. Shared via `ContentContext` so multiple components on the same page don't fire duplicate requests.
+
+### Hand-maintained static files (`src/data/`)
+
+These are **not** fetched from Supabase and are edited directly:
+
+| File | Purpose |
+|---|---|
+| `contact.js` | Social/contact links |
+| `routes.js` | Navigation route config |
+| `about.md` | Personal bio (markdown) |
+| `changelog.md` | Versioned changelog |
+| `pageMeta.js` | Per-route OG/Twitter metadata consumed by `Main.js` and `functions/_middleware.js` |
+| `stats/personal.js` | Hand-curated personal stats |
+
+---
+
+## Images / Storage
+
+All sport, trek, Instagram, and project images are stored in the Supabase `media` Storage bucket (public). The DB stores relative paths (`/images/sports/foo.jpg`); `toStorageUrl()` prepends the bucket base URL at read time. Static assets that remain in `public/images/` are limited to favicons, `me.jpg`, `logo.png`, and `logo.svg`.
 
 ---
 
 ## Styling
 
-Tailwind CSS is the primary styling system. SCSS in `src/static/css/` provides supplementary base styles, typography variables, and component-level overrides that are difficult to express in Tailwind alone.
-
-Dark mode is managed via `ThemeContext` and toggled by `FloatingToggle` (bottom-right corner on all pages). The `dark:` Tailwind variant is used throughout.
+Tailwind CSS is the primary styling system. SCSS in `src/static/css/` provides supplementary base styles, typography variables, and component-level overrides. Dark mode is managed via `ThemeContext` and toggled by `FloatingToggle`.
 
 ---
 
-## Known Data Inconsistencies (Planned Future Work)
+## Social-Share Meta
 
-| Inconsistency | Files | Status |
-|---|---|---|
-| Date formats: Treks use `DD-MM-YYYY`, Sports use `"Month D, YYYY"` | `treks.js`, `sports.js` | Deferred |
-| Distance units inconsistent in Sports: `"10K"` vs `"21 Kms"` | `sports.js` | Deferred |
-| Books `category` is a comma-separated string; `tags` is an array | `books.js` | Deferred |
+`functions/_middleware.js` (Cloudflare Pages Function) runs server-side on every request and injects per-route `og:*` / `twitter:*` tags from `src/data/pageMeta.js`, ensuring social crawlers see correct metadata without a server-rendered React pass.

@@ -2,14 +2,11 @@
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your machine:
-
-- **Node.js**: v14 or higher. You can download it from [nodejs.org](https://nodejs.org/).
-- **npm** (Node Package Manager) or **yarn**.
+- **Node.js** v20 or higher ([nodejs.org](https://nodejs.org/))
+- **npm** (bundled with Node.js)
+- A **Supabase** project with the schema applied (see `supabase/migrations/`)
 
 ## Getting Started
-
-Follow these steps to get the project running locally:
 
 ### 1. Clone the Repository
 
@@ -20,41 +17,55 @@ cd personal-site
 
 ### 2. Install Dependencies
 
-Install the necessary packages using npm:
-
 ```bash
 npm install
 ```
 
-Or if you prefer yarn:
+### 3. Configure Environment Variables
 
 ```bash
-yarn install
+cp .env.example .env
 ```
 
-### 3. Start Development Server
+Open `.env` and fill in:
 
-Run the app in development mode:
+| Variable | Where to find it |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase Dashboard → Project Settings → API → Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase Dashboard → Project Settings → API → Project API keys → Publishable |
+| `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → Project API keys → service_role (**server-only, never commit**) |
+
+`SUPABASE_SERVICE_ROLE_KEY` is only needed when running the one-time import scripts (`npm run data:import`, `npm run images:upload`). It is never used by the browser.
+
+### 4. Start Development Server
 
 ```bash
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser. The page will reload when you make changes.
+Open [http://localhost:3000](http://localhost:3000). The page reloads on changes.
 
-## Troubleshooting
+## One-Time Data Import (first setup only)
 
-### Common Issues
+If setting up a fresh Supabase project, run the seed scripts once:
 
-- **`npm install` fails**: Ensure you have the correct Node.js version. Try deleting `node_modules` and `package-lock.json` and running `npm install` again.
-- **Port 3000 is busy**: React will ask if you want to run on a different port. Confirm with `Y`.
+```bash
+npm run data:import       # imports all content into Supabase tables
+npm run images:upload     # uploads public/images/** to the media Storage bucket
+```
+
+Both scripts require `SUPABASE_SERVICE_ROLE_KEY` to be set in `.env`. They are safe to re-run (upsert-based).
 
 ## Building for Production
-
-To build the app for production to the `build` folder:
 
 ```bash
 npm run build
 ```
 
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Output goes to `build/`. See [deployment.md](deployment.md) for Cloudflare Pages setup.
+
+## Troubleshooting
+
+- **Blank pages / "not set" warning in console**: `VITE_SUPABASE_URL` or `VITE_SUPABASE_PUBLISHABLE_KEY` is missing from `.env`. Vite bakes these at build time — restart the dev server after editing `.env`.
+- **`npm install` fails**: Delete `node_modules` and `package-lock.json`, then retry.
+- **Port 3000 is busy**: Vite will prompt to use an alternate port — confirm with `Y`.

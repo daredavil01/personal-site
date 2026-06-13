@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v9.1.2] — 2026-06-13
+
+### Changed
+
+- **Docs** (`docs/`): Removed 6 obsolete documents (`cms-data-flow.md`, `cms-github-oauth-setup.md`, `customization.md`, `improvement-plan.md`, `supabase-migration-plan.md`, `features.md`). Rewrote `architecture.md`, `deployment.md`, and `setup_guide.md` to reflect the current Supabase-backed stack. Kept `contributing.md` unchanged.
+
+---
+
 ## [v9.1.1] — 2026-06-13
 
 ### Changed
