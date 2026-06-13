@@ -3,6 +3,7 @@
 ## Project Overview
 
 React 18 single-page application (personal portfolio). Key stack:
+
 - **React 18** with `react-router-dom` v6 for routing
 - **react-helmet-async** for per-page `<head>` metadata
 - **Tailwind CSS** for styling
@@ -54,6 +55,7 @@ React 18 single-page application (personal portfolio). Key stack:
   - **Patch** (e.g. `v5.1.0` → `v5.1.1`): bug fixes, copy/style tweaks, metadata changes, documentation updates.
 
 #### Weekly Minor Version Rule
+
 - Create **at most one minor version per calendar week** (Monday–Sunday).
 - If a minor change is made and a minor version already exists for the current week: **do not bump** — instead update the date on the existing version header to today and append the new change entries to that block.
 - Only create a new minor version if no minor version exists yet for the current week, or if the previous change was a major bump.
@@ -89,21 +91,25 @@ Follow this exact format (taken from the existing entries):
 Before placing any image in `public/images/sports/` or `public/images/treks/`, compress it to keep page load fast.
 
 **Option A — `sharp-cli` (Node.js, recommended):**
+
 ```bash
 npx sharp-cli --input path/to/image.jpg --output public/images/sports/ --format jpeg --quality 80
 ```
 
 **Option B — ImageMagick:**
+
 ```bash
 convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" public/images/sports/output.jpg
 ```
 
 **Option C — convert HEIC → JPEG first (iPhone photos):**
+
 ```bash
 convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" public/images/sports/output.jpeg
 ```
 
 **Target guidelines:**
+
 - Max width: 1200px (landscape), 900px (portrait)
 - Quality: 75–85%
 - Target file size: ≤150 KB per image; **hard cap 300 KB** (mobile-network audience)
@@ -128,6 +134,7 @@ When pushing a new month's update:
 3. All older month files remain unchanged — the page sorts and archives them automatically.
 
 **Questions to ask before editing:**
+
 - "What month and year is this update for? (e.g., May, 2026)"
 - "What are the bullet-point activities for this month?"
 
@@ -151,6 +158,7 @@ Ask the user these questions to collect all required fields:
 10. `tags` — "List relevant tags (comma-separated, e.g., Technology, Non-Fiction, History)"
 
 **Mechanical steps:**
+
 - `id` = highest existing `id` in `src/cms-content/books/` + 1 (ids must be unique)
 - Create `src/cms-content/books/{id}-{slugified-title}.md` with the fields as YAML frontmatter (omit empty optional fields entirely; see existing files)
 - Run `npm run cms:sync` and commit both the markdown and `src/data/books.js`
@@ -176,11 +184,13 @@ Ask the user these questions:
 9. Images — "How many photos do you have? Please share them." (compress before adding — see Image Compression above)
 
 **Image naming convention:**
+
 - Format: `[event-abbreviation]_[YYYY]_[N].jpeg`
 - Example: `tum_2026_1.jpeg`, `tum_2026_2.jpeg`
 - Place in: `public/images/sports/`
 
 **Mechanical steps:**
+
 - `id` = highest existing `id` in `src/cms-content/sports/` + 1
 - Create `src/cms-content/sports/{id}-{slugified-title}.md` with the fields as YAML frontmatter
 - `slideImages` is a YAML list of `{ url: /images/sports/[filename], caption: "Slide N" }` (plain paths — the sync script adds the `PUBLIC_URL` prefix)
@@ -203,11 +213,13 @@ Ask the user these questions:
 6. Images — "How many photos do you have? Please share them." (compress before adding — see Image Compression above)
 
 **Image naming convention:**
+
 - Format: `[fort-name-lowercase-underscores]_[N].jpg`
 - Example: `tikona_1.jpg`, `panhala_pawankhind_1.jpg`
 - Place in: `public/images/treks/`
 
 **Mechanical steps:**
+
 - `id` = highest existing `id` in `src/cms-content/treks/` + 1
 - Create `src/cms-content/treks/{id}-{slugified-fort-name}.md` with the fields as YAML frontmatter
 - `slideImages` is a YAML list of `{ url: /images/treks/[filename], caption: "Slide N" }`
@@ -226,3 +238,31 @@ Ask the user these questions:
   (YYYY-MM-DD), `language` (English/Marathi), `blog_tags` (list),
   `challenge_id: 100_days_to_offload`
 - Run `npm run cms:sync` and commit both files
+
+---
+
+### Micro-Blog Page
+
+**Canonical store:** the Supabase `microblog` table — NOT markdown. This page
+is a bulk-imported social archive, so it lives directly in Postgres (with
+server-side full-text search) rather than the `src/cms-content/` markdown
+pipeline. There is no generated JS data file.
+
+- **Schema:** `supabase/migrations/0002_microblog.sql` (`microblog` table +
+  `search_tsv` GIN index + RLS + `microblog_tag_facets()` RPC). Apply it via the
+  Supabase SQL editor or `supabase db push` before importing.
+- **Seeding from the Tumblr export:** `npm run microblog:import` reads
+  `knowledge_base/tumblr_posts.json`, cleans each post (HTML-entity decode,
+  `<br>` → newline, post_type mapping), and **upserts on `(source, source_id)`**.
+  It is idempotent (re-runnable, no duplicates) and **non-destructive** — it
+  never clears the table, so admin-authored `manual` posts survive re-imports.
+  Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env`.
+- **Adding posts by hand:** use the admin dashboard → **Micro Blog** tab
+  (`src/pages/admin/MicroblogManager.js`). New posts default to `source: manual`
+  with a null `source_id`.
+- **`source` column** (`tumblr` | `instagram` | `manual`) lets other archives
+  (e.g. an Instagram text export) share this table later.
+- **Photo posts:** ~59% of Tumblr posts are photos whose images aren't in the
+  repo; `image_url` is currently blank. To backfill, upload the Tumblr export's
+  `media/` folder to the `media` storage bucket and set each row's `image_url`
+  (the source filename is `<source_id>.png`).

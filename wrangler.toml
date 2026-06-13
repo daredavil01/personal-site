@@ -7,6 +7,7 @@ pages_build_output_dir = "build"
 [vars]
 VITE_SUPABASE_URL = "https://xjqbvvurlmbslikiukdm.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8FUmeJKKuTHvy3JFNPLfnQ_9TY6P2GG"
+VITE_SUPABASE_ANON_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcWJ2dnVybG1ic2xpa2l1a2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzMTUwNTYsImV4cCI6MjA5Njg5MTA1Nn0.5mfUNQFJCgSxfeB_mNU9ifsRLbIcVS9bt4EcNt80xpg"
 
 # SUPABASE_SERVICE_ROLE_KEY is a secret — never put it here.
 # Set it once via the CLI:

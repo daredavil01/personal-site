@@ -9,6 +9,47 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.1.1] — 2026-06-13
+
+### Changed
+
+- **Admin Dashboard** (`src/pages/admin/Dashboard.js`): Active tab is now synced to the URL via `?tab=<key>` query param using `useSearchParams`. Deep-linking to a specific tab (e.g. `/admin?tab=__microblog`) now works correctly, and the browser back/forward buttons navigate between tabs.
+
+### Added
+
+- **Share, Copy, and Permalink in detail modals** (`src/components/Treks/TrekDetailsModal.js`, `src/components/Sports/MarathonDetailsModal.js`, `src/components/Books/DigitalLibrary.js`, `src/pages/OneHundredDays.js`, `src/components/MicroBlog/PostModal.js`): Every detail modal footer now has three actions — **Share** (Web Share API on mobile, clipboard fallback on desktop), **Copy** (always clipboard), and **Permalink ↗** (opens the dedicated detail page). All show a 2-second confirmation on success.
+
+---
+
+## [v10.1.0] — 2026-06-13
+
+### Added
+
+- **Micro Blog tabs** (`src/pages/MicroBlog.js`): Split the page into a **Posts** tab (existing search/filter UI) and a **Stats** tab showing total post count, date range, unique tag count, post-type breakdown (text/quote/photo) with percentage bars, source breakdown, and top 15 tags ranked by post count.
+- **Sort controls** (`src/pages/MicroBlog.js`, `src/lib/api/microblog.js`): Added **Newest / Oldest / Shuffle** sort options to the Posts tab. Date sorts are server-side (Postgres `ORDER BY date`); Shuffle does a client-side Fisher-Yates randomisation — clicking Shuffle again re-shuffles without a new network request.
+- **`getMicroblogStats()`** (`src/lib/api/microblog.js`): New API function that fires 8 parallel Supabase queries to build the Stats panel data.
+- **Micro Blog post permalinks** (`src/pages/MicroBlogPost.js`, `src/App.js`): Added `/micro-blog/:id` as a dedicated page for individual posts — full text, all tags, source info, and a back link to the archive.
+- **Per-post OG meta** (`functions/_middleware.js`): The Cloudflare Pages middleware now detects `/micro-blog/:id`, fetches the post from Supabase REST at the edge (using `SUPABASE_URL` + `SUPABASE_ANON_KEY` env vars set in the CF Pages dashboard), and injects per-post title and description into OG/Twitter meta tags for correct social-share previews.
+- **Permalink links** (`src/components/MicroBlog/PostCard.js`, `src/components/MicroBlog/PostModal.js`): Each post card now shows a subtle ↗ permalink; the detail modal shows a "Permalink ↗" link in the footer.
+- **Detail pages for all content types** (`src/pages/TrekPost.js`, `SportPost.js`, `BookPost.js`, `ProjectPost.js`, `BlogPost.js`): Added individual permalink pages for treks (`/treks/:id`), races (`/sports/:id`), books (`/books/:id`), projects (`/projects/:id`), and 100-days posts (`/100-days-to-offload/:id`). Each page has a share button (Web Share API / clipboard fallback), full item details, and a back link. Permalink ↗ links added to all corresponding card/list components.
+- **Share button** (`src/pages/MicroBlogPost.js`, and all new detail pages): Share button in the top-right of every detail page — uses `navigator.share()` on mobile, falls back to clipboard copy with "Copied!" confirmation.
+- **Content Tags section** (`src/pages/Stats.js`): New full-width bento card on the Stats page showing all book tags, all 100-days blog tags, and top-40 microblog tags — each with post counts, loaded from their respective data sources.
+
+---
+
+## [v10.0.0] — 2026-06-13
+
+### Added
+
+- **Micro Blog page** (`src/pages/MicroBlog.js`, `src/components/MicroBlog/`): New `/micro-blog` page — a searchable, paginated archive of short posts imported from Tumblr (1,600+ posts). Server-side full-text search (Postgres `tsvector`), tag/source/type filters, load-more pagination, and a detail modal. Added to the main nav (`src/data/routes.js`) and per-route meta (`src/data/pageMeta.js`).
+- **`microblog` table** (`supabase/migrations/0002_microblog.sql`): New Supabase table with a generated `search_tsv` full-text index (GIN), tags/date indexes, RLS (public read / owner write), and a `microblog_tag_facets()` RPC for the filter UI. Carries a `source` column so Instagram can be added later.
+- **Tumblr importer** (`scripts/import-tumblr-microblog.mjs`, `npm run microblog:import`): Re-runnable script that cleans the Tumblr export (`knowledge_base/tumblr_posts.json`) and upserts on `(source, source_id)` — idempotent and non-destructive to admin-authored posts.
+- **Micro Blog data API** (`src/lib/api/microblog.js`): `searchMicroblog()` (server-side full-text search + tag/source/type filters + pagination), `getMicroblogTagFacets()`, and CRUD via the shared `createResource` factory.
+- **Admin Micro Blog manager** (`src/pages/admin/MicroblogManager.js`, `src/pages/admin/Dashboard.js`): New admin tab with a server-side searched/paginated list and a create/edit/delete form for adding posts manually.
+- **Shareable filters** (`src/pages/MicroBlog.js`): The search query, tags, source, and type filters are mirrored into the URL query string (`?q=&tags=&source=&type=`) and initialise from it, so filtered views are bookmarkable and survive a reload.
+
+---
+
 ## [v9.1.6] — 2026-06-13
 
 ### Fixed
