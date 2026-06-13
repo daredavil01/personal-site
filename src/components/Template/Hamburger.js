@@ -107,9 +107,8 @@ const Hamburger = () => {
             ))}
           </div>
           <a
-            href={`${process.env.PUBLIC_URL || ''}/sanket-tambare-resume.pdf`}
+            href={`https://flowcv.com/resume/4wn6onnkg9`}
             target="_blank"
-            download
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-stone-200 rounded font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-700 transition-all"
           >

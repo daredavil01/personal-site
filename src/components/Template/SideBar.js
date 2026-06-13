@@ -54,9 +54,8 @@ const SideBar = () => {
             </Link>
           )}
           <a
-            href={`${process.env.PUBLIC_URL || ''}/sanket-tambare-resume.pdf`}
+            href={`https://flowcv.com/resume/4wn6onnkg9`}
             target="_blank"
-            download
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-2 bg-stone-900 dark:bg-stone-200 text-white dark:text-stone-950 border border-stone-900 dark:border-stone-200 font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-800 dark:hover:bg-stone-300 transition-all rounded-sm"
           >
