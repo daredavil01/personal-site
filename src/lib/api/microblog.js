@@ -41,13 +41,16 @@ const microblog = createResource({
 
 /**
  * Server-side, paginated full-text search over the microblog table.
+ * sort: "date_desc" (default) | "date_asc" | "random" (random is handled
+ * client-side — this function always fetches in date order).
  * @returns {Promise<{ rows: object[], count: number }>}
  */
 export async function searchMicroblog({
-  query = "", tags = [], source = "", type = "", page = 0, pageSize = 24,
+  query = "", tags = [], source = "", type = "", page = 0, pageSize = 24, sort = "date_desc",
 } = {}) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
+  const ascending = sort === "date_asc";
 
   let q = supabase.from("microblog").select(COLUMNS, { count: "exact" });
 
@@ -60,8 +63,8 @@ export async function searchMicroblog({
   if (type) q = q.eq("post_type", type);
 
   q = q
-    .order("date", { ascending: false })
-    .order("id", { ascending: false })
+    .order("date", { ascending })
+    .order("id", { ascending })
     .range(from, to);
 
   const { data, error, count } = await q;
@@ -74,6 +77,30 @@ export async function getMicroblogTagFacets() {
   const { data, error } = await supabase.rpc("microblog_tag_facets");
   if (error) throw error;
   return (data ?? []).map((r) => ({ tag: r.tag, count: Number(r.count) }));
+}
+
+/**
+ * Aggregate stats for the stats tab: total count, date range, type breakdown,
+ * source breakdown. Tag facets come from the component's existing facets state.
+ */
+export async function getMicroblogStats() {
+  const [totalRes, minDateRes, maxDateRes, textRes, quoteRes, photoRes, tumblrRes, manualRes] = await Promise.all([
+    supabase.from("microblog").select("id", { count: "exact", head: true }),
+    supabase.from("microblog").select("date").order("date", { ascending: true }).limit(1),
+    supabase.from("microblog").select("date").order("date", { ascending: false }).limit(1),
+    supabase.from("microblog").select("id", { count: "exact", head: true }).eq("post_type", "text"),
+    supabase.from("microblog").select("id", { count: "exact", head: true }).eq("post_type", "quote"),
+    supabase.from("microblog").select("id", { count: "exact", head: true }).eq("post_type", "photo"),
+    supabase.from("microblog").select("id", { count: "exact", head: true }).eq("source", "tumblr"),
+    supabase.from("microblog").select("id", { count: "exact", head: true }).eq("source", "manual"),
+  ]);
+  return {
+    total: totalRes.count ?? 0,
+    minDate: minDateRes.data?.[0]?.date ?? null,
+    maxDate: maxDateRes.data?.[0]?.date ?? null,
+    byType: { text: textRes.count ?? 0, quote: quoteRes.count ?? 0, photo: photoRes.count ?? 0 },
+    bySource: { tumblr: tumblrRes.count ?? 0, manual: manualRes.count ?? 0 },
+  };
 }
 
 export default microblog;
