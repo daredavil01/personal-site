@@ -9,6 +9,17 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.1.2] — 2026-06-14
+
+### Added
+- **`sitemap.xml`** (`public/sitemap.xml`): Static XML sitemap covering all 17 public routes with priorities and change frequencies, served at the site root for search engine discovery.
+- **`agents.md`** (`public/agents.md`): AI-agent discovery file (llms.txt-style) with rich context about Sanket Tambare — professional background, site sections, social links, tech stack, and content inventory.
+
+### Changed
+- **`robots.txt`** (`public/robots.txt`): Added `Disallow: /admin/`, explicit AI-crawler Allow blocks (GPTBot, Claude-Web, CCBot, anthropic-ai, PerplexityBot), and a `Sitemap:` directive pointing to the new sitemap.xml.
+
+---
+
 ## [v10.1.1] — 2026-06-13
 
 ### Changed
