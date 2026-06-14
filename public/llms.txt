@@ -1,0 +1,32 @@
+# Sanket Tambare — Personal Site
+
+> Software Development Engineer, endurance runner, fort-trekker, and writer based in Pune, India. This site is a personal portfolio and digital archive — books read, races run, treks completed, blog posts published, and projects shipped.
+
+## About
+
+- [About](https://daredavil.pages.dev/about): Full-stack software developer, ultra-marathoner, fort-trekker, and writer. Background, interests, and what drives him.
+- [Now](https://daredavil.pages.dev/now): What Sanket is working on right now — current projects, daily rituals, books in progress, and ideas being explored. Updated monthly.
+- [Resume](https://daredavil.pages.dev/resume): Professional background — full-stack engineer with experience in cloud infrastructure, AI integration, and enterprise software. Work history, education, and certifications.
+- [Contact](https://daredavil.pages.dev/contact): Contact information for collaboration on technology, endurance sports, or research.
+
+## Content
+
+- [Books](https://daredavil.pages.dev/books): Interactive catalog of 100+ books read, with reviews spanning design, philosophy, technology, and Marathi literature.
+- [Sports / Races](https://daredavil.pages.dev/sports): Race logs, marathon results, and performance stats from 10 K to Full Marathon — tracking every kilometre from 2023 onwards.
+- [Treks](https://daredavil.pages.dev/treks): Trek log across Maharashtra's historic forts and mountain trails — with statistics, difficulty breakdowns, yearly timelines, and detailed route stories.
+- [Projects](https://daredavil.pages.dev/projects): Full-stack experiments and production apps — social platforms, AI-powered tools, and web applications built with modern tech stacks.
+- [100 Days To Offload](https://daredavil.pages.dev/100-days-to-offload): Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking and interactive filtering of every post.
+- [Micro Blog](https://daredavil.pages.dev/micro-blog): Searchable archive of 1 600+ short posts, quotes, and captures imported from Tumblr — years of thoughts, one micro-post at a time.
+- [Instagram](https://daredavil.pages.dev/instagram): Curated visual archive of captured moments, textures, and stories — preserved from before the Instagram account was deleted.
+
+## Meta
+
+- [Stats](https://daredavil.pages.dev/stats): Metrics of Intent — a quantitative deep-dive into a year of technical growth, artistic captures, and consistent physical output.
+- [Challenges](https://daredavil.pages.dev/challenges): Tracking personal challenges like #100DaysToOffload — public commitment to consistent creative output.
+- [Interactive Me](https://daredavil.pages.dev/interactive-me): Shuffled, image-first visual timeline of every marathon run and mountain trek.
+- [Mind Map](https://daredavil.pages.dev/mindmap): Interactive mindmap of everything on the site — books, marathons, treks, projects, and blogs.
+- [Changelog](https://daredavil.pages.dev/changelog): Transparent record of every meaningful change made to this website.
+
+## Optional
+
+- [agents.md](https://daredavil.pages.dev/agents.md): Extended structured context about this site intended for AI agents, LLMs, and automated crawlers.
