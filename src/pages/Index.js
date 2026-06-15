@@ -2,6 +2,16 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Main from "../layouts/Main";
 import LifeStats from "../components/Index/LifeStats";
+import OneMinuteIntro from "../components/common/OneMinuteIntro";
+
+const SectionHeader = ({ label }) => (
+  <div className="flex items-center gap-4 mb-6">
+    <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
+      {label}
+    </p>
+    <div className="flex-1 h-px bg-stone-100 dark:bg-stone-800" />
+  </div>
+);
 
 const features = [
   {
@@ -91,33 +101,48 @@ const Index = () => (
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {features.map((item) => (
-          <div key={item.path} className="p-8 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl hover:border-secondary dark:hover:border-secondary transition-colors group flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-secondary opacity-60 group-hover:opacity-100 transition-opacity">
-                  {item.icon}
-                </span>
-                <h3 className="font-headline text-xl font-bold uppercase tracking-widest text-stone-800 dark:text-stone-200">
-                  <Link to={item.path} className="no-underline hover:text-secondary transition-colors">{item.title}</Link>
-                </h3>
-              </div>
-              <p className="font-body text-stone-500 dark:text-stone-400 leading-relaxed text-sm">
-                {item.desc}
-              </p>
-            </div>
-            <div className="mt-6">
-              <Link to={item.path} className="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary flex items-center gap-2 group-hover:gap-4 transition-all no-underline">
-                Explore Section
-                <span className="material-symbols-outlined text-[14px]">arrow_right_alt</span>
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-
       <LifeStats />
+
+      <section>
+        <SectionHeader label="In 1 Minute" />
+        <OneMinuteIntro className="font-body text-lg text-stone-600 dark:text-stone-300 max-w-2xl leading-relaxed mb-6" />
+        <Link
+          to="/about"
+          className="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary inline-flex items-center gap-2 hover:gap-4 transition-all no-underline"
+        >
+          Read the full story
+          <span className="material-symbols-outlined text-[14px]">arrow_right_alt</span>
+        </Link>
+      </section>
+
+      <section>
+        <SectionHeader label="Explore" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((item) => (
+            <div key={item.path} className="p-8 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl hover:border-secondary dark:hover:border-secondary transition-colors group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="material-symbols-outlined text-secondary opacity-60 group-hover:opacity-100 transition-opacity">
+                    {item.icon}
+                  </span>
+                  <h3 className="font-headline text-xl font-bold uppercase tracking-widest text-stone-800 dark:text-stone-200">
+                    <Link to={item.path} className="no-underline hover:text-secondary transition-colors">{item.title}</Link>
+                  </h3>
+                </div>
+                <p className="font-body text-stone-500 dark:text-stone-400 leading-relaxed text-sm">
+                  {item.desc}
+                </p>
+              </div>
+              <div className="mt-6">
+                <Link to={item.path} className="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary flex items-center gap-2 group-hover:gap-4 transition-all no-underline">
+                  Explore Section
+                  <span className="material-symbols-outlined text-[14px]">arrow_right_alt</span>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-4 p-12 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-2xl text-center">
         <h2 className="font-headline text-3xl font-black mb-6 text-stone-900 dark:text-stone-100">Let&apos;s build the future together.</h2>

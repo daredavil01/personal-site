@@ -6,33 +6,19 @@
 
 /* Wrapper */
 
+	// NOTE: The #wrapper element (src/layouts/Main.js) is laid out entirely by
+	// its Tailwind utility classes (`flex flex-col lg:flex-row max-w-[1440px]
+	// mx-auto px-4 md:px-8 pt-24 gap-8`). The original HTML5UP rules below set
+	// `display`/`flex-direction`/`padding`/`width` via an ID selector, which
+	// outranks those utilities and — at the skel `large` breakpoint (≤1280px) —
+	// forced `display: block`, collapsing the sidebar + content columns into an
+	// overlapping block stack on every page. Layout is left to Tailwind now;
+	// only the menu-dim opacity transition is kept.
 	#wrapper {
-		@include vendor('display', 'flex');
-		@include vendor('flex-direction', 'row-reverse');
 		@include vendor('transition', 'opacity #{_duration(menu)} ease');
-		margin: 0 auto;
-		max-width: 100%;
 		opacity: 1;
-		padding: (_size(section-spacing) * 1.5);
-		width: 90em;
 
 		body.is-menu-visible & {
 			opacity: 0.15;
-		}
-
-		@include breakpoint(xlarge) {
-			padding: _size(section-spacing);
-		}
-
-		@include breakpoint(large) {
-			display: block;
-		}
-
-		@include breakpoint(small) {
-			padding: _size(section-spacing-small);
-		}
-
-		body.single & {
-			display: block;
 		}
 	}

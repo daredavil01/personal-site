@@ -83,6 +83,15 @@ export async function getMicroblogPost(id) {
   return fromRow(data);
 }
 
+/** Lightweight total post count (no rows shipped) for summary widgets. */
+export async function getMicroblogCount() {
+  const { count, error } = await supabase
+    .from("microblog")
+    .select("id", { count: "exact", head: true });
+  if (error) throw error;
+  return count ?? 0;
+}
+
 /** Distinct tags with post counts, for the filter UI. */
 export async function getMicroblogTagFacets() {
   const { data, error } = await supabase.rpc("microblog_tag_facets");
