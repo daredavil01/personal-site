@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSports, useTreks, useBooks, useBlogs, useProjects } from '../../context/ContentContext';
 import ContactIcons from '../Contact/ContactIcons';
+import OneMinuteIntro from '../common/OneMinuteIntro';
 
 const useCountUp = (target, duration, active) => {
   const [count, setCount] = useState(0);
@@ -161,13 +162,7 @@ const AboutDocument = () => {
 
       <section>
         <SectionHeader label="In 1 Minute" />
-        <p className="font-body text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-8">
-          Software developer by day, ultra-marathoner and fort-trekker by adventure. I care deeply about
-          the intersection of technology, society, and public policy — and I write about it weekly in
-          my Substack newsletter <em>The Wanderer's Technical Anecdotes</em>, as part of the 100 Days
-          to Offload challenge. I also host <em>Dare Write's</em>, a podcast on book reviews,
-          technology, and travelogues. I read voraciously in both English and Marathi.
-        </p>
+        <OneMinuteIntro className="font-body text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-8" />
         <div ref={statsRef} className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {statCards.map((s) => (
             <Link

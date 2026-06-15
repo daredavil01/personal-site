@@ -50,7 +50,7 @@ const Main = (props) => {
 
         <div
           id="wrapper"
-          className="flex flex-col lg:flex-row pt-24 px-4 md:px-8 max-w-[1440px] mx-auto w-full gap-8"
+          className="flex flex-col lg:flex-row-reverse pt-24 px-4 md:px-8 max-w-[1440px] mx-auto w-full gap-8"
         >
           <SideBar />
           <main id="main" className="flex-grow min-w-0 py-8 min-h-[50vh]">

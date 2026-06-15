@@ -9,6 +9,28 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.2.1] — 2026-06-15
+
+### Fixed
+
+- **Sidebar/content overlap at desktop widths on every page** (`src/static/css/layout/_wrapper.scss`, `src/layouts/Main.js`): The vendored HTML5UP `#wrapper` rule styled the layout container by **ID** (`display: flex; flex-direction: row-reverse`) and forced `display: block` at the skel `large` breakpoint (`≤1280px`), which outranks the Tailwind layout utilities on the same element. Between `lg` (1024px) and 1280px the sidebar (profile / about / résumé) and the main content collapsed into an overlapping block stack. Removed the legacy layout declarations and set `lg:flex-row-reverse` on the wrapper in `Main.js` so Tailwind owns the layout — the sidebar keeps its original right-hand column position across all desktop widths, without the overlap.
+
+---
+
+## [v10.2.0] — 2026-06-15
+
+### Changed
+
+- **Home page layout** (`src/pages/Index.js`): Reordered the page so the **Life in Numbers** stats band and a new **In 1 Minute** intro now sit directly under the hero, with the section-navigation cards moved below them under a new **Explore** header.
+- **Life in Numbers** (`src/components/Index/LifeStats.js`): Expanded from 4 to 6 stat cards — added **Projects Built** and **Micro Posts** (live Supabase count) alongside Books, On Foot, Treks, and Posts. Cards use the compact single-row strip styling from the About page — 3-up on mobile, all six in one line on tablet/desktop.
+
+### Added
+
+- **`OneMinuteIntro`** (`src/components/common/OneMinuteIntro.js`): Shared "In 1 Minute" intro blurb, now rendered on both the home page and the About page (`src/components/About/AboutDocument.js`) so the two never drift.
+- **`getMicroblogCount()`** (`src/lib/api/microblog.js`): Lightweight head-only Supabase count of micro-blog posts, used by the home-page stats band.
+
+---
+
 ## [v10.1.2] — 2026-06-14
 
 ### Added
