@@ -13,7 +13,7 @@ patch for fixes and tweaks.
 
 ### Fixed
 
-- **Sidebar/content overlap at desktop widths on every page** (`src/static/css/layout/_wrapper.scss`): The vendored HTML5UP `#wrapper` rule styled the layout container by **ID** (`display: flex; flex-direction: row-reverse`) and forced `display: block` at the skel `large` breakpoint (`≤1280px`), which outranks the Tailwind layout utilities on the same element in `src/layouts/Main.js`. Between `lg` (1024px) and 1280px the sidebar (profile / about / résumé) and the main content collapsed into an overlapping block stack. Removed the legacy layout declarations so Tailwind's `flex flex-col lg:flex-row` owns the wrapper — the sidebar now renders as a clean left column across all desktop widths.
+- **Sidebar/content overlap at desktop widths on every page** (`src/static/css/layout/_wrapper.scss`, `src/layouts/Main.js`): The vendored HTML5UP `#wrapper` rule styled the layout container by **ID** (`display: flex; flex-direction: row-reverse`) and forced `display: block` at the skel `large` breakpoint (`≤1280px`), which outranks the Tailwind layout utilities on the same element. Between `lg` (1024px) and 1280px the sidebar (profile / about / résumé) and the main content collapsed into an overlapping block stack. Removed the legacy layout declarations and set `lg:flex-row-reverse` on the wrapper in `Main.js` so Tailwind owns the layout — the sidebar keeps its original right-hand column position across all desktop widths, without the overlap.
 
 ---
 
