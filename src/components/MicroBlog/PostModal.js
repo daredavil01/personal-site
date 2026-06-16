@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-const sourceLabels = { tumblr: "Tumblr", instagram: "Instagram", manual: "Manual" };
+import ExportImageButton from "./ExportImageButton";
+import { sourceLabels } from "./constants";
 
 const PostModal = ({ post, onClose }) => {
   const [copyState, setCopyState] = useState('idle');
@@ -124,6 +124,7 @@ const PostModal = ({ post, onClose }) => {
               <span className="material-symbols-outlined text-sm">{copyState === 'copied' ? 'check' : 'content_copy'}</span>
               {copyState === 'copied' ? 'Copied!' : 'Copy'}
             </div>
+            <ExportImageButton post={post} />
             <Link to={`/micro-blog/${post.id}`} className="font-label text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 hover:text-secondary transition-colors">
               Permalink ↗
             </Link>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { typeColors } from "./constants";
 
 // Legacy theme CSS force-styles bare <button> elements, so clickable cards use
 // div[role="button"] like the rest of the site (see OneHundredDays.js).
@@ -8,12 +9,6 @@ const keyActivate = (fn) => (e) => {
     e.preventDefault();
     fn();
   }
-};
-
-const typeColors = {
-  text: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
-  quote: "bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400",
-  photo: "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
 };
 
 const PostCard = ({ post, onOpen }) => {

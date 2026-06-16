@@ -3,17 +3,11 @@ import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
 import { getMicroblogPost } from "../lib/api/microblog";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
+import ExportImageButton from "../components/MicroBlog/ExportImageButton";
+import { sourceLabels, typeColors } from "../components/MicroBlog/constants";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
-};
-
-const sourceLabels = { tumblr: "Tumblr", instagram: "Instagram", manual: "Manual" };
-
-const typeColors = {
-  text: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
-  quote: "bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400",
-  photo: "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
 };
 
 const MicroBlogPost = () => {
@@ -63,17 +57,20 @@ const MicroBlogPost = () => {
             <span className="material-symbols-outlined text-sm">arrow_back</span>
             Micro Blog
           </Link>
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={handleShare}
-            onKeyDown={keyActivate(handleShare)}
-            className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm">
-              {shareState === "idle" ? "share" : "check"}
-            </span>
-            { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
+          <div className="flex items-center gap-4">
+            {post && <ExportImageButton post={post} />}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleShare}
+              onKeyDown={keyActivate(handleShare)}
+              className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">
+                {shareState === "idle" ? "share" : "check"}
+              </span>
+              { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
+            </div>
           </div>
         </div>
 
