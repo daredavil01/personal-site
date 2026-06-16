@@ -8,6 +8,12 @@ import {
   DEFAULT_META,
   DEFAULT_IMAGE,
   composeTitle,
+  buildMicroblogMeta,
+  buildTrekMeta,
+  buildSportMeta,
+  buildBookMeta,
+  buildBlogMeta,
+  buildProjectMeta,
 } from "../src/data/pageMeta";
 
 function escAttr(str) {
@@ -88,19 +94,24 @@ export async function onRequest(context) {
     if (mbMatch) {
       try {
         const postRes = await fetch(
-          `${supabaseUrl}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date,post_type&limit=1`,
+          `${supabaseUrl}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date,image_url&limit=1`,
           { headers },
         );
         const posts = await postRes.json();
         const post = posts?.[0];
         if (post) {
-          const raw = (post.text || post.title || "").replace(/\s+/g, " ").trim();
-          const snippet = raw.length > 160 ? `${raw.slice(0, 157)}…` : raw;
-          dynamicMeta = {
-            title: `Post · ${post.date}`,
-            description: snippet || "A micro-blog post.",
-            image: DEFAULT_IMAGE,
-          };
+          let imageUrl = DEFAULT_IMAGE;
+          if (post.image_url) {
+            imageUrl = post.image_url.startsWith("http")
+              ? post.image_url
+              : `${supabaseUrl}/storage/v1/object/public/media${post.image_url}`;
+          }
+          dynamicMeta = buildMicroblogMeta({
+            title: post.title,
+            text: post.text,
+            date: post.date,
+            image: imageUrl,
+          });
         }
       } catch (_) {
         // Ignored
@@ -123,11 +134,13 @@ export async function onRequest(context) {
                 : `${supabaseUrl}/storage/v1/object/public/media${firstImg}`;
             }
           }
-          dynamicMeta = {
-            title: `${trek.fort_name} Trek`,
-            description: `A ${trek.endurance_level?.toLowerCase() || "medium"} endurance trek to ${trek.fort_name} fort on ${trek.date}. Trek duration: ${trek.trek_time}.`,
+          dynamicMeta = buildTrekMeta({
+            fortName: trek.fort_name,
+            enduranceLevel: trek.endurance_level,
+            trekTime: trek.trek_time,
+            date: trek.date,
             image: imageUrl,
-          };
+          });
         }
       } catch (_) {
         // Ignored
@@ -150,11 +163,15 @@ export async function onRequest(context) {
                 : `${supabaseUrl}/storage/v1/object/public/media${firstImg}`;
             }
           }
-          dynamicMeta = {
+          dynamicMeta = buildSportMeta({
             title: race.title,
-            description: race.description || `Participated in the ${race.distance} race at ${race.place} on ${race.date}. Finishing time: ${race.time}.`,
+            distance: race.distance,
+            place: race.place,
+            date: race.date,
+            time: race.time,
+            description: race.description,
             image: imageUrl,
-          };
+          });
         }
       } catch (_) {
         // Ignored
@@ -168,11 +185,11 @@ export async function onRequest(context) {
         const books = await bookRes.json();
         const book = books?.[0];
         if (book) {
-          dynamicMeta = {
-            title: `${book.title} by ${book.author}`,
-            description: book.description || `Read ${book.title} by ${book.author} — a review and analysis from Sanket Tambare's personal library.`,
-            image: DEFAULT_IMAGE,
-          };
+          dynamicMeta = buildBookMeta({
+            title: book.title,
+            author: book.author,
+            description: book.description,
+          });
         }
       } catch (_) {
         // Ignored
@@ -192,11 +209,12 @@ export async function onRequest(context) {
               ? project.image
               : `${supabaseUrl}/storage/v1/object/public/media${project.image}`;
           }
-          dynamicMeta = {
+          dynamicMeta = buildProjectMeta({
             title: project.title,
-            description: project.description || project.subtitle || `Detailed view of the project: ${project.title}.`,
+            subtitle: project.subtitle,
+            description: project.description,
             image: imageUrl,
-          };
+          });
         }
       } catch (_) {
         // Ignored
@@ -210,11 +228,10 @@ export async function onRequest(context) {
         const blogs = await blogRes.json();
         const blog = blogs?.[0];
         if (blog) {
-          dynamicMeta = {
+          dynamicMeta = buildBlogMeta({
             title: blog.blog_title,
-            description: blog.blog_description || `A blog post from the 100 Days to Offload challenge: ${blog.blog_title}.`,
-            image: DEFAULT_IMAGE,
-          };
+            description: blog.blog_description,
+          });
         }
       } catch (_) {
         // Ignored
@@ -225,6 +242,7 @@ export async function onRequest(context) {
   // Fall back to parent page meta if dynamic fetching is unconfigured or failed.
   if (!dynamicMeta) {
     const staticChildParents = [
+      [/^\/micro-blog\/\d+$/, "/micro-blog"],
       [/^\/treks\/\d+$/, "/treks"],
       [/^\/sports\/\d+$/, "/sports"],
       [/^\/books\/\d+$/, "/books"],

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import { buildBookMeta } from "../data/pageMeta";
 import { useBooks } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 
@@ -46,11 +47,11 @@ const BookPost = () => {
     );
   }
 
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = buildBookMeta({ title: book.title, author: book.author, description: book.description });
+
   return (
-    <Main
-      title={book.title}
-      description={book.description || `${book.title} by ${book.author}.`}
-    >
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/books" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">

@@ -9,6 +9,19 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.2.2] — 2026-06-16
+
+### Fixed
+
+- **Dynamic metadata for individual micro-blog posts** (`functions/_middleware.js`, `src/pages/MicroBlogPost.js`): Per-post social/SEO metadata was effectively generic — the OG/page **title** was a bare date stamp (`Post · <date>`) instead of the post's content, the share **image** was always the site logo, and on any Supabase fetch miss a post fell back to the site-wide default meta (every other dynamic route degrades to its section listing). Posts now derive a content-based title, use the post's own `image_url` for `og:image` when present, and fall back to the **Micro Blog** section meta.
+- **Crawler/client metadata drift on every detail route** (`functions/_middleware.js`, `src/pages/{TrekPost,SportPost,BookPost,BlogPost,ProjectPost}.js`): The Cloudflare middleware (what crawlers/social cards see) and the client-side react-helmet tags derived their `og:title` / `og:description` independently, with different wording — and the client pages didn't pass a per-item `og:image` at all, so the share image fell back to the section default while the crawler used the item's photo. Treks, sports, books, 100-Days blogs, and projects now all build their meta through one shared per-type helper used by both layers, so crawler and client tags are identical and the item image is used on both.
+
+### Added
+
+- **Shared per-type meta helpers** (`src/data/pageMeta.js`): Pure, import-free `buildMicroblogMeta`, `buildTrekMeta`, `buildSportMeta`, `buildBookMeta`, `buildBlogMeta`, and `buildProjectMeta` — each returns a bare `{ title, description, image }` and is consumed by BOTH the client detail page and the esbuild-bundled Cloudflare middleware so the two can never drift. Covered by `src/data/pageMeta.test.js`. (Instagram has no per-post detail route, so no per-post metadata applies there.)
+
+---
+
 ## [v10.2.1] — 2026-06-15
 
 ### Fixed
@@ -17,17 +30,19 @@ patch for fixes and tweaks.
 
 ---
 
-## [v10.2.0] — 2026-06-15
+## [v10.2.0] — 2026-06-16
 
 ### Changed
 
 - **Home page layout** (`src/pages/Index.js`): Reordered the page so the **Life in Numbers** stats band and a new **In 1 Minute** intro now sit directly under the hero, with the section-navigation cards moved below them under a new **Explore** header.
 - **Life in Numbers** (`src/components/Index/LifeStats.js`): Expanded from 4 to 6 stat cards — added **Projects Built** and **Micro Posts** (live Supabase count) alongside Books, On Foot, Treks, and Posts. Cards use the compact single-row strip styling from the About page — 3-up on mobile, all six in one line on tablet/desktop.
+- **Micro Blog post actions** (`src/components/MicroBlog/PostModal.js`, `src/pages/MicroBlogPost.js`): Added the new **Export as image** action alongside the existing Share/Copy/Permalink controls. Extracted the duplicated `typeColors`/`sourceLabels` maps from `PostModal.js`, `MicroBlogPost.js`, and `PostCard.js` into a shared `src/components/MicroBlog/constants.js`.
 
 ### Added
 
 - **`OneMinuteIntro`** (`src/components/common/OneMinuteIntro.js`): Shared "In 1 Minute" intro blurb, now rendered on both the home page and the About page (`src/components/About/AboutDocument.js`) so the two never drift.
 - **`getMicroblogCount()`** (`src/lib/api/microblog.js`): Lightweight head-only Supabase count of micro-blog posts, used by the home-page stats band.
+- **`ExportImageButton`** (`src/components/MicroBlog/ExportImageButton.js`): Exports a single micro-blog post as a branded PNG card (via `html-to-image`). Renders an off-screen, fixed light-theme template — site branding, date, type badge, full post text (with quote styling), tags, source, and a permalink watermark — then downloads it as `microblog-<id>.png`. Available from both the list-view modal and the single-post page.
 
 ---
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import { buildBlogMeta } from "../data/pageMeta";
 import { useBlogs } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 
@@ -57,11 +58,11 @@ const BlogPost = () => {
 
   const visibleTags = (blog.blog_tags || []).filter((t) => t.toLowerCase() !== CHALLENGE_TAG);
 
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = buildBlogMeta({ title: blog.blog_title, description: blog.blog_description });
+
   return (
-    <Main
-      title={blog.blog_title}
-      description={blog.blog_description || `${blog.blog_title} — a post from the 100 Days to Offload challenge.`}
-    >
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/100-days-to-offload" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">

@@ -2,18 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
 import { getMicroblogPost } from "../lib/api/microblog";
+import { buildMicroblogMeta } from "../data/pageMeta";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
+import ExportImageButton from "../components/MicroBlog/ExportImageButton";
+import { sourceLabels, typeColors } from "../components/MicroBlog/constants";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
-};
-
-const sourceLabels = { tumblr: "Tumblr", instagram: "Instagram", manual: "Manual" };
-
-const typeColors = {
-  text: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
-  quote: "bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400",
-  photo: "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
 };
 
 const MicroBlogPost = () => {
@@ -49,11 +44,13 @@ const MicroBlogPost = () => {
   };
 
   const body = post?.text || post?.title || "";
-  const pageTitle = post ? `Post · ${post.date}` : "Post";
-  const description = body ? body.replace(/\s+/g, " ").trim().slice(0, 160) : "A micro-blog post.";
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = post
+    ? buildMicroblogMeta({ title: post.title, text: post.text, date: post.date, image: post.imageUrl })
+    : { title: "Post", description: "A micro-blog post.", image: undefined };
 
   return (
-    <Main title={pageTitle} description={description}>
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link
@@ -63,17 +60,20 @@ const MicroBlogPost = () => {
             <span className="material-symbols-outlined text-sm">arrow_back</span>
             Micro Blog
           </Link>
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={handleShare}
-            onKeyDown={keyActivate(handleShare)}
-            className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm">
-              {shareState === "idle" ? "share" : "check"}
-            </span>
-            { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
+          <div className="flex items-center gap-4">
+            {post && <ExportImageButton post={post} />}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleShare}
+              onKeyDown={keyActivate(handleShare)}
+              className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">
+                {shareState === "idle" ? "share" : "check"}
+              </span>
+              { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
+            </div>
           </div>
         </div>
 
