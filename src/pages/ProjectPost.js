@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import { buildProjectMeta } from "../data/pageMeta";
 import { useProjects } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 
@@ -47,11 +48,16 @@ const ProjectPost = () => {
     );
   }
 
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = buildProjectMeta({
+    title: project.title,
+    subtitle: project.subtitle,
+    description: project.desc,
+    image: project.image,
+  });
+
   return (
-    <Main
-      title={project.title}
-      description={project.desc || project.subtitle || `${project.title} — a project by Sanket Tambare.`}
-    >
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/projects" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">

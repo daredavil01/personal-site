@@ -9,6 +9,19 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.2.2] — 2026-06-16
+
+### Fixed
+
+- **Dynamic metadata for individual micro-blog posts** (`functions/_middleware.js`, `src/pages/MicroBlogPost.js`): Per-post social/SEO metadata was effectively generic — the OG/page **title** was a bare date stamp (`Post · <date>`) instead of the post's content, the share **image** was always the site logo, and on any Supabase fetch miss a post fell back to the site-wide default meta (every other dynamic route degrades to its section listing). Posts now derive a content-based title, use the post's own `image_url` for `og:image` when present, and fall back to the **Micro Blog** section meta.
+- **Crawler/client metadata drift on every detail route** (`functions/_middleware.js`, `src/pages/{TrekPost,SportPost,BookPost,BlogPost,ProjectPost}.js`): The Cloudflare middleware (what crawlers/social cards see) and the client-side react-helmet tags derived their `og:title` / `og:description` independently, with different wording — and the client pages didn't pass a per-item `og:image` at all, so the share image fell back to the section default while the crawler used the item's photo. Treks, sports, books, 100-Days blogs, and projects now all build their meta through one shared per-type helper used by both layers, so crawler and client tags are identical and the item image is used on both.
+
+### Added
+
+- **Shared per-type meta helpers** (`src/data/pageMeta.js`): Pure, import-free `buildMicroblogMeta`, `buildTrekMeta`, `buildSportMeta`, `buildBookMeta`, `buildBlogMeta`, and `buildProjectMeta` — each returns a bare `{ title, description, image }` and is consumed by BOTH the client detail page and the esbuild-bundled Cloudflare middleware so the two can never drift. Covered by `src/data/pageMeta.test.js`. (Instagram has no per-post detail route, so no per-post metadata applies there.)
+
+---
+
 ## [v10.2.1] — 2026-06-15
 
 ### Fixed

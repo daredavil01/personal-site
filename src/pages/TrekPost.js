@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import { buildTrekMeta } from "../data/pageMeta";
 import { useTreks } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ImageSlider from "../components/Instagram/ImageSlider";
@@ -56,11 +57,17 @@ const TrekPost = () => {
     );
   }
 
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = buildTrekMeta({
+    fortName: trek.fort_name,
+    enduranceLevel: trek.endurance_level,
+    trekTime: trek.trek_time,
+    date: trek.date,
+    image: trek.slideImages?.[0]?.url,
+  });
+
   return (
-    <Main
-      title={trek.fort_name}
-      description={`${trek.endurance_level} difficulty trek at ${trek.fort_name}. Duration: ${trek.trek_time}. Date: ${trek.date}.`}
-    >
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/treks" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">

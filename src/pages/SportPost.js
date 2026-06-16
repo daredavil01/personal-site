@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import { buildSportMeta } from "../data/pageMeta";
 import { useSports } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ImageSlider from "../components/Instagram/ImageSlider";
@@ -47,11 +48,19 @@ const SportPost = () => {
     );
   }
 
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = buildSportMeta({
+    title: race.title,
+    distance: race.distance,
+    place: race.place,
+    date: race.date,
+    time: race.time,
+    description: race.description,
+    image: race.slideImages?.[0]?.url,
+  });
+
   return (
-    <Main
-      title={race.title}
-      description={`${race.distance} race at ${race.place} on ${race.date}. Finishing time: ${race.time}.`}
-    >
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/sports" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">

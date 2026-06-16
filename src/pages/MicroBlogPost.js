@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Main from "../layouts/Main";
 import { getMicroblogPost } from "../lib/api/microblog";
+import { buildMicroblogMeta } from "../data/pageMeta";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import ExportImageButton from "../components/MicroBlog/ExportImageButton";
 import { sourceLabels, typeColors } from "../components/MicroBlog/constants";
@@ -43,11 +44,13 @@ const MicroBlogPost = () => {
   };
 
   const body = post?.text || post?.title || "";
-  const pageTitle = post ? `Post · ${post.date}` : "Post";
-  const description = body ? body.replace(/\s+/g, " ").trim().slice(0, 160) : "A micro-blog post.";
+  // Shared with the Cloudflare middleware so crawler + client OG tags match.
+  const meta = post
+    ? buildMicroblogMeta({ title: post.title, text: post.text, date: post.date, image: post.imageUrl })
+    : { title: "Post", description: "A micro-blog post.", image: undefined };
 
   return (
-    <Main title={pageTitle} description={description}>
+    <Main title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link
