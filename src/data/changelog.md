@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.2.3] — 2026-06-17
+
+### Fixed
+
+- **Share-as-image hero crop** (`src/components/share/ShareCard.js`): The included photo was forced into a full-width, fixed-height box with `object-cover`, cropping portrait/landscape images. The image now keeps the fixed height but takes a dynamic width from its natural aspect ratio and is centered, so the whole photo is shown un-cropped.
+
+---
+
 ## [v10.2.2] — 2026-06-16
 
 ### Fixed

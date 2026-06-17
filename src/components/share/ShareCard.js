@@ -127,14 +127,14 @@ const ShareCard = ({
 
         {showHero && (
           <div
-            className={`w-full shrink-0 overflow-hidden rounded-2xl border ${theme.heroBorder}`}
+            className="flex w-full shrink-0 justify-center"
             style={{ height: portrait ? 400 : 460 }}
           >
             <img
               src={model.imageUrl}
               alt=""
               crossOrigin="anonymous"
-              className="h-full w-full object-cover"
+              className={`h-full w-auto rounded-2xl border object-contain ${theme.heroBorder}`}
             />
           </div>
         )}
