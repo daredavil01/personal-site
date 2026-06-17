@@ -2,8 +2,7 @@ import React from "react";
 import { SITE_NAME } from "../../data/pageMeta";
 import BrandMark from "./BrandMark";
 
-const LOGO_SRC = "/images/brand/logo.png";
-const SIGNATURE_SRC = "/images/brand/signature.png";
+const BRAND = "/images/brand";
 
 // Faint binary texture echoing the site logo art, used by the abstract theme.
 const BINARY_TEXTURE = "01001101 01010011 01010100 00100110 ".repeat(240);
@@ -25,7 +24,8 @@ const THEMES = {
     divider: "border-stone-200",
     footer: "text-stone-400",
     heroBorder: "border-stone-200",
-    signature: "",
+    logo: `${BRAND}/logo.png`,
+    signature: `${BRAND}/black_sign.png`,
     decoration: false,
   },
   dark: {
@@ -41,7 +41,8 @@ const THEMES = {
     divider: "border-white/10",
     footer: "text-stone-500",
     heroBorder: "border-white/10",
-    signature: "invert",
+    logo: `${BRAND}/logo_circle.png`,
+    signature: `${BRAND}/white_sign.png`,
     decoration: false,
   },
   abstract: {
@@ -58,7 +59,8 @@ const THEMES = {
     divider: "border-white/15",
     footer: "text-stone-300/80",
     heroBorder: "border-white/15",
-    signature: "invert",
+    logo: `${BRAND}/logo_circle.png`,
+    signature: `${BRAND}/white_sign.png`,
     decoration: true,
   },
 };
@@ -117,7 +119,7 @@ const ShareCard = ({
 
       <div className="relative flex min-h-0 flex-1 flex-col gap-9 px-16 py-14">
         <div className="flex shrink-0 items-center justify-between">
-          <BrandMark src={LOGO_SRC} alt={SITE_NAME} className="h-20 w-auto object-contain" />
+          <BrandMark src={theme.logo} alt={SITE_NAME} className="h-20 w-auto object-contain" />
           <span className={`font-label text-2xl uppercase tracking-[0.3em] ${theme.eyebrow}`}>
             {eyebrow}
           </span>
@@ -197,9 +199,9 @@ const ShareCard = ({
 
         <div className={`flex shrink-0 items-end justify-between border-t pt-7 ${theme.divider}`}>
           <BrandMark
-            src={SIGNATURE_SRC}
+            src={theme.signature}
             alt="Signature"
-            className={`h-16 w-auto object-contain ${theme.signature}`}
+            className="h-16 w-auto object-contain"
           />
           <div className="text-right">
             {footerNote ? (
