@@ -30,19 +30,23 @@ patch for fixes and tweaks.
 
 ---
 
-## [v10.2.0] — 2026-06-16
+## [v10.2.0] — 2026-06-17
 
 ### Changed
 
 - **Home page layout** (`src/pages/Index.js`): Reordered the page so the **Life in Numbers** stats band and a new **In 1 Minute** intro now sit directly under the hero, with the section-navigation cards moved below them under a new **Explore** header.
 - **Life in Numbers** (`src/components/Index/LifeStats.js`): Expanded from 4 to 6 stat cards — added **Projects Built** and **Micro Posts** (live Supabase count) alongside Books, On Foot, Treks, and Posts. Cards use the compact single-row strip styling from the About page — 3-up on mobile, all six in one line on tablet/desktop.
 - **Micro Blog post actions** (`src/components/MicroBlog/PostModal.js`, `src/pages/MicroBlogPost.js`): Added the new **Export as image** action alongside the existing Share/Copy/Permalink controls. Extracted the duplicated `typeColors`/`sourceLabels` maps from `PostModal.js`, `MicroBlogPost.js`, and `PostCard.js` into a shared `src/components/MicroBlog/constants.js`.
+- **Unified micro-blog image export** (`src/components/MicroBlog/ExportImageButton.js`): Now delegates to the shared `ShareImageButton` (`kind="microblog"`) instead of its own bespoke template, so micro-blog exports share one code path with every other content type and gain the customization popup, the three backgrounds, and native share.
+- **"Share as image" across content** (`src/components/Sports/MarathonDetailsModal.js`, `src/components/Treks/TrekDetailsModal.js`, `src/components/Books/DigitalLibrary.js`, `src/pages/OneHundredDays.js`, `src/components/Instagram/Post.js`): Added an **Image** action alongside the existing Share/Copy/Permalink controls (inline on each Instagram post, which has no modal). The same **Image** action also sits in the header of the standalone detail pages (`src/pages/{BookPost,BlogPost,SportPost,TrekPost}.js`) next to their Share control, so an item can be exported straight from its permalink.
+- **Admin multi-tag input** (`src/pages/admin/FormField.js`): Replaced the comma-separated `type: "tags"` text box with a chip editor — type and press Enter or comma to add, ×/Backspace to remove, with case-insensitive dedupe. The value stays a `string[]`, so books, 100-Days blogs, Instagram, micro-blog, and résumé skills all benefit unchanged.
 
 ### Added
 
 - **`OneMinuteIntro`** (`src/components/common/OneMinuteIntro.js`): Shared "In 1 Minute" intro blurb, now rendered on both the home page and the About page (`src/components/About/AboutDocument.js`) so the two never drift.
 - **`getMicroblogCount()`** (`src/lib/api/microblog.js`): Lightweight head-only Supabase count of micro-blog posts, used by the home-page stats band.
 - **`ExportImageButton`** (`src/components/MicroBlog/ExportImageButton.js`): Exports a single micro-blog post as a branded PNG card (via `html-to-image`). Renders an off-screen, fixed light-theme template — site branding, date, type badge, full post text (with quote styling), tags, source, and a permalink watermark — then downloads it as `microblog-<id>.png`. Available from both the list-view modal and the single-post page.
+- **Shared "Share as image" module** (`src/components/share/`): A reusable exporter that turns any content item — micro-blog, book, 100-Days blog, Instagram post, marathon, or trek — into a branded PNG via `html-to-image`. `ShareImageButton` opens a customization popup (`ShareImageModal`) with a live preview offering **Light / Dark / Abstract** backgrounds, **Portrait (1080×1350)** or **Auto-height**, an optional hero image, and **Download** or native **Share**. One presentational `ShareCard` renders every type through per-type adapters in `shareCardConfig.js`; the card carries theme-aware brand marks — logo and signature variants in `public/images/brand/` chosen to match each background — and hides any that are missing. The logo PNGs are downscaled to 500 px (~75 KB, from ~600 KB) so they stay light when `html-to-image` embeds them into each export.
 
 ---
 

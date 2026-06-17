@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Main from '../layouts/Main';
 import { useBlogs } from '../context/ContentContext';
+import ShareImageButton from '../components/share/ShareImageButton';
 
 const YEAR = 2026;
 const GOAL = 100;
@@ -524,6 +525,7 @@ const OneHundredDays = () => {
                   READ FULL POST
                 </a>
                 <div className="flex items-center gap-3">
+                  <ShareImageButton kind="blog" item={selectedBlog} />
                   <div
                     role="button"
                     tabIndex={0}

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import ImageSlider from "./ImageSlider";
+import ShareImageButton from "../share/ShareImageButton";
 
 const Post = ({ data }) => {
   return (
@@ -25,6 +26,9 @@ const Post = ({ data }) => {
       </div>
       <div className="w-full mt-6 rounded-lg overflow-hidden">
         <ImageSlider data={data.slideImages} />
+      </div>
+      <div className="mt-6 flex items-center justify-end border-t border-stone-100 dark:border-stone-800 pt-4">
+        <ShareImageButton kind="instagram" item={data} />
       </div>
     </article>
   );

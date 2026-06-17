@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ImageSlider from '../Instagram/ImageSlider';
+import ShareImageButton from '../share/ShareImageButton';
 
 const difficultyBadgeClass = (level) => {
   switch (level?.toLowerCase()) {
@@ -127,6 +128,7 @@ const TrekDetailsModal = ({ isOpen, onClose, trek }) => {
             </a>
           ) : <span />}
           <div className="flex items-center gap-3 shrink-0">
+            <ShareImageButton kind="trek" item={trek} />
             <div
               role="button"
               tabIndex={0}

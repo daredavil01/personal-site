@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ImageSlider from '../Instagram/ImageSlider';
+import ShareImageButton from '../share/ShareImageButton';
 
 const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
   const [copyState, setCopyState] = useState('idle');
@@ -104,6 +105,7 @@ const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
             </a>
           ) : <span />}
           <div className="flex items-center gap-3 shrink-0">
+            <ShareImageButton kind="sport" item={raceDetails} />
             <div
               role="button"
               tabIndex={0}
