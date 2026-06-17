@@ -67,7 +67,7 @@ const blog = (item) => ({
     item.language ? { icon: "translate", label: item.language } : null,
   ].filter(Boolean),
   body: clean(item.blog_description),
-  tags: (item.blog_tags || []).filter((tag) => tag !== CHALLENGE_TAG),
+  tags: (item.blog_tags || []).filter((tag) => tag.toLowerCase() !== CHALLENGE_TAG.toLowerCase()),
   imageUrl: null,
   footerUrl: `${SITE_DOMAIN}/100-days-to-offload/${item.id}`,
 });

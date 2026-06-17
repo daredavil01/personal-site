@@ -4,6 +4,7 @@ import Main from "../layouts/Main";
 import { buildSportMeta } from "../data/pageMeta";
 import { useSports } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
+import ShareImageButton from "../components/share/ShareImageButton";
 import ImageSlider from "../components/Instagram/ImageSlider";
 
 const keyActivate = (fn) => (e) => {
@@ -66,15 +67,18 @@ const SportPost = () => {
           <Link to="/sports" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">
             <span className="material-symbols-outlined text-sm">arrow_back</span> Sports
           </Link>
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={handleShare}
-            onKeyDown={keyActivate(handleShare)}
-            className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm">{shareState === "idle" ? "share" : "check"}</span>
-            { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
+          <div className="flex items-center gap-4">
+            <ShareImageButton kind="sport" item={race} />
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleShare}
+              onKeyDown={keyActivate(handleShare)}
+              className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">{shareState === "idle" ? "share" : "check"}</span>
+              { { shared: "Shared!", copied: "Copied!" }[shareState] || "Share" }
+            </div>
           </div>
         </div>
 

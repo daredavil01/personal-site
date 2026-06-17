@@ -27,12 +27,12 @@ describe("toShareModel", () => {
     expect(model.subtitle).toBe("A · tr. X");
   });
 
-  it("drops the challenge tag from a blog", () => {
+  it("drops the challenge tag from a blog regardless of case", () => {
     const model = toShareModel("blog", {
       id: 2,
       blog_title: "Day 1",
       blog_description: "d",
-      blog_tags: ["100_Days_to_Offload", "Life"],
+      blog_tags: ["100_Days_to_Offload", "100_days_to_offload", "Life"],
       blog_date: "2026-01-01",
       blog_platform: "Substack",
       language: "English",
