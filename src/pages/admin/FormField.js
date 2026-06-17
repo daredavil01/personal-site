@@ -148,6 +148,75 @@ const SelectOrOther = ({ options, value, onChange }) => {
   );
 };
 
+// Chip-style multi-tag editor. Type a tag and press Enter or comma to add it as
+// a removable chip; Backspace on an empty input removes the last chip; pasting a
+// comma-separated string adds each piece. Value stays a string[] (deduped,
+// case-insensitive) so every consumer of `type: "tags"` is unchanged.
+const TagInput = ({ value, onChange }) => {
+  const [buffer, setBuffer] = useState("");
+  const tags = Array.isArray(value) ? value : [];
+
+  const addTags = (raw) => {
+    const incoming = raw.split(",").map((t) => t.trim()).filter(Boolean);
+    if (!incoming.length) return;
+    const next = [...tags];
+    incoming.forEach((tag) => {
+      if (!next.some((existing) => existing.toLowerCase() === tag.toLowerCase())) next.push(tag);
+    });
+    onChange(next);
+  };
+
+  const commit = () => {
+    if (buffer.trim()) addTags(buffer);
+    setBuffer("");
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      commit();
+    } else if (e.key === "Backspace" && !buffer && tags.length) {
+      onChange(tags.slice(0, -1));
+    }
+  };
+
+  return (
+    <div className={`${inputClass} flex flex-wrap items-center gap-1.5 focus-within:border-secondary`}>
+      {tags.map((tag, i) => (
+        <span
+          key={tag}
+          className="inline-flex items-center gap-1 px-2 py-1 bg-stone-100 dark:bg-stone-800 rounded text-xs text-stone-700 dark:text-stone-200"
+        >
+          {tag}
+          <button
+            type="button"
+            className="leading-none text-stone-400 hover:text-red-600"
+            onClick={() => onChange(tags.filter((_, idx) => idx !== i))}
+            aria-label={`Remove ${tag}`}
+          >
+            &times;
+          </button>
+        </span>
+      ))}
+      <input
+        className="flex-1 min-w-[120px] bg-transparent text-sm text-stone-800 dark:text-stone-200 outline-none"
+        placeholder={tags.length ? "" : "Type and press Enter"}
+        value={buffer}
+        onChange={(e) => setBuffer(e.target.value)}
+        onKeyDown={onKeyDown}
+        onBlur={commit}
+        onPaste={(e) => {
+          const text = e.clipboardData.getData("text");
+          if (text.includes(",")) {
+            e.preventDefault();
+            addTags(text);
+          }
+        }}
+      />
+    </div>
+  );
+};
+
 const FormField = ({ field, value, folder, onChange }) => {
   const set = (v) => onChange(field.name, v);
 
@@ -175,14 +244,7 @@ const FormField = ({ field, value, folder, onChange }) => {
         </select>
       );
     case "tags":
-      return (
-        <input
-          className={inputClass}
-          placeholder="Comma-separated"
-          value={(Array.isArray(value) ? value : []).join(", ")}
-          onChange={(e) => set(e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
-        />
-      );
+      return <TagInput value={Array.isArray(value) ? value : []} onChange={set} />;
     case "stringList":
       return (
         <textarea

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import ShareImageButton from '../share/ShareImageButton';
 
 const BookCard = ({ book, onClick }) => (
   <div className="group cursor-pointer border border-transparent flex flex-col h-full" onClick={onClick}>
@@ -351,6 +352,7 @@ const DigitalLibrary = ({ books }) => {
                   </a>
                 )}
                 <div className="ml-auto flex items-center gap-3 shrink-0">
+                  <ShareImageButton kind="book" item={selectedBook} />
                   <div
                     role="button"
                     tabIndex={0}
