@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.2.4] — 2026-06-22
+
+### Changed
+
+- **Micro-blog search query cost** (`src/lib/api/microblog.js`, `src/pages/MicroBlog.js`, `src/pages/admin/MicroblogManager.js`): `searchMicroblog()` recomputed an exact `count` on every request — including every "Load more" page and admin prev/next page, where the total never changes (an exact count over a filtered full-text result set forces Postgres to count every matching row). Added a `withCount` option (default `true`, so existing callers are unchanged); the public "Load more" now skips the count, and the admin list fetches it only on page 0 and reuses it across pages — roughly halving the DB work per pagination step. The page-0 fetch still returns the exact total that powers the post count, "Load more" visibility, and the admin "Page X of Y".
+
+---
+
 ## [v10.2.3] — 2026-06-17
 
 ### Fixed

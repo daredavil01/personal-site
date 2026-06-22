@@ -58,11 +58,13 @@ const MicroblogManager = () => {
     let active = true;
     setRows(null);
     setError(null);
-    searchMicroblog({ query: searchTerm, page, pageSize: PAGE_SIZE })
+    // The total is constant across pages of one search, so only count on page 0
+    // (a new search / refresh resets to page 0) and reuse it for prev/next.
+    searchMicroblog({ query: searchTerm, page, pageSize: PAGE_SIZE, withCount: page === 0 })
       .then(({ rows: r, count: c }) => {
         if (!active) return;
         setRows(r);
-        setCount(c);
+        if (c !== null) setCount(c);
       })
       .catch((e) => {
         if (active) setError(e);
@@ -70,7 +72,8 @@ const MicroblogManager = () => {
     return () => { active = false; };
   }, [searchTerm, page, reloadKey]);
 
-  const refresh = () => setReloadKey((k) => k + 1);
+  // Reset to page 0 so the recounted total stays exact after a create/delete.
+  const refresh = () => { setPage(0); setReloadKey((k) => k + 1); };
   const onField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
 
   const save = async (e) => {
