@@ -43,16 +43,21 @@ const microblog = createResource({
  * Server-side, paginated full-text search over the microblog table.
  * sort: "date_desc" (default) | "date_asc" | "random" (random is handled
  * client-side — this function always fetches in date order).
- * @returns {Promise<{ rows: object[], count: number }>}
+ * withCount: request the exact total (default true). Pass false when paginating
+ * an existing result set — the count is constant across pages, so re-counting on
+ * every "Load more"/next page is wasted work. When false, `count` is null.
+ * @returns {Promise<{ rows: object[], count: number|null }>}
  */
 export async function searchMicroblog({
-  query = "", tags = [], source = "", type = "", page = 0, pageSize = 24, sort = "date_desc",
+  query = "", tags = [], source = "", type = "", page = 0, pageSize = 24, sort = "date_desc", withCount = true,
 } = {}) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
   const ascending = sort === "date_asc";
 
-  let q = supabase.from("microblog").select(COLUMNS, { count: "exact" });
+  // An exact count over a filtered full-text result set makes Postgres count
+  // every matching row, so only ask for it when the caller needs it (page 0).
+  let q = supabase.from("microblog").select(COLUMNS, withCount ? { count: "exact" } : {});
 
   const trimmed = (query || "").trim();
   if (trimmed) {
@@ -69,7 +74,7 @@ export async function searchMicroblog({
 
   const { data, error, count } = await q;
   if (error) throw error;
-  return { rows: (data ?? []).map(fromRow), count: count ?? 0 };
+  return { rows: (data ?? []).map(fromRow), count: withCount ? (count ?? 0) : null };
 }
 
 /** Fetch a single post by numeric id. Throws if not found. */

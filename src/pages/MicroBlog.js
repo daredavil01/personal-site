@@ -143,8 +143,9 @@ const MicroBlog = () => {
     const next = page + 1;
     setLoadingMore(true);
     const apiSort = sort === "random" ? "date_desc" : sort;
+    // Paginating an existing result set — skip the count (reuses the page-0 count).
     searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, page: next, pageSize: PAGE_SIZE, sort: apiSort,
+      query: searchTerm, tags: activeTags, source, type, page: next, pageSize: PAGE_SIZE, sort: apiSort, withCount: false,
     })
       .then(({ rows: r }) => {
         setRows((prev) => [...prev, ...(sort === "random" ? shuffleArray(r) : r)]);
