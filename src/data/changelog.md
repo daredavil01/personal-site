@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.2.4] — 2026-06-30
+
+### Fixed
+
+- **"Is current month" toggle in the Now · Months admin editor** (`src/pages/admin/FormField.js`): The boolean checkbox was invisible and felt un-editable. The vendored HTML5UP form stylesheet (`src/static/css/components/_form.scss`) applies a global `input[type="checkbox"] { appearance: none; opacity: 0; float: left; }` rule (the skel pattern that hides the real box and draws a fake one via a paired `<label>`), and that attribute selector outranks the Tailwind utility classes on the admin checkbox. Restored native rendering with inline styles (which win over the no-`!important` legacy rule) so the toggle is visible and clickable again.
+
+---
+
 ## [v10.2.3] — 2026-06-17
 
 ### Fixed

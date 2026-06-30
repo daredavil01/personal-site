@@ -228,10 +228,25 @@ const FormField = ({ field, value, folder, onChange }) => {
     case "url":
       return <input type="url" className={inputClass} value={value ?? ""} onChange={(e) => set(e.target.value)} />;
     case "boolean":
+      // The legacy HTML5UP form SCSS (static/css/components/_form.scss) hides
+      // every bare input[type=checkbox] (appearance:none; opacity:0; float:left)
+      // because it expects a paired <label> to draw a fake box. That attribute
+      // selector outranks Tailwind utility classes, so we restore native
+      // rendering with inline styles, which win over the no-!important legacy rule.
       return (
         <input
           type="checkbox"
-          className="w-5 h-5 accent-[color:var(--color-secondary,#eb6c4f)]"
+          className="accent-[color:var(--color-secondary,#eb6c4f)]"
+          style={{
+            appearance: "auto",
+            WebkitAppearance: "auto",
+            opacity: 1,
+            float: "none",
+            width: "1.25rem",
+            height: "1.25rem",
+            margin: 0,
+            zIndex: "auto",
+          }}
           checked={!!value}
           onChange={(e) => set(e.target.checked)}
         />
