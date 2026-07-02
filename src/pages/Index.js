@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Main from "../layouts/Main";
 import LifeStats from "../components/Index/LifeStats";
+import LatestPosts from "../components/Index/LatestPosts";
+import MonthlyDigest from "../components/Index/MonthlyDigest";
 import OneMinuteIntro from "../components/common/OneMinuteIntro";
 
 const SectionHeader = ({ label }) => (
@@ -113,6 +115,16 @@ const Index = () => (
           Read the full story
           <span className="material-symbols-outlined text-[14px]">arrow_right_alt</span>
         </Link>
+      </section>
+
+      <section>
+        <SectionHeader label="Latest Writing" />
+        <LatestPosts batchSize={5} />
+      </section>
+
+      <section>
+        <SectionHeader label="Monthly Digest" />
+        <MonthlyDigest />
       </section>
 
       <section>

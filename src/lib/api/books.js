@@ -15,6 +15,7 @@ const books = createResource({
     translator: r.translator ?? undefined,
     blog_link: r.blog_link ?? undefined,
     blog_platform: r.blog_platform ?? undefined,
+    created_at: r.created_at,
   }),
   toRow: (v) => ({
     title: v.title,
