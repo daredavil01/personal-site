@@ -12,6 +12,7 @@ const treks = createResource({
     date: r.date,
     blog_link: r.blog_link ?? undefined,
     slideImages: toStorageImages(r.slide_images),
+    created_at: r.created_at,
   }),
   toRow: (v) => ({
     fort_name: v.fort_name,

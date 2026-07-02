@@ -9,6 +9,23 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.3.0] — 2026-07-02
+
+### Added
+
+- **Substack RSS Pages Function** (`functions/rss-feed.js`): New Cloudflare Pages Function that fetches the "The Wanderer's Technical Anecdotes" Substack feed server-side (Substack blocks CORS), parses the `<item>` blocks with a dependency-free regex parser, edge-caches the result for 30 minutes, and serves it as same-origin JSON at `/rss-feed`.
+- **Latest Writing feed** (`src/components/Index/LatestPosts.js`): Homepage section that renders the live Substack feed in a scroll region, revealing 10 posts at a time as the reader scrolls (IntersectionObserver on a sentinel). Fails silently if the feed is unavailable.
+- **Monthly Digest dashboard** (`src/components/Index/MonthlyDigest.js`): Auto-aggregating homepage dashboard that groups blogs, treks, marathons, and micro-posts by their content month, with a dropdown month picker (only months that have content), KPI count-tiles, and a capped list per type (~6 items, "View all →" to the section page). Items link to their internal detail routes.
+- **Month/date helpers** (`src/lib/monthDigest.js`): Dependency-free `parseContentDate`/`monthKey`/`monthLabel`/`monthRange`/`itemMonthKey` that reconcile the three content date formats (blogs `YYYY-MM-DD`, treks `DD-MM-YYYY`, sports `Month DD, YYYY`) plus microblog ISO dates, falling back to `created_at`.
+- **Microblog month queries** (`src/lib/api/microblog.js`): `getMicroblogMonths()` (distinct content months for the dropdown) and `getMicroblogByMonth()` (capped, counted month slice via the `date` index).
+
+### Changed
+
+- **Homepage** (`src/pages/Index.js`): Added the "Latest Writing" and "Monthly Digest" sections above "Explore".
+- **Blogs/treks/sports read-mappers** (`src/lib/api/{blogs,treks,sports}.js`): Expose `created_at` from each row (read-only) so the digest's date fallback can use it.
+
+---
+
 ## [v10.2.4] — 2026-06-30
 
 ### Fixed

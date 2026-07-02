@@ -1,5 +1,6 @@
 import createResource from "./_crud";
 import { supabase, toStorageUrl } from "../supabaseClient";
+import { monthRange } from "../monthDigest";
 
 // Explicit column list so the generated `search_tsv` tsvector is never shipped
 // to the browser.
@@ -121,6 +122,47 @@ export async function getMicroblogStats() {
     byType: { text: textRes.count ?? 0, quote: quoteRes.count ?? 0, photo: photoRes.count ?? 0 },
     bySource: { tumblr: tumblrRes.count ?? 0, manual: manualRes.count ?? 0 },
   };
+}
+
+/**
+ * Distinct "YYYY-MM" month keys that contain at least one micro-post, derived
+ * from the post `date`. Ships only the date column (~1,600 short strings) so the
+ * Monthly Digest can union microblog months into its dropdown without loading rows.
+ * @returns {Promise<string[]>} sorted descending (newest first)
+ */
+export async function getMicroblogMonths() {
+  const { data, error } = await supabase
+    .from("microblog")
+    .select("date")
+    .order("date", { ascending: false });
+  if (error) throw error;
+  const keys = new Set();
+  (data ?? []).forEach((row) => {
+    if (typeof row.date === "string" && row.date.length >= 7) {
+      keys.add(row.date.slice(0, 7));
+    }
+  });
+  return [...keys].sort().reverse();
+}
+
+/**
+ * Micro-posts whose `date` falls within the given "YYYY-MM" month, newest first,
+ * capped at `limit`. `count` is the true total for the month (drives "View all").
+ * Efficient: microblog_date_idx covers `date desc`.
+ * @returns {Promise<{ rows: object[], count: number }>}
+ */
+export async function getMicroblogByMonth(key, limit = 6) {
+  const { start, endExclusive } = monthRange(key);
+  const { data, error, count } = await supabase
+    .from("microblog")
+    .select(COLUMNS, { count: "exact" })
+    .gte("date", start)
+    .lt("date", endExclusive)
+    .order("date", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return { rows: (data ?? []).map(fromRow), count: count ?? 0 };
 }
 
 export default microblog;
