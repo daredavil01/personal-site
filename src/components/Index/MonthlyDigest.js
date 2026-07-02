@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useBlogs, useTreks, useSports } from "../../context/ContentContext";
+import {
+  useBlogs, useTreks, useSports, useBooks,
+} from "../../context/ContentContext";
 import { getMicroblogMonths, getMicroblogByMonth } from "../../lib/api/microblog";
 import { itemMonthKey, monthLabel } from "../../lib/monthDigest";
 import NowSectionHeader from "../Now/NowSectionHeader";
@@ -76,6 +78,7 @@ const MonthlyDigest = () => {
   const { data: blogsData, loading: blogsLoading } = useBlogs();
   const { data: treksData, loading: treksLoading } = useTreks();
   const { data: sportsData, loading: sportsLoading } = useSports();
+  const { data: booksData, loading: booksLoading } = useBooks();
 
   const [microMonths, setMicroMonths] = useState([]);
   const [micro, setMicro] = useState({ rows: [], count: 0 });
@@ -95,8 +98,10 @@ const MonthlyDigest = () => {
     blogsData.forEach((b) => { const k = itemMonthKey(b, "blog"); if (k) set.add(k); });
     treksData.forEach((t) => { const k = itemMonthKey(t, "trek"); if (k) set.add(k); });
     sportsData.forEach((s) => { const k = itemMonthKey(s, "sport"); if (k) set.add(k); });
+    // Books have no month-precise date, so they bucket by created_at (fallback).
+    booksData.forEach((b) => { const k = itemMonthKey(b, "book"); if (k) set.add(k); });
     return [...set].sort().reverse();
-  }, [blogsData, treksData, sportsData, microMonths]);
+  }, [blogsData, treksData, sportsData, booksData, microMonths]);
 
   useEffect(() => {
     if (monthKeys.length && !monthKeys.includes(selectedMonth)) {
@@ -125,8 +130,12 @@ const MonthlyDigest = () => {
     () => sportsData.filter((s) => itemMonthKey(s, "sport") === selectedMonth),
     [sportsData, selectedMonth]
   );
+  const monthBooks = useMemo(
+    () => booksData.filter((b) => itemMonthKey(b, "book") === selectedMonth),
+    [booksData, selectedMonth]
+  );
 
-  const anyLoading = blogsLoading || treksLoading || sportsLoading;
+  const anyLoading = blogsLoading || treksLoading || sportsLoading || booksLoading;
 
   if (!monthKeys.length) {
     if (anyLoading) {
@@ -137,12 +146,12 @@ const MonthlyDigest = () => {
     return null;
   }
 
-  const sections = [
-    monthBlogs.length > 0,
-    monthSports.length > 0,
-    monthTreks.length > 0,
-    micro.rows.length > 0,
-  ].filter(Boolean).length;
+  const hasBlogs = monthBlogs.length > 0;
+  const hasMicro = micro.rows.length > 0;
+  const hasTreks = monthTreks.length > 0;
+  const hasSports = monthSports.length > 0;
+  const hasBooks = monthBooks.length > 0;
+  const anySection = hasBlogs || hasMicro || hasTreks || hasSports || hasBooks;
 
   return (
     <div className="rounded-xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 p-6 flex flex-col gap-6">
@@ -164,99 +173,131 @@ const MonthlyDigest = () => {
       </div>
 
       {/* KPI tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatTile value={monthBlogs.length} label="Blogs" active={monthBlogs.length > 0} />
-        <StatTile value={monthTreks.length} label="Treks" active={monthTreks.length > 0} />
-        <StatTile value={monthSports.length} label="Marathons" active={monthSports.length > 0} />
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <StatTile value={monthBlogs.length} label="Blogs" active={hasBlogs} />
         <StatTile value={micro.count} label="Micro Posts" active={micro.count > 0} />
+        <StatTile value={monthTreks.length} label="Treks" active={hasTreks} />
+        <StatTile value={monthSports.length} label="Marathons" active={hasSports} />
+        <StatTile value={monthBooks.length} label="Books" active={hasBooks} />
       </div>
 
-      {/* Per-type sections */}
-      {sections > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {monthBlogs.length > 0 && (
-            <DigestSection
-              icon="article"
-              label="Blogs Published"
-              total={monthBlogs.length}
-              viewAllTo="/100-days-to-offload"
-            >
-              {monthBlogs.slice(0, CAP).map((b) => (
-                <ItemLink
-                  key={b.id}
-                  to={`/100-days-to-offload/${b.id}`}
-                  title={b.blog_title}
-                  meta={b.blog_description}
-                  badges={b.blog_platform && <Badge>{b.blog_platform}</Badge>}
-                />
-              ))}
-            </DigestSection>
+      {/* Per-type sections. Row 1: Blogs + Micro Posts. Row 2: Treks + Marathons.
+          Row 3: Books. Each row is its own 2-col grid so the pairing holds even
+          when one side is empty for the month. */}
+      {anySection ? (
+        <div className="flex flex-col gap-6">
+          {(hasBlogs || hasMicro) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              {hasBlogs && (
+                <DigestSection
+                  icon="article"
+                  label="Blogs Published"
+                  total={monthBlogs.length}
+                  viewAllTo="/100-days-to-offload"
+                >
+                  {monthBlogs.slice(0, CAP).map((b) => (
+                    <ItemLink
+                      key={b.id}
+                      to={`/100-days-to-offload/${b.id}`}
+                      title={b.blog_title}
+                      meta={b.blog_description}
+                      badges={b.blog_platform && <Badge>{b.blog_platform}</Badge>}
+                    />
+                  ))}
+                </DigestSection>
+              )}
+
+              {hasMicro && (
+                <DigestSection
+                  icon="forum"
+                  label="Micro Posts"
+                  total={micro.count}
+                  viewAllTo="/micro-blog"
+                >
+                  {micro.rows.map((p) => (
+                    <ItemLink
+                      key={p.id}
+                      to={`/micro-blog/${p.id}`}
+                      title={p.title || p.text || "Untitled"}
+                      meta={p.title ? p.text : ""}
+                      badges={p.postType && <Badge>{p.postType}</Badge>}
+                    />
+                  ))}
+                </DigestSection>
+              )}
+            </div>
           )}
 
-          {monthSports.length > 0 && (
-            <DigestSection
-              icon="fitness_center"
-              label="Marathons"
-              total={monthSports.length}
-              viewAllTo="/sports"
-            >
-              {monthSports.slice(0, CAP).map((s) => (
-                <ItemLink
-                  key={s.id}
-                  to={`/sports/${s.id}`}
-                  title={s.title}
-                  meta={s.place}
-                  badges={(
-                    <>
-                      {s.distance && <Badge>{s.distance}</Badge>}
-                      {s.time && <Badge>{s.time}</Badge>}
-                    </>
-                  )}
-                />
-              ))}
-            </DigestSection>
+          {(hasTreks || hasSports) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              {hasTreks && (
+                <DigestSection
+                  icon="landscape"
+                  label="Treks"
+                  total={monthTreks.length}
+                  viewAllTo="/treks"
+                >
+                  {monthTreks.slice(0, CAP).map((t) => (
+                    <ItemLink
+                      key={t.id}
+                      to={`/treks/${t.id}`}
+                      title={t.fort_name}
+                      badges={(
+                        <>
+                          {t.endurance_level && <Badge>{t.endurance_level}</Badge>}
+                          {t.trek_time && <Badge>{t.trek_time}</Badge>}
+                        </>
+                      )}
+                    />
+                  ))}
+                </DigestSection>
+              )}
+
+              {hasSports && (
+                <DigestSection
+                  icon="fitness_center"
+                  label="Marathons"
+                  total={monthSports.length}
+                  viewAllTo="/sports"
+                >
+                  {monthSports.slice(0, CAP).map((s) => (
+                    <ItemLink
+                      key={s.id}
+                      to={`/sports/${s.id}`}
+                      title={s.title}
+                      meta={s.place}
+                      badges={(
+                        <>
+                          {s.distance && <Badge>{s.distance}</Badge>}
+                          {s.time && <Badge>{s.time}</Badge>}
+                        </>
+                      )}
+                    />
+                  ))}
+                </DigestSection>
+              )}
+            </div>
           )}
 
-          {monthTreks.length > 0 && (
-            <DigestSection
-              icon="landscape"
-              label="Treks"
-              total={monthTreks.length}
-              viewAllTo="/treks"
-            >
-              {monthTreks.slice(0, CAP).map((t) => (
-                <ItemLink
-                  key={t.id}
-                  to={`/treks/${t.id}`}
-                  title={t.fort_name}
-                  badges={(
-                    <>
-                      {t.endurance_level && <Badge>{t.endurance_level}</Badge>}
-                      {t.trek_time && <Badge>{t.trek_time}</Badge>}
-                    </>
-                  )}
-                />
-              ))}
-            </DigestSection>
-          )}
-
-          {micro.rows.length > 0 && (
-            <DigestSection
-              icon="forum"
-              label="Micro Posts"
-              total={micro.count}
-              viewAllTo="/micro-blog"
-            >
-              {micro.rows.map((p) => (
-                <ItemLink
-                  key={p.id}
-                  to={`/micro-blog/${p.id}`}
-                  title={p.title || p.text || "Untitled"}
-                  meta={p.title ? p.text : ""}
-                  badges={p.postType && <Badge>{p.postType}</Badge>}
-                />
-              ))}
-            </DigestSection>
+          {hasBooks && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <DigestSection
+                icon="auto_stories"
+                label="Books Read"
+                total={monthBooks.length}
+                viewAllTo="/books"
+              >
+                {monthBooks.slice(0, CAP).map((b) => (
+                  <ItemLink
+                    key={b.id}
+                    to={`/books/${b.id}`}
+                    title={b.title}
+                    meta={b.author ? `by ${b.author}` : ""}
+                    badges={b.language && <Badge>{b.language}</Badge>}
+                  />
+                ))}
+              </DigestSection>
+            </div>
           )}
         </div>
       ) : (
