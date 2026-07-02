@@ -21,7 +21,7 @@ const SkeletonCard = () => (
 // Live Substack RSS feed (served as JSON by functions/rss-feed.js). Renders the
 // full feed inside a scroll region, revealing `batchSize` posts at a time as the
 // user scrolls to the bottom (IntersectionObserver on a sentinel).
-const LatestPosts = ({ batchSize = 10 }) => {
+const LatestPosts = ({ batchSize = 5 }) => {
   const [items, setItems] = useState([]);
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const [visibleCount, setVisibleCount] = useState(batchSize);

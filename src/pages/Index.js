@@ -119,7 +119,7 @@ const Index = () => (
 
       <section>
         <SectionHeader label="Latest Writing" />
-        <LatestPosts batchSize={10} />
+        <LatestPosts batchSize={5} />
       </section>
 
       <section>

@@ -23,6 +23,8 @@ patch for fixes and tweaks.
 
 - **Homepage** (`src/pages/Index.js`): Added the "Latest Writing" and "Monthly Digest" sections above "Explore".
 - **Blogs/treks/sports read-mappers** (`src/lib/api/{blogs,treks,sports}.js`): Expose `created_at` from each row (read-only) so the digest's date fallback can use it.
+- **Latest Writing feed default** (`src/components/Index/LatestPosts.js`, `src/pages/Index.js`): The RSS feed now shows 5 Substack posts initially (and reveals 5 more per scroll) instead of 10.
+- **Project docs** (`CLAUDE.md`): Rewrote the stale content-pipeline instructions — the markdown/`cms:sync` CMS flow was removed, so the docs now describe Supabase as the single source of truth (admin dashboard, `src/lib/api/*`, `media` storage bucket) and note the new homepage RSS/digest sections.
 
 ---
 
