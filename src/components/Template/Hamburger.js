@@ -128,6 +128,7 @@ const Hamburger = () => {
         onClick={() => setOpen((v) => !v)}
         className="p-2 text-stone-600 dark:text-stone-400 hover:text-secondary transition-colors"
         aria-label="Toggle Menu"
+        data-tour="hamburger"
       >
         <span className="material-symbols-outlined text-2xl">
           {open ? 'close' : 'menu'}

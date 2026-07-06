@@ -9,6 +9,21 @@ patch for fixes and tweaks.
 
 ---
 
+## [v10.3.0] — 2026-07-06
+
+### Added
+- **"My World" interactive 3D globe on homepage** (`src/components/Index/GlobeShowcase.js`, `src/components/Index/GlobeRenderer.js`, `src/components/Index/globe/`, `src/data/homeFeatures.js`): A new homepage section renders an abstract WebGL globe (react-globe.gl/three.js) with six themed "worlds" — Marathons, Treks, Writer, Reader, Creator, Person — each anchoring a spiral of clickable content pins (races, treks, blog posts, books, projects, site features), procedural hexagon terrain, a radar ring, and a cross-fading background artwork. Clicking a pin opens a rich detail card (extended MindMapDetailPanel with a new `feature` type). The globe and its three.js dependency are code-split via React.lazy and only mount once the section scrolls into view.
+- **Globe exploration features** (`src/components/Index/GlobeRenderer.js`, `src/components/Index/globe/`): Always-visible domain legend chips with item counts (click to fly), an active-domain glass info card with a "View all" link, constellation arcs linking the active domain's pins, an auto-play mode that drifts world-to-world, a "Replay my journey" mode that rotates the globe through all six worlds in turn — round-robin, a few stops per world — with a comet arc and section-labelled captions, a dark-mode twinkling starfield, a gamified "worlds explored" tracker with a one-time confetti celebration, a first-visit "drag to explore" coach mark, and shareable deep links (`/?world=treks`).
+- **Get Started site tour with per-page walkthroughs** (`src/components/Template/TourGuide.js`, `src/components/Template/TourMount.js`, `src/context/TourContext.js`, `src/data/tourSteps.js`, `src/components/Template/FloatingToggle.js`): A guided walkthrough (react-joyride, lazy-loaded only when started) launched from a new floating "Get Started" button above the dark-mode toggle. Each page has its own content-aware tour keyed by route — the homepage walks the whole menu bar (opening the "More" dropdown to reveal its items) plus the globe/stats/explore highlights, while every other page spotlights its own content (e.g. the Sports view tabs, the 100-Days progress map, the Micro Blog search). Steps whose targets aren't visible at the current breakpoint are filtered out, so desktop-nav vs. mobile-hamburger steps swap automatically. First-time visitors get a dismissible "take the tour?" prompt bubble.
+
+### Changed
+- **Homepage feature list hoisted** (`src/data/homeFeatures.js`, `src/pages/Index.js`): The 12-entry feature-grid array moved out of Index.js into a shared data module so both the feature grid and the new globe pins consume the same source of truth.
+- **Globe scroll rotation refined** (`src/components/Index/GlobeRenderer.js`): Page scroll still drifts the globe between worlds, but gentler, and it pauses while dragging, while a detail card is open, when the section is off-screen, and under `prefers-reduced-motion`.
+- **Globe accessibility & mobile** (`src/components/Index/GlobeRenderer.js`): Pins are keyboard-focusable (Enter/Space opens details), pin labels declutter to hover/zoom reveal, controls are always visible on touch devices, and all animated extras respect `prefers-reduced-motion`.
+- **Globe image assets compressed** (`public/images/globe/`): Background artwork and globe textures converted from 0.6–1.2MB PNGs to ≤235KB JPEGs; six unused per-domain texture PNGs (~6.7MB), the unused earth day/night textures, and the obsolete `src/data/geo/placeCoordinates.js` lookup were removed.
+
+---
+
 ## [v10.2.4] — 2026-06-30
 
 ### Fixed

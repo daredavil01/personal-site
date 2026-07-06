@@ -60,7 +60,7 @@ const TreksPage = () => {
 
         {/* Tab Navigation */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-          <div className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
+          <div data-tour="treks-views" className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
               let activeColor;

@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ContentProvider } from "./context/ContentContext";
+import { TourProvider } from "./context/TourContext";
+import TourMount from "./components/Template/TourMount";
 import Main from "./layouts/Main"; // fallback for lazy pages
 import "./tailwind.css"; // Tailwind globals
 import "./static/css/main.scss"; // All of our styles
@@ -41,8 +43,10 @@ const App = () => (
   <HelmetProvider>
     <ContentProvider>
       <BrowserRouter basename={PUBLIC_URL}>
-        <Suspense fallback={<Main />}>
-          <Routes>
+        <TourProvider>
+          <TourMount />
+          <Suspense fallback={<Main />}>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/projects" element={<Projects />} />
@@ -67,9 +71,10 @@ const App = () => (
             <Route path="/interactive-me" element={<InteractiveMePage />} />
             <Route path="/mindmap" element={<MindMap />} />
             <Route path="/admin/*" element={<AdminApp />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </TourProvider>
       </BrowserRouter>
     </ContentProvider>
   </HelmetProvider>

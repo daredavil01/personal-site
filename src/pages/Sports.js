@@ -50,7 +50,7 @@ const SportsPage = () => {
     <Main>
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
-        <header>
+        <header data-tour="sports-hero">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
             <div>
               <span className="font-label text-secondary uppercase tracking-[0.3em] font-bold text-xs mb-4 block">
@@ -73,7 +73,7 @@ const SportsPage = () => {
 
         {/* Tab Navigation */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-          <div className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
+          <div data-tour="sports-views" className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
               const activeColor = isActive
@@ -93,6 +93,7 @@ const SportsPage = () => {
 
           <button
             onClick={handleShare}
+            data-tour="sports-share"
             className="flex items-center gap-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-950 px-5 py-2.5 rounded-lg font-label text-xs uppercase tracking-widest font-bold transition-colors shadow-sm"
           >
             <span className="material-symbols-outlined text-[16px]">

@@ -8,7 +8,7 @@ const Posts = () => {
 
   return (
     <article className="w-full flex flex-col gap-8">
-      <div>
+      <div data-tour="instagram-hero">
         <h1 className="font-headline text-3xl md:text-5xl font-bold text-stone-900 dark:text-stone-100 mb-4">
           Some Good Posts!
         </h1>

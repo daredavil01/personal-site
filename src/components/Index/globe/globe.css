@@ -1,0 +1,66 @@
+/* Pin labels: hidden by default, revealed on hover/focus or when zoomed in. */
+.globe-pin {
+  outline: none;
+}
+.globe-pin .globe-pin-icon {
+  transition: transform 0.2s ease;
+}
+.globe-pin:hover .globe-pin-icon,
+.globe-pin:focus-visible .globe-pin-icon {
+  transform: scale(1.25);
+}
+.globe-pin .globe-pin-label {
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.globe-pin:hover .globe-pin-label,
+.globe-pin:focus-visible .globe-pin-label,
+.globe-zoomed .globe-pin .globe-pin-label {
+  opacity: 1;
+  transform: none;
+}
+
+/* First-visit coach mark drag hint */
+@keyframes globe-drag-hint {
+  0%,
+  100% {
+    transform: translateX(-16px);
+  }
+  50% {
+    transform: translateX(16px);
+  }
+}
+.globe-drag-hint {
+  animation: globe-drag-hint 1.8s ease-in-out infinite;
+}
+
+/* Small pop-in used by toasts, captions and the coach mark */
+@keyframes globe-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.globe-pop-in {
+  animation: globe-pop-in 0.3s ease-out both;
+}
+
+/* Legend chip strip: horizontally scrollable without a visible scrollbar */
+.globe-chip-scroll {
+  scrollbar-width: none;
+}
+.globe-chip-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe-drag-hint,
+  .globe-pop-in {
+    animation: none;
+  }
+}

@@ -3,90 +3,9 @@ import { Link } from "react-router-dom";
 import Main from "../layouts/Main";
 import LifeStats from "../components/Index/LifeStats";
 import OneMinuteIntro from "../components/common/OneMinuteIntro";
-
-const SectionHeader = ({ label }) => (
-  <div className="flex items-center gap-4 mb-6">
-    <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
-      {label}
-    </p>
-    <div className="flex-1 h-px bg-stone-100 dark:bg-stone-800" />
-  </div>
-);
-
-const features = [
-  {
-    title: "About Me",
-    desc: "I am a software developer specialized in full-stack development. My interests span technology, society, and marathons. I critically engage in new developments and aim to better myself every day.",
-    path: "/about",
-    icon: "person",
-  },
-  {
-    title: "Now",
-    desc: "What I'm doing lately: from developing AI-focused blogs and finishing the Tata Ultra 50K Marathon to publishing thoughts on our digital identities.",
-    path: "/now",
-    icon: "schedule",
-  },
-  {
-    title: "Challenges",
-    desc: "Tracking personal and professional hurdles like the '#100DaysToOffload' blogging challenge to maintain consistency and growth.",
-    path: "/challenges",
-    icon: "hotel_class",
-  },
-  {
-    title: "Digital Library",
-    desc: "An interactive catalog of my reading journey, featuring reviews and ratings for over 100 books that have shaped my perspective.",
-    path: "/books",
-    icon: "auto_stories",
-  },
-  {
-    title: "Project Archive",
-    desc: "A showcase of technical experiments and applications, including social platforms and management tools built with modern tech stacks.",
-    path: "/projects",
-    icon: "terminal",
-  },
-  {
-    title: "Sports Log",
-    desc: "A record of my endurance journey, featuring marathon results, training logs, and personal bests from 10K to Full Marathons.",
-    path: "/sports",
-    icon: "fitness_center",
-  },
-  {
-    title: "Interactive Me",
-    desc: "A shuffled, image-first visual timeline of every marathon and mountain trek — cards connected by curves, auto-scrolling through the moments.",
-    path: "/interactive-me",
-    icon: "timeline",
-  },
-  {
-    title: "Mind Map",
-    desc: "Everything on this site visualised in one place — an interactive radial map of books, marathons, treks, projects, and blogs. Click any bubble to explore.",
-    path: "/mindmap",
-    icon: "account_tree",
-  },
-  {
-    title: "Vital Stats",
-    desc: "A data-driven snapshot of my activities: from the number of books read and kilometers run to the lines of code written.",
-    path: "/stats",
-    icon: "query_stats",
-  },
-  {
-    title: "Visual Narrative",
-    desc: "A curated archive of captured moments, textures, and digital stories, preserved from a time before my Instagram account was deleted.",
-    path: "/instagram",
-    icon: "photo_library",
-  },
-  {
-    title: "Professional Resume",
-    desc: "Explore my professional background, from full-stack engineering to my work with social organizations and geotechnological research.",
-    path: "/resume",
-    icon: "badge",
-  },
-  {
-    title: "Get In Touch",
-    desc: "Wanna discuss technology, society, or marathons? Reach out for collaborations, discussions, or just a friendly chat.",
-    path: "/contact",
-    icon: "alternate_email",
-  },
-];
+import GlobeShowcase from "../components/Index/GlobeShowcase";
+import SectionHeader from "../components/common/SectionHeader";
+import HOME_FEATURES from "../data/homeFeatures";
 
 const Index = () => (
   <Main>
@@ -101,7 +20,11 @@ const Index = () => (
         </p>
       </header>
 
-      <LifeStats />
+      <GlobeShowcase />
+
+      <div data-tour="stats">
+        <LifeStats />
+      </div>
 
       <section>
         <SectionHeader label="In 1 Minute" />
@@ -115,10 +38,10 @@ const Index = () => (
         </Link>
       </section>
 
-      <section>
+      <section data-tour="explore">
         <SectionHeader label="Explore" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {features.map((item) => (
+          {HOME_FEATURES.map((item) => (
             <div key={item.path} className="p-8 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl hover:border-secondary dark:hover:border-secondary transition-colors group flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">

@@ -321,7 +321,7 @@ const MicroBlog = () => {
         </header>
 
         {/* Tabs */}
-        <div className="flex border-b border-stone-100 dark:border-stone-800">
+        <div data-tour="micro-tabs" className="flex border-b border-stone-100 dark:border-stone-800">
           {[{ value: "list", label: "Posts" }, { value: "stats", label: "Stats" }].map(({ value: v, label }) => (
             <div
               key={v}
@@ -347,7 +347,7 @@ const MicroBlog = () => {
         {tab === "list" && (
           <>
             {/* Search + filters */}
-            <section>
+            <section data-tour="micro-search">
               <input
                 type="search"
                 value={searchInput}
