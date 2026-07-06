@@ -164,7 +164,7 @@ const Stats = () => {
         </section>
 
         {/* Bento Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
+        <div data-tour="stats-grid" className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
 
           {/* Quick Profile Card */}
           <div className="col-span-1 md:col-span-4 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-between transition-colors shadow-sm">

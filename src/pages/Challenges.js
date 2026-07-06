@@ -37,7 +37,7 @@ const Challenges = () => {
           </section>
 
           {/* Active Challenges Section */}
-          <section>
+          <section data-tour="challenges-active">
             <h2 className="font-label text-[10px] uppercase tracking-[0.2em] text-stone-900 dark:text-stone-300 font-bold mb-6">Active Challenges</h2>
             <div className="grid grid-cols-1 gap-6">
               <Link

@@ -231,7 +231,7 @@ const OneHundredDays = () => {
         </header>
 
         {/* Progress ring + pace stats */}
-        <section className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
+        <section data-tour="offload-progress" className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <ProgressRing value={completion} />
             <div className="flex-1 w-full">
@@ -262,7 +262,7 @@ const OneHundredDays = () => {
         </section>
 
         {/* Calendar heatmap — cells with posts are clickable */}
-        <section>
+        <section data-tour="offload-calendar">
           <div className="flex items-center gap-4 mb-6">
             <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
               Progress Map ({YEAR})
@@ -353,7 +353,7 @@ const OneHundredDays = () => {
         </section>
 
         {/* Explorer: search + filters + post cards */}
-        <section>
+        <section data-tour="offload-explore">
           <div className="flex items-center gap-4 mb-6">
             <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
               Explore Posts

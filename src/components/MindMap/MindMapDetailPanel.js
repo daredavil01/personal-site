@@ -1,17 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
 const difficultyClass = (level) => {
   switch (level?.toLowerCase()) {
-    case 'easy': return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400';
-    case 'medium': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400';
-    case 'hard': return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400';
-    default: return 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-400';
+    case "easy":
+      return "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400";
+    case "medium":
+      return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400";
+    case "hard":
+      return "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400";
+    default:
+      return "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-400";
   }
 };
 
 const MetaChip = ({ icon, text }) => (
   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-400 text-sm">
-    <span className="material-symbols-outlined text-base text-secondary">{icon}</span>
+    <span className="material-symbols-outlined text-base text-secondary">
+      {icon}
+    </span>
     <span className="font-label font-bold">{text}</span>
   </div>
 );
@@ -25,8 +31,11 @@ const BookDetail = ({ book }) => (
     </div>
     {book.category && (
       <div className="flex flex-wrap gap-2">
-        {book.category.split(',').map((c) => (
-          <span key={c} className="px-2 py-0.5 rounded-full text-[10px] font-label font-bold uppercase tracking-widest bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400">
+        {book.category.split(",").map((c) => (
+          <span
+            key={c}
+            className="px-2 py-0.5 rounded-full text-[10px] font-label font-bold uppercase tracking-widest bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400"
+          >
             {c.trim()}
           </span>
         ))}
@@ -40,7 +49,10 @@ const BookDetail = ({ book }) => (
     {book.tags && (
       <div className="flex flex-wrap gap-2">
         {book.tags.map((t) => (
-          <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-label bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400">
+          <span
+            key={t}
+            className="px-2 py-0.5 rounded-full text-[10px] font-label bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+          >
             #{t}
           </span>
         ))}
@@ -51,12 +63,21 @@ const BookDetail = ({ book }) => (
 
 const MarathonDetail = ({ race }) => (
   <div className="space-y-4">
+    {race.slideImages?.[0]?.url && (
+      <img
+        src={race.slideImages[0].url}
+        alt={race.title}
+        className="w-full h-48 object-cover rounded-xl"
+      />
+    )}
     <div className="flex flex-wrap gap-4">
       <MetaChip icon="calendar_today" text={race.date} />
       {race.place && <MetaChip icon="location_on" text={race.place} />}
       <MetaChip icon="timer" text={race.time} />
       <MetaChip icon="social_leaderboard" text={race.distance} />
-      {race.bibNumber && <MetaChip icon="confirmation_number" text={`Bib #${race.bibNumber}`} />}
+      {race.bibNumber && (
+        <MetaChip icon="confirmation_number" text={`Bib #${race.bibNumber}`} />
+      )}
     </div>
     {race.description && (
       <p className="font-body text-stone-600 dark:text-stone-300 text-base leading-relaxed italic border-l-4 border-blue-400/40 pl-4 py-1">
@@ -68,13 +89,35 @@ const MarathonDetail = ({ race }) => (
 
 const TrekDetail = ({ trek }) => (
   <div className="space-y-4">
+    {trek.slideImages?.[0]?.url && (
+      <img
+        src={trek.slideImages[0].url}
+        alt={trek.fort_name}
+        className="w-full h-48 object-cover rounded-xl"
+      />
+    )}
     <div className="flex flex-wrap gap-4 items-center">
       <MetaChip icon="calendar_today" text={trek.date} />
       <MetaChip icon="schedule" text={trek.trek_time} />
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-label font-bold uppercase tracking-widest ${difficultyClass(trek.endurance_level)}`}>
+      <span
+        className={`px-2 py-0.5 rounded-full text-[10px] font-label font-bold uppercase tracking-widest ${difficultyClass(trek.endurance_level)}`}
+      >
         {trek.endurance_level}
       </span>
     </div>
+  </div>
+);
+
+const FeatureDetail = ({ feature }) => (
+  <div className="space-y-4">
+    <div className="flex justify-center py-6 bg-stone-50 dark:bg-stone-800/50 rounded-xl mb-4 border border-secondary/40">
+      <span className="material-symbols-outlined text-6xl text-secondary">
+        {feature.icon}
+      </span>
+    </div>
+    <p className="font-body text-stone-600 dark:text-stone-300 text-base leading-relaxed border-l-4 border-secondary/40 pl-4 py-1">
+      {feature.desc}
+    </p>
   </div>
 );
 
@@ -109,7 +152,10 @@ const BlogDetail = ({ blog }) => (
     {blog.blog_tags && (
       <div className="flex flex-wrap gap-2">
         {blog.blog_tags.map((t) => (
-          <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-label bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400">
+          <span
+            key={t}
+            className="px-2 py-0.5 rounded-full text-[10px] font-label bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+          >
             #{t}
           </span>
         ))}
@@ -119,23 +165,52 @@ const BlogDetail = ({ blog }) => (
 );
 
 const ctaConfig = {
-  book: { label: 'Browse All Books', path: '/books', color: 'bg-orange-500 hover:bg-orange-600' },
-  marathon: { label: 'View All Races', path: '/sports', color: 'bg-blue-600 hover:bg-blue-700' },
-  trek: { label: 'View All Treks', path: '/treks', color: 'bg-green-600 hover:bg-green-700' },
-  project: { label: 'View All Projects', path: '/projects', color: 'bg-purple-600 hover:bg-purple-700' },
-  blog: { label: 'Read All Posts', path: '/100-days-to-offload', color: 'bg-pink-600 hover:bg-pink-700' },
+  book: {
+    label: "Browse All Books",
+    path: "/books",
+    color: "bg-orange-500 hover:bg-orange-600",
+  },
+  marathon: {
+    label: "View All Races",
+    path: "/sports",
+    color: "bg-blue-600 hover:bg-blue-700",
+  },
+  trek: {
+    label: "View All Treks",
+    path: "/treks",
+    color: "bg-green-600 hover:bg-green-700",
+  },
+  project: {
+    label: "View All Projects",
+    path: "/projects",
+    color: "bg-purple-600 hover:bg-purple-700",
+  },
+  blog: {
+    label: "Read All Posts",
+    path: "/100-days-to-offload",
+    color: "bg-pink-600 hover:bg-pink-700",
+  },
+  feature: {
+    label: "Explore Section",
+    path: "",
+    color: "bg-secondary hover:bg-secondary/90 text-white",
+  },
 };
 
 const MindMapDetailPanel = ({ item, onClose }) => {
   useEffect(() => {
-    const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    const handleEsc = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'auto'; };
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, []);
 
   if (!item) return null;
@@ -147,6 +222,7 @@ const MindMapDetailPanel = ({ item, onClose }) => {
     trek: data.fort_name,
     project: data.title,
     blog: data.blog_title,
+    feature: data.title,
   };
 
   const cta = ctaConfig[type];
@@ -160,11 +236,11 @@ const MindMapDetailPanel = ({ item, onClose }) => {
   const externalLink = externalLinkMap[type] || null;
 
   const externalLabelMap = {
-    book: 'Read Review',
-    marathon: 'View Certificate',
-    trek: 'Read Blog Post',
-    project: 'View Project',
-    blog: 'Read Post',
+    book: "Read Review",
+    marathon: "View Certificate",
+    trek: "Read Blog Post",
+    project: "View Project",
+    blog: "Read Post",
   };
   const externalLabel = externalLabelMap[type] || null;
 
@@ -190,11 +266,12 @@ const MindMapDetailPanel = ({ item, onClose }) => {
         </div>
 
         <div className="p-6 flex-1">
-          {type === 'book' && <BookDetail book={data} />}
-          {type === 'marathon' && <MarathonDetail race={data} />}
-          {type === 'trek' && <TrekDetail trek={data} />}
-          {type === 'project' && <ProjectDetail project={data} />}
-          {type === 'blog' && <BlogDetail blog={data} />}
+          {type === "book" && <BookDetail book={data} />}
+          {type === "marathon" && <MarathonDetail race={data} />}
+          {type === "trek" && <TrekDetail trek={data} />}
+          {type === "project" && <ProjectDetail project={data} />}
+          {type === "blog" && <BlogDetail blog={data} />}
+          {type === "feature" && <FeatureDetail feature={data} />}
         </div>
 
         <div className="p-6 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 sticky bottom-0 z-10 flex flex-col sm:flex-row gap-3">
@@ -209,8 +286,12 @@ const MindMapDetailPanel = ({ item, onClose }) => {
             </a>
           )}
           <a
-            href={cta.path}
-            className="flex-1 block text-center bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 px-5 py-3.5 rounded-xl font-label font-bold text-sm uppercase tracking-widest transition-all"
+            href={type === "feature" ? data.path : cta.path}
+            className={`flex-1 block text-center px-5 py-3.5 rounded-xl font-label font-bold text-sm uppercase tracking-widest transition-all ${
+              type === "feature"
+                ? cta.color
+                : "bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300"
+            }`}
           >
             {cta.label}
           </a>

@@ -33,7 +33,7 @@ const Resume = () => {
         {/* Main Content Grid */}
         <div className="grid grid-cols-12 gap-6 w-full">
           {/* Primary Interests / Summary (Bento Large) */}
-          <section className="col-span-12 md:col-span-7 bg-secondary/[0.03] p-10 rounded-xl relative overflow-hidden group border border-secondary/10">
+          <section data-tour="resume-focus" className="col-span-12 md:col-span-7 bg-secondary/[0.03] p-10 rounded-xl relative overflow-hidden group border border-secondary/10">
             <div className="relative z-10">
               <span className="font-label text-[10px] uppercase tracking-widest text-stone-400">Focus Area</span>
               <h3 className="font-headline text-3xl mt-2 mb-6 text-stone-800">Human-AI Interface Design</h3>

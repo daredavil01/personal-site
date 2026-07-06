@@ -14,7 +14,7 @@ const Now = () => {
     <Main>
       <div className="flex flex-col gap-10 w-full">
         {/* Hero Section */}
-        <section>
+        <section data-tour="now-hero">
           <div className="max-w-3xl">
             <span className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4 block">
               Current Status
@@ -71,7 +71,9 @@ const Now = () => {
           </section>
         )}
 
-        <NowDocument months={nowData} />
+        <div data-tour="now-timeline">
+          <NowDocument months={nowData} />
+        </div>
       </div>
     </Main>
   );

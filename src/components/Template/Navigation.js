@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import routes from "../../data/routes";
+import { useTour } from "../../context/TourContext";
 import Hamburger from "./Hamburger";
 import Logo from "./Logo";
 
 const Navigation = () => {
   const location = useLocation();
+  // The site tour can force the "More" dropdown open to spotlight its items.
+  const { forcedMoreOpen } = useTour();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const moreOpen = isMoreDropdownOpen || forcedMoreOpen;
   const [openDropdown, setOpenDropdown] = useState(null); // Track which item's dropdown is open
 
   const indexRoute = routes.find((l) => l.index);
@@ -41,6 +45,7 @@ const Navigation = () => {
                 >
                   <Link
                     to={l.path}
+                    data-tour={`nav-${l.path.slice(1)}`}
                     className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
                       isActive
                         ? "text-secondary font-bold"
@@ -97,18 +102,19 @@ const Navigation = () => {
             <span className="text-stone-100 dark:text-stone-800 ml-4 pointer-events-none">|</span>
             <button
               aria-haspopup="true"
-              aria-expanded={isMoreDropdownOpen}
+              aria-expanded={moreOpen}
+              data-tour="nav-more"
               className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
-                isMoreDropdownOpen ? "text-stone-900 dark:text-stone-100" : "text-stone-500 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
+                moreOpen ? "text-stone-900 dark:text-stone-100" : "text-stone-500 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
               }`}
             >
               More
-              <span className={`material-symbols-outlined text-[12px] transition-transform duration-300 ${isMoreDropdownOpen ? 'rotate-180' : ''}`}>expand_more</span>
+              <span className={`material-symbols-outlined text-[12px] transition-transform duration-300 ${moreOpen ? 'rotate-180' : ''}`}>expand_more</span>
             </button>
 
             {/* Dropdown Menu */}
             <div className={`absolute top-full right-0 mt-0 w-48 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-2xl overflow-hidden transition-all duration-300 origin-top rounded-b-xl ${
-              isMoreDropdownOpen ? "opacity-100 scale-y-100 visible" : "opacity-0 scale-y-95 invisible"
+              moreOpen ? "opacity-100 scale-y-100 visible" : "opacity-0 scale-y-95 invisible"
             }`}
             >
               <div className="py-2">
