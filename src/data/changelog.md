@@ -9,7 +9,7 @@ patch for fixes and tweaks.
 
 ---
 
-## [v10.3.0] — 2026-07-06
+## [v10.4.0] — 2026-07-06
 
 ### Added
 - **"My World" interactive 3D globe on homepage** (`src/components/Index/GlobeShowcase.js`, `src/components/Index/GlobeRenderer.js`, `src/components/Index/globe/`, `src/data/homeFeatures.js`): A new homepage section renders an abstract WebGL globe (react-globe.gl/three.js) with six themed "worlds" — Marathons, Treks, Writer, Reader, Creator, Person — each anchoring a spiral of clickable content pins (races, treks, blog posts, books, projects, site features), procedural hexagon terrain, a radar ring, and a cross-fading background artwork. Clicking a pin opens a rich detail card (extended MindMapDetailPanel with a new `feature` type). The globe and its three.js dependency are code-split via React.lazy and only mount once the section scrolls into view.
@@ -21,6 +21,23 @@ patch for fixes and tweaks.
 - **Globe scroll rotation refined** (`src/components/Index/GlobeRenderer.js`): Page scroll still drifts the globe between worlds, but gentler, and it pauses while dragging, while a detail card is open, when the section is off-screen, and under `prefers-reduced-motion`.
 - **Globe accessibility & mobile** (`src/components/Index/GlobeRenderer.js`): Pins are keyboard-focusable (Enter/Space opens details), pin labels declutter to hover/zoom reveal, controls are always visible on touch devices, and all animated extras respect `prefers-reduced-motion`.
 - **Globe image assets compressed** (`public/images/globe/`): Background artwork and globe textures converted from 0.6–1.2MB PNGs to ≤235KB JPEGs; six unused per-domain texture PNGs (~6.7MB), the unused earth day/night textures, and the obsolete `src/data/geo/placeCoordinates.js` lookup were removed.
+
+## [v10.3.0] — 2026-07-02
+
+### Added
+
+- **Substack RSS Pages Function** (`functions/rss-feed.js`): New Cloudflare Pages Function that fetches the "The Wanderer's Technical Anecdotes" Substack feed server-side (Substack blocks CORS), parses the `<item>` blocks with a dependency-free regex parser, edge-caches the result for 30 minutes, and serves it as same-origin JSON at `/rss-feed`.
+- **Latest Writing feed** (`src/components/Index/LatestPosts.js`): Homepage section that renders the live Substack feed in a scroll region, revealing 10 posts at a time as the reader scrolls (IntersectionObserver on a sentinel). Fails silently if the feed is unavailable.
+- **Monthly Digest dashboard** (`src/components/Index/MonthlyDigest.js`): Auto-aggregating homepage dashboard that groups blogs, micro-posts, treks, marathons, and books by their content month, with a dropdown month picker (only months that have content), KPI count-tiles, and a capped list per type (~6 items, "View all →" to the section page). Sections are laid out in fixed rows — Blogs + Micro Posts, then Treks + Marathons, then Books. Items link to their internal detail routes. (Books have no month-precise date, so they bucket by `created_at`.)
+- **Month/date helpers** (`src/lib/monthDigest.js`): Dependency-free `parseContentDate`/`monthKey`/`monthLabel`/`monthRange`/`itemMonthKey` that reconcile the three content date formats (blogs `YYYY-MM-DD`, treks `DD-MM-YYYY`, sports `Month DD, YYYY`) plus microblog ISO dates, falling back to `created_at`.
+- **Microblog month queries** (`src/lib/api/microblog.js`): `getMicroblogMonths()` (distinct content months for the dropdown) and `getMicroblogByMonth()` (capped, counted month slice via the `date` index).
+
+### Changed
+
+- **Homepage** (`src/pages/Index.js`): Added the "Latest Writing" and "Monthly Digest" sections above "Explore".
+- **Blogs/treks/sports read-mappers** (`src/lib/api/{blogs,treks,sports}.js`): Expose `created_at` from each row (read-only) so the digest's date fallback can use it.
+- **Latest Writing feed default** (`src/components/Index/LatestPosts.js`, `src/pages/Index.js`): The RSS feed now shows 5 Substack posts initially (and reveals 5 more per scroll) instead of 10.
+- **Project docs** (`CLAUDE.md`): Rewrote the stale content-pipeline instructions — the markdown/`cms:sync` CMS flow was removed, so the docs now describe Supabase as the single source of truth (admin dashboard, `src/lib/api/*`, `media` storage bucket) and note the new homepage RSS/digest sections.
 
 ---
 

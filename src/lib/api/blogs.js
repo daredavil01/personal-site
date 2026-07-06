@@ -14,6 +14,7 @@ const blogs = createResource({
     blog_link: r.blog_link,
     blog_platform: r.blog_platform,
     language: r.language,
+    created_at: r.created_at,
   }),
   toRow: (v) => ({
     blog_title: v.blog_title,

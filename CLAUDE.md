@@ -7,25 +7,55 @@ React 18 single-page application (personal portfolio). Key stack:
 - **React 18** with `react-router-dom` v6 for routing
 - **react-helmet-async** for per-page `<head>` metadata
 - **Tailwind CSS** for styling
-- **Decap CMS** (`/cms/`, GitHub backend) for content editing
-- **Built with Vite** (`vite.config.js`) — JSX lives in `.js` files via an esbuild loader shim; `process.env.PUBLIC_URL` is shimmed to `""` with `define` (the generated data files embed it — do not regenerate them to remove it).
-- **Deployed on Cloudflare Pages** — build command is `npm run build` (`vite build`, output in `build/`). A `prebuild` hook runs `npm run cms:sync` so the build always regenerates `src/data/*.js` from the CMS markdown.
+- **Supabase** (Postgres + Storage + Row-Level Security) as the content store and backend
+- **Built with Vite** (`vite.config.js`) — JSX lives in `.js` files via an esbuild loader shim; `process.env.PUBLIC_URL` is shimmed to `""` with `define`.
+- **Deployed on Cloudflare Pages** — build command is `npm run build` (`vite build`, output in `build/`). Server-side logic lives in `functions/` as Cloudflare Pages Functions (file-based routing).
 
-## Content Pipeline (Single Source of Truth)
+## Content Store (Single Source of Truth)
 
-**`src/cms-content/**/*.md` is the canonical content store.** The JS files in
-`src/data/` are generated from it by `npm run cms:sync`.
+**All dynamic content lives in Supabase Postgres.** There is no markdown/CMS
+pipeline — the old `src/cms-content/` + `npm run cms:sync` flow, `public/cms/`
+Decap config, and generated `src/data/*.js` content files were removed. Supabase
+is canonical.
 
-- **Never edit generated `src/data/*.js` files by hand** (`books.js`, `sports.js`,
-  `treks.js`, `instagram.js`, `projects.js`, `100DaysToOffload.js`, `resume/*.js`).
-  Edit or add the markdown file in `src/cms-content/`, then run `npm run cms:sync`
-  and commit **both** the markdown and the regenerated JS.
-- CI fails if `src/data/` drifts from the markdown (`cms:sync` + `git diff --exit-code`).
-- Hand-maintained files that are NOT generated: `src/data/changelog.md`,
-  `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js`,
-  `src/data/stats/personal.js`, `src/data/pageMeta.js`.
-- `scripts/seed-cms-content.js` regenerates markdown FROM the JS files — only for
-  recovery when a JS file is known to be ahead. Normal flow never needs it.
+- **Schema:** `supabase/migrations/*.sql` (tables, RLS policies, indexes, RPCs).
+  Apply via the Supabase SQL editor or `supabase db push`.
+- **Client data access:** `src/lib/api/*.js` — each module wraps one table with the
+  `createResource` CRUD factory (`_crud.js`) and `fromRow` / `toRow` mappers.
+  Full lists are loaded lazily and cached through `src/context/ContentContext.js`,
+  which exposes hooks: `useBooks`, `useSports`, `useTreks`, `useProjects`,
+  `useBlogs`, `useInstagram`, `useResume`, `useNowMeta`, `useNowMonths`
+  (each returns `{ data, loading, error }`).
+- **Microblog is the exception** — 1,600+ rows, so it is **not** in the context.
+  Query it directly via `src/lib/api/microblog.js` (server-side paginated search
+  plus `getMicroblogMonths` / `getMicroblogByMonth` date helpers).
+- **Editing content:** the admin dashboard at `/admin` (`src/pages/admin/`). Forms
+  are schema-driven from `src/pages/admin/resources.js` — each resource's `fields`
+  match the shape its api's `toRow` expects. Postgres auto-assigns row `id`s.
+- **Bulk seeding scripts** (`scripts/`, require `SUPABASE_SERVICE_ROLE_KEY` in
+  `.env`): `npm run data:import` (`import-to-supabase.mjs`),
+  `npm run microblog:import` (Tumblr archive, idempotent upsert),
+  `npm run images:upload` (`upload-images-to-supabase.mjs`).
+- **Hand-maintained files NOT in Supabase:** `src/data/changelog.md`,
+  `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
+  `src/data/pageMeta.js`, `src/data/stats/personal.js`.
+
+## Environment Variables
+
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — client (baked into the
+  bundle by Vite). Public; committed in `wrangler.toml` `[vars]`.
+- `SUPABASE_SERVICE_ROLE_KEY` — **secret**, server/scripts only. Never commit;
+  set via `wrangler pages secret put` or the Cloudflare dashboard.
+
+## Images (Supabase Storage)
+
+Images live in the public **`media`** storage bucket, not the repo. Admin form
+image / `slideImages` fields upload through `src/lib/api/storage.js`
+(`uploadImage(file, folder)` → `media/<folder>/…` and returns the public URL).
+At read time, `toStorageUrl` / `toStorageImages` (in `src/lib/supabaseClient.js`)
+prefix stored relative paths with the bucket URL. **Always compress before
+uploading** (see Image Compression below) and group by type folder (`sports`,
+`treks`, etc.).
 
 ## Key File Locations
 
@@ -34,15 +64,27 @@ React 18 single-page application (personal portfolio). Key stack:
 | Changelog | `src/data/changelog.md` |
 | Page layout + Helmet | `src/layouts/Main.js` |
 | App routes | `src/App.js` |
-| CMS content (canonical) | `src/cms-content/` |
-| Generated data files | `src/data/` |
-| CMS config (collections) | `public/cms/config.yml` |
-| Markdown → JS sync | `scripts/sync-cms-to-data.js` |
-| Static HTML (favicons) | `public/index.html` |
+| Nav menu | `src/data/routes.js` |
+| Supabase client + storage helpers | `src/lib/supabaseClient.js` |
+| Content API layer (per table) | `src/lib/api/*.js` |
+| Content context hooks | `src/context/ContentContext.js` |
+| Admin dashboard | `src/pages/admin/` |
+| Admin form schema | `src/pages/admin/resources.js` |
+| DB schema / migrations | `supabase/migrations/` |
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
+| Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |
+
+## Homepage Sections
+
+`src/pages/Index.js` composes, in order: `LifeStats` (aggregate KPI tiles), an
+"In 1 Minute" intro, **`LatestPosts`** (live Substack RSS feed proxied by
+`functions/rss-feed.js`, scroll-to-reveal), **`MonthlyDigest`** (auto-aggregated
+monthly digest of blogs / treks / marathons / micro-posts — uses
+`src/lib/monthDigest.js` to reconcile the differing date formats), then the
+"Explore" grid. Section meta comes from `src/data/pageMeta.js`.
 
 ## Changelog Rule
 
@@ -86,26 +128,32 @@ Follow this exact format (taken from the existing entries):
 
 ## Dynamic Content Update Instructions
 
+Add/edit any content type through the **admin dashboard** (`/admin`), which writes
+to Supabase via `src/lib/api/*`. The field lists below are what to collect from the
+user; the concrete form schema (types, options, required flags) lives in
+`src/pages/admin/resources.js`. Postgres assigns the `id`.
+
 ### Image Compression (Required Before Adding Any Images)
 
-Before placing any image in `public/images/sports/` or `public/images/treks/`, compress it to keep page load fast.
+Before uploading any image (to the `media` bucket, e.g. for sports/treks slides),
+compress it to keep page load fast.
 
 **Option A — `sharp-cli` (Node.js, recommended):**
 
 ```bash
-npx sharp-cli --input path/to/image.jpg --output public/images/sports/ --format jpeg --quality 80
+npx sharp-cli --input path/to/image.jpg --output ./ --format jpeg --quality 80
 ```
 
 **Option B — ImageMagick:**
 
 ```bash
-convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" public/images/sports/output.jpg
+convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" output.jpg
 ```
 
 **Option C — convert HEIC → JPEG first (iPhone photos):**
 
 ```bash
-convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" public/images/sports/output.jpeg
+convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" output.jpeg
 ```
 
 **Target guidelines:**
@@ -120,133 +168,79 @@ convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" public/image
 
 ### Now Page
 
-**Data files:** `src/cms-content/now/months/*.md` (one file per month) and
-`src/cms-content/now/meta.md` (intro, rituals). The `/now` page reads these
-markdown files directly at runtime — there is no generated JS file.
+**Tables:** `now_months` + `now_meta` (Supabase), read via `useNowMonths` /
+`useNowMeta`. Edit in the admin dashboard → **Now · Months** (and the Now-meta
+editor, `src/pages/admin/NowMetaEditor.js`).
+
+Each `now_months` row has `month`, `year`, `isCurrent` (boolean), and a `sections`
+JSON blob keyed by any of `blogs`, `running`, `books`, `events`, `projects`,
+`website`, `stats`, `certificates`, `misc` (see existing rows for field shapes).
 
 When pushing a new month's update:
 
-1. Create `src/cms-content/now/months/YYYY-Month.md` (e.g. `2026-June.md`) with
-   frontmatter: `month`, `year`, `isCurrent: true`, and any of the section keys
-   `blogs`, `running`, `books`, `events`, `projects`, `website`, `stats`,
-   `certificates`, `misc` (see existing month files for the field shapes).
-2. Set `isCurrent: false` in the previous month's file.
-3. All older month files remain unchanged — the page sorts and archives them automatically.
+1. Add a `now_months` row with `isCurrent: true` and the month's `sections`.
+2. Set `isCurrent: false` on the previous month's row.
+3. Older rows stay unchanged — the page sorts/archives them automatically.
 
-**Questions to ask before editing:**
-
-- "What month and year is this update for? (e.g., May, 2026)"
-- "What are the bullet-point activities for this month?"
+**Questions to ask:** "What month and year? (e.g., May, 2026)" and "What are the
+bullet-point activities for this month?"
 
 ---
 
 ### Books Page
 
-**Data files:** `src/cms-content/books/*.md` (canonical) → generates `src/data/books.js`
+**Table:** `books` (`src/lib/api/books.js`), admin → **Books**. Collect:
 
-Ask the user these questions to collect all required fields:
+1. `title`, 2. `author`, 3. `category` (comma-separated genres),
+4. `language` (English/Marathi), 5. `translator` (optional),
+6. `blog_link` (optional review URL), 7. `blog_platform` (optional),
+8. `description` (2–4 sentences), 9. `year`, 10. `tags` (comma-separated).
 
-1. `title` — "What is the full title of the book?"
-2. `author` — "Who is the author? (full name)"
-3. `category` — "What category/genre? (comma-separated, e.g., Non-Fiction, Technology)"
-4. `language` — "Is the book in English or Marathi?"
-5. `translator` — "Is it a translated edition? If yes, who is the translator? (otherwise omit)"
-6. `blog_link` — "Do you have a review link? Paste the URL, or skip."
-7. `blog_platform` — "Which platform hosts the review? (Blogger, Canva, WordPress, Substack, Medium — or skip)"
-8. `description` — "Write a 2–4 sentence description of the book."
-9. `year` — "What year did you read this book?"
-10. `tags` — "List relevant tags (comma-separated, e.g., Technology, Non-Fiction, History)"
-
-**Mechanical steps:**
-
-- `id` = highest existing `id` in `src/cms-content/books/` + 1 (ids must be unique)
-- Create `src/cms-content/books/{id}-{slugified-title}.md` with the fields as YAML frontmatter (omit empty optional fields entirely; see existing files)
-- Run `npm run cms:sync` and commit both the markdown and `src/data/books.js`
-- No images needed
+No images.
 
 ---
 
 ### Sports Page
 
-**Data files:** `src/cms-content/sports/*.md` (canonical) → generates `src/data/sports.js`
-**Image directory:** `public/images/sports/`
+**Table:** `sports` (`src/lib/api/sports.js`), admin → **Sports / Races**. Collect:
 
-Ask the user these questions:
+1. `title`, 2. `date` (**Month DD, YYYY** — e.g. `February 22, 2026`),
+3. `description`, 4. `place`, 5. `distance` (`10 Kms` / `21 Kms` / `35 Kms` /
+`42 Kms` / `50 Kms`, or other), 6. `time` (HH:MM:SS), 7. `timeCertificateLink`,
+8. `bibNumber`, 9. Images.
 
-1. `title` — "What is the name of the marathon or race?"
-2. `date` — "What was the race date? (format: Month DD, YYYY — e.g., February 22, 2026)"
-3. `description` — "Short personal note about the race (1–2 sentences)."
-4. `place` — "Where was the race? (e.g., NDA, Pune)"
-5. `distance` — "What was the distance? Choose from: `5K`, `10K`, `21K`, `21 Kms`, `35 Kms`, `42 Kms`, `50 Kms`"
-6. `time` — "What was your finishing time? (format: HH:MM:SS — e.g., 01:26:40)"
-7. `timeCertificateLink` — "URL to your timing certificate or results page."
-8. `bibNumber` — "What was your bib number?"
-9. Images — "How many photos do you have? Please share them." (compress before adding — see Image Compression above)
-
-**Image naming convention:**
-
-- Format: `[event-abbreviation]_[YYYY]_[N].jpeg`
-- Example: `tum_2026_1.jpeg`, `tum_2026_2.jpeg`
-- Place in: `public/images/sports/`
-
-**Mechanical steps:**
-
-- `id` = highest existing `id` in `src/cms-content/sports/` + 1
-- Create `src/cms-content/sports/{id}-{slugified-title}.md` with the fields as YAML frontmatter
-- `slideImages` is a YAML list of `{ url: /images/sports/[filename], caption: "Slide N" }` (plain paths — the sync script adds the `PUBLIC_URL` prefix)
-- Run `npm run cms:sync` and commit both the markdown and `src/data/sports.js`
+Add photos via the form's **Images** (`slideImages`) field — they upload
+compressed to the `media` bucket (`sports` folder). Compress first.
 
 ---
 
 ### Treks Page
 
-**Data files:** `src/cms-content/treks/*.md` (canonical) → generates `src/data/treks.js`
-**Image directory:** `public/images/treks/`
+**Table:** `treks` (`src/lib/api/treks.js`), admin → **Treks**. Collect:
 
-Ask the user these questions:
+1. `fort_name`, 2. `trek_time` (e.g. `2 Hrs`), 3. `endurance_level`
+(Easy/Medium/Hard), 4. `date` (**DD-MM-YYYY** — e.g. `17-02-2019`),
+5. `blog_link` (optional), 6. Images.
 
-1. `fort_name` — "What is the name of the fort or trek location?"
-2. `trek_time` — "How long was the trek? (e.g., 2 Hrs, 22 Hours)"
-3. `endurance_level` — "What is the difficulty level? Choose from: `Easy`, `Medium`, `Hard`"
-4. `date` — "What was the trek date? (format: DD-MM-YYYY — e.g., 17-02-2019)"
-5. `blog_link` — "Do you have a blog post about this trek? Paste the URL, or leave blank."
-6. Images — "How many photos do you have? Please share them." (compress before adding — see Image Compression above)
-
-**Image naming convention:**
-
-- Format: `[fort-name-lowercase-underscores]_[N].jpg`
-- Example: `tikona_1.jpg`, `panhala_pawankhind_1.jpg`
-- Place in: `public/images/treks/`
-
-**Mechanical steps:**
-
-- `id` = highest existing `id` in `src/cms-content/treks/` + 1
-- Create `src/cms-content/treks/{id}-{slugified-fort-name}.md` with the fields as YAML frontmatter
-- `slideImages` is a YAML list of `{ url: /images/treks/[filename], caption: "Slide N" }`
-- Include `blog_link` only if the user provided one — omit the key entirely otherwise
-- Run `npm run cms:sync` and commit both the markdown and `src/data/treks.js`
+Add photos via the **Images** (`slideImages`) field — they upload to the `media`
+bucket (`treks` folder). Compress first.
 
 ---
 
 ### 100 Days To Offload
 
-**Data files:** `src/cms-content/100days/*.md` (canonical) → generates `src/data/100DaysToOffload.js`
+**Table:** `blogs` (`src/lib/api/blogs.js`), admin → **100 Days (Blogs)**. Collect:
 
-- `id` = highest existing `id` + 1; filename `YYYY-MM-DD-{slugified-title}.md`
-- Frontmatter fields: `id`, `blog_title`, `blog_description`, `blog_link`,
-  `blog_platform` (Substack/Medium/Ghost/WordPress/Other), `blog_date`
-  (YYYY-MM-DD), `language` (English/Marathi), `blog_tags` (list),
-  `challenge_id: 100_days_to_offload`
-- Run `npm run cms:sync` and commit both files
+- `blog_title`, `blog_description`, `blog_date` (**YYYY-MM-DD**), `blog_link`,
+  `blog_platform` (Substack/Medium/Ghost/WordPress/Other), `language`
+  (English/Marathi), `blog_tags` (list), `challenge_id` (`100_days_to_offload`).
 
 ---
 
 ### Micro-Blog Page
 
-**Canonical store:** the Supabase `microblog` table — NOT markdown. This page
-is a bulk-imported social archive, so it lives directly in Postgres (with
-server-side full-text search) rather than the `src/cms-content/` markdown
-pipeline. There is no generated JS data file.
+**Table:** the Supabase `microblog` table. This page is a bulk-imported social
+archive with server-side full-text search; there is no generated JS data file.
 
 - **Schema:** `supabase/migrations/0002_microblog.sql` (`microblog` table +
   `search_tsv` GIN index + RLS + `microblog_tag_facets()` RPC). Apply it via the
@@ -257,7 +251,7 @@ pipeline. There is no generated JS data file.
   It is idempotent (re-runnable, no duplicates) and **non-destructive** — it
   never clears the table, so admin-authored `manual` posts survive re-imports.
   Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env`.
-- **Adding posts by hand:** use the admin dashboard → **Micro Blog** tab
+- **Adding posts by hand:** admin dashboard → **Micro Blog** tab
   (`src/pages/admin/MicroblogManager.js`). New posts default to `source: manual`
   with a null `source_id`.
 - **`source` column** (`tumblr` | `instagram` | `manual`) lets other archives
