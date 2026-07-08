@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ContentProvider } from "./context/ContentContext";
+import { WorldProvider } from "./atlas/world/WorldContext";
 import { TourProvider } from "./context/TourContext";
 import TourMount from "./components/Template/TourMount";
 import Main from "./layouts/Main"; // fallback for lazy pages
@@ -38,10 +39,13 @@ const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
 const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
+// Atlas preview route (noindexed; becomes a redirect to "/" at the flip).
+const AtlasHome = lazy(() => import("./atlas/AtlasHome"));
 
 const App = () => (
   <HelmetProvider>
     <ContentProvider>
+      <WorldProvider>
       <BrowserRouter basename={PUBLIC_URL}>
         <TourProvider>
           <TourMount />
@@ -71,11 +75,13 @@ const App = () => (
             <Route path="/interactive-me" element={<InteractiveMePage />} />
             <Route path="/mindmap" element={<MindMap />} />
             <Route path="/admin/*" element={<AdminApp />} />
+            <Route path="/world" element={<AtlasHome />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </TourProvider>
       </BrowserRouter>
+      </WorldProvider>
     </ContentProvider>
   </HelmetProvider>
 );

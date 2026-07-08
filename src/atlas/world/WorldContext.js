@@ -1,0 +1,144 @@
+// WorldContext — the single owner of the atlas.v1 gamification state (§4.5).
+// Pipeline: read -> migrate -> useReducer -> debounced persist. Nothing else
+// in the app reads or writes atlas localStorage directly.
+//
+// Tracking (visitRegion/track/foundEgg) runs in BOTH view modes; only the
+// game UI (HUD, toasts) is atlas-mode-gated, in AtlasFrame.
+
+import React, {
+  createContext, useContext, useEffect, useMemo, useReducer, useRef, useState,
+} from "react";
+import PropTypes from "prop-types";
+import migrate from "./migrate";
+import {
+  readRaw, readLegacyGlobeKeys, createDebouncedPersist, VISIT_DAYS_CAP,
+  readPreviewFlag, writePreviewFlag,
+} from "./storage";
+
+const WorldContext = createContext(null);
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const nowIso = () => new Date().toISOString();
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "visitRegion": {
+      const { region } = action;
+      if (!region || state.visitedRegions[region]) return state;
+      const ts = nowIso();
+      return {
+        ...state,
+        visitedRegions: { ...state.visitedRegions, [region]: ts },
+        stamps: { ...state.stamps, [region]: { ...(state.stamps[region] || {}), first: ts } },
+      };
+    }
+    case "track": {
+      const { action: name, id } = action;
+      if (!name || id == null) return state;
+      const ids = state.actions[name] || [];
+      if (ids.includes(id)) return state;
+      return { ...state, actions: { ...state.actions, [name]: [...ids, id] } };
+    }
+    case "foundEgg": {
+      const { egg } = action;
+      if (!egg || state.eggs[egg]) return state;
+      return { ...state, eggs: { ...state.eggs, [egg]: nowIso() } };
+    }
+    case "setView": {
+      const view = action.view === "atlas" || action.view === "classic" ? action.view : null;
+      if (view === state.view) return state;
+      return { ...state, view };
+    }
+    case "toggleSound":
+      return { ...state, sound: !state.sound };
+    case "setTime": {
+      const time = action.time === "day" || action.time === "night" ? action.time : "auto";
+      if (time === state.time) return state;
+      return { ...state, time };
+    }
+    case "introSeen":
+      return state.introSeen ? state : { ...state, introSeen: true };
+    case "recordVisitDay": {
+      const { day } = action;
+      if (state.visitDays.includes(day)) return state;
+      return { ...state, visitDays: [...state.visitDays, day].slice(-VISIT_DAYS_CAP) };
+    }
+    default:
+      return state;
+  }
+}
+
+export const WorldProvider = ({ children }) => {
+  const [world, dispatch] = useReducer(
+    reducer,
+    undefined,
+    () => migrate(readRaw(), readLegacyGlobeKeys()),
+  );
+  const [preview, setPreview] = useState(() => readPreviewFlag());
+
+  // Whether a theme was already stored BEFORE this session touched anything.
+  // ThemeProvider persists `theme` in its own mount effect, so this must be
+  // captured during initial render (render phase runs before all effects) —
+  // AtlasFrame uses it for the day/night auto rule (§4.10).
+  const hadStoredThemeRef = useRef(null);
+  if (hadStoredThemeRef.current === null) {
+    let stored = null;
+    try {
+      stored = window.localStorage.getItem("theme");
+    } catch (e) { /* non-fatal */ }
+    hadStoredThemeRef.current = stored != null;
+  }
+
+  // Debounced persist of every world change (including the initial migrated
+  // state, which materializes atlas.v1 on first load).
+  const persistRef = useRef(null);
+  if (!persistRef.current) persistRef.current = createDebouncedPersist();
+  useEffect(() => {
+    persistRef.current(world);
+  }, [world]);
+  useEffect(() => () => persistRef.current.cancel(), []);
+
+  // Distinct-day visit log (feeds the "Regular" achievement in phase 6).
+  useEffect(() => {
+    dispatch({ type: "recordVisitDay", day: todayKey() });
+  }, []);
+
+  const api = useMemo(
+    () => ({
+      visitRegion: (region) => dispatch({ type: "visitRegion", region }),
+      track: (name, id) => dispatch({ type: "track", action: name, id }),
+      foundEgg: (egg) => dispatch({ type: "foundEgg", egg }),
+      setView: (view) => dispatch({ type: "setView", view }),
+      toggleSound: () => dispatch({ type: "toggleSound" }),
+      setTime: (time) => dispatch({ type: "setTime", time }),
+      markIntroSeen: () => dispatch({ type: "introSeen" }),
+      enablePreview: () => { writePreviewFlag(true); setPreview(true); },
+      disablePreview: () => { writePreviewFlag(false); setPreview(false); },
+    }),
+    [],
+  );
+
+  const value = useMemo(
+    () => ({ world, preview, hadStoredTheme: hadStoredThemeRef.current, ...api }),
+    [world, preview, api],
+  );
+
+  return <WorldContext.Provider value={value}>{children}</WorldContext.Provider>;
+};
+
+WorldProvider.propTypes = {
+  children: PropTypes.node,
+};
+
+WorldProvider.defaultProps = {
+  children: null,
+};
+
+export const useWorld = () => {
+  const ctx = useContext(WorldContext);
+  if (!ctx) throw new Error("useWorld must be used inside <WorldProvider>");
+  return ctx;
+};
+
+// Exported for unit tests only.
+export { reducer as worldReducer };

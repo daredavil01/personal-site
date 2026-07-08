@@ -272,8 +272,19 @@ export async function onRequest(context) {
     <meta name="twitter:description" content="${escAttr(meta.description)}">
     <meta name="twitter:image" content="${escAttr(meta.image)}">`;
 
-  return new HTMLRewriter()
+  const rewritten = new HTMLRewriter()
     .on("title", new TitleRewriter(fullTitle))
     .on("head", new HeadInjector(tags))
     .transform(response);
+
+  // The atlas preview route must stay out of search indexes until the
+  // v11.0.0 flip (belt: this header; suspenders: the Helmet robots meta the
+  // route renders client-side).
+  if (pathname === "/world") {
+    const noindexed = new Response(rewritten.body, rewritten);
+    noindexed.headers.set("X-Robots-Tag", "noindex");
+    return noindexed;
+  }
+
+  return rewritten;
 }
