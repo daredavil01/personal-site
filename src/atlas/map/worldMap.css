@@ -1,0 +1,161 @@
+/* ============================================================================
+   WorldMap — map-hub styles (§4.6). Scene colors come exclusively from the
+   atlasTokens.css custom properties; everything here is layout, the hover
+   lift, idle-life animation and the day/night opacity switches.
+   ========================================================================== */
+
+.atlas-map-stage {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--atlas-sky);
+}
+
+.atlas-map-viewport,
+.atlas-worldmap {
+  width: 100%;
+  height: 100%;
+}
+
+.atlas-worldmap {
+  display: block;
+  touch-action: none; /* usePanZoom owns all pointer gestures */
+  cursor: grab;
+  transition: background 0.7s ease;
+}
+
+.atlas-worldmap:active {
+  cursor: grabbing;
+}
+
+/* During a fly-in the map is a camera, not a control surface. */
+.atlas-map-viewport.is-flying .atlas-region-hit {
+  pointer-events: none;
+}
+
+/* Day/night repaint: fills/opacities ease when [data-time] flips. */
+.atlas-worldmap * {
+  transition: fill 0.7s ease, stroke 0.7s ease, opacity 0.7s ease;
+}
+
+/* ---- Region hotspots (RegionLayer) ---- */
+.atlas-region-hit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.atlas-region-hit:focus-visible {
+  stroke: var(--atlas-glow);
+  stroke-width: 10;
+  stroke-dasharray: 26 16;
+}
+
+/* ---- Hover/focus lift (§1: "hover a region: it lifts") ----
+   CSS transform would REPLACE the positioning transform attribute, so the
+   lift lives on an inner group — position outside, motion inside. */
+.atlas-lift {
+  transition: transform 0.3s ease;
+}
+
+.atlas-lift.is-lifted {
+  transform: translateY(-10px);
+}
+
+.atlas-plaque-text {
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  fill: var(--atlas-ink);
+}
+
+/* ---- Day/night switches (values defined in atlasTokens.css) ---- */
+.atlas-day-only { opacity: var(--atlas-day); }
+.atlas-night-only { opacity: var(--atlas-night); }
+.atlas-cloud { opacity: var(--atlas-cloud); }
+.atlas-star { opacity: var(--atlas-night); }
+.atlas-beam { opacity: calc(var(--atlas-night) * 0.35); }
+.atlas-halo { opacity: calc(var(--atlas-night) * 0.5); }
+
+/* ---- Idle life (§1) ---- */
+.atlas-cloud-a { animation: atlas-drift 70s ease-in-out infinite alternate; }
+.atlas-cloud-b { animation: atlas-drift 95s ease-in-out infinite alternate-reverse; }
+
+@keyframes atlas-drift {
+  from { transform: translateX(-45px); }
+  to { transform: translateX(45px); }
+}
+
+.atlas-gear {
+  animation: atlas-spin 26s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes atlas-spin {
+  to { transform: rotate(360deg); }
+}
+
+.atlas-flag {
+  animation: atlas-flutter 3.2s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+@keyframes atlas-flutter {
+  from { transform: skewY(-4deg); }
+  to { transform: skewY(5deg); }
+}
+
+.atlas-smoke {
+  animation: atlas-puff 5s ease-in infinite;
+}
+
+@keyframes atlas-puff {
+  0% { transform: translateY(6px); opacity: 0; }
+  30% { opacity: 0.5; }
+  100% { transform: translateY(-22px); opacity: 0; }
+}
+
+.atlas-ff {
+  opacity: 0;
+  animation: atlas-firefly 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes atlas-firefly {
+  from { opacity: calc(var(--atlas-night) * 0.15); }
+  to { opacity: var(--atlas-night); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-cloud-a,
+  .atlas-cloud-b,
+  .atlas-gear,
+  .atlas-flag,
+  .atlas-smoke {
+    animation: none;
+  }
+
+  .atlas-ff {
+    animation: none;
+    opacity: calc(var(--atlas-night) * 0.8);
+  }
+
+  .atlas-worldmap *,
+  .atlas-lift {
+    transition: none;
+  }
+}
+
+/* ---- Screen-reader-only mirror nav ---- */
+.atlas-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

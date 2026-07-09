@@ -30,6 +30,14 @@
   --atlas-line: rgba(59, 50, 40, 0.18);
   --atlas-accent: #b22200; /* hometown red until a region overrides it */
   --atlas-shadow: rgba(31, 41, 55, 0.18);
+
+  /* Day/night switches consumed by map art (worldMap.css): 0/1 opacities for
+     time-gated elements, cloud brightness, and the window fill that makes
+     buildings light up after dark. */
+  --atlas-day: 1;
+  --atlas-night: 0;
+  --atlas-cloud: 0.92;
+  --atlas-window: rgba(59, 50, 40, 0.32);
 }
 
 /* ---- Night palette ---- */
@@ -47,6 +55,10 @@
   --atlas-ink-soft: rgba(232, 228, 216, 0.65);
   --atlas-line: rgba(232, 228, 216, 0.18);
   --atlas-shadow: rgba(0, 0, 0, 0.45);
+  --atlas-day: 0;
+  --atlas-night: 1;
+  --atlas-cloud: 0.16;
+  --atlas-window: var(--atlas-glow);
 }
 
 /* ---- Region accent overrides (keys = globe/domains.js) ---- */
