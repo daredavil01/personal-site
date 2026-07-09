@@ -8,6 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { DOMAINS } from "../../components/Index/globe/domains";
 import { ATLAS_LIVE } from "../../config/featureFlags";
 import { useWorld } from "../world/WorldContext";
+import { ALL_QUESTS } from "../gamification/quests";
+import { progressOf } from "../gamification/questEngine";
+import atlasEvent from "../lib/analytics";
 
 const MAP_PATH = ATLAS_LIVE ? "/" : "/world";
 
@@ -31,6 +34,14 @@ const PassportModal = ({ onClose }) => {
   }, [onClose]);
 
   const visitedCount = DOMAINS.filter((d) => world.visitedRegions[d.key]).length;
+  const questsDone = ALL_QUESTS.filter((q) => world.quests[q.id] && world.quests[q.id].done).length;
+  const eggsFound = Object.keys(world.eggs || {}).length;
+
+  const switchToClassic = () => {
+    atlasEvent("atlas_view_switch", { to: "classic" });
+    setView("classic");
+    onClose();
+  };
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close convenience; Escape + the close button are the accessible paths
@@ -43,8 +54,10 @@ const PassportModal = ({ onClose }) => {
           </button>
         </div>
         <p className="atlas-modal-sub">
-          {visitedCount} of {DOMAINS.length} regions explored
-          {world.visitDays.length > 1 ? ` · ${world.visitDays.length} visit days` : ""}
+          {visitedCount} of {DOMAINS.length} regions
+          {" · "}
+          {questsDone} of {ALL_QUESTS.length} quests
+          {eggsFound > 0 ? ` · ${eggsFound} secret${eggsFound > 1 ? "s" : ""}` : ""}
         </p>
 
         <div className="atlas-stamp-grid">
@@ -66,6 +79,34 @@ const PassportModal = ({ onClose }) => {
           })}
         </div>
 
+        <h3 className="atlas-passport-h3">Quests &amp; Achievements</h3>
+        <ul className="atlas-quest-list">
+          {ALL_QUESTS.map((q) => {
+            const done = !!(world.quests[q.id] && world.quests[q.id].done);
+            const { current, target } = progressOf(q, world, ALL_QUESTS);
+            const pct = target ? Math.round((current / target) * 100) : 0;
+            return (
+              <li key={q.id} className={`atlas-quest${done ? " is-done" : ""}`}>
+                <span className="atlas-quest-seal" style={{ "--reward-color": q.color }} aria-hidden="true">
+                  {done ? "★" : "☆"}
+                </span>
+                <div className="atlas-quest-body">
+                  <div className="atlas-quest-top">
+                    <strong>{q.title}</strong>
+                    <span className="atlas-quest-count">{done ? "Done" : `${current}/${target}`}</span>
+                  </div>
+                  <p className="atlas-quest-desc">{q.desc}</p>
+                  {!done && (
+                    <div className="atlas-quest-bar">
+                      <span style={{ width: `${pct}%`, background: q.color }} />
+                    </div>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
         <div className="atlas-modal-row">
           <span>Replay the intro</span>
           <button
@@ -77,7 +118,7 @@ const PassportModal = ({ onClose }) => {
         </div>
         <div className="atlas-modal-row">
           <span>Prefer the classic site?</span>
-          <button type="button" onClick={() => { setView("classic"); onClose(); }}>
+          <button type="button" onClick={switchToClassic}>
             Switch to Classic
           </button>
         </div>

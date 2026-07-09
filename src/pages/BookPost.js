@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import { buildBookMeta } from "../data/pageMeta";
 import { useBooks } from "../context/ContentContext";
+import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 
@@ -13,9 +14,16 @@ const keyActivate = (fn) => (e) => {
 const BookPost = () => {
   const { id } = useParams();
   const { data: books, loading } = useBooks();
+  const { track } = useWorld();
   const [shareState, setShareState] = useState("idle");
 
   const book = books.find((b) => String(b.id) === id);
+
+  // Opening a book counts toward the Bibliophile collector quest (§4.5);
+  // track() is a no-op-safe dedupe and runs in both view modes.
+  useEffect(() => {
+    if (book && book.id != null) track("book:open", String(book.id));
+  }, [book, track]);
 
   const handleShare = async () => {
     const url = window.location.href;

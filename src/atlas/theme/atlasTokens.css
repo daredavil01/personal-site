@@ -349,6 +349,95 @@
   opacity: 0.6;
 }
 
+/* Passport quests / achievements */
+.atlas-passport-h3 {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--atlas-ink-soft);
+  margin: 0.25rem 0 0.6rem;
+}
+
+.atlas-quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.atlas-quest {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.atlas-quest-seal {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--reward-color, var(--atlas-glow));
+  border: 2px solid var(--reward-color, var(--atlas-line));
+  background: transparent;
+}
+
+.atlas-quest.is-done .atlas-quest-seal {
+  background: color-mix(in srgb, var(--reward-color, var(--atlas-glow)) 18%, transparent);
+}
+
+.atlas-quest-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.atlas-quest-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.atlas-quest-top strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.atlas-quest-count {
+  flex: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--atlas-ink-soft);
+}
+
+.atlas-quest.is-done .atlas-quest-count {
+  color: var(--reward-color, var(--atlas-accent));
+}
+
+.atlas-quest-desc {
+  font-size: 0.78rem;
+  color: var(--atlas-ink-soft);
+  margin: 0.1rem 0 0.35rem;
+}
+
+.atlas-quest-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--atlas-line);
+  overflow: hidden;
+}
+
+.atlas-quest-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
 .atlas-modal-row {
   display: flex;
   align-items: center;

@@ -52,6 +52,57 @@
   stroke-dasharray: 26 16;
 }
 
+/* ---- Easter eggs (EggLayer, §4.6) ---- */
+.atlas-egg {
+  cursor: pointer;
+  outline: none;
+}
+
+.atlas-egg-glint {
+  opacity: 0.4;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: atlas-egg-twinkle 3.6s ease-in-out infinite;
+}
+
+/* Night-only eggs stay dark by day (steady glow at night, no day twinkle). */
+.atlas-egg-night .atlas-egg-glint {
+  animation: none;
+  opacity: calc(var(--atlas-night) * 0.75);
+}
+
+.atlas-egg:hover .atlas-egg-glint,
+.atlas-egg:focus-visible .atlas-egg-glint {
+  opacity: 1;
+  stroke: var(--atlas-glow);
+  stroke-width: 2;
+}
+
+@keyframes atlas-egg-twinkle {
+  0%, 100% { opacity: 0.22; transform: scale(0.8); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+.atlas-egg-halo {
+  opacity: 0.22;
+}
+
+.atlas-egg.is-found .atlas-egg-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: atlas-egg-pop 0.5s ease;
+}
+
+@keyframes atlas-egg-pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* During a fly-in the eggs are scenery, not controls. */
+.atlas-map-viewport.is-flying .atlas-egg {
+  pointer-events: none;
+}
+
 /* ---- Hover/focus lift (§1: "hover a region: it lifts") ----
    CSS transform would REPLACE the positioning transform attribute, so the
    lift lives on an inner group — position outside, motion inside. */
@@ -132,8 +183,14 @@
   .atlas-cloud-b,
   .atlas-gear,
   .atlas-flag,
-  .atlas-smoke {
+  .atlas-smoke,
+  .atlas-egg-glint,
+  .atlas-egg-star {
     animation: none;
+  }
+
+  .atlas-egg-glint {
+    opacity: 0.6;
   }
 
   .atlas-ff {

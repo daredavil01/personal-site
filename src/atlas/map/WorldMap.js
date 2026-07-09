@@ -18,10 +18,13 @@ import React, {
 import PropTypes from "prop-types";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import usePanZoom from "../../hooks/usePanZoom";
+import { useWorld } from "../world/WorldContext";
+import { EGGS } from "../gamification/easterEggs";
 import {
   REGIONS, FULL_VIEW, HOME_VIEW, INTRO_VIEW, MAP_W, MAP_H,
 } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
+import EasterEggHotspot from "./EasterEggHotspot";
 import SkyLayer from "./art/SkyLayer";
 import BiomeRidge from "./art/BiomeRidge";
 import BiomeForest from "./art/BiomeForest";
@@ -72,6 +75,7 @@ const restingView = () => (smallViewport() ? HOME_VIEW : FULL_VIEW);
 const WorldMap = ({ entry }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { world, foundEgg } = useWorld();
   const [hoverKey, setHoverKey] = useState(null);
   const [focusKey, setFocusKey] = useState(null);
   const [rovingKey, setRovingKey] = useState("person");
@@ -237,9 +241,6 @@ const WorldMap = ({ entry }) => {
           {/* NearLayer — foreground props land with the phase-11 art pass */}
           <g className="atlas-near-layer" />
 
-          {/* EggLayer — easter-egg hotspots arrive with the game layer (phase 6) */}
-          <g className="atlas-egg-layer" />
-
           {/* LabelLayer — plaques lift with their region */}
           <g>
             {REGIONS.map((r) => {
@@ -272,6 +273,19 @@ const WorldMap = ({ entry }) => {
               onHoverEnd={() => setHoverKey((k) => (k === r.key ? null : k))}
               onFocus={() => { setFocusKey(r.key); setRovingKey(r.key); }}
               onBlur={() => setFocusKey((k) => (k === r.key ? null : k))}
+            />
+          ))}
+        </g>
+
+        {/* EggLayer (§4.6) — interactive, so it lives outside the aria-hidden
+            art; hints are vague on purpose. Suppressed during a fly-in. */}
+        <g className="atlas-egg-layer">
+          {EGGS.map((egg) => (
+            <EasterEggHotspot
+              key={egg.id}
+              egg={egg}
+              found={!!world.eggs[egg.id]}
+              onFound={foundEgg}
             />
           ))}
         </g>

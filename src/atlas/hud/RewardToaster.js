@@ -6,8 +6,10 @@
 
 import React, { useEffect, useRef } from "react";
 import launchConfetti from "../lib/confetti";
+import atlasEvent from "../lib/analytics";
 import { useWorld } from "../world/WorldContext";
 import { getRegion } from "../regions/registry";
+import { getEgg } from "../gamification/easterEggs";
 
 const prefersReducedMotion = () => (
   typeof window !== "undefined"
@@ -35,11 +37,12 @@ const describeReward = (reward) => {
     };
   }
   if (reward.kind === "egg") {
+    const egg = getEgg(reward.eggId);
     return {
       seal: "🔎",
-      title: reward.title || "You found a hidden spot!",
-      subtitle: reward.subtitle || "An easter egg on the map",
-      color: reward.color || "var(--atlas-glow)",
+      title: egg ? egg.title : "You found a hidden spot!",
+      subtitle: egg ? egg.found : "An easter egg on the map",
+      color: "var(--atlas-glow)",
     };
   }
   return {
@@ -64,6 +67,7 @@ const RewardToaster = () => {
       const swatch = typeof color === "string" && color.startsWith("#") ? color : "#f2a949";
       launchConfetti(fxRef.current, [swatch, "#f2a949", "#ffffff"]);
     }
+    atlasEvent("atlas_reward", { kind: current.kind, id: current.id });
     const timer = setTimeout(() => dismissReward(current.id), 4200);
     return () => clearTimeout(timer);
   }, [current, dismissReward]);

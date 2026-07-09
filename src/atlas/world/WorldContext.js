@@ -14,11 +14,36 @@ import {
   readRaw, readLegacyGlobeKeys, createDebouncedPersist, VISIT_DAYS_CAP,
   readPreviewFlag, writePreviewFlag,
 } from "./storage";
+import { evaluate } from "../gamification/questEngine";
+import { ALL_QUESTS } from "../gamification/quests";
 
 const WorldContext = createContext(null);
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 const nowIso = () => new Date().toISOString();
+
+// After any state change that could satisfy a quest/achievement (§4.5), mark
+// the newly-completed ones done and queue a reward for each. Pure over the
+// quest engine; the reducer is the only caller so side effects stay contained.
+const applyQuests = (state, now = new Date()) => {
+  const newly = evaluate(ALL_QUESTS, state, now);
+  if (!newly.length) return state;
+  const iso = now.toISOString();
+  const quests = { ...state.quests };
+  const rewards = [...(state.pendingRewards || [])];
+  newly.forEach((q) => {
+    quests[q.id] = { done: iso };
+    rewards.push({
+      id: `quest:${q.id}`,
+      kind: "quest",
+      questId: q.id,
+      title: `${q.title} — complete!`,
+      subtitle: (q.reward && q.reward.label) || "A new passport stamp",
+      color: q.color,
+    });
+  });
+  return { ...state, quests, pendingRewards: rewards };
+};
 
 function reducer(state, action) {
   switch (action.type) {
@@ -29,24 +54,32 @@ function reducer(state, action) {
       // A genuine first visit queues a reward so RewardToaster can celebrate
       // the region stamp (§4.5). pendingRewards is transient (not persisted).
       const reward = { id: `region:${region}`, kind: "region", region, ts };
-      return {
+      const visited = {
         ...state,
         visitedRegions: { ...state.visitedRegions, [region]: ts },
         stamps: { ...state.stamps, [region]: { ...(state.stamps[region] || {}), first: ts } },
         pendingRewards: [...(state.pendingRewards || []), reward],
       };
+      return applyQuests(visited);
     }
     case "track": {
       const { action: name, id } = action;
       if (!name || id == null) return state;
       const ids = state.actions[name] || [];
       if (ids.includes(id)) return state;
-      return { ...state, actions: { ...state.actions, [name]: [...ids, id] } };
+      return applyQuests({ ...state, actions: { ...state.actions, [name]: [...ids, id] } });
     }
     case "foundEgg": {
       const { egg } = action;
       if (!egg || state.eggs[egg]) return state;
-      return { ...state, eggs: { ...state.eggs, [egg]: nowIso() } };
+      // RewardToaster resolves the egg's title/blurb from the egg table.
+      const reward = { id: `egg:${egg}`, kind: "egg", eggId: egg, ts: nowIso() };
+      const found = {
+        ...state,
+        eggs: { ...state.eggs, [egg]: nowIso() },
+        pendingRewards: [...(state.pendingRewards || []), reward],
+      };
+      return applyQuests(found);
     }
     case "setView": {
       const view = action.view === "atlas" || action.view === "classic" ? action.view : null;
@@ -63,9 +96,14 @@ function reducer(state, action) {
     case "introSeen":
       return state.introSeen ? state : { ...state, introSeen: true };
     case "recordVisitDay": {
+      // Fires once per session on mount — also the reliable re-check point for
+      // the time/return achievements (Night Owl, Regular, Completionist), so
+      // evaluate quests even when today is already logged.
       const { day } = action;
-      if (state.visitDays.includes(day)) return state;
-      return { ...state, visitDays: [...state.visitDays, day].slice(-VISIT_DAYS_CAP) };
+      const next = state.visitDays.includes(day)
+        ? state
+        : { ...state, visitDays: [...state.visitDays, day].slice(-VISIT_DAYS_CAP) };
+      return applyQuests(next);
     }
     case "dismissReward": {
       const { id } = action;

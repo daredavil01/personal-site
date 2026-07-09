@@ -18,6 +18,7 @@ import "./theme/atlasTokens.css";
 import PageMeta from "../components/Template/PageMeta";
 import { useWorld } from "./world/WorldContext";
 import { resolveTime } from "./theme/timeOfDay";
+import atlasEvent from "./lib/analytics";
 import WorldMap from "./map/WorldMap";
 import OrbitStage from "./intro/OrbitStage";
 
@@ -77,6 +78,7 @@ const AtlasHome = () => {
   };
 
   const handleSkip = () => {
+    atlasEvent("atlas_intro_skip");
     markIntroSeen();
     goToMap("direct");
   };
@@ -89,6 +91,7 @@ const AtlasHome = () => {
 
   // Timeline finished: drop the overlay and remember the intro was seen.
   const handleDiveDone = () => {
+    atlasEvent("atlas_intro_finish");
     setDiving(false);
     markIntroSeen();
   };
