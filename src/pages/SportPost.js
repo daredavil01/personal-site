@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import { buildSportMeta } from "../data/pageMeta";
 import { useSports } from "../context/ContentContext";
+import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 import ImageSlider from "../components/Instagram/ImageSlider";
@@ -14,9 +15,15 @@ const keyActivate = (fn) => (e) => {
 const SportPost = () => {
   const { id } = useParams();
   const { data: sportsData, loading } = useSports();
+  const { track } = useWorld();
   const [shareState, setShareState] = useState("idle");
 
   const race = sportsData.find((r) => String(r.id) === id);
+
+  // Opening a race counts toward the Roadrunner collector quest (§4.5).
+  useEffect(() => {
+    if (race && race.id != null) track("race:open", String(race.id));
+  }, [race, track]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -34,18 +41,18 @@ const SportPost = () => {
     setTimeout(() => setShareState("idle"), 2000);
   };
 
-  if (loading) return <Main><LoadingBlock label="Loading race…" /></Main>;
+  if (loading) return <PageShell region="marathons"><LoadingBlock label="Loading race…" /></PageShell>;
 
   if (!race) {
     return (
-      <Main title="Race Not Found">
+      <PageShell region="marathons" title="Race Not Found">
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/sports" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> Sports
           </Link>
           <p className="font-body text-stone-500 dark:text-stone-400">Race not found.</p>
         </div>
-      </Main>
+      </PageShell>
     );
   }
 
@@ -61,7 +68,7 @@ const SportPost = () => {
   });
 
   return (
-    <Main title={meta.title} description={meta.description} image={meta.image}>
+    <PageShell region="marathons" title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/sports" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">
@@ -139,7 +146,7 @@ const SportPost = () => {
           )}
         </article>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

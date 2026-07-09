@@ -10,25 +10,30 @@
 import { lazy } from "react";
 import { DOMAINS } from "../../components/Index/globe/domains";
 
+const CoastHeader = lazy(() => import("./headers/CoastHeader"));
+const RidgeHeader = lazy(() => import("./headers/RidgeHeader"));
+const ScriptoriumHeader = lazy(() => import("./headers/ScriptoriumHeader"));
 const ForestHeader = lazy(() => import("./headers/ForestHeader"));
+const WorkshopHeader = lazy(() => import("./headers/WorkshopHeader"));
+const SquareHeader = lazy(() => import("./headers/SquareHeader"));
 
 // key -> presentation. `label` is the biome name (distinct from the globe
-// domain label); `Header` is the lazy biome header band or null until its wave.
+// domain label); `Header` is the lazy biome header band.
 const PRESENTATION = {
   marathons: {
     label: "Coastal Road",
     tagline: "a winding shoreline of mile-markers and medals",
-    Header: null,
+    Header: CoastHeader,
   },
   treks: {
     label: "Sahyadri Ridge",
     tagline: "fort-crowned summits, each a flag on the skyline",
-    Header: null,
+    Header: RidgeHeader,
   },
   writer: {
     label: "Scriptorium",
     tagline: "the writer's desk — letters, posts and a pinboard",
-    Header: null,
+    Header: ScriptoriumHeader,
   },
   reader: {
     label: "Book Forest",
@@ -38,12 +43,12 @@ const PRESENTATION = {
   creator: {
     label: "Workshop",
     tagline: "drafting tables, blueprints and turning gears",
-    Header: null,
+    Header: WorkshopHeader,
   },
   person: {
     label: "Hometown Square",
     tagline: "the personal center — home, now and everything else",
-    Header: null,
+    Header: SquareHeader,
   },
 };
 

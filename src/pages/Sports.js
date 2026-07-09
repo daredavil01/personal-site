@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import SportsStatistics from "../components/Sports/SportsStatistics";
 import SportsInteractive from "../components/Sports/SportsInteractive";
 import SportsDefault from "../components/Sports/SportsDefault";
@@ -47,7 +47,7 @@ const SportsPage = () => {
   };
 
   return (
-    <Main>
+    <PageShell region="marathons">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header data-tour="sports-hero">
@@ -126,7 +126,7 @@ const SportsPage = () => {
         onClose={() => setSelectedRace(null)}
         raceDetails={selectedRace}
       />
-    </Main>
+    </PageShell>
   );
 };
 

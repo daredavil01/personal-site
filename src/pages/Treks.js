@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import TreksStatistics from "../components/Treks/TreksStatistics";
 import TreksDefault from "../components/Treks/TreksDefault";
 import TrekDetailsModal from "../components/Treks/TrekDetailsModal";
@@ -41,7 +41,7 @@ const TreksPage = () => {
   };
 
   return (
-    <Main>
+    <PageShell region="treks">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header>
@@ -109,7 +109,7 @@ const TreksPage = () => {
         onClose={() => setSelectedTrek(null)}
         trek={selectedTrek}
       />
-    </Main>
+    </PageShell>
   );
 };
 
