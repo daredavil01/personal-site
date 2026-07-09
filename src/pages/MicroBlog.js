@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import {
   searchMicroblog, getMicroblogTagFacets, getMicroblogStats,
 } from "../lib/api/microblog";
@@ -301,7 +301,8 @@ const MicroBlog = () => {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <Main
+    <PageShell
+      region="writer"
       title="Micro Blog"
       description="A searchable archive of short posts, quotes, and captures imported from Tumblr — spanning years of thoughts, one micro-post at a time."
     >
@@ -465,7 +466,7 @@ const MicroBlog = () => {
       </div>
 
       <PostModal post={selected} onClose={() => setSelected(null)} />
-    </Main>
+    </PageShell>
   );
 };
 

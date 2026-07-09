@@ -53,6 +53,17 @@ export const QUESTS = [
     color: "#22c55e",
   },
   {
+    id: "collector_writing",
+    type: "collector",
+    region: "writer",
+    action: "blog:open",
+    target: 5,
+    title: "Wordsmith",
+    desc: "Open five posts in the Scriptorium.",
+    reward: { stamp: "wordsmith", label: "Wordsmith stamp" },
+    color: "#ec4899",
+  },
+  {
     id: "egg_hunter",
     type: "eggs",
     target: EGG_COUNT,

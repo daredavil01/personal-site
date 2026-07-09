@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Main from '../layouts/Main';
+import PageShell from '../atlas/PageShell';
 import { useBlogs } from '../context/ContentContext';
 import ShareImageButton from '../components/share/ShareImageButton';
 
@@ -211,7 +211,8 @@ const OneHundredDays = () => {
   };
 
   return (
-    <Main
+    <PageShell
+      region="writer"
       title="100 Days To Offload"
       description="Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking, pace status, and interactive filtering of every post."
     >
@@ -560,7 +561,7 @@ const OneHundredDays = () => {
           </div>
         )}
       </div>
-    </Main>
+    </PageShell>
   );
 };
 
