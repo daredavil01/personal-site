@@ -4,9 +4,12 @@
 
 import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import { DOMAINS } from "../../components/Index/globe/domains";
 import { ATLAS_LIVE } from "../../config/featureFlags";
 import { useWorld } from "../world/WorldContext";
+
+const MAP_PATH = ATLAS_LIVE ? "/" : "/world";
 
 const fmtDate = (iso) => {
   const t = Date.parse(iso);
@@ -17,6 +20,7 @@ const fmtDate = (iso) => {
 
 const PassportModal = ({ onClose }) => {
   const { world, preview, setView, disablePreview } = useWorld();
+  const navigate = useNavigate();
   const closeRef = useRef(null);
 
   useEffect(() => {
@@ -64,8 +68,11 @@ const PassportModal = ({ onClose }) => {
 
         <div className="atlas-modal-row">
           <span>Replay the intro</span>
-          <button type="button" disabled title="Arrives with the dive sequence (phase 4)">
-            Coming soon
+          <button
+            type="button"
+            onClick={() => { onClose(); navigate(MAP_PATH, { state: { replayIntro: Date.now() } }); }}
+          >
+            Replay
           </button>
         </div>
         <div className="atlas-modal-row">

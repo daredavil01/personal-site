@@ -15,10 +15,11 @@
 import React, {
   useEffect, useMemo, useRef, useState,
 } from "react";
+import PropTypes from "prop-types";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import usePanZoom from "../../hooks/usePanZoom";
 import {
-  REGIONS, FULL_VIEW, HOME_VIEW, MAP_W, MAP_H,
+  REGIONS, FULL_VIEW, HOME_VIEW, INTRO_VIEW, MAP_W, MAP_H,
 } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
 import SkyLayer from "./art/SkyLayer";
@@ -68,7 +69,7 @@ const smallViewport = () => (
 
 const restingView = () => (smallViewport() ? HOME_VIEW : FULL_VIEW);
 
-const WorldMap = () => {
+const WorldMap = ({ entry }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [hoverKey, setHoverKey] = useState(null);
@@ -78,9 +79,11 @@ const WorldMap = () => {
   const hotspotRefs = useRef({});
   const flightRef = useRef(null);
 
-  // Mount camera: on the returning region (reverse fly-in) or the resting
-  // view (mobile starts ~1.6× zoomed on Hometown Square). Mount-only.
+  // Mount camera (mount-only): after the dive, tight on the center to pull out
+  // as the clouds part (entry="intro"); else on the returning region for the
+  // reverse fly-in; else the resting view (mobile starts ~1.6× on hometown).
   const initialViewBox = useMemo(() => {
+    if (entry === "intro" && !prefersReducedMotion()) return INTRO_VIEW;
     const back = state?.toRegion && REGIONS.find((r) => r.key === state.toRegion);
     if (back && !prefersReducedMotion()) return back.viewBox;
     return restingView();
@@ -90,12 +93,18 @@ const WorldMap = () => {
     svgRef, viewBox, animateTo, didDrag, handlers,
   } = usePanZoom({ initialViewBox, minWidth: 480, maxWidth: 2600 });
 
-  // Reverse read: arrived from a region → pull out to the full map.
+  // Pull out to the full map on arrival — from the dive (intro) or from a
+  // region (the exact reverse read of the fly-in). Mount-only.
   useEffect(() => {
-    if (!state?.toRegion || prefersReducedMotion()) return undefined;
+    if (prefersReducedMotion()) return undefined;
+    if (entry === "intro") {
+      const id = setTimeout(() => animateTo(restingView(), 900), 60);
+      return () => clearTimeout(id);
+    }
+    if (!state?.toRegion) return undefined;
     const id = setTimeout(() => animateTo(restingView(), 700), 80);
     return () => clearTimeout(id);
-  }, []); // mount-only: reverse fly-in runs once on arrival
+  }, []); // mount-only: entry pull-out runs once on arrival
 
   useEffect(() => () => clearTimeout(flightRef.current), []);
 
@@ -269,6 +278,15 @@ const WorldMap = () => {
       </svg>
     </div>
   );
+};
+
+WorldMap.propTypes = {
+  // "intro" = post-dive center pull-out; "return"/"direct"/null = existing reads.
+  entry: PropTypes.oneOf(["intro", "return", "direct"]),
+};
+
+WorldMap.defaultProps = {
+  entry: null,
 };
 
 // Referenced by AtlasHome for layout math; kept exported for phase 4's dive
