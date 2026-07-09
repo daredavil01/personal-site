@@ -2,17 +2,20 @@
 // orbit -> dive -> map state machine; phases 3 and 4 build those stages.
 // Until then this is the /world preview stub: it turns the preview flag on
 // (so navigation across the site stays in atlas mode in this browser) and
-// shows a placeholder. Noindexed via Helmet here + X-Robots-Tag in
-// functions/_middleware.js for the preview period.
+// shows a placeholder dressed in the atlas tokens. Noindexed via Helmet
+// here + X-Robots-Tag in functions/_middleware.js for the preview period.
 
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "./theme/atlasTokens.css";
 import PageMeta from "../components/Template/PageMeta";
 import { useWorld } from "./world/WorldContext";
+import { resolveTime } from "./theme/timeOfDay";
 
 const AtlasHome = () => {
-  const { enablePreview, disablePreview } = useWorld();
+  const { world, enablePreview, disablePreview } = useWorld();
   const navigate = useNavigate();
+  const time = resolveTime(world.time);
 
   useEffect(() => {
     enablePreview();
@@ -30,30 +33,37 @@ const AtlasHome = () => {
         description="A living, explorable map of everything on this site — in the making."
         noindex
       />
-      <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center bg-gradient-to-b from-sky-300 via-sky-200 to-amber-100 dark:from-[#0b1026] dark:via-[#16305e] dark:to-[#1d2233] text-stone-800 dark:text-stone-100">
-        <span className="fixed top-0 inset-x-0 py-1.5 text-xs font-semibold tracking-widest uppercase bg-amber-400/90 text-stone-900 z-50">
-          Preview build — the Atlas is being drawn
-        </span>
-
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+      <div
+        className="atlas-root"
+        data-time={time}
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "1.5rem",
+          padding: "1.5rem",
+          textAlign: "center",
+          background: "linear-gradient(to bottom, var(--atlas-sky) 0%, var(--atlas-horizon) 78%, var(--atlas-foliage-1) 100%)",
+        }}
+      >
+        <h1 style={{ fontSize: "clamp(2.25rem, 6vw, 3.25rem)", letterSpacing: "-0.02em" }}>
           The Wanderer&apos;s Atlas
         </h1>
-        <p className="max-w-md text-lg opacity-80 mb-0">
+        <p style={{ maxWidth: "28rem", fontSize: "1.1rem", color: "var(--atlas-ink-soft)" }}>
           Six regions. One world. The cartographers are still at their desks —
           the globe, the dive, and the map land here piece by piece.
         </p>
 
-        <div className="flex items-center gap-4 mt-4">
-          {/* !text-* + explicit metrics counter the legacy _button.scss element
-              styles; the .atlas-root reset (phase 2) makes this unnecessary */}
-          <button
-            type="button"
-            onClick={exitPreview}
-            className="px-5 py-2.5 h-auto rounded-full bg-stone-900 !text-white dark:bg-white dark:!text-stone-900 text-sm font-semibold normal-case tracking-normal leading-normal whitespace-normal shadow-none hover:shadow-none hover:opacity-85 transition-opacity"
-          >
-            Exit preview
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={exitPreview}
+          className="atlas-hud-pill"
+          style={{ marginTop: "0.5rem" }}
+        >
+          Exit preview
+        </button>
       </div>
     </>
   );

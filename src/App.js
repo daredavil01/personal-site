@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ContentProvider } from "./context/ContentContext";
 import { WorldProvider } from "./atlas/world/WorldContext";
+import useViewMode from "./atlas/useViewMode";
 import { TourProvider } from "./context/TourContext";
 import TourMount from "./components/Template/TourMount";
 import Main from "./layouts/Main"; // fallback for lazy pages
@@ -41,6 +42,19 @@ const MindMap = lazy(() => import("./pages/MindMap"));
 const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
 // Atlas preview route (noindexed; becomes a redirect to "/" at the flip).
 const AtlasHome = lazy(() => import("./atlas/AtlasHome"));
+// The fixed atlas chrome (HUD etc.) — mounted once, outside Routes, only in
+// atlas mode (§4.7). Lazy keeps atlas CSS/JS out of the entry bundle.
+const AtlasFrame = lazy(() => import("./atlas/AtlasFrame"));
+
+const AtlasFrameGate = () => {
+  const mode = useViewMode();
+  if (mode !== "atlas") return null;
+  return (
+    <Suspense fallback={null}>
+      <AtlasFrame />
+    </Suspense>
+  );
+};
 
 const App = () => (
   <HelmetProvider>
@@ -49,6 +63,7 @@ const App = () => (
       <BrowserRouter basename={PUBLIC_URL}>
         <TourProvider>
           <TourMount />
+          <AtlasFrameGate />
           <Suspense fallback={<Main />}>
             <Routes>
             <Route path="/" element={<Index />} />
