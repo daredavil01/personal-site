@@ -376,6 +376,83 @@
   text-decoration: none;
 }
 
+/* Reward toaster (§4.5) — stamp / quest / egg celebrations. */
+.atlas-reward-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 960;
+  pointer-events: none;
+}
+
+.atlas-reward {
+  position: fixed;
+  left: 50%;
+  bottom: 5.5rem;
+  transform: translateX(-50%);
+  z-index: 961;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(92vw, 24rem);
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.9rem;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 10px 34px var(--atlas-shadow);
+  pointer-events: auto;
+  animation: atlas-reward-in 0.35s ease both;
+}
+
+@keyframes atlas-reward-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.atlas-reward-seal {
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--reward-color, var(--atlas-glow));
+  background: color-mix(in srgb, var(--reward-color, var(--atlas-glow)) 18%, transparent);
+  border: 2px solid var(--reward-color, var(--atlas-glow));
+}
+
+.atlas-reward-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.atlas-reward-text strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.atlas-reward-text span {
+  font-size: 0.78rem;
+  color: var(--atlas-ink-soft);
+}
+
+.atlas-reward-close {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  color: var(--atlas-ink-soft) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-reward {
+    animation: none;
+  }
+}
+
 /* Preview ribbon (removed at the flip) */
 .atlas-ribbon {
   position: fixed;

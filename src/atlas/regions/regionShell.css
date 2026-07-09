@@ -1,0 +1,135 @@
+/* ============================================================================
+   RegionShell — the atlas-mode page frame (§4.8). Scene colors come only from
+   atlasTokens.css custom props (day/night follows [data-time]); this file is
+   layout, the biome header band and the map→region entrance.
+   ========================================================================== */
+
+.atlas-region {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--atlas-parchment);
+  color: var(--atlas-ink);
+}
+
+/* Skip link — visually hidden until focused. */
+.atlas-region-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 30;
+}
+
+.atlas-region-skip:focus {
+  left: 1rem;
+  top: 1rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 2px 8px var(--atlas-shadow);
+}
+
+/* ---- Biome header band ---- */
+.atlas-region-header {
+  position: relative;
+  height: clamp(190px, 30vh, 300px);
+  overflow: hidden;
+  background: var(--atlas-sky);
+}
+
+.atlas-region-art,
+.atlas-header-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Legibility scrim so the breadcrumb + name read over the art. */
+.atlas-region-header-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--atlas-parchment) 92%, transparent) 0%,
+    color-mix(in srgb, var(--atlas-parchment) 30%, transparent) 42%,
+    transparent 78%
+  );
+}
+
+.atlas-region-header-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.atlas-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "Raleway", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--atlas-ink-soft);
+}
+
+.atlas-breadcrumb a {
+  color: var(--atlas-ink-soft);
+}
+
+.atlas-breadcrumb a:hover {
+  color: var(--atlas-accent) !important;
+}
+
+.atlas-region-name {
+  font-size: clamp(1.9rem, 4.4vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-shadow: 0 2px 16px var(--atlas-shadow);
+}
+
+.atlas-region-tagline {
+  color: var(--atlas-ink-soft);
+  font-size: clamp(0.85rem, 2vw, 1rem);
+}
+
+/* ---- Content column ---- */
+.atlas-region-main {
+  position: relative;
+  z-index: 1;
+  background: var(--atlas-parchment);
+  padding: 2rem 1rem 5rem;
+  min-height: 55vh;
+}
+
+.atlas-region-column {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---- map → region entrance (state.fromMap) ---- */
+.atlas-region-enter {
+  animation: atlas-region-in 0.5s ease both;
+}
+
+@keyframes atlas-region-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-region-enter {
+    animation: none;
+  }
+}

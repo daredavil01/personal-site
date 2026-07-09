@@ -12,6 +12,7 @@ import { useTheme } from "../context/ThemeContext";
 import { resolveTime } from "./theme/timeOfDay";
 import { ATLAS_LIVE } from "../config/featureFlags";
 import Hud from "./hud/Hud";
+import RewardToaster from "./hud/RewardToaster";
 
 const AtlasFrame = () => {
   const { world, hadStoredTheme, setTime } = useWorld();
@@ -44,6 +45,7 @@ const AtlasFrame = () => {
     <div className="atlas-root atlas-frame" data-time={time}>
       {!ATLAS_LIVE && <div className="atlas-ribbon">Wanderer&apos;s Atlas — preview build</div>}
       <Hud time={time} onTimeChange={handleTimeChange} />
+      <RewardToaster />
     </div>
   );
 };

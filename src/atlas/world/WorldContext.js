@@ -26,10 +26,14 @@ function reducer(state, action) {
       const { region } = action;
       if (!region || state.visitedRegions[region]) return state;
       const ts = nowIso();
+      // A genuine first visit queues a reward so RewardToaster can celebrate
+      // the region stamp (§4.5). pendingRewards is transient (not persisted).
+      const reward = { id: `region:${region}`, kind: "region", region, ts };
       return {
         ...state,
         visitedRegions: { ...state.visitedRegions, [region]: ts },
         stamps: { ...state.stamps, [region]: { ...(state.stamps[region] || {}), first: ts } },
+        pendingRewards: [...(state.pendingRewards || []), reward],
       };
     }
     case "track": {
@@ -63,6 +67,12 @@ function reducer(state, action) {
       if (state.visitDays.includes(day)) return state;
       return { ...state, visitDays: [...state.visitDays, day].slice(-VISIT_DAYS_CAP) };
     }
+    case "dismissReward": {
+      const { id } = action;
+      const rewards = state.pendingRewards || [];
+      if (!rewards.some((r) => r.id === id)) return state;
+      return { ...state, pendingRewards: rewards.filter((r) => r.id !== id) };
+    }
     default:
       return state;
   }
@@ -72,7 +82,9 @@ export const WorldProvider = ({ children }) => {
   const [world, dispatch] = useReducer(
     reducer,
     undefined,
-    () => migrate(readRaw(), readLegacyGlobeKeys()),
+    // pendingRewards is transient reward-toast state, seeded empty and never
+    // read back from storage (stripped before persist below).
+    () => ({ ...migrate(readRaw(), readLegacyGlobeKeys()), pendingRewards: [] }),
   );
   const [preview, setPreview] = useState(() => readPreviewFlag());
 
@@ -94,7 +106,9 @@ export const WorldProvider = ({ children }) => {
   const persistRef = useRef(null);
   if (!persistRef.current) persistRef.current = createDebouncedPersist();
   useEffect(() => {
-    persistRef.current(world);
+    // Strip the transient reward queue — only durable game state is persisted.
+    const { pendingRewards, ...persistable } = world;
+    persistRef.current(persistable);
   }, [world]);
   useEffect(() => () => persistRef.current.cancel(), []);
 
@@ -108,6 +122,7 @@ export const WorldProvider = ({ children }) => {
       visitRegion: (region) => dispatch({ type: "visitRegion", region }),
       track: (name, id) => dispatch({ type: "track", action: name, id }),
       foundEgg: (egg) => dispatch({ type: "foundEgg", egg }),
+      dismissReward: (id) => dispatch({ type: "dismissReward", id }),
       setView: (view) => dispatch({ type: "setView", view }),
       toggleSound: () => dispatch({ type: "toggleSound" }),
       setTime: (time) => dispatch({ type: "setTime", time }),
