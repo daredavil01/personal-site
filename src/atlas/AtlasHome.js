@@ -6,9 +6,9 @@
 // WorldMap reverse the fly-in. "Replay intro" (passport) navigates here with
 // state.replayIntro to restart at orbit.
 //
-// Visiting keeps the preview flag on so navigation across the site stays in
-// atlas mode in this browser. Noindexed via Helmet here + X-Robots-Tag in
-// functions/_middleware.js for the preview period.
+// This serves "/" in atlas mode (App.js HomeRoute), so its meta is the site's
+// homepage meta straight from PAGE_META — no title override and, since the
+// v11.0.0 flip, no noindex.
 
 import React, {
   Suspense, useEffect, useMemo, useRef, useState,
@@ -33,14 +33,10 @@ const prefersReducedMotion = () => (
 );
 
 const AtlasHome = () => {
-  const { world, enablePreview, markIntroSeen } = useWorld();
+  const { world, markIntroSeen } = useWorld();
   const { state } = useLocation();
   const time = resolveTime(world.time);
   const globeApiRef = useRef(null);
-
-  useEffect(() => {
-    enablePreview();
-  }, [enablePreview]);
 
   // Where to start (mount-only): a fresh visitor plays the intro; a returning
   // one (or one coming back from a region) lands on the map.
@@ -98,11 +94,7 @@ const AtlasHome = () => {
 
   return (
     <>
-      <PageMeta
-        title="The Wanderer's Atlas"
-        description="A living, explorable map of everything on this site — six regions, one world."
-        noindex
-      />
+      <PageMeta />
       <div className="atlas-root atlas-map-stage" data-time={time}>
         <h1 className="atlas-sr-only">The Wanderer&apos;s Atlas — world map</h1>
 

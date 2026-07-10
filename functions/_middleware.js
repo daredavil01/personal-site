@@ -63,6 +63,14 @@ export async function onRequest(context) {
     return next();
   }
 
+  // "/world" was the noindexed preview route during the atlas dark build. The
+  // atlas now serves "/", so redirect permanently and let the search engines
+  // collapse the two. (App.js also renders a client-side <Navigate>, which
+  // covers in-app navigation that never reaches this worker.)
+  if (pathname === "/world") {
+    return Response.redirect(new URL("/", url).toString(), 301);
+  }
+
   const response = await next();
 
   // Only rewrite HTML responses (definitive gate on the actual content type).
@@ -272,19 +280,8 @@ export async function onRequest(context) {
     <meta name="twitter:description" content="${escAttr(meta.description)}">
     <meta name="twitter:image" content="${escAttr(meta.image)}">`;
 
-  const rewritten = new HTMLRewriter()
+  return new HTMLRewriter()
     .on("title", new TitleRewriter(fullTitle))
     .on("head", new HeadInjector(tags))
     .transform(response);
-
-  // The atlas preview route must stay out of search indexes until the
-  // v11.0.0 flip (belt: this header; suspenders: the Helmet robots meta the
-  // route renders client-side).
-  if (pathname === "/world") {
-    const noindexed = new Response(rewritten.body, rewritten);
-    noindexed.headers.set("X-Robots-Tag", "noindex");
-    return noindexed;
-  }
-
-  return rewritten;
 }

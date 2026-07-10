@@ -4,8 +4,10 @@
 //   1. ?view=classic / ?view=atlas URL param (also persisted as the choice)
 //   2. Stored preference (atlas.v1 `view`, explicit user choice only)
 //   3. prefers-reduced-motion: reduce -> classic (automatic escape hatch)
-//   4. atlas.preview localStorage flag -> atlas (the /world preview mechanism)
-//   5. ATLAS_LIVE feature flag (false until the v11.0.0 flip)
+//   4. atlas.preview localStorage flag -> atlas (the dark-build preview
+//      mechanism; redundant now, but kept so ATLAS_LIVE can be flipped back
+//      off without stranding anyone who opted in during the preview)
+//   5. ATLAS_LIVE feature flag (true since the v11.0.0 flip)
 //
 // Everything is resolved synchronously from state initializers / context so
 // the first render is deterministic — no post-mount mode flip, no flash.

@@ -9,6 +9,57 @@ patch for fixes and tweaks.
 
 ---
 
+## [v11.0.0] — 2026-07-10
+
+**The Wanderer's Atlas.** The site is now an explorable illustrated world. You
+arrive in orbit above a globe, dive through the clouds, and land on a hand-drawn
+2.5D map whose six regions are the six things this site is about. Every page is
+a place inside one of them. The old editorial layout is still here — one click
+away, and automatic if you ask for reduced motion — but it is no longer the
+front door.
+
+Built as sixteen phases on a single branch behind an `ATLAS_LIVE` flag and a
+hidden `/world` preview route; this entry is the whole story, landing at once.
+
+### Added
+
+- **The atlas homepage** (`src/atlas/AtlasHome.js`, `src/atlas/intro/`): an orbit → dive → map state machine. `OrbitStage` reuses the existing homepage globe through a new `mode="orbit"`, and `DiveSequence` + `CloudBloom` play a ~3.5s GSAP plunge through a whiteout into the map. The intro is skippable, remembered (`introSeen`), replayable from the passport, and reduced to a quiet fade under `prefers-reduced-motion`.
+- **The map hub** (`src/atlas/map/`): a layered SVG world — sky, far backdrop, mid biomes, near props, easter eggs, labels — with pan/zoom/pinch, keyboard-navigable region hotspots with an offscreen screen-reader mirror, a pointer-parallax rig (`parallax.js`), and a fly-in that hands off to the router.
+- **Six biomes as code** (`src/atlas/map/art/`): Book Forest, Coast, Ridge, Scriptorium, Workshop and Hometown Square, drawn as flat-vector SVG-in-JSX against a per-file size budget. Each has idle life (drifting clouds, turning gears, waves) and a night state — lit windows, stars, fireflies — driven entirely by CSS custom properties.
+- **Region interiors** (`src/atlas/regions/`): `RegionShell` renders each content page inside its biome — themed header band, breadcrumb, parchment column, region accent tokens — from a single truth table (`registry.js`) that also feeds the compass menu. Page content is untouched between shells.
+- **The world HUD** (`src/atlas/hud/`): compass menu (every page, grouped by region), passport, sound toggle, day/night sun-moon, and a return portal, mounted once outside the router so it survives navigation.
+- **Gamification** (`src/atlas/gamification/`): a pure `questEngine` over Explorer/Collector quests, achievements, and five hidden easter eggs — two of them night-only. Progress lands as passport stamps with confetti and a reward toaster. Everything is local: no accounts, no server.
+- **Persistent world state** (`src/atlas/world/`): an `atlas.v1` localStorage schema behind a reducer + debounced writer, with a pure, tested migration that seeds your passport from the old `globe-visited-worlds` key — so anyone who explored the globe already has stamps.
+- **Day/night** (`src/atlas/theme/`): `--atlas-*` design tokens under `.atlas-root[data-time]`, coupled one-way to the existing `ThemeContext`, and set automatically from the visitor's local hour (19:00–06:00 → night) on first visit.
+- **Ambient audio** (`src/atlas/audio/`, `public/audio/`): a hand-rolled ~150-line WebAudio manager — no library — that loads nothing until you turn sound on, then cross-fades a per-region bed. The seven loops and the SFX sprite are procedurally synthesised by `scripts/generate-atlas-audio.mjs` (filtered noise + sine partials), so the repo owns its audio outright. Off by default.
+- **A guide** (`src/atlas/guide/`): a flat-vector mini Sanket who pops in with one line at a time — a welcome, a nudge toward the passport, a hint that sound exists. Each beat is acknowledged once, forever. Replaces the react-joyride tour.
+- **Two-shell plumbing** (`src/atlas/PageShell.js`, `src/atlas/useViewMode.js`, `src/config/featureFlags.js`, `src/components/Template/PageMeta.js`): one route table, two shells. View mode resolves synchronously — `?view=` param, then stored choice, then reduced-motion, then the flag — so the first paint is never wrong. `PageMeta` is shared, so page metadata cannot fork between shells.
+- **`src/styles/classic.css`**: bare-element defaults for the classic shell, scoped to `.classic-root` and wrapped in `:where()` so a utility class always wins. The counterpart to the `.atlas-root` reset.
+- **Flip tests** (`src/__tests__/AppAtlas.test.js`): assert that `/` serves the map, that the classic nav is absent, and that `/world` redirects.
+
+### Changed
+
+- **`/` is the atlas** (`src/App.js`, `src/config/featureFlags.js`): `ATLAS_LIVE` is now `true`, and a new `HomeRoute` picks the world map or the editorial homepage per shell. Classic remains reachable via `?view=classic`, the passport's "Switch to Classic" kill switch, and `prefers-reduced-motion`.
+- **`/world` redirects to `/`** (`src/App.js`, `functions/_middleware.js`): the preview route now 301s at the edge and `<Navigate>`s in-app; its `X-Robots-Tag: noindex` is gone, and the atlas homepage is indexed as `/`.
+- **`GlobeRenderer`** (`src/components/Index/GlobeRenderer.js`): gained an `orbit` mode (chrome hidden, auto-rotating, imperative `plunge()` handle). three.js stays exactly as lazy as before — the atlas intro shares the homepage's chunk.
+- **`usePanZoom` and `confetti` promoted** (`src/hooks/usePanZoom.js`, `src/atlas/lib/confetti.js`): moved out of MindMap/globe into shared homes, with re-export shims at the old paths.
+- **Body base styles** (`src/tailwind.css`): the `body` rule finally applies — the legacy stylesheet loaded after Tailwind and had been silently winning — and now tracks the theme instead of pinning a near-black background.
+- **`docs/architecture.md`**: styling section rewritten now that Tailwind is the only system.
+
+### Removed
+
+- **The HTML5UP theme** (`src/static/css/`, 28 files, ~3,960 lines of SCSS, and the `sass` devDependency): every class it defined was dead once the page waves finished migrating content to Tailwind, and its `!important` element globals only fought them. The entry stylesheet drops from **164.17 KB to 102.24 KB raw (25.90 → 15.85 KB gzipped)**.
+- **react-joyride** and its tour system (`TourContext.js`, `TourGuide.js`, `TourMount.js`, `tourSteps.js`), plus the 28 now-inert `data-tour` attributes it left across 19 components. Dropping it (~40 KB) roughly paid for GSAP (~30 KB), which is confined to lazy atlas chunks. The entry bundle ends at **149.66 KB gzipped**, within the 5 KB budget set at the start.
+- The `#wrapper`/`#main` ID styling hooks, the admin checkbox's inline-style workaround, and the `!important` marks in the `.atlas-root` reset — all of them scaffolding against the deleted stylesheet.
+
+### Fixed
+
+- **`rounded-full` was not round** (`tailwind.config.js`): it had been overridden to `0.75rem`. That looks correct only on elements short enough for the browser to clamp the radius to half their height — dots and progress bars — and had quietly squared off every avatar, icon button and tag pill on the site. Restored to `9999px`.
+- **Markdown headings on `/changelog`**: the legacy `h1–h6 { text-transform: uppercase }` global was overriding the prose styles, shouting every version heading. Removed with the stylesheet.
+- **Region header art** (`src/atlas/map/art/biomeLife.css`): headers reuse the biome components but never loaded the map's stylesheet, so their halos and light beams rendered at full daytime opacity regardless of the hour. The day/night switches now live in a stylesheet the art itself imports.
+
+---
+
 ## [v10.4.0] — 2026-07-06
 
 ### Added

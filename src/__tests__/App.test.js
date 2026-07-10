@@ -10,6 +10,12 @@ import App from '../App';
 // Render with the same providers as src/index.js
 const render = (ui) => rtlRender(<ThemeProvider>{ui}</ThemeProvider>);
 
+// Since the v11.0.0 flip the atlas is the default shell, and it has no classic
+// nav/sidebar. These tests are about the classic shell, so they enter through
+// `?view=classic` — the same escape hatch a real visitor uses. useViewMode
+// persists that choice, so the later in-app navigations stay classic too.
+const startClassic = () => window.history.pushState({}, '', '/?view=classic');
+
 // Increase timeout for async finding
 const timeout = 5000;
 
@@ -30,6 +36,7 @@ describe('renders the app', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    startClassic();
   });
 
   afterEach(() => {

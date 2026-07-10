@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ContentProvider } from "./context/ContentContext";
 import { WorldProvider } from "./atlas/world/WorldContext";
@@ -37,7 +37,7 @@ const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
 const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
-// Atlas preview route (noindexed; becomes a redirect to "/" at the flip).
+// The atlas homepage: orbit -> dive -> map. Serves "/" in atlas mode.
 const AtlasHome = lazy(() => import("./atlas/AtlasHome"));
 // The fixed atlas chrome (HUD etc.) — mounted once, outside Routes, only in
 // atlas mode (§4.7). Lazy keeps atlas CSS/JS out of the entry bundle.
@@ -53,43 +53,51 @@ const AtlasFrameGate = () => {
   );
 };
 
+// "/" is the one route whose two shells render different components rather than
+// the same content in a different wrapper: the atlas homepage is the world map,
+// the classic homepage is the editorial hub. Every other route goes through
+// PageShell, which wraps identical content.
+const HomeRoute = () => (useViewMode() === "atlas" ? <AtlasHome /> : <Index />);
+
 const App = () => (
   <HelmetProvider>
     <ContentProvider>
       <WorldProvider>
-      <BrowserRouter basename={PUBLIC_URL}>
-        <AtlasFrameGate />
-        <Suspense fallback={<Main />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/stats" element={<Stats />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/resume" element={<Resume />} />
-            <Route path="/instagram" element={<Instagram />} />
-            <Route path="/sports" element={<SportsPage />} />
-            <Route path="/now" element={<Now />} />
-            <Route path="/books" element={<Books />} />
-            <Route path="/challenges" element={<Challenges />} />
-            <Route path="/100-days-to-offload" element={<OneHundredDays />} />
-            <Route path="/micro-blog" element={<MicroBlog />} />
-            <Route path="/micro-blog/:id" element={<MicroBlogPost />} />
-            <Route path="/treks/:id" element={<TrekPost />} />
-            <Route path="/sports/:id" element={<SportPost />} />
-            <Route path="/books/:id" element={<BookPost />} />
-            <Route path="/projects/:id" element={<ProjectPost />} />
-            <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
-            <Route path="/changelog" element={<Changelog />} />
-            <Route path="/treks" element={<TreksPage />} />
-            <Route path="/interactive-me" element={<InteractiveMePage />} />
-            <Route path="/mindmap" element={<MindMap />} />
-            <Route path="/admin/*" element={<AdminApp />} />
-            <Route path="/world" element={<AtlasHome />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+        <BrowserRouter basename={PUBLIC_URL}>
+          <AtlasFrameGate />
+          <Suspense fallback={<Main />}>
+            <Routes>
+              <Route path="/" element={<HomeRoute />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/stats" element={<Stats />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/resume" element={<Resume />} />
+              <Route path="/instagram" element={<Instagram />} />
+              <Route path="/sports" element={<SportsPage />} />
+              <Route path="/now" element={<Now />} />
+              <Route path="/books" element={<Books />} />
+              <Route path="/challenges" element={<Challenges />} />
+              <Route path="/100-days-to-offload" element={<OneHundredDays />} />
+              <Route path="/micro-blog" element={<MicroBlog />} />
+              <Route path="/micro-blog/:id" element={<MicroBlogPost />} />
+              <Route path="/treks/:id" element={<TrekPost />} />
+              <Route path="/sports/:id" element={<SportPost />} />
+              <Route path="/books/:id" element={<BookPost />} />
+              <Route path="/projects/:id" element={<ProjectPost />} />
+              <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
+              <Route path="/changelog" element={<Changelog />} />
+              <Route path="/treks" element={<TreksPage />} />
+              <Route path="/interactive-me" element={<InteractiveMePage />} />
+              <Route path="/mindmap" element={<MindMap />} />
+              <Route path="/admin/*" element={<AdminApp />} />
+              {/* The dark-build preview route. Kept so old links and bookmarks
+                still land somewhere sensible now that "/" is the atlas. */}
+              <Route path="/world" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       </WorldProvider>
     </ContentProvider>
   </HelmetProvider>
