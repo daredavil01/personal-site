@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import routes from "../../data/routes";
-import { useTour } from "../../context/TourContext";
 import Hamburger from "./Hamburger";
 import Logo from "./Logo";
 
 const Navigation = () => {
   const location = useLocation();
-  // The site tour can force the "More" dropdown open to spotlight its items.
-  const { forcedMoreOpen } = useTour();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
-  const moreOpen = isMoreDropdownOpen || forcedMoreOpen;
+  const moreOpen = isMoreDropdownOpen;
   const [openDropdown, setOpenDropdown] = useState(null); // Track which item's dropdown is open
 
   const indexRoute = routes.find((l) => l.index);

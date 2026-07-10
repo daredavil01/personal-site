@@ -15,6 +15,7 @@ import { ATLAS_LIVE } from "../config/featureFlags";
 import { regionForPath } from "./map/mapRegions";
 import Hud from "./hud/Hud";
 import RewardToaster from "./hud/RewardToaster";
+import GuideAvatar from "./guide/GuideAvatar";
 
 // Which ambient bed a path wants: region routes by prefix, the hub its own
 // "map" bed, anything else (e.g. /admin) silence.
@@ -83,6 +84,7 @@ const AtlasFrame = () => {
       {!ATLAS_LIVE && <div className="atlas-ribbon">Wanderer&apos;s Atlas — preview build</div>}
       <Hud time={time} onTimeChange={handleTimeChange} />
       <RewardToaster />
+      <GuideAvatar />
     </div>
   );
 };

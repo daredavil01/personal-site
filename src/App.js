@@ -4,8 +4,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { ContentProvider } from "./context/ContentContext";
 import { WorldProvider } from "./atlas/world/WorldContext";
 import useViewMode from "./atlas/useViewMode";
-import { TourProvider } from "./context/TourContext";
-import TourMount from "./components/Template/TourMount";
 import Main from "./layouts/Main"; // fallback for lazy pages
 import "./tailwind.css"; // Tailwind globals
 import "./static/css/main.scss"; // All of our styles
@@ -61,11 +59,9 @@ const App = () => (
     <ContentProvider>
       <WorldProvider>
       <BrowserRouter basename={PUBLIC_URL}>
-        <TourProvider>
-          <TourMount />
-          <AtlasFrameGate />
-          <Suspense fallback={<Main />}>
-            <Routes>
+        <AtlasFrameGate />
+        <Suspense fallback={<Main />}>
+          <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/projects" element={<Projects />} />
@@ -91,10 +87,9 @@ const App = () => (
             <Route path="/mindmap" element={<MindMap />} />
             <Route path="/admin/*" element={<AdminApp />} />
             <Route path="/world" element={<AtlasHome />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </TourProvider>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
       </WorldProvider>
     </ContentProvider>

@@ -24,6 +24,7 @@ export const defaultState = () => ({
   quests: {}, // quest id -> { done: ISO timestamp | null }
   eggs: {}, // egg id -> found ISO timestamp
   visitDays: [], // distinct "YYYY-MM-DD" strings, capped at VISIT_DAYS_CAP
+  guide: {}, // guide beat id -> acknowledged ISO timestamp (phase 13)
 });
 
 const safeGet = (key) => {

@@ -28,6 +28,7 @@ const sanitize = (raw) => {
   out.visitDays = Array.isArray(raw.visitDays)
     ? raw.visitDays.filter((d) => typeof d === "string").slice(-VISIT_DAYS_CAP)
     : [];
+  out.guide = isPlainObject(raw.guide) ? { ...raw.guide } : {};
   return out;
 };
 

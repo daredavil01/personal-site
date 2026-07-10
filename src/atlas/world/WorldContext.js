@@ -95,6 +95,12 @@ function reducer(state, action) {
     }
     case "introSeen":
       return state.introSeen ? state : { ...state, introSeen: true };
+    case "guideSeen": {
+      // Guide speech beats (phase 13): acknowledged once, never re-shown.
+      const { beat } = action;
+      if (!beat || (state.guide && state.guide[beat])) return state;
+      return { ...state, guide: { ...state.guide, [beat]: nowIso() } };
+    }
     case "recordVisitDay": {
       // Fires once per session on mount — also the reliable re-check point for
       // the time/return achievements (Night Owl, Regular, Completionist), so
@@ -165,6 +171,7 @@ export const WorldProvider = ({ children }) => {
       toggleSound: () => dispatch({ type: "toggleSound" }),
       setTime: (time) => dispatch({ type: "setTime", time }),
       markIntroSeen: () => dispatch({ type: "introSeen" }),
+      markGuideSeen: (beat) => dispatch({ type: "guideSeen", beat }),
       enablePreview: () => { writePreviewFlag(true); setPreview(true); },
       disablePreview: () => { writePreviewFlag(false); setPreview(false); },
     }),
