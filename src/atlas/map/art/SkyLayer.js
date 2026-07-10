@@ -4,6 +4,7 @@
 
 import React from "react";
 import { MAP_W, MAP_H } from "../mapRegions";
+import "./biomeLife.css";
 
 // Fixed star field (deterministic render; y stays above the horizon band).
 const STARS = [
@@ -51,8 +52,10 @@ const SkyLayer = () => (
       </linearGradient>
     </defs>
 
-    <rect width={MAP_W} height={MAP_H} fill="var(--atlas-sky)" />
-    <rect y="230" width={MAP_W} height="250" fill="url(#atlas-horizon-grad)" />
+    {/* Oversized past the canvas edges so the sky layer's parallax lag
+        (±55 world units, see parallax.js) can never expose a border gap. */}
+    <rect x="-80" y="-60" width={MAP_W + 160} height={MAP_H + 120} fill="var(--atlas-sky)" />
+    <rect x="-80" y="230" width={MAP_W + 160} height="250" fill="url(#atlas-horizon-grad)" />
 
     <g>
       {STARS.map(([x, y, r]) => (

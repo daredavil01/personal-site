@@ -25,7 +25,9 @@ import {
 } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
 import EasterEggHotspot from "./EasterEggHotspot";
+import initMapParallax from "./parallax";
 import SkyLayer from "./art/SkyLayer";
+import NearProps from "./art/NearProps";
 import BiomeRidge from "./art/BiomeRidge";
 import BiomeForest from "./art/BiomeForest";
 import BiomeWorkshop from "./art/BiomeWorkshop";
@@ -52,8 +54,11 @@ const ROADS = [
   "M980,810 Q850,930 740,1010",
 ];
 
-const FAR_RANGE = "M0,470 Q150,392 300,462 Q450,398 600,465 Q780,396 960,462 "
-  + "Q1140,400 1320,465 Q1500,396 1680,462 Q1840,404 2000,460 L2000,540 L0,540 Z";
+// Extends past the canvas edges so the far layer's parallax lag (±90 world
+// units, see parallax.js) can never expose a gap at the map's borders.
+const FAR_RANGE = "M-140,466 Q-30,398 90,462 Q210,396 330,464 Q450,398 600,465 "
+  + "Q780,396 960,462 Q1140,400 1320,465 Q1500,396 1680,462 Q1840,404 2000,460 "
+  + "Q2070,428 2140,458 L2140,540 L-140,540 Z";
 const GROUND = "M0,470 C300,432 700,455 1000,445 C1400,432 1700,455 2000,440 L2000,1250 L0,1250 Z";
 const SEA = "M0,830 C180,845 320,900 430,975 C540,1050 640,1140 690,1250 L0,1250 Z";
 const SHORE = "M0,830 C180,845 320,900 430,975 C540,1050 640,1140 690,1250";
@@ -82,6 +87,10 @@ const WorldMap = ({ entry }) => {
   const [flying, setFlying] = useState(false);
   const hotspotRefs = useRef({});
   const flightRef = useRef(null);
+  const skyRef = useRef(null);
+  const farRef = useRef(null);
+  const nearRef = useRef(null);
+  const parallaxRef = useRef(null);
 
   // Mount camera (mount-only): after the dive, tight on the center to pull out
   // as the clouds part (entry="intro"); else on the returning region for the
@@ -111,6 +120,23 @@ const WorldMap = ({ entry }) => {
   }, []); // mount-only: entry pull-out runs once on arrival
 
   useEffect(() => () => clearTimeout(flightRef.current), []);
+
+  // Parallax (phase 11): backdrop layers lag / near props lead the camera,
+  // plus pointer drift on fine pointers. Mount-only; parallax.js no-ops under
+  // prefers-reduced-motion and only ever touches layer transforms (§4.6).
+  useEffect(() => {
+    const rest = restingView();
+    parallaxRef.current = initMapParallax(
+      { sky: skyRef.current, far: farRef.current, near: nearRef.current },
+      { cx: rest.x + rest.w / 2, cy: rest.y + rest.h / 2 },
+      svgRef.current,
+    );
+    return parallaxRef.current.dispose;
+  }, []); // mount-only: layer elements live for the map's lifetime
+
+  useEffect(() => {
+    parallaxRef.current?.onViewBox(viewBox);
+  }, [viewBox]);
 
   // didDrag only guards pointer clicks (a drag ending over a hotspot still
   // fires click); keyboard activation must never be blocked by a stale flag.
@@ -199,10 +225,14 @@ const WorldMap = ({ entry }) => {
         onKeyDown={onKeyDown}
       >
         <g aria-hidden="true">
-          <SkyLayer />
+          <g ref={skyRef}>
+            <SkyLayer />
+          </g>
 
-          {/* FarLayer */}
-          <path d={FAR_RANGE} fill="var(--atlas-foliage-3)" opacity=".38" />
+          {/* FarLayer (parallax factor: lags the camera, see parallax.js) */}
+          <g ref={farRef}>
+            <path d={FAR_RANGE} fill="var(--atlas-foliage-3)" opacity=".38" />
+          </g>
 
           {/* Ground, sea, roads */}
           <path d={GROUND} fill="var(--atlas-foliage-1)" />
@@ -238,8 +268,10 @@ const WorldMap = ({ entry }) => {
             })}
           </g>
 
-          {/* NearLayer — foreground props land with the phase-11 art pass */}
-          <g className="atlas-near-layer" />
+          {/* NearLayer — foreground props, leading the camera slightly */}
+          <g ref={nearRef} className="atlas-near-layer">
+            <NearProps />
+          </g>
 
           {/* LabelLayer — plaques lift with their region */}
           <g>

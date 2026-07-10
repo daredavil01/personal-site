@@ -1,7 +1,9 @@
 /* ============================================================================
    WorldMap — map-hub styles (§4.6). Scene colors come exclusively from the
-   atlasTokens.css custom properties; everything here is layout, the hover
-   lift, idle-life animation and the day/night opacity switches.
+   atlasTokens.css custom properties; everything here is map-only layout,
+   hotspots, eggs and the hover lift. The biome art's day/night switches and
+   idle-life animations live in art/biomeLife.css (imported by the art
+   components, so region headers get them too — phase 11).
    ========================================================================== */
 
 .atlas-map-stage {
@@ -32,11 +34,6 @@
 /* During a fly-in the map is a camera, not a control surface. */
 .atlas-map-viewport.is-flying .atlas-region-hit {
   pointer-events: none;
-}
-
-/* Day/night repaint: fills/opacities ease when [data-time] flips. */
-.atlas-worldmap * {
-  transition: fill 0.7s ease, stroke 0.7s ease, opacity 0.7s ease;
 }
 
 /* ---- Region hotspots (RegionLayer) ---- */
@@ -120,70 +117,7 @@
   fill: var(--atlas-ink);
 }
 
-/* ---- Day/night switches (values defined in atlasTokens.css) ---- */
-.atlas-day-only { opacity: var(--atlas-day); }
-.atlas-night-only { opacity: var(--atlas-night); }
-.atlas-cloud { opacity: var(--atlas-cloud); }
-.atlas-star { opacity: var(--atlas-night); }
-.atlas-beam { opacity: calc(var(--atlas-night) * 0.35); }
-.atlas-halo { opacity: calc(var(--atlas-night) * 0.5); }
-
-/* ---- Idle life (§1) ---- */
-.atlas-cloud-a { animation: atlas-drift 70s ease-in-out infinite alternate; }
-.atlas-cloud-b { animation: atlas-drift 95s ease-in-out infinite alternate-reverse; }
-
-@keyframes atlas-drift {
-  from { transform: translateX(-45px); }
-  to { transform: translateX(45px); }
-}
-
-.atlas-gear {
-  animation: atlas-spin 26s linear infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-@keyframes atlas-spin {
-  to { transform: rotate(360deg); }
-}
-
-.atlas-flag {
-  animation: atlas-flutter 3.2s ease-in-out infinite alternate;
-  transform-box: fill-box;
-  transform-origin: left center;
-}
-
-@keyframes atlas-flutter {
-  from { transform: skewY(-4deg); }
-  to { transform: skewY(5deg); }
-}
-
-.atlas-smoke {
-  animation: atlas-puff 5s ease-in infinite;
-}
-
-@keyframes atlas-puff {
-  0% { transform: translateY(6px); opacity: 0; }
-  30% { opacity: 0.5; }
-  100% { transform: translateY(-22px); opacity: 0; }
-}
-
-.atlas-ff {
-  opacity: 0;
-  animation: atlas-firefly 2.8s ease-in-out infinite alternate;
-}
-
-@keyframes atlas-firefly {
-  from { opacity: calc(var(--atlas-night) * 0.15); }
-  to { opacity: var(--atlas-night); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .atlas-cloud-a,
-  .atlas-cloud-b,
-  .atlas-gear,
-  .atlas-flag,
-  .atlas-smoke,
   .atlas-egg-glint,
   .atlas-egg-star {
     animation: none;
@@ -193,12 +127,6 @@
     opacity: 0.6;
   }
 
-  .atlas-ff {
-    animation: none;
-    opacity: calc(var(--atlas-night) * 0.8);
-  }
-
-  .atlas-worldmap *,
   .atlas-lift {
     transition: none;
   }

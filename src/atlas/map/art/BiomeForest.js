@@ -5,6 +5,7 @@
 // flips to night — same markup, zero art changes (§4.10).
 
 import React from "react";
+import "./biomeLife.css";
 
 // One shelf-tree, reused at five positions/scales via <use>.
 const ShelfTree = () => (
