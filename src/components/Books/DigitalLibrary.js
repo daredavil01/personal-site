@@ -117,7 +117,7 @@ const DigitalLibrary = ({ books }) => {
   return (
     <div className="flex flex-col gap-12 w-full">
       {/* Hero Section: Featured Review */}
-      <section className="mb-12" data-tour="books-featured">
+      <section className="mb-12">
         <div className="w-full bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-8 lg:p-12 rounded-2xl relative overflow-hidden group">
           <div className="absolute -top-10 -right-10 p-12 opacity-[0.03] pointer-events-none">
             <span className="material-symbols-outlined text-[15rem] leading-none transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110" style={{ fontVariationSettings: "'FILL' 1" }}>menu_book</span>

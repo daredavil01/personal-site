@@ -63,7 +63,6 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.8",
     "rimraf": "^4.4.0",
-    "sass": "^1.59.3",
     "source-map-explorer": "^2.5.3",
     "tailwindcss": "^3.4.19",
     "vite": "^6.3.5"

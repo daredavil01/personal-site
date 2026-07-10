@@ -68,7 +68,7 @@ const Changelog = () => {
         </section>
 
         {/* Quick nav badges */}
-        <div data-tour="changelog-versions" className="flex flex-wrap gap-2 -mt-4">
+        <div className="flex flex-wrap gap-2 -mt-4">
           {[
             "v5.0.0",
             "v4.0.0",

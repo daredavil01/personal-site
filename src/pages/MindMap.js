@@ -21,7 +21,7 @@ const MindMap = () => {
   return (
     <PageShell region="person">
       <div className="px-4 md:px-8 py-10 max-w-7xl mx-auto w-full">
-        <div className="mb-8" data-tour="mindmap-hero">
+        <div className="mb-8">
           <h1 className="font-headline text-4xl md:text-5xl text-stone-900 dark:text-stone-100 mb-3">
             Mind Map
           </h1>

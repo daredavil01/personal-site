@@ -1,0 +1,100 @@
+/* ============================================================================
+   Classic shell — scoped bare-element defaults (§4.11 step 4).
+
+   This replaces `src/static/css/main.scss`, the 1625-line HTML5UP "Future
+   Imperfect" theme that used to style bare `button` / `h1-h6` / `a:hover`
+   globally with `!important` and pt-based body sizing. Every class it defined
+   (`.book-card`, `.skillbar`, `.post`, the skel `.Nu` grid, …) was dead by the
+   time the page waves finished migrating content components to Tailwind, and
+   its element globals only ever fought them.
+
+   What survives is this: a small set of defaults for bare elements inside the
+   classic shell, so a `<hr>` or an unclassed `<a>` still looks deliberate.
+
+   Specificity, as in `.atlas-root` (theme/atlasTokens.css): element selectors
+   are wrapped in `:where()` so the reset carries zero specificity and can
+   never out-rank the Tailwind utility classes on page content. `.classic-root a`
+   would be (0,1,1) and would beat a single utility class; `:where()` is (0,0,0)
+   and loses to everything, which is what a baseline should do.
+   ========================================================================== */
+
+/* Unclassed links keep the old theme's dotted-underline affordance. Anything
+   Tailwind touches (every link in a content component) opts out by having a
+   class at all. */
+:where(.classic-root) a:not([class]) {
+  border-bottom: dotted 1px currentColor;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+:where(.classic-root) a:not([class]):hover {
+  border-bottom-color: transparent;
+  color: theme("colors.secondary");
+}
+
+:where(.classic-root) strong,
+:where(.classic-root) b {
+  font-weight: 700;
+}
+
+:where(.classic-root) em,
+:where(.classic-root) i {
+  font-style: italic;
+}
+
+:where(.classic-root) hr {
+  border: 0;
+  border-bottom: solid 1px theme("colors.stone.200");
+  margin: 2rem 0;
+}
+
+:where(.dark .classic-root) hr {
+  border-bottom-color: theme("colors.stone.800");
+}
+
+:where(.classic-root) blockquote {
+  border-left: solid 4px theme("colors.stone.200");
+  font-style: italic;
+  margin: 0 0 1.5rem 0;
+  padding: 0.5rem 0 0.5rem 1.5rem;
+}
+
+:where(.dark .classic-root) blockquote {
+  border-left-color: theme("colors.stone.800");
+}
+
+:where(.classic-root) code {
+  background: theme("colors.stone.100");
+  border-radius: theme("borderRadius.DEFAULT");
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+}
+
+:where(.dark .classic-root) code {
+  background: theme("colors.stone.800");
+}
+
+:where(.classic-root) pre {
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0 1.5rem 0;
+}
+
+:where(.classic-root) pre code {
+  display: block;
+  line-height: 1.75;
+  overflow-x: auto;
+  padding: 1em 1.5em;
+}
+
+:where(.classic-root) sub {
+  font-size: 0.8em;
+  position: relative;
+  top: 0.5em;
+}
+
+:where(.classic-root) sup {
+  font-size: 0.8em;
+  position: relative;
+  top: -0.5em;
+}

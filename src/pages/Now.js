@@ -14,7 +14,7 @@ const Now = () => {
     <PageShell region="person">
       <div className="flex flex-col gap-10 w-full">
         {/* Hero Section */}
-        <section data-tour="now-hero">
+        <section>
           <div className="max-w-3xl">
             <span className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4 block">
               Current Status
@@ -71,9 +71,7 @@ const Now = () => {
           </section>
         )}
 
-        <div data-tour="now-timeline">
-          <NowDocument months={nowData} />
-        </div>
+        <NowDocument months={nowData} />
       </div>
     </PageShell>
   );

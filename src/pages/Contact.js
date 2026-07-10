@@ -17,7 +17,7 @@ const Contact = () => (
         </p>
       </header>
 
-      <div data-tour="contact-card" className="flex flex-col gap-6 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-8 rounded-xl">
+      <div className="flex flex-col gap-6 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 p-8 rounded-xl">
         <div>
           <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold block mb-2">Email</span>
           <EmailLink />

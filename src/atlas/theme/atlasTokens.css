@@ -7,10 +7,9 @@
    Per-region accents live under [data-region] and are set by RegionShell
    (phase 5) / map hotspots (phase 3).
 
-   The .atlas-root reset gives atlas UI sane bare-element defaults so it
-   never depends on load-order wins against the legacy HTML5UP globals
-   (main.scss styles bare button/h1-h6/a with pt sizing and !important
-   colors until its removal in phase 14).
+   The .atlas-root reset gives atlas UI sane bare-element defaults, so atlas
+   chrome never depends on whatever a global stylesheet happens to say about
+   bare button/h1-h6/a. Its classic-shell counterpart is styles/classic.css.
    ========================================================================== */
 
 /* ---- Day palette (default) ---- */
@@ -80,9 +79,7 @@
    have to look exactly as they do in classic mode. A plain `.atlas-root button`
    selector (0,1,1) beats a single Tailwind class (0,1,0) and silently strips
    padding/background/colour from every content button; :where() (0,0,1) does
-   not. The !important marks only counter equally-important legacy declarations
-   (button / a:hover colours in main.scss); drop the whole hack when main.scss
-   dies (PR 14).
+   not.
    ========================================================================== */
 .atlas-root,
 .atlas-root *,
@@ -125,7 +122,7 @@
 
 :where(.atlas-root) a:hover {
   border-bottom: 0;
-  color: var(--atlas-accent) !important;
+  color: var(--atlas-accent);
 }
 
 :where(.atlas-root) button {
@@ -134,7 +131,7 @@
   background: none;
   border: 0;
   box-shadow: none;
-  color: inherit !important;
+  color: inherit;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -154,7 +151,7 @@
 
 :where(.atlas-root) button:hover {
   box-shadow: none;
-  color: inherit !important;
+  color: inherit;
 }
 
 :where(.atlas-root) ul,

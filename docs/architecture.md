@@ -6,7 +6,7 @@
 |---|---|
 | UI | React 18 (functional components + hooks) |
 | Routing | react-router-dom v6 (lazy-loaded routes) |
-| Styling | Tailwind CSS (primary) + SCSS (`src/static/css/`) |
+| Styling | Tailwind CSS |
 | Head/SEO | react-helmet-async |
 | Backend | Supabase (Postgres + Auth + Storage + RLS) |
 | Icons | FontAwesome (brands, regular, solid SVG) |
@@ -167,7 +167,17 @@ All sport, trek, Instagram, and project images are stored in the Supabase `media
 
 ## Styling
 
-Tailwind CSS is the primary styling system. SCSS in `src/static/css/` provides supplementary base styles, typography variables, and component-level overrides. Dark mode is managed via `ThemeContext` and toggled by `FloatingToggle`.
+Tailwind CSS is the only styling system; the HTML5UP SCSS theme that used to sit
+in `src/static/css/` was deleted once every component had migrated to utilities.
+Two small hand-written stylesheets supply bare-element defaults, each scoped to
+one shell so they cannot leak into the other: `src/styles/classic.css`
+(`.classic-root`) and `src/atlas/theme/atlasTokens.css` (`.atlas-root`, which
+also holds the day/night design tokens). Both wrap their element selectors in
+`:where()` so a Tailwind utility class always wins.
+
+Dark mode is managed via `ThemeContext`, which toggles a `dark` class on
+`<html>`, and is surfaced by `FloatingToggle` in the classic shell and the
+sun/moon HUD control in the atlas.
 
 ---
 

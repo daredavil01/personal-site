@@ -3,8 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  /* Both shells paint their own full-height root, so this only shows through
+     on overscroll — but it must still track the theme, and the text colour is
+     the fallback for anything rendered outside a shell (portals). Until the
+     legacy main.scss was deleted its `body` rule loaded later and won, so this
+     declaration never actually applied; the values below are the first ones
+     that do. */
   body {
-    @apply font-body text-stone-300 antialiased bg-[#0c0c0c];
+    @apply font-body antialiased bg-white text-stone-900 dark:bg-stone-950 dark:text-stone-100;
   }
 
   /* Global keyboard focus ring */

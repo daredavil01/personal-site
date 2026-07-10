@@ -52,7 +52,7 @@ const InteractiveMePage = () => {
         </header>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-          <div data-tour="interactive-views" className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
+          <div className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
               return (
@@ -91,7 +91,7 @@ const InteractiveMePage = () => {
       </div>
 
       {/* Floating scroll controls — scoped to this page only */}
-      <div data-tour="interactive-controls" className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-2">
         {/* Speed toggle */}
         <div className="flex items-center bg-stone-900 dark:bg-stone-100 rounded-full shadow-lg overflow-hidden">
           <button

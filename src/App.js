@@ -6,7 +6,6 @@ import { WorldProvider } from "./atlas/world/WorldContext";
 import useViewMode from "./atlas/useViewMode";
 import Main from "./layouts/Main"; // fallback for lazy pages
 import "./tailwind.css"; // Tailwind globals
-import "./static/css/main.scss"; // All of our styles
 
 const { PUBLIC_URL } = process.env;
 

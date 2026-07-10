@@ -8,7 +8,7 @@ const config = {
     // supabaseClient.js reads import.meta.env (also a Vite-only macro) — stub it
     // so the content layer resolves to empty data under jsdom.
     '^.+/supabaseClient$': '<rootDir>/src/lib/supabaseClient.jest-stub.js',
-    '^.+\\.(css|less|scss)$': 'babel-jest',
+    '^.+\\.css$': 'babel-jest',
     '^.+\\.md(\\?url)?$': 'markdown-to-jsx',
   },
 };

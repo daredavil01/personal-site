@@ -27,9 +27,7 @@ const Index = () => (
 
       <GlobeShowcase />
 
-      <div data-tour="stats">
-        <LifeStats />
-      </div>
+      <LifeStats />
 
       <section>
         <SectionHeader label="In 1 Minute" />
@@ -55,7 +53,7 @@ const Index = () => (
         <MonthlyDigest />
       </section>
 
-      <section data-tour="explore">
+      <section>
         <SectionHeader label="Explore" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {HOME_FEATURES.map((item) => (
