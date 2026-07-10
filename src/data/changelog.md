@@ -9,6 +9,18 @@ patch for fixes and tweaks.
 
 ---
 
+## [v11.1.0] — 2026-07-10
+
+### Added
+
+- **Map zoom controls** (`src/atlas/map/MapControls.js`, `src/atlas/map/worldMap.css`): An on-screen zoom-in / zoom-out / reset cluster at the bottom-left of the map hub, so touch users and wheel-less pointer users get the affordances the wheel/pinch gestures assume. Reset flies the camera back to the resting view (the same target as the Escape key) — the escape hatch when a pinch strands the view. Fades out during a fly-in.
+
+### Changed
+
+- **Map hub fits every region on mobile** (`src/atlas/map/WorldMap.js`, `src/atlas/map/mapRegions.js`): The hub now rests on the whole map on every viewport instead of zooming ~1.6× onto the hometown on phones. Small screens switch the SVG from fill-and-crop (`slice`) to fit (`xMidYMid meet`), so all six worlds sit in one window — centered vertically, with sky filling evenly above and below; wider screens keep the immersive full-bleed slice. Removes the now-unused `HOME_VIEW`.
+
+---
+
 ## [v11.0.0] — 2026-07-10
 
 **The Wanderer's Atlas.** The site is now an explorable illustrated world. You

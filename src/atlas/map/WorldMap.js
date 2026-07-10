@@ -12,20 +12,17 @@
 // ReturnPortal) mounts the camera on that region and pulls out — the exact
 // reverse read.
 
-import React, {
-  useEffect, useMemo, useRef, useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import usePanZoom from "../../hooks/usePanZoom";
 import { playSfx } from "../audio/sfxBus";
 import { useWorld } from "../world/WorldContext";
 import { EGGS } from "../gamification/easterEggs";
-import {
-  REGIONS, FULL_VIEW, HOME_VIEW, INTRO_VIEW, MAP_W, MAP_H,
-} from "./mapRegions";
+import { REGIONS, FULL_VIEW, INTRO_VIEW, MAP_W, MAP_H } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
 import EasterEggHotspot from "./EasterEggHotspot";
+import MapControls from "./MapControls";
 import initMapParallax from "./parallax";
 import SkyLayer from "./art/SkyLayer";
 import NearProps from "./art/NearProps";
@@ -64,19 +61,29 @@ const GROUND = "M0,470 C300,432 700,455 1000,445 C1400,432 1700,455 2000,440 L20
 const SEA = "M0,830 C180,845 320,900 430,975 C540,1050 640,1140 690,1250 L0,1250 Z";
 const SHORE = "M0,830 C180,845 320,900 430,975 C540,1050 640,1140 690,1250";
 
-const prefersReducedMotion = () => (
-  typeof window !== "undefined"
+const prefersReducedMotion = () => typeof window !== "undefined"
   && !!window.matchMedia
-  && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-);
+  && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const smallViewport = () => (
-  typeof window !== "undefined"
+const MOBILE_MQ = "(max-width: 640px)";
+
+const smallViewport = () => typeof window !== "undefined"
   && !!window.matchMedia
-  && window.matchMedia("(max-width: 640px)").matches
-);
+  && window.matchMedia(MOBILE_MQ).matches;
 
-const restingView = () => (smallViewport() ? HOME_VIEW : FULL_VIEW);
+// The resting view is always the whole map, so every region sits in one
+// window. On a tall phone that only works when the SVG is told to *fit* the
+// viewBox (letterboxing into the sky) instead of *slice* it — slice would crop
+// the left/right regions off-screen. See `fit` in the component.
+const restingView = () => FULL_VIEW;
+
+// preserveAspectRatio per viewport: phones fit the whole map (all six regions
+// visible), centered vertically so the scene sits in the middle of a tall
+// screen with sky filling evenly above and below; wider screens keep the
+// immersive full-bleed slice, where the landscape map already fills the frame.
+const MOBILE_FIT = "xMidYMid meet";
+const DESKTOP_FIT = "xMidYMid slice";
+const fitFor = (small) => (small ? MOBILE_FIT : DESKTOP_FIT);
 
 const WorldMap = ({ entry }) => {
   const navigate = useNavigate();
@@ -86,6 +93,7 @@ const WorldMap = ({ entry }) => {
   const [focusKey, setFocusKey] = useState(null);
   const [rovingKey, setRovingKey] = useState("person");
   const [flying, setFlying] = useState(false);
+  const [fit, setFit] = useState(() => fitFor(smallViewport()));
   const hotspotRefs = useRef({});
   const flightRef = useRef(null);
   const skyRef = useRef(null);
@@ -95,7 +103,7 @@ const WorldMap = ({ entry }) => {
 
   // Mount camera (mount-only): after the dive, tight on the center to pull out
   // as the clouds part (entry="intro"); else on the returning region for the
-  // reverse fly-in; else the resting view (mobile starts ~1.6× on hometown).
+  // reverse fly-in; else the resting view (the whole map).
   const initialViewBox = useMemo(() => {
     if (entry === "intro" && !prefersReducedMotion()) return INTRO_VIEW;
     const back = state?.toRegion && REGIONS.find((r) => r.key === state.toRegion);
@@ -103,9 +111,14 @@ const WorldMap = ({ entry }) => {
     return restingView();
   }, []); // mount-only: the entry camera is captured once
 
-  const {
-    svgRef, viewBox, animateTo, didDrag, handlers,
-  } = usePanZoom({ initialViewBox, minWidth: 480, maxWidth: 2600 });
+  const { svgRef, viewBox, animateTo, zoomCenter, didDrag, handlers } = usePanZoom({ initialViewBox, minWidth: 480, maxWidth: 2600 });
+
+  // Fly the camera home — the resting view (the whole map). Shared by the
+  // Escape key and the Reset control.
+  const resetView = () => {
+    if (flying) return;
+    animateTo(restingView(), 400);
+  };
 
   // Pull out to the full map on arrival — from the dive (intro) or from a
   // region (the exact reverse read of the fly-in). Mount-only.
@@ -121,6 +134,16 @@ const WorldMap = ({ entry }) => {
   }, []); // mount-only: entry pull-out runs once on arrival
 
   useEffect(() => () => clearTimeout(flightRef.current), []);
+
+  // Track the mobile breakpoint so the fit mode (and thus whether all six
+  // regions are visible at once) follows orientation / resize changes.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(MOBILE_MQ);
+    const sync = () => setFit(fitFor(mq.matches));
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   // Parallax (phase 11): backdrop layers lag / near props lead the camera,
   // plus pointer drift on fine pointers. Mount-only; parallax.js no-ops under
@@ -191,7 +214,7 @@ const WorldMap = ({ entry }) => {
         jumpRoving(REGIONS.length - 1);
         break;
       case "Escape":
-        animateTo(restingView(), 400);
+        resetView();
         break;
       default:
     }
@@ -206,7 +229,10 @@ const WorldMap = ({ entry }) => {
         <ul>
           {REGIONS.map((r) => (
             <li key={r.key}>
-              <Link to={r.path} state={{ fromMap: true }}>{`${r.name} — ${r.blurb}`}</Link>
+              <Link
+                to={r.path}
+                state={{ fromMap: true }}
+              >{`${r.name} — ${r.blurb}`}</Link>
             </li>
           ))}
         </ul>
@@ -218,7 +244,7 @@ const WorldMap = ({ entry }) => {
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
         width="100%"
         height="100%"
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio={fit}
         onPointerDown={handlers.onPointerDown}
         onPointerMove={handlers.onPointerMove}
         onPointerUp={handlers.onPointerUp}
@@ -238,10 +264,28 @@ const WorldMap = ({ entry }) => {
 
           {/* Ground, sea, roads */}
           <path d={GROUND} fill="var(--atlas-foliage-1)" />
-          <ellipse cx="1030" cy="770" rx="500" ry="210" fill="var(--atlas-horizon)" opacity=".16" />
+          <ellipse
+            cx="1030"
+            cy="770"
+            rx="500"
+            ry="210"
+            fill="var(--atlas-horizon)"
+            opacity=".16"
+          />
           <path d={SEA} fill="var(--atlas-water)" />
-          <path d={SHORE} fill="none" stroke="var(--atlas-parchment)" strokeWidth="6" opacity=".55" />
-          <g stroke="#ffffff" strokeWidth="4" strokeLinecap="round" opacity=".3">
+          <path
+            d={SHORE}
+            fill="none"
+            stroke="var(--atlas-parchment)"
+            strokeWidth="6"
+            opacity=".55"
+          />
+          <g
+            stroke="#ffffff"
+            strokeWidth="4"
+            strokeLinecap="round"
+            opacity=".3"
+          >
             <path d="M120,980 h55" />
             <path d="M240,1080 h48" />
             <path d="M420,1150 h60" />
@@ -249,10 +293,22 @@ const WorldMap = ({ entry }) => {
           </g>
           <g fill="none" strokeLinecap="round">
             {ROADS.map((d) => (
-              <path key={d} d={d} stroke="var(--atlas-foliage-3)" strokeWidth="17" opacity=".45" />
+              <path
+                key={d}
+                d={d}
+                stroke="var(--atlas-foliage-3)"
+                strokeWidth="17"
+                opacity=".45"
+              />
             ))}
             {ROADS.map((d) => (
-              <path key={`top-${d}`} d={d} stroke="var(--atlas-parchment)" strokeWidth="10" opacity=".9" />
+              <path
+                key={`top-${d}`}
+                d={d}
+                stroke="var(--atlas-parchment)"
+                strokeWidth="10"
+                opacity=".9"
+              />
             ))}
           </g>
 
@@ -261,8 +317,14 @@ const WorldMap = ({ entry }) => {
             {REGIONS.map((r) => {
               const Art = ART[r.key];
               return (
-                <g key={r.key} data-region={r.key} transform={`translate(${r.at[0]},${r.at[1]})`}>
-                  <g className={`atlas-lift${liftedKey === r.key ? " is-lifted" : ""}`}>
+                <g
+                  key={r.key}
+                  data-region={r.key}
+                  transform={`translate(${r.at[0]},${r.at[1]})`}
+                >
+                  <g
+                    className={`atlas-lift${liftedKey === r.key ? " is-lifted" : ""}`}
+                  >
                     <Art />
                   </g>
                 </g>
@@ -281,10 +343,24 @@ const WorldMap = ({ entry }) => {
               const [px, py, pw] = r.plaque;
               return (
                 <g key={r.key} transform={`translate(${px},${py})`}>
-                  <g className={`atlas-lift${liftedKey === r.key ? " is-lifted" : ""}`}>
-                    <rect width={pw} height="33" rx="8" fill="var(--atlas-parchment)" stroke="var(--atlas-line)" />
+                  <g
+                    className={`atlas-lift${liftedKey === r.key ? " is-lifted" : ""}`}
+                  >
+                    <rect
+                      width={pw}
+                      height="33"
+                      rx="8"
+                      fill="var(--atlas-parchment)"
+                      stroke="var(--atlas-line)"
+                    />
                     <circle cx="20" cy="16.5" r="6" fill={r.color} />
-                    <text className="atlas-plaque-text" x={(pw / 2) + 10} y="22" textAnchor="middle" fontSize="15">
+                    <text
+                      className="atlas-plaque-text"
+                      x={pw / 2 + 10}
+                      y="22"
+                      textAnchor="middle"
+                      fontSize="15"
+                    >
                       {r.name.toUpperCase()}
                     </text>
                   </g>
@@ -299,13 +375,18 @@ const WorldMap = ({ entry }) => {
           {REGIONS.map((r) => (
             <RegionHotspot
               key={r.key}
-              ref={(node) => { hotspotRefs.current[r.key] = node; }}
+              ref={(node) => {
+                hotspotRefs.current[r.key] = node;
+              }}
               region={r}
               tabbable={rovingKey === r.key}
               onActivate={(source) => flyTo(r, source)}
               onHoverStart={() => setHoverKey(r.key)}
               onHoverEnd={() => setHoverKey((k) => (k === r.key ? null : k))}
-              onFocus={() => { setFocusKey(r.key); setRovingKey(r.key); }}
+              onFocus={() => {
+                setFocusKey(r.key);
+                setRovingKey(r.key);
+              }}
               onBlur={() => setFocusKey((k) => (k === r.key ? null : k))}
             />
           ))}
@@ -324,6 +405,15 @@ const WorldMap = ({ entry }) => {
           ))}
         </g>
       </svg>
+
+      {/* Zoom cluster — pointer/touch affordance for the wheel/pinch gestures,
+          with Reset as the way back when a pinch strands the view. Hidden
+          during a fly-in via the .is-flying rule (worldMap.css). */}
+      <MapControls
+        onZoomIn={() => !flying && zoomCenter(0.8)}
+        onZoomOut={() => !flying && zoomCenter(1.25)}
+        onReset={resetView}
+      />
     </div>
   );
 };

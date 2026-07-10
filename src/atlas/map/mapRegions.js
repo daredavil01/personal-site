@@ -26,9 +26,6 @@ const boxAround = (cx, cy, w) => {
   };
 };
 
-// Mobile initial view (§4.6): ~1.6× zoomed on Hometown Square.
-export const HOME_VIEW = boxAround(1050, 745, MAP_W / 1.6);
-
 // Post-dive entry view (§4.2): the map mounts tight on the hometown center
 // behind the whiteout, then pulls out to the full map as the clouds part.
 export const INTRO_VIEW = boxAround(1050, 745, MAP_W / 3.2);

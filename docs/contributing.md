@@ -6,22 +6,30 @@ We welcome contributions to improve this project!
 
 1. **Fork the Repository**: Click the "Fork" button on the top right of the repository page.
 2. **Clone your Fork**:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/personal-site.git
    ```
+
 3. **Create a Branch**:
+
    ```bash
    git checkout -b feature/amazing-feature
    ```
+
 4. **Make Changes**: Implement your feature or fix.
 5. **Commit Changes**:
+
    ```bash
    git commit -m "Add some amazing feature"
    ```
+
 6. **Push to Branch**:
+
    ```bash
    git push origin feature/amazing-feature
    ```
+
 7. **Open a Pull Request**: Go to the original repository and open a Pull Request from your fork.
 
 ## Code Style

@@ -4,7 +4,12 @@
 
 import { DOMAINS } from "../../components/Index/globe/domains";
 import {
-  REGIONS, MAP_ORDER, FULL_VIEW, HOME_VIEW, MAP_W, MAP_H, regionForPath,
+  REGIONS,
+  MAP_ORDER,
+  INTRO_VIEW,
+  MAP_W,
+  MAP_H,
+  regionForPath,
 } from "./mapRegions";
 
 describe("REGIONS table", () => {
@@ -36,10 +41,11 @@ describe("REGIONS table", () => {
     });
   });
 
-  it("defines the mobile home view zoomed ~1.6× inside the canvas", () => {
-    expect(HOME_VIEW.w).toBeCloseTo(FULL_VIEW.w / 1.6, 5);
-    expect(HOME_VIEW.x + HOME_VIEW.w).toBeLessThanOrEqual(MAP_W);
-    expect(HOME_VIEW.y + HOME_VIEW.h).toBeLessThanOrEqual(MAP_H);
+  it("keeps the post-dive intro view inside the canvas", () => {
+    expect(INTRO_VIEW.x).toBeGreaterThanOrEqual(0);
+    expect(INTRO_VIEW.y).toBeGreaterThanOrEqual(0);
+    expect(INTRO_VIEW.x + INTRO_VIEW.w).toBeLessThanOrEqual(MAP_W);
+    expect(INTRO_VIEW.y + INTRO_VIEW.h).toBeLessThanOrEqual(MAP_H);
   });
 });
 
