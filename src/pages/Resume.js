@@ -1,5 +1,5 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import SkillsSection from "../components/Resume/SkillsSection";
 import ExperienceSection from "../components/Resume/ExperienceSection";
 import EducationSection from "../components/Resume/EducationSection";
@@ -15,7 +15,7 @@ const Resume = () => {
   } = resume;
 
   return (
-    <Main>
+    <PageShell region="creator">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
@@ -78,7 +78,7 @@ const Resume = () => {
           )}
         </div>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

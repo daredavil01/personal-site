@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import { buildProjectMeta } from "../data/pageMeta";
 import { useProjects } from "../context/ContentContext";
+import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 
 const keyActivate = (fn) => (e) => {
@@ -12,10 +13,16 @@ const keyActivate = (fn) => (e) => {
 const ProjectPost = () => {
   const { id } = useParams();
   const { data: projects, loading } = useProjects();
+  const { track } = useWorld();
   const [shareState, setShareState] = useState("idle");
   const [imgError, setImgError] = useState(false);
 
   const project = projects.find((p) => String(p.id) === id);
+
+  // Opening a project counts toward the Tinkerer collector quest (§4.5).
+  useEffect(() => {
+    if (project && project.id != null) track("project:open", String(project.id));
+  }, [project, track]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -33,18 +40,18 @@ const ProjectPost = () => {
     setTimeout(() => setShareState("idle"), 2000);
   };
 
-  if (loading) return <Main><LoadingBlock label="Loading project…" /></Main>;
+  if (loading) return <PageShell region="creator"><LoadingBlock label="Loading project…" /></PageShell>;
 
   if (!project) {
     return (
-      <Main title="Project Not Found">
+      <PageShell region="creator" title="Project Not Found">
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/projects" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> Projects
           </Link>
           <p className="font-body text-stone-500 dark:text-stone-400">Project not found.</p>
         </div>
-      </Main>
+      </PageShell>
     );
   }
 
@@ -57,7 +64,7 @@ const ProjectPost = () => {
   });
 
   return (
-    <Main title={meta.title} description={meta.description} image={meta.image}>
+    <PageShell region="creator" title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/projects" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">
@@ -113,7 +120,7 @@ const ProjectPost = () => {
           </div>
         </article>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

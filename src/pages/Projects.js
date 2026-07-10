@@ -1,5 +1,5 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import ProjectGallery from "../components/Projects/ProjectGallery";
 import { useProjects } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
@@ -8,7 +8,7 @@ const Projects = () => {
   const { data: projectsData, loading, error } = useProjects();
 
   return (
-    <Main>
+    <PageShell region="creator">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
@@ -37,7 +37,7 @@ const Projects = () => {
           </button>
         </footer>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

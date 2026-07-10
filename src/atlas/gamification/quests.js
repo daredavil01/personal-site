@@ -64,6 +64,17 @@ export const QUESTS = [
     color: "#ec4899",
   },
   {
+    id: "collector_projects",
+    type: "collector",
+    region: "creator",
+    action: "project:open",
+    target: 3,
+    title: "Tinkerer",
+    desc: "Open three projects in the Workshop.",
+    reward: { stamp: "tinkerer", label: "Tinkerer stamp" },
+    color: "#a855f7",
+  },
+  {
     id: "egg_hunter",
     type: "eggs",
     target: EGG_COUNT,
