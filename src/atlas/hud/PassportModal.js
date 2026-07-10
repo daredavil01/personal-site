@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { DOMAINS } from "../../components/Index/globe/domains";
 import { ATLAS_LIVE } from "../../config/featureFlags";
+import { getRegion } from "../regions/registry";
 import { useWorld } from "../world/WorldContext";
 import { ALL_QUESTS } from "../gamification/quests";
 import { progressOf } from "../gamification/questEngine";
@@ -70,7 +71,7 @@ const PassportModal = ({ onClose }) => {
                 style={{ "--stamp-color": d.color }}
               >
                 <span className="atlas-stamp-seal" aria-hidden="true">{visitedAt ? "✦" : "·"}</span>
-                {d.label}
+                {getRegion(d.key).label}
                 <span style={{ fontWeight: 400 }}>
                   {visitedAt ? fmtDate(visitedAt) : "Unexplored"}
                 </span>

@@ -9,7 +9,7 @@ export const EGGS = [
     at: [430, 1035],
     region: "marathons",
     title: "The 50K medal",
-    hint: "A glint half-buried on the Coastal Road",
+    hint: "A glint half-buried along the shore",
     found: "Tata Ultra 50K — the ultra-marathon medal.",
   },
   {

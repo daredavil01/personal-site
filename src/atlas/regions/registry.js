@@ -26,7 +26,7 @@ const SquareHeader = lazy(() => import("./headers/SquareHeader"));
 // (the font the rest of the site already loads).
 const PRESENTATION = {
   marathons: {
-    label: "Coastal Road",
+    label: "Marathons",
     tagline: "a winding shoreline of mile-markers and medals",
     Header: CoastHeader,
     pages: [
@@ -34,7 +34,7 @@ const PRESENTATION = {
     ],
   },
   treks: {
-    label: "Sahyadri Ridge",
+    label: "Treks",
     tagline: "fort-crowned summits, each a flag on the skyline",
     Header: RidgeHeader,
     pages: [
@@ -60,7 +60,7 @@ const PRESENTATION = {
     ],
   },
   creator: {
-    label: "Workshop",
+    label: "Projects",
     tagline: "drafting tables, blueprints and turning gears",
     Header: WorkshopHeader,
     pages: [

@@ -39,7 +39,7 @@ export const MAP_ORDER = ["treks", "reader", "creator", "marathons", "writer", "
 
 const MAP_DATA = {
   treks: {
-    name: "Sahyadri Ridge",
+    name: "Treks",
     blurb: "treks and summit forts",
     at: [300, 300],
     focus: [660, 480, 1000],
@@ -55,7 +55,7 @@ const MAP_DATA = {
     plaque: [1505, 812, 190],
   },
   creator: {
-    name: "Workshop",
+    name: "Projects",
     blurb: "projects and resume",
     at: [1360, 880],
     focus: [1620, 1030, 900],
@@ -63,7 +63,7 @@ const MAP_DATA = {
     plaque: [1495, 1148, 165],
   },
   marathons: {
-    name: "Coastal Road",
+    name: "Marathons",
     blurb: "races and running",
     at: [40, 850],
     focus: [480, 1050, 1000],
