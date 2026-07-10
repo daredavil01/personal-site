@@ -1,11 +1,11 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import AboutDocument from "../components/About/AboutDocument";
 
 const About = () => (
-  <Main>
+  <PageShell region="person">
     <AboutDocument />
-  </Main>
+  </PageShell>
 );
 
 export default About;

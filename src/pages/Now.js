@@ -1,5 +1,5 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import NowDocument from "../components/Now/NowDocument";
 import { useNowMeta, useNowMonths } from "../context/ContentContext";
 
@@ -11,7 +11,7 @@ const Now = () => {
   const lastUpdated = current ? `${current.month} ${current.year}` : "";
 
   return (
-    <Main>
+    <PageShell region="person">
       <div className="flex flex-col gap-10 w-full">
         {/* Hero Section */}
         <section data-tour="now-hero">
@@ -75,7 +75,7 @@ const Now = () => {
           <NowDocument months={nowData} />
         </div>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

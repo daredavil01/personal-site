@@ -1,11 +1,11 @@
 import React from "react";
 
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import EmailLink from "../components/Contact/EmailLink";
 import ContactIcons from "../components/Contact/ContactIcons";
 
 const Contact = () => (
-  <Main>
+  <PageShell region="person">
     <div className="flex flex-col gap-12 w-full max-w-2xl">
       <header>
         <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary mb-4 font-bold">Let&apos;s Talk</p>
@@ -28,7 +28,7 @@ const Contact = () => (
         </div>
       </div>
     </div>
-  </Main>
+  </PageShell>
 );
 
 export default Contact;

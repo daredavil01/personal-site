@@ -1,14 +1,14 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import Posts from "../components/Instagram/Posts";
 
 const Instagram = () => {
   return (
-    <Main>
+    <PageShell region="person">
       <div className="flex flex-col gap-12 w-full">
         <Posts />
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

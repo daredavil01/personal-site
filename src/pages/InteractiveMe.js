@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import InteractiveMeTimeline from "../components/InteractiveMe/InteractiveMeTimeline";
 
 const tabs = ["SPORTS", "TREKS"];
@@ -28,7 +28,7 @@ const InteractiveMePage = () => {
   };
 
   return (
-    <Main>
+    <PageShell region="person">
       <div className="flex flex-col gap-12 w-full">
         <header>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
@@ -139,7 +139,7 @@ const InteractiveMePage = () => {
           {scrollEnabled ? "Pause" : "Scroll"}
         </button>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import personalData from "../data/stats/personal";
 import { getPBRaw, formatHoursMinutes, formatMinutesSeconds } from "../utils/raceStats";
 import {
@@ -148,11 +148,11 @@ const Stats = () => {
   // Projects
   const projectCount = projects.length;
 
-  if (isLoading) return <Main><LoadingBlock label="Loading stats…" /></Main>;
-  if (hasError) return <Main><ErrorBlock /></Main>;
+  if (isLoading) return <PageShell region="person"><LoadingBlock label="Loading stats…" /></PageShell>;
+  if (hasError) return <PageShell region="person"><ErrorBlock /></PageShell>;
 
   return (
-    <Main>
+    <PageShell region="person">
       <div className="flex flex-col gap-16 w-full">
         {/* Hero Title Section */}
         <section>
@@ -549,7 +549,7 @@ const Stats = () => {
 
         </div>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

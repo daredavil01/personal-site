@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import Main from '../layouts/Main';
+import PageShell from '../atlas/PageShell';
 import MindMapCanvas from '../components/MindMap/MindMapCanvas';
 import { useBooks, useSports, useTreks, useProjects, useBlogs } from '../context/ContentContext';
 
@@ -19,7 +19,7 @@ const MindMap = () => {
   ], [booksData, sportsData, treksData, projectsData, blogsData]);
 
   return (
-    <Main>
+    <PageShell region="person">
       <div className="px-4 md:px-8 py-10 max-w-7xl mx-auto w-full">
         <div className="mb-8" data-tour="mindmap-hero">
           <h1 className="font-headline text-4xl md:text-5xl text-stone-900 dark:text-stone-100 mb-3">
@@ -36,7 +36,7 @@ const MindMap = () => {
 
         <MindMapCanvas categories={categories} />
       </div>
-    </Main>
+    </PageShell>
   );
 };
 
