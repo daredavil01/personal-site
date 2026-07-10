@@ -2,8 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { typeColors } from "./constants";
 
-// Legacy theme CSS force-styles bare <button> elements, so clickable cards use
-// div[role="button"] like the rest of the site (see OneHundredDays.js).
+// Clickable cards use div[role="button"] like the rest of the site (see
+// OneHundredDays.js). That began as a workaround for the legacy HTML5UP CSS,
+// which force-styled bare <button>; the stylesheet is gone, so these can become
+// real buttons whenever someone sweeps the pattern.
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") {
     e.preventDefault();

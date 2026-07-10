@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import MonthSection from "./MonthSection";
 
-// Legacy theme CSS (static/css/components/_button.scss) force-styles bare
-// <button> elements (fixed height, nowrap, !important color), so the pills
-// use div[role="button"] like the rest of the site.
+// The pills use div[role="button"] like the rest of the site — originally to
+// dodge the legacy HTML5UP button globals, which no longer exist.
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") {
     e.preventDefault();

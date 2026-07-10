@@ -7,6 +7,12 @@
       "runtimeArgs": ["start"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "Atlas Preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "4317", "--strictPort"],
+      "port": 4317
     }
   ]
 }

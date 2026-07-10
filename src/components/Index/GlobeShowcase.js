@@ -96,7 +96,7 @@ const GlobeShowcase = () => {
   }, [sportsData, treksData, booksData, blogsData, projectsData, inView]);
 
   return (
-    <section ref={containerRef} className="w-full" data-tour="globe">
+    <section ref={containerRef} className="w-full">
       <SectionHeader label="My World" />
       {!inView ? (
         <GlobeSkeleton />

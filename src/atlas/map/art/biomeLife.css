@@ -1,0 +1,219 @@
+/* ============================================================================
+   Biome art life — day/night switches + idle-life animation for the biome
+   SVG components (phase 11 art pass). Imported by the art components
+   themselves so the WorldMap hub AND the region-header bands (which reuse
+   the same biomes) both get the switches — previously these lived in
+   worldMap.css and headers rendered halos/beams at full daytime opacity.
+
+   Colors stay exclusively in atlasTokens.css; --atlas-day/--atlas-night/
+   --atlas-cloud are the 0/1 switches flipped by [data-time] (§4.10).
+   ========================================================================== */
+
+/* Day/night repaint: fills/opacities ease when [data-time] flips. */
+.atlas-worldmap *,
+.atlas-header-art * {
+  transition: fill 0.7s ease, stroke 0.7s ease, opacity 0.7s ease;
+}
+
+/* ---- Day/night switches ---- */
+.atlas-day-only { opacity: var(--atlas-day); }
+.atlas-night-only { opacity: var(--atlas-night); }
+.atlas-cloud { opacity: var(--atlas-cloud); }
+.atlas-star { opacity: var(--atlas-night); }
+.atlas-beam { opacity: calc(var(--atlas-night) * 0.35); }
+.atlas-halo { opacity: calc(var(--atlas-night) * 0.5); }
+
+/* ---- Idle life (§1: flag flutter, page-birds, workshop gears…) ---- */
+.atlas-cloud-a { animation: atlas-drift 70s ease-in-out infinite alternate; }
+.atlas-cloud-b { animation: atlas-drift 95s ease-in-out infinite alternate-reverse; }
+.atlas-mist-a { animation: atlas-drift 46s ease-in-out infinite alternate; }
+.atlas-mist-b { animation: atlas-drift 58s ease-in-out infinite alternate-reverse; }
+
+@keyframes atlas-drift {
+  from { transform: translateX(-45px); }
+  to { transform: translateX(45px); }
+}
+
+.atlas-gear {
+  animation: atlas-spin 26s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.atlas-gear-rev {
+  animation: atlas-spin 18s linear infinite reverse;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.atlas-gear-slow {
+  animation: atlas-spin 34s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes atlas-spin {
+  to { transform: rotate(360deg); }
+}
+
+.atlas-flag {
+  animation: atlas-flutter 3.2s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+@keyframes atlas-flutter {
+  from { transform: skewY(-4deg); }
+  to { transform: skewY(5deg); }
+}
+
+.atlas-smoke {
+  animation: atlas-puff 5s ease-in infinite;
+}
+
+@keyframes atlas-puff {
+  0% { transform: translateY(6px); opacity: 0; }
+  30% { opacity: 0.5; }
+  100% { transform: translateY(-22px); opacity: 0; }
+}
+
+.atlas-ff {
+  opacity: 0;
+  animation: atlas-firefly 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes atlas-firefly {
+  from { opacity: calc(var(--atlas-night) * 0.15); }
+  to { opacity: var(--atlas-night); }
+}
+
+/* Buoys and boats ride the swell. */
+.atlas-bob {
+  animation: atlas-bob 4.2s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes atlas-bob {
+  from { transform: translateY(-3px) rotate(-2deg); }
+  to { transform: translateY(3px) rotate(2deg); }
+}
+
+/* Shore waves lap sideways and brighten. */
+.atlas-wave {
+  animation: atlas-lap 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes atlas-lap {
+  from { transform: translateX(-8px); opacity: 0.3; }
+  to { transform: translateX(8px); opacity: 0.7; }
+}
+
+/* The scriptorium quill writes — a slow rock about its nib. */
+.atlas-quill {
+  animation: atlas-scribe 5s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 12% 96%;
+}
+
+@keyframes atlas-scribe {
+  from { transform: rotate(-2.5deg); }
+  to { transform: rotate(2deg); }
+}
+
+/* The printing-press arm stamps on a slow cycle. */
+.atlas-press-arm {
+  animation: atlas-press 3.4s ease-in-out infinite;
+}
+
+@keyframes atlas-press {
+  0%, 55%, 100% { transform: translateY(0); }
+  70%, 82% { transform: translateY(9px); }
+}
+
+/* Bunting strings and drying pages sway together. */
+.atlas-bunting {
+  animation: atlas-sway-skew 6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+@keyframes atlas-sway-skew {
+  from { transform: skewX(-2deg); }
+  to { transform: skewX(2.5deg); }
+}
+
+/* Crane loads swing gently from their rope. */
+.atlas-sway {
+  animation: atlas-pendulum 7s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+@keyframes atlas-pendulum {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(2.4deg); }
+}
+
+/* Fountain jet pulses; droplets rise and fall. */
+.atlas-fountain {
+  animation: atlas-jet 2.6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+@keyframes atlas-jet {
+  from { transform: scaleY(0.72); }
+  to { transform: scaleY(1.08); }
+}
+
+.atlas-drop {
+  animation: atlas-droplet 2.6s ease-in infinite;
+}
+
+@keyframes atlas-droplet {
+  0% { transform: translateY(0); opacity: 0; }
+  25% { opacity: 0.9; }
+  100% { transform: translateY(14px); opacity: 0; }
+}
+
+/* ---- Reduced motion: scenery freezes but stays legible ---- */
+@media (prefers-reduced-motion: reduce) {
+  .atlas-cloud-a,
+  .atlas-cloud-b,
+  .atlas-mist-a,
+  .atlas-mist-b,
+  .atlas-gear,
+  .atlas-gear-rev,
+  .atlas-gear-slow,
+  .atlas-flag,
+  .atlas-smoke,
+  .atlas-bob,
+  .atlas-wave,
+  .atlas-quill,
+  .atlas-press-arm,
+  .atlas-bunting,
+  .atlas-sway,
+  .atlas-fountain {
+    animation: none;
+  }
+
+  .atlas-ff {
+    animation: none;
+    opacity: calc(var(--atlas-night) * 0.8);
+  }
+
+  .atlas-wave {
+    opacity: 0.5;
+  }
+
+  .atlas-drop {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .atlas-worldmap *,
+  .atlas-header-art * {
+    transition: none;
+  }
+}

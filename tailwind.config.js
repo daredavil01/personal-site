@@ -61,7 +61,13 @@ module.exports = {
         "body": ["Inter", "sans-serif"],
         "label": ["Plus Jakarta Sans", "sans-serif"]
       },
-      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+      // `full` must be a true circle/pill: the atlas draws its compass, sun/moon
+      // and passport stamps with it, and the site's avatars, icon buttons and
+      // tag pills always assumed it. It had been overridden to 0.75rem, which
+      // only looked correct on elements short enough for the browser to clamp
+      // the radius to half their height (dots, progress bars) and quietly
+      // squared off everything taller.
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "9999px"},
     },
   },
   plugins: [

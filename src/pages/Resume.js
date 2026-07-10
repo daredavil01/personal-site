@@ -1,5 +1,5 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import SkillsSection from "../components/Resume/SkillsSection";
 import ExperienceSection from "../components/Resume/ExperienceSection";
 import EducationSection from "../components/Resume/EducationSection";
@@ -15,7 +15,7 @@ const Resume = () => {
   } = resume;
 
   return (
-    <Main>
+    <PageShell region="creator">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
@@ -33,7 +33,7 @@ const Resume = () => {
         {/* Main Content Grid */}
         <div className="grid grid-cols-12 gap-6 w-full">
           {/* Primary Interests / Summary (Bento Large) */}
-          <section data-tour="resume-focus" className="col-span-12 md:col-span-7 bg-secondary/[0.03] p-10 rounded-xl relative overflow-hidden group border border-secondary/10">
+          <section className="col-span-12 md:col-span-7 bg-secondary/[0.03] p-10 rounded-xl relative overflow-hidden group border border-secondary/10">
             <div className="relative z-10">
               <span className="font-label text-[10px] uppercase tracking-widest text-stone-400">Focus Area</span>
               <h3 className="font-headline text-3xl mt-2 mb-6 text-stone-800">Human-AI Interface Design</h3>
@@ -78,7 +78,7 @@ const Resume = () => {
           )}
         </div>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

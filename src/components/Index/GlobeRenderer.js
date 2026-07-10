@@ -1,4 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState, useRef, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle,
+} from "react";
+import PropTypes from "prop-types";
 import Globe from "react-globe.gl";
 import { useTheme } from "../../context/ThemeContext";
 import { DOMAINS, PIN_ICONS, findDomainIndexByKey, hexToRgba } from "./globe/domains";
@@ -60,13 +63,19 @@ const initialDomainIndex = () => {
 
 const controlBtnCls = "w-10 h-10 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md text-stone-700 dark:text-stone-300 rounded-full shadow-lg border border-stone-200 dark:border-stone-700 flex items-center justify-center hover:bg-white dark:hover:bg-stone-800 transition-colors";
 
-const GlobeRenderer = ({ pins, onPinClick, paused }) => {
+const GlobeRenderer = forwardRef(({
+  pins, onPinClick, paused, mode,
+}, ref) => {
   const rootRef = useRef(null);
   const containerRef = useRef(null);
   const globeRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  // Orbit mode (§4.2): the atlas arrival stage. Chrome hidden, gentle
+  // auto-rotate, fills its parent; the imperative handle lets DiveSequence
+  // plunge the camera.
+  const isOrbit = mode === "orbit";
 
   const reducedMotion = useMemo(
     () => window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false,
@@ -132,6 +141,33 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
     setJourneyArc(null);
     setCaption(null);
   }, []);
+
+  // Imperative handle for the atlas dive (§4.2): plunge the camera toward the
+  // surface. Only meaningful in orbit mode; a no-op ref otherwise.
+  useImperativeHandle(ref, () => ({
+    plunge: (ms = 1200) => {
+      const g = globeRef.current;
+      if (!g) return;
+      try { g.controls().autoRotate = false; } catch (e) { /* pre-mount */ }
+      const pov = g.pointOfView();
+      g.pointOfView({ ...pov, altitude: 0.04 }, reducedMotion ? 0 : ms);
+    },
+  }), [reducedMotion]);
+
+  // Orbit mode: a slow drift so the arrival scene feels alive without input.
+  useEffect(() => {
+    if (!isOrbit) return undefined;
+    let raf = 0;
+    const setup = () => {
+      const g = globeRef.current;
+      const controls = g && g.controls && g.controls();
+      if (!controls) { raf = requestAnimationFrame(setup); return; }
+      controls.autoRotate = !reducedMotion;
+      controls.autoRotateSpeed = 0.55;
+    };
+    setup();
+    return () => { if (raf) cancelAnimationFrame(raf); };
+  }, [isOrbit, reducedMotion]);
 
   // ---- Data derivations -------------------------------------------------
 
@@ -564,22 +600,28 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
     ? "opacity-100"
     : "opacity-0 group-hover:opacity-100 focus-within:opacity-100";
 
+  // Container height: orbit fills its parent; showcase keeps its fixed frame.
+  let containerHeightCls = "h-[420px] md:h-[560px]";
+  if (isOrbit) containerHeightCls = "h-full";
+  else if (isFullscreen) containerHeightCls = "flex-1 min-h-0 shadow-2xl";
+
+  // Root layout: orbit fills the stage; fullscreen overlays; else normal flow.
+  let rootLayoutCls = "w-full";
+  if (isOrbit) rootLayoutCls = "w-full h-full";
+  else if (isFullscreen) {
+    rootLayoutCls = "fixed inset-0 z-50 p-2 md:p-6 bg-stone-100/90 dark:bg-stone-900/90 backdrop-blur-md";
+  }
+
   return (
     <div
       ref={rootRef}
-      className={`flex flex-col gap-3 transition-all duration-500 ease-in-out ${
-        isFullscreen
-          ? "fixed inset-0 z-50 p-2 md:p-6 bg-stone-100/90 dark:bg-stone-900/90 backdrop-blur-md"
-          : "w-full"
-      }`}
+      className={`flex flex-col gap-3 transition-all duration-500 ease-in-out ${rootLayoutCls}`}
     >
       <div
         ref={containerRef}
-        className={`w-full ${
-          isFullscreen ? "flex-1 min-h-0 shadow-2xl" : "h-[420px] md:h-[560px]"
-        } bg-stone-100 dark:bg-stone-900 overflow-hidden cursor-grab active:cursor-grabbing relative group rounded-2xl border border-stone-200 dark:border-stone-800 transition-all duration-500 ${
-          zoomedIn ? "globe-zoomed" : ""
-        }`}
+        className={`w-full ${containerHeightCls} bg-stone-100 dark:bg-stone-900 overflow-hidden cursor-grab active:cursor-grabbing relative group transition-all duration-500 ${
+          isOrbit ? "" : "rounded-2xl border border-stone-200 dark:border-stone-800"
+        } ${zoomedIn ? "globe-zoomed" : ""}`}
       >
         {/* Cross-fading per-domain backgrounds */}
         {DOMAINS.map((d, i) => (
@@ -677,16 +719,21 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
         )}
 
         {/* Active-domain info card (top left) */}
-        <div className="absolute top-4 left-4 z-20">
-          <DomainInfoCard domain={activeDomain} count={counts[activeDomain.key] || 0} />
-        </div>
+        {!isOrbit && (
+          <div className="absolute top-4 left-4 z-20">
+            <DomainInfoCard domain={activeDomain} count={counts[activeDomain.key] || 0} />
+          </div>
+        )}
 
         {/* Exploration tracker (top right) */}
-        <div className="absolute top-4 right-4 z-20">
-          <ExplorationTracker domains={DOMAINS} visitedKeys={visitedKeys} />
-        </div>
+        {!isOrbit && (
+          <div className="absolute top-4 right-4 z-20">
+            <ExplorationTracker domains={DOMAINS} visitedKeys={visitedKeys} />
+          </div>
+        )}
 
         {/* Experience controls (bottom left) */}
+        {!isOrbit && (
         <div
           className={`absolute bottom-4 left-4 flex flex-col gap-2 ${controlsVisibility} transition-opacity duration-300 z-20`}
         >
@@ -729,8 +776,10 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
             <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
           </button>
         </div>
+        )}
 
         {/* View controls (bottom right) */}
+        {!isOrbit && (
         <div
           className={`absolute bottom-4 right-4 flex flex-col gap-2 ${controlsVisibility} transition-opacity duration-300 z-20`}
         >
@@ -769,9 +818,10 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
             <span className="material-symbols-outlined text-[20px]">remove</span>
           </button>
         </div>
+        )}
 
         {/* Journey / status caption (bottom center) */}
-        {caption && (
+        {!isOrbit && caption && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 max-w-[85%]">
             <div className="globe-pop-in flex items-center gap-2 px-4 py-2 rounded-full bg-stone-900/80 text-white backdrop-blur-md shadow-xl border border-white/10">
               <span
@@ -794,7 +844,7 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
         )}
 
         {/* Completion toast (top center) */}
-        {toast && (
+        {!isOrbit && toast && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30">
             <div className="globe-pop-in flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-white shadow-xl">
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
@@ -807,19 +857,38 @@ const GlobeRenderer = ({ pins, onPinClick, paused }) => {
           </div>
         )}
 
-        {showCoach && dimensions.width > 0 && <CoachMark />}
+        {!isOrbit && showCoach && dimensions.width > 0 && <CoachMark />}
       </div>
 
       {/* Domain legend chips */}
-      <DomainLegend
-        domains={DOMAINS}
-        counts={counts}
-        activeIndex={activeDomainIndex}
-        visitedKeys={visitedKeys}
-        onSelect={handleSelectDomain}
-      />
+      {!isOrbit && (
+        <DomainLegend
+          domains={DOMAINS}
+          counts={counts}
+          activeIndex={activeDomainIndex}
+          visitedKeys={visitedKeys}
+          onSelect={handleSelectDomain}
+        />
+      )}
     </div>
   );
+});
+
+GlobeRenderer.displayName = "GlobeRenderer";
+
+GlobeRenderer.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types -- pin objects vary by domain type
+  pins: PropTypes.arrayOf(PropTypes.object),
+  onPinClick: PropTypes.func,
+  paused: PropTypes.bool,
+  mode: PropTypes.oneOf(["showcase", "orbit"]),
+};
+
+GlobeRenderer.defaultProps = {
+  pins: [],
+  onPinClick: () => {},
+  paused: false,
+  mode: "showcase",
 };
 
 export default GlobeRenderer;

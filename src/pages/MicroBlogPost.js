@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import { getMicroblogPost } from "../lib/api/microblog";
 import { buildMicroblogMeta } from "../data/pageMeta";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
@@ -50,7 +50,7 @@ const MicroBlogPost = () => {
     : { title: "Post", description: "A micro-blog post.", image: undefined };
 
   return (
-    <Main title={meta.title} description={meta.description} image={meta.image}>
+    <PageShell region="writer" title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link
@@ -139,7 +139,7 @@ const MicroBlogPost = () => {
           </article>
         )}
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

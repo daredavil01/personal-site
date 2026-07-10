@@ -1,5 +1,5 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import ProjectGallery from "../components/Projects/ProjectGallery";
 import { useProjects } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
@@ -8,7 +8,7 @@ const Projects = () => {
   const { data: projectsData, loading, error } = useProjects();
 
   return (
-    <Main>
+    <PageShell region="creator">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header className="mb-12">
@@ -29,7 +29,7 @@ const Projects = () => {
         {!loading && !error && <ProjectGallery projects={projectsData} />}
 
         {/* Pagination / Call to action */}
-        <footer data-tour="projects-cta" className="mt-16 border-t border-stone-100 dark:border-stone-900 pt-16 text-center w-full">
+        <footer className="mt-16 border-t border-stone-100 dark:border-stone-900 pt-16 text-center w-full">
           <h3 className="font-headline text-3xl font-bold mb-6 text-stone-800 dark:text-stone-200" id="discuss-vision">Have a project in mind?</h3>
           <button className="group inline-flex items-center gap-4 text-xl font-label uppercase tracking-widest text-secondary hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
             Let&apos;s discuss the vision
@@ -37,7 +37,7 @@ const Projects = () => {
           </button>
         </footer>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

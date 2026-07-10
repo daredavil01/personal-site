@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Markdown from "markdown-to-jsx";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 
 const Changelog = () => {
   const [markdown, setMarkdown] = useState("");
@@ -19,7 +19,7 @@ const Changelog = () => {
   }, []);
 
   return (
-    <Main>
+    <PageShell region="person">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <section className="mb-4">
@@ -68,7 +68,7 @@ const Changelog = () => {
         </section>
 
         {/* Quick nav badges */}
-        <div data-tour="changelog-versions" className="flex flex-wrap gap-2 -mt-4">
+        <div className="flex flex-wrap gap-2 -mt-4">
           {[
             "v5.0.0",
             "v4.0.0",
@@ -95,7 +95,7 @@ const Changelog = () => {
           </article>
         )}
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

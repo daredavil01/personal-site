@@ -63,6 +63,14 @@ export async function onRequest(context) {
     return next();
   }
 
+  // "/world" was the noindexed preview route during the atlas dark build. The
+  // atlas now serves "/", so redirect permanently and let the search engines
+  // collapse the two. (App.js also renders a client-side <Navigate>, which
+  // covers in-app navigation that never reaches this worker.)
+  if (pathname === "/world") {
+    return Response.redirect(new URL("/", url).toString(), 301);
+  }
+
   const response = await next();
 
   // Only rewrite HTML responses (definitive gate on the actual content type).

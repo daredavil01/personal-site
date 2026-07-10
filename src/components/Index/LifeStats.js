@@ -4,26 +4,7 @@ import {
   useBooks, useSports, useTreks, useBlogs, useProjects,
 } from "../../context/ContentContext";
 import { getMicroblogCount } from "../../lib/api/microblog";
-
-const useCountUp = (target, duration, active) => {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!active || target === 0) {
-      return undefined;
-    }
-    let frame = 0;
-    const totalFrames = Math.round(duration / 16);
-    const timer = setInterval(() => {
-      frame += 1;
-      const progress = frame / totalFrames;
-      const eased = 1 - (1 - progress) ** 3; // ease-out cubic
-      setCount(Math.min(Math.round(eased * target), target));
-      if (frame >= totalFrames) clearInterval(timer);
-    }, 16);
-    return () => { clearInterval(timer); };
-  }, [active, target, duration]);
-  return count;
-};
+import useCountUp from "../../hooks/useCountUp";
 
 const LifeStats = () => {
   const [animated, setAnimated] = useState(false);

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import { buildTrekMeta } from "../data/pageMeta";
 import { useTreks } from "../context/ContentContext";
+import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 import ImageSlider from "../components/Instagram/ImageSlider";
@@ -23,9 +24,15 @@ const keyActivate = (fn) => (e) => {
 const TrekPost = () => {
   const { id } = useParams();
   const { data: treksData, loading } = useTreks();
+  const { track } = useWorld();
   const [shareState, setShareState] = useState("idle");
 
   const trek = treksData.find((t) => String(t.id) === id);
+
+  // Opening a trek counts toward the Summiteer collector quest (§4.5).
+  useEffect(() => {
+    if (trek && trek.id != null) track("trek:open", String(trek.id));
+  }, [trek, track]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -43,18 +50,18 @@ const TrekPost = () => {
     setTimeout(() => setShareState("idle"), 2000);
   };
 
-  if (loading) return <Main><LoadingBlock label="Loading trek…" /></Main>;
+  if (loading) return <PageShell region="treks"><LoadingBlock label="Loading trek…" /></PageShell>;
 
   if (!trek) {
     return (
-      <Main title="Trek Not Found">
+      <PageShell region="treks" title="Trek Not Found">
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/treks" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> Treks
           </Link>
           <p className="font-body text-stone-500 dark:text-stone-400">Trek not found.</p>
         </div>
-      </Main>
+      </PageShell>
     );
   }
 
@@ -68,7 +75,7 @@ const TrekPost = () => {
   });
 
   return (
-    <Main title={meta.title} description={meta.description} image={meta.image}>
+    <PageShell region="treks" title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/treks" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">
@@ -136,7 +143,7 @@ const TrekPost = () => {
           )}
         </article>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

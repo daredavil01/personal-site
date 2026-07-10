@@ -1,0 +1,605 @@
+/* ============================================================================
+   Wanderer's Atlas design tokens + scoped reset (§4.10, §4.11 step 2).
+
+   All atlas art and UI color comes ONLY from these custom properties — that
+   IS the day/night palette-swap mechanism: flipping [data-time] repaints the
+   whole scene (night = windows light up, stars appear, fireflies later).
+   Per-region accents live under [data-region] and are set by RegionShell
+   (phase 5) / map hotspots (phase 3).
+
+   The .atlas-root reset gives atlas UI sane bare-element defaults, so atlas
+   chrome never depends on whatever a global stylesheet happens to say about
+   bare button/h1-h6/a. Its classic-shell counterpart is styles/classic.css.
+   ========================================================================== */
+
+/* ---- Day palette (default) ---- */
+.atlas-root,
+.atlas-root[data-time="day"] {
+  --atlas-sky: #7ec8e3;
+  --atlas-horizon: #f7e9c9;
+  --atlas-water: #4aa8d8;
+  --atlas-foliage-1: #7cb56b;
+  --atlas-foliage-2: #5a9e52;
+  --atlas-foliage-3: #3d7d44;
+  --atlas-stone: #b8a48a;
+  --atlas-glow: #f2a949;
+  --atlas-parchment: #faf3e3;
+  --atlas-ink: #3b3228;
+  --atlas-ink-soft: rgba(59, 50, 40, 0.65);
+  --atlas-line: rgba(59, 50, 40, 0.18);
+  --atlas-accent: #b22200; /* hometown red until a region overrides it */
+  --atlas-shadow: rgba(31, 41, 55, 0.18);
+
+  /* Day/night switches consumed by map art (worldMap.css): 0/1 opacities for
+     time-gated elements, cloud brightness, and the window fill that makes
+     buildings light up after dark. */
+  --atlas-day: 1;
+  --atlas-night: 0;
+  --atlas-cloud: 0.92;
+  --atlas-window: rgba(59, 50, 40, 0.32);
+}
+
+/* ---- Night palette ---- */
+.atlas-root[data-time="night"] {
+  --atlas-sky: #101b3c;
+  --atlas-horizon: #2a3560;
+  --atlas-water: #16305e;
+  --atlas-foliage-1: #2e5544;
+  --atlas-foliage-2: #24463a;
+  --atlas-foliage-3: #1a3830;
+  --atlas-stone: #5a5a72;
+  --atlas-glow: #ffd166;
+  --atlas-parchment: #1d2233;
+  --atlas-ink: #e8e4d8;
+  --atlas-ink-soft: rgba(232, 228, 216, 0.65);
+  --atlas-line: rgba(232, 228, 216, 0.18);
+  --atlas-shadow: rgba(0, 0, 0, 0.45);
+  --atlas-day: 0;
+  --atlas-night: 1;
+  --atlas-cloud: 0.16;
+  --atlas-window: var(--atlas-glow);
+}
+
+/* ---- Region accent overrides (keys = globe/domains.js) ---- */
+.atlas-root [data-region="marathons"], .atlas-root[data-region="marathons"] { --atlas-accent: #3b82f6; }
+.atlas-root [data-region="treks"],     .atlas-root[data-region="treks"]     { --atlas-accent: #22c55e; }
+.atlas-root [data-region="writer"],    .atlas-root[data-region="writer"]    { --atlas-accent: #ec4899; }
+.atlas-root [data-region="reader"],    .atlas-root[data-region="reader"]    { --atlas-accent: #f97316; }
+.atlas-root [data-region="creator"],   .atlas-root[data-region="creator"]   { --atlas-accent: #a855f7; }
+.atlas-root [data-region="person"],    .atlas-root[data-region="person"]    { --atlas-accent: #b22200; }
+
+/* ============================================================================
+   Scoped reset — sane defaults for bare elements inside atlas CHROME (HUD,
+   guide, modals, region header/breadcrumb).
+
+   The element selectors are wrapped in :where() so the reset carries
+   (near-)zero specificity. That is deliberate: bare atlas elements still get
+   these defaults, but the reset must NEVER out-specify the Tailwind utility
+   classes on imported page content rendered inside a RegionShell — those pages
+   have to look exactly as they do in classic mode. A plain `.atlas-root button`
+   selector (0,1,1) beats a single Tailwind class (0,1,0) and silently strips
+   padding/background/colour from every content button; :where() (0,0,1) does
+   not.
+   ========================================================================== */
+.atlas-root,
+.atlas-root *,
+.atlas-root *::before,
+.atlas-root *::after {
+  box-sizing: border-box;
+}
+
+.atlas-root {
+  color: var(--atlas-ink);
+  font-family: "Raleway", "Source Sans Pro", Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+:where(.atlas-root) h1,
+:where(.atlas-root) h2,
+:where(.atlas-root) h3,
+:where(.atlas-root) h4,
+:where(.atlas-root) h5,
+:where(.atlas-root) h6 {
+  color: inherit;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: normal;
+  line-height: 1.2;
+  margin: 0;
+  text-transform: none;
+}
+
+:where(.atlas-root) p {
+  margin: 0;
+}
+
+:where(.atlas-root) a {
+  border-bottom: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+:where(.atlas-root) a:hover {
+  border-bottom: 0;
+  color: var(--atlas-accent);
+}
+
+:where(.atlas-root) button {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: inherit;
+  height: auto;
+  letter-spacing: normal;
+  line-height: 1.2;
+  padding: 0;
+  text-align: center;
+  text-transform: none;
+  white-space: normal;
+}
+
+:where(.atlas-root) button:hover {
+  box-shadow: none;
+  color: inherit;
+}
+
+:where(.atlas-root) ul,
+:where(.atlas-root) ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.atlas-root :focus-visible {
+  outline: 2px solid var(--atlas-glow);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   AtlasFrame — the fixed chrome layer that bridges routes (§4.7).
+   The frame itself never intercepts the page; only HUD widgets do.
+   ========================================================================== */
+.atlas-frame {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+}
+
+.atlas-hud > * {
+  pointer-events: auto;
+}
+
+.atlas-hud-corner {
+  position: fixed;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.atlas-hud-tl { top: 1rem; left: 1rem; }
+.atlas-hud-tr { top: 1rem; right: 1rem; }
+.atlas-hud-bl { bottom: 1.25rem; left: 1rem; }
+
+/* During the preview period the ribbon occupies the top strip — drop the
+   top HUD row below it (the ribbon and the whole rule vanish at the flip). */
+.atlas-ribbon ~ .atlas-hud .atlas-hud-tl,
+.atlas-ribbon ~ .atlas-hud .atlas-hud-tr {
+  top: 2.25rem;
+}
+
+.atlas-ribbon ~ .atlas-hud .atlas-compass-panel {
+  top: 5.5rem;
+}
+
+.atlas-hud-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 2px 8px var(--atlas-shadow);
+  font-size: 1.25rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.atlas-hud-btn:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 12px var(--atlas-shadow);
+}
+
+.atlas-hud-btn[aria-pressed="true"] {
+  border-color: var(--atlas-glow);
+  box-shadow: 0 0 0 2px var(--atlas-glow), 0 2px 8px var(--atlas-shadow);
+}
+
+.atlas-hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 2px 8px var(--atlas-shadow);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.atlas-hud-pill:hover {
+  transform: translateY(-1px);
+}
+
+/* Compass dropdown panel — the map directory: every page grouped by region. */
+.atlas-compass-panel {
+  position: fixed;
+  top: 4.25rem;
+  left: 1rem;
+  width: 15rem;
+  max-height: min(76vh, 34rem);
+  overflow-y: auto;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 8px 24px var(--atlas-shadow);
+}
+
+.atlas-compass-panel a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.atlas-compass-panel a:hover {
+  background: color-mix(in srgb, var(--atlas-accent) 12%, transparent);
+}
+
+.atlas-compass-panel a.is-active {
+  background: color-mix(in srgb, var(--atlas-accent) 16%, transparent);
+  color: var(--atlas-accent) !important;
+}
+
+/* World Map link sits above the region groups. */
+.atlas-compass-home {
+  font-weight: 700 !important;
+}
+
+/* One region section: a small-caps header + its page links. */
+.atlas-compass-group {
+  border-top: 1px solid var(--atlas-line);
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+.atlas-compass-region {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--atlas-ink-soft);
+}
+
+/* Icons inherit the link color (ink, accent on hover/active); the region
+   header icon keeps its per-region color, set inline. The panel-scoped
+   selector overrides the Material Symbols font's default 24px sizing. */
+.atlas-compass-panel .atlas-compass-icon {
+  font-size: 1.2rem;
+  flex: none;
+}
+
+.atlas-compass-panel .atlas-compass-region-icon {
+  font-size: 1.1rem;
+  flex: none;
+}
+
+/* Passport modal */
+.atlas-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 34, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  pointer-events: auto;
+}
+
+.atlas-modal {
+  width: 100%;
+  max-width: 26rem;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 16px 48px var(--atlas-shadow);
+}
+
+.atlas-modal h2 {
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.atlas-modal-sub {
+  color: var(--atlas-ink-soft);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.atlas-stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.atlas-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 0.25rem;
+  border-radius: 0.75rem;
+  border: 2px dashed var(--atlas-line);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--atlas-ink-soft);
+  text-align: center;
+}
+
+.atlas-stamp.is-stamped {
+  border-style: solid;
+  border-color: var(--stamp-color, var(--atlas-accent));
+  color: var(--atlas-ink);
+}
+
+.atlas-stamp-seal {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: color-mix(in srgb, var(--stamp-color, var(--atlas-accent)) 18%, transparent);
+  border: 2px solid var(--stamp-color, var(--atlas-accent));
+}
+
+.atlas-stamp:not(.is-stamped) .atlas-stamp-seal {
+  background: transparent;
+  border: 2px dashed var(--atlas-line);
+  opacity: 0.6;
+}
+
+/* Passport quests / achievements */
+.atlas-passport-h3 {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--atlas-ink-soft);
+  margin: 0.25rem 0 0.6rem;
+}
+
+.atlas-quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.atlas-quest {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.atlas-quest-seal {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--reward-color, var(--atlas-glow));
+  border: 2px solid var(--reward-color, var(--atlas-line));
+  background: transparent;
+}
+
+.atlas-quest.is-done .atlas-quest-seal {
+  background: color-mix(in srgb, var(--reward-color, var(--atlas-glow)) 18%, transparent);
+}
+
+.atlas-quest-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.atlas-quest-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.atlas-quest-top strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.atlas-quest-count {
+  flex: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--atlas-ink-soft);
+}
+
+.atlas-quest.is-done .atlas-quest-count {
+  color: var(--reward-color, var(--atlas-accent));
+}
+
+.atlas-quest-desc {
+  font-size: 0.78rem;
+  color: var(--atlas-ink-soft);
+  margin: 0.1rem 0 0.35rem;
+}
+
+.atlas-quest-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--atlas-line);
+  overflow: hidden;
+}
+
+.atlas-quest-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.atlas-modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--atlas-line);
+  font-size: 0.9rem;
+}
+
+.atlas-modal-row button {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--atlas-accent) !important;
+}
+
+.atlas-modal-row button:hover {
+  text-decoration: underline;
+  color: var(--atlas-accent) !important;
+}
+
+.atlas-modal-row button:disabled {
+  color: var(--atlas-ink-soft) !important;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* Reward toaster (§4.5) — stamp / quest / egg celebrations. */
+.atlas-reward-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 960;
+  pointer-events: none;
+}
+
+.atlas-reward {
+  position: fixed;
+  left: 50%;
+  bottom: 5.5rem;
+  transform: translateX(-50%);
+  z-index: 961;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(92vw, 24rem);
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.9rem;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  box-shadow: 0 10px 34px var(--atlas-shadow);
+  pointer-events: auto;
+  animation: atlas-reward-in 0.35s ease both;
+}
+
+@keyframes atlas-reward-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.atlas-reward-seal {
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--reward-color, var(--atlas-glow));
+  background: color-mix(in srgb, var(--reward-color, var(--atlas-glow)) 18%, transparent);
+  border: 2px solid var(--reward-color, var(--atlas-glow));
+}
+
+.atlas-reward-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.atlas-reward-text strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.atlas-reward-text span {
+  font-size: 0.78rem;
+  color: var(--atlas-ink-soft);
+}
+
+.atlas-reward-close {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  color: var(--atlas-ink-soft) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-reward {
+    animation: none;
+  }
+}
+
+/* Preview ribbon (removed at the flip) */
+.atlas-ribbon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 950;
+  padding: 0.3rem 0;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--atlas-glow);
+  color: #3b3228;
+  pointer-events: none;
+}

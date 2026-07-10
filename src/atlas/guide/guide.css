@@ -1,0 +1,71 @@
+/* GuideAvatar (§2 decision #8, phase 13) — bottom-right of the atlas frame.
+   Colors mix the guide's own likeness palette (inline in the SVG) with the
+   shared atlas tokens for the bubble chrome. */
+
+.atlas-guide {
+  position: fixed;
+  right: 1rem;
+  bottom: 1.25rem;
+  z-index: 930; /* over the HUD corners, under modal overlays */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  pointer-events: auto;
+  max-width: min(88vw, 21rem);
+}
+
+.atlas-guide-figure {
+  width: 4.5rem;
+  height: 5.25rem;
+  filter: drop-shadow(0 4px 10px var(--atlas-shadow));
+  animation: atlas-guide-bob 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes atlas-guide-bob {
+  from { transform: translateY(0); }
+  to { transform: translateY(-5px); }
+}
+
+.atlas-guide-bubble {
+  position: relative;
+  background: var(--atlas-parchment);
+  border: 1px solid var(--atlas-line);
+  border-radius: 0.9rem;
+  border-bottom-right-radius: 0.25rem;
+  box-shadow: 0 10px 30px var(--atlas-shadow);
+  padding: 0.8rem 0.95rem;
+  animation: atlas-guide-in 0.3s ease both;
+}
+
+.atlas-guide-bubble p {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin: 0 0 0.5rem;
+}
+
+.atlas-guide-bubble button {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--atlas-accent) !important; /* counters legacy a/button globals until PR 14 */
+}
+
+.atlas-guide-bubble button:hover {
+  text-decoration: underline;
+}
+
+@keyframes atlas-guide-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-guide-figure {
+    animation: none;
+  }
+
+  .atlas-guide-bubble {
+    animation: none;
+  }
+}

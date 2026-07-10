@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import TreksStatistics from "../components/Treks/TreksStatistics";
 import TreksDefault from "../components/Treks/TreksDefault";
 import TrekDetailsModal from "../components/Treks/TrekDetailsModal";
@@ -41,7 +41,7 @@ const TreksPage = () => {
   };
 
   return (
-    <Main>
+    <PageShell region="treks">
       <div className="flex flex-col gap-12 w-full">
         {/* Hero Section */}
         <header>
@@ -60,7 +60,7 @@ const TreksPage = () => {
 
         {/* Tab Navigation */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-          <div data-tour="treks-views" className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
+          <div className="flex flex-wrap items-center gap-2 bg-stone-100 dark:bg-stone-800/50 p-1.5 rounded-xl">
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
               let activeColor;
@@ -109,7 +109,7 @@ const TreksPage = () => {
         onClose={() => setSelectedTrek(null)}
         trek={selectedTrek}
       />
-    </Main>
+    </PageShell>
   );
 };
 

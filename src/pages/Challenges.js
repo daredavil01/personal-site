@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 
 const Challenges = () => {
   return (
-    <Main>
+    <PageShell region="writer">
       <article className="max-w-4xl">
         <header className="mb-12">
           <h1 className="font-headline text-4xl font-bold text-stone-900 dark:text-stone-100 mb-4 uppercase tracking-tighter">Challenges</h1>
@@ -37,7 +37,7 @@ const Challenges = () => {
           </section>
 
           {/* Active Challenges Section */}
-          <section data-tour="challenges-active">
+          <section>
             <h2 className="font-label text-[10px] uppercase tracking-[0.2em] text-stone-900 dark:text-stone-300 font-bold mb-6">Active Challenges</h2>
             <div className="grid grid-cols-1 gap-6">
               <Link
@@ -71,7 +71,7 @@ const Challenges = () => {
           </section>
         </div>
       </article>
-    </Main>
+    </PageShell>
   );
 };
 

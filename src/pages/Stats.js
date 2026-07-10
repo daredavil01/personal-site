@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import personalData from "../data/stats/personal";
 import { getPBRaw, formatHoursMinutes, formatMinutesSeconds } from "../utils/raceStats";
 import {
@@ -148,11 +148,11 @@ const Stats = () => {
   // Projects
   const projectCount = projects.length;
 
-  if (isLoading) return <Main><LoadingBlock label="Loading stats…" /></Main>;
-  if (hasError) return <Main><ErrorBlock /></Main>;
+  if (isLoading) return <PageShell region="person"><LoadingBlock label="Loading stats…" /></PageShell>;
+  if (hasError) return <PageShell region="person"><ErrorBlock /></PageShell>;
 
   return (
-    <Main>
+    <PageShell region="person">
       <div className="flex flex-col gap-16 w-full">
         {/* Hero Title Section */}
         <section>
@@ -164,7 +164,7 @@ const Stats = () => {
         </section>
 
         {/* Bento Stats Grid */}
-        <div data-tour="stats-grid" className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
 
           {/* Quick Profile Card */}
           <div className="col-span-1 md:col-span-4 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-between transition-colors shadow-sm">
@@ -549,7 +549,7 @@ const Stats = () => {
 
         </div>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

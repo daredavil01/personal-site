@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import {
   searchMicroblog, getMicroblogTagFacets, getMicroblogStats,
 } from "../lib/api/microblog";
@@ -31,7 +31,7 @@ const SORTS = [
 
 const selectClass = "h-11 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg px-3 font-label text-xs uppercase tracking-wider text-stone-600 dark:text-stone-300 outline-none cursor-pointer hover:border-secondary transition-colors";
 
-// Legacy theme CSS force-styles bare <button> elements — use div[role="button"] on public pages.
+// Public pages use div[role="button"] — a leftover of the retired legacy CSS.
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
 };
@@ -301,7 +301,8 @@ const MicroBlog = () => {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <Main
+    <PageShell
+      region="writer"
       title="Micro Blog"
       description="A searchable archive of short posts, quotes, and captures imported from Tumblr — spanning years of thoughts, one micro-post at a time."
     >
@@ -321,7 +322,7 @@ const MicroBlog = () => {
         </header>
 
         {/* Tabs */}
-        <div data-tour="micro-tabs" className="flex border-b border-stone-100 dark:border-stone-800">
+        <div className="flex border-b border-stone-100 dark:border-stone-800">
           {[{ value: "list", label: "Posts" }, { value: "stats", label: "Stats" }].map(({ value: v, label }) => (
             <div
               key={v}
@@ -347,7 +348,7 @@ const MicroBlog = () => {
         {tab === "list" && (
           <>
             {/* Search + filters */}
-            <section data-tour="micro-search">
+            <section>
               <input
                 type="search"
                 value={searchInput}
@@ -465,7 +466,7 @@ const MicroBlog = () => {
       </div>
 
       <PostModal post={selected} onClose={() => setSelected(null)} />
-    </Main>
+    </PageShell>
   );
 };
 

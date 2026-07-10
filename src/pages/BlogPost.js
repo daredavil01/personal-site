@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import { buildBlogMeta } from "../data/pageMeta";
 import { useBlogs } from "../context/ContentContext";
+import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 
@@ -22,9 +23,15 @@ const CHALLENGE_TAG = "100_days_to_offload";
 const BlogPost = () => {
   const { id } = useParams();
   const { data: blogsData, loading } = useBlogs();
+  const { track } = useWorld();
   const [shareState, setShareState] = useState("idle");
 
   const blog = blogsData.find((b) => String(b.id) === id);
+
+  // Opening a post counts toward the Wordsmith collector quest (§4.5).
+  useEffect(() => {
+    if (blog && blog.id != null) track("blog:open", String(blog.id));
+  }, [blog, track]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -42,18 +49,18 @@ const BlogPost = () => {
     setTimeout(() => setShareState("idle"), 2000);
   };
 
-  if (loading) return <Main><LoadingBlock label="Loading post…" /></Main>;
+  if (loading) return <PageShell region="writer"><LoadingBlock label="Loading post…" /></PageShell>;
 
   if (!blog) {
     return (
-      <Main title="Post Not Found">
+      <PageShell region="writer" title="Post Not Found">
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/100-days-to-offload" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> 100 Days to Offload
           </Link>
           <p className="font-body text-stone-500 dark:text-stone-400">Post not found.</p>
         </div>
-      </Main>
+      </PageShell>
     );
   }
 
@@ -63,7 +70,7 @@ const BlogPost = () => {
   const meta = buildBlogMeta({ title: blog.blog_title, description: blog.blog_description });
 
   return (
-    <Main title={meta.title} description={meta.description} image={meta.image}>
+    <PageShell region="writer" title={meta.title} description={meta.description} image={meta.image}>
       <div className="flex flex-col gap-8 w-full max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/100-days-to-offload" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors">
@@ -134,7 +141,7 @@ const BlogPost = () => {
           )}
         </article>
       </div>
-    </Main>
+    </PageShell>
   );
 };
 

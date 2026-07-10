@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Main from '../layouts/Main';
+import PageShell from '../atlas/PageShell';
 import { useBlogs } from '../context/ContentContext';
 import ShareImageButton from '../components/share/ShareImageButton';
 
@@ -10,9 +10,8 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 // Every post carries the challenge tag — filtering by it is a no-op, so hide it
 const CHALLENGE_TAG = '100_Days_to_Offload';
 
-// Legacy theme CSS (static/css/components/_button.scss) force-styles bare
-// <button> elements (fixed height, nowrap, uppercase, !important color), so
-// interactive elements here use div[role="button"] like the rest of the site.
+// Interactive elements here use div[role="button"] like the rest of the site —
+// originally to dodge the legacy HTML5UP button globals, which no longer exist.
 const keyActivate = (fn) => (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
@@ -211,7 +210,8 @@ const OneHundredDays = () => {
   };
 
   return (
-    <Main
+    <PageShell
+      region="writer"
       title="100 Days To Offload"
       description="Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking, pace status, and interactive filtering of every post."
     >
@@ -231,7 +231,7 @@ const OneHundredDays = () => {
         </header>
 
         {/* Progress ring + pace stats */}
-        <section data-tour="offload-progress" className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
+        <section className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <ProgressRing value={completion} />
             <div className="flex-1 w-full">
@@ -262,7 +262,7 @@ const OneHundredDays = () => {
         </section>
 
         {/* Calendar heatmap — cells with posts are clickable */}
-        <section data-tour="offload-calendar">
+        <section>
           <div className="flex items-center gap-4 mb-6">
             <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
               Progress Map ({YEAR})
@@ -353,7 +353,7 @@ const OneHundredDays = () => {
         </section>
 
         {/* Explorer: search + filters + post cards */}
-        <section data-tour="offload-explore">
+        <section>
           <div className="flex items-center gap-4 mb-6">
             <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
               Explore Posts
@@ -560,7 +560,7 @@ const OneHundredDays = () => {
           </div>
         )}
       </div>
-    </Main>
+    </PageShell>
   );
 };
 
