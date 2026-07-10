@@ -7,9 +7,13 @@
 import React, { useEffect, useRef } from "react";
 import launchConfetti from "../lib/confetti";
 import atlasEvent from "../lib/analytics";
+import { playSfx } from "../audio/sfxBus";
 import { useWorld } from "../world/WorldContext";
 import { getRegion } from "../regions/registry";
 import { getEgg } from "../gamification/easterEggs";
+
+// reward kind -> sprite name (no-op until sound is enabled, §4.9).
+const SFX_FOR_KIND = { region: "stamp", quest: "chime", egg: "egg" };
 
 const prefersReducedMotion = () => (
   typeof window !== "undefined"
@@ -68,6 +72,7 @@ const RewardToaster = () => {
       launchConfetti(fxRef.current, [swatch, "#f2a949", "#ffffff"]);
     }
     atlasEvent("atlas_reward", { kind: current.kind, id: current.id });
+    playSfx(SFX_FOR_KIND[current.kind] || "chime");
     const timer = setTimeout(() => dismissReward(current.id), 4200);
     return () => clearTimeout(timer);
   }, [current, dismissReward]);

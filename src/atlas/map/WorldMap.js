@@ -18,6 +18,7 @@ import React, {
 import PropTypes from "prop-types";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import usePanZoom from "../../hooks/usePanZoom";
+import { playSfx } from "../audio/sfxBus";
 import { useWorld } from "../world/WorldContext";
 import { EGGS } from "../gamification/easterEggs";
 import {
@@ -148,6 +149,7 @@ const WorldMap = ({ entry }) => {
       return;
     }
     setFlying(true);
+    playSfx("whoosh");
     animateTo(region.viewBox, 450);
     flightRef.current = setTimeout(
       () => navigate(region.path, { state: { fromMap: true } }),
