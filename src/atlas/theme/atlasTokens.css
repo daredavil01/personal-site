@@ -70,9 +70,19 @@
 .atlas-root [data-region="person"],    .atlas-root[data-region="person"]    { --atlas-accent: #b22200; }
 
 /* ============================================================================
-   Scoped reset — sane defaults for bare elements inside atlas UI.
-   The !important marks exist only to counter equally-important legacy
-   declarations (button/a:hover colors); drop them when main.scss dies (PR 14).
+   Scoped reset — sane defaults for bare elements inside atlas CHROME (HUD,
+   guide, modals, region header/breadcrumb).
+
+   The element selectors are wrapped in :where() so the reset carries
+   (near-)zero specificity. That is deliberate: bare atlas elements still get
+   these defaults, but the reset must NEVER out-specify the Tailwind utility
+   classes on imported page content rendered inside a RegionShell — those pages
+   have to look exactly as they do in classic mode. A plain `.atlas-root button`
+   selector (0,1,1) beats a single Tailwind class (0,1,0) and silently strips
+   padding/background/colour from every content button; :where() (0,0,1) does
+   not. The !important marks only counter equally-important legacy declarations
+   (button / a:hover colours in main.scss); drop the whole hack when main.scss
+   dies (PR 14).
    ========================================================================== */
 .atlas-root,
 .atlas-root *,
@@ -88,12 +98,12 @@
   line-height: 1.5;
 }
 
-.atlas-root h1,
-.atlas-root h2,
-.atlas-root h3,
-.atlas-root h4,
-.atlas-root h5,
-.atlas-root h6 {
+:where(.atlas-root) h1,
+:where(.atlas-root) h2,
+:where(.atlas-root) h3,
+:where(.atlas-root) h4,
+:where(.atlas-root) h5,
+:where(.atlas-root) h6 {
   color: inherit;
   font-family: inherit;
   font-weight: 700;
@@ -103,22 +113,22 @@
   text-transform: none;
 }
 
-.atlas-root p {
+:where(.atlas-root) p {
   margin: 0;
 }
 
-.atlas-root a {
+:where(.atlas-root) a {
   border-bottom: 0;
   color: inherit;
   text-decoration: none;
 }
 
-.atlas-root a:hover {
+:where(.atlas-root) a:hover {
   border-bottom: 0;
   color: var(--atlas-accent) !important;
 }
 
-.atlas-root button {
+:where(.atlas-root) button {
   appearance: none;
   -webkit-appearance: none;
   background: none;
@@ -142,13 +152,13 @@
   white-space: normal;
 }
 
-.atlas-root button:hover {
+:where(.atlas-root) button:hover {
   box-shadow: none;
   color: inherit !important;
 }
 
-.atlas-root ul,
-.atlas-root ol {
+:where(.atlas-root) ul,
+:where(.atlas-root) ol {
   list-style: none;
   margin: 0;
   padding: 0;
