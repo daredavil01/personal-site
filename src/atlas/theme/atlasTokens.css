@@ -235,12 +235,14 @@
   transform: translateY(-1px);
 }
 
-/* Compass dropdown panel */
+/* Compass dropdown panel — the map directory: every page grouped by region. */
 .atlas-compass-panel {
   position: fixed;
   top: 4.25rem;
   left: 1rem;
-  min-width: 13rem;
+  width: 15rem;
+  max-height: min(76vh, 34rem);
+  overflow-y: auto;
   padding: 0.5rem;
   border-radius: 0.75rem;
   background: var(--atlas-parchment);
@@ -251,10 +253,10 @@
 .atlas-compass-panel a {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.55rem;
+  padding: 0.45rem 0.6rem;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
@@ -262,10 +264,45 @@
   background: color-mix(in srgb, var(--atlas-accent) 12%, transparent);
 }
 
-.atlas-compass-dot {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
+.atlas-compass-panel a.is-active {
+  background: color-mix(in srgb, var(--atlas-accent) 16%, transparent);
+  color: var(--atlas-accent) !important;
+}
+
+/* World Map link sits above the region groups. */
+.atlas-compass-home {
+  font-weight: 700 !important;
+}
+
+/* One region section: a small-caps header + its page links. */
+.atlas-compass-group {
+  border-top: 1px solid var(--atlas-line);
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+.atlas-compass-region {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--atlas-ink-soft);
+}
+
+/* Icons inherit the link color (ink, accent on hover/active); the region
+   header icon keeps its per-region color, set inline. The panel-scoped
+   selector overrides the Material Symbols font's default 24px sizing. */
+.atlas-compass-panel .atlas-compass-icon {
+  font-size: 1.2rem;
+  flex: none;
+}
+
+.atlas-compass-panel .atlas-compass-region-icon {
+  font-size: 1.1rem;
   flex: none;
 }
 

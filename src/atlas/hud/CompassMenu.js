@@ -1,11 +1,13 @@
 // Compass menu — the HUD's navigation (§2 decision #9). Doubles as the
-// region-list fallback on touch devices where map panning is clumsy (§4.6).
-// Region entries derive from the globe's domain table until the region
-// registry lands in phase 5.
+// full page directory / touch-device fallback where map panning is clumsy
+// (§4.6): every content page is reachable here, grouped by region. Region
+// sections + their pages (labels, icons, order) come from the region
+// registry — the single source of truth (§4.8) — so this menu never drifts
+// from the map. Icons are Material Symbols (the font the site already loads).
 
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { DOMAINS } from "../../components/Index/globe/domains";
+import { REGION_LIST } from "../regions/registry";
 import { ATLAS_LIVE } from "../../config/featureFlags";
 
 const MAP_PATH = ATLAS_LIVE ? "/" : "/world";
@@ -14,6 +16,7 @@ const CompassMenu = () => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
   const location = useLocation();
+  const here = location.pathname;
 
   // Close when navigating or pressing Escape.
   useEffect(() => setOpen(false), [location.pathname]);
@@ -38,7 +41,7 @@ const CompassMenu = () => {
         className="atlas-hud-btn"
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Compass — open region menu"
+        aria-label="Compass — open the map directory"
         title="Compass"
         onClick={() => setOpen((v) => !v)}
       >
@@ -46,23 +49,46 @@ const CompassMenu = () => {
       </button>
 
       {open && (
-        <nav className="atlas-compass-panel" aria-label="Atlas regions">
-          <ul>
-            <li>
-              <Link to={MAP_PATH}>
-                <span className="atlas-compass-dot" style={{ background: "var(--atlas-glow)" }} aria-hidden="true" />
-                World Map
-              </Link>
-            </li>
-            {DOMAINS.map((d) => (
-              <li key={d.key} data-region={d.key}>
-                <Link to={d.path}>
-                  <span className="atlas-compass-dot" style={{ background: d.color }} aria-hidden="true" />
-                  {d.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <nav className="atlas-compass-panel" aria-label="Atlas directory">
+          <Link to={MAP_PATH} className="atlas-compass-home">
+            <span className="material-symbols-outlined atlas-compass-icon" aria-hidden="true">map</span>
+            World Map
+          </Link>
+
+          {REGION_LIST.map((region) => (
+            <div className="atlas-compass-group" key={region.key} data-region={region.key}>
+              <p className="atlas-compass-region">
+                <span
+                  className="material-symbols-outlined atlas-compass-region-icon"
+                  style={{ color: region.color }}
+                  aria-hidden="true"
+                >
+                  {region.icon}
+                </span>
+                {region.label}
+              </p>
+              <ul>
+                {region.pages.map((page) => {
+                  const active = here === page.path || here.startsWith(`${page.path}/`);
+                  return (
+                    <li key={page.path}>
+                      <Link
+                        to={page.path}
+                        state={{ fromMap: true }}
+                        aria-current={active ? "page" : undefined}
+                        className={active ? "is-active" : undefined}
+                      >
+                        <span className="material-symbols-outlined atlas-compass-icon" aria-hidden="true">
+                          {page.icon}
+                        </span>
+                        {page.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
       )}
     </div>
