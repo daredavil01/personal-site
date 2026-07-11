@@ -10,6 +10,10 @@
 > (§10) were confirmed one-by-one with Sanket; the architecture was designed
 > against the codebase as of v10.4.0. Items still to elaborate are tracked in
 > §11 — refine them before their phase, not before starting.
+>
+> **See also:** [`wanderers-atlas-build-log.md`](wanderers-atlas-build-log.md) —
+> the narrative of how it was actually built, prompt by prompt, with the key
+> user choices highlighted at each turn (the story to this spec's blueprint).
 
 ---
 
