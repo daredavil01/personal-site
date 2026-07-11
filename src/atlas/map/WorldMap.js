@@ -22,6 +22,7 @@ import { EGGS } from "../gamification/easterEggs";
 import { REGIONS, FULL_VIEW, INTRO_VIEW, MAP_W, MAP_H } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
 import EasterEggHotspot from "./EasterEggHotspot";
+import StatsWidget from "./StatsWidget";
 import MapControls from "./MapControls";
 import initMapParallax from "./parallax";
 import SkyLayer from "./art/SkyLayer";
@@ -180,6 +181,16 @@ const WorldMap = ({ entry }) => {
     );
   };
 
+  // The stats placard above the Book Forest is a shortcut into /stats. It's not
+  // a region on the map, so it navigates straight there (no camera fly); the
+  // didDrag guard still stops a map-drag that ends over it from firing.
+  const goToStats = (source) => {
+    if (flying || (source === "pointer" && didDrag.current)) return;
+    setHoverKey(null);
+    playSfx("chime");
+    navigate("/stats", { state: { fromMap: true } });
+  };
+
   const moveRoving = (delta) => {
     const idx = REGIONS.findIndex((r) => r.key === rovingKey);
     const next = REGIONS[(idx + delta + REGIONS.length) % REGIONS.length];
@@ -235,6 +246,12 @@ const WorldMap = ({ entry }) => {
               >{`${r.name} — ${r.blurb}`}</Link>
             </li>
           ))}
+          {/* The stats placard above the Book Forest (StatsWidget) mirrored. */}
+          <li>
+            <Link to="/stats" state={{ fromMap: true }}>
+              Statistics — life in numbers
+            </Link>
+          </li>
         </ul>
       </nav>
 
@@ -391,6 +408,10 @@ const WorldMap = ({ entry }) => {
             />
           ))}
         </g>
+
+        {/* StatsLayer — a shortcut placard hanging above the Book Forest that
+            jumps to /stats. Interactive, so outside the aria-hidden art. */}
+        <StatsWidget onActivate={goToStats} />
 
         {/* EggLayer (§4.6) — interactive, so it lives outside the aria-hidden
             art; hints are vague on purpose. Suppressed during a fly-in. */}

@@ -9,15 +9,18 @@ patch for fixes and tweaks.
 
 ---
 
-## [v11.1.0] — 2026-07-10
+## [v11.1.0] — 2026-07-11
 
 ### Added
 
 - **Map zoom controls** (`src/atlas/map/MapControls.js`, `src/atlas/map/worldMap.css`): An on-screen zoom-in / zoom-out / reset cluster at the bottom-left of the map hub, so touch users and wheel-less pointer users get the affordances the wheel/pinch gestures assume. Reset flies the camera back to the resting view (the same target as the Escape key) — the escape hatch when a pinch strands the view. Fades out during a fly-in.
+- **"Enter the Atlas" button** (`src/components/Template/FloatingToggle.js`): A floating action button in the classic shell that switches back to the Wanderer's Atlas — the mirror of the passport's "Switch to Classic". Previously classic view was a one-way trip: there was no in-app way back into the atlas once you left it. Setting the stored view outranks the reduced-motion default, so it works even for a visitor who was auto-routed to classic.
+- **Stats placard on the map hub** (`src/atlas/map/StatsWidget.js`, `src/atlas/map/WorldMap.js`): A floating "Life in Numbers" card hangs in the sky above the Book Forest, showing headline counts (books · treks · races · micro-posts) from the hand-maintained `atlasStats.js`. Clicking or activating it jumps straight to the `/stats` page. It's a real `role="link"` element with keyboard (Enter/Space) and screen-reader support, lifts on hover/focus like the region plaques, and inherits the reader biome's accent so it reads as part of the world.
 
 ### Changed
 
 - **Map hub fits every region on mobile** (`src/atlas/map/WorldMap.js`, `src/atlas/map/mapRegions.js`): The hub now rests on the whole map on every viewport instead of zooming ~1.6× onto the hometown on phones. Small screens switch the SVG from fill-and-crop (`slice`) to fit (`xMidYMid meet`), so all six worlds sit in one window — centered vertically, with sky filling evenly above and below; wider screens keep the immersive full-bleed slice. Removes the now-unused `HOME_VIEW`.
+- **Instant orbit arrival, no cold-load API** (`src/atlas/intro/OrbitStage.js`, `src/data/atlasStats.js`): The atlas arrival (orbit) stage no longer waits on Supabase before it can paint. The teaser counts (races · treks · books · micro-posts) now read from hand-maintained numbers in the new `atlasStats.js`, and the arrival globe shows the six worlds as static markers built from the `DOMAINS` constant. This drops five list fetches plus a microblog COUNT query from the very first screen a visitor sees — the slow first paint on mobile networks. Live, per-item content still loads the moment the visitor enters the world.
 
 ---
 

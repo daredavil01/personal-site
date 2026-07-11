@@ -5,20 +5,20 @@
 // teasers (useCountUp, §9), the pulsing "Enter the World" CTA and an
 // always-visible "Skip intro" (§2 decision #4).
 //
+// The arrival scene must paint instantly on a cold mobile load, so it makes NO
+// network call: the teaser counts come from hand-maintained numbers
+// (src/data/atlasStats.js) and the globe shows the six worlds as static
+// markers built from the DOMAINS constant. The real, per-item content loads
+// only once the visitor enters the world (WorldMap / region pages).
+//
 // The forwarded ref reaches GlobeRenderer's imperative handle so DiveSequence
 // can plunge the camera at the start of the dive.
 
-import React, {
-  forwardRef, useEffect, useMemo, useState,
-} from "react";
+import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import { DOMAINS } from "../../components/Index/globe/domains";
-import HOME_FEATURES from "../../data/homeFeatures";
-import {
-  useSports, useTreks, useBooks, useBlogs, useProjects,
-} from "../../context/ContentContext";
-import { getMicroblogCount } from "../../lib/api/microblog";
 import useCountUp from "../../hooks/useCountUp";
+import ATLAS_STATS from "../../data/atlasStats";
 import "./intro.css";
 
 // Lazy so react-globe.gl + three.js stay in their own chunk (never the atlas
@@ -27,66 +27,25 @@ const GlobeRenderer = React.lazy(() => import("../../components/Index/GlobeRende
 
 const noop = () => {};
 
-// Vogel-spiral pin placement — mirrors GlobeShowcase so the orbit globe reads
-// identically to the homepage "My World" globe.
-const distribute = (anchorLat, anchorLng, index, radiusStep = 3.5) => {
-  if (index === 0) return { lat: anchorLat, lng: anchorLng };
-  const angle = index * 2.39996;
-  const r = Math.sqrt(index) * radiusStep;
-  return {
-    lat: anchorLat + Math.cos(angle) * r,
-    lng: anchorLng + Math.sin(angle) * r,
-  };
-};
+// One static marker per world, anchored on its DOMAINS coordinate — no content
+// fetch needed, so the arrival globe is populated the instant it renders.
+const ORBIT_PINS = DOMAINS.map((d) => ({
+  id: `world-${d.key}`,
+  type: d.type,
+  lat: d.lat,
+  lng: d.lng,
+  label: d.label,
+  color: d.color,
+  data: d,
+}));
 
 const OrbitStage = forwardRef(({ onEnter, onSkip }, globeApiRef) => {
-  const { data: sportsData } = useSports();
-  const { data: treksData } = useTreks();
-  const { data: booksData } = useBooks();
-  const { data: blogsData } = useBlogs();
-  const { data: projectsData } = useProjects();
-
-  const [microTotal, setMicroTotal] = useState(0);
-  useEffect(() => {
-    let active = true;
-    getMicroblogCount().then((c) => { if (active) setMicroTotal(c); }).catch(() => {});
-    return () => { active = false; };
-  }, []);
-
-  const pins = useMemo(() => {
-    const listsByType = {
-      marathon: { items: sportsData || [], getLabel: (s) => s.title },
-      trek: { items: treksData || [], getLabel: (t) => t.fort_name },
-      blog: { items: (blogsData || []).slice(0, 15), getLabel: (b) => b.blog_title },
-      book: { items: (booksData || []).slice(0, 20), getLabel: (b) => b.title },
-      project: { items: projectsData || [], getLabel: (p) => p.title },
-      feature: { items: HOME_FEATURES, getLabel: (f) => f.title },
-    };
-    const p = [];
-    DOMAINS.forEach((domain) => {
-      const { items, getLabel } = listsByType[domain.type];
-      const radiusStep = domain.type === "feature" ? 5 : 3.5;
-      items.forEach((item, index) => {
-        const coords = distribute(domain.lat, domain.lng, index, radiusStep);
-        p.push({
-          id: `${domain.type}-${item.id ?? index}`,
-          type: domain.type,
-          lat: coords.lat,
-          lng: coords.lng,
-          label: getLabel(item),
-          color: domain.color,
-          data: item,
-        });
-      });
-    });
-    return p;
-  }, [sportsData, treksData, booksData, blogsData, projectsData]);
-
-  const ready = pins.length > 0;
-  const races = useCountUp(sportsData?.length || 0, 1200, ready);
-  const treks = useCountUp(treksData?.length || 0, 1200, ready);
-  const books = useCountUp(booksData?.length || 0, 1400, ready);
-  const micro = useCountUp(microTotal, 1600, microTotal > 0);
+  // Hardcoded counts (see src/data/atlasStats.js) drive the teasers with no API
+  // call — active from mount so they animate immediately on the cold load.
+  const races = useCountUp(ATLAS_STATS.races, 1200, true);
+  const treks = useCountUp(ATLAS_STATS.treks, 1200, true);
+  const books = useCountUp(ATLAS_STATS.books, 1400, true);
+  const micro = useCountUp(ATLAS_STATS.microPosts, 1600, true);
 
   const fmtK = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n.toLocaleString());
   const teasers = [
@@ -99,7 +58,7 @@ const OrbitStage = forwardRef(({ onEnter, onSkip }, globeApiRef) => {
   return (
     <div className="atlas-orbit">
       <React.Suspense fallback={<div className="atlas-orbit-globe-skeleton" />}>
-        <GlobeRenderer ref={globeApiRef} pins={pins} onPinClick={noop} mode="orbit" />
+        <GlobeRenderer ref={globeApiRef} pins={ORBIT_PINS} onPinClick={noop} mode="orbit" />
       </React.Suspense>
 
       <div className="atlas-orbit-overlay">
