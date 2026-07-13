@@ -16,6 +16,7 @@ import { Link, useLocation } from "react-router-dom";
 import "../theme/atlasTokens.css";
 import "./regionShell.css";
 import PageMeta from "../../components/Template/PageMeta";
+import Footer from "../../components/Template/Footer";
 import { ATLAS_LIVE } from "../../config/featureFlags";
 import { useWorld } from "../world/WorldContext";
 import { resolveTime } from "../theme/timeOfDay";
@@ -71,6 +72,10 @@ const RegionShell = ({
           {children}
         </div>
       </main>
+
+      {/* Same footer as the classic shell, so every content page ends the
+          same way in both modes. The map hub stays footer-free. */}
+      <Footer />
     </div>
   );
 };

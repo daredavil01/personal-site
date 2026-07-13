@@ -1,5 +1,7 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter, Routes, Route, Navigate, useLocation,
+} from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ContentProvider } from "./context/ContentContext";
 import { WorldProvider } from "./atlas/world/WorldContext";
@@ -45,7 +47,10 @@ const AtlasFrame = lazy(() => import("./atlas/AtlasFrame"));
 
 const AtlasFrameGate = () => {
   const mode = useViewMode();
-  if (mode !== "atlas") return null;
+  const { pathname } = useLocation();
+  // The admin dashboard is a workspace, not a place in the world: no map
+  // compass, return portal, passport or sound buttons over its UI.
+  if (mode !== "atlas" || pathname.startsWith("/admin")) return null;
   return (
     <Suspense fallback={null}>
       <AtlasFrame />

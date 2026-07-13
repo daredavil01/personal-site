@@ -14,7 +14,9 @@ import atlasEvent from "../../atlas/lib/analytics";
 // The old "Get Started" joyride tour that lived here was retired with the
 // Wanderer's Atlas guide (atlas mode has GuideAvatar; classic view is the
 // simplicity hatch and gets no tour).
-const FloatingToggle = () => {
+// `showAtlasSwitch={false}` keeps only the theme toggle — the admin dashboard
+// uses it so no map/atlas affordance renders over the editing UI.
+const FloatingToggle = ({ showAtlasSwitch = true }) => {
   const { theme, toggleTheme } = useTheme();
   const { setView } = useWorld();
   const mode = useViewMode();
@@ -31,7 +33,7 @@ const FloatingToggle = () => {
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
       {/* Guard against the transient <Main/> Suspense fallback rendering this
           while an atlas page is still loading. */}
-      {mode === "classic" && (
+      {showAtlasSwitch && mode === "classic" && (
         <button
           type="button"
           onClick={enterAtlas}
