@@ -9,6 +9,26 @@ patch for fixes and tweaks.
 
 ---
 
+## [v11.2.0] — 2026-07-13
+
+### Added
+
+- **Full share-image editor** (`src/components/share/ShareImageModal.js`, `src/components/share/ShareCard.js`): The "Share as image" popup grew from three backgrounds into a full editor, for every content type (micro-blog, 100-days blogs, books, treks, races, instagram). Seventeen themes in five families — Core (Light / Dark / Abstract), Editorial (Sepia / Ivory / Charcoal / Midnight), Gradient (Sunset / Ocean / Forest / Aurora), Texture (Notebook / Terminal / Blueprint / Newsprint) and Signature (Letterpress / Neon) — picked from a grouped swatch grid that previews each card background. New Square (1:1) and Story (9:16) shapes join Portrait and Auto. Text controls let you restyle the body as plain text, a serif quote, or a bold headline, switch the font (sans / serif / mono), size (Auto/S/M/L) and alignment; the Terminal theme defaults to mono and Letterpress to serif for Marathi quote posts. Toggles control inclusion of the timestamp, tags, and the handwritten signature on the exported card.
+- **Designed Marathi & handwritten faces** (`src/components/share/shareFonts.js`, `ShareImageModal.js`, `ShareCard.js`): The editor gains eight display typefaces picked from live specimens — five Marathi/Devanagari faces (Tiro Devanagari Marathi, Yatra One, Modak, Kalam, Rozha One; each specimen renders "मराठी" in the face itself) and three English handwriting faces (Caveat, Dancing Script, Shadows Into Light). The Google Fonts stylesheet loads once, only when the editor opens, so regular page loads ship zero extra font bytes. Devanagari has no italics, so the quote style drops its synthetic italic whenever a display face is active.
+- **Footer on atlas pages** (`src/atlas/regions/RegionShell.js`): Atlas-mode region pages now end with the same classic footer (copyright + Mail / GitHub / LinkedIn / Instagram) as the classic shell, so every content page closes the same way in both modes. The full-screen map hub stays footer-free.
+
+### Fixed
+
+- **Micro-blog photo posts never offered "Include image"** (`src/components/share/shareCardConfig.js`): The microblog share adapter read `image_url`, but API rows arrive camelCased as `imageUrl`, so the hero image (and its toggle) never appeared for photo posts. The adapter now accepts both shapes.
+
+### Changed
+
+- **Image size control** (`src/components/share/ShareImageModal.js`, `src/components/share/ShareCard.js`): When an item has a photo and "Include image" is on, a new S / M / L control sets the hero height per shape (e.g. 280 / 400 / 540 px on Portrait); the body's line budget hands back or gives up two lines in step, so text never overflows the frame.
+- **Admin dashboard sheds atlas chrome** (`src/App.js`, `src/pages/admin/Dashboard.js`, `src/components/Template/FloatingToggle.js`): In atlas mode the world HUD (compass menu, return-to-map portal, passport, sound and day/night buttons) no longer mounts over `/admin`, and the admin's floating corner control now shows only the light/dark theme toggle — the "Enter the Atlas" button is gone there. `FloatingToggle` gained a `showAtlasSwitch` prop for this.
+- **Share-model timestamps** (`src/components/share/shareCardConfig.js`): Date meta rows are now flagged `isDate`, which powers the editor's timestamp toggle across all content types.
+
+---
+
 ## [v11.1.0] — 2026-07-11
 
 ### Added

@@ -66,7 +66,8 @@ const Dashboard = ({ session }) => {
       <main className="flex-1 p-6 md:p-10">
         {renderPanel()}
       </main>
-      <FloatingToggle />
+      {/* Theme toggle only — no map/atlas buttons inside the admin. */}
+      <FloatingToggle showAtlasSwitch={false} />
     </div>
   );
 };

@@ -3,9 +3,12 @@
 // the share module — ShareCard itself never reads raw item fields.
 //
 // ShareModel = {
-//   kind, eyebrow, title, subtitle?, metaRows:[{ icon?, label }],
+//   kind, eyebrow, title, subtitle?, metaRows:[{ icon?, label, isDate? }],
 //   body?, quote?, tags?:string[], imageUrl?:string|null, footerNote?, footerUrl
 // }
+//
+// Rows flagged `isDate: true` are the item's timestamp — ShareCard hides them
+// when the user turns "Timestamp" off in the editor.
 
 import { BASE_URL } from "../../data/pageMeta";
 import { sourceLabels } from "../MicroBlog/constants";
@@ -27,13 +30,14 @@ const microblog = (item) => {
     eyebrow: "Micro Blog",
     title: "",
     metaRows: [
-      item.date ? { icon: "calendar_today", label: item.date } : null,
+      item.date ? { icon: "calendar_today", label: item.date, isDate: true } : null,
       item.postType ? { label: item.postType } : null,
     ].filter(Boolean),
     body: clean(item.text || item.title),
     quote: isQuote,
     tags: item.tags || [],
-    imageUrl: item.image_url || null,
+    // API rows arrive camelCased (imageUrl); raw DB rows keep image_url.
+    imageUrl: item.imageUrl || item.image_url || null,
     footerNote: `Source: ${sourceLabels[item.source] || item.source || "—"}`,
     footerUrl: `${SITE_DOMAIN}/micro-blog/${item.id}`,
   };
@@ -62,7 +66,7 @@ const blog = (item) => ({
   eyebrow: "100 Days To Offload",
   title: clean(item.blog_title),
   metaRows: [
-    item.blog_date ? { icon: "calendar_today", label: item.blog_date } : null,
+    item.blog_date ? { icon: "calendar_today", label: item.blog_date, isDate: true } : null,
     item.blog_platform ? { icon: "public", label: item.blog_platform } : null,
     item.language ? { icon: "translate", label: item.language } : null,
   ].filter(Boolean),
@@ -88,7 +92,7 @@ const sport = (item) => ({
   eyebrow: "Physical Endurance",
   title: clean(item.title),
   metaRows: [
-    item.date ? { icon: "calendar_today", label: item.date } : null,
+    item.date ? { icon: "calendar_today", label: item.date, isDate: true } : null,
     item.place ? { icon: "location_on", label: item.place } : null,
     item.distance ? { icon: "social_leaderboard", label: item.distance } : null,
     item.time ? { icon: "timer", label: item.time } : null,
@@ -105,7 +109,7 @@ const trek = (item) => ({
   title: clean(item.fort_name),
   subtitle: item.endurance_level ? `${item.endurance_level} endurance` : "",
   metaRows: [
-    item.date ? { icon: "calendar_today", label: item.date } : null,
+    item.date ? { icon: "calendar_today", label: item.date, isDate: true } : null,
     item.trek_time ? { icon: "schedule", label: item.trek_time } : null,
     item.endurance_level ? { icon: "terrain", label: item.endurance_level } : null,
   ].filter(Boolean),
