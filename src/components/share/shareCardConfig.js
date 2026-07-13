@@ -36,7 +36,8 @@ const microblog = (item) => {
     body: clean(item.text || item.title),
     quote: isQuote,
     tags: item.tags || [],
-    imageUrl: item.image_url || null,
+    // API rows arrive camelCased (imageUrl); raw DB rows keep image_url.
+    imageUrl: item.imageUrl || item.image_url || null,
     footerNote: `Source: ${sourceLabels[item.source] || item.source || "—"}`,
     footerUrl: `${SITE_DOMAIN}/micro-blog/${item.id}`,
   };

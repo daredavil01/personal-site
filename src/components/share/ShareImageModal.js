@@ -46,6 +46,12 @@ const ALIGNMENTS = [
   { id: "center", label: "Center" },
 ];
 
+const IMAGE_SIZES = [
+  { id: "s", label: "S" },
+  { id: "m", label: "M" },
+  { id: "l", label: "L" },
+];
+
 const SegButton = ({ active, onClick, children }) => (
   <div
     role="button"
@@ -155,6 +161,7 @@ const ShareImageModal = ({ kind, item, onClose }) => {
   const [textSize, setTextSize] = useState("auto");
   const [align, setAlign] = useState("left");
   const [includeImage, setIncludeImage] = useState(itemHasImage);
+  const [imageSize, setImageSize] = useState("m");
   const [showTimestamp, setShowTimestamp] = useState(true);
   const [showTags, setShowTags] = useState(true);
   const [showSignature, setShowSignature] = useState(true);
@@ -203,6 +210,7 @@ const ShareImageModal = ({ kind, item, onClose }) => {
     theme,
     aspect,
     includeImage,
+    imageSize,
     textStyle,
     font,
     textSize,
@@ -221,8 +229,8 @@ const ShareImageModal = ({ kind, item, onClose }) => {
     ro.observe(el);
     return () => ro.disconnect();
     // Re-measure whenever anything that can change the card's height changes.
-  }, [model, theme, aspect, includeImage, textStyle, font, textSize, align,
-    showTimestamp, showTags, showSignature]);
+  }, [model, theme, aspect, includeImage, imageSize, textStyle, font, textSize,
+    align, showTimestamp, showTags, showSignature]);
 
   if (!model) return null;
 
@@ -330,6 +338,15 @@ const ShareImageModal = ({ kind, item, onClose }) => {
             <div className="flex flex-col gap-3">
               {itemHasImage && (
                 <Toggle label="Include image" value={includeImage} onChange={setIncludeImage} />
+              )}
+              {itemHasImage && includeImage && (
+                <Field label="Image size">
+                  {IMAGE_SIZES.map((s) => (
+                    <SegButton key={s.id} active={imageSize === s.id} onClick={() => setImageSize(s.id)}>
+                      {s.label}
+                    </SegButton>
+                  ))}
+                </Field>
               )}
               {hasDate && (
                 <Toggle label="Timestamp" value={showTimestamp} onChange={setShowTimestamp} />

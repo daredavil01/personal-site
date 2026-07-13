@@ -388,24 +388,37 @@ export const themeBase = (themeId) => (THEMES[themeId] || THEMES.light).base;
 
 // Card pixel heights per aspect; `auto` grows with content.
 const HEIGHTS = { portrait: 1350, square: 1080, story: 1920 };
+
+// Hero (photo) height ladder per aspect: Small / Medium / Large. Medium is the
+// pre-editor default.
 const HERO_HEIGHTS = {
-  portrait: 400, square: 300, story: 460, auto: 460,
+  portrait: { s: 280, m: 400, l: 540 },
+  square: { s: 210, m: 300, l: 400 },
+  story: { s: 330, m: 460, l: 640 },
+  auto: { s: 330, m: 460, l: 620 },
+};
+
+const heroHeight = (aspect, imageSize) => {
+  const ladder = HERO_HEIGHTS[aspect] || HERO_HEIGHTS.auto;
+  return ladder[imageSize] || ladder.m;
 };
 
 // Body-line budget per aspect: [withHero, withoutHero]. "big" covers the quote
 // and headline styles (larger glyphs, fewer lines fit). Auto height never
-// clamps; Small/Large text shifts the budget by ±2 lines.
+// clamps; Small/Large text shifts the budget by ±2 lines, and a Small/Large
+// hero hands lines back / takes lines away in step with its height.
 const CLAMP = {
   portrait: { big: [5, 9], regular: [7, 13] },
   square: { big: [3, 6], regular: [4, 8] },
   story: { big: [8, 14], regular: [12, 20] },
 };
 
-const clampLines = (aspect, big, showHero, textSize) => {
+const clampLines = (aspect, big, showHero, textSize, imageSize) => {
   if (!CLAMP[aspect]) return 0;
   const base = CLAMP[aspect][big ? "big" : "regular"][showHero ? 0 : 1];
-  const adjust = { s: 2, l: -2 }[textSize] || 0;
-  return Math.max(2, base + adjust);
+  const textAdjust = { s: 2, l: -2 }[textSize] || 0;
+  const heroAdjust = showHero ? { s: 2, l: -2 }[imageSize] || 0 : 0;
+  return Math.max(2, base + textAdjust + heroAdjust);
 };
 
 const FONT_CLASS = { sans: "font-body", serif: "font-headline", mono: "font-mono" };
@@ -445,6 +458,7 @@ const ShareCard = ({
   theme: themeId = "light",
   aspect = "portrait",
   includeImage = true,
+  imageSize = "m",
   textStyle = "auto",
   font = "auto",
   textSize = "auto",
@@ -469,7 +483,7 @@ const ShareCard = ({
   const visibleMeta = metaRows.filter((row) => showTimestamp || !row.isDate);
 
   const titleClass = title && title.length > 48 ? "text-5xl" : "text-6xl";
-  const lines = clampLines(aspect, big, showHero, textSize);
+  const lines = clampLines(aspect, big, showHero, textSize, imageSize);
   const bodyClampStyle = lines
     ? {
       display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -519,7 +533,7 @@ const ShareCard = ({
         {showHero && (
           <div
             className="flex w-full shrink-0 justify-center"
-            style={{ height: HERO_HEIGHTS[aspect] || HERO_HEIGHTS.auto }}
+            style={{ height: heroHeight(aspect, imageSize) }}
           >
             <img
               src={model.imageUrl}
