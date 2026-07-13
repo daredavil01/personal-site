@@ -1,6 +1,7 @@
 import React from "react";
 import { SITE_NAME } from "../../data/pageMeta";
 import BrandMark from "./BrandMark";
+import { displayFont } from "./shareFonts";
 
 const BRAND = "/images/brand";
 
@@ -423,10 +424,15 @@ const clampLines = (aspect, big, showHero, textSize, imageSize) => {
 
 const FONT_CLASS = { sans: "font-body", serif: "font-headline", mono: "font-mono" };
 
-const resolveFontClass = (font, style, theme) => {
-  if (FONT_CLASS[font]) return FONT_CLASS[font];
-  if (theme.bodyFontDefault) return FONT_CLASS[theme.bodyFontDefault];
-  return style === "regular" ? "font-body" : "font-headline";
+// A base font resolves to a Tailwind class; a Marathi/display face resolves to
+// an inline font-family (they aren't part of the Tailwind theme).
+const resolveBodyFont = (font, style, theme) => {
+  const display = displayFont(font);
+  if (display) return { className: "", style: { fontFamily: display.family }, isDisplay: true };
+  let className = FONT_CLASS[font];
+  if (!className) className = FONT_CLASS[theme.bodyFontDefault];
+  if (!className) className = style === "regular" ? "font-body" : "font-headline";
+  return { className, style: null, isDisplay: false };
 };
 
 // text-size ladders; "auto" keeps the original shrink-long-text behaviour.
@@ -444,10 +450,12 @@ const bodySizeClass = (style, textSize, body) => {
   return ladder[textSize] || ladder[body.length > 260 ? "long" : "short"];
 };
 
-const STYLE_CLASS = {
-  regular: "leading-relaxed",
-  quote: "italic leading-snug",
-  headline: "font-black leading-tight",
+// Devanagari has no italics and the display faces ship one weight, so synthetic
+// italic/black styling is skipped when a display face is active.
+const styleClass = (style, isDisplay) => {
+  if (style === "quote") return isDisplay ? "leading-snug" : "italic leading-snug";
+  if (style === "headline") return isDisplay ? "leading-tight" : "font-black leading-tight";
+  return "leading-relaxed";
 };
 
 // Presentational, type-agnostic share card. Always 1080px wide; Portrait /
@@ -490,10 +498,11 @@ const ShareCard = ({
     }
     : undefined;
 
+  const bodyFont = resolveBodyFont(font, style, theme);
   const bodyClass = [
-    resolveFontClass(font, style, theme),
+    bodyFont.className,
     bodySizeClass(style, textSize, body || ""),
-    STYLE_CLASS[style],
+    styleClass(style, bodyFont.isDisplay),
     big ? theme.title : theme.body,
     centered ? "text-center" : "",
   ].join(" ");
@@ -577,7 +586,10 @@ const ShareCard = ({
           )}
 
           {body ? (
-            <p className={`mb-0 whitespace-pre-line ${bodyClass}`} style={bodyClampStyle}>
+            <p
+              className={`mb-0 whitespace-pre-line ${bodyClass}`}
+              style={{ ...bodyClampStyle, ...bodyFont.style }}
+            >
               {style === "quote" ? `“${body}”` : body}
             </p>
           ) : null}

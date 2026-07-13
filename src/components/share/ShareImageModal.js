@@ -4,6 +4,7 @@ import React, {
 import { SITE_NAME } from "../../data/pageMeta";
 import ShareCard, { THEME_GROUPS, themeBase } from "./ShareCard";
 import { hasImage, toShareModel } from "./shareCardConfig";
+import { HANDWRITTEN_FONTS, MARATHI_FONTS, loadDisplayFonts } from "./shareFonts";
 import useImageExport from "./useImageExport";
 
 const keyActivate = (fn) => (e) => {
@@ -101,6 +102,47 @@ const Toggle = ({ label, value, onChange }) => (
   </div>
 );
 
+// Designed display faces: each option is a live specimen — the sample ("मराठी"
+// or "hello") renders in the face itself, so the picker doubles as an
+// illustrated type showcase. Clicking the active face returns to Auto.
+const DisplayFontPicker = ({ fonts, font, onChange }) => (
+  <div className="grid w-full grid-cols-3 gap-2 sm:grid-cols-5">
+    {fonts.map((f) => {
+      const active = font === f.id;
+      return (
+        <div
+          key={f.id}
+          role="button"
+          tabIndex={0}
+          aria-pressed={active}
+          onClick={() => onChange(active ? "auto" : f.id)}
+          onKeyDown={keyActivate(() => onChange(active ? "auto" : f.id))}
+          title={`${f.label} — ${f.note}`}
+          className={`flex cursor-pointer flex-col items-center gap-1 rounded-lg border px-1 py-2 transition-all ${
+            active
+              ? "border-secondary ring-2 ring-secondary"
+              : "border-stone-200 hover:border-stone-400 dark:border-stone-700 dark:hover:border-stone-500"
+          }`}
+        >
+          <span
+            className="text-2xl leading-none text-stone-800 dark:text-stone-200"
+            style={{ fontFamily: f.family }}
+          >
+            {f.sample}
+          </span>
+          <span
+            className={`font-label text-[9px] uppercase tracking-wider ${
+              active ? "font-bold text-secondary" : "text-stone-400 dark:text-stone-500"
+            }`}
+          >
+            {f.label}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+);
+
 // Theme picker: one swatch per theme, grouped by family. Each swatch previews
 // the theme's real card background (colour or gradient).
 const ThemePicker = ({ theme, onChange }) => (
@@ -193,6 +235,12 @@ const ShareImageModal = ({ kind, item, onClose }) => {
     } catch (_) {
       setCanShareFiles(false);
     }
+  }, []);
+
+  // Marathi/display faces load only once the editor opens — normal page loads
+  // ship zero extra font bytes.
+  useEffect(() => {
+    loadDisplayFonts();
   }, []);
 
   useLayoutEffect(() => {
@@ -314,6 +362,14 @@ const ShareImageModal = ({ kind, item, onClose }) => {
                       {f.label}
                     </SegButton>
                   ))}
+                </Field>
+
+                <Field label="Marathi & display faces">
+                  <DisplayFontPicker fonts={MARATHI_FONTS} font={font} onChange={setFont} />
+                </Field>
+
+                <Field label="English handwritten">
+                  <DisplayFontPicker fonts={HANDWRITTEN_FONTS} font={font} onChange={setFont} />
                 </Field>
 
                 <div className="grid grid-cols-2 gap-4">
