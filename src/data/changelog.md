@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v11.2.1] — 2026-07-18
+
+### Added
+
+- **Site dossier** (`docs/SITE_DOSSIER.md`): A complete feature and architecture reference for the whole site — the two-shell system, the Wanderer's Atlas (intro, map hub, HUD, gamification, audio, guide), the classic homepage and every public page, the share-image editor, design language, Supabase data architecture, admin CMS, and the Cloudflare delivery layer — written as the source document for a design presentation. Counts and version facts dated as of 2026-07-18.
+
+---
+
 ## [v11.2.0] — 2026-07-13
 
 ### Added
