@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import {
-  searchMicroblog, getMicroblogTagFacets, getMicroblogStats,
+  searchMicroblog, getMicroblogTagFacets, getMicroblogStats, getMicroblogActivity,
 } from "../lib/api/microblog";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import PostCard from "../components/MicroBlog/PostCard";
+import PinboardCard from "../components/MicroBlog/PinboardCard";
+import MonthRiver from "../components/MicroBlog/MonthRiver";
 import PostModal from "../components/MicroBlog/PostModal";
 
 const PAGE_SIZE = 24;
@@ -57,6 +59,10 @@ const MicroBlog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [tab, setTab] = useState(() => searchParams.get("tab") || "list");
+  // The pinboard is the default; ?layout=list keeps the classic list. (`view`
+  // is off-limits — useViewMode reserves it for the atlas/classic shell
+  // switch.)
+  const [view, setView] = useState(() => (searchParams.get("layout") === "list" ? "list" : "wall"));
 
   // List filters — initialise from URL so links are shareable/bookmarkable.
   const [searchInput, setSearchInput] = useState(() => searchParams.get("q") || "");
@@ -64,7 +70,14 @@ const MicroBlog = () => {
   const [activeTags, setActiveTags] = useState(() => parseTags(searchParams.get("tags")));
   const [source, setSource] = useState(() => searchParams.get("source") || "");
   const [type, setType] = useState(() => searchParams.get("type") || "");
+  const [month, setMonth] = useState(() => searchParams.get("month") || "");
   const [sort, setSort] = useState(() => searchParams.get("sort") || "date_desc");
+
+  // The river strip's data: posts-per-month across the whole archive.
+  const [activity, setActivity] = useState(null);
+  useEffect(() => {
+    getMicroblogActivity().then(setActivity).catch(() => setActivity(null));
+  }, []);
 
   const [rows, setRows] = useState([]);
   const [count, setCount] = useState(0);
@@ -94,13 +107,15 @@ const MicroBlog = () => {
   useEffect(() => {
     const next = {};
     if (tab !== "list") next.tab = tab;
+    next.layout = view; // always recorded, so shared links keep the chosen view
     if (searchTerm) next.q = searchTerm;
     if (activeTags.length) next.tags = activeTags.join(",");
     if (source) next.source = source;
     if (type) next.type = type;
+    if (month) next.month = month;
     if (sort !== "date_desc") next.sort = sort;
     setSearchParams(next, { replace: true });
-  }, [tab, searchTerm, activeTagsKey, source, type, sort, setSearchParams]);
+  }, [tab, view, searchTerm, activeTagsKey, source, type, month, sort, setSearchParams]);
 
   // Tag facets load once (used by both tabs).
   useEffect(() => {
@@ -126,7 +141,7 @@ const MicroBlog = () => {
     setError(null);
     const apiSort = sort === "random" ? "date_desc" : sort;
     searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, page: 0, pageSize: PAGE_SIZE, sort: apiSort,
+      query: searchTerm, tags: activeTags, source, type, month, page: 0, pageSize: PAGE_SIZE, sort: apiSort,
     })
       .then(({ rows: r, count: c }) => {
         if (!active) return;
@@ -137,14 +152,14 @@ const MicroBlog = () => {
       .catch((e) => { if (active) setError(e); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [searchTerm, activeTagsKey, source, type, sort]);
+  }, [searchTerm, activeTagsKey, source, type, month, sort]);
 
   const loadMore = () => {
     const next = page + 1;
     setLoadingMore(true);
     const apiSort = sort === "random" ? "date_desc" : sort;
     searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, page: next, pageSize: PAGE_SIZE, sort: apiSort,
+      query: searchTerm, tags: activeTags, source, type, month, page: next, pageSize: PAGE_SIZE, sort: apiSort,
     })
       .then(({ rows: r }) => {
         setRows((prev) => [...prev, ...(sort === "random" ? shuffleArray(r) : r)]);
@@ -167,13 +182,14 @@ const MicroBlog = () => {
     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
   ));
 
-  const hasFilters = searchTerm || activeTags.length > 0 || source || type;
+  const hasFilters = searchTerm || activeTags.length > 0 || source || type || month;
   const clearFilters = () => {
     setSearchInput("");
     setSearchTerm("");
     setActiveTags([]);
     setSource("");
     setType("");
+    setMonth("");
   };
 
   const hasMore = rows.length < count;
@@ -190,6 +206,14 @@ const MicroBlog = () => {
     } = stats;
     const topTagList = facets.slice(0, 15);
     const maxTagCount = topTagList[0]?.count ?? 1;
+
+    const yearCounts = (activity?.monthCounts ?? []).reduce((acc, { key, count: c }) => {
+      const year = key.slice(0, 4);
+      acc.set(year, (acc.get(year) || 0) + c);
+      return acc;
+    }, new Map());
+    const years = [...yearCounts.entries()];
+    const maxYearCount = Math.max(...years.map(([, c]) => c), 1);
 
     return (
       <div className="flex flex-col gap-10">
@@ -214,6 +238,34 @@ const MicroBlog = () => {
             </div>
           ))}
         </div>
+
+        {/* Posts per year */}
+        {years.length > 0 && (
+          <div>
+            <div className="flex items-baseline justify-between mb-4">
+              <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
+                Posts per year
+              </p>
+              {activity?.longestStreak > 1 && (
+                <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
+                  Longest daily streak: <span className="text-secondary font-bold">{activity.longestStreak} days</span>
+                </p>
+              )}
+            </div>
+            <div className="flex items-end gap-2 h-28 overflow-x-auto pb-1">
+              {years.map(([year, c]) => (
+                <div key={year} className="flex flex-col items-center justify-end gap-1 h-full flex-1 min-w-[34px]">
+                  <span className="font-mono text-[10px] text-stone-500 dark:text-stone-400">{c.toLocaleString()}</span>
+                  <div
+                    className="w-full max-w-[30px] rounded-t-md bg-secondary/70"
+                    style={{ height: `${Math.max(4, (c / maxYearCount) * 72)}px` }}
+                  />
+                  <span className="font-mono text-[9px] text-stone-400 dark:text-stone-500">{year}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Post type breakdown */}
         <div>
@@ -357,6 +409,17 @@ const MicroBlog = () => {
                 className="w-full mb-3 px-4 py-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-body text-sm text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-secondary transition-colors"
               />
 
+              {/* The river — the archive's pulse, one bar per month, click to filter */}
+              {activity && activity.monthCounts.length > 0 && (
+                <div className="mb-4 px-1">
+                  <MonthRiver
+                    months={activity.monthCounts}
+                    activeMonth={month || null}
+                    onSelect={(key) => setMonth(key || "")}
+                  />
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <select className={selectClass} value={source} onChange={(e) => setSource(e.target.value)}>
                   {SOURCES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -366,6 +429,26 @@ const MicroBlog = () => {
                 </select>
 
                 <div className="flex items-center gap-3 ml-auto">
+                  {/* List ↔ Pinboard view toggle */}
+                  <div className="flex gap-1">
+                    {[{ value: "list", label: "List" }, { value: "wall", label: "Pinboard" }].map(({ value: v, label }) => (
+                      <div
+                        key={v}
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={view === v}
+                        onClick={() => setView(v)}
+                        onKeyDown={keyActivate(() => setView(v))}
+                        className={`px-2.5 py-1 rounded-lg font-label text-[10px] uppercase tracking-wider cursor-pointer transition-colors ${
+                          view === v
+                            ? "bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900"
+                            : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary"
+                        }`}
+                      >
+                        {label}
+                      </div>
+                    ))}
+                  </div>
                   <div className="flex gap-1">
                     {SORTS.map(({ value: v, label }) => (
                       <div
@@ -436,11 +519,19 @@ const MicroBlog = () => {
                 </p>
               )}
               {!error && rows.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {rows.map((post) => (
-                    <PostCard key={post.id} post={post} onOpen={setSelected} />
-                  ))}
-                </div>
+                view === "wall" ? (
+                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 px-1 pt-2">
+                    {rows.map((post) => (
+                      <PinboardCard key={post.id} post={post} onOpen={setSelected} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {rows.map((post) => (
+                      <PostCard key={post.id} post={post} onOpen={setSelected} />
+                    ))}
+                  </div>
+                )
               )}
 
               {!error && hasMore && (

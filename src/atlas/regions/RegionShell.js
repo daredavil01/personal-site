@@ -10,7 +10,7 @@
 // entrance; on mount it records the region visit (which stamps + toasts on a
 // genuine first visit, via WorldContext + RewardToaster).
 
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
 import "../theme/atlasTokens.css";
@@ -34,15 +34,26 @@ const RegionShell = ({
   const fromMap = !!(state && state.fromMap);
   const { Header } = meta;
 
+  // The entrance animates `transform`, and a kept animation (fill-mode: both)
+  // leaves the wrapper a containing block for position:fixed descendants —
+  // which strands every page modal's fixed backdrop/panel mid-document. Drop
+  // the class as soon as the entrance finishes so `fixed` means the viewport
+  // again.
+  const [entered, setEntered] = useState(false);
+  const handleEntranceEnd = (e) => {
+    if (e.animationName === "atlas-region-in") setEntered(true);
+  };
+
   useEffect(() => {
     visitRegion(region);
   }, [region, visitRegion]);
 
   return (
     <div
-      className={`atlas-root ${meta.tokensClass} atlas-region${fromMap ? " atlas-region-enter" : ""}`}
+      className={`atlas-root ${meta.tokensClass} atlas-region${fromMap && !entered ? " atlas-region-enter" : ""}`}
       data-region={region}
       data-time={time}
+      onAnimationEnd={handleEntranceEnd}
     >
       <a href="#main" className="atlas-region-skip">Skip to main content</a>
       <PageMeta title={title} description={description} image={image} />
