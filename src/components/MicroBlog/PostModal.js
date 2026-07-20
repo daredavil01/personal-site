@@ -37,6 +37,14 @@ const PostModal = ({ post, onClose }) => {
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // Keep the page behind from scrolling while a post is open.
+  useEffect(() => {
+    if (!post) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [post]);
+
   if (!post) return null;
   const body = post.text || post.title || "";
 

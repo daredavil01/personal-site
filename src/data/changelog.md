@@ -9,6 +9,23 @@ patch for fixes and tweaks.
 
 ---
 
+## [v12.0.0] — 2026-07-20
+
+### Added
+
+- **Expedition Trail** (`src/components/OneHundredDays/ExpeditionTrail.js`): The 100 Days challenge drawn as a journey — an illustrated SVG route from Base Camp (post 0) to the Summit (post 100) across the writer region's ridge. One waypoint per post (published waypoints are inked, clickable, and open the post modal), tents mark the quarter camps, a pennant flag shows today's position with the pace delta as a margin note, and the walked segment draws itself in on first view (reduced-motion renders instantly). A steeper switchback route keeps it legible on phones. The classic ring + tiles band survives behind the new Trail/Classic toggle (`?layout=classic`).
+- **Micro Blog pinboard view** (`src/components/MicroBlog/PinboardCard.js`): The archive's new default view renders results as paper pinned to the Scriptorium wall — sticky notes for text posts (warmer paper for Marathi), torn slips with a drop quotation mark for quotes, polaroids for photos — with deterministic tilts, pushpins, and the same chips, tags, permalinks and modal as the list. The classic list stays one toggle away (`?layout=list`); the choice is always recorded in the URL.
+- **Month river strip** (`src/components/MicroBlog/MonthRiver.js`): One thin bar per month from the first Tumblr post to today (calendar gaps included), sitting under the search box as both a visualization of nine years of posting and a filter — clicking a month narrows the archive to it (`?month=YYYY-MM`), powered by a new `month` filter in `searchMicroblog` and a `getMicroblogActivity` helper (`src/lib/api/microblog.js`) that also computes the longest daily posting streak. The stats tab gains a posts-per-year chart from the same fetch.
+- **Stats Almanac** (`src/components/Stats/StatsAlmanac.js`): The stats page's new default layout — the bento re-grouped into chapters (I Persona · II Mind · III Body · IV Lens · V Craft) under `ChapterRibbon` headers, opened by a highlights strip (busiest writing month, longest micro streak, top topic, kilometres raced). Numbers count up on first scroll (`src/components/Stats/CountUp.js`, reduced-motion safe), and new charts land where static digits were: 100-days posts per month, micro-blog posts per year, races per year. The previous layout is preserved verbatim as `StatsClassic.js` behind an Almanac/Classic toggle (`?layout=classic` — `view` is reserved by the shell switch).
+- **Pune skyline** (`src/components/Stats/PuneSkyline.js`): An inline line-art skyline (fort wall, temple shikhara, towers, Sinhagad on the horizon) replacing the profile card's hot-linked Google-CDN photograph in the almanac view — one less external dependency that could vanish.
+
+### Fixed
+
+- **Modals stranded off-screen after arriving from the map** (`src/atlas/regions/RegionShell.js`): The map→region entrance animates `transform`, and its `fill-mode: both` kept the animation applied forever — which quietly made the page wrapper the containing block for every `position: fixed` descendant. Any modal opened after arriving from the map (blog cards, calendar squares, micro-blog posts) painted its backdrop over the whole document and centered its panel mid-document instead of mid-viewport, so the page dimmed and blurred with no modal in sight. Deep links were unaffected, which made it look random. The entrance class is now removed the moment the animation ends.
+- **100 Days modal overflow and a11y** (`src/pages/OneHundredDays.js`): The post modal now caps at 85vh with internal scrolling (tall posts were clipped on phones), closes on Escape, locks the page scroll behind it while open, and its action row wraps instead of squeezing "Read full post" onto three lines. The micro-blog modal gains the same scroll lock (`src/components/MicroBlog/PostModal.js`).
+
+---
+
 ## [v11.2.1] — 2026-07-18
 
 ### Added

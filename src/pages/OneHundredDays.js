@@ -1,8 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import PageShell from '../atlas/PageShell';
 import { useBlogs } from '../context/ContentContext';
 import ShareImageButton from '../components/share/ShareImageButton';
+import ExpeditionTrail from '../components/OneHundredDays/ExpeditionTrail';
+import ClassicProgress from '../components/OneHundredDays/ClassicProgress';
 
 const YEAR = 2026;
 const GOAL = 100;
@@ -32,63 +34,18 @@ const platformColors = {
   Canva: 'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400',
 };
 
-const ProgressRing = ({ value }) => {
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setProgress(value));
-    return () => cancelAnimationFrame(raf);
-  }, [value]);
-
-  const radius = 70;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - progress / 100);
-
-  return (
-    <div className="relative w-[180px] h-[180px] shrink-0">
-      <svg width="180" height="180" viewBox="0 0 180 180" className="-rotate-90">
-        <circle
-          cx="90"
-          cy="90"
-          r={radius}
-          fill="none"
-          strokeWidth="12"
-          className="stroke-stone-100 dark:stroke-stone-800"
-        />
-        <circle
-          cx="90"
-          cy="90"
-          r={radius}
-          fill="none"
-          strokeWidth="12"
-          strokeLinecap="round"
-          stroke="currentColor"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="text-secondary"
-          style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.33, 1, 0.68, 1)' }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-headline text-4xl font-black text-stone-900 dark:text-stone-100 leading-none">
-          {value}%
-        </span>
-        <span className="font-label text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1">
-          of {GOAL} posts
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const StatTile = ({ value, label, valueClass = 'text-stone-900 dark:text-stone-100' }) => (
-  <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg p-4 text-center">
-    <p className={`font-headline text-2xl font-black m-0 ${valueClass}`}>{value}</p>
-    <p className="font-label text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1 mb-0">{label}</p>
-  </div>
-);
-
 const OneHundredDays = () => {
   const { data: blogsData } = useBlogs();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Dynamic (trail) is the default; ?layout=classic keeps the old progress
+  // band. (`view` is off-limits here — useViewMode reserves it for the
+  // atlas/classic shell switch.)
+  const view = searchParams.get('layout') === 'classic' ? 'classic' : 'trail';
+  const setView = (next) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('layout', next);
+    setSearchParams(params, { replace: true });
+  };
   const [titleText, setTitleText] = useState('');
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [blogCopyState, setBlogCopyState] = useState('idle');
@@ -132,7 +89,25 @@ const OneHundredDays = () => {
   }, []);
 
   const totalPosts = blogsData.length;
-  const completion = Math.round((totalPosts / GOAL) * 100);
+
+  // Waypoints walk the trail in publish order regardless of row order.
+  const trailBlogs = useMemo(
+    () => blogsData.slice().sort((a, b) => (a.blog_date < b.blog_date ? -1 : 1)),
+    [blogsData],
+  );
+
+  // Modal a11y: Esc closes, and the page behind doesn't scroll while open.
+  useEffect(() => {
+    if (!selectedBlog) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setSelectedBlog(null); };
+    document.addEventListener('keydown', onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedBlog]);
 
   // Pace: where the post count should be if spread evenly over the year
   const pace = useMemo(() => {
@@ -230,35 +205,47 @@ const OneHundredDays = () => {
           </p>
         </header>
 
-        {/* Progress ring + pace stats */}
+        {/* Progress band — the Expedition Trail by default, ?view=classic for the ring */}
         <section className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <ProgressRing value={completion} />
-            <div className="flex-1 w-full">
-              <p className="font-body text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
-                Publish <strong>100 posts in a year</strong> — an experiment in consistent
-                writing on technology, policy, digital well-being, and life. Inspired by{' '}
-                <a
-                  href="https://100daystooffload.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-secondary hover:underline"
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
+            <p className="font-body text-stone-600 dark:text-stone-400 leading-relaxed mb-0 max-w-2xl flex-1">
+              Publish <strong>100 posts in a year</strong> — an experiment in consistent
+              writing on technology, policy, digital well-being, and life. Inspired by{' '}
+              <a
+                href="https://100daystooffload.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-secondary hover:underline"
+              >
+                100DaysToOffload.com
+              </a>.
+              {view === 'trail' && ' Every inked waypoint on the trail is a published post — click one to open it.'}
+            </p>
+            <div className="flex gap-1 shrink-0">
+              {[{ value: 'trail', label: 'Trail' }, { value: 'classic', label: 'Classic' }].map(({ value: v, label }) => (
+                <div
+                  key={v}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={view === v}
+                  onClick={() => setView(v)}
+                  onKeyDown={keyActivate(() => setView(v))}
+                  className={`px-2.5 py-1 rounded-lg font-label text-[10px] uppercase tracking-wider cursor-pointer transition-colors ${
+                    view === v
+                      ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
+                      : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary border border-stone-200 dark:border-stone-700'
+                  }`}
                 >
-                  100DaysToOffload.com
-                </a>.
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <StatTile value={totalPosts} label="Published" />
-                <StatTile value={GOAL - totalPosts} label="Remaining" />
-                <StatTile value={pace.expected} label="Pace Target" />
-                <StatTile
-                  value={pace.delta >= 0 ? `+${pace.delta}` : pace.delta}
-                  label={pace.delta >= 0 ? 'Ahead' : 'Behind'}
-                  valueClass={pace.delta >= 0 ? 'text-emerald-600 dark:text-emerald-500' : 'text-secondary'}
-                />
-              </div>
+                  {label}
+                </div>
+              ))}
             </div>
           </div>
+          {view === 'trail' ? (
+            <ExpeditionTrail blogs={trailBlogs} goal={GOAL} pace={pace} onSelect={setSelectedBlog} />
+          ) : (
+            <ClassicProgress totalPosts={totalPosts} goal={GOAL} pace={pace} />
+          )}
         </section>
 
         {/* Calendar heatmap — cells with posts are clickable */}
@@ -489,7 +476,7 @@ const OneHundredDays = () => {
             onClick={() => setSelectedBlog(null)}
           >
             <div
-              className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl max-w-2xl w-full p-8 relative shadow-2xl transition-transform"
+              className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 relative shadow-2xl transition-transform"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -515,12 +502,12 @@ const OneHundredDays = () => {
                 <span className="font-bold text-stone-400">Language:</span> {selectedBlog.language} |{' '}
                 <span className="font-bold text-stone-400">Date:</span> {selectedBlog.blog_date}
               </p>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <a
                   href={selectedBlog.blog_link}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-block bg-secondary text-white px-8 py-4 rounded-xl font-label font-bold text-sm tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-secondary/20"
+                  className="inline-block whitespace-nowrap bg-secondary text-white px-8 py-4 rounded-xl font-label font-bold text-sm tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-secondary/20"
                 >
                   READ FULL POST
                 </a>

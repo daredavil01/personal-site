@@ -44,10 +44,12 @@ const microblog = createResource({
  * Server-side, paginated full-text search over the microblog table.
  * sort: "date_desc" (default) | "date_asc" | "random" (random is handled
  * client-side — this function always fetches in date order).
+ * month: optional "YYYY-MM" key restricting results to that month (the
+ * river strip's click-to-filter).
  * @returns {Promise<{ rows: object[], count: number }>}
  */
 export async function searchMicroblog({
-  query = "", tags = [], source = "", type = "", page = 0, pageSize = 24, sort = "date_desc",
+  query = "", tags = [], source = "", type = "", month = "", page = 0, pageSize = 24, sort = "date_desc",
 } = {}) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
@@ -62,6 +64,10 @@ export async function searchMicroblog({
   if (Array.isArray(tags) && tags.length) q = q.contains("tags", tags);
   if (source) q = q.eq("source", source);
   if (type) q = q.eq("post_type", type);
+  if (month) {
+    const { start, endExclusive } = monthRange(month);
+    q = q.gte("date", start).lt("date", endExclusive);
+  }
 
   q = q
     .order("date", { ascending })
@@ -143,6 +149,50 @@ export async function getMicroblogMonths() {
     }
   });
   return [...keys].sort().reverse();
+}
+
+/**
+ * The archive's pulse, from one lightweight all-dates fetch (same payload as
+ * getMicroblogMonths): posts-per-month for the river strip, plus the longest
+ * run of consecutive posting days for the stats highlights.
+ * @returns {Promise<{ monthCounts: {key: string, count: number}[], longestStreak: number }>}
+ *          monthCounts sorted ascending (oldest first)
+ */
+export async function getMicroblogActivity() {
+  const { data, error } = await supabase
+    .from("microblog")
+    .select("date")
+    .order("date", { ascending: true });
+  if (error) throw error;
+
+  const counts = new Map();
+  const days = new Set();
+  (data ?? []).forEach((row) => {
+    if (typeof row.date !== "string" || row.date.length < 10) return;
+    const key = row.date.slice(0, 7);
+    counts.set(key, (counts.get(key) || 0) + 1);
+    days.add(row.date.slice(0, 10));
+  });
+
+  let longestStreak = 0;
+  days.forEach((day) => {
+    const prev = new Date(`${day}T00:00:00Z`);
+    prev.setUTCDate(prev.getUTCDate() - 1);
+    if (days.has(prev.toISOString().slice(0, 10))) return; // not a streak start
+    let run = 1;
+    const cursor = new Date(`${day}T00:00:00Z`);
+    for (;;) {
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+      if (!days.has(cursor.toISOString().slice(0, 10))) break;
+      run += 1;
+    }
+    if (run > longestStreak) longestStreak = run;
+  });
+
+  return {
+    monthCounts: [...counts.entries()].map(([key, count]) => ({ key, count })),
+    longestStreak,
+  };
 }
 
 /**
