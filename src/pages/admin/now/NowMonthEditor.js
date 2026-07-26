@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import FormField, { inputClass } from "../FormField";
 import { LoadingBlock, ErrorBlock } from "../../../components/common/AsyncStates";
 import { nowMonths, MONTH_ORDER } from "../../../lib/api/now";
@@ -6,6 +6,7 @@ import {
   useBlogs, useBooks, useSports, useTreks,
 } from "../../../context/ContentContext";
 import { monthLabel } from "../../../lib/monthDigest";
+import { getMicroblogByMonth } from "../../../lib/api/microblog";
 import { collectMonthRecords } from "../../../lib/nowAutofill";
 import { changelogHighlights, loadChangelog, parseChangelog } from "../../../lib/changelogEntries";
 import {
@@ -18,6 +19,9 @@ import AutofillPreview from "./AutofillPreview";
 // month's `sections` blob holds nine differently-shaped sub-sections that used
 // to be typed as raw JSON. Each gets a real form here, plus two auto-fills —
 // one from the content tables, one from the changelog.
+
+// Enough to cover a busy micro-blogging month without shipping the archive.
+const MICRO_LIMIT = 50;
 
 const labelClass = "font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400";
 const cardClass = "border border-stone-200 dark:border-stone-800 rounded-xl p-4 flex flex-col gap-3";
@@ -46,6 +50,8 @@ const NowMonthEditor = () => {
   // structured edit — otherwise the raw panel shows stale text.
   const [jsonKey, setJsonKey] = useState(0);
   const [preview, setPreview] = useState(null);
+  const [pulling, setPulling] = useState(false);
+  const [contentError, setContentError] = useState(null);
   const [changelog, setChangelog] = useState(null);
   const [changelogError, setChangelogError] = useState(null);
 
@@ -108,10 +114,22 @@ const NowMonthEditor = () => {
   };
 
   // --- Auto-fill: content records ----------------------------------------
-  const contentGroups = useMemo(() => {
-    if (!monthKey) return [];
-    return collectMonthRecords({
-      blogs, sports, books, treks,
+  // Micro-posts are not in ContentContext (1,600+ rows), so they are fetched
+  // for just this month; everything else is already cached client-side.
+  const openContent = async () => {
+    setPulling(true);
+    setContentError(null);
+    let micro = [];
+    try {
+      ({ rows: micro } = await getMicroblogByMonth(monthKey, MICRO_LIMIT));
+    } catch (err) {
+      // A failed micro fetch shouldn't hide the records we already have.
+      setContentError(err.message);
+    } finally {
+      setPulling(false);
+    }
+    const groups = collectMonthRecords({
+      blogs, sports, books, treks, micro,
     }, monthKey, sections).map((group) => ({
       key: group.key,
       label: `${group.label} → ${group.section}`,
@@ -124,7 +142,8 @@ const NowMonthEditor = () => {
         payload: { section: group.section, row: r.row },
       })),
     }));
-  }, [monthKey, blogs, sports, books, treks, sections]);
+    setPreview({ kind: "content", groups });
+  };
 
   const applyContent = (groups) => {
     const additions = {};
@@ -225,11 +244,11 @@ const NowMonthEditor = () => {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              disabled={!monthKey}
-              onClick={() => setPreview({ kind: "content", groups: contentGroups })}
+              disabled={!monthKey || pulling}
+              onClick={openContent}
               className="px-4 py-2 bg-secondary text-white rounded-lg font-label text-xs uppercase tracking-widest font-bold disabled:opacity-40"
             >
-              Pull records for this month
+              {pulling ? "Pulling…" : "Pull records for this month"}
             </button>
             <button
               type="button"
@@ -240,6 +259,9 @@ const NowMonthEditor = () => {
               Pull highlights from changelog
             </button>
           </div>
+          {contentError && (
+            <p className="text-sm text-red-600 mb-0">Could not load micro posts: {contentError}</p>
+          )}
           {changelogError && (
             <p className="text-sm text-red-600 mb-0">Could not read the changelog: {changelogError}</p>
           )}

@@ -44,13 +44,23 @@ describe("collectMonthRecords", () => {
       },
     ],
     books: [],
+    // Micro-posts arrive already restricted to the month by the server query.
+    micro: [
+      {
+        id: 7, date: "2026-05-12", postType: "quote", title: "", text: "A short scrap.", tags: ["reading"],
+      },
+      {
+        id: 8, date: "2026-05-20", postType: "photo", text: "", title: "", imageUrl: "https://img/8.jpg",
+      },
+      { id: 9, date: "2026-05-21", postType: "text", text: "", title: "", imageUrl: "" },
+    ],
   };
 
   it("buckets each source into its Now section for the given month", () => {
     const groups = collectMonthRecords(data, "2026-05", {});
     const byKey = Object.fromEntries(groups.map((g) => [g.key, g]));
 
-    expect(groups.map((g) => g.key).sort()).toEqual(["blogs", "sports", "treks"]);
+    expect(groups.map((g) => g.key).sort()).toEqual(["blogs", "micro", "sports", "treks"]);
     expect(byKey.blogs.section).toBe("blogs");
     expect(byKey.blogs.rows).toHaveLength(1);
     expect(byKey.blogs.rows[0].row).toMatchObject({ title: "May post", url: "https://x/1", platform: "Substack" });
@@ -68,20 +78,44 @@ describe("collectMonthRecords", () => {
     });
   });
 
+  it("takes micro-posts as pre-filtered and keeps image-only photo posts", () => {
+    const micro = collectMonthRecords(data, "2026-05", {}).find((g) => g.key === "micro");
+
+    expect(micro.section).toBe("micro");
+    // The empty row (no text, no title, no image) is dropped; the photo is kept.
+    expect(micro.rows.map((r) => r.row.id)).toEqual([7, 8]);
+    expect(micro.rows[0].row).toMatchObject({
+      id: 7, date: "2026-05-12", postType: "quote", text: "A short scrap.", tags: ["reading"],
+    });
+    expect(micro.rows[1].label).toBe("(image only)");
+
+    // Pre-filtered means the month key does not re-filter them out.
+    const other = collectMonthRecords({ micro: data.micro }, "2026-01", {});
+    expect(other.find((g) => g.key === "micro").rows).toHaveLength(2);
+  });
+
   it("drops records already present in the section", () => {
-    const sections = { blogs: [{ title: "May post", url: "https://x/1" }] };
+    const sections = {
+      blogs: [{ title: "May post", url: "https://x/1" }],
+      micro: [{ id: 7, text: "edited locally" }],
+    };
     const groups = collectMonthRecords(data, "2026-05", sections);
     expect(groups.map((g) => g.key)).not.toContain("blogs");
+    // Micro-posts dedupe on archive id, not on text.
+    expect(groups.find((g) => g.key === "micro").rows.map((r) => r.row.id)).toEqual([8]);
   });
 
   it("returns nothing for a month with no content", () => {
-    expect(collectMonthRecords(data, "2026-01", {})).toEqual([]);
+    const { micro, ...tables } = data;
+    expect(collectMonthRecords(tables, "2026-01", {})).toEqual([]);
     expect(collectMonthRecords(data, null, {})).toEqual([]);
   });
 });
 
 describe("isDuplicate", () => {
-  it("matches on url when both have one, else on title", () => {
+  it("matches on id first, then url, then title", () => {
+    expect(isDuplicate([{ id: 1, text: "A" }], { id: 1, text: "B" }, "micro")).toBe(true);
+    expect(isDuplicate([{ id: 1, text: "A" }], { id: 2, text: "A" }, "micro")).toBe(false);
     expect(isDuplicate([{ title: "A", url: "https://x" }], { title: "B", url: "https://x" }, "blogs")).toBe(true);
     expect(isDuplicate([{ title: "A" }], { title: "a" }, "blogs")).toBe(true);
     expect(isDuplicate([{ title: "A" }], { title: "B" }, "blogs")).toBe(false);

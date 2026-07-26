@@ -21,6 +21,22 @@ export const SECTION_SPECS = [
     ],
   },
   {
+    key: "micro",
+    label: "Micro posts",
+    titleField: "text",
+    // Auto-filled rows also carry `id` (for the archive permalink) and
+    // `imageUrl`; both are preserved on save but not edited here.
+    fields: [
+      { name: "text", label: "Text", type: "textarea", required: true, full: true },
+      { name: "date", label: "Date", type: "isoDate" },
+      {
+        name: "postType", label: "Type", type: "select", options: ["text", "quote", "photo"],
+      },
+      { name: "title", label: "Title", type: "text" },
+      { name: "tags", label: "Tags", type: "tags", full: true },
+    ],
+  },
+  {
     key: "running",
     label: "Running & Marathons",
     titleField: "event",
@@ -107,13 +123,15 @@ export const STAT_PRESETS = [
 ];
 
 const blank = (spec) => spec.fields.reduce((acc, f) => {
-  acc[f.name] = f.type === "boolean" ? false : "";
+  if (f.type === "tags") acc[f.name] = [];
+  else acc[f.name] = f.type === "boolean" ? false : "";
   return acc;
 }, {});
 
 export const blankRow = blank;
 
-const isBlank = (v) => v === undefined || v === null || v === "" || v === false;
+const isBlank = (v) => v === undefined || v === null || v === "" || v === false
+  || (Array.isArray(v) && v.length === 0);
 
 /** Numeric strings become numbers so the stored JSON keeps its historic shape. */
 const coerce = (v) => {

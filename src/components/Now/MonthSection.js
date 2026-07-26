@@ -1,5 +1,6 @@
 import React from "react";
 import NowBlogsSection from "./NowBlogsSection";
+import NowMicroSection from "./NowMicroSection";
 import NowRunningSection from "./NowRunningSection";
 import NowBooksSection from "./NowBooksSection";
 import NowEventsSection from "./NowEventsSection";
@@ -43,6 +44,11 @@ const MonthSection = ({ month }) => {
         {sections.blogs?.length > 0 && (
           <Card full>
             <NowBlogsSection blogs={sections.blogs} />
+          </Card>
+        )}
+        {sections.micro?.length > 0 && (
+          <Card full>
+            <NowMicroSection micro={sections.micro} />
           </Card>
         )}
         {sections.running?.length > 0 && (
