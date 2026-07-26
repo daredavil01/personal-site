@@ -7,7 +7,6 @@ import instagram from "../../lib/api/instagram";
 import {
   positions, degrees, certifications, skills,
 } from "../../lib/api/resume";
-import { nowMonths } from "../../lib/api/now";
 
 // Schema-driven CRUD config. `api` is a resource from lib/api/_crud (list /
 // create / update / remove). `title` derives a list-row label. `fields` drive
@@ -169,18 +168,9 @@ const resources = [
       { name: "sortOrder", label: "Sort order", type: "number" },
     ],
   },
-  {
-    key: "now_months",
-    label: "Now · Months",
-    api: nowMonths,
-    title: (r) => `${r.month} ${r.year}`,
-    fields: [
-      { name: "month", label: "Month", type: "text", required: true },
-      { name: "year", label: "Year", type: "number", required: true },
-      { name: "isCurrent", label: "Is current month", type: "boolean" },
-      { name: "sections", label: "Sections (JSON)", type: "json" },
-    ],
-  },
+  // `now_months` is not here: its `sections` blob needs per-section forms, so it
+  // has a dedicated editor (src/pages/admin/now/NowMonthEditor.js) wired as a
+  // Dashboard tab instead of a generic resource.
 ];
 
 export default resources;

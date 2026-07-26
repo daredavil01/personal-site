@@ -9,6 +9,24 @@ patch for fixes and tweaks.
 
 ---
 
+## [v12.1.0] — 2026-07-26
+
+### Added
+
+- **Now month editor** (`src/pages/admin/now/NowMonthEditor.js`): The admin's Now · Months tab is now its own editor instead of a row in the generic resource form. Every section of the month — blogs, running, books, events, projects, certificates, website, misc, stats — gets a real form with labelled fields and repeatable rows, so the nine differently-shaped sub-sections no longer have to be typed as raw JSON. Month is a dropdown of full English month names (free text quietly broke the Now page's sort order), and saving a month marked "current" clears the flag on the previous one, which used to be a second manual edit. The raw JSON survives behind an "Advanced" panel as an escape hatch.
+- **Month auto-fill from the content tables** (`src/lib/nowAutofill.js`): A "Pull records for this month" button gathers every blog, race, book, trek and micro-post dated inside the month being edited and offers them as checkboxes — nothing is applied until you pick it, and records already in the section are filtered out. Races map into the running section (converting `"21 Kms"` to the bare `"21"` the card expects) and treks into events, since the Now page has no trek section. Date normalisation reuses `parseContentDate` from the monthly-digest helpers. Micro-posts are the one source not held in `ContentContext`, so they are fetched for just that month via `getMicroblogByMonth` and passed in pre-filtered; they de-duplicate on archive id rather than on text.
+- **Micro posts on the Now page** (`src/components/Now/NowMicroSection.js`): A month can now carry its micro-blog scraps, rendered as a grid of small cards — type chip, date, optional photo, clamped text (quotes get typographic quote marks) and tags — each linking back to its archive permalink. Rows typed by hand in the admin have no id and render unlinked. The section is editable like any other, so a pulled post can be trimmed or removed before publishing.
+- **Changelog highlights auto-fill** (`src/lib/changelogEntries.js`): A "Pull highlights from changelog" button on the Website Updates section parses this file, filters to versions released in that month, and offers each entry as an editable one-liner — the feature name plus its first sentence. Added entries come pre-checked; Changed, Fixed and Removed are listed unchecked.
+- **Custom stat groups** (`src/components/Now/NowStatsSection.js`): Now-page stats are no longer limited to Strava and Substack. A month can carry any number of named groups of `{label, value, unit}` tiles, authored in the admin and rendered in a neutral tile style below the two branded groups.
+- **`isoDate` form field** (`src/pages/admin/FormField.js`): A date picker that stores its own `YYYY-MM-DD` value verbatim, for real Postgres date columns and the Now JSON fields. The existing `date` type still writes the `"Month DD, YYYY"` string that Sports rows use.
+
+### Changed
+
+- **Micro-blog date defaults to today** (`src/pages/admin/MicroblogManager.js`): The date was a hand-typed text box with no default, in front of a `date NOT NULL` column that every reader assumes is exactly ten ISO characters. New posts now open with a "Today" toggle on and the date filled in; unchecking it reveals a date picker for backdating, and while the toggle is on the date is re-stamped at save time so a form left open across midnight still records the right day. Editing an existing post always opens with the toggle off.
+- **Date helpers** (`src/lib/monthDigest.js`): Added `toIsoDate` / `todayIso`, built from local-time getters rather than `toISOString` — UTC would roll an IST evening back to the previous day.
+
+---
+
 ## [v12.0.0] — 2026-07-20
 
 ### Added

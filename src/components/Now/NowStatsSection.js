@@ -12,9 +12,19 @@ const StatTile = ({ value, label, approximate, className }) => (
   </div>
 );
 
+const GroupLabel = ({ children }) => (
+  <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-3">
+    {children}
+  </p>
+);
+
 const NowStatsSection = ({ stats }) => {
   if (!stats) return null;
   const { strava, substack } = stats;
+  // Anything outside the two branded services: free-form groups authored in the
+  // admin as { label, approximate, tiles: [{ label, value, unit }] }.
+  const custom = (stats.custom || []).filter((g) => g?.tiles?.length);
+  if (!strava && !substack && !custom.length) return null;
 
   return (
     <div>
@@ -22,9 +32,7 @@ const NowStatsSection = ({ stats }) => {
       <div className="space-y-6">
         {strava && (
           <div>
-            <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-3">
-              Strava
-            </p>
+            <GroupLabel>Strava</GroupLabel>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <StatTile
                 value={strava.activities}
@@ -55,9 +63,7 @@ const NowStatsSection = ({ stats }) => {
         )}
         {substack && (
           <div>
-            <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-3">
-              Substack
-            </p>
+            <GroupLabel>Substack</GroupLabel>
             <div className="grid grid-cols-2 gap-3">
               <StatTile
                 value={substack.views}
@@ -74,6 +80,22 @@ const NowStatsSection = ({ stats }) => {
             </div>
           </div>
         )}
+        {custom.map((group, i) => (
+          <div key={group.label || i}>
+            {group.label && <GroupLabel>{group.label}</GroupLabel>}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {group.tiles.map((tile, j) => (
+                <StatTile
+                  key={tile.label || j}
+                  value={tile.unit ? `${tile.value} ${tile.unit}` : tile.value}
+                  label={tile.label}
+                  approximate={group.approximate}
+                  className="bg-stone-50 dark:bg-stone-800/40 border-stone-200/70 dark:border-stone-700/50"
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

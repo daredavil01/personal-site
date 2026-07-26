@@ -1,7 +1,7 @@
 import { supabase } from "../supabaseClient";
 import createResource from "./_crud";
 
-const MONTH_ORDER = [
+export const MONTH_ORDER = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];

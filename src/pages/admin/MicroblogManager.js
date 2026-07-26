@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import FormField from "./FormField";
 import microblog, { searchMicroblog } from "../../lib/api/microblog";
+import { todayIso } from "../../lib/monthDigest";
 import { LoadingBlock, ErrorBlock } from "../../components/common/AsyncStates";
 
 // Dedicated manager (not the generic ResourceManager): the microblog table has
@@ -13,7 +14,6 @@ const FIELDS = [
   {
     name: "source", label: "Source", type: "select", options: ["tumblr", "instagram", "manual"], required: true,
   },
-  { name: "date", label: "Date (YYYY-MM-DD)", type: "text", required: true },
   {
     name: "postType", label: "Type", type: "select", options: ["text", "quote", "photo"], required: true,
   },
@@ -24,8 +24,19 @@ const FIELDS = [
   { name: "imageUrl", label: "Image", type: "image" },
 ];
 
+// `useToday` is form-only state (never persisted): while it is on, the date
+// stays pinned to today and is re-stamped at save time, so a form left open
+// across midnight still records the right day.
 const newForm = () => ({
-  source: "manual", date: "", postType: "text", title: "", text: "", tags: [], url: "", imageUrl: "",
+  source: "manual",
+  date: todayIso(),
+  useToday: true,
+  postType: "text",
+  title: "",
+  text: "",
+  tags: [],
+  url: "",
+  imageUrl: "",
 });
 
 const rowLabel = (r) => {
@@ -78,8 +89,10 @@ const MicroblogManager = () => {
     setSaving(true);
     setFormError(null);
     try {
-      if (form.id) await microblog.update(form.id, form);
-      else await microblog.create(form);
+      const { useToday, ...rest } = form;
+      const payload = { ...rest, date: useToday ? todayIso() : rest.date };
+      if (payload.id) await microblog.update(payload.id, payload);
+      else await microblog.create(payload);
       setForm(null);
       refresh();
     } catch (err) {
@@ -107,6 +120,37 @@ const MicroblogManager = () => {
         <h2 className="font-headline text-2xl text-stone-900 dark:text-stone-100 mb-0">
           {form.id ? "Edit" : "New"} Micro Blog post
         </h2>
+        <div className="flex flex-col gap-1">
+          <span className="font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
+            Date *
+          </span>
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <FormField
+                field={{ name: "date", type: "isoDate", disabled: form.useToday }}
+                value={form.useToday ? todayIso() : form.date}
+                onChange={onField}
+              />
+            </div>
+            {/* The checkbox is nested directly inside this label. */}
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label className="shrink-0 flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 cursor-pointer">
+              <input
+                type="checkbox"
+                className="h-5 w-5 rounded border-stone-300 text-secondary focus:ring-secondary dark:border-stone-600 dark:bg-stone-800"
+                checked={!!form.useToday}
+                onChange={(e) => setForm((prev) => ({
+                  ...prev,
+                  useToday: e.target.checked,
+                  // Re-checking snaps back to today; unchecking keeps the value
+                  // on screen so it can be nudged into the past.
+                  date: e.target.checked ? todayIso() : prev.date,
+                }))}
+              />
+              Today
+            </label>
+          </div>
+        </div>
         {FIELDS.map((field) => (
           <div key={field.name} className="flex flex-col gap-1">
             <span className="font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
@@ -170,7 +214,7 @@ const MicroblogManager = () => {
             <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <span className="text-sm text-stone-800 dark:text-stone-200 truncate">{rowLabel(row)}</span>
               <span className="flex gap-2 shrink-0">
-                <button type="button" onClick={() => setForm(row)} className="text-xs font-bold uppercase tracking-wider text-secondary">Edit</button>
+                <button type="button" onClick={() => setForm({ ...row, useToday: false })} className="text-xs font-bold uppercase tracking-wider text-secondary">Edit</button>
                 <button type="button" onClick={() => remove(row)} className="text-xs font-bold uppercase tracking-wider text-red-600">Delete</button>
               </span>
             </li>

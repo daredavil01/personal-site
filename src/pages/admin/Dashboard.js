@@ -3,14 +3,18 @@ import { useSearchParams } from "react-router-dom";
 import resources from "./resources";
 import ResourceManager from "./ResourceManager";
 import NowMetaEditor from "./NowMetaEditor";
+import NowMonthEditor from "./now/NowMonthEditor";
 import MicroblogManager from "./MicroblogManager";
 import FloatingToggle from "../../components/Template/FloatingToggle";
 import { supabase } from "../../lib/supabaseClient";
 
 const NOW_META_KEY = "__nowmeta";
+const NOW_MONTHS_KEY = "__nowmonths";
 const MICROBLOG_KEY = "__microblog";
 
-const ALL_KEYS = new Set([...resources.map((r) => r.key), MICROBLOG_KEY, NOW_META_KEY]);
+const ALL_KEYS = new Set([
+  ...resources.map((r) => r.key), MICROBLOG_KEY, NOW_MONTHS_KEY, NOW_META_KEY,
+]);
 
 const Dashboard = ({ session }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,6 +24,7 @@ const Dashboard = ({ session }) => {
 
   const renderPanel = () => {
     if (activeKey === NOW_META_KEY) return <NowMetaEditor />;
+    if (activeKey === NOW_MONTHS_KEY) return <NowMonthEditor />;
     if (activeKey === MICROBLOG_KEY) return <MicroblogManager />;
     return <ResourceManager key={active.key} resource={active} />;
   };
@@ -49,6 +54,7 @@ const Dashboard = ({ session }) => {
         <nav className="flex flex-col gap-1">
           {resources.map((r) => navBtn(r.key, r.label))}
           {navBtn(MICROBLOG_KEY, "Micro Blog")}
+          {navBtn(NOW_MONTHS_KEY, "Now · Months")}
           {navBtn(NOW_META_KEY, "Now · Meta")}
         </nav>
         <div className="mt-auto pt-4 border-t border-stone-200 dark:border-stone-800 flex flex-col gap-2">
