@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import uploadImage from "../../lib/api/storage";
 
-const inputClass = "w-full px-3 py-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg text-sm text-stone-800 dark:text-stone-200 focus:outline-none focus:border-secondary";
+export const inputClass = "w-full px-3 py-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg text-sm text-stone-800 dark:text-stone-200 focus:outline-none focus:border-secondary";
 
 const UploadButton = ({ folder, onUploaded }) => {
   const [busy, setBusy] = useState(false);
@@ -269,6 +269,19 @@ const FormField = ({ field, value, folder, onChange }) => {
           className={inputClass}
           value={toDateInput(value)}
           onChange={(e) => set(fromDateInput(e.target.value))}
+        />
+      );
+    // Like "date" but stores the picker's own "YYYY-MM-DD" value verbatim —
+    // for columns that are real Postgres dates (microblog) or JSON fields the
+    // Now components feed straight to new Date().
+    case "isoDate":
+      return (
+        <input
+          type="date"
+          className={inputClass}
+          disabled={field.disabled}
+          value={value ?? ""}
+          onChange={(e) => set(e.target.value)}
         />
       );
     case "selectOrOther":

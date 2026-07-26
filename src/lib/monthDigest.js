@@ -44,6 +44,24 @@ export function parseContentDate(item, type) {
   return null;
 }
 
+/**
+ * Date → "YYYY-MM-DD" using local-time getters.
+ * Deliberately not toISOString(), which is UTC and rolls the date backwards for
+ * an IST evening — the authored dates are local calendar days.
+ */
+export function toIsoDate(date) {
+  if (!date || Number.isNaN(date.getTime())) return "";
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/** Today as "YYYY-MM-DD" in the author's local timezone. */
+export function todayIso() {
+  return toIsoDate(new Date());
+}
+
 /** Date → "YYYY-MM" key (local time, matching how the dates are authored). */
 export function monthKey(date) {
   if (!date) return null;
