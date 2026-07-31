@@ -19,6 +19,7 @@ const Modal = ({
   open, onClose, title, description, footer, size = "md", children,
 }) => {
   const panelRef = useRef(null);
+  const bodyRef = useRef(null);
   const returnFocusRef = useRef(null);
 
   const onKeyDown = useCallback((e) => {
@@ -28,8 +29,9 @@ const Modal = ({
       return;
     }
     if (e.key !== "Tab" || !panelRef.current) return;
-    const items = Array.from(panelRef.current.querySelectorAll(FOCUSABLE))
-      .filter((el) => el.offsetParent !== null || el === document.activeElement);
+    // The selector already excludes disabled controls; nothing else in a dialog
+    // is hidden, and offsetParent is unusable here (it is always null in jsdom).
+    const items = Array.from(panelRef.current.querySelectorAll(FOCUSABLE));
     if (!items.length) return;
     const first = items[0];
     const last = items[items.length - 1];
@@ -47,8 +49,12 @@ const Modal = ({
     returnFocusRef.current = document.activeElement;
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
-    // Focus the first control in the panel, falling back to the panel itself.
-    const target = panelRef.current?.querySelector(FOCUSABLE) ?? panelRef.current;
+    // Prefer the first control in the body — the header's close button comes
+    // first in DOM order, and landing on it means a dialog with a search box or
+    // a form field opens with the wrong thing focused.
+    const target = bodyRef.current?.querySelector(FOCUSABLE)
+      ?? panelRef.current?.querySelector(FOCUSABLE)
+      ?? panelRef.current;
     target?.focus();
     return () => {
       document.body.style.overflow = overflow;
@@ -88,7 +94,7 @@ const Modal = ({
             <IconButton icon={X} label="Close" size="sm" onClick={onClose} />
           </header>
         )}
-        {children && <div className="px-5 py-4 overflow-y-auto min-h-0">{children}</div>}
+        {children && <div ref={bodyRef} className="px-5 py-4 overflow-y-auto min-h-0">{children}</div>}
         {footer && (
           <footer className={`flex items-center justify-end gap-2 px-5 py-3 border-t ${hairline}`}>
             {footer}
