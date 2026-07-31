@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-
-const inputClass = "w-full px-3 py-2.5 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg text-sm text-stone-800 dark:text-stone-200 focus:outline-none focus:border-secondary";
+import Button from "./ui/Button";
+import Field from "./ui/Field";
+import { Input } from "./ui/Input";
+import { AlertTriangle } from "./ui/icons";
+import { hairline, mutedText, surface } from "./ui/tokens";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,42 +16,64 @@ const Login = () => {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    if (err) setError(err.message);
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) setError(authError.message);
     setBusy(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-stone-50 dark:bg-stone-950">
-      <form onSubmit={submit} className="w-full max-w-sm flex flex-col gap-4 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-8 shadow-sm">
-        <h1 className="font-headline text-3xl text-stone-900 dark:text-stone-100 mb-2">Admin</h1>
-        <input
-          type="email"
-          aria-label="Email"
-          placeholder="Email"
-          className={inputClass}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          aria-label="Password"
-          placeholder="Password"
-          className={inputClass}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {error && <p className="text-sm text-red-600 mb-0">{error}</p>}
-        <button
-          type="submit"
-          disabled={busy}
-          className="px-5 py-2.5 bg-secondary text-white rounded-lg font-label text-xs uppercase tracking-widest font-bold disabled:opacity-50"
-        >
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center p-4 font-body bg-stone-50 dark:bg-stone-950">
+      <div className={`w-full max-w-sm ${surface} border ${hairline} rounded-xl shadow-sm p-6 flex flex-col gap-5`}>
+        <div className="flex flex-col gap-1">
+          <span className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-admin-600 text-white font-semibold text-sm mb-2">
+            ST
+          </span>
+          <h1 className="font-semibold tracking-tight text-lg text-stone-900 dark:text-stone-50 mb-0">
+            Sign in
+          </h1>
+          <p className={`text-sm ${mutedText} mb-0`}>Content dashboard</p>
+        </div>
+
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <Field label="Email" required>
+            <Input
+              type="email"
+              aria-label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              placeholder="you@example.com"
+              required
+            />
+          </Field>
+          <Field label="Password" required>
+            <Input
+              type="password"
+              aria-label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              required
+            />
+          </Field>
+
+          {error && (
+            <p className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400 mb-0" role="alert">
+              <AlertTriangle size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" variant="primary" loading={busy} className="w-full">
+            {busy ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+
+        <a href="/" className={`text-xs text-center ${mutedText} hover:text-admin-600 dark:hover:text-admin-400 transition-colors no-underline`}>
+          ← Back to the site
+        </a>
+      </div>
     </div>
   );
 };
