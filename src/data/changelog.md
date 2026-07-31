@@ -9,6 +9,20 @@ patch for fixes and tweaks.
 
 ---
 
+## [v12.2.0] — 2026-07-31
+
+### Added
+
+- **Blog word-count extractor** (`scripts/blog-word-counts.mjs`): A read-only script — `npm run blogs:wordcount` — that answers "how much have I actually written?". It pages the Substack archive API, whose post objects carry a native `wordcount`, and the WordPress.com API, which has no such field and so gets its counts derived by stripping tags from the rendered body. Each post records which of the two methods produced its number, because Substack's counter and a whitespace split are not the same measurement and shouldn't be blended silently. Output is `knowledge_base/blog-word-counts.json`: per-post rows plus totals rolled up by month, year, platform and lifetime. Posts are bucketed by their own publish timestamp converted to IST, not by `blogs.blog_date`, so a late-evening post lands on the day the site says it did.
+- **Coverage and anomaly reporting** (`scripts/blog-word-counts.mjs`): The script reads the `blogs` table to mark which published posts the site actually tracks, and reports the gap rather than papering over it — 43 of 93 posts (the 2021 explainer series, most book reviews, older WordPress writing) exist on a platform but have no row. It also flags rows whose `blog_date` isn't `YYYY-MM-DD`, which surfaced id 45 storing `2026--07-09`; that malformed value produces a junk month bucket in the 100 Days chart and the Almanac's "busiest writing month". Nothing is written back — the table is read with the publishable key, so no service-role secret is needed.
+- **Month-to-date and year-to-date metrics** (`scripts/blog-word-counts.mjs`): A `currentPeriod` block reporting words, posts and words/day for the running month and year. The year-on-year comparison cuts last year at the same month and day rather than comparing a partial year against a whole one, which would flatter the current one every January.
+- **The Writing Ledger page** (`public/writing-ledger.html`, built by `scripts/build-blog-infographic.mjs` from `scripts/infographic-template.html`): A standalone infographic served at `/writing-ledger.html` — hero total, stat tiles, month/year-to-date panel, a cumulative sparkline, and charts for words per year, every month on record, platform split, post-length distribution and day-of-week cadence, plus the longest ten posts and the recurring tags. It ships from `public/` so Vite copies it verbatim into `build/`; the dot in the filename means `functions/_middleware.js` skips it, so the page carries its own canonical and OG tags rather than having the SPA's meta injected over the top. `npm run blogs:infographic` inlines the JSON into the template, so the page is a single self-contained file with no fetch, no CORS and no external assets.
+- **Filterable post ledger** (`scripts/infographic-template.html`): Every post in one collapsed table — search across titles, tags and sections, filter by platform, year and whether the site tracks the post, and sort on any column. Titles link out to the published piece. It stays collapsed by default because 93 rows would otherwise more than double the page height, and the summary reports how many posts the current filters match.
+- **Light/dark theme toggle** (`scripts/infographic-template.html`): Follows the OS by default and remembers an explicit choice in `localStorage`. Chart marks are painted with `var(--…)` rather than a hex resolved once at load, so switching theme repaints the SVGs instead of stranding light-mode blues on a dark surface. The palette was checked with the data-viz validator and clears the lightness, chroma, CVD-separation, normal-vision and contrast gates in both modes.
+- **Poster export** (`?capture=light` / `?capture=dark`): A capture mode that hides the interactive-only chrome so a headless-Chrome screenshot exports the infographic rather than an 8,000px table dump. Rendered to `knowledge_base/writing-ledger-{light,dark}.png` at 2× scale.
+
+---
+
 ## [v12.1.0] — 2026-07-26
 
 ### Added
