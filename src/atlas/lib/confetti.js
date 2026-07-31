@@ -10,6 +10,13 @@ const launchConfetti = (host, colors) => {
   canvas.height = host.clientHeight;
   host.appendChild(canvas);
   const ctx = canvas.getContext("2d");
+  // getContext returns null where 2D canvas isn't available — jsdom under test,
+  // or a browser that has run out of contexts. There is no cancelAnimationFrame
+  // here, so an unguarded null would throw on every frame of the whole burst.
+  if (!ctx) {
+    canvas.remove();
+    return;
+  }
 
   const particles = Array.from({ length: 130 }, () => ({
     x: canvas.width / 2 + (Math.random() - 0.5) * canvas.width * 0.3,
@@ -26,6 +33,9 @@ const launchConfetti = (host, colors) => {
   const DURATION = 2400;
 
   const tick = (now) => {
+    // The host can unmount mid-burst (route change, toast dismissed). Nothing
+    // cancels this loop, so stop it once the canvas is off the document.
+    if (!canvas.isConnected) return;
     const elapsed = now - start;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const fade = Math.max(0, 1 - elapsed / DURATION);

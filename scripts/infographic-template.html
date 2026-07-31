@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Writing Ledger — a six-year word count</title>
+<!-- Served straight from /public, so functions/_middleware.js skips it (it bails
+     on any path containing a "."). These tags are therefore authored here, not
+     injected at the edge. -->
+<meta name="description" content="Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform." />
+<link rel="canonical" href="https://daredavil.pages.dev/writing-ledger.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Sanket Tambare" />
+<meta property="og:title" content="The Writing Ledger — a six-year word count" />
+<meta property="og:description" content="Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform." />
+<meta property="og:url" content="https://daredavil.pages.dev/writing-ledger.html" />
+<meta property="og:image" content="https://daredavil.pages.dev/images/logo.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Writing Ledger — a six-year word count" />
+<meta name="twitter:description" content="Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform." />
+<meta name="twitter:image" content="https://daredavil.pages.dev/images/logo.png" />
+<style>
+  :root {
+    color-scheme: light;
+    --plane:      #f4f3ef;
+    --surface:    #fcfcfb;
+    --ink:        #0b0b0b;
+    --ink-2:      #52514e;
+    --muted:      #898781;
+    --grid:       #e1e0d9;
+    --axis:       #c3c2b7;
+    --rule:       rgba(11,11,11,0.10);
+    --s1:         #2a78d6;
+    --s2:         #eb6834;
+    --s1-wash:    rgba(42,120,214,0.10);
+    --shadow:     0 1px 2px rgba(11,11,11,.04), 0 8px 24px rgba(11,11,11,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --plane:   #0d0d0d;
+      --surface: #1a1a19;
+      --ink:     #ffffff;
+      --ink-2:   #c3c2b7;
+      --muted:   #898781;
+      --grid:    #2c2c2a;
+      --axis:    #383835;
+      --rule:    rgba(255,255,255,0.10);
+      --s1:      #3987e5;
+      --s2:      #d95926;
+      --s1-wash: rgba(57,135,229,0.14);
+      --shadow:  none;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane:   #0d0d0d;
+    --surface: #1a1a19;
+    --ink:     #ffffff;
+    --ink-2:   #c3c2b7;
+    --muted:   #898781;
+    --grid:    #2c2c2a;
+    --axis:    #383835;
+    --rule:    rgba(255,255,255,0.10);
+    --s1:      #3987e5;
+    --s2:      #d95926;
+    --s1-wash: rgba(57,135,229,0.14);
+    --shadow:  none;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .sheet { max-width: 1180px; margin: 0 auto; padding: 56px 32px 72px; }
+
+  /* ---------- masthead ---------- */
+  .eyebrow {
+    font-size: 12px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px;
+  }
+  h1 {
+    font-size: clamp(34px, 5.2vw, 60px); line-height: 1.04; letter-spacing: -.03em;
+    font-weight: 680; margin: 0 0 16px; max-width: 15ch;
+  }
+  .standfirst {
+    font-size: 17px; color: var(--ink-2); max-width: 62ch; margin: 0 0 40px;
+  }
+  .masthead { border-bottom: 1px solid var(--rule); padding-bottom: 40px; margin-bottom: 40px; }
+
+  /* ---------- hero figure ---------- */
+  .hero {
+    display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr);
+    gap: 44px; align-items: end;
+  }
+  .hero-fig {
+    font-size: clamp(60px, 11vw, 122px); line-height: .88; letter-spacing: -.045em;
+    font-weight: 700; margin: 0;
+  }
+  .hero-fig span { color: var(--s1); }
+  .hero-cap { font-size: 15px; color: var(--ink-2); margin: 18px 0 0; max-width: 46ch; }
+
+  /* ---------- stat tiles ---------- */
+  .tiles {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 12px; overflow: hidden; margin: 44px 0 0;
+  }
+  .tile { background: var(--surface); padding: 20px 18px; }
+  .tile dt { font-size: 12px; color: var(--muted); margin: 0 0 8px; font-weight: 500; }
+  .tile dd {
+    margin: 0; font-size: 27px; font-weight: 670; letter-spacing: -.025em; line-height: 1.1;
+  }
+  .tile .sub { font-size: 12px; color: var(--ink-2); font-weight: 450; letter-spacing: 0; display: block; margin-top: 5px; }
+
+  /* ---------- layout ---------- */
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 22px; margin-top: 22px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+    padding: 24px 26px 20px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; }
+  .span-7  { grid-column: span 7; }  .span-6 { grid-column: span 6; }
+  .span-5  { grid-column: span 5; }  .span-4 { grid-column: span 4; }
+  @media (max-width: 900px) { .grid > * { grid-column: span 12 !important; } .hero { grid-template-columns: 1fr; } }
+
+  h2 { font-size: 17px; font-weight: 650; letter-spacing: -.012em; margin: 0 0 5px; }
+  .note { font-size: 13px; color: var(--ink-2); margin: 0 0 20px; max-width: 68ch; }
+  .section-head { margin: 46px 0 0; padding-top: 34px; border-top: 1px solid var(--rule); }
+  .section-head h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+
+  /* ---------- chart chrome ---------- */
+  .chart { position: relative; width: 100%; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .tick { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .cat  { font-size: 11px; fill: var(--muted); }
+  .dlabel { font-size: 12px; font-weight: 640; fill: var(--ink); }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .mark { transition: opacity .12s ease; }
+  .chart:hover .mark { opacity: .45; }
+  .chart .mark:hover { opacity: 1; }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 16px; padding: 0; list-style: none; }
+  .legend li { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-2); }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transform: translate(-50%, -100%);
+    background: var(--ink); color: var(--surface); font-size: 12px; line-height: 1.45;
+    padding: 7px 10px; border-radius: 7px; white-space: nowrap; z-index: 5;
+    transition: opacity .1s ease; font-variant-numeric: tabular-nums;
+  }
+  .tip b { font-weight: 640; }
+
+  /* ---------- ranked list ---------- */
+  .rank { list-style: none; margin: 0; padding: 0; }
+  .rank li { display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: baseline;
+             padding: 9px 0; border-bottom: 1px solid var(--rule); }
+  .rank li:last-child { border-bottom: 0; }
+  .rank.two-col { columns: 2; column-gap: 44px; }
+  .rank.two-col li { break-inside: avoid; }
+  @media (max-width: 720px) { .rank.two-col { columns: 1; } }
+  .rank .n { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rank .t { font-size: 13.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank .t small { display: block; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+  .rank .v { font-size: 13.5px; font-weight: 640; font-variant-numeric: tabular-nums; }
+
+  /* ---------- tag cloud ---------- */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    display: inline-flex; align-items: baseline; gap: 7px; padding: 6px 11px;
+    border: 1px solid var(--rule); border-radius: 999px; font-size: 13px; color: var(--ink-2);
+  }
+  .tag b { color: var(--ink); font-weight: 640; font-variant-numeric: tabular-nums; }
+
+  /* ---------- table view (a11y) ---------- */
+  details { margin-top: 16px; }
+  summary { font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .scroll { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; font-size: 12.5px; width: 100%; min-width: 380px; }
+  th, td { text-align: right; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--muted); font-weight: 550; }
+  td { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+  /* ---------- delta tokens ---------- */
+  :root { --up: #006300; --down: #b3332f; }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) { --up: #0ca30c; --down: #e66767; }
+  }
+  :root[data-theme="dark"] { --up: #0ca30c; --down: #e66767; }
+
+  /* ---------- topbar + theme toggle ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+  .topbar .eyebrow { margin: 0; }
+  .theme-toggle {
+    display: inline-flex; align-items: center; gap: 8px; flex: none;
+    font: inherit; font-size: 12.5px; font-weight: 550; color: var(--ink-2);
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 999px;
+    padding: 7px 14px 7px 11px; cursor: pointer; line-height: 1;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .theme-toggle:hover { border-color: var(--axis); color: var(--ink); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+  .theme-toggle svg { width: 15px; height: 15px; display: block; }
+  .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .theme-toggle .moon { display: block; }
+    :root:where(:not([data-theme="light"])) .theme-toggle .sun { display: none; }
+  }
+
+  /* ---------- to-date panel ---------- */
+  .periods { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; margin-top: 22px; }
+  .period { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 22px 24px; box-shadow: var(--shadow); }
+  .period .k { font-size: 12px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .period .asof { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+  .period .v { font-size: 42px; font-weight: 690; letter-spacing: -.03em; line-height: 1; margin: 0; }
+  .period .v em { font-size: 15px; font-style: normal; font-weight: 500; color: var(--ink-2); letter-spacing: 0; margin-left: 8px; }
+  .period .meta { font-size: 13px; color: var(--ink-2); margin: 12px 0 0; }
+  .delta { display: inline-flex; align-items: baseline; gap: 5px; font-size: 13px; font-weight: 620; }
+  .delta.up { color: var(--up); } .delta.down { color: var(--down); }
+  .delta .arrow { font-size: 11px; }
+
+  /* ---------- filterable ledger ---------- */
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .filters input, .filters select {
+    font: inherit; font-size: 13px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 8px 11px; min-width: 0;
+  }
+  .filters input { flex: 1 1 240px; }
+  .filters input::placeholder { color: var(--muted); }
+  .filters input:focus, .filters select:focus { outline: 2px solid var(--s1); outline-offset: 1px; border-color: transparent; }
+  .filters .ghost {
+    font: inherit; font-size: 13px; color: var(--ink-2); background: none;
+    border: 1px solid var(--rule); border-radius: 8px; padding: 8px 13px; cursor: pointer;
+  }
+  .filters .ghost:hover { border-color: var(--axis); color: var(--ink); }
+  .fcount { font-size: 12.5px; color: var(--muted); margin: 0 0 10px; font-variant-numeric: tabular-nums; }
+
+  table.ledger { min-width: 720px; }
+  table.ledger th { cursor: pointer; user-select: none; white-space: nowrap; }
+  table.ledger th:hover { color: var(--ink); }
+  table.ledger th .caret { opacity: 0; font-size: 9px; margin-left: 4px; }
+  table.ledger th[aria-sort] .caret { opacity: 1; }
+  table.ledger td { color: var(--ink-2); vertical-align: top; padding: 10px 12px 10px 0; }
+  table.ledger td.title { white-space: normal; min-width: 300px; }
+  table.ledger a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); font-weight: 550; }
+  table.ledger a:hover { border-bottom-color: var(--s1); color: var(--s1); }
+  table.ledger td small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 3px; }
+  table.ledger .w { font-weight: 620; color: var(--ink); }
+  .pill { display: inline-block; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-2); white-space: nowrap; }
+  .empty { padding: 28px 0; text-align: center; color: var(--muted); font-size: 13.5px; }
+
+  /* ---------- collapsible ledger ---------- */
+  .ledger-details { margin-top: 0; }
+  .ledger-details > summary {
+    list-style: none; cursor: pointer; font-size: inherit; color: inherit;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+  }
+  .ledger-details > summary::-webkit-details-marker { display: none; }
+  .ledger-details > summary h2 { margin-bottom: 5px; }
+  .ledger-details > summary .note { margin-bottom: 0; }
+  .ledger-details > summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 4px; border-radius: 8px; }
+  .chev {
+    flex: none; display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
+    font-size: 12.5px; font-weight: 550; color: var(--ink-2);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 8px 15px; line-height: 1;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .ledger-details > summary:hover .chev { border-color: var(--axis); color: var(--ink); }
+  .chev .arrow { display: inline-block; font-size: 10px; transition: transform .18s ease; }
+  .ledger-details[open] .chev .arrow { transform: rotate(180deg); }
+  .ledger-panel { padding-top: 22px; }
+
+  /* Poster capture (?capture=light|dark): drop the interactive-only chrome so
+     the exported PNG is the infographic, not an 8,000px table dump. */
+  body.capture #ledgerBlock, body.capture .theme-toggle, body.capture details { display: none; }
+
+  footer { margin-top: 46px; padding-top: 26px; border-top: 1px solid var(--rule);
+           font-size: 12.5px; color: var(--muted); }
+  footer p { margin: 0 0 8px; max-width: 90ch; }
+  footer b { color: var(--ink-2); font-weight: 600; }
+
+  @media print { body { background: #fff; } .card { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+  <header class="masthead">
+    <div class="topbar">
+      <p class="eyebrow" id="eyebrow"></p>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"/></svg>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+    <h1>The Writing Ledger</h1>
+    <p class="standfirst" id="standfirst"></p>
+
+    <div class="hero">
+      <div>
+        <p class="hero-fig"><span id="heroWords"></span></p>
+        <p class="hero-cap" id="heroCap"></p>
+      </div>
+      <div class="chart" id="sparkWrap">
+        <svg id="spark" viewBox="0 0 460 150" role="img" aria-label="Cumulative words written over time"></svg>
+      </div>
+    </div>
+
+    <dl class="tiles" id="tiles"></dl>
+    <div class="periods" id="periods"></div>
+  </header>
+
+  <div class="section-head"><h2>The long arc</h2></div>
+  <div class="grid">
+    <section class="card span-7">
+      <h2>Words per year</h2>
+      <p class="note" id="yearNote"></p>
+      <div class="chart" id="yearWrap"><svg id="yearChart" role="img" aria-label="Words written per year"></svg></div>
+      <details><summary>Table view</summary><div class="scroll" id="yearTable"></div></details>
+    </section>
+
+    <section class="card span-5">
+      <h2>Where it goes</h2>
+      <p class="note">Two platforms, two counting methods — see the note at the foot.</p>
+      <ul class="legend" id="platLegend"></ul>
+      <div class="chart" id="platWrap"><svg id="platChart" role="img" aria-label="Words by publishing platform"></svg></div>
+      <details><summary>Table view</summary><div class="scroll" id="platTable"></div></details>
+    </section>
+
+    <section class="card span-12">
+      <h2>Every month on record</h2>
+      <p class="note" id="monthNote"></p>
+      <div class="chart" id="monthWrap"><svg id="monthChart" role="img" aria-label="Words written each month"></svg></div>
+      <details><summary>Table view</summary><div class="scroll" id="monthTable"></div></details>
+    </section>
+  </div>
+
+  <div class="section-head"><h2>The shape of a post</h2></div>
+  <div class="grid">
+    <section class="card span-6">
+      <h2>How long is a post</h2>
+      <p class="note" id="lenNote"></p>
+      <div class="chart" id="lenWrap"><svg id="lenChart" role="img" aria-label="Distribution of post length"></svg></div>
+    </section>
+
+    <section class="card span-6">
+      <h2>Which day gets written</h2>
+      <p class="note" id="dowNote"></p>
+      <div class="chart" id="dowWrap"><svg id="dowChart" role="img" aria-label="Posts by day of week"></svg></div>
+    </section>
+
+    <section class="card span-12">
+      <h2>The longest ten</h2>
+      <p class="note">Single posts, ranked by word count.</p>
+      <ol class="rank two-col" id="topList"></ol>
+    </section>
+
+    <section class="card span-12">
+      <h2>Recurring themes</h2>
+      <p class="note">Tags carried by the posts, sized by how many times each appears.</p>
+      <div class="tags" id="tagCloud"></div>
+    </section>
+  </div>
+
+  <div id="ledgerBlock">
+  <div class="section-head"><h2>Every post on record</h2></div>
+  <div class="grid">
+    <section class="card span-12">
+      <details class="ledger-details" id="ledgerDetails">
+      <summary>
+        <span>
+          <h2>The full ledger</h2>
+          <p class="note">Every post counted above, searchable and sortable. Titles link out to the published piece.</p>
+        </span>
+        <span class="chev"><span id="chevLabel">Show all posts</span><span class="arrow" aria-hidden="true">▾</span></span>
+      </summary>
+      <div class="ledger-panel">
+      <div class="filters">
+        <input id="fSearch" type="search" placeholder="Search titles, tags and sections…" aria-label="Search posts" />
+        <select id="fPlatform" aria-label="Filter by platform"></select>
+        <select id="fYear" aria-label="Filter by year"></select>
+        <select id="fTracked" aria-label="Filter by tracking status">
+          <option value="">All posts</option>
+          <option value="yes">On the site</option>
+          <option value="no">Platform only</option>
+        </select>
+        <button class="ghost" id="fReset" type="button">Reset</button>
+      </div>
+      <p class="fcount" id="fCount"></p>
+      <div class="scroll">
+        <table class="ledger" id="ledger">
+          <thead>
+            <tr>
+              <th data-sort="title" scope="col">Post<span class="caret">▼</span></th>
+              <th data-sort="date" scope="col">Date<span class="caret">▼</span></th>
+              <th data-sort="platform" scope="col">Platform<span class="caret">▼</span></th>
+              <th data-sort="tracked" scope="col">On site<span class="caret">▼</span></th>
+              <th data-sort="words" scope="col">Words<span class="caret">▼</span></th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="fEmpty" hidden>No posts match those filters.</p>
+      </div>
+      </details>
+    </section>
+  </div>
+  </div>
+
+  <footer>
+    <p><b>Sources.</b> <span id="srcNote"></span></p>
+    <p><b>Two counting methods.</b> Substack publishes its own <code>wordcount</code> per post and that number is taken as-is. WordPress.com exposes no equivalent field, so those counts are derived by stripping HTML from the post body and splitting on whitespace. The two are close but not identical measurements, and each post records which produced its figure.</p>
+    <p><b>Coverage.</b> <span id="covNote"></span></p>
+    <p id="stamp"></p>
+  </footer>
+</main>
+
+<script id="wordcount-data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("wordcount-data").textContent);
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return n.toLocaleString("en-US"); };
+  var css = function (v) { return getComputedStyle(document.body).getPropertyValue(v).trim(); };
+
+  // ---------- shared chart helpers ----------
+  var PAD = 4; // rounded data-end radius
+  var BAR_MAX = 24;
+
+  function colPath(x, y, w, h) {           // rounded cap, square baseline
+    var r = Math.min(PAD, w / 2, Math.max(h, 0));
+    if (h <= 0.5) return "";
+    return "M" + x + "," + (y + h) + " L" + x + "," + (y + r) +
+           " Q" + x + "," + y + " " + (x + r) + "," + y +
+           " L" + (x + w - r) + "," + y +
+           " Q" + (x + w) + "," + y + " " + (x + w) + "," + (y + r) +
+           " L" + (x + w) + "," + (y + h) + " Z";
+  }
+  function rowPath(x, y, w, h) {           // rounded right end, square at axis
+    var r = Math.min(PAD, h / 2, Math.max(w, 0));
+    if (w <= 0.5) return "";
+    return "M" + x + "," + y + " L" + (x + w - r) + "," + y +
+           " Q" + (x + w) + "," + y + " " + (x + w) + "," + (y + r) +
+           " L" + (x + w) + "," + (y + h - r) +
+           " Q" + (x + w) + "," + (y + h) + " " + (x + w - r) + "," + (y + h) +
+           " L" + x + "," + (y + h) + " Z";
+  }
+  function niceTicks(max, count) {
+    var raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var step = [1, 2, 2.5, 5, 10].map(function (m) { return m * mag; })
+      .filter(function (s) { return s >= raw; })[0] || 10 * mag;
+    // The top tick must sit at or ABOVE the max, or the tallest bar overflows
+    // the plot area. Index the loop rather than accumulating a float step.
+    var n = Math.ceil(max / step);
+    var out = [];
+    for (var i = 0; i <= n; i++) out.push(i * step);
+    return out;
+  }
+  function el(tag, attrs, text) {
+    var n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  // one tooltip per chart container
+  function attachTip(wrap) {
+    var tip = document.createElement("div");
+    tip.className = "tip";
+    wrap.appendChild(tip);
+    wrap.addEventListener("mousemove", function (e) {
+      var t = e.target.closest("[data-tip]");
+      if (!t) { tip.style.opacity = 0; return; }
+      var r = wrap.getBoundingClientRect();
+      tip.innerHTML = t.getAttribute("data-tip");
+      tip.style.left = (e.clientX - r.left) + "px";
+      tip.style.top = (e.clientY - r.top - 10) + "px";
+      tip.style.opacity = 1;
+    });
+    wrap.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+  }
+
+  /* Vertical column chart. rows: [{label, value, tip, emphasise}] */
+  function columns(svg, wrap, rows, opts) {
+    opts = opts || {};
+    var W = opts.width || 1100, H = opts.height || 260;
+    var m = { t: 18, r: 8, b: 34, l: opts.left != null ? opts.left : 52 };
+    var iw = W - m.l - m.r, ih = H - m.t - m.b;
+    var max = Math.max.apply(null, rows.map(function (d) { return d.value; })) || 1;
+    var ticks = niceTicks(max, 4);
+    var top = ticks[ticks.length - 1];
+    var y = function (v) { return m.t + ih - (v / top) * ih; };
+    var band = iw / rows.length;
+    var bw = Math.min(BAR_MAX, Math.max(3, band - 2)); // 2px surface gap between neighbours
+
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.innerHTML = "";
+
+    ticks.forEach(function (t) {
+      svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: t === 0 ? "baseline" : "gridline" }));
+      svg.appendChild(el("text", { x: m.l - 10, y: y(t) + 4, class: "tick", "text-anchor": "end" }, opts.tickFmt ? opts.tickFmt(t) : fmt(t)));
+    });
+
+    rows.forEach(function (d, i) {
+      var x = m.l + i * band + (band - bw) / 2;
+      var h = (d.value / top) * ih;
+      var p = el("path", {
+        d: colPath(x, y(d.value), bw, h),
+        fill: d.emphasise ? "var(--s2)" : "var(--s1)",
+        class: "mark", "data-tip": d.tip
+      });
+      svg.appendChild(p);
+      if (d.label && (!opts.every || i % opts.every === 0 || i === rows.length - 1)) {
+        svg.appendChild(el("text", { x: x + bw / 2, y: H - 12, class: "cat", "text-anchor": "middle" }, d.label));
+      }
+      if (d.emphasise) {
+        svg.appendChild(el("text", { x: x + bw / 2, y: y(d.value) - 9, class: "dlabel", "text-anchor": "middle" }, fmt(d.value)));
+      }
+    });
+    attachTip(wrap);
+  }
+
+  /* Horizontal bar chart. rows: [{label, value, tip, color}] */
+  function bars(svg, wrap, rows, opts) {
+    opts = opts || {};
+    var W = opts.width || 460, rowH = opts.rowH || 40, m = { t: 6, r: 62, b: 6, l: opts.left || 96 };
+    var H = m.t + m.b + rows.length * rowH;
+    var iw = W - m.l - m.r;
+    var max = Math.max.apply(null, rows.map(function (d) { return d.value; })) || 1;
+    var bh = Math.min(BAR_MAX, rowH - 14);
+
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.innerHTML = "";
+    svg.appendChild(el("line", { x1: m.l, x2: m.l, y1: m.t, y2: H - m.b, class: "baseline" }));
+
+    rows.forEach(function (d, i) {
+      var yy = m.t + i * rowH + (rowH - bh) / 2;
+      var w = (d.value / max) * iw;
+      svg.appendChild(el("path", {
+        d: rowPath(m.l, yy, w, bh), fill: d.color || "var(--s1)",
+        class: "mark", "data-tip": d.tip
+      }));
+      svg.appendChild(el("text", { x: m.l - 10, y: yy + bh / 2 + 4, class: "cat", "text-anchor": "end" }, d.label));
+      svg.appendChild(el("text", { x: m.l + w + 9, y: yy + bh / 2 + 4, class: "dlabel" }, fmt(d.value)));
+    });
+    attachTip(wrap);
+  }
+
+  function table(host, cols, rows) {
+    var h = "<table><thead><tr>" + cols.map(function (c) { return "<th>" + c + "</th>"; }).join("") + "</tr></thead><tbody>";
+    h += rows.map(function (r) {
+      return "<tr>" + r.map(function (c) { return "<td>" + c + "</td>"; }).join("") + "</tr>";
+    }).join("");
+    host.innerHTML = h + "</tbody></table>";
+  }
+
+  // ---------- masthead ----------
+  var T = D.totals;
+  var firstYear = T.firstPost.slice(0, 4), lastYear = T.latestPost.slice(0, 4);
+  $("eyebrow").textContent = "Writing archive · " + firstYear + "–" + lastYear;
+  $("standfirst").textContent =
+    "Every blog post published across Substack and WordPress since " + firstYear +
+    ", counted word by word and rolled up by month, year and platform. " +
+    D.byMonth.length + " active months, two platforms, one running total.";
+  $("heroWords").textContent = fmt(T.words);
+  $("heroCap").textContent =
+    "words written across " + fmt(T.posts) + " posts — an average of " + fmt(T.averageWords) +
+    " per post, sustained over " + (Number(lastYear) - Number(firstYear) + 1) + " calendar years.";
+
+  var tiles = [
+    ["Posts published", fmt(T.posts), D.byPlatform.map(function (p) { return p.posts + " " + p.platform; }).join(" · ")],
+    ["Average length", fmt(T.averageWords), "words per post"],
+    ["Longest post", fmt(T.longestPost.words), T.longestPost.title],
+    ["Busiest month", fmt(T.busiestMonth.words), T.busiestMonth.label + " · " + T.busiestMonth.posts + " posts"],
+    ["Busiest year", fmt(T.busiestYear.words), T.busiestYear.year + " · " + T.busiestYear.posts + " posts"],
+    ["Active months", fmt(T.activeMonths), "with at least one post"]
+  ];
+  $("tiles").innerHTML = tiles.map(function (t) {
+    return "<div class='tile'><dt>" + t[0] + "</dt><dd>" + t[1] + "<span class='sub'>" + t[2] + "</span></dd></div>";
+  }).join("");
+
+  // ---------- cumulative sparkline (area + line + end dot) ----------
+  (function () {
+    var svg = $("spark"), rows = D.cumulative;
+    var W = 460, H = 150, m = { t: 28, r: 14, b: 22, l: 8 };
+    var iw = W - m.l - m.r, ih = H - m.t - m.b;
+    var max = rows[rows.length - 1].words;
+    var X = function (i) { return m.l + (i / (rows.length - 1)) * iw; };
+    var Y = function (v) { return m.t + ih - (v / max) * ih; };
+    var line = rows.map(function (d, i) { return (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(d.words).toFixed(1); }).join(" ");
+
+    svg.innerHTML = "";
+    svg.appendChild(el("path", { d: line + " L" + X(rows.length - 1) + "," + (m.t + ih) + " L" + X(0) + "," + (m.t + ih) + " Z", fill: "var(--s1-wash)" }));
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: m.t + ih, y2: m.t + ih, class: "baseline" }));
+    svg.appendChild(el("path", { d: line, fill: "none", stroke: "var(--s1)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    // end marker with 2px surface ring
+    svg.appendChild(el("circle", { cx: X(rows.length - 1), cy: Y(max), r: 5, fill: "var(--s1)", stroke: "var(--surface)", "stroke-width": 2 }));
+    svg.appendChild(el("text", { x: m.l, y: H - 6, class: "cat" }, rows[0].label));
+    svg.appendChild(el("text", { x: W - m.r, y: H - 6, class: "cat", "text-anchor": "end" }, rows[rows.length - 1].label));
+    svg.appendChild(el("text", { x: W - m.r, y: Y(max) - 12, class: "dlabel", "text-anchor": "end" }, "cumulative"));
+    // invisible hit targets for the crosshair
+    rows.forEach(function (d, i) {
+      svg.appendChild(el("rect", {
+        x: X(i) - iw / rows.length / 2, y: m.t, width: iw / rows.length, height: ih,
+        fill: "transparent", "data-tip": "<b>" + d.label + "</b><br>" + fmt(d.words) + " words · " + d.posts + " posts"
+      }));
+    });
+    attachTip($("sparkWrap"));
+  })();
+
+  // ---------- words per year ----------
+  (function () {
+    var peak = T.busiestYear.year;
+    $("yearNote").textContent =
+      "2026 alone accounts for " + Math.round(T.busiestYear.words / T.words * 100) +
+      "% of everything written — more than the previous " +
+      (D.byYear.length - 1) + " years combined.";
+    columns($("yearChart"), $("yearWrap"), D.byYear.map(function (d) {
+      return {
+        label: d.year, value: d.words, emphasise: d.year === peak,
+        tip: "<b>" + d.year + "</b><br>" + fmt(d.words) + " words · " + d.posts + " posts"
+      };
+    }), { width: 620, height: 250, tickFmt: function (v) { return v >= 1000 ? (v / 1000) + "k" : v; } });
+
+    table($("yearTable"), ["Year", "Posts", "Words"],
+      D.byYear.map(function (d) { return [d.year, fmt(d.posts), fmt(d.words)]; }));
+  })();
+
+  // ---------- platform ----------
+  (function () {
+    $("platLegend").innerHTML = D.byPlatform.map(function (p, i) {
+      return "<li><span class='swatch' style='background:" + (i === 0 ? "var(--s1)" : "var(--s2)") + "'></span>" +
+        p.platform + "</li>";
+    }).join("");
+    bars($("platChart"), $("platWrap"), D.byPlatform.map(function (p, i) {
+      return {
+        label: p.platform, value: p.words, color: i === 0 ? "var(--s1)" : "var(--s2)",
+        tip: "<b>" + p.platform + "</b><br>" + fmt(p.words) + " words · " + p.posts + " posts<br>" + p.method
+      };
+    }), { width: 460, rowH: 110, left: 84 });
+
+    table($("platTable"), ["Platform", "Posts", "Words", "Method"],
+      D.byPlatform.map(function (p) { return [p.platform, fmt(p.posts), fmt(p.words), p.method]; }));
+  })();
+
+  // ---------- every month ----------
+  (function () {
+    var peak = T.busiestMonth.month;
+    $("monthNote").textContent =
+      "One column per calendar month with at least one post, from " + D.byMonth[0].label +
+      " to " + D.byMonth[D.byMonth.length - 1].label + ". The peak is " + T.busiestMonth.label + ".";
+    columns($("monthChart"), $("monthWrap"), D.byMonth.map(function (d) {
+      return {
+        label: d.month.slice(5) === "01" ? d.month.slice(0, 4) : "",
+        value: d.words, emphasise: d.month === peak,
+        tip: "<b>" + d.label + "</b><br>" + fmt(d.words) + " words · " + d.posts + " posts"
+      };
+    }), { width: 1100, height: 280, tickFmt: function (v) { return v >= 1000 ? (v / 1000) + "k" : v; } });
+
+    table($("monthTable"), ["Month", "Posts", "Words"],
+      D.byMonth.map(function (d) { return [d.label, fmt(d.posts), fmt(d.words)]; }));
+  })();
+
+  // ---------- length distribution ----------
+  (function () {
+    var top = D.byLength.slice().sort(function (a, b) { return b.posts - a.posts; })[0];
+    $("lenNote").textContent =
+      "Most posts land in the " + top.label + " word range — a readable ten minutes rather than an essay.";
+    columns($("lenChart"), $("lenWrap"), D.byLength.map(function (d) {
+      return { label: d.label, value: d.posts, emphasise: d.label === top.label,
+               tip: "<b>" + d.label + " words</b><br>" + d.posts + " posts" };
+    }), { width: 460, height: 230, left: 34 });
+  })();
+
+  // ---------- day of week ----------
+  (function () {
+    var top = D.byDayOfWeek.slice().sort(function (a, b) { return b.posts - a.posts; })[0];
+    $("dowNote").textContent = top.day + " is the most published day, with " + top.posts + " posts.";
+    columns($("dowChart"), $("dowWrap"), D.byDayOfWeek.map(function (d) {
+      return { label: d.day.slice(0, 3), value: d.posts, emphasise: d.day === top.day,
+               tip: "<b>" + d.day + "</b><br>" + d.posts + " posts · " + fmt(d.words) + " words" };
+    }), { width: 460, height: 230, left: 34 });
+  })();
+
+  // ---------- longest ten ----------
+  $("topList").innerHTML = D.topPosts.slice(0, 10).map(function (p, i) {
+    return "<li><span class='n'>" + String(i + 1).padStart(2, "0") + "</span>" +
+      "<span class='t'>" + p.title + "<small>" + p.date + " · " + p.platform + "</small></span>" +
+      "<span class='v'>" + fmt(p.words) + "</span></li>";
+  }).join("");
+
+  // ---------- tags ----------
+  $("tagCloud").innerHTML = D.byTag.slice(0, 26).map(function (t) {
+    return "<span class='tag'>" + t.tag.replace(/[-_]/g, " ") + " <b>" + t.posts + "</b></span>";
+  }).join("");
+
+  // ---------- poster capture mode ----------
+  var capture = (/[?&#]capture(?:=(light|dark))?/.exec(location.href) || [])[1];
+  if (/[?&#]capture/.test(location.href)) {
+    document.body.classList.add("capture");
+    if (capture) document.documentElement.setAttribute("data-theme", capture);
+  }
+
+  // ---------- theme toggle ----------
+  (function () {
+    var root = document.documentElement, btn = $("themeToggle"), label = $("themeLabel");
+    var media = window.matchMedia("(prefers-color-scheme: dark)");
+    var stored = null;
+    try { stored = localStorage.getItem("ledger-theme"); } catch (e) { /* file:// or blocked */ }
+    // A ?capture= theme is explicit and outranks whatever the reader last chose.
+    if (!capture && (stored === "dark" || stored === "light")) root.setAttribute("data-theme", stored);
+
+    function isDark() {
+      var attr = root.getAttribute("data-theme");
+      return attr ? attr === "dark" : media.matches;
+    }
+    function sync() {
+      var dark = isDark();
+      // The button offers the theme you'd switch TO.
+      label.textContent = dark ? "Light" : "Dark";
+      btn.setAttribute("aria-pressed", String(dark));
+      btn.setAttribute("aria-label", "Switch to " + (dark ? "light" : "dark") + " theme");
+    }
+    btn.addEventListener("click", function () {
+      var next = isDark() ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("ledger-theme", next); } catch (e) { /* non-fatal */ }
+      sync();
+    });
+    // Follow the OS while the reader hasn't expressed a preference.
+    media.addEventListener("change", function () { if (!root.getAttribute("data-theme")) sync(); });
+    sync();
+  })();
+
+  // ---------- month-to-date / year-to-date ----------
+  (function () {
+    var P = D.currentPeriod;
+    if (!P) return;
+    function delta(pct, vsLabel) {
+      if (pct == null) return "<span class='meta'>no prior " + vsLabel + " to compare</span>";
+      var up = pct >= 0;
+      return "<span class='delta " + (up ? "up" : "down") + "'>" +
+        "<span class='arrow' aria-hidden='true'>" + (up ? "▲" : "▼") + "</span>" +
+        (up ? "+" : "") + pct + "%</span> <span style='color:var(--ink-2)'>vs " + vsLabel + "</span>";
+    }
+    var m = P.monthToDate, y = P.yearToDate;
+    $("periods").innerHTML =
+      "<div class='period'>" +
+        "<p class='k'>Month to date</p>" +
+        "<p class='asof'>" + m.label + " · through day " + m.daysElapsed + "</p>" +
+        "<p class='v'>" + fmt(m.words) + "<em>words</em></p>" +
+        "<p class='meta'>" + m.posts + " posts · " + fmt(m.wordsPerDay) + " words/day<br>" +
+          delta(m.changeVsPreviousMonth, "last month") + "</p>" +
+      "</div>" +
+      "<div class='period'>" +
+        "<p class='k'>Year to date</p>" +
+        "<p class='asof'>" + y.year + " · through " + P.asOf + " (day " + y.daysElapsed + ")</p>" +
+        "<p class='v'>" + fmt(y.words) + "<em>words</em></p>" +
+        "<p class='meta'>" + y.posts + " posts · " + fmt(y.wordsPerDay) + " words/day<br>" +
+          delta(y.changeVsPriorYear, y.priorYearSamePeriod.year + " same period") +
+          " <span style='color:var(--muted)'>(" + fmt(y.priorYearSamePeriod.words) + " words by then)</span></p>" +
+      "</div>";
+  })();
+
+  // ---------- filterable ledger ----------
+  (function () {
+    var rows = D.posts.slice();
+    var body = $("ledgerBody"), countEl = $("fCount"), emptyEl = $("fEmpty");
+    var search = $("fSearch"), fPlat = $("fPlatform"), fYear = $("fYear"), fTracked = $("fTracked");
+    var details = $("ledgerDetails");
+    var sort = { key: "date", dir: -1 };
+    details.addEventListener("toggle", function () { render(); });
+
+    function opts(sel, values, allLabel) {
+      sel.innerHTML = "<option value=''>" + allLabel + "</option>" +
+        values.map(function (v) { return "<option value='" + v + "'>" + v + "</option>"; }).join("");
+    }
+    opts(fPlat, D.byPlatform.map(function (p) { return p.platform; }), "All platforms");
+    opts(fYear, D.byYear.map(function (y) { return y.year; }).reverse(), "All years");
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    function matches(p) {
+      var q = search.value.trim().toLowerCase();
+      if (q) {
+        var hay = (p.title + " " + (p.tags || []).join(" ") + " " + (p.section || "")).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      if (fPlat.value && p.platform !== fPlat.value) return false;
+      if (fYear.value && (!p.date || p.date.slice(0, 4) !== fYear.value)) return false;
+      if (fTracked.value === "yes" && !p.trackedInBlogsTable) return false;
+      if (fTracked.value === "no" && p.trackedInBlogsTable) return false;
+      return true;
+    }
+
+    function render() {
+      var out = rows.filter(matches);
+      out.sort(function (a, b) {
+        var av, bv;
+        if (sort.key === "words") { av = a.words || 0; bv = b.words || 0; }
+        else if (sort.key === "title") { av = a.title.toLowerCase(); bv = b.title.toLowerCase(); }
+        else if (sort.key === "platform") { av = a.platform; bv = b.platform; }
+        else if (sort.key === "tracked") { av = a.trackedInBlogsTable ? 1 : 0; bv = b.trackedInBlogsTable ? 1 : 0; }
+        else { av = a.publishedAt || ""; bv = b.publishedAt || ""; }
+        return av < bv ? -sort.dir : av > bv ? sort.dir : 0;
+      });
+
+      body.innerHTML = out.map(function (p) {
+        return "<tr>" +
+          "<td class='title'><a href='" + esc(p.url) + "' target='_blank' rel='noopener noreferrer'>" +
+            esc(p.title) + "</a>" +
+            (p.section ? "<small>" + esc(p.section) + "</small>" : "") + "</td>" +
+          "<td>" + (p.date || "—") + "</td>" +
+          "<td><span class='pill'>" + esc(p.platform) + "</span></td>" +
+          "<td>" + (p.trackedInBlogsTable ? "Yes" : "—") + "</td>" +
+          "<td class='w'>" + fmt(p.words || 0) + "</td>" +
+        "</tr>";
+      }).join("");
+
+      var words = out.reduce(function (s, p) { return s + (p.words || 0); }, 0);
+      countEl.textContent = "Showing " + fmt(out.length) + " of " + fmt(rows.length) +
+        " posts · " + fmt(words) + " words";
+      // Keep the collapsed summary honest about what's inside.
+      var filtered = out.length !== rows.length;
+      $("chevLabel").textContent = details.open
+        ? "Hide"
+        : filtered
+          ? "Show " + fmt(out.length) + " matching posts"
+          : "Show all " + fmt(rows.length) + " posts";
+      emptyEl.hidden = out.length > 0;
+      $("ledger").hidden = out.length === 0;
+    }
+
+    [search, fPlat, fYear, fTracked].forEach(function (c) {
+      c.addEventListener("input", render);
+      c.addEventListener("change", render);
+    });
+    $("fReset").addEventListener("click", function () {
+      search.value = ""; fPlat.value = ""; fYear.value = ""; fTracked.value = "";
+      sort = { key: "date", dir: -1 };
+      applySortAttrs();
+      render();
+    });
+
+    var heads = [].slice.call(document.querySelectorAll("#ledger th[data-sort]"));
+    function applySortAttrs() {
+      heads.forEach(function (th) {
+        var k = th.getAttribute("data-sort");
+        if (k === sort.key) {
+          th.setAttribute("aria-sort", sort.dir === 1 ? "ascending" : "descending");
+          th.querySelector(".caret").textContent = sort.dir === 1 ? "▲" : "▼";
+        } else {
+          th.removeAttribute("aria-sort");
+        }
+      });
+    }
+    heads.forEach(function (th) {
+      th.addEventListener("click", function () {
+        var k = th.getAttribute("data-sort");
+        // New column starts descending for numbers/dates, ascending for text.
+        if (sort.key === k) sort.dir = -sort.dir;
+        else sort = { key: k, dir: k === "title" || k === "platform" ? 1 : -1 };
+        applySortAttrs();
+        render();
+      });
+    });
+
+    applySortAttrs();
+    render();
+  })();
+
+  // ---------- footer ----------
+  $("srcNote").textContent =
+    "Substack archive API (" + D.byPlatform[0].posts + " posts) and the WordPress.com public API (" +
+    D.byPlatform[1].posts + " posts), both read unauthenticated. Posts are bucketed by their own publish " +
+    "timestamp converted to IST, so a late-evening post lands on the day it reads as published.";
+  var untracked = D.anomalies.filter(function (a) { return a.kind === "untracked_post"; }).length;
+  $("covNote").textContent =
+    fmt(T.trackedPosts) + " of " + fmt(T.posts) + " posts have a row in the site's own content table; the other " +
+    untracked + " exist only on the platforms. The totals above count everything published, tracked or not.";
+  $("stamp").textContent = "Generated " + new Date(D.generatedAt).toISOString().slice(0, 10) + " from blog-word-counts.json.";
+})();
+</script>
+</body>
+</html>
