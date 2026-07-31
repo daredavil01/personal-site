@@ -9,6 +9,35 @@ patch for fixes and tweaks.
 
 ---
 
+## [v13.0.0] — 2026-07-31
+
+### Changed
+
+- **Admin dashboard redesigned as a workspace** (`src/pages/admin/`): The public site went through a full redesign across v11–v12; the admin never did, and it still looked and behaved like the scaffolding it started as. It is now a purpose-built content tool, deliberately dressed differently from the site — plain Inter instead of Noto Serif headlines and uppercase Plus Jakarta overlines, and a scoped indigo accent (`admin` in `tailwind.config.js`) instead of the rust `secondary`, which stays untouched for every public page. The data layer's contract is unchanged: same `src/lib/api/*` mappers, same `toRow`/`fromRow` shapes, same schema and RLS.
+- **Real routes and a grouped sidebar** (`src/pages/admin/AdminLayout.js`, `navigation.js`): Thirteen flat tabs driven by a `?tab=` query param become nested routes under a sidebar grouped into Overview · Content · Now · Résumé. `/admin/books` and `/admin/now/months` are deep-linkable and the back button works. The four résumé tables — nearly a third of the old nav — move behind one entry, with `ResumePage` rendering them as sub-tabs. Old `?tab=` bookmarks are translated to their new path and the history entry replaced, so they land where they used to rather than on the overview.
+- **Lists became tables** (`src/pages/admin/ui/DataTable.js`, `resources.js`): The plain `<ul>` — one line per row, no columns, no search, no sorting — is now a table with configurable columns, client-side search, sortable headers, multi-select and bulk delete, plus a "View on site" link per row. Below `md` it renders one card per row instead. Sorting needed care where the stored format doesn't sort as text: treks store `DD-MM-YYYY`, which would otherwise order by day-of-month, so that column sorts on a derived key.
+- **Two-column forms over a sticky action bar** (`src/pages/admin/ResourceManager.js`): Fields lay out in a responsive grid driven by an optional `span` on each field, with Save/Cancel/Delete pinned to the bottom instead of buried at the end of a long scroll.
+- **Feedback moved in-app** (`src/pages/admin/ui/ToastContext.js`, `ConfirmDialog.js`): Every `window.alert` and `window.confirm` is gone. Error toasts persist until dismissed — a failed save isn't something to blink past — while everything else auto-dismisses.
+- **Images show what they are** (`src/pages/admin/FormField.js`): The `image` and `slideImages` widgets rendered uploaded URLs as raw text in a text box, so a good upload and a 404 looked identical. Both now show a thumbnail, accept a drag-and-drop, flag a URL that fails to load, and reject files over the 300 KB cap before they reach the bucket. Slide rows can be reordered.
+- **`_crud` exposes row timestamps** (`src/lib/api/_crud.js`): Every table carries trigger-maintained `created_at`/`updated_at` and the selects already pulled them, but most `fromRow` mappers dropped them. The factory re-attaches them once, so tables can sort by "recently touched" and the overview's activity feed has something to read. Read-only — `toRow` is untouched.
+
+### Added
+
+- **Admin UI primitives** (`src/pages/admin/ui/`): The same button class string had been copy-pasted across eight sites and `inputClass` declared three times in three files. There is now one module for the dashboard's chrome — Button, Input/Textarea/Select/Checkbox, Field, Card, Badge, DataTable, Modal, ConfirmDialog, toasts, PageHeader and the async states. `tokens.js` documents the radius trap the Tailwind config creates (`rounded-lg` is 4px and `rounded-xl` is 8px here, while `md` is left at the stock 6px), so the admin standard is `rounded-md` for controls and `rounded-xl` for cards.
+- **Overview page** (`src/pages/admin/Overview.js`, `src/lib/api/adminStats.js`): A landing page with row counts for all twelve tables, a recently-updated feed merged across them, a Now-page status card reporting how many months behind the flagged month is with a one-click "Start next month", and quick-create shortcuts. Counts are head-only requests, so no rows cross the wire; a table that errors reports blank rather than failing the page.
+- **Command palette** (`src/pages/admin/CommandPalette.js`): ⌘K / Ctrl+K to jump to any table or start a new entry. Hand-rolled subsequence matching, no dependency.
+- **Date pickers for the free-text date columns** (`src/pages/admin/FormField.js`): Treks and 100 Days had hand-typed date boxes in front of columns every reader parses, which is how `blogs` id 45 came to hold `2026--07-09` — a value that produces a junk month bucket in the 100 Days chart and the Almanac's "busiest writing month". Both are pickers now, via a new `ddmmyyyy` field type for treks and the existing `isoDate` for blogs. The stored strings are byte-identical to before, so no reader changes and no migration; it simply stops being possible to type a malformed date. Projects keeps free text, since its `date` is a display label like "Summer 2024".
+- **Required actually blocks a save** (`src/pages/admin/ResourceManager.js`): `required` used to render an asterisk in the label and never reach the input, so empty submits travelled to Postgres to fail there. It is now passed through, and the composite widgets that can't carry the attribute — tags, string lists, slides, JSON — are checked on submit and marked inline.
+- **Unsaved-changes guard** (`src/pages/admin/ui/useUnsavedGuard.js`): Leaving a dirty form used to discard it silently. `beforeunload` covers closing the tab; in-app navigation is caught by a capture-phase click listener, since this app uses `BrowserRouter` and has no data router for `useBlocker`.
+- **Structured editors for the Now · Meta JSON blobs** (`src/pages/admin/NowMetaEditor.js`): `daily_rituals` (an array of `{label, icon, description}`) and `inspired_by` (a `{name, url, nownownow}` object) were two raw-JSON textareas you had to hand-type braces into. Both have real fields now, reusing `RepeatableRows` for the array, with the JSON view kept behind an Advanced panel. Unknown keys are spread through on save, so a row carrying more than the spec knows about isn't silently trimmed.
+- **Tests for the admin** (`src/__tests__/admin/`): There were none. Seventy-three cases now cover the date serialization (including that `2026--07-09` yields empty rather than a plausible wrong date), Modal's Escape/scroll-lock/Tab-wrap, toast persistence rules, DataTable's search and three-state sort, form validation and the unsaved guard, and every admin route including the résumé sub-tabs and each legacy `?tab=` redirect.
+
+### Fixed
+
+- **Modal opened with the wrong control focused** (`src/pages/admin/ui/Modal.js`): The header's close button comes first in DOM order, so a dialog with a search box or a form field — most visibly the command palette — landed focus on Close. It now focuses the first control in the dialog body.
+
+---
+
 ## [v12.2.1] — 2026-07-31
 
 ### Fixed
