@@ -9,6 +9,20 @@ patch for fixes and tweaks.
 
 ---
 
+## [v12.2.1] — 2026-07-31
+
+### Fixed
+
+- **Confetti burst crashed without a 2D canvas context** (`src/atlas/lib/confetti.js`): `canvas.getContext("2d")` returns `null` where 2D canvas isn't available — jsdom under test, or a browser that has run out of contexts — and the queued animation frame then threw `Cannot read properties of null (reading 'clearRect')`. Because the burst has no `cancelAnimationFrame` path, it threw on every frame for the full 2.4s. In CI this surfaced as an unrelated failure in whichever test was running when the frame fired (`AppAtlas.test.js › redirects /world to /`); it passed locally only because teardown won the race. The burst now bails and removes its canvas when there is no context.
+- **Confetti loop outlived its host** (`src/atlas/lib/confetti.js`): Nothing stopped the animation when the host unmounted mid-burst — a route change or a dismissed toast left the loop drawing to a detached canvas until the duration elapsed. Each frame now stops if the canvas is no longer connected to the document.
+- **Starfield had the same null-context crash** (`src/components/Index/globe/Starfield.js`): Identical `getContext` case, where the reduced-motion path would throw synchronously on its first `drawStatic()`. Guarded the same way.
+
+### Added
+
+- **Confetti regression tests** (`src/__tests__/confetti.test.js`): Cover the null-context bail, the unmount-mid-burst stop, and the normal draw-and-requeue path, so the flake cannot return silently.
+
+---
+
 ## [v12.2.0] — 2026-07-31
 
 ### Added
