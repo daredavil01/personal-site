@@ -54,7 +54,24 @@ module.exports = {
         "surface-container": "#eeeeee",
         "secondary-container": "#d73b19",
         "primary-fixed-dim": "#c8c6c6",
-        "on-tertiary-container": "#7da1af"
+        "on-tertiary-container": "#7da1af",
+        // Scoped to /admin only. The dashboard is a workspace, not a page of
+        // the site, so it deliberately drops the rust `secondary` accent for a
+        // cooler indigo. Nothing outside src/pages/admin/ should use these.
+        "admin": {
+          50: "#eef0fd",
+          100: "#e0e3fb",
+          200: "#c7cbf7",
+          300: "#a5aaf1",
+          400: "#8285e8",
+          500: "#6c6ade",
+          600: "#5b5bd6",
+          700: "#4f4bc0",
+          800: "#413f9b",
+          900: "#39387b",
+          950: "#232248",
+          DEFAULT: "#5b5bd6"
+        }
       },
       fontFamily: {
         "headline": ["Noto Serif", "serif"],
