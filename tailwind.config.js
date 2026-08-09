@@ -85,6 +85,18 @@ module.exports = {
       // the radius to half their height (dots, progress bars) and quietly
       // squared off everything taller.
       borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "9999px"},
+      // Indeterminate fill for the admin's ProgressBar: Supabase's storage
+      // client reports no upload progress, so that phase slides instead of
+      // pretending to a percentage.
+      keyframes: {
+        "progress-slide": {
+          "0%": { left: "-40%" },
+          "100%": { left: "100%" },
+        },
+      },
+      animation: {
+        "progress-slide": "progress-slide 1.1s ease-in-out infinite",
+      },
     },
   },
   plugins: [

@@ -1,10 +1,12 @@
 import React, { useRef, useState } from "react";
 import uploadImage from "../../lib/api/storage";
+import { ImageCompressError, compressImage, formatBytes } from "../../lib/imageCompress";
 import Button, { IconButton } from "./ui/Button";
 import { Checkbox, Input, Select, Textarea } from "./ui/Input";
 import {
   ChevronDown, ChevronUp, ImageIcon, Trash2, Upload, X,
 } from "./ui/icons";
+import ProgressBar from "./ui/ProgressBar";
 import { useToast } from "./ui/ToastContext";
 import { faintText, hairline, inputClass } from "./ui/tokens";
 
@@ -13,35 +15,68 @@ import { faintText, hairline, inputClass } from "./ui/tokens";
 // tokens module existed.
 export { inputClass };
 
-// CLAUDE.md's hard cap for the media bucket — the audience is on mobile data.
-const MAX_BYTES = 300 * 1024;
+// Compression is measurable — a known number of encode attempts — and the
+// upload isn't, since supabase-js emits no progress events. The bar runs
+// determinate to here, then goes indeterminate rather than inventing a number.
+const COMPRESS_SHARE = 0.85;
 
+const STAGE_LABEL = { analyzing: "Reading image…", encoding: "Optimizing…", uploading: "Uploading…" };
+
+/**
+ * Every image on the site enters through here, so this is where optimization
+ * belongs. It used to reject anything over 300 KB and tell the user to go
+ * compress it by hand; it now resizes and re-encodes to the same targets.
+ */
 const useUploader = (folder) => {
   const toast = useToast();
-  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(null); // { stage, value } | null
+  const [report, setReport] = useState(null);
 
   const upload = async (file, onUploaded) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error(`${file.name} is not an image.`);
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      toast.error(`${file.name} is ${Math.round(file.size / 1024)} KB — compress it below 300 KB before uploading.`);
-      return;
-    }
-    setBusy(true);
+    setReport(null);
+    setProgress({ stage: "analyzing", value: 0 });
     try {
-      onUploaded(await uploadImage(file, folder));
-      toast.success("Image uploaded.");
+      const result = await compressImage(file, {
+        onProgress: ({ stage, value }) => setProgress({ stage, value: value * COMPRESS_SHARE }),
+      });
+
+      setProgress({ stage: "uploading", value: null });
+      const url = await uploadImage(result.file, folder);
+      onUploaded(url);
+
+      setReport(result);
+      toast.success(result.skipped
+        ? `Uploaded — already optimized (${formatBytes(result.final.bytes)}).`
+        : `Uploaded — ${formatBytes(result.original.bytes)} → ${formatBytes(result.final.bytes)}.`);
     } catch (err) {
-      toast.error(`Upload failed: ${err.message}`);
+      // ImageCompressError messages are written for the person looking at the
+      // form (the HEIC one carries the conversion command); anything else is a
+      // network or bucket failure and reads better with a prefix.
+      toast.error(err instanceof ImageCompressError ? err.message : `Upload failed: ${err.message}`);
     } finally {
-      setBusy(false);
+      setProgress(null);
     }
   };
 
-  return { busy, upload };
+  return { busy: progress !== null, progress, report, clearReport: () => setReport(null), upload };
+};
+
+// "4.2 MB → 118 KB · 97% smaller · 1200×900 · JPEG", or the short form in the
+// slide rows, where the field sits in a cramped column.
+const savingsLine = (report, compact) => {
+  const { original, final, format, skipped } = report;
+  if (skipped) {
+    return compact
+      ? formatBytes(final.bytes)
+      : `${formatBytes(final.bytes)} · ${final.width}×${final.height} · ${format} · already optimized`;
+  }
+  const head = `${formatBytes(original.bytes)} → ${formatBytes(final.bytes)}`;
+  if (compact) return head;
+  const saved = original.bytes > 0
+    ? Math.round((1 - final.bytes / original.bytes) * 100)
+    : 0;
+  return `${head} · ${saved}% smaller · ${final.width}×${final.height} · ${format}`;
 };
 
 /**
@@ -50,10 +85,18 @@ const useUploader = (folder) => {
  * no way to tell a good upload from a 404.
  */
 const ImagePicker = ({ value, folder, onChange, compact = false }) => {
-  const { busy, upload } = useUploader(folder);
+  const { busy, progress, report, clearReport, upload } = useUploader(folder);
   const [dragging, setDragging] = useState(false);
   const [broken, setBroken] = useState(false);
   const inputRef = useRef(null);
+
+  // The readout describes the file this field currently holds, so a hand-typed
+  // or cleared URL retires it.
+  const replaceUrl = (next) => {
+    clearReport();
+    setBroken(false);
+    onChange(next);
+  };
 
   const onDrop = (e) => {
     e.preventDefault();
@@ -99,19 +142,25 @@ const ImagePicker = ({ value, folder, onChange, compact = false }) => {
         <div className="flex items-center gap-1.5">
           <Input
             value={value ?? ""}
-            onChange={(e) => { setBroken(false); onChange(e.target.value); }}
+            onChange={(e) => replaceUrl(e.target.value)}
             placeholder="Click the tile to upload, or paste a URL"
             aria-label="Image URL"
           />
           {value && (
-            <IconButton icon={X} label="Clear image" size="sm" onClick={() => onChange("")} />
+            <IconButton icon={X} label="Clear image" size="sm" onClick={() => replaceUrl("")} />
           )}
         </div>
+        {busy && progress && (
+          <ProgressBar value={progress.value} label={STAGE_LABEL[progress.stage]} />
+        )}
+        {!busy && report && value && (
+          <span className={`text-xs ${faintText}`}>{savingsLine(report, compact)}</span>
+        )}
         {broken && value && (
           <span className="text-xs text-red-600 dark:text-red-400">This URL didn&apos;t load.</span>
         )}
-        {!compact && !value && (
-          <span className={`text-xs ${faintText}`}>Drag an image onto the tile. Max 300 KB — compress first.</span>
+        {!compact && !value && !busy && (
+          <span className={`text-xs ${faintText}`}>Drag an image onto the tile — it&apos;s resized and compressed automatically.</span>
         )}
         <input
           ref={inputRef}

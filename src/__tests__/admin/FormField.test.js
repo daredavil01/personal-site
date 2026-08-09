@@ -1,8 +1,19 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import FormField, {
   toDateInput, fromDateInput, toDdmmyyyyInput, fromDdmmyyyyInput,
 } from "../../pages/admin/FormField";
+import { compressImage } from "../../lib/imageCompress";
+import uploadImage from "../../lib/api/storage";
+
+// The upload path talks to a canvas and to Supabase, neither of which exists
+// under jsdom. The compressor's own logic is covered in lib/imageCompress.test.js;
+// what's under test here is that FormField reports what came back.
+jest.mock("../../lib/api/storage", () => jest.fn());
+jest.mock("../../lib/imageCompress", () => ({
+  ...jest.requireActual("../../lib/imageCompress"),
+  compressImage: jest.fn(),
+}));
 
 // The three date types each serialize to a different stored format, and every
 // public reader parses the stored string directly — so a change in any of these
@@ -125,6 +136,98 @@ describe("FormField", () => {
       renderField({ name: "image", type: "image" }, "https://example.com/missing.jpg");
       fireEvent.error(screen.getByRole("img"));
       expect(screen.getByText("This URL didn't load.")).toBeInTheDocument();
+    });
+
+    // The field used to refuse anything over 300 KB and tell the user to go
+    // compress it by hand. It compresses for them now, so the old instruction
+    // would be a lie.
+    it("promises automatic compression rather than a size limit", () => {
+      renderField({ name: "image", type: "image" }, "");
+      expect(screen.queryByText(/Max 300 KB/)).not.toBeInTheDocument();
+      expect(screen.getByText(/resized and compressed automatically/)).toBeInTheDocument();
+    });
+
+    describe("upload", () => {
+      const pick = (container, file) => fireEvent.change(
+        container.querySelector("input[type=file]"),
+        { target: { files: [file] } },
+      );
+      const photo = () => new File(["x"], "trek.jpg", { type: "image/jpeg" });
+
+      beforeEach(() => {
+        compressImage.mockReset();
+        uploadImage.mockReset().mockResolvedValue("https://cdn.example.com/treks/1-trek.jpeg");
+      });
+
+      it("compresses before uploading and reports what was saved", async () => {
+        compressImage.mockResolvedValue({
+          file: new File(["y"], "trek.jpeg", { type: "image/jpeg" }),
+          original: { bytes: 4 * 1024 * 1024, width: 4000, height: 3000 },
+          final: { bytes: 118 * 1024, width: 1200, height: 900 },
+          format: "JPEG",
+          skipped: false,
+        });
+
+        const onChange = jest.fn();
+        const { container, rerender } = renderField({ name: "image", type: "image" }, "", onChange);
+        pick(container, photo());
+
+        await waitFor(() => expect(onChange).toHaveBeenCalledWith("image", "https://cdn.example.com/treks/1-trek.jpeg"));
+        // The bucket gets the compressed file, never the original.
+        expect(uploadImage).toHaveBeenCalledWith(expect.objectContaining({ name: "trek.jpeg" }), undefined);
+
+        // The readout only shows once the field actually holds the new URL.
+        rerender(<FormField field={{ name: "image", type: "image" }} value="https://cdn.example.com/treks/1-trek.jpeg" onChange={onChange} />);
+        expect(await screen.findByText("4.0 MB → 118 KB · 97% smaller · 1200×900 · JPEG")).toBeInTheDocument();
+      });
+
+      it("says so when the file was already small enough to leave alone", async () => {
+        compressImage.mockResolvedValue({
+          file: photo(),
+          original: { bytes: 90 * 1024, width: 800, height: 600 },
+          final: { bytes: 90 * 1024, width: 800, height: 600 },
+          format: "JPEG",
+          skipped: true,
+        });
+
+        const onChange = jest.fn();
+        const { container, rerender } = renderField({ name: "image", type: "image" }, "", onChange);
+        pick(container, photo());
+
+        await waitFor(() => expect(onChange).toHaveBeenCalled());
+        rerender(<FormField field={{ name: "image", type: "image" }} value="https://cdn.example.com/treks/1-trek.jpeg" onChange={onChange} />);
+        expect(await screen.findByText(/already optimized/)).toBeInTheDocument();
+      });
+
+      it("shows a progress bar while the work is in flight and nothing after", async () => {
+        let release;
+        compressImage.mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+
+        const { container } = renderField({ name: "image", type: "image" }, "");
+        pick(container, photo());
+
+        expect(await screen.findByRole("progressbar")).toBeInTheDocument();
+
+        release({
+          file: photo(),
+          original: { bytes: 1024, width: 10, height: 10 },
+          final: { bytes: 512, width: 10, height: 10 },
+          format: "JPEG",
+          skipped: false,
+        });
+        await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
+      });
+
+      it("leaves the field untouched when the upload fails", async () => {
+        compressImage.mockRejectedValue(new Error("boom"));
+        const onChange = jest.fn();
+        const { container } = renderField({ name: "image", type: "image" }, "", onChange);
+        pick(container, photo());
+
+        await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
+        expect(onChange).not.toHaveBeenCalled();
+        expect(uploadImage).not.toHaveBeenCalled();
+      });
     });
   });
 

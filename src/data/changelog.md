@@ -9,6 +9,21 @@ patch for fixes and tweaks.
 
 ---
 
+## [v13.1.0] — 2026-08-09
+
+### Added
+
+- **Images compress themselves on upload** (`src/lib/imageCompress.js`): Every image on the site enters through one function in the admin's `image`/`slideImages` fields, and until now that function's entire contribution was to *refuse* anything over 300 KB and tell you to go run ImageMagick yourself. It now does the work instead. The file is decoded (honouring EXIF orientation, so portrait phone photos stop landing sideways), resized to the long edge the page actually needs — 1200px landscape, 900px portrait — and re-encoded down a quality ladder from 85% until the bytes fit under the 150 KB target. If quality alone can't get there, the dimensions step down too (1200 → 1000 → 800 → 640), so the 300 KB cap became a guarantee rather than a gate you had to satisfy. A 12 MB camera JPEG lands at ~150 KB. Output is `.jpeg`, except where the source genuinely has a transparent pixel, which is detected rather than assumed and encoded as `.webp` — a project logo with an alpha channel no longer gets a white box baked into it. Files already under the target and within bounds are passed through untouched instead of being re-encoded for nothing. No new dependency: `createImageBitmap` and `canvas.toBlob` were enough.
+- **Progress bar** (`src/pages/admin/ui/ProgressBar.js`): The admin had no determinate progress anywhere — every wait was a pulse or a spinner. Compression is a known number of encode attempts, so it gets a real percentage; the Supabase upload that follows reports nothing, so that phase slides indeterminately rather than inventing a number to show you.
+
+### Changed
+
+- **Image fields say what they did** (`src/pages/admin/FormField.js`): A successful upload used to leave a thumbnail and a URL, which told you nothing about what actually reached the bucket — a 290 KB image squeaking under the cap looked identical to a 40 KB one. Each field now reports `4.2 MB → 118 KB · 97% smaller · 1200×900 · JPEG` after the upload, condensed to the before/after pair in the cramped slide rows, and shows the progress bar while the work is in flight. HEIC is still rejected, since no browser but Safari can decode it, but the message now carries the exact `convert` command. The readout is cleared when the URL is edited or cleared by hand, so it never describes a file the field no longer holds.
+- **Uploads declare their content type** (`src/lib/api/storage.js`): The bucket inferred the MIME type from the file it was handed. Now that the bytes arriving are re-encoded rather than original, it is set explicitly so the stored object's type always matches its extension.
+- **Compression docs describe the automatic path** (`CLAUDE.md`): The "Required Before Adding Any Images" section instructed a manual `sharp-cli`/ImageMagick pass before every upload. That is no longer true for anything added through `/admin`; the CLI recipes remain, scoped to the bulk `npm run images:upload` script, which is unchanged and still uploads raw bytes.
+
+---
+
 ## [v13.0.0] — 2026-07-31
 
 ### Changed
