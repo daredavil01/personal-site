@@ -6,7 +6,7 @@
 
 import React, { useEffect, useRef } from "react";
 import launchConfetti from "../lib/confetti";
-import atlasEvent from "../lib/analytics";
+import atlasEvent from "../lib/atlasEvent";
 import { playSfx } from "../audio/sfxBus";
 import { useWorld } from "../world/WorldContext";
 import { getRegion } from "../regions/registry";

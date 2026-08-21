@@ -11,7 +11,7 @@ import { getRegion } from "../regions/registry";
 import { useWorld } from "../world/WorldContext";
 import { ALL_QUESTS } from "../gamification/quests";
 import { progressOf } from "../gamification/questEngine";
-import atlasEvent from "../lib/analytics";
+import atlasEvent from "../lib/atlasEvent";
 
 const MAP_PATH = ATLAS_LIVE ? "/" : "/world";
 

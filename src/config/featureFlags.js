@@ -8,7 +8,7 @@ export const ATLAS_LIVE = true;
 
 // Which shell a visitor lands in when nothing else decides for them — no
 // `?view=` param, no stored choice, no reduced-motion, no atlas preview flag.
-// "classic" since v12.2.0: the atlas is still reachable through `?view=atlas`,
+// "classic" since v13.2.0: the atlas is still reachable through `?view=atlas`,
 // the compass menu, and a stored preference — it is just no longer the front
 // door. Set back to "atlas" to make the map the default again.
 // See the full priority order in atlas/useViewMode.js.

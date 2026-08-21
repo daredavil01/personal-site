@@ -7,7 +7,7 @@
 //   4. atlas.preview localStorage flag -> atlas (the dark-build preview
 //      mechanism, kept so anyone who opted in during the preview keeps the
 //      atlas without having to re-choose it)
-//   5. DEFAULT_VIEW feature flag ("classic" since v12.2.0)
+//   5. DEFAULT_VIEW feature flag ("classic" since v13.2.0)
 //
 // Everything is resolved synchronously from state initializers / context so
 // the first render is deterministic — no post-mount mode flip, no flash.

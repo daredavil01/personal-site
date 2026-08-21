@@ -2,7 +2,7 @@ import React from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useWorld } from "../../atlas/world/WorldContext";
 import useViewMode from "../../atlas/useViewMode";
-import atlasEvent from "../../atlas/lib/analytics";
+import atlasEvent from "../../atlas/lib/atlasEvent";
 
 // Floating action buttons (bottom right) for the classic shell:
 //   1. "Enter the Atlas" — the way back INTO the gamified world. The passport

@@ -18,7 +18,7 @@ import "./theme/atlasTokens.css";
 import PageMeta from "../components/Template/PageMeta";
 import { useWorld } from "./world/WorldContext";
 import { resolveTime } from "./theme/timeOfDay";
-import atlasEvent from "./lib/analytics";
+import atlasEvent from "./lib/atlasEvent";
 import WorldMap from "./map/WorldMap";
 import OrbitStage from "./intro/OrbitStage";
 

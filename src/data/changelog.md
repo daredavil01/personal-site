@@ -9,7 +9,15 @@ patch for fixes and tweaks.
 
 ---
 
-## [v12.2.0] — 2026-08-21
+## [v13.2.1] — 2026-08-21
+
+### Fixed
+
+- **Atlas event module renamed off a blocklisted filename** (`src/atlas/lib/atlasEvent.js`): Ad and tracker blockers match any request path ending in `analytics.js` and answer it with `ERR_BLOCKED_BY_CLIENT`. In dev, where Vite serves each module at its real source path, that blocked request took down every importer of the old `atlas/lib/analytics.js` — including the classic shell's "Enter the Atlas" toggle. The module is now `atlasEvent.js`, matching its default export; production builds were never affected because the name is bundled away.
+
+---
+
+## [v13.2.0] — 2026-08-21
 
 ### Changed
 

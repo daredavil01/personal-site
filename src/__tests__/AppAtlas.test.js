@@ -9,7 +9,7 @@ import { ATLAS_LIVE, DEFAULT_VIEW } from '../config/featureFlags';
 import App from '../App';
 
 // The atlas shell still owns "/" as the world map (ATLAS_LIVE), but since
-// v12.2.0 it is no longer the default landing shell — a visitor has to ask for
+// v13.2.0 it is no longer the default landing shell — a visitor has to ask for
 // it via `?view=atlas` or a stored preference. App.test.js covers the classic
 // shell, which is now what "/" renders with no preference at all.
 const render = (ui) => rtlRender(<ThemeProvider>{ui}</ThemeProvider>);
