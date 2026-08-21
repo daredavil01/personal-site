@@ -54,7 +54,24 @@ module.exports = {
         "surface-container": "#eeeeee",
         "secondary-container": "#d73b19",
         "primary-fixed-dim": "#c8c6c6",
-        "on-tertiary-container": "#7da1af"
+        "on-tertiary-container": "#7da1af",
+        // Scoped to /admin only. The dashboard is a workspace, not a page of
+        // the site, so it deliberately drops the rust `secondary` accent for a
+        // cooler indigo. Nothing outside src/pages/admin/ should use these.
+        "admin": {
+          50: "#eef0fd",
+          100: "#e0e3fb",
+          200: "#c7cbf7",
+          300: "#a5aaf1",
+          400: "#8285e8",
+          500: "#6c6ade",
+          600: "#5b5bd6",
+          700: "#4f4bc0",
+          800: "#413f9b",
+          900: "#39387b",
+          950: "#232248",
+          DEFAULT: "#5b5bd6"
+        }
       },
       fontFamily: {
         "headline": ["Noto Serif", "serif"],
@@ -68,6 +85,18 @@ module.exports = {
       // the radius to half their height (dots, progress bars) and quietly
       // squared off everything taller.
       borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "9999px"},
+      // Indeterminate fill for the admin's ProgressBar: Supabase's storage
+      // client reports no upload progress, so that phase slides instead of
+      // pretending to a percentage.
+      keyframes: {
+        "progress-slide": {
+          "0%": { left: "-40%" },
+          "100%": { left: "100%" },
+        },
+      },
+      animation: {
+        "progress-slide": "progress-slide 1.1s ease-in-out infinite",
+      },
     },
   },
   plugins: [

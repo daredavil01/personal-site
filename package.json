@@ -19,7 +19,9 @@
     "analyze": "npm run build && source-map-explorer build/assets/*.js",
     "data:import": "node scripts/import-to-supabase.mjs",
     "microblog:import": "node scripts/import-tumblr-microblog.mjs",
-    "images:upload": "node scripts/upload-images-to-supabase.mjs"
+    "images:upload": "node scripts/upload-images-to-supabase.mjs",
+    "blogs:wordcount": "node scripts/blog-word-counts.mjs",
+    "blogs:infographic": "node scripts/build-blog-infographic.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
@@ -30,6 +32,7 @@
     "dayjs": "^1.11.7",
     "gsap": "^3.15.0",
     "html-to-image": "^1.11.13",
+    "lucide-react": "^1.28.0",
     "markdown-to-jsx": "^7.1.9",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",

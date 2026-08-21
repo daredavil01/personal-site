@@ -53,9 +53,10 @@ Images live in the public **`media`** storage bucket, not the repo. Admin form
 image / `slideImages` fields upload through `src/lib/api/storage.js`
 (`uploadImage(file, folder)` → `media/<folder>/…` and returns the public URL).
 At read time, `toStorageUrl` / `toStorageImages` (in `src/lib/supabaseClient.js`)
-prefix stored relative paths with the bucket URL. **Always compress before
-uploading** (see Image Compression below) and group by type folder (`sports`,
-`treks`, etc.).
+prefix stored relative paths with the bucket URL. Admin uploads are **resized and
+compressed automatically** in the browser by `src/lib/imageCompress.js` (see
+Image Compression below); bulk script uploads still need compressing by hand.
+Uploads are grouped by type folder (`sports`, `treks`, etc.).
 
 ## Key File Locations
 
@@ -133,36 +134,43 @@ to Supabase via `src/lib/api/*`. The field lists below are what to collect from 
 user; the concrete form schema (types, options, required flags) lives in
 `src/pages/admin/resources.js`. Postgres assigns the `id`.
 
-### Image Compression (Required Before Adding Any Images)
+### Image Compression
 
-Before uploading any image (to the `media` bucket, e.g. for sports/treks slides),
-compress it to keep page load fast.
+**Admin uploads compress themselves — drop the full-size photo in.**
+`src/lib/imageCompress.js` runs in the browser on every `image` / `slideImages`
+field, so no manual pre-step is needed for anything added through `/admin`. The
+field shows the before/after size and the final dimensions once it's done.
 
-**Option A — `sharp-cli` (Node.js, recommended):**
+**Targets** (the constants in `imageCompress.js` — keep this list and that file
+in sync):
 
-```bash
-npx sharp-cli --input path/to/image.jpg --output ./ --format jpeg --quality 80
-```
+- Max long edge: 1200px (landscape/square), 900px (portrait)
+- Quality: ladders 85% → 50%, stopping at the first size that fits
+- Target file size: ≤150 KB per image; **hard cap 300 KB** (mobile-network
+  audience). If quality alone can't get there the long edge steps down
+  (1200 → 1000 → 800 → 640) until it does.
+- Output: `.jpeg`, or `.webp` when the source actually has transparency.
+  Extensions are lowercased — hosting is case-sensitive.
+- Images already under 150 KB and within bounds are uploaded untouched rather
+  than re-encoded.
 
-**Option B — ImageMagick:**
-
-```bash
-convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" output.jpg
-```
-
-**Option C — convert HEIC → JPEG first (iPhone photos):**
+**HEIC is rejected, not converted** — Chrome and Firefox can't decode it.
+Convert iPhone photos first:
 
 ```bash
 convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" output.jpeg
 ```
 
-**Target guidelines:**
+**Bulk uploads still need manual compression.** `npm run images:upload`
+(`scripts/upload-images-to-supabase.mjs`) pushes raw bytes from `public/images/`
+with no processing, so compress before running it:
 
-- Max width: 1200px (landscape), 900px (portrait)
-- Quality: 75–85%
-- Target file size: ≤150 KB per image; **hard cap 300 KB** (mobile-network audience)
-- Preferred format: `.jpeg` or `.jpg` — **never** `.heic` (does not render in Chrome/Firefox) and avoid `.png` for photos
-- Use lowercase file extensions — hosting is case-sensitive
+```bash
+# sharp-cli
+npx sharp-cli --input path/to/image.jpg --output ./ --format jpeg --quality 80
+# or ImageMagick
+convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" output.jpg
+```
 
 ---
 
@@ -209,8 +217,9 @@ No images.
 `42 Kms` / `50 Kms`, or other), 6. `time` (HH:MM:SS), 7. `timeCertificateLink`,
 8. `bibNumber`, 9. Images.
 
-Add photos via the form's **Images** (`slideImages`) field — they upload
-compressed to the `media` bucket (`sports` folder). Compress first.
+Add photos via the form's **Images** (`slideImages`) field — full-size files are
+fine, they're compressed in the browser on the way to the `media` bucket
+(`sports` folder).
 
 ---
 
@@ -222,8 +231,9 @@ compressed to the `media` bucket (`sports` folder). Compress first.
 (Easy/Medium/Hard), 4. `date` (**DD-MM-YYYY** — e.g. `17-02-2019`),
 5. `blog_link` (optional), 6. Images.
 
-Add photos via the **Images** (`slideImages`) field — they upload to the `media`
-bucket (`treks` folder). Compress first.
+Add photos via the **Images** (`slideImages`) field — full-size files are fine,
+they're compressed in the browser on the way to the `media` bucket (`treks`
+folder).
 
 ---
 

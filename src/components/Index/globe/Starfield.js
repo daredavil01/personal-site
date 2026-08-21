@@ -10,6 +10,9 @@ const Starfield = ({ reducedMotion }) => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
     const ctx = canvas.getContext("2d");
+    // Same null-context case as atlas/lib/confetti.js: without this, the
+    // reduced-motion path throws synchronously on the first drawStatic().
+    if (!ctx) return undefined;
     let stars = [];
     let raf = null;
     let shootingStar = null;

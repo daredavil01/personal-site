@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import FormField, { inputClass } from "../FormField";
-import { LoadingBlock, ErrorBlock } from "../../../components/common/AsyncStates";
+import { useSearchParams } from "react-router-dom";
+import FormField from "../FormField";
 import { nowMonths, MONTH_ORDER } from "../../../lib/api/now";
 import {
   useBlogs, useBooks, useSports, useTreks,
@@ -14,6 +14,20 @@ import {
 } from "./sectionSpecs";
 import { RepeatableRows, StringLines, StatsEditor } from "./SectionEditors";
 import AutofillPreview from "./AutofillPreview";
+import PageHeader from "../ui/PageHeader";
+import Card from "../ui/Card";
+import Field from "../ui/Field";
+import DataTable from "../ui/DataTable";
+import Badge from "../ui/Badge";
+import Button, { IconButton } from "../ui/Button";
+import ConfirmDialog from "../ui/ConfirmDialog";
+import { Checkbox, Select } from "../ui/Input";
+import { useToast } from "../ui/ToastContext";
+import useUnsavedGuard from "../ui/useUnsavedGuard";
+import {
+  ExternalLink, Pencil, Plus, Sparkles, Trash2,
+} from "../ui/icons";
+import { hairline, mutedText, surface } from "../ui/tokens";
 
 // Dedicated manager for `now_months` (not the generic ResourceManager): the
 // month's `sections` blob holds nine differently-shaped sub-sections that used
@@ -22,9 +36,6 @@ import AutofillPreview from "./AutofillPreview";
 
 // Enough to cover a busy micro-blogging month without shipping the archive.
 const MICRO_LIMIT = 50;
-
-const labelClass = "font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400";
-const cardClass = "border border-stone-200 dark:border-stone-800 rounded-xl p-4 flex flex-col gap-3";
 
 const emptyForm = () => ({
   month: MONTH_ORDER[new Date().getMonth()],
@@ -44,6 +55,7 @@ const NowMonthEditor = () => {
   const [rows, setRows] = useState(null);
   const [error, setError] = useState(null);
   const [form, setForm] = useState(null); // null = list view
+  const [baseline, setBaseline] = useState(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState(null);
   // JsonField seeds its textarea once, so bump this to remount it after any
@@ -54,11 +66,18 @@ const NowMonthEditor = () => {
   const [contentError, setContentError] = useState(null);
   const [changelog, setChangelog] = useState(null);
   const [changelogError, setChangelogError] = useState(null);
+  const [confirming, setConfirming] = useState(null);
+  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const toast = useToast();
 
   const { data: blogs } = useBlogs();
   const { data: sports } = useSports();
   const { data: books } = useBooks();
   const { data: treks } = useTreks();
+
+  const dirty = !!form && JSON.stringify(form) !== JSON.stringify(baseline);
+  const unsaved = useUnsavedGuard(dirty);
 
   const refresh = useCallback(() => {
     setRows(null);
@@ -70,6 +89,40 @@ const NowMonthEditor = () => {
 
   const monthKey = form ? formMonthKey(form) : null;
   const sections = form?.sections || {};
+
+  const openForm = useCallback((next) => {
+    setForm(next);
+    setBaseline(next);
+    setPreview(null);
+    setFormError(null);
+    setJsonKey((k) => k + 1);
+  }, []);
+
+  const closeForm = () => {
+    setForm(null);
+    setBaseline(null);
+    setPreview(null);
+  };
+
+  // ?new=1 from the command palette; ?start=May 2027 from the overview's
+  // "Start <month>" button, which pre-seeds the month it wants created.
+  useEffect(() => {
+    const start = searchParams.get("start");
+    const isNew = searchParams.get("new") === "1";
+    if (!start && !isNew) return;
+    const seeded = emptyForm();
+    if (start) {
+      const [month, year] = start.split(" ");
+      if (MONTH_ORDER.includes(month)) seeded.month = month;
+      if (year) seeded.year = year;
+      seeded.isCurrent = true;
+    }
+    openForm(seeded);
+    const next = new URLSearchParams(searchParams);
+    next.delete("new");
+    next.delete("start");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, openForm]);
 
   const setSection = (key, value) => {
     setForm((prev) => ({ ...prev, sections: { ...prev.sections, [key]: value } }));
@@ -92,24 +145,27 @@ const NowMonthEditor = () => {
           .filter((r) => r.isCurrent && r.id !== saved.id)
           .map((r) => nowMonths.update(r.id, { ...r, isCurrent: false })));
       }
-      setForm(null);
+      toast.success(`${payload.month} ${payload.year} saved.`);
+      closeForm();
       refresh();
     } catch (err) {
       setFormError(err.message);
+      toast.error(`Couldn't save: ${err.message}`);
     } finally {
       setSaving(false);
     }
   };
 
-  const remove = async (row) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(`Delete "${row.month} ${row.year}"?`)) return;
+  const runDelete = async () => {
+    const targets = confirming?.rows ?? [];
     try {
-      await nowMonths.remove(row.id);
+      await Promise.all(targets.map((row) => nowMonths.remove(row.id)));
+      toast.success(targets.length === 1 ? "Month deleted." : `${targets.length} months deleted.`);
+      setConfirming(null);
       refresh();
     } catch (err) {
-      // eslint-disable-next-line no-alert
-      window.alert(`Delete failed: ${err.message}`);
+      toast.error(`Delete failed: ${err.message}`);
+      setConfirming(null);
     }
   };
 
@@ -201,71 +257,78 @@ const NowMonthEditor = () => {
     setPreview(null);
   };
 
+  const guardDialog = (
+    <ConfirmDialog
+      open={unsaved.pending}
+      title="Discard your changes?"
+      message="This month has unsaved edits. Leaving now throws them away."
+      confirmLabel="Discard"
+      destructive
+      onConfirm={unsaved.confirm}
+      onClose={unsaved.cancel}
+    />
+  );
+
   // --- Form view -----------------------------------------------------------
   if (form) {
     return (
-      <form onSubmit={save} className="flex flex-col gap-5 max-w-3xl">
-        <h2 className="font-headline text-2xl text-stone-900 dark:text-stone-100 mb-0">
-          {form.id ? "Edit" : "New"} Now month
-        </h2>
+      <form onSubmit={save} className="flex flex-col gap-5 pb-20">
+        <PageHeader
+          title={`${form.id ? "Edit" : "New"} Now month`}
+          description={monthKey ? monthLabel(monthKey) : "Pick a month and year"}
+        />
 
-        <div className={cardClass}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-            <div className="flex flex-col gap-1">
-              <span className={labelClass}>Month *</span>
-              <select
-                className={inputClass}
+        <Card title="Month">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <Field label="Month" required>
+              <Select
                 value={form.month}
                 onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
               >
                 {MONTH_ORDER.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className={labelClass}>Year *</span>
+              </Select>
+            </Field>
+            <Field label="Year" required>
               <FormField
-                field={{ name: "year", type: "number" }}
+                field={{ name: "year", type: "number", required: true }}
                 value={form.year}
                 onChange={(name, v) => setForm((prev) => ({ ...prev, [name]: v }))}
               />
-            </div>
+            </Field>
             {/* The checkbox is nested directly inside this label. */}
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-            <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 pb-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="h-5 w-5 rounded border-stone-300 text-secondary focus:ring-secondary dark:border-stone-600 dark:bg-stone-800"
+            <label className="flex items-center gap-2 text-[13px] text-stone-700 dark:text-stone-300 pb-2 cursor-pointer">
+              <Checkbox
                 checked={!!form.isCurrent}
                 onChange={(e) => setForm((prev) => ({ ...prev, isCurrent: e.target.checked }))}
               />
               Current month
             </label>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Button
+              size="sm"
+              variant="primary"
+              icon={Sparkles}
               disabled={!monthKey || pulling}
+              loading={pulling}
               onClick={openContent}
-              className="px-4 py-2 bg-secondary text-white rounded-lg font-label text-xs uppercase tracking-widest font-bold disabled:opacity-40"
             >
               {pulling ? "Pulling…" : "Pull records for this month"}
-            </button>
-            <button
-              type="button"
-              disabled={!monthKey}
-              onClick={openChangelog}
-              className="px-4 py-2 bg-stone-200 dark:bg-stone-700 rounded-lg font-label text-xs uppercase tracking-widest font-bold disabled:opacity-40"
-            >
+            </Button>
+            <Button size="sm" icon={Sparkles} disabled={!monthKey} onClick={openChangelog}>
               Pull highlights from changelog
-            </button>
+            </Button>
           </div>
+
           {contentError && (
-            <p className="text-sm text-red-600 mb-0">Could not load micro posts: {contentError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-3 mb-0">{`Could not load micro posts: ${contentError}`}</p>
           )}
           {changelogError && (
-            <p className="text-sm text-red-600 mb-0">Could not read the changelog: {changelogError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-3 mb-0">{`Could not read the changelog: ${changelogError}`}</p>
           )}
-        </div>
+        </Card>
 
         {preview && (
           <AutofillPreview
@@ -282,48 +345,40 @@ const NowMonthEditor = () => {
         )}
 
         {SECTION_SPECS.map((spec) => (
-          <div key={spec.key} className={cardClass}>
-            <span className={labelClass}>{spec.label}</span>
+          <Card key={spec.key} title={spec.label}>
             <RepeatableRows
               spec={spec}
               value={sections[spec.key]}
+              folder="now"
               onChange={(v) => setSection(spec.key, v)}
             />
-          </div>
+          </Card>
         ))}
 
         {LIST_SECTIONS.map((section) => (
-          <div key={section.key} className={cardClass}>
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <span className={labelClass}>{section.label}</span>
-              {section.key === "website" && (
-                <button
-                  type="button"
-                  disabled={!monthKey}
-                  onClick={openChangelog}
-                  className="text-xs font-bold uppercase tracking-wider text-secondary disabled:opacity-40"
-                >
-                  Pull highlights from changelog
-                </button>
-              )}
-            </div>
+          <Card
+            key={section.key}
+            title={section.label}
+            actions={section.key === "website" && (
+              <Button size="xs" variant="ghost" icon={Sparkles} disabled={!monthKey} onClick={openChangelog}>
+                From changelog
+              </Button>
+            )}
+          >
             <StringLines
               value={sections[section.key]}
               placeholder={section.hint}
               onChange={(v) => setSection(section.key, v)}
             />
-          </div>
+          </Card>
         ))}
 
-        <div className={cardClass}>
-          <span className={labelClass}>Stats</span>
+        <Card title="Stats">
           <StatsEditor value={sections.stats} onChange={(v) => setSection("stats", v)} />
-        </div>
+        </Card>
 
-        <details className="border border-stone-200 dark:border-stone-800 rounded-xl p-4">
-          <summary className="cursor-pointer font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
-            Advanced: raw JSON
-          </summary>
+        <details className={`border ${hairline} rounded-xl px-4 py-3`}>
+          <summary className="text-[13px] font-medium cursor-pointer">Advanced: raw JSON</summary>
           <div className="mt-3">
             <FormField
               key={jsonKey}
@@ -334,73 +389,128 @@ const NowMonthEditor = () => {
           </div>
         </details>
 
-        {formError && <p className="text-sm text-red-600 mb-0">{formError}</p>}
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-5 py-2.5 bg-secondary text-white rounded-lg font-label text-xs uppercase tracking-widest font-bold disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
-          <button
-            type="button"
-            onClick={() => { setForm(null); setPreview(null); }}
-            className="px-5 py-2.5 bg-stone-200 dark:bg-stone-700 rounded-lg font-label text-xs uppercase tracking-widest font-bold"
-          >
-            Cancel
-          </button>
+        {formError && (
+          <p className="text-sm text-red-600 dark:text-red-400 mb-0" role="alert">{formError}</p>
+        )}
+
+        <div className={`fixed bottom-0 left-0 right-0 md:left-60 z-30 flex items-center gap-2 px-4 md:px-8 py-3 border-t ${hairline} ${surface}`}>
+          <div className="mx-auto w-full max-w-5xl flex items-center gap-2">
+            <Button type="submit" variant="primary" loading={saving}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
+            <Button type="button" onClick={() => unsaved.guard(closeForm)}>Cancel</Button>
+            {dirty && <span className={`text-xs ${mutedText}`}>Unsaved changes</span>}
+            {form.id && (
+              <Button
+                type="button"
+                variant="dangerGhost"
+                icon={Trash2}
+                className="ml-auto"
+                onClick={() => setConfirming({ rows: [form] })}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
         </div>
+
+        <ConfirmDialog
+          open={!!confirming}
+          title="Delete this month?"
+          message={confirming ? `"${confirming.rows[0].month} ${confirming.rows[0].year}" will be removed permanently.` : ""}
+          confirmLabel="Delete"
+          destructive
+          onConfirm={async () => { await runDelete(); closeForm(); }}
+          onClose={() => setConfirming(null)}
+        />
+        {guardDialog}
       </form>
     );
   }
 
   // --- List view -----------------------------------------------------------
-  const openNew = () => { setForm(emptyForm()); setPreview(null); setJsonKey((k) => k + 1); };
-  const openEdit = (row) => {
-    setForm({ ...row, year: String(row.year), sections: row.sections || {} });
-    setPreview(null);
-    setJsonKey((k) => k + 1);
-  };
+  const openEdit = (row) => openForm({
+    ...row, year: String(row.year), sections: row.sections || {},
+  });
+
+  const COLUMNS = [
+    {
+      key: "month",
+      label: "Month",
+      primary: true,
+      render: (r) => (
+        <span className="inline-flex items-center gap-2">
+          {`${r.month} ${r.year}`}
+          {r.isCurrent && <Badge tone="accent">Current</Badge>}
+        </span>
+      ),
+    },
+    { key: "year", label: "Year", sortable: true, width: "6rem" },
+    {
+      key: "sections",
+      label: "Sections",
+      width: "8rem",
+      sortable: true,
+      sortValue: (r) => Object.keys(r.sections || {}).length,
+      render: (r) => Object.keys(r.sections || {}).length,
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-2xl text-stone-900 dark:text-stone-100 mb-0">Now · Months</h2>
-        <button
-          type="button"
-          onClick={openNew}
-          className="px-4 py-2 bg-secondary text-white rounded-lg font-label text-xs uppercase tracking-widest font-bold"
-        >
-          + New
-        </button>
-      </div>
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        title="Now · Months"
+        description={rows ? `${rows.length} months on record` : "Loading…"}
+        actions={(
+          <Button variant="primary" icon={Plus} onClick={() => openForm(emptyForm())}>New month</Button>
+        )}
+      />
 
-      {error && <ErrorBlock />}
-      {!error && rows === null && <LoadingBlock label="Loading…" />}
-      {!error && rows && rows.length === 0 && (
-        <p className="text-stone-500 dark:text-stone-400 italic">No entries yet.</p>
-      )}
-      {!error && rows && rows.length > 0 && (
-        <ul className="flex flex-col divide-y divide-stone-100 dark:divide-stone-800 border border-stone-100 dark:border-stone-800 rounded-lg">
-          {rows.map((row) => (
-            <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
-              <span className="text-sm text-stone-800 dark:text-stone-200 truncate">
-                {row.month} {row.year}
-                {row.isCurrent && (
-                  <span className="ml-2 font-label text-[9px] uppercase tracking-widest bg-secondary text-white px-2 py-0.5 rounded">
-                    Current
-                  </span>
-                )}
-              </span>
-              <span className="flex gap-2 shrink-0">
-                <button type="button" onClick={() => openEdit(row)} className="text-xs font-bold uppercase tracking-wider text-secondary">Edit</button>
-                <button type="button" onClick={() => remove(row)} className="text-xs font-bold uppercase tracking-wider text-red-600">Delete</button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <DataTable
+        rows={rows}
+        error={error}
+        columns={COLUMNS}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search months…"
+        searchKeys={["month", "year"]}
+        renderActions={(row) => (
+          <>
+            <IconButton icon={Pencil} label="Edit" size="sm" onClick={() => openEdit(row)} />
+            <a
+              href="/now"
+              target="_blank"
+              rel="noreferrer"
+              title="View on site"
+              aria-label="View on site"
+              className={`inline-flex items-center justify-center h-8 w-8 rounded-md ${mutedText} hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors no-underline`}
+            >
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+            <IconButton
+              icon={Trash2}
+              label="Delete"
+              size="sm"
+              variant="dangerGhost"
+              onClick={() => setConfirming({ rows: [row] })}
+            />
+          </>
+        )}
+        emptyAction={(
+          <Button size="sm" variant="primary" icon={Plus} onClick={() => openForm(emptyForm())}>New month</Button>
+        )}
+      />
+
+      <ConfirmDialog
+        open={!!confirming}
+        title="Delete this month?"
+        message={confirming ? `"${confirming.rows[0].month} ${confirming.rows[0].year}" will be removed permanently.` : ""}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={runDelete}
+        onClose={() => setConfirming(null)}
+      />
+      {guardDialog}
     </div>
   );
 };
