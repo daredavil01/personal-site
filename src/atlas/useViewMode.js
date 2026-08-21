@@ -5,9 +5,9 @@
 //   2. Stored preference (atlas.v1 `view`, explicit user choice only)
 //   3. prefers-reduced-motion: reduce -> classic (automatic escape hatch)
 //   4. atlas.preview localStorage flag -> atlas (the dark-build preview
-//      mechanism; redundant now, but kept so ATLAS_LIVE can be flipped back
-//      off without stranding anyone who opted in during the preview)
-//   5. ATLAS_LIVE feature flag (true since the v11.0.0 flip)
+//      mechanism, kept so anyone who opted in during the preview keeps the
+//      atlas without having to re-choose it)
+//   5. DEFAULT_VIEW feature flag ("classic" since v12.2.0)
 //
 // Everything is resolved synchronously from state initializers / context so
 // the first render is deterministic — no post-mount mode flip, no flash.
@@ -21,16 +21,16 @@
 
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { ATLAS_LIVE } from "../config/featureFlags";
+import { DEFAULT_VIEW } from "../config/featureFlags";
 import { useWorld } from "./world/WorldContext";
 
 // Pure resolution — unit-tested in useViewMode.test.js.
-export function resolveViewMode({ param, storedView, reducedMotion, preview, atlasLive }) {
+export function resolveViewMode({ param, storedView, reducedMotion, preview, defaultView }) {
   if (param === "classic" || param === "atlas") return param;
   if (storedView === "classic" || storedView === "atlas") return storedView;
   if (reducedMotion) return "classic";
   if (preview) return "atlas";
-  return atlasLive ? "atlas" : "classic";
+  return defaultView === "atlas" ? "atlas" : "classic";
 }
 
 const readReducedMotion = () => {
@@ -56,6 +56,6 @@ export default function useViewMode() {
     storedView: world.view,
     reducedMotion,
     preview,
-    atlasLive: ATLAS_LIVE,
+    defaultView: DEFAULT_VIEW,
   });
 }

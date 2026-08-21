@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v12.2.0] — 2026-08-21
+
+### Changed
+
+- **Classic is the default view again** (`src/config/featureFlags.js`, `src/atlas/useViewMode.js`): A visitor with no stored preference, no `?view=` param and no reduced-motion request now lands on the classic editorial homepage instead of the Wanderer's Atlas. The atlas itself is untouched and fully live — it still owns `/` as the world map, and is one click away through the "Enter the Atlas" toggle, `?view=atlas`, or a stored preference, which continues to win over the default. The landing choice moved out of the `ATLAS_LIVE` flag (which still governs atlas routing and labels) into its own `DEFAULT_VIEW` flag, so the two can be flipped independently; set it back to `"atlas"` to make the map the front door again.
+
+---
+
 ## [v12.1.0] — 2026-07-26
 
 ### Added

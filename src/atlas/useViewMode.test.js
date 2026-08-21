@@ -5,16 +5,16 @@ const base = {
   storedView: null,
   reducedMotion: false,
   preview: false,
-  atlasLive: false,
+  defaultView: "classic",
 };
 
 describe("resolveViewMode priority order", () => {
-  it("defaults to classic pre-flip when nothing else applies", () => {
+  it("defaults to classic when nothing else applies", () => {
     expect(resolveViewMode(base)).toBe("classic");
   });
 
-  it("defaults to atlas once ATLAS_LIVE flips", () => {
-    expect(resolveViewMode({ ...base, atlasLive: true })).toBe("atlas");
+  it("defaults to atlas when DEFAULT_VIEW says so", () => {
+    expect(resolveViewMode({ ...base, defaultView: "atlas" })).toBe("atlas");
   });
 
   it("1: URL param beats everything, both directions", () => {
@@ -22,31 +22,31 @@ describe("resolveViewMode priority order", () => {
       ...base, param: "atlas", storedView: "classic", reducedMotion: true,
     })).toBe("atlas");
     expect(resolveViewMode({
-      ...base, param: "classic", storedView: "atlas", preview: true, atlasLive: true,
+      ...base, param: "classic", storedView: "atlas", preview: true, defaultView: "atlas",
     })).toBe("classic");
   });
 
-  it("2: stored preference beats reduced-motion, preview, and the flag", () => {
+  it("2: stored preference beats reduced-motion, preview, and the default", () => {
     expect(resolveViewMode({
       ...base, storedView: "atlas", reducedMotion: true,
     })).toBe("atlas");
     expect(resolveViewMode({
-      ...base, storedView: "classic", preview: true, atlasLive: true,
+      ...base, storedView: "classic", preview: true, defaultView: "atlas",
     })).toBe("classic");
   });
 
-  it("3: reduced motion forces classic over preview and the flag", () => {
+  it("3: reduced motion forces classic over preview and the default", () => {
     expect(resolveViewMode({
-      ...base, reducedMotion: true, preview: true, atlasLive: true,
+      ...base, reducedMotion: true, preview: true, defaultView: "atlas",
     })).toBe("classic");
   });
 
-  it("4: preview flag turns atlas on pre-flip", () => {
+  it("4: preview flag turns atlas on over a classic default", () => {
     expect(resolveViewMode({ ...base, preview: true })).toBe("atlas");
   });
 
   it("ignores junk param values", () => {
-    expect(resolveViewMode({ ...base, param: "wat", atlasLive: true })).toBe("atlas");
+    expect(resolveViewMode({ ...base, param: "wat", defaultView: "atlas" })).toBe("atlas");
     expect(resolveViewMode({ ...base, param: "wat" })).toBe("classic");
   });
 });
