@@ -3,7 +3,7 @@
 // Pages Functions are bundled with esbuild, which resolves this relative
 // import at deploy time; the module is dependency-free by design.
 import {
-  BASE_URL,
+  SITE_URL,
   PAGE_META,
   DEFAULT_META,
   DEFAULT_IMAGE,
@@ -90,7 +90,8 @@ export async function onRequest(context) {
   const blogMatch = pathname.match(/^\/100-days-to-offload\/(\d+)$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseAnonKey =
+    env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (supabaseUrl && supabaseAnonKey) {
     const headers = {
@@ -257,7 +258,9 @@ export async function onRequest(context) {
       [/^\/projects\/\d+$/, "/projects"],
       [/^\/100-days-to-offload\/\d+$/, "/100-days-to-offload"],
     ];
-    const parentPath = staticChildParents.find(([rx]) => rx.test(pathname))?.[1];
+    const parentPath = staticChildParents.find(([rx]) =>
+      rx.test(pathname),
+    )?.[1];
     if (parentPath) {
       dynamicMeta = PAGE_META[parentPath] ?? null;
     }
@@ -265,7 +268,7 @@ export async function onRequest(context) {
 
   const meta = dynamicMeta ?? PAGE_META[pathname] ?? DEFAULT_META;
   const fullTitle = composeTitle(meta.title);
-  const canonicalUrl = `${BASE_URL}${pathname === "/" ? "" : pathname}`;
+  const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
   const tags = `
     <link rel="canonical" href="${escAttr(canonicalUrl)}">

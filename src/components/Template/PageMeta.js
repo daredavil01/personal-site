@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
-import { BASE_URL, PAGE_META, DEFAULT_META, composeTitle } from "../../data/pageMeta";
+import { SITE_URL, PAGE_META, DEFAULT_META, composeTitle } from "../../data/pageMeta";
 
 // The single Helmet block for every shell (§4.3). Extracted from layouts/
 // Main.js so the classic shell and the atlas RegionShell consume the exact
@@ -16,7 +16,7 @@ const PageMeta = (props) => {
   const pageMeta = PAGE_META[pathKey] || DEFAULT_META;
   const title = props.title || pageMeta.title;
   const description = props.description || pageMeta.description;
-  const canonicalUrl = `${BASE_URL}${pathKey === "/" ? "" : pathKey}`;
+  const canonicalUrl = `${SITE_URL}${pathKey === "/" ? "" : pathKey}`;
   const ogImage = props.image || pageMeta.image;
   const ogTitle = composeTitle(title);
 

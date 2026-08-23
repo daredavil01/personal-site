@@ -10,11 +10,11 @@
 // Rows flagged `isDate: true` are the item's timestamp — ShareCard hides them
 // when the user turns "Timestamp" off in the editor.
 
-import { BASE_URL } from "../../data/pageMeta";
+import { SITE_URL } from "../../data/pageMeta";
 import { sourceLabels } from "../MicroBlog/constants";
 
 // Domain shown on the exported card's footer (without protocol).
-export const SITE_DOMAIN = BASE_URL.replace(/^https?:\/\//, "");
+export const SITE_DOMAIN = SITE_URL.replace(/^https?:\/\//, "");
 
 // Every 100-Days post carries this tag; it is noise on a share card.
 const CHALLENGE_TAG = "100_Days_to_Offload";
