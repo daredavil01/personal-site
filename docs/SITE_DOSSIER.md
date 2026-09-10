@@ -1,4 +1,4 @@
-# Site Dossier — daredavil.pages.dev
+# Site Dossier — sankettambare.in
 
 > A complete feature and architecture reference for Sanket Tambare's personal
 > website. Written as the source document for a Claude-generated showcase
@@ -15,7 +15,7 @@ writer, and reader. It is not a static portfolio; it is a living archive of
 everything he does, backed by a real database and updated continuously
 (11 major versions and counting, documented in a public changelog).
 
-- **URL:** https://daredavil.pages.dev
+- **URL:** https://sankettambare.in
 - **Identity line:** "The Digital Hub." — a digital garden
 - **Content domains:** marathons & races, fort treks, books & reviews, blog
   writing (the "100 Days To Offload" challenge + Substack newsletter *The

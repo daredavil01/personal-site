@@ -5,10 +5,10 @@
 // The middleware is bundled with esbuild, so this module must stay
 // dependency-free: no imports, no process.env, plain object literals only.
 
-export const BASE_URL = "https://daredavil.pages.dev";
+export const SITE_URL = "https://sankettambare.in";
 export const SITE_NAME = "Sanket Tambare";
-export const DEFAULT_IMAGE = `${BASE_URL}/images/logo.png`;
-export const PERSON_IMAGE = `${BASE_URL}/images/me.jpg`;
+export const DEFAULT_IMAGE = `${SITE_URL}/images/logo.png`;
+export const PERSON_IMAGE = `${SITE_URL}/images/me.jpg`;
 
 // `title` is the bare page title; consumers compose "<title> | Sanket Tambare".
 // `title: null` means the route uses the site name alone (home page).
@@ -147,7 +147,13 @@ export function buildMicroblogMeta({ title, text, date, image } = {}) {
 // extracts the item fields (client camelCase / REST snake_case) and resolves the
 // image URL, then passes normalised primitives in.
 
-export function buildTrekMeta({ fortName, enduranceLevel, trekTime, date, image } = {}) {
+export function buildTrekMeta({
+  fortName,
+  enduranceLevel,
+  trekTime,
+  date,
+  image,
+} = {}) {
   return {
     title: `${fortName} Trek`,
     description: `A ${(enduranceLevel || "medium").toLowerCase()} endurance trek to ${fortName} fort on ${date}. Trek duration: ${trekTime}.`,
@@ -155,10 +161,20 @@ export function buildTrekMeta({ fortName, enduranceLevel, trekTime, date, image 
   };
 }
 
-export function buildSportMeta({ title, distance, place, date, time, description, image } = {}) {
+export function buildSportMeta({
+  title,
+  distance,
+  place,
+  date,
+  time,
+  description,
+  image,
+} = {}) {
   return {
     title,
-    description: description || `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
+    description:
+      description
+      || `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
     image: image || DEFAULT_IMAGE,
   };
 }
@@ -166,7 +182,9 @@ export function buildSportMeta({ title, distance, place, date, time, description
 export function buildBookMeta({ title, author, description, image } = {}) {
   return {
     title: `${title} by ${author}`,
-    description: description || `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
+    description:
+      description
+      || `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
     image: image || DEFAULT_IMAGE,
   };
 }
@@ -174,7 +192,9 @@ export function buildBookMeta({ title, author, description, image } = {}) {
 export function buildBlogMeta({ title, description, image } = {}) {
   return {
     title,
-    description: description || `A blog post from the 100 Days to Offload challenge: ${title}.`,
+    description:
+      description
+      || `A blog post from the 100 Days to Offload challenge: ${title}.`,
     image: image || DEFAULT_IMAGE,
   };
 }
@@ -182,7 +202,8 @@ export function buildBlogMeta({ title, description, image } = {}) {
 export function buildProjectMeta({ title, subtitle, description, image } = {}) {
   return {
     title,
-    description: description || subtitle || `Detailed view of the project: ${title}.`,
+    description:
+      description || subtitle || `Detailed view of the project: ${title}.`,
     image: image || DEFAULT_IMAGE,
   };
 }

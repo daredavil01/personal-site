@@ -8,7 +8,7 @@
 - **Handle / alias:** daredavil / i_daredavil
 - **Date of birth:** January 22, 1999
 - **Location:** Pune, Maharashtra, India
-- **Website:** https://daredavil.pages.dev
+- **Website:** https://sankettambare.in
 - **Email:** sanket.tambare01@gmail.com
 
 ---
@@ -108,6 +108,6 @@
 
 ## Canonical URL
 
-https://daredavil.pages.dev
+https://sankettambare.in
 
 *This file was last updated: 2026-06-14*

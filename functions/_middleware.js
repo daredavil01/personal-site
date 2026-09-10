@@ -3,7 +3,7 @@
 // Pages Functions are bundled with esbuild, which resolves this relative
 // import at deploy time; the module is dependency-free by design.
 import {
-  BASE_URL,
+  SITE_URL,
   PAGE_META,
   DEFAULT_META,
   DEFAULT_IMAGE,
@@ -265,7 +265,7 @@ export async function onRequest(context) {
 
   const meta = dynamicMeta ?? PAGE_META[pathname] ?? DEFAULT_META;
   const fullTitle = composeTitle(meta.title);
-  const canonicalUrl = `${BASE_URL}${pathname === "/" ? "" : pathname}`;
+  const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
   const tags = `
     <link rel="canonical" href="${escAttr(canonicalUrl)}">

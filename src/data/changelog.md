@@ -9,6 +9,30 @@ patch for fixes and tweaks.
 
 ---
 
+## [v13.2.4] — 2026-09-10
+
+### Fixed
+
+- **Lint compliance** (`functions/_middleware.js`, `src/data/pageMeta.js`): Reformatted the site-URL centralization changes to satisfy airbnb ESLint rules (`operator-linebreak`, `implicit-arrow-linebreak`, `function-paren-newline`, `no-confusing-arrow`) — 8 errors, no behaviour change.
+
+---
+
+## [v13.2.3] — 2026-08-23
+
+### Changed
+
+- **Site URL configuration** (`src/data/pageMeta.js`): Renamed the shared site-origin constant to `SITE_URL` and updated metadata, Cloudflare crawler middleware, and share-card configuration to consume it.
+
+---
+
+## [v13.2.2] — 2026-08-23
+
+### Changed
+
+- **Canonical site domain** (`src/data/pageMeta.js`, `public/`): Replaced all previous Pages-domain URL references with `sankettambare.in` across site metadata, crawler files, sitemap, AI-readable documentation, and the writing-ledger template.
+
+---
+
 ## [v13.2.1] — 2026-08-21
 
 ### Fixed
