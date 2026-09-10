@@ -10,6 +10,7 @@ Detailed documentation is available in the `docs/` folder:
 - [**Architecture**](docs/architecture.md): Project structure, key components, and data management.
 - [**Customization**](docs/customization.md): How to update content (resume, sports, projects) and styling.
 - [**Deployment**](docs/deployment.md): Building for production and deploying to Cloudflare Pages.
+- [**Writing Ledger**](docs/writing-ledger.md): Refreshing the blog word-count data and infographic page.
 - [**Contributing**](docs/contributing.md): Guidelines for contributing to the project.
 
 ## 🚀 Quick Start

@@ -9,6 +9,18 @@ patch for fixes and tweaks.
 
 ---
 
+## [v13.2.5] — 2026-09-10
+
+### Added
+
+- **Writing Ledger refresh guide** (`docs/writing-ledger.md`): Documents how to manually refresh the blog word-count data — the `npm run blogs:wordcount` → `npm run blogs:infographic` order, what each script reads and writes, which output is committed vs gitignored, how to read the anomaly report, and troubleshooting for the common failures. Linked from the README docs index.
+
+### Changed
+
+- **The Writing Ledger** (`public/writing-ledger.html`): Regenerated from a fresh extract — 103 posts and 99,185 words across Substack and WordPress, current through 2026-09-10 (was 2026-09-01).
+
+---
+
 ## [v13.2.4] — 2026-09-10
 
 ### Fixed
