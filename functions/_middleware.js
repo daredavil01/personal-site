@@ -90,8 +90,7 @@ export async function onRequest(context) {
   const blogMatch = pathname.match(/^\/100-days-to-offload\/(\d+)$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
-  const supabaseAnonKey =
-    env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (supabaseUrl && supabaseAnonKey) {
     const headers = {
@@ -258,9 +257,7 @@ export async function onRequest(context) {
       [/^\/projects\/\d+$/, "/projects"],
       [/^\/100-days-to-offload\/\d+$/, "/100-days-to-offload"],
     ];
-    const parentPath = staticChildParents.find(([rx]) =>
-      rx.test(pathname),
-    )?.[1];
+    const parentPath = staticChildParents.find(([rx]) => rx.test(pathname))?.[1];
     if (parentPath) {
       dynamicMeta = PAGE_META[parentPath] ?? null;
     }

@@ -134,8 +134,7 @@ export function composeTitle(title) {
 // without the two layers drifting. Returns a BARE title — callers wrap it via
 // composeTitle / Helmet's titleTemplate, matching the PAGE_META convention.
 export function buildMicroblogMeta({ title, text, date, image } = {}) {
-  const truncate = (str, max) =>
-    str.length > max ? `${str.slice(0, max - 3)}…` : str;
+  const truncate = (str, max) => (str.length > max ? `${str.slice(0, max - 3)}…` : str);
   const raw = (text || title || "").replace(/\s+/g, " ").trim();
   const metaTitle = raw ? truncate(raw, 70) : `Post · ${date}`;
   const description = raw ? truncate(raw, 160) : "A micro-blog post.";
@@ -174,8 +173,8 @@ export function buildSportMeta({
   return {
     title,
     description:
-      description ||
-      `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
+      description
+      || `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
     image: image || DEFAULT_IMAGE,
   };
 }
@@ -184,8 +183,8 @@ export function buildBookMeta({ title, author, description, image } = {}) {
   return {
     title: `${title} by ${author}`,
     description:
-      description ||
-      `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
+      description
+      || `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
     image: image || DEFAULT_IMAGE,
   };
 }
@@ -194,8 +193,8 @@ export function buildBlogMeta({ title, description, image } = {}) {
   return {
     title,
     description:
-      description ||
-      `A blog post from the 100 Days to Offload challenge: ${title}.`,
+      description
+      || `A blog post from the 100 Days to Offload challenge: ${title}.`,
     image: image || DEFAULT_IMAGE,
   };
 }

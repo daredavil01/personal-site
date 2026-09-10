@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v13.2.4] — 2026-09-10
+
+### Fixed
+
+- **Lint compliance** (`functions/_middleware.js`, `src/data/pageMeta.js`): Reformatted the site-URL centralization changes to satisfy airbnb ESLint rules (`operator-linebreak`, `implicit-arrow-linebreak`, `function-paren-newline`, `no-confusing-arrow`) — 8 errors, no behaviour change.
+
+---
+
 ## [v13.2.3] — 2026-08-23
 
 ### Changed
