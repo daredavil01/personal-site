@@ -205,17 +205,24 @@ export async function onRequest(context) {
     } else if (projectMatch) {
       try {
         const projectRes = await fetch(
-          `${supabaseUrl}/rest/v1/projects?id=eq.${projectMatch[1]}&select=title,subtitle,description,image&limit=1`,
+          `${supabaseUrl}/rest/v1/projects?id=eq.${projectMatch[1]}&select=title,subtitle,description,image,slide_images&limit=1`,
           { headers },
         );
         const projects = await projectRes.json();
+        // A hidden project returns [] here — the anon key means RLS applies, so a
+        // draft never leaks its title into a crawler's card.
         const project = projects?.[0];
         if (project) {
+          // `image` is optional since 0005; the first screenshot stands in for it,
+          // matching coverFor() on the client so both cards show the same picture.
+          const cover = project.image
+            || (project.slide_images ?? []).find((s) => s?.url)?.url
+            || "";
           let imageUrl = DEFAULT_IMAGE;
-          if (project.image) {
-            imageUrl = project.image.startsWith("http")
-              ? project.image
-              : `${supabaseUrl}/storage/v1/object/public/media${project.image}`;
+          if (cover) {
+            imageUrl = cover.startsWith("http")
+              ? cover
+              : `${supabaseUrl}/storage/v1/object/public/media${cover}`;
           }
           dynamicMeta = buildProjectMeta({
             title: project.title,

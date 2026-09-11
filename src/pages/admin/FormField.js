@@ -6,7 +6,7 @@ import { ImageCompressError, compressImage, formatBytes } from "../../lib/imageC
 import Button, { IconButton } from "./ui/Button";
 import { Checkbox, Input, Select, Textarea } from "./ui/Input";
 import {
-  ChevronDown, ChevronUp, ImageIcon, Trash2, Upload, X,
+  ChevronDown, ChevronUp, ImageIcon, LinkIcon, Trash2, Upload, X,
 } from "./ui/icons";
 import ProgressBar from "./ui/ProgressBar";
 import { useToast } from "./ui/ToastContext";
@@ -235,6 +235,64 @@ const SlideImages = ({ value, folder, onChange }) => {
   );
 };
 
+// Repeatable {label, url} rows — a GitHub repo, a live demo, a write-up. Same
+// add/reorder/remove shape as SlideImages above, minus the uploader.
+const LinkList = ({ value, onChange }) => {
+  const rows = Array.isArray(value) ? value : [];
+  const update = (i, patch) => onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  const move = (i, delta) => {
+    const target = i + delta;
+    if (target < 0 || target >= rows.length) return;
+    const next = [...rows];
+    [next[i], next[target]] = [next[target], next[i]];
+    onChange(next);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      {rows.map((row, i) => (
+        <div key={i} className={`flex flex-col sm:flex-row sm:items-start gap-2 p-2 rounded-md border ${hairline}`}>
+          <Input
+            className="sm:w-40"
+            placeholder="GitHub"
+            aria-label={`Label for link ${i + 1}`}
+            value={row.label || ""}
+            onChange={(e) => update(i, { label: e.target.value })}
+          />
+          <Input
+            type="url"
+            className="flex-1 min-w-0"
+            placeholder="https://github.com/…"
+            aria-label={`URL for link ${i + 1}`}
+            value={row.url || ""}
+            onChange={(e) => update(i, { url: e.target.value })}
+          />
+          <div className="flex items-center gap-0.5 shrink-0">
+            <IconButton icon={ChevronUp} label={`Move link ${i + 1} up`} size="sm" disabled={i === 0} onClick={() => move(i, -1)} />
+            <IconButton icon={ChevronDown} label={`Move link ${i + 1} down`} size="sm" disabled={i === rows.length - 1} onClick={() => move(i, 1)} />
+            <IconButton
+              icon={Trash2}
+              label={`Remove link ${i + 1}`}
+              size="sm"
+              variant="dangerGhost"
+              onClick={() => onChange(rows.filter((_, idx) => idx !== i))}
+            />
+          </div>
+        </div>
+      ))}
+      <Button
+        size="sm"
+        icon={LinkIcon}
+        className="self-start"
+        onClick={() => onChange([...rows, { label: "", url: "" }])}
+      >
+        Add link
+      </Button>
+    </div>
+  );
+};
+
 const JsonField = ({ value, onChange }) => {
   const [text, setText] = useState(() => JSON.stringify(value ?? {}, null, 2));
   const [error, setError] = useState(null);
@@ -332,10 +390,13 @@ const matchSuggestions = (all, buffer, selected) => {
   const q = buffer.trim().toLowerCase();
   if (!q) return [];
   const taken = new Set(selected.map((t) => t.toLowerCase()));
+  // Central tag names are already lowercase, but a `suggestFrom` pool keeps its
+  // display casing ("React"), so every comparison here folds case.
   return all
-    .filter((t) => !taken.has(t.name)
-      && (t.name.includes(q) || t.displayName.toLowerCase().includes(q)))
-    .sort((a, b) => (Number(b.name.startsWith(q)) - Number(a.name.startsWith(q))) || (b.total - a.total))
+    .filter((t) => !taken.has(t.name.toLowerCase())
+      && (t.name.toLowerCase().includes(q) || t.displayName.toLowerCase().includes(q)))
+    .sort((a, b) => (Number(b.name.toLowerCase().startsWith(q))
+      - Number(a.name.toLowerCase().startsWith(q))) || (b.total - a.total))
     .slice(0, MAX_SUGGESTIONS);
 };
 
@@ -348,14 +409,17 @@ const matchSuggestions = (all, buffer, selected) => {
 // + usage count); ↑/↓ pick one, Enter adds it, Esc closes the list. A name
 // that isn't in the list is still added as typed — set_entity_tags creates the
 // tag on save.
-const TagInput = ({ value, onChange, suggest = false }) => {
+const TagInput = ({ value, onChange, suggest = false, options = null }) => {
   const [buffer, setBuffer] = useState("");
   const [active, setActive] = useState(-1);
   const [open, setOpen] = useState(false);
   const allTags = useOptionalTags();
   const listId = useId();
   const tags = Array.isArray(value) ? value : [];
-  const suggestions = suggest && open ? matchSuggestions(allTags, buffer, tags) : [];
+  // `options` lets a field autocomplete from its own resource's values (tech
+  // stacks, say) instead of the central tag list. Same widget, different pool.
+  const pool = options ?? allTags;
+  const suggestions = suggest && open ? matchSuggestions(pool, buffer, tags) : [];
 
   const addTags = (raw) => {
     const incoming = raw.split(",").map((t) => t.trim()).filter(Boolean);
@@ -452,7 +516,8 @@ const TagInput = ({ value, onChange, suggest = false }) => {
         >
           {suggestions.map((t, i) => (
             <li
-              key={t.id}
+              // A `suggestFrom` pool has no row ids — names are unique in both.
+              key={t.id ?? t.name}
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
@@ -484,9 +549,9 @@ const TagInput = ({ value, onChange, suggest = false }) => {
 
 // Composite widgets can't carry a native `required`, so the form validates them
 // on submit instead. See ResourceManager.
-export const COMPOSITE_TYPES = new Set(["tags", "stringList", "slideImages", "json"]);
+export const COMPOSITE_TYPES = new Set(["tags", "stringList", "slideImages", "linkList", "json"]);
 
-const FormField = ({ field, value, folder, onChange }) => {
+const FormField = ({ field, value, folder, onChange, suggestOptions = null }) => {
   const set = (v) => onChange(field.name, v);
   const required = !!field.required;
 
@@ -516,7 +581,16 @@ const FormField = ({ field, value, folder, onChange }) => {
         </Select>
       );
     case "tags":
-      return <TagInput value={Array.isArray(value) ? value : []} onChange={set} suggest={!!field.suggest} />;
+      // `suggest` pulls from the central tag list; `suggestFrom` pulls from
+      // values already used on this resource (ResourceManager builds the pool).
+      return (
+        <TagInput
+          value={Array.isArray(value) ? value : []}
+          onChange={set}
+          suggest={!!field.suggest || !!field.suggestFrom}
+          options={field.suggestFrom ? suggestOptions ?? [] : null}
+        />
+      );
     case "stringList":
       return (
         <Textarea
@@ -572,6 +646,8 @@ const FormField = ({ field, value, folder, onChange }) => {
       );
     case "slideImages":
       return <SlideImages value={value} folder={folder} onChange={set} />;
+    case "linkList":
+      return <LinkList value={value} onChange={set} />;
     case "json":
       return <JsonField value={value} onChange={set} />;
     default:
