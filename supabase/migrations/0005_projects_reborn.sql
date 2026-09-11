@@ -21,6 +21,11 @@ alter table public.projects drop column if exists sort_order;
 -- ---------------------------------------------------------------------------
 alter table public.projects alter column date drop not null;
 
+-- One title carries a leading space (" E20 ka Chakravyuha"). Clean it first, and
+-- match on btrim below, so a stray space can't silently drop a row out of the
+-- backfill and into the null safety net.
+update public.projects set title = btrim(title) where title <> btrim(title);
+
 update public.projects as p set date = v.date
 from (values
   ('Expense Management Web-App using firebase',        '2020-10-20'),
@@ -37,7 +42,7 @@ from (values
   ('CMS Site Planner',                                 '2026-08-01'),
   ('Personal Websites & Projects Directory',           '2026-08-01')
 ) as v(title, date)
-where p.title = v.title;
+where btrim(p.title) = v.title;
 
 -- Safety net: anything unmatched above that still isn't ISO is cleared rather
 -- than blocking the type conversion. Re-enter it via /admin.

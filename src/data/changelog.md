@@ -20,6 +20,7 @@ patch for fixes and tweaks.
 - **Case-study detail page** (`src/pages/ProjectPost.js`): renders the date, status, organization, role, tech chips, highlights, a screenshot gallery and Problem / Solution / Outcome sections, alongside the custom-link buttons.
 - **`linkList` form widget** (`src/pages/admin/FormField.js`): repeatable `{label, url}` rows with reorder and delete, modelled on the existing `slideImages` widget.
 - **Pooled field autocomplete** (`src/pages/admin/FormField.js`, `ResourceManager.js`): a field can declare `suggestFrom` to autocomplete from values already used on its own resource rather than from the central tag list — how the tech-stack field suggests stacks you have used before.
+- **Project metadata, backfilled from the live sites** (`supabase/migrations/0006_projects_metadata.sql`): every one of the 13 projects now carries a category, status, role, tech stack, highlights and Problem / Solution / Outcome, sourced by visiting each project's own site and repository rather than guessed. Organizations are attributed (YUNG Foundation, Antyodaya Punarvasan), repos and live demos are linked, and RunFolio, E20 ka Chakravyuha and the Nisarg school portal are pinned as featured. The tech vocabulary this produces — Astro, React, Supabase, Tailwind, Cloudflare Pages/Workers, Firebase, Next.js and the rest — is what the new filter chips actually filter on.
 - **Field defaults in the admin form** (`src/pages/admin/ResourceManager.js`): a field can declare `default`, which `emptyForm` honours ahead of its type-based seed. Without it, `visible` would start false and every new project would be born hidden.
 
 ### Changed
@@ -32,6 +33,9 @@ patch for fixes and tweaks.
 
 ### Fixed
 
+- **A leading space that would have eaten a date** (`supabase/migrations/0005_projects_reborn.sql`): one project is stored as `" E20 ka Chakravyuha"`. Every `where title = …` in the date backfill missed it, so applying the migration as written would have dropped that row into the null safety net and cleared its date. Titles are now trimmed first and matched with `btrim`.
+- **Six projects sharing one cover image** (`supabase/migrations/0006_projects_metadata.sql`): RunFolio, Visiting Card, E20, Antyodaya, CMS Site Planner and the Nisarg portal all pointed at the YUNG Foundation's logo, a placeholder that got reused. Cleared, so the new fallback shows a neutral placeholder instead of another organization's branding.
+- **RunLog archived** (`supabase/migrations/0006_projects_metadata.sql`): its deployment returns 404 and RunFolio superseded it, so it is marked Archived and hidden rather than left on the page as a dead link.
 - **Mind map project year** (`src/components/MindMap/MindMapDetailPanel.js`): the year chip read `project.date.slice(0, 4)`, which rendered "Augu" for a project dated "August 2026". It now uses `projectYear` and is omitted when there is no date. The panel also shows category, status and stack.
 - **Tag suggestion keys** (`src/pages/admin/FormField.js`): suggestion rows keyed on `t.id`, which is undefined for a pooled (non-central-tag) source. Keys now fall back to the name.
 - **`tag_entities` after the date change** (`supabase/migrations/0005_projects_reborn.sql`): the RPC declares `date text` and passed `projects.date` through raw, which only type-checked while that column was text. It is now cast, the same way the micro-blog arm already was.
