@@ -4,14 +4,18 @@
  *   knowledge_base/tumblr_posts.json  →  Supabase `microblog` table.
  *
  * Cleans each exported Tumblr post (HTML-entity decode, <br> → newline),
- * normalises post_type, and UPSERTs on (source, source_id). Unlike
- * scripts/import-to-supabase.mjs this does NOT clear the table first, so
- * admin-authored `manual` rows are preserved and re-runs never duplicate.
+ * normalises post_type, and UPSERTs on (source, source_id). It does NOT
+ * clear the table first, so admin-authored `manual` rows are preserved and
+ * re-runs never duplicate.
+ *
+ * Tags go to the central tag tables via the set_entity_tags RPC (not onto the
+ * row), and only for posts whose export carries tags — so tags added in the
+ * admin to an untagged Tumblr post survive a re-import.
  *
  * Uses the SERVICE ROLE key (bypasses RLS) — run locally only, never ship it.
  *
  * Usage:
- *   1. Apply supabase/migrations/0002_microblog.sql to the database.
+ *   1. Apply supabase/migrations/0002_microblog.sql and 0003_centralized_tags.sql.
  *   2. Fill .env with SUPABASE_URL (or VITE_SUPABASE_URL) and
  *      SUPABASE_SERVICE_ROLE_KEY.
  *   3. npm run microblog:import
@@ -99,7 +103,6 @@ function toRow(post) {
     date: post.date,
     title: cleanText(post.title) || "",
     text: cleanText(post.text) || "",
-    tags: Array.isArray(post.tags) ? post.tags : [],
     url: post.url || null,
     image_url: null, // photo media isn't in the repo yet — backfilled later
   };
@@ -111,22 +114,36 @@ async function importAll() {
     throw new Error(`Source file not found: ${SOURCE_FILE}`);
   }
 
-  const posts = JSON.parse(fs.readFileSync(SOURCE_FILE, "utf8"));
-  const rows = posts
-    .filter((p) => p && p.id && p.date) // a valid date is required (NOT NULL column)
-    .map(toRow);
+  const posts = JSON.parse(fs.readFileSync(SOURCE_FILE, "utf8"))
+    .filter((p) => p && p.id && p.date); // a valid date is required (NOT NULL column)
+  const rows = posts.map(toRow);
+  const tagsBySourceId = new Map(posts
+    .filter((p) => Array.isArray(p.tags) && p.tags.length)
+    .map((p) => [String(p.id), p.tags]));
 
   console.log(`\nImporting ${rows.length} posts → Supabase (microblog)\n`);
 
   let processed = 0;
+  let tagged = 0;
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const batch = rows.slice(i, i + BATCH_SIZE);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("microblog")
-      .upsert(batch, { onConflict: "source,source_id" });
+      .upsert(batch, { onConflict: "source,source_id" })
+      .select("id, source_id");
     if (error) throw new Error(`batch ${i / BATCH_SIZE + 1}: ${error.message}`);
     processed += batch.length;
-    console.log(`  ✓ upserted ${processed}/${rows.length}`);
+
+    for (const { id, source_id: sourceId } of data) {
+      const tags = tagsBySourceId.get(sourceId);
+      if (!tags) continue;
+      const { error: tagErr } = await supabase.rpc("set_entity_tags", {
+        p_type: "microblog", p_id: id, p_names: tags,
+      });
+      if (tagErr) throw new Error(`tags for post ${sourceId}: ${tagErr.message}`);
+      tagged += 1;
+    }
+    console.log(`  ✓ upserted ${processed}/${rows.length} (${tagged} tagged)`);
   }
 
   const { count, error: countErr } = await supabase

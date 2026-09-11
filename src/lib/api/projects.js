@@ -8,6 +8,7 @@ const projects = createResource({
     { column: "sort_order", ascending: true },
     { column: "id", ascending: true },
   ],
+  tagType: "project",
   fromRow: (r) => ({
     id: r.id,
     title: r.title,
@@ -17,6 +18,7 @@ const projects = createResource({
     date: r.date,
     desc: r.description,
     sortOrder: r.sort_order,
+    tags: r.tag_names ?? [],
   }),
   toRow: (v) => ({
     title: v.title,

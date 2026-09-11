@@ -17,7 +17,7 @@
     "lint": "eslint src functions --ext .js",
     "test": "jest",
     "analyze": "npm run build && source-map-explorer build/assets/*.js",
-    "data:import": "node scripts/import-to-supabase.mjs",
+    "tags:migrate": "node scripts/migrate-tags-to-central.mjs",
     "microblog:import": "node scripts/import-tumblr-microblog.mjs",
     "images:upload": "node scripts/upload-images-to-supabase.mjs",
     "blogs:wordcount": "node scripts/blog-word-counts.mjs",

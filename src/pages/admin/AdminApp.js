@@ -9,6 +9,7 @@ import Overview from "./Overview";
 import ResourceRoute from "./ResourceRoute";
 import ResumePage from "./ResumePage";
 import MicroblogManager from "./MicroblogManager";
+import TagManager from "./TagManager";
 import NowMetaEditor from "./NowMetaEditor";
 import NowMonthEditor from "./now/NowMonthEditor";
 import { ToastProvider } from "./ui/ToastContext";
@@ -43,6 +44,7 @@ const AdminRoutes = ({ session }) => {
       <Route element={<AdminLayout session={session} />}>
         <Route index element={<Overview />} />
         <Route path="microblog" element={<MicroblogManager />} />
+        <Route path="tags" element={<TagManager />} />
         <Route path="now/months" element={<NowMonthEditor />} />
         <Route path="now/meta" element={<NowMetaEditor />} />
         <Route path="resume" element={<Navigate to="/admin/resume/experience" replace />} />

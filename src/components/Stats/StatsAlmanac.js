@@ -150,7 +150,7 @@ const StatsAlmanac = () => {
   const blogTagCounts = {};
   offloadData.forEach((post) => {
     (post.blog_tags || []).forEach((t) => {
-      if (t !== '100_Days_to_Offload' && t !== '100_Days_To_Offload') {
+      if (t.toLowerCase() !== '100_days_to_offload') {
         blogTagCounts[t] = (blogTagCounts[t] || 0) + 1;
       }
     });

@@ -256,6 +256,7 @@ export async function onRequest(context) {
       [/^\/books\/\d+$/, "/books"],
       [/^\/projects\/\d+$/, "/projects"],
       [/^\/100-days-to-offload\/\d+$/, "/100-days-to-offload"],
+      [/^\/tags\/[^/]+$/, "/tags"],
     ];
     const parentPath = staticChildParents.find(([rx]) => rx.test(pathname))?.[1];
     if (parentPath) {

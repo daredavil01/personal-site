@@ -56,3 +56,5 @@ stitch/
 
 # Raw Data
 knowledge_base/
+# Supabase CLI local link state
+supabase/.temp/

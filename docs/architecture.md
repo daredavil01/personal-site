@@ -91,7 +91,8 @@ personal-site/
 ├── supabase/
 │   └── migrations/             # SQL schema + RLS policies
 ├── scripts/
-│   ├── import-to-supabase.mjs  # One-time seed: imports data into Supabase (service-role)
+│   ├── import-tumblr-microblog.mjs    # Tumblr archive → microblog (idempotent upsert)
+│   ├── migrate-tags-to-central.mjs    # One-time: legacy text[] tags → tags + tag_associations
 │   └── upload-images-to-supabase.mjs  # One-time bulk image upload to Storage media bucket
 └── package.json
 ```

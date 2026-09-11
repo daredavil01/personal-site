@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { colorForTag, postArt } from "../../lib/generativeArt";
 
 // One piece of paper on the Scriptorium pinboard. The paper itself carries the
 // post type — sticky note for text, a slip with a drop quotation mark for
@@ -29,10 +30,45 @@ const typeChipFor = (postType) => ({
   photo: "bg-amber-50 text-amber-700",
 }[postType] || "bg-stone-100 text-stone-500");
 
-const PinboardCard = ({ post, onOpen }) => {
+// The card's generative background: seeded by post id, colored by its tags
+// (or a seeded palette when it has none). Kept faint so the text stays the
+// point; the paper is always light, so one opacity suits both themes.
+const PostArt = ({ art }) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid slice"
+    // -z-10 is safe: the card's rotate() transform makes it a stacking
+    // context, so this lands above the paper but under the text.
+    className="absolute inset-0 -z-10 w-full h-full pointer-events-none rounded-[3px] opacity-[0.16]"
+  >
+    {art.shapes.map((s, i) => (s.kind === "circle"
+      // eslint-disable-next-line react/no-array-index-key
+      ? <circle key={i} cx={s.cx} cy={s.cy} r={s.r} fill={s.fill} fillOpacity={s.opacity} />
+      : (
+        <rect
+          // eslint-disable-next-line react/no-array-index-key
+          key={i}
+          x={s.x}
+          y={s.y}
+          width={s.w}
+          height={s.h}
+          rx={2}
+          fill={s.fill}
+          fillOpacity={s.opacity}
+          transform={`rotate(${s.rotate} ${s.x + s.w / 2} ${s.y + s.h / 2})`}
+        />
+      )))}
+  </svg>
+);
+
+const NO_COLORS = new Map();
+
+const PinboardCard = ({ post, onOpen, tagColors = NO_COLORS }) => {
   const body = post.text || post.title || "";
   // Deterministic tilt so the wall doesn't reshuffle on every render.
   const rotation = ((post.id % 9) - 4) * 0.7;
+  const art = useMemo(() => postArt(post, tagColors), [post, tagColors]);
 
   return (
     <div
@@ -43,6 +79,9 @@ const PinboardCard = ({ post, onOpen }) => {
       style={{ transform: `rotate(${rotation}deg)` }}
       className={`relative break-inside-avoid mb-5 p-4 pt-5 text-left cursor-pointer shadow-[0_3px_10px_rgba(59,50,40,0.18)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.45)] hover:shadow-[0_6px_18px_rgba(59,50,40,0.28)] hover:z-10 hover:scale-[1.02] transition-all rounded-[3px] ${paperFor(post)}`}
     >
+      {/* Photo posts already carry a picture (or its placeholder). */}
+      {post.postType !== "photo" && <PostArt art={art} />}
+
       {/* pushpin */}
       <span
         aria-hidden="true"
@@ -93,7 +132,12 @@ const PinboardCard = ({ post, onOpen }) => {
       {post.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2.5">
           {post.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="font-label text-[9px] text-stone-500">
+            <span key={tag} className="inline-flex items-center gap-1 font-label text-[9px] text-stone-500">
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: colorForTag(tag, tagColors.get(tag)) }}
+              />
               #{tag}
             </span>
           ))}

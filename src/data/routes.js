@@ -67,6 +67,11 @@ const routes = [
     dropdown: true,
   },
   {
+    label: "Tags",
+    path: "/tags",
+    dropdown: true,
+  },
+  {
     label: "Contact",
     path: "/contact",
     dropdown: true,

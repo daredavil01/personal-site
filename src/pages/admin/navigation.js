@@ -11,6 +11,7 @@ import {
   MountainSnow,
   Rss,
   Sparkles,
+  Tags,
   Wrench,
 } from "./ui/icons";
 
@@ -42,6 +43,7 @@ export const NAV_GROUPS = [
       { to: "/admin/blogs", label: "100 Days", icon: FileText, resource: "blogs" },
       { to: "/admin/instagram", label: "Instagram", icon: Camera, resource: "instagram" },
       { to: "/admin/microblog", label: "Micro Blog", icon: Rss },
+      { to: "/admin/tags", label: "Tags", icon: Tags },
     ],
   },
   {

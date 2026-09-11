@@ -6,6 +6,7 @@ import { useBooks } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
+import TagLinks from "../components/common/TagLinks";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
@@ -117,15 +118,7 @@ const BookPost = () => {
             </p>
           )}
 
-          {book.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {book.tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-md text-xs border border-stone-100 dark:border-stone-800">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <TagLinks tags={book.tags} />
 
           {book.blog_link && (
             <div className="pt-2 border-t border-stone-100 dark:border-stone-800">

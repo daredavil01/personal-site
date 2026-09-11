@@ -24,8 +24,9 @@ is canonical.
   `createResource` CRUD factory (`_crud.js`) and `fromRow` / `toRow` mappers.
   Full lists are loaded lazily and cached through `src/context/ContentContext.js`,
   which exposes hooks: `useBooks`, `useSports`, `useTreks`, `useProjects`,
-  `useBlogs`, `useInstagram`, `useResume`, `useNowMeta`, `useNowMonths`
-  (each returns `{ data, loading, error }`).
+  `useBlogs`, `useInstagram`, `useResume`, `useNowMeta`, `useNowMonths`,
+  `useTags` (each returns `{ data, loading, error }`), plus `useTagColors`
+  (tag name → color map) and `useContentRefresh` (re-fetch one key).
 - **Microblog is the exception** — 1,600+ rows, so it is **not** in the context.
   Query it directly via `src/lib/api/microblog.js` (server-side paginated search
   plus `getMicroblogMonths` / `getMicroblogByMonth` date helpers).
@@ -33,9 +34,45 @@ is canonical.
   are schema-driven from `src/pages/admin/resources.js` — each resource's `fields`
   match the shape its api's `toRow` expects. Postgres auto-assigns row `id`s.
 - **Bulk seeding scripts** (`scripts/`, require `SUPABASE_SERVICE_ROLE_KEY` in
-  `.env`): `npm run data:import` (`import-to-supabase.mjs`),
-  `npm run microblog:import` (Tumblr archive, idempotent upsert),
+  `.env`): `npm run microblog:import` (Tumblr archive, idempotent upsert),
+  `npm run tags:migrate` (one-time legacy tag migration — see Tags below),
   `npm run images:upload` (`upload-images-to-supabase.mjs`).
+
+## Tags (Centralized)
+
+Tags are **not** columns on content rows. One `tags` table holds each tag's
+metadata (lowercase `name`, `display_name`, `color`, `category`,
+`description`); a polymorphic `tag_associations` table (`entity_type`,
+`entity_id`, `tag_id`, `position`) links tags to rows in `books`, `blogs`,
+`instagram`, `microblog`, `sports`, `treks`, `projects`. Schema + RPCs:
+`supabase/migrations/0003_centralized_tags.sql`. Resume skill categories are
+**not** tags (`resume_skills.category` stays a plain `text[]`).
+
+- **Reads:** select `*, tag_names` — `tag_names(<table>)` is a PostgREST computed
+  field. `_crud.js` does this automatically for resources created with
+  `tagType`; each `fromRow` maps `r.tag_names` onto its `tags` (blogs:
+  `blog_tags`) field, so components still read `.tags`.
+- **Writes:** `_crud.js` calls `rpc("set_entity_tags", { p_type, p_id, p_names })`
+  after saving the row. It normalizes (lowercase/trim/dedupe), creates missing
+  tags, and replaces the row's tag set atomically. Never write tag arrays to
+  content tables.
+- **Other RPCs:** `tags_with_counts()` (hub/admin/colors), `tag_entities(name)`
+  (cross-entity results), `merge_tags(from, into)`, `microblog_tag_facets()`,
+  `microblog_month_tags()`. Deleting a content row deletes its associations
+  (trigger).
+- **Admin:** `/admin/tags` (`src/pages/admin/TagManager.js`) — edit color /
+  display name / category, rename, merge duplicates, delete, JSON export/import
+  of metadata. Form tag fields with `suggest: true` autocomplete from the
+  central list.
+- **Public:** `/tags` (`src/pages/TagsHub.js`) and `/tags/:name`
+  (`src/pages/TagDetail.js`). Link with `tagPath(name)` from
+  `src/lib/api/tags.js` (URI-encoded, never slugified — Marathi names).
+  Tag colors resolve through `colorForTag` in `src/lib/generativeArt.js`
+  (stored color, else a hue hashed from the name).
+- **Compare tags case-insensitively** — names are stored lowercase.
+- **Legacy migration (one-time):** apply 0003 → `npm run tags:migrate -- --dry-run`
+  → `npm run tags:migrate` (verify must pass) → re-run just before deploying
+  → deploy → apply `0004_drop_legacy_tag_columns.sql`.
 - **Hand-maintained files NOT in Supabase:** `src/data/changelog.md`,
   `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
   `src/data/pageMeta.js`, `src/data/stats/personal.js`.
@@ -72,6 +109,8 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Admin dashboard | `src/pages/admin/` |
 | Admin form schema | `src/pages/admin/resources.js` |
 | DB schema / migrations | `supabase/migrations/` |
+| Tag API / admin / public pages | `src/lib/api/tags.js`, `src/pages/admin/TagManager.js`, `src/pages/TagsHub.js`, `src/pages/TagDetail.js` |
+| Tag colors + micro-blog art | `src/lib/generativeArt.js` |
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
@@ -215,7 +254,7 @@ No images.
 1. `title`, 2. `date` (**Month DD, YYYY** — e.g. `February 22, 2026`),
 3. `description`, 4. `place`, 5. `distance` (`10 Kms` / `21 Kms` / `35 Kms` /
 `42 Kms` / `50 Kms`, or other), 6. `time` (HH:MM:SS), 7. `timeCertificateLink`,
-8. `bibNumber`, 9. Images.
+8. `bibNumber`, 9. `tags` (optional, e.g. `marathon`), 10. Images.
 
 Add photos via the form's **Images** (`slideImages`) field — full-size files are
 fine, they're compressed in the browser on the way to the `media` bucket
@@ -229,7 +268,7 @@ fine, they're compressed in the browser on the way to the `media` bucket
 
 1. `fort_name`, 2. `trek_time` (e.g. `2 Hrs`), 3. `endurance_level`
 (Easy/Medium/Hard), 4. `date` (**DD-MM-YYYY** — e.g. `17-02-2019`),
-5. `blog_link` (optional), 6. Images.
+5. `blog_link` (optional), 6. `tags` (optional, e.g. `forts`), 7. Images.
 
 Add photos via the **Images** (`slideImages`) field — full-size files are fine,
 they're compressed in the browser on the way to the `media` bucket (`treks`
@@ -253,14 +292,18 @@ folder).
 archive with server-side full-text search; there is no generated JS data file.
 
 - **Schema:** `supabase/migrations/0002_microblog.sql` (`microblog` table +
-  `search_tsv` GIN index + RLS + `microblog_tag_facets()` RPC). Apply it via the
-  Supabase SQL editor or `supabase db push` before importing.
+  `search_tsv` GIN index + RLS). Tags live in the central tag tables (0003);
+  `microblog_tag_facets()` and the `?tags=` filter read them via `tag_names`.
+  Apply migrations via the Supabase SQL editor or `supabase db push` before importing.
 - **Seeding from the Tumblr export:** `npm run microblog:import` reads
   `knowledge_base/tumblr_posts.json`, cleans each post (HTML-entity decode,
   `<br>` → newline, post_type mapping), and **upserts on `(source, source_id)`**.
   It is idempotent (re-runnable, no duplicates) and **non-destructive** — it
   never clears the table, so admin-authored `manual` posts survive re-imports.
-  Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env`.
+  Export tags are written through `set_entity_tags` (only for posts that have
+  them). Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env`.
+- **Pinboard art:** each card draws seeded generative art (`src/lib/generativeArt.js`)
+  from its tags' colors, or a palette seeded by post id when untagged.
 - **Adding posts by hand:** admin dashboard → **Micro Blog** tab
   (`src/pages/admin/MicroblogManager.js`). New posts default to `source: manual`
   with a null `source_id`.

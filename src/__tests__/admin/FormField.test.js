@@ -10,6 +10,14 @@ import uploadImage from "../../lib/api/storage";
 // under jsdom. The compressor's own logic is covered in lib/imageCompress.test.js;
 // what's under test here is that FormField reports what came back.
 jest.mock("../../lib/api/storage", () => jest.fn());
+// The central tag list the suggest dropdown reads from.
+jest.mock("../../context/ContentContext", () => ({
+  useOptionalTags: () => [
+    { id: 1, name: "marathon", displayName: "", color: "#ff0000", total: 4 },
+    { id: 2, name: "marathons", displayName: "", color: null, total: 9 },
+    { id: 3, name: "trek", displayName: "", color: null, total: 2 },
+  ],
+}));
 jest.mock("../../lib/imageCompress", () => ({
   ...jest.requireActual("../../lib/imageCompress"),
   compressImage: jest.fn(),
@@ -92,6 +100,21 @@ describe("FormField", () => {
         clipboardData: { getData: () => "one, two ,three" },
       });
       expect(onChange).toHaveBeenCalledWith("tags", ["one", "two", "three"]);
+    });
+
+    it("suggests existing tags and adds the one picked with the arrow keys", () => {
+      const onChange = jest.fn();
+      renderField({ name: "tags", type: "tags", suggest: true }, ["trek"], onChange);
+      const input = screen.getByRole("combobox");
+
+      fireEvent.change(input, { target: { value: "mara" } });
+      // Both prefix-match; the more-used tag ranks first. "trek" is already held.
+      expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual(["marathons9", "marathon4"]);
+
+      fireEvent.keyDown(input, { key: "ArrowDown" });
+      fireEvent.keyDown(input, { key: "ArrowDown" });
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(onChange).toHaveBeenCalledWith("tags", ["trek", "marathon"]);
     });
 
     it("removes the last chip on Backspace in an empty input", () => {

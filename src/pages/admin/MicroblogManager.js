@@ -33,7 +33,9 @@ const FIELDS = [
   { name: "title", label: "Title", type: "text" },
   { name: "url", label: "Original URL", type: "url" },
   { name: "text", label: "Text", type: "textarea", required: true, span: "full" },
-  { name: "tags", label: "Tags", type: "tags", span: "full" },
+  {
+    name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+  },
   { name: "imageUrl", label: "Image", type: "image", span: "full" },
 ];
 

@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import {
-  searchMicroblog, getMicroblogTagFacets, getMicroblogStats, getMicroblogActivity,
+  searchMicroblog, getMicroblogTagFacets, getMicroblogStats, getMicroblogActivity, getMicroblogMonthTags,
 } from "../lib/api/microblog";
+import { useTagColors } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import PostCard from "../components/MicroBlog/PostCard";
 import PinboardCard from "../components/MicroBlog/PinboardCard";
@@ -38,7 +39,8 @@ const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
 };
 
-const parseTags = (raw) => (raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : []);
+// Lowercased because tag names are stored lowercase — keeps old ?tags=Life links working.
+const parseTags = (raw) => (raw ? raw.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean) : []);
 
 const shuffleArray = (arr) => {
   const a = [...arr];
@@ -73,10 +75,15 @@ const MicroBlog = () => {
   const [month, setMonth] = useState(() => searchParams.get("month") || "");
   const [sort, setSort] = useState(() => searchParams.get("sort") || "date_desc");
 
-  // The river strip's data: posts-per-month across the whole archive.
+  // The river strip's data: posts-per-month across the whole archive, plus
+  // each month's tags (for bar tints). Tag colors are fetched once here and
+  // shared by every card and bar.
   const [activity, setActivity] = useState(null);
+  const [monthTags, setMonthTags] = useState(null);
+  const tagColors = useTagColors();
   useEffect(() => {
     getMicroblogActivity().then(setActivity).catch(() => setActivity(null));
+    getMicroblogMonthTags().then(setMonthTags).catch(() => setMonthTags(null));
   }, []);
 
   const [rows, setRows] = useState([]);
@@ -416,6 +423,8 @@ const MicroBlog = () => {
                     months={activity.monthCounts}
                     activeMonth={month || null}
                     onSelect={(key) => setMonth(key || "")}
+                    monthTags={monthTags}
+                    tagColors={tagColors}
                   />
                 </div>
               )}
@@ -522,7 +531,7 @@ const MicroBlog = () => {
                 view === "wall" ? (
                   <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 px-1 pt-2">
                     {rows.map((post) => (
-                      <PinboardCard key={post.id} post={post} onOpen={setSelected} />
+                      <PinboardCard key={post.id} post={post} onOpen={setSelected} tagColors={tagColors} />
                     ))}
                   </div>
                 ) : (

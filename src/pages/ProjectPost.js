@@ -5,6 +5,7 @@ import { buildProjectMeta } from "../data/pageMeta";
 import { useProjects } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
+import TagLinks from "../components/common/TagLinks";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
@@ -105,6 +106,8 @@ const ProjectPost = () => {
             {project.desc && (
               <p className="font-body text-stone-700 dark:text-stone-300 leading-relaxed mb-0">{project.desc}</p>
             )}
+
+            <TagLinks tags={project.tags} />
 
             {project.link && (
               <a

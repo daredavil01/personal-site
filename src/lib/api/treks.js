@@ -4,6 +4,7 @@ import { toStorageImages } from "../supabaseClient";
 const treks = createResource({
   table: "treks",
   order: [{ column: "id", ascending: true }],
+  tagType: "trek",
   fromRow: (r) => ({
     id: r.id,
     fort_name: r.fort_name,
@@ -12,6 +13,7 @@ const treks = createResource({
     date: r.date,
     blog_link: r.blog_link ?? undefined,
     slideImages: toStorageImages(r.slide_images),
+    tags: r.tag_names ?? [],
     created_at: r.created_at,
   }),
   toRow: (v) => ({

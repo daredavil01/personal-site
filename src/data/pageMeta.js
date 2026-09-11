@@ -109,6 +109,12 @@ export const PAGE_META = {
       "Metrics of Intent: A quantitative deep-dive into a year of technical growth, artistic captures, and consistent physical output.",
     image: DEFAULT_IMAGE,
   },
+  "/tags": {
+    title: "Tags",
+    description:
+      "Browse Sanket's whole archive by theme — books, blogs, races, treks, projects, and micro-posts gathered under shared tags.",
+    image: DEFAULT_IMAGE,
+  },
   "/treks": {
     title: "My Treks",
     description:

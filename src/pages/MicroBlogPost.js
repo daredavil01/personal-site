@@ -5,6 +5,7 @@ import { getMicroblogPost } from "../lib/api/microblog";
 import { buildMicroblogMeta } from "../data/pageMeta";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import ExportImageButton from "../components/MicroBlog/ExportImageButton";
+import TagLinks from "../components/common/TagLinks";
 import { sourceLabels, typeColors } from "../components/MicroBlog/constants";
 
 const keyActivate = (fn) => (e) => {
@@ -107,18 +108,7 @@ const MicroBlogPost = () => {
               </p>
             )}
 
-            {post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-md text-xs border border-stone-100 dark:border-stone-800"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            <TagLinks tags={post.tags} />
 
             <div className="flex items-center justify-between pt-4 border-t border-stone-100 dark:border-stone-800">
               <p className="text-xs text-stone-400 font-label uppercase tracking-widest mb-0">

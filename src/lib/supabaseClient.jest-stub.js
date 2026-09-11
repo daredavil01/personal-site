@@ -15,6 +15,7 @@ export const isSupabaseConfigured = false;
 
 export const supabase = {
   from: () => makeQuery(),
+  rpc: () => makeQuery(),
   storage: {
     from: () => ({
       upload: async () => ({ data: null, error: null }),

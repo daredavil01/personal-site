@@ -65,7 +65,9 @@ const resources = [
       { name: "translator", label: "Translator" },
       { name: "blog_link", label: "Review link", type: "url" },
       { name: "blog_platform", label: "Review platform" },
-      { name: "tags", label: "Tags", type: "tags", span: "full" },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+      },
       { name: "description", label: "Description", type: "textarea", required: true, span: "full" },
     ],
   },
@@ -105,6 +107,9 @@ const resources = [
       { name: "time", label: "Finish time", type: "text", required: true, hint: "HH:MM:SS" },
       { name: "bibNumber", label: "Bib number" },
       { name: "timeCertificateLink", label: "Certificate link", type: "url", span: "full" },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+      },
       { name: "description", label: "Description", type: "textarea", required: true, span: "full" },
       { name: "slideImages", label: "Images", type: "slideImages", span: "full" },
     ],
@@ -142,6 +147,9 @@ const resources = [
         name: "endurance_level", label: "Endurance", type: "select", options: ["Easy", "Medium", "Hard"], required: true,
       },
       { name: "blog_link", label: "Blog link", type: "url", span: "full" },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+      },
       { name: "slideImages", label: "Images", type: "slideImages", span: "full" },
     ],
   },
@@ -166,6 +174,9 @@ const resources = [
       { name: "sortOrder", label: "Sort order", type: "number" },
       { name: "link", label: "Link", type: "url", required: true, span: "full" },
       { name: "image", label: "Image", type: "image", required: true, span: "full" },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+      },
       { name: "desc", label: "Description", type: "textarea", required: true, span: "full" },
     ],
   },
@@ -200,7 +211,9 @@ const resources = [
       },
       { name: "challenge_id", label: "Challenge id", hint: "e.g. 100_days_to_offload" },
       { name: "blog_link", label: "Link", type: "url", required: true },
-      { name: "blog_tags", label: "Tags", type: "tags", span: "full" },
+      {
+        name: "blog_tags", label: "Tags", type: "tags", suggest: true, span: "full",
+      },
       { name: "blog_description", label: "Description", type: "textarea", required: true, span: "full" },
     ],
   },
@@ -219,7 +232,9 @@ const resources = [
     ],
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
-      { name: "tags", label: "Tags", type: "tags" },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true,
+      },
       { name: "caption", label: "Caption", type: "textarea", required: true, span: "full" },
       { name: "slideImages", label: "Images", type: "slideImages", span: "full" },
     ],

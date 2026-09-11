@@ -1,5 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
+import { useOptionalTags } from "../../context/ContentContext";
 import uploadImage from "../../lib/api/storage";
+import { colorForTag } from "../../lib/generativeArt";
 import { ImageCompressError, compressImage, formatBytes } from "../../lib/imageCompress";
 import Button, { IconButton } from "./ui/Button";
 import { Checkbox, Input, Select, Textarea } from "./ui/Input";
@@ -322,13 +324,38 @@ const SelectOrOther = ({ options, value, onChange, placeholder, required }) => {
   );
 };
 
+const MAX_SUGGESTIONS = 8;
+
+// Central-tag matches for the typed text: prefix matches first, then by how
+// often the tag is used, skipping tags the field already holds.
+const matchSuggestions = (all, buffer, selected) => {
+  const q = buffer.trim().toLowerCase();
+  if (!q) return [];
+  const taken = new Set(selected.map((t) => t.toLowerCase()));
+  return all
+    .filter((t) => !taken.has(t.name)
+      && (t.name.includes(q) || t.displayName.toLowerCase().includes(q)))
+    .sort((a, b) => (Number(b.name.startsWith(q)) - Number(a.name.startsWith(q))) || (b.total - a.total))
+    .slice(0, MAX_SUGGESTIONS);
+};
+
 // Chip-style multi-tag editor. Type a tag and press Enter or comma to add it as
 // a removable chip; Backspace on an empty input removes the last chip; pasting a
 // comma-separated string adds each piece. Value stays a string[] (deduped,
 // case-insensitive) so every consumer of `type: "tags"` is unchanged.
-const TagInput = ({ value, onChange }) => {
+//
+// With `suggest`, typing also opens a list of existing central tags (color dot
+// + usage count); ↑/↓ pick one, Enter adds it, Esc closes the list. A name
+// that isn't in the list is still added as typed — set_entity_tags creates the
+// tag on save.
+const TagInput = ({ value, onChange, suggest = false }) => {
   const [buffer, setBuffer] = useState("");
+  const [active, setActive] = useState(-1);
+  const [open, setOpen] = useState(false);
+  const allTags = useOptionalTags();
+  const listId = useId();
   const tags = Array.isArray(value) ? value : [];
+  const suggestions = suggest && open ? matchSuggestions(allTags, buffer, tags) : [];
 
   const addTags = (raw) => {
     const incoming = raw.split(",").map((t) => t.trim()).filter(Boolean);
@@ -340,22 +367,43 @@ const TagInput = ({ value, onChange }) => {
     onChange(next);
   };
 
-  const commit = () => {
-    if (buffer.trim()) addTags(buffer);
+  const commit = (raw = buffer) => {
+    if (raw.trim()) addTags(raw);
     setBuffer("");
+    setActive(-1);
   };
 
   const onKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if (suggestions.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
       e.preventDefault();
-      commit();
+      const last = suggestions.length - 1;
+      setActive((i) => {
+        if (e.key === "ArrowDown") return i >= last ? 0 : i + 1;
+        return i <= 0 ? last : i - 1;
+      });
+    } else if (e.key === "Escape" && suggestions.length) {
+      e.preventDefault();
+      setOpen(false);
+    } else if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      commit(active >= 0 && suggestions[active] ? suggestions[active].name : buffer);
     } else if (e.key === "Backspace" && !buffer && tags.length) {
       onChange(tags.slice(0, -1));
     }
   };
 
+  const comboProps = suggest
+    ? {
+      role: "combobox",
+      "aria-expanded": suggestions.length > 0,
+      "aria-controls": listId,
+      "aria-autocomplete": "list",
+      "aria-activedescendant": active >= 0 && suggestions[active] ? `${listId}-${active}` : undefined,
+    }
+    : {};
+
   return (
-    <div className={`${inputClass} flex flex-wrap items-center gap-1.5 focus-within:ring-2 focus-within:ring-admin-500/40 focus-within:border-admin-500`}>
+    <div className={`relative ${inputClass} flex flex-wrap items-center gap-1.5 focus-within:ring-2 focus-within:ring-admin-500/40 focus-within:border-admin-500`}>
       {tags.map((tag, i) => (
         <span
           key={tag}
@@ -376,9 +424,16 @@ const TagInput = ({ value, onChange }) => {
         className="flex-1 min-w-[120px] bg-transparent text-sm text-stone-900 dark:text-stone-100 outline-none"
         placeholder={tags.length ? "" : "Type and press Enter"}
         value={buffer}
-        onChange={(e) => setBuffer(e.target.value)}
+        onChange={(e) => {
+          setBuffer(e.target.value);
+          setActive(-1);
+          setOpen(true);
+        }}
         onKeyDown={onKeyDown}
-        onBlur={commit}
+        onBlur={() => {
+          commit();
+          setOpen(false);
+        }}
         onPaste={(e) => {
           const text = e.clipboardData.getData("text");
           if (text.includes(",")) {
@@ -386,7 +441,43 @@ const TagInput = ({ value, onChange }) => {
             addTags(text);
           }
         }}
+        {...comboProps}
       />
+      {suggestions.length > 0 && (
+        <ul
+          id={listId}
+          role="listbox"
+          aria-label="Existing tags"
+          className={`absolute left-0 right-0 top-full mt-1 z-20 max-h-64 overflow-auto rounded-md border ${hairline} bg-white dark:bg-stone-900 shadow-lg py-1 m-0 list-none`}
+        >
+          {suggestions.map((t, i) => (
+            <li
+              key={t.id}
+              id={`${listId}-${i}`}
+              role="option"
+              aria-selected={i === active}
+              // mousedown, not click: the input's blur would otherwise commit
+              // the half-typed text before the pick lands.
+              onMouseDown={(e) => {
+                e.preventDefault();
+                commit(t.name);
+              }}
+              onMouseEnter={() => setActive(i)}
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer text-stone-700 dark:text-stone-200 ${
+                i === active ? "bg-stone-100 dark:bg-stone-800" : ""
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className="h-2.5 w-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: colorForTag(t.name, t.color) }}
+              />
+              <span className="flex-1 truncate">{t.name}</span>
+              <span className={`text-xs ${faintText}`}>{t.total}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -425,7 +516,7 @@ const FormField = ({ field, value, folder, onChange }) => {
         </Select>
       );
     case "tags":
-      return <TagInput value={Array.isArray(value) ? value : []} onChange={set} />;
+      return <TagInput value={Array.isArray(value) ? value : []} onChange={set} suggest={!!field.suggest} />;
     case "stringList":
       return (
         <Textarea

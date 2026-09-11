@@ -38,6 +38,8 @@ const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
+const TagsHub = lazy(() => import("./pages/TagsHub"));
+const TagDetail = lazy(() => import("./pages/TagDetail"));
 const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
 // The atlas homepage: orbit -> dive -> map. Serves "/" in atlas mode.
 const AtlasHome = lazy(() => import("./atlas/AtlasHome"));
@@ -95,6 +97,8 @@ const App = () => (
               <Route path="/treks" element={<TreksPage />} />
               <Route path="/interactive-me" element={<InteractiveMePage />} />
               <Route path="/mindmap" element={<MindMap />} />
+              <Route path="/tags" element={<TagsHub />} />
+              <Route path="/tags/:name" element={<TagDetail />} />
               <Route path="/admin/*" element={<AdminApp />} />
               {/* The dark-build preview route. Kept so old links and bookmarks
                 still land somewhere sensible now that "/" is the atlas. */}

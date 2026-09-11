@@ -4,12 +4,14 @@ import createResource from "./_crud";
 const blogs = createResource({
   table: "blogs",
   order: [{ column: "id", ascending: true }],
+  tagType: "blog",
+  tagField: "blog_tags",
   fromRow: (r) => ({
     id: r.id,
     blog_title: r.blog_title,
     blog_description: r.blog_description,
     challenge_id: r.challenge_id,
-    blog_tags: r.blog_tags ?? [],
+    blog_tags: r.tag_names ?? [],
     blog_date: r.blog_date,
     blog_link: r.blog_link,
     blog_platform: r.blog_platform,
@@ -20,7 +22,6 @@ const blogs = createResource({
     blog_title: v.blog_title,
     blog_description: v.blog_description,
     challenge_id: v.challenge_id || "100_days_to_offload",
-    blog_tags: v.blog_tags ?? [],
     blog_date: v.blog_date,
     blog_link: v.blog_link,
     blog_platform: v.blog_platform,

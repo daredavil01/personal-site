@@ -9,6 +9,37 @@ patch for fixes and tweaks.
 
 ---
 
+## [v14.0.0] — 2026-09-11
+
+### Added
+
+- **Centralized tags schema** (`supabase/migrations/0003_centralized_tags.sql`): A `tags` table (lowercase canonical `name`, `display_name`, `color`, `category`, `description`) plus a polymorphic `tag_associations` table linking tags to books, blogs, instagram, micro-posts, races, treks, and projects. Includes RLS (public read, owner write), an orphan-cleanup trigger on every content table, the `tag_names` computed field for reads, the atomic `set_entity_tags` RPC for writes, and the `tags_with_counts`, `tag_entities`, `merge_tags`, and `microblog_month_tags` RPCs.
+- **Legacy tag migration** (`scripts/migrate-tags-to-central.mjs`, `npm run tags:migrate`): Copies the old `text[]` tag columns into the new tables through `set_entity_tags`, keeps the original casing as `display_name`, supports `--dry-run`, and finishes with a per-table verify step. `supabase/migrations/0004_drop_legacy_tag_columns.sql` drops the old columns once it passes.
+- **Tags hub** (`src/pages/TagsHub.js`, `/tags`): Every tag across the archive, sorted by use, with category filters and search.
+- **Tag pages** (`src/pages/TagDetail.js`, `/tags/:name`): Everything carrying one tag, grouped by content type, with links to each item.
+- **Tag manager** (`src/pages/admin/TagManager.js`, `/admin/tags`): Edit a tag's color, display name, category, and description; rename; merge duplicates; delete; export/import tag metadata as JSON.
+- **Tag autocomplete** (`src/pages/admin/FormField.js`): Tag fields marked `suggest: true` list matching existing tags with a color dot and usage count, with keyboard navigation.
+- **Tags on races, treks, and projects** (`src/pages/admin/resources.js`, `src/lib/api/sports.js`, `treks.js`, `projects.js`): New tag fields in the admin, shown as links on their detail pages.
+- **Micro-blog pinboard art** (`src/lib/generativeArt.js`, `src/components/MicroBlog/PinboardCard.js`): Each card gets seeded generative art drawn from its tags' colors, or from a palette seeded by the post id when it has no tags. Tag chips gain color dots.
+- **Month river tag tints** (`src/components/MicroBlog/MonthRiver.js`): Tagged months are tinted with their top tag's color, and hovering a month lists its top tags.
+- **Tag links** (`src/components/common/TagLinks.js`): Tag chips on book, blog, micro-post, race, trek, and project pages now link to their tag page.
+
+### Changed
+
+- **Content API layer** (`src/lib/api/_crud.js` and the per-table modules): Tagged resources read `tag_names` and save tags through `set_entity_tags` after the row itself. Components still read `.tags` / `.blog_tags`, so nothing downstream changed shape.
+- **Micro-blog tag filter and facets** (`src/lib/api/microblog.js`): Filter by the `tag_names` computed field; facets now come from the central tables.
+- **Tumblr importer** (`scripts/import-tumblr-microblog.mjs`): Writes export tags through `set_entity_tags` instead of a column.
+- **Content context** (`src/context/ContentContext.js`): Adds `useTags`, `useTagColors`, `useContentRefresh`, and `useOptionalTags`.
+- **Markdown importer removed** (`scripts/import-to-supabase.mjs`, `npm run data:import`): Its `src/cms-content/` source no longer exists, and it cleared tables and wrote the dropped tag columns. Docs now point at `microblog:import` / `tags:migrate`.
+- **Git ignore** (`.gitignore`): Ignores `supabase/.temp/`, the Supabase CLI's local link state.
+
+### Fixed
+
+- **100 Days / Stats tag filtering** (`src/pages/OneHundredDays.js`, `src/components/Stats/StatsClassic.js`, `StatsAlmanac.js`): The challenge tag is now excluded case-insensitively, so lowercase tag names don't push `100_days_to_offload` into the topic lists.
+- **Old micro-blog tag links** (`src/pages/MicroBlog.js`): `?tags=` values are lowercased, so old links with capitalized tags still match.
+
+---
+
 ## [v13.2.5] — 2026-09-10
 
 ### Added

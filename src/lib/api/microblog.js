@@ -3,8 +3,8 @@ import { supabase, toStorageUrl } from "../supabaseClient";
 import { monthRange } from "../monthDigest";
 
 // Explicit column list so the generated `search_tsv` tsvector is never shipped
-// to the browser.
-const COLUMNS = "id, source, source_id, post_type, date, title, text, tags, url, image_url, created_at, updated_at";
+// to the browser. `tag_names` is the computed field from 0003_centralized_tags.
+const COLUMNS = "id, source, source_id, post_type, date, title, text, tag_names, url, image_url, created_at, updated_at";
 
 const fromRow = (r) => ({
   id: r.id,
@@ -14,7 +14,7 @@ const fromRow = (r) => ({
   date: r.date,
   title: r.title ?? "",
   text: r.text ?? "",
-  tags: r.tags ?? [],
+  tags: r.tag_names ?? [],
   url: r.url ?? undefined,
   imageUrl: toStorageUrl(r.image_url) ?? undefined,
 });
@@ -26,7 +26,6 @@ const toRow = (v) => ({
   date: v.date,
   title: v.title || "",
   text: v.text || "",
-  tags: v.tags ?? [],
   url: v.url || null,
   image_url: v.imageUrl || null,
 });
@@ -36,6 +35,7 @@ const toRow = (v) => ({
 const microblog = createResource({
   table: "microblog",
   order: [{ column: "date", ascending: false }, { column: "id", ascending: false }],
+  tagType: "microblog",
   fromRow,
   toRow,
 });
@@ -61,7 +61,7 @@ export async function searchMicroblog({
   if (trimmed) {
     q = q.textSearch("search_tsv", trimmed, { type: "websearch", config: "simple" });
   }
-  if (Array.isArray(tags) && tags.length) q = q.contains("tags", tags);
+  if (Array.isArray(tags) && tags.length) q = q.contains("tag_names", tags);
   if (source) q = q.eq("source", source);
   if (type) q = q.eq("post_type", type);
   if (month) {
@@ -104,6 +104,21 @@ export async function getMicroblogTagFacets() {
   const { data, error } = await supabase.rpc("microblog_tag_facets");
   if (error) throw error;
   return (data ?? []).map((r) => ({ tag: r.tag, count: Number(r.count) }));
+}
+
+/**
+ * Tag counts per "YYYY-MM" month, for the river strip's bar tints.
+ * @returns {Promise<Map<string, {tag: string, count: number}[]>>} each list most-used first
+ */
+export async function getMicroblogMonthTags() {
+  const { data, error } = await supabase.rpc("microblog_month_tags");
+  if (error) throw error;
+  const byMonth = new Map();
+  (data ?? []).forEach(({ month, tag, count }) => {
+    if (!byMonth.has(month)) byMonth.set(month, []);
+    byMonth.get(month).push({ tag, count: Number(count) });
+  });
+  return byMonth;
 }
 
 /**

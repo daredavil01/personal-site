@@ -3,6 +3,7 @@ import createResource from "./_crud";
 const books = createResource({
   table: "books",
   order: [{ column: "id", ascending: true }],
+  tagType: "book",
   fromRow: (r) => ({
     id: r.id,
     title: r.title,
@@ -11,7 +12,7 @@ const books = createResource({
     language: r.language,
     description: r.description,
     year: r.year,
-    tags: r.tags ?? [],
+    tags: r.tag_names ?? [],
     translator: r.translator ?? undefined,
     blog_link: r.blog_link ?? undefined,
     blog_platform: r.blog_platform ?? undefined,
@@ -24,7 +25,6 @@ const books = createResource({
     language: v.language,
     description: v.description,
     year: Number(v.year),
-    tags: v.tags ?? [],
     translator: v.translator || null,
     blog_link: v.blog_link || null,
     blog_platform: v.blog_platform || null,

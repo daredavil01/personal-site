@@ -10,7 +10,10 @@ const YEAR = 2026;
 const GOAL = 100;
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 // Every post carries the challenge tag — filtering by it is a no-op, so hide it
-const CHALLENGE_TAG = '100_Days_to_Offload';
+// Tags are stored lowercase (tags.name is canonical lowercase), so compare
+// case-insensitively.
+const CHALLENGE_TAG = '100_days_to_offload';
+const isChallengeTag = (tag) => tag.toLowerCase() === CHALLENGE_TAG;
 
 // Interactive elements here use div[role="button"] like the rest of the site —
 // originally to dodge the legacy HTML5UP button globals, which no longer exist.
@@ -122,7 +125,7 @@ const OneHundredDays = () => {
     const dist = {};
     blogsData.forEach((blog) => {
       blog.blog_tags.forEach((tag) => {
-        if (tag !== CHALLENGE_TAG) dist[tag] = (dist[tag] || 0) + 1;
+        if (!isChallengeTag(tag)) dist[tag] = (dist[tag] || 0) + 1;
       });
     });
     return Object.entries(dist).sort((a, b) => b[1] - a[1]);
@@ -457,7 +460,7 @@ const OneHundredDays = () => {
                     </p>
                   )}
                   <div className="flex flex-wrap gap-1 mt-auto pt-1">
-                    {blog.blog_tags.filter((t) => t !== CHALLENGE_TAG).map((tag) => (
+                    {blog.blog_tags.filter((t) => !isChallengeTag(t)).map((tag) => (
                       <span key={tag} className="font-label text-[9px] text-stone-400 dark:text-stone-500">
                         #{tag}
                       </span>

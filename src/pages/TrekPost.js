@@ -7,6 +7,7 @@ import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 import ImageSlider from "../components/Instagram/ImageSlider";
+import TagLinks from "../components/common/TagLinks";
 
 const difficultyClass = (level) => {
   switch (level?.toLowerCase()) {
@@ -117,6 +118,8 @@ const TrekPost = () => {
               ))}
             </div>
           </div>
+
+          <TagLinks tags={trek.tags} className="px-8 pt-6" />
 
           {trek.slideImages?.length > 0 && (
             <div className="p-8">

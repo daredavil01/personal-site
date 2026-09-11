@@ -4,6 +4,7 @@ import { toStorageImages } from "../supabaseClient";
 const sports = createResource({
   table: "sports",
   order: [{ column: "id", ascending: true }],
+  tagType: "sport",
   fromRow: (r) => ({
     id: r.id,
     title: r.title,
@@ -15,6 +16,7 @@ const sports = createResource({
     timeCertificateLink: r.time_certificate_link,
     bibNumber: r.bib_number,
     slideImages: toStorageImages(r.slide_images),
+    tags: r.tag_names ?? [],
     created_at: r.created_at,
   }),
   toRow: (v) => ({
