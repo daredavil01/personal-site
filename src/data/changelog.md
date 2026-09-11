@@ -9,6 +9,42 @@ patch for fixes and tweaks.
 
 ---
 
+## [v15.0.0] — 2026-09-11
+
+### Added
+
+- **Projects page, rebuilt** (`src/pages/Projects.js`, `src/components/Projects/`): `/projects` is now four tabbed views sharing one filter bar — **Showcase** (featured spotlight + masonry grid with hover screenshot previews), **Timeline** (grouped by year), **Statistics** (per-year, per-tech, per-category and per-status breakdowns), and **Table** (dense, sortable). Filters and the active view both live in the URL, so any filtered view is a shareable link. Replaces `ProjectGallery.js`, whose fixed `index % 6` layout meant a card changed shape whenever the list reordered.
+- **Project filters** (`src/components/Projects/useProjectFilters.js`, `ProjectFilters.js`): live search across title, subtitle, description, organization and role, plus category / status / year selects and multi-select tech and tag chips. Tech and tags OR within their own axis and AND across axes. Central tags are finally surfaced on `/projects` — projects have carried them since v14.0.0 but the page never rendered them.
+- **Quick-look modal** (`src/components/Projects/ProjectDetailsModal.js`): opens from any view with screenshots, stack, highlights, tags and links, without losing your place in the grid. Traps focus, closes on Escape, and returns focus to the card that opened it.
+- **Project metadata** (`supabase/migrations/0005_projects_reborn.sql`, `src/lib/api/projects.js`): `category`, `status`, `role`, `org`, `featured`, `visible`, `highlights`, `problem`, `solution`, `outcome`, `tech_stack`, `slide_images` (screenshots) and `links` (custom links — GitHub repo, live demo, write-up).
+- **Case-study detail page** (`src/pages/ProjectPost.js`): renders the date, status, organization, role, tech chips, highlights, a screenshot gallery and Problem / Solution / Outcome sections, alongside the custom-link buttons.
+- **`linkList` form widget** (`src/pages/admin/FormField.js`): repeatable `{label, url}` rows with reorder and delete, modelled on the existing `slideImages` widget.
+- **Pooled field autocomplete** (`src/pages/admin/FormField.js`, `ResourceManager.js`): a field can declare `suggestFrom` to autocomplete from values already used on its own resource rather than from the central tag list — how the tech-stack field suggests stacks you have used before.
+- **Project metadata, backfilled from the live sites** (`supabase/migrations/0006_projects_metadata.sql`): every one of the 13 projects now carries a category, status, role, tech stack, highlights and Problem / Solution / Outcome, sourced by visiting each project's own site and repository rather than guessed. Organizations are attributed (YUNG Foundation, Antyodaya Punarvasan), repos and live demos are linked, and RunFolio, E20 ka Chakravyuha and the Nisarg school portal are pinned as featured. The tech vocabulary this produces — Astro, React, Supabase, Tailwind, Cloudflare Pages/Workers, Firebase, Next.js and the rest — is what the new filter chips actually filter on.
+- **Field defaults in the admin form** (`src/pages/admin/ResourceManager.js`): a field can declare `default`, which `emptyForm` honours ahead of its type-based seed. Without it, `visible` would start false and every new project would be born hidden.
+
+### Changed
+
+- **Featured projects stay in the grid** (`src/components/Projects/ProjectsShowcase.js`, `ProjectCard.js`): the Showcase view used to remove a featured project from the masonry grid once it was in the spotlight, so a visitor scanning the list found it missing. Every project now appears in the grid, and a featured card carries a small ★ Featured marker so the repetition reads as deliberate. Timeline and Table already behaved this way, so all four views now agree.
+- **Screenshots render in colour** (`src/components/Projects/ProjectCard.js`): cards no longer greyscale their image until hover. Screenshots are the point of a portfolio card — desaturating them by default hid the thing the visitor came to see. The hover zoom stays.
+- **Project ordering** (`src/lib/api/projects.js`, `src/pages/admin/resources.js`): the hand-maintained `sort_order` column is gone — it was `0` on nine of thirteen rows. Projects now sort featured-first, then newest-first, and the visitor can re-sort by date, title or category.
+- **Project dates** (`supabase/migrations/0005_projects_reborn.sql`, `src/lib/projectDate.js`): `date` was free text holding a mix of `2020-10-20` and `August 2026`, which could not be sorted or filtered. The migration normalizes every row to ISO and converts the column to a real Postgres `date`; the admin form now uses a date picker. The column is nullable, and undated projects sort last everywhere.
+- **Cover images are optional** (`src/pages/admin/resources.js`, `src/components/Projects/projectMedia.js`): `image` is no longer required. A project falls back to its first screenshot, and to a placeholder when it has neither — previously a missing image rendered an empty tile, because a falsy `src` does not reliably fire `onError`.
+- **Project visibility** (`supabase/migrations/0005_projects_reborn.sql`): a project can be toggled hidden in `/admin`. This is enforced in RLS (`visible or is_owner()`), not in React, so a draft never reaches an anonymous visitor's payload, its `/tags` pages, its share card, or the public project counts.
+- **Social share tags** (`functions/_middleware.js`): the project OG image falls back to the first screenshot, matching what the page itself shows.
+
+### Fixed
+
+- **Restored a date the first cut of 0005 cleared** (`supabase/migrations/0007_restore_missing_project_dates.sql`): the `btrim` fix below landed one commit after 0005 was first published, so a database that applied the original version had already lost E20 ka Chakravyuha's date. 0007 restores any project left dateless by that bug. It only touches rows whose date is null, so it is idempotent and a no-op on a database that never ran the broken version.
+- **A leading space that would have eaten a date** (`supabase/migrations/0005_projects_reborn.sql`): one project is stored as `" E20 ka Chakravyuha"`. Every `where title = …` in the date backfill missed it, so applying the migration as written would have dropped that row into the null safety net and cleared its date. Titles are now trimmed first and matched with `btrim`.
+- **Six projects sharing one cover image** (`supabase/migrations/0006_projects_metadata.sql`): RunFolio, Visiting Card, E20, Antyodaya, CMS Site Planner and the Nisarg portal all pointed at the YUNG Foundation's logo, a placeholder that got reused. Cleared, so the new fallback shows a neutral placeholder instead of another organization's branding.
+- **RunLog archived** (`supabase/migrations/0006_projects_metadata.sql`): its deployment returns 404 and RunFolio superseded it, so it is marked Archived and hidden rather than left on the page as a dead link.
+- **Mind map project year** (`src/components/MindMap/MindMapDetailPanel.js`): the year chip read `project.date.slice(0, 4)`, which rendered "Augu" for a project dated "August 2026". It now uses `projectYear` and is omitted when there is no date. The panel also shows category, status and stack.
+- **Tag suggestion keys** (`src/pages/admin/FormField.js`): suggestion rows keyed on `t.id`, which is undefined for a pooled (non-central-tag) source. Keys now fall back to the name.
+- **`tag_entities` after the date change** (`supabase/migrations/0005_projects_reborn.sql`): the RPC declares `date text` and passed `projects.date` through raw, which only type-checked while that column was text. It is now cast, the same way the micro-blog arm already was.
+
+---
+
 ## [v14.1.0] — 2026-09-11
 
 ### Added

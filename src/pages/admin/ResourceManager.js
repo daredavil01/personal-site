@@ -15,13 +15,38 @@ import {
 } from "./ui/icons";
 import { hairline, mutedText, surface } from "./ui/tokens";
 
+// A field's own `default` wins over the type-based seed. Without it a boolean
+// like `visible` would start false and every new project would be born hidden.
 const emptyForm = (fields) => fields.reduce((acc, f) => {
-  if (f.type === "tags" || f.type === "stringList" || f.type === "slideImages") acc[f.name] = [];
+  if (f.default !== undefined) acc[f.name] = f.default;
+  else if (f.type === "tags" || f.type === "stringList"
+    || f.type === "slideImages" || f.type === "linkList") acc[f.name] = [];
   else if (f.type === "boolean") acc[f.name] = false;
   else if (f.type === "json") acc[f.name] = {};
   else acc[f.name] = "";
   return acc;
 }, {});
+
+// Values already used for `field` across this resource's rows, most-used first,
+// shaped like the central tag objects matchSuggestions expects. Backs the
+// `suggestFrom` autocomplete (e.g. tech stacks) without touching the tag tables.
+const pooledValues = (rows, field) => {
+  const counts = new Map();
+  (rows ?? []).forEach((row) => {
+    const values = Array.isArray(row?.[field]) ? row[field] : [];
+    values.forEach((raw) => {
+      const name = String(raw).trim();
+      if (!name) return;
+      const key = name.toLowerCase();
+      const entry = counts.get(key);
+      // First spelling seen wins and is what gets inserted, so picking a
+      // suggestion yields "React", not "react".
+      if (entry) entry.total += 1;
+      else counts.set(key, { name, displayName: name, total: 1 });
+    });
+  });
+  return [...counts.values()].sort((a, b) => b.total - a.total);
+};
 
 const isBlank = (value) => value === null
   || value === undefined
@@ -174,6 +199,7 @@ const ResourceManager = ({ resource }) => {
                 value={form[field.name]}
                 folder={resource.key}
                 onChange={onField}
+                suggestOptions={field.suggestFrom ? pooledValues(rows, field.suggestFrom) : null}
               />
             </Field>
           ))}

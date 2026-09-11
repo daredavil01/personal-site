@@ -29,6 +29,7 @@ export {
   Inbox,
   Info,
   LayoutDashboard,
+  Link as LinkIcon,
   Loader2,
   LogOut,
   Menu,

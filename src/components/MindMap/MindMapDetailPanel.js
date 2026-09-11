@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { projectYear } from "../../lib/projectDate";
 
 const difficultyClass = (level) => {
   switch (level?.toLowerCase()) {
@@ -121,21 +122,36 @@ const FeatureDetail = ({ feature }) => (
   </div>
 );
 
-const ProjectDetail = ({ project }) => (
-  <div className="space-y-4">
-    {(project.subtitle || project.subTitle) && (
-      <p className="font-label text-stone-500 dark:text-stone-400 text-sm">
-        {project.subtitle || project.subTitle}
-      </p>
-    )}
-    <MetaChip icon="calendar_today" text={project.date?.slice(0, 4)} />
-    {project.desc && (
-      <p className="font-body text-stone-600 dark:text-stone-300 text-base leading-relaxed border-l-4 border-purple-400/40 pl-4 py-1">
-        {project.desc}
-      </p>
-    )}
-  </div>
-);
+const ProjectDetail = ({ project }) => {
+  // Was project.date.slice(0, 4), which only produced a year for rows that
+  // happened to start with one — "August 2026" rendered as "Augu". The column is
+  // a real date now, and the helper returns null rather than a nonsense chip.
+  const year = projectYear(project.date);
+  return (
+    <div className="space-y-4">
+      {(project.subtitle || project.subTitle) && (
+        <p className="font-label text-stone-500 dark:text-stone-400 text-sm">
+          {project.subtitle || project.subTitle}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-4">
+        {year && <MetaChip icon="calendar_today" text={year} />}
+        {project.category && <MetaChip icon="category" text={project.category} />}
+        {project.status && <MetaChip icon="bolt" text={project.status} />}
+      </div>
+      {project.techStack?.length > 0 && (
+        <p className="font-label text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider">
+          {project.techStack.join(" · ")}
+        </p>
+      )}
+      {project.desc && (
+        <p className="font-body text-stone-600 dark:text-stone-300 text-base leading-relaxed border-l-4 border-purple-400/40 pl-4 py-1">
+          {project.desc}
+        </p>
+      )}
+    </div>
+  );
+};
 
 const BlogDetail = ({ blog }) => (
   <div className="space-y-4">

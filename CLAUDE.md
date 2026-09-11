@@ -276,6 +276,42 @@ folder).
 
 ---
 
+### Projects Page
+
+**Table:** `projects` (`src/lib/api/projects.js`), admin → **Projects**. Collect:
+
+1. `title`, 2. `subtitle`, 3. `date` (**YYYY-MM-DD**, optional — a real Postgres
+`date` since `0005`), 4. `category` (Web App / Website / Data Story / Tool /
+Design / Other), 5. `status` (Live / In Progress / Archived / Concept),
+6. `role`, 7. `org` (blank for personal), 8. `featured` (pins it to the
+spotlight), 9. `visible` (off = draft), 10. `link` (required primary URL),
+11. `image` (optional cover), 12. `techStack`, 13. `tags`, 14. `links`
+(`{label, url}` rows — GitHub repo, demo, write-up), 15. `desc`,
+16. `highlights`, 17. `problem` / `solution` / `outcome`, 18. Screenshots.
+
+Add screenshots via the form's **Screenshots** (`slideImages`) field — full-size
+files are fine, they're compressed in the browser on the way to the `media`
+bucket (`projects` folder). A project with no cover image falls back to its first
+screenshot.
+
+- **Visibility is enforced in Postgres, not React.** `0005` narrows the table's
+  RLS select policy to `visible or is_owner()`, so a hidden project never reaches
+  an anonymous payload, its `/tags` pages, its share card, or the public counts.
+  `/admin` is authenticated as the owner and still sees everything.
+- **`tech_stack` is a plain `text[]`, not tags.** `set_entity_tags` replaces an
+  entity's *entire* tag set, so it can't back two independent tag fields on one
+  row. Central `tags` stay the topical axis; tech stack is the build axis. Both
+  are filterable on `/projects`.
+- **Ordering is featured-first, then newest-first.** The old `sort_order` column
+  was dropped in `0005`; don't reintroduce it.
+- **Public page:** `src/pages/Projects.js` composes four views from
+  `src/components/Projects/` (Showcase, Timeline, Statistics, Table) over one
+  `useProjectFilters` hook. Filters and `?view=` are both URL state, so merge
+  into existing search params — never `setSearchParams({ view })`, which wipes
+  the filters.
+
+---
+
 ### 100 Days To Offload
 
 **Table:** `blogs` (`src/lib/api/blogs.js`), admin → **100 Days (Blogs)**. Collect:

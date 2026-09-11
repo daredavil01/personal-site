@@ -50,8 +50,8 @@ describe("date serialization", () => {
   });
 });
 
-const renderField = (field, value, onChange = () => {}) => render(
-  <FormField field={field} value={value} onChange={onChange} />,
+const renderField = (field, value, onChange = () => {}, suggestOptions = null) => render(
+  <FormField field={field} value={value} onChange={onChange} suggestOptions={suggestOptions} />,
 );
 
 describe("FormField", () => {
@@ -276,6 +276,80 @@ describe("FormField", () => {
       renderField({ name: "slideImages", type: "slideImages" }, SLIDES, onChange);
       fireEvent.click(screen.getByRole("button", { name: "Remove slide 1" }));
       expect(onChange).toHaveBeenCalledWith("slideImages", [SLIDES[1]]);
+    });
+  });
+
+  describe("linkList", () => {
+    const LINKS = [
+      { label: "GitHub", url: "https://github.com/x" },
+      { label: "Demo", url: "https://demo.example" },
+    ];
+
+    it("adds an empty row", () => {
+      const onChange = jest.fn();
+      renderField({ name: "links", type: "linkList" }, [], onChange);
+      fireEvent.click(screen.getByRole("button", { name: /add link/i }));
+      expect(onChange).toHaveBeenCalledWith("links", [{ label: "", url: "" }]);
+    });
+
+    it("edits a row's label and url independently", () => {
+      const onChange = jest.fn();
+      renderField({ name: "links", type: "linkList" }, LINKS, onChange);
+
+      fireEvent.change(screen.getByLabelText("Label for link 1"), { target: { value: "Source" } });
+      expect(onChange).toHaveBeenCalledWith("links", [
+        { label: "Source", url: "https://github.com/x" }, LINKS[1],
+      ]);
+
+      fireEvent.change(screen.getByLabelText("URL for link 2"), { target: { value: "https://new" } });
+      expect(onChange).toHaveBeenCalledWith("links", [
+        LINKS[0], { label: "Demo", url: "https://new" },
+      ]);
+    });
+
+    it("reorders rows and keeps the ends disabled", () => {
+      const onChange = jest.fn();
+      renderField({ name: "links", type: "linkList" }, LINKS, onChange);
+
+      expect(screen.getByRole("button", { name: "Move link 1 up" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Move link 2 down" })).toBeDisabled();
+
+      fireEvent.click(screen.getByRole("button", { name: "Move link 2 up" }));
+      expect(onChange).toHaveBeenCalledWith("links", [LINKS[1], LINKS[0]]);
+    });
+
+    it("removes a row", () => {
+      const onChange = jest.fn();
+      renderField({ name: "links", type: "linkList" }, LINKS, onChange);
+      fireEvent.click(screen.getByRole("button", { name: "Remove link 1" }));
+      expect(onChange).toHaveBeenCalledWith("links", [LINKS[1]]);
+    });
+  });
+
+  // `suggest` reads the central tag list; `suggestFrom` reads values already used
+  // on the resource. A tech-stack field must never offer "marathon".
+  describe("tags with a pooled suggestion source", () => {
+    // The shape ResourceManager.pooledValues emits: display casing preserved, so
+    // picking a suggestion inserts "React" rather than lowercasing it.
+    const POOL = [
+      { name: "React", displayName: "React", total: 5 },
+      { name: "Supabase", displayName: "Supabase", total: 3 },
+    ];
+
+    it("suggests from the injected pool, not the central tags", () => {
+      renderField({ name: "techStack", type: "tags", suggestFrom: "techStack" }, [], () => {}, POOL);
+      fireEvent.change(screen.getByRole("combobox"), { target: { value: "r" } });
+
+      expect(screen.getByText("React")).toBeInTheDocument();
+      expect(screen.queryByText("marathon")).not.toBeInTheDocument();
+    });
+
+    it("still suggests central tags for a plain suggest field", () => {
+      renderField({ name: "tags", type: "tags", suggest: true }, []);
+      fireEvent.change(screen.getByRole("combobox"), { target: { value: "mara" } });
+
+      expect(screen.getByText("marathon")).toBeInTheDocument();
+      expect(screen.queryByText("React")).not.toBeInTheDocument();
     });
   });
 

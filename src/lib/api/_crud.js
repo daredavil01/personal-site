@@ -44,8 +44,8 @@ export default function createResource({
 
   async function list() {
     let query = supabase.from(table).select(columns);
-    order.forEach(({ column, ascending }) => {
-      query = query.order(column, { ascending });
+    order.forEach(({ column, ascending, nullsFirst }) => {
+      query = query.order(column, { ascending, nullsFirst });
     });
     const { data, error } = await query;
     if (error) throw error;
