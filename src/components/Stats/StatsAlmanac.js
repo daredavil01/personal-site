@@ -5,7 +5,8 @@ import {
   useBooks, useBlogs, useSports, useInstagram, useTreks, useProjects, useResume,
 } from "../../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../common/AsyncStates";
-import { getMicroblogTagFacets, getMicroblogActivity } from "../../lib/api/microblog";
+import { getMicroblogActivity } from "../../lib/api/microblog";
+import TagAnalysis from "./TagAnalysis";
 import CountUp from "./CountUp";
 import ChapterRibbon from "./ChapterRibbon";
 import PuneSkyline from "./PuneSkyline";
@@ -29,10 +30,8 @@ const StatsAlmanac = () => {
   const hasError = booksError || blogsError || sportsError || instaError
     || treksError || projectsError || resumeError;
 
-  const [microblogTags, setMicroblogTags] = useState([]);
   const [microActivity, setMicroActivity] = useState(null);
   useEffect(() => {
-    getMicroblogTagFacets().then(setMicroblogTags).catch(() => {});
     getMicroblogActivity().then(setMicroActivity).catch(() => {});
   }, []);
 
@@ -141,7 +140,6 @@ const StatsAlmanac = () => {
     (b.tags || []).forEach((t) => { bookTagCounts[t] = (bookTagCounts[t] || 0) + 1; });
   });
   const topBookTags = Object.entries(bookTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  const allBookTags = Object.entries(bookTagCounts).sort((a, b) => b[1] - a[1]);
 
   // Books: with reviews
   const booksWithReviews = books.filter((b) => b.blog_link).length;
@@ -156,7 +154,6 @@ const StatsAlmanac = () => {
     });
   });
   const topBlogTags = Object.entries(blogTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const allBlogTags = Object.entries(blogTagCounts).sort((a, b) => b[1] - a[1]);
 
   // Blog: language split
   const blogEnglish = offloadData.filter((p) => p.language === 'English').length;
@@ -647,42 +644,9 @@ const StatsAlmanac = () => {
 
           {/* Content Tags — full-width appendix */}
           <div className={`col-span-1 md:col-span-12 ${cellBase}`}>
-            <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Appendix · All Tags Across Content</span>
+            <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Appendix · Themes Across Content</span>
             <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-8">Content Tags</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-4">Books · {allBookTags.length} tags</p>
-                <div className="flex flex-wrap gap-2">
-                  {allBookTags.map(([tag, count]) => (
-                    <span key={tag} className="px-2.5 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-full font-label text-[10px] uppercase tracking-widest border border-stone-200 dark:border-stone-700">
-                      {tag} <span className="text-secondary font-bold">·{count}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-4">100 Days to Offload · {allBlogTags.length} tags</p>
-                <div className="flex flex-wrap gap-2">
-                  {allBlogTags.map(([tag, count]) => (
-                    <span key={tag} className="px-2.5 py-1 bg-secondary/5 dark:bg-secondary/10 text-secondary rounded-full font-label text-[10px] uppercase tracking-widest border border-secondary/15 dark:border-secondary/25">
-                      {tag.replace(/_/g, ' ')} <span className="font-bold">·{count}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-4">Micro Blog · {microblogTags.length} tags</p>
-                <div className="flex flex-wrap gap-2">
-                  {microblogTags.length > 0 ? microblogTags.slice(0, 40).map(({ tag, count }) => (
-                    <span key={tag} className="px-2.5 py-1 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded-full font-label text-[10px] uppercase tracking-widest border border-stone-200 dark:border-stone-700">
-                      #{tag} <span className="text-secondary/70 font-bold">·{count}</span>
-                    </span>
-                  )) : (
-                    <span className="font-label text-[10px] text-stone-400 dark:text-stone-600 uppercase tracking-widest">Loading…</span>
-                  )}
-                </div>
-              </div>
-            </div>
+            <TagAnalysis />
           </div>
 
         </div>

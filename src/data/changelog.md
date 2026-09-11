@@ -9,6 +9,18 @@ patch for fixes and tweaks.
 
 ---
 
+## [v14.1.0] — 2026-09-11
+
+### Added
+
+- **Tag analysis** (`src/components/Stats/TagAnalysis.js`): The Stats page's Content Tags section is now an analysis of the central tag tables rather than three separate per-table tag lists. It shows headline numbers (themes in use, tag links, cross-content themes, share used only once), the 12 most-used themes as bars split by content type, "bridge" themes that span several content types, and a per-type table of theme counts and top themes. Every tag links to its `/tags/:name` page. Content-type colors come from the validated dataviz palette in separate light and dark steps. The challenge's `100_days_to_offload` marker tag is left out.
+
+### Changed
+
+- **Stats views** (`src/components/Stats/StatsAlmanac.js`, `StatsClassic.js`): Both render `TagAnalysis` in place of the old tag dump and no longer fetch micro-blog tag facets separately.
+
+---
+
 ## [v14.0.0] — 2026-09-11
 
 ### Added
