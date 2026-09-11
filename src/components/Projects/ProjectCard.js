@@ -69,14 +69,21 @@ const ProjectCard = ({ project, onOpen }) => {
               loading="lazy"
               decoding="async"
               onError={() => setErrored(true)}
-              className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
             <Placeholder />
           )}
 
-          {project.status && (
-            <div className="absolute top-3 left-3">
+          {/* Featured projects also appear in the grid, so the card says why it
+              is up in the spotlight too rather than looking duplicated. */}
+          {(project.status || project.featured) && (
+            <div className="absolute top-3 left-3 flex items-center gap-1.5">
+              {project.featured && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-900/90 backdrop-blur font-label text-[10px] uppercase tracking-widest font-bold text-white">
+                  ★ Featured
+                </span>
+              )}
               <StatusBadge status={project.status} />
             </div>
           )}

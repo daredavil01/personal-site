@@ -68,10 +68,20 @@ const setup = (entries = ["/projects"]) => render(
 describe("Projects page", () => {
   beforeEach(() => { PROJECTS_REF.current = PROJECTS; });
 
-  it("renders the spotlight for a featured project and cards for the rest", () => {
+  it("spotlights a featured project and still lists it in the grid", () => {
     setup();
+    // The spotlight is a highlight, not a filing cabinet — a promoted project
+    // must not vanish from the grid a visitor is scanning.
     expect(screen.getByText("Featured")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open details for RunLog/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /open details for Social-Ape/i })).toBeInTheDocument();
+  });
+
+  it("renders screenshots in colour rather than greyed out", () => {
+    setup();
+    const card = screen.getByRole("button", { name: /open details for RunLog/i });
+    const img = within(card).getByRole("img");
+    expect(img.className).not.toMatch(/grayscale/);
   });
 
   it("shows a placeholder instead of a broken tile when a project has no imagery", () => {
