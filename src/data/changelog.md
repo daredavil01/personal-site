@@ -33,6 +33,7 @@ patch for fixes and tweaks.
 
 ### Fixed
 
+- **Restored a date the first cut of 0005 cleared** (`supabase/migrations/0007_restore_missing_project_dates.sql`): the `btrim` fix below landed one commit after 0005 was first published, so a database that applied the original version had already lost E20 ka Chakravyuha's date. 0007 restores any project left dateless by that bug. It only touches rows whose date is null, so it is idempotent and a no-op on a database that never ran the broken version.
 - **A leading space that would have eaten a date** (`supabase/migrations/0005_projects_reborn.sql`): one project is stored as `" E20 ka Chakravyuha"`. Every `where title = …` in the date backfill missed it, so applying the migration as written would have dropped that row into the null safety net and cleared its date. Titles are now trimmed first and matched with `btrim`.
 - **Six projects sharing one cover image** (`supabase/migrations/0006_projects_metadata.sql`): RunFolio, Visiting Card, E20, Antyodaya, CMS Site Planner and the Nisarg portal all pointed at the YUNG Foundation's logo, a placeholder that got reused. Cleared, so the new fallback shows a neutral placeholder instead of another organization's branding.
 - **RunLog archived** (`supabase/migrations/0006_projects_metadata.sql`): its deployment returns 404 and RunFolio superseded it, so it is marked Archived and hidden rather than left on the page as a dead link.
