@@ -297,7 +297,11 @@ async function fromOpenLibrary(book) {
 const GOOGLE_KEY = process.env.GOOGLE_BOOKS_API_KEY || "";
 
 async function fromGoogleBooks(book) {
-  const q = encodeURIComponent(`intitle:${book.title} inauthor:${book.author}`);
+  // The main title only, for the same reason Open Library gets it: the
+  // subtitles in this table are invented and sometimes misspelled.
+  const q = encodeURIComponent(
+    `intitle:${mainTitle(book.title)} inauthor:${firstAuthor(book.author)}`,
+  );
   const key = GOOGLE_KEY ? `&key=${GOOGLE_KEY}` : "";
   const data = await getJson(
     `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=5${key}`,
@@ -310,30 +314,37 @@ async function fromGoogleBooks(book) {
   }
   if (!data?.items?.length) return null;
 
-  const item = data.items.find((i) =>
-    acceptable(book.title, i.volumeInfo?.title ?? ""),
-  );
+  const item = data.items.find((i) => {
+    const v = i.volumeInfo ?? {};
+    return acceptable(book.title, v.title ?? "")
+      && authorOk(book, { author_name: v.authors ?? [] });
+  });
   if (!item) return null;
   const v = item.volumeInfo;
 
   return {
     source: "googlebooks",
-    matched: v.title,
+    matched: `${v.title} — ${(v.authors ?? [])[0] ?? "?"}`,
     score: score(book.title, v.title),
-    // zoom=1 is the readable cover; the default thumbnail is a 128px postage stamp.
+    // zoom=2 is ~75 KB and readable at shelf size. The default thumbnail
+    // (zoom=1) is a 9 KB postage stamp; zoom=4 blows past the 300 KB cap.
     coverUrl:
       v.imageLinks?.thumbnail
         ?.replace(/^http:/, "https:")
-        .replace(/&edge=curl/, "") ?? null,
+        .replace(/&edge=curl/, "")
+        .replace(/zoom=\d/, "zoom=2") ?? null,
     isbn:
       v.industryIdentifiers?.find((i) => i.type === "ISBN_13")?.identifier ??
       v.industryIdentifiers?.[0]?.identifier ??
       null,
     pageCount: v.pageCount || null,
-    firstPublished: v.publishedDate
-      ? Number(String(v.publishedDate).slice(0, 4))
-      : null,
-    publisher: v.publisher ?? null,
+    // Deliberately not mapped. Google Books reports the *edition's* publication
+    // date — Sapiens comes back as 2014 — and `first_published` means the year
+    // the book first appeared (2011). Open Library's first_publish_year is the
+    // only source here that answers the right question, so a Google Books hit
+    // leaves this null rather than filling it with a plausible wrong number.
+    firstPublished: null,
+    publisher: tidyPublisher(v.publisher),
   };
 }
 
