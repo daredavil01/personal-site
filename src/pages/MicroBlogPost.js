@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { getMicroblogPost } from "../lib/api/microblog";
 import { buildMicroblogMeta } from "../data/pageMeta";
@@ -126,6 +127,7 @@ const MicroBlogPost = () => {
                 </a>
               )}
             </div>
+            <RelatedContent type="microblog" id={id} />
           </article>
         )}
       </div>

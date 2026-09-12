@@ -24,7 +24,10 @@
     "blogs:infographic": "node scripts/build-blog-infographic.mjs",
     "books:backfill": "node scripts/backfill-books-metadata.mjs",
     "books:template": "node scripts/make-books-template.mjs",
-    "books:apply": "node scripts/apply-books-metadata.mjs"
+    "books:apply": "node scripts/apply-books-metadata.mjs",
+    "dev:ask": "npm run build && wrangler pages dev build --port 8788",
+    "ask:index": "node scripts/build-content-index.mjs",
+    "docs:build": "node scripts/build-docs.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.3.0",

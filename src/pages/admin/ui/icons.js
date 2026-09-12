@@ -33,6 +33,8 @@ export {
   Loader2,
   LogOut,
   Menu,
+  MessageCircle,
+  MessagesSquare,
   Moon,
   MountainSnow,
   Pencil,

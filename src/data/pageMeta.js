@@ -25,6 +25,12 @@ export const PAGE_META = {
       "Full-stack software developer, ultra-marathoner, fort-trekker, and writer. Read about Sanket Tambare's background, interests, and what drives him.",
     image: PERSON_IMAGE,
   },
+  "/ask": {
+    title: "Ask the Archive",
+    description:
+      "Ask this site anything in plain language. A second brain over every book, race, trek, project and short post, answering with the pages it drew from.",
+    image: DEFAULT_IMAGE,
+  },
   "/books": {
     title: "Books",
     description:

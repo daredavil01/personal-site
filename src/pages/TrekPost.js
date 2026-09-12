@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildTrekMeta } from "../data/pageMeta";
 import { useTreks } from "../context/ContentContext";
@@ -144,6 +145,7 @@ const TrekPost = () => {
               </a>
             </div>
           )}
+          <RelatedContent type="trek" id={id} />
         </article>
       </div>
     </PageShell>

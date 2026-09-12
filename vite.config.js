@@ -25,6 +25,15 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    // Vite does not run Cloudflare Pages Functions, so /api/ask 404s here and
+    // the chat says "Something went wrong". Run `npm run dev:ask` alongside
+    // `npm run dev` and this forwards the endpoint to that worker.
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8788",
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     outDir: "build",

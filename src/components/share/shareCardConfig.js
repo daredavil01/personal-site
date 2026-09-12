@@ -119,6 +119,19 @@ const trek = (item) => ({
   footerUrl: `${SITE_DOMAIN}/treks/${item.id}`,
 });
 
+// An /ask answer. The question is the title, the answer is the body, and the
+// sources become the tag row so the card says where it came from.
+const ask = (item) => ({
+  kind: "ask",
+  eyebrow: "Ask the Archive",
+  title: clean(item.question),
+  metaRows: [],
+  body: clean(item.answer).replace(/\[(\d{1,2})\]/g, ""),
+  tags: (item.sources || []).slice(0, 4).map((s) => clean(s.title)).filter(Boolean),
+  imageUrl: null,
+  footerUrl: `${SITE_DOMAIN}/ask`,
+});
+
 export const ADAPTERS = {
   microblog,
   book,
@@ -126,6 +139,7 @@ export const ADAPTERS = {
   instagram,
   sport,
   trek,
+  ask,
 };
 
 // Human label used in the trigger title / share sheet text.
@@ -136,6 +150,7 @@ export const KIND_LABELS = {
   instagram: "Post",
   sport: "Race",
   trek: "Trek",
+  ask: "Answer",
 };
 
 export const toShareModel = (kind, item) => (ADAPTERS[kind] && item ? ADAPTERS[kind](item) : null);

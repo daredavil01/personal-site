@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildBlogMeta } from "../data/pageMeta";
 import { useBlogs } from "../context/ContentContext";
@@ -132,6 +133,7 @@ const BlogPost = () => {
               </a>
             </div>
           )}
+          <RelatedContent type="blog" id={id} />
         </article>
       </div>
     </PageShell>

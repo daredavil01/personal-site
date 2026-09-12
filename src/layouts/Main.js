@@ -7,6 +7,7 @@ import Footer from "../components/Template/Footer";
 import ScrollToTop from "../components/Template/ScrollToTop";
 import FloatingToggle from "../components/Template/FloatingToggle";
 import PageMeta from "../components/Template/PageMeta";
+import AskLauncher from "../components/Ask/AskLauncher";
 import "../styles/classic.css"; // bare-element defaults, scoped to .classic-root
 
 const Main = (props) => (
@@ -27,6 +28,7 @@ const Main = (props) => (
 
       <Footer />
       <FloatingToggle />
+      <AskLauncher />
     </div>
   </>
 );

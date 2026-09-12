@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildSportMeta } from "../data/pageMeta";
 import { useSports } from "../context/ContentContext";
@@ -147,6 +148,7 @@ const SportPost = () => {
               </a>
             </div>
           )}
+          <RelatedContent type="sport" id={id} />
         </article>
       </div>
     </PageShell>

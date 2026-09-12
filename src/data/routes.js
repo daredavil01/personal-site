@@ -26,6 +26,10 @@ const routes = [
     path: "/about",
   },
   {
+    label: "Ask Me",
+    path: "/ask",
+  },
+  {
     label: "Writing",
     path: "/micro-blog",
     subRoutes: [
