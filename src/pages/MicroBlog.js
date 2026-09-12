@@ -190,6 +190,10 @@ const MicroBlog = () => {
   ));
 
   const hasFilters = searchTerm || activeTags.length > 0 || source || type || month;
+
+  // How many *axes* are in play. The search box is excluded: it still narrows
+  // while tags / source / type / month widen.
+  const axisCount = [activeTags.length ? "tags" : "", source, type, month].filter(Boolean).length;
   const clearFilters = () => {
     setSearchInput("");
     setSearchTerm("");
@@ -505,15 +509,25 @@ const MicroBlog = () => {
               )}
 
               {hasFilters && (
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={clearFilters}
-                  onKeyDown={keyActivate(clearFilters)}
-                  className="inline-flex items-center gap-1 font-label text-xs font-bold text-secondary cursor-pointer hover:underline"
-                >
-                  <span className="material-symbols-outlined text-sm">close</span>
-                  Clear all filters
+                <div className="flex flex-wrap items-center gap-4">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={clearFilters}
+                    onKeyDown={keyActivate(clearFilters)}
+                    className="inline-flex items-center gap-1 font-label text-xs font-bold text-secondary cursor-pointer hover:underline"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                    Clear all filters
+                  </div>
+                  {/* Tags, source, type and month union rather than intersect, so
+                      each one adds posts. Said out loud because it is the
+                      opposite of what a filter row usually does. */}
+                  {axisCount > 1 && (
+                    <p className="mb-0 font-body text-xs text-stone-400 dark:text-stone-500">
+                      Showing posts matching any of your filters.
+                    </p>
+                  )}
                 </div>
               )}
             </section>

@@ -9,6 +9,45 @@ patch for fixes and tweaks.
 
 ---
 
+## [v16.0.0] — 2026-09-12
+
+### Added
+
+- **Books page, rebuilt** (`src/pages/Books.js`, `src/components/Books/`): `/books` is now four tabbed views sharing one filter bar — **Shelf** (cover-forward grid, six across on desktop and two on a phone), **Timeline** (grouped by reading year with sticky year headers), **Statistics** (per-year, per-category, per-language, per-decade and per-rating breakdowns) and **Table** (dense, sortable on title, author, category, pages, rating and date read). Filters and the active view both live in the URL, so any filtered shelf is a shareable link. Replaces `DigitalLibrary.js`, a single 394-line component with no cover art, no sort, no URL state and two references to a `link` field that never existed in the schema.
+- **Book filters** (`src/components/Books/useBookFilters.js`, `BookFilters.js`): live search across title, author, translator, description and publisher, plus category / language / year / rating / reviewed selects and multi-select tag chips. **The axes combine with OR, not AND** — with eleven categories over fifty-one books, intersecting two axes almost always emptied the shelf, so each control you touch now adds books rather than removing them. The search box is the exception and still narrows.
+- **Book metadata** (`supabase/migrations/0008_books_reborn.sql`, `src/lib/api/books.js`): `cover_url`, `isbn`, `page_count`, `publisher`, `first_published`, `rating`, `date_finished`, `date_precision`, `status`, `format`, `goodreads_url`, `quote` and `note`. `year` keeps its original meaning — the year the book was *read* — and the book's own publication year is the new `first_published`; the old single column conflated the two.
+- **Metadata backfill script** (`scripts/backfill-books-metadata.mjs`, `npm run books:backfill`): resolves each book against Open Library, Google Books and BookGanga (the Marathi catalogue, which is the only one of the three with any Devanagari coverage), downloads the cover into the `media` bucket rather than hotlinking it, and lifts a pull-quote and a real finish date out of the Substack / WordPress / Blogger review where one exists. Idempotent — a column that already has a value is never overwritten, so a cover fixed by hand in `/admin` survives a re-run.
+- **Cover component** (`src/components/Books/BookCover.js`): renders the fetched cover, or a seeded two-tone generative cover with the title set on it when there is none. A missing cover is the normal case rather than an error state — no cover API indexes Marathi titles, which is two fifths of the shelf.
+- **Quick-look modal** (`src/components/Books/BookDetailsModal.js`): opens from any view with the cover, rating, pull-quote, personal note, the full bibliographic row and the review links, without losing your place. Traps focus, closes on Escape, returns focus to the card that opened it, and is a full-screen sheet below `sm`.
+- **Shared stat primitives** (`src/components/common/StatBars.js`): the KPI tile and horizontal bar chart, lifted out of `ProjectsStatistics.js` so `/books` and `/projects` cannot drift apart visually.
+- **Navigation, regrouped** (`src/data/routes.js`, `src/components/Template/Navigation.js`, `Hamburger.js`): the top bar is five entries — About, **Writing**, **Living**, **Work**, **Play** — instead of ten links plus a "More" bin. Seventeen flat links in a bar is a list, not navigation: nothing was findable because nothing was grouped. Each group is a verb, its dropdown holds its pages, and clicking a group heading lands on its most useful child. A group highlights when any of its children is the current page, so the bar still says where you are.
+- **Footer site map** (`src/components/Template/Footer.js`): every route, in columns under the same headings as the nav, built from `data/routes.js` so the two cannot drift apart. Contact and Changelog live here rather than in the top bar. Replaces a footer that was one copyright line and four social links.
+- **Writing Ledger is linked both ways** (`public/writing-ledger.html`, `src/data/routes.js`): the ledger now carries a link back to the site — it is served straight from `/public` and shared no chrome with the app, so it was a dead end with nothing on it saying where it came from — and it appears in the Writing group and the footer. Flagged `external: true` in the route data because React Router cannot navigate to a file in `/public`.
+
+- **Manual metadata fill** (`scripts/make-books-template.mjs`, `scripts/apply-books-metadata.mjs`): `npm run books:template` writes a JSON file listing every book still missing bibliographic data, and only the fields actually blank for each one; `npm run books:apply` reads it back. No book API indexes Marathi titles, so most of the shelf was never going to be reachable by the API backfill — this is the path for the rest. Unlike the API backfill, values here overwrite: this is a human correcting the robot. Blanks are skipped, so a half-filled file can be applied and topped up repeatedly.
+
+- **Filter hook tests** (`src/__tests__/components/useBookFilters.test.js`): covers the OR-across-axes behaviour, the search box still narrowing, tag OR-within-axis, the rating floor, and URL round-tripping.
+
+### Changed
+
+- **Micro-blog filters union instead of intersecting** (`src/lib/api/microblog.js`, `src/pages/MicroBlog.js`): tags, source, type and month now combine with OR, and tags OR *within* their own axis. Over 1,600 posts the axes barely overlap, so intersecting them emptied the page — `life` (19 posts) AND `youtube` (13 posts) returned **0**; they now return 32. Tags previously used `contains`, meaning a post had to carry *every* selected tag, so picking a second tag was almost always zero results. Free-text search still narrows. Implemented as a single PostgREST `or=(…)` so the filtering stays server-side and paginated.
+- **Footer and sidebar links** (`src/components/Template/Footer.js`, `src/data/contact.js`): added Substack, WordPress, the digital card (`card.sankettambare.in`) and LinkTree; dropped the Instagram profile link. The `/instagram` page, which archives the posts, is unchanged and still sits under Play. The card link carries no `?bg=` — it reads the visitor's own theme rather than being pinned to one that would fight the site.
+- **Writing Ledger shares the site's theme** (`public/writing-ledger.html`): the ledger kept its own `ledger-theme` localStorage key, so switching to dark on the site and then opening it started over from the OS preference. It now reads and writes the same `theme` key as `ThemeContext` — same origin, same `dark`/`light` values — and migrates any existing `ledger-theme` value across once. Applied by an inline script in `<head>` so arriving from a dark site never flashes light.
+
+- **Book categories are a canonical list** (`supabase/migrations/0008_books_reborn.sql`): `category` was free text and had drifted into `Semi-counductor`, `Autography`, `Non-FIction`, `Social ` (trailing space) and `Story, FIction`. All 51 rows are remapped onto eleven values and a check constraint now enforces them. The specific secondary genres that were dropped (`privacy`, `surveillance`, `forts`, `oil`, `semiconductors`, `ai`…) were migrated into the central tag system rather than discarded; the generic ones were not, because they duplicated the category axis.
+- **Books admin form** (`src/pages/admin/resources.js`): `category` is a select over the canonical list, and the form gained a cover uploader plus fields for every new column. The list table shows category and rating.
+- **Book permalink** (`src/pages/BookPost.js`): renders the cover, rating, pull-quote, personal note, the bibliographic line and a Goodreads link.
+- **Books sort newest-read first** (`src/lib/api/books.js`): was ascending by `id`.
+
+### Fixed
+
+- **Admin list tables scrolled the whole page** (`src/pages/admin/ui/DataTable.js`): on `/admin/books` and `/admin/projects` the row actions were unreachable — the table pushed the page sideways instead of scrolling inside its own box, and Edit sat past the right edge with no way to get to it. The card is a flex item of the resource column, so its default `min-width: auto` resolved to the table's min-content width: it grew past the viewport rather than shrinking, and the inner `overflow-x-auto` never engaged. Adding `min-w-0` restores it. The actions column is now also `sticky right-0`, so Edit and Delete stay on screen however far the other columns scroll.
+
+- **Dead field references** (`src/components/Books/DigitalLibrary.js`, removed): the featured hero and the detail modal both read `book.link`, a field no migration or mapper ever defined, so the "View on Goodreads" button could never appear. There is now a real `goodreads_url`.
+- **Migration history drift** (`supabase/migrations/`): `0005`, `0006` and `0007` had been applied by hand through the SQL editor and never recorded, so `supabase db push` would have re-run two files of `update public.projects set …` and overwritten every project edit made since v15.0.0. Repaired to `applied` before pushing `0008`.
+
+---
+
 ## [v15.0.0] — 2026-09-11
 
 ### Added

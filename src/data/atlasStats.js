@@ -14,7 +14,7 @@
 const ATLAS_STATS = {
   races: 21,
   treks: 18,
-  books: 48,
+  books: 51,
   microPosts: 1631,
 };
 

@@ -61,13 +61,24 @@ export async function searchMicroblog({
   if (trimmed) {
     q = q.textSearch("search_tsv", trimmed, { type: "websearch", config: "simple" });
   }
-  if (Array.isArray(tags) && tags.length) q = q.contains("tag_names", tags);
-  if (source) q = q.eq("source", source);
-  if (type) q = q.eq("post_type", type);
+
+  // Tags, source, type and month combine with OR, matching /books. Over 1,600
+  // posts the axes barely intersect — picking a tag and then a month almost
+  // always emptied the page, and tags used to AND *within* the axis too
+  // (`contains` = every tag), so two tags were nearly always zero results.
+  // Now each control adds posts. Free-text search still narrows.
+  const clauses = [];
+  if (Array.isArray(tags) && tags.length) {
+    // Quoted so a tag containing a comma or space can't be read as a separator.
+    clauses.push(`tag_names.ov.{${tags.map((t) => `"${String(t).replace(/"/g, '\\"')}"`).join(",")}}`);
+  }
+  if (source) clauses.push(`source.eq.${source}`);
+  if (type) clauses.push(`post_type.eq.${type}`);
   if (month) {
     const { start, endExclusive } = monthRange(month);
-    q = q.gte("date", start).lt("date", endExclusive);
+    clauses.push(`and(date.gte.${start},date.lt.${endExclusive})`);
   }
+  if (clauses.length) q = q.or(clauses.join(","));
 
   q = q
     .order("date", { ascending })
