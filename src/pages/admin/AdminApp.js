@@ -11,6 +11,8 @@ import ResumePage from "./ResumePage";
 import MicroblogManager from "./MicroblogManager";
 import TagManager from "./TagManager";
 import NowMetaEditor from "./NowMetaEditor";
+import AskSettingsEditor from "./AskSettingsEditor";
+import AskConversations from "./AskConversations";
 import NowMonthEditor from "./now/NowMonthEditor";
 import { ToastProvider } from "./ui/ToastContext";
 import { Spinner } from "./ui/Feedback";
@@ -47,6 +49,8 @@ const AdminRoutes = ({ session }) => {
         <Route path="tags" element={<TagManager />} />
         <Route path="now/months" element={<NowMonthEditor />} />
         <Route path="now/meta" element={<NowMetaEditor />} />
+        <Route path="ask/settings" element={<AskSettingsEditor />} />
+        <Route path="ask/conversations" element={<AskConversations />} />
         <Route path="resume" element={<Navigate to="/admin/resume/experience" replace />} />
         <Route path="resume/:section" element={<ResumePage />} />
         {/* Static segments outrank this, so it only catches the schema-driven

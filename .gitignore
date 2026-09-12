@@ -58,3 +58,6 @@ stitch/
 knowledge_base/
 # Supabase CLI local link state
 supabase/.temp/
+
+# wrangler pages dev local state
+.wrangler/

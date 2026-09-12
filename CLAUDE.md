@@ -77,6 +77,56 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
   `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
   `src/data/pageMeta.js`, `src/data/stats/personal.js`.
 
+## Docs (read before touching a table)
+
+`docs/` is the deep reference; this file is the summary.
+
+- `docs/data-model.md` — every table's columns, types, CHECK constraints and live
+  row counts, generated from the database.
+- `docs/entities.md` — what each content type *means* (hand-written, and the part
+  that is not derivable from the schema).
+- `docs/routes.md`, `docs/tags.md` — route map and the tag vocabulary.
+- `docs/chatbot-context.md` — the ~1,200-token card `/ask` injects; derived, never
+  hand-edited.
+
+Regenerate with `npm run docs:build` (or `npm run ask:index`, which calls it).
+Generated blocks live between `<!-- generated:NAME start/end -->` markers; prose
+outside them survives. See `docs/README.md`.
+
+## Second Brain (/ask)
+
+Natural-language chat over the whole content store.
+
+- **Index:** `content_chunks` (`supabase/migrations/0009_second_brain.sql`), one
+  embedded chunk per row, built by `npm run ask:index`
+  (`scripts/build-content-index.mjs`). Idempotent and incremental. Needs
+  `CF_ACCOUNT_ID` / `CF_API_TOKEN` for Workers AI embeddings.
+- **Retrieval:** `hybrid_search()` fuses tsvector keyword ranking with pgvector
+  semantic ranking via RRF, and runs keyword-only when the caller passes a null
+  embedding. `site_facts()` supplies the counting/aggregate answers.
+- **Endpoint:** `functions/api/ask.js` — `/api/ask`, **not** `/ask`: a Function
+  at `/ask` would shadow the `/ask` page. Streams SSE (sources first, then the
+  answer); `?stream` off falls back to one JSON response. Shared helpers live in
+  `src/data/askConfig.js` and `src/lib/askTiers.js` — NOT under `functions/`,
+  because Pages routes every file there.
+- **Model ladder:** Gemini → Workers AI → Workers AI → search-only. Order and
+  model ids are rows in `ask_settings`, not constants — a retired model is an
+  `/admin` edit. The one hard-coded model is the **embedding** model
+  (`EMBEDDING_MODEL` in `askConfig.js`): changing it invalidates every stored
+  vector, so it is a re-index, not a setting.
+- **Config + caps:** the `ask_settings` singleton, edited at `/admin/ask/settings`,
+  read by the worker with a 60-second cache. Quotas are counted in `ask_usage`
+  through the `ask_quota()` RPC and fail closed.
+- **UI:** `src/pages/Ask.js` (`/ask`) and `src/components/Ask/AskLauncher.js`
+  (site-wide, mounted in `Main.js`), both rendering `AskChat.js`. Local dev
+  needs `npm run dev:ask` beside `npm run dev` — Vite proxies `/api` to it.
+- **Conversation log:** `ask_conversations` / `ask_messages`, written by the
+  `ask_log()` RPC from `waitUntil()` so it can never slow an answer. Owner-only;
+  read and exported at `/admin/ask/conversations`.
+- **Related content:** `related_content_ranked()` powers the "more like this"
+  strip on every detail page from the same embeddings — no model call at read
+  time.
+
 ## Environment Variables
 
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — client (baked into the
@@ -114,6 +164,10 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
+| Second brain endpoint | `functions/ask.js` |
+| Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |
+| Ask UI | `src/pages/Ask.js`, `src/components/Ask/` |
+| Generated + hand-written docs | `docs/` |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |
 

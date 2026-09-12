@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
+import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildProjectMeta } from "../data/pageMeta";
 import { useProjects } from "../context/ContentContext";
@@ -195,6 +196,7 @@ const ProjectPost = () => {
               ))}
             </div>
           </div>
+          <RelatedContent type="project" id={id} />
         </article>
       </div>
     </PageShell>

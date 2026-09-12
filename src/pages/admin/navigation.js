@@ -8,6 +8,8 @@ import {
   Footprints,
   GraduationCap,
   LayoutDashboard,
+  MessageCircle,
+  MessagesSquare,
   MountainSnow,
   Rss,
   Sparkles,
@@ -52,6 +54,14 @@ export const NAV_GROUPS = [
     items: [
       { to: "/admin/now/months", label: "Months", icon: Calendar },
       { to: "/admin/now/meta", label: "Meta", icon: Sparkles },
+    ],
+  },
+  {
+    id: "ask",
+    label: "Ask",
+    items: [
+      { to: "/admin/ask/settings", label: "Settings", icon: MessageCircle },
+      { to: "/admin/ask/conversations", label: "Conversations", icon: MessagesSquare },
     ],
   },
   {

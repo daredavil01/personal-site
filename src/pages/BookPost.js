@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildBookMeta } from "../data/pageMeta";
 import { useBooks } from "../context/ContentContext";
@@ -182,6 +183,7 @@ const BookPost = () => {
               )}
             </div>
           )}
+          <RelatedContent type="book" id={id} />
         </article>
       </div>
     </PageShell>

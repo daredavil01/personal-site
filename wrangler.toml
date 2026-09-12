@@ -13,3 +13,14 @@ VITE_SUPABASE_ANON_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 # Set it once via the CLI:
 #   wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY
 # or via the Cloudflare dashboard: Settings → Environment Variables → Add secret.
+
+# Workers AI — powers /ask: query embeddings (@cf/baai/bge-m3) and the fallback
+# rungs of the model ladder. Free allowance is 10,000 neurons/day on both the
+# Free and Paid plans, which is the whole budget this feature is designed around.
+[ai]
+binding = "AI"
+
+# /ask also needs these secrets (never in [vars] — this file is committed):
+#   wrangler pages secret put GEMINI_API_KEY
+#   wrangler pages secret put ASK_IP_SALT
+#   wrangler pages secret put TURNSTILE_SECRET_KEY   (optional)
