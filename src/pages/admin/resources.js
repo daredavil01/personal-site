@@ -1,5 +1,5 @@
 import React from "react";
-import books from "../../lib/api/books";
+import books, { BOOK_CATEGORIES, BOOK_FORMATS, BOOK_STATUSES } from "../../lib/api/books";
 import sports from "../../lib/api/sports";
 import treks from "../../lib/api/treks";
 import projects from "../../lib/api/projects";
@@ -46,29 +46,64 @@ const resources = [
     singular: "book",
     api: books,
     title: (r) => r.title,
-    searchKeys: ["title", "author", "category", "tags"],
+    searchKeys: ["title", "author", "category", "tags", "publisher", "isbn"],
     viewPath: (r) => `/books/${r.id}`,
     columns: [
       { key: "title", label: "Title", sortable: true, primary: true },
       { key: "author", label: "Author", sortable: true },
-      { key: "year", label: "Year", sortable: true, width: "5rem" },
+      { key: "category", label: "Category", sortable: true, width: "11rem" },
+      { key: "year", label: "Read", sortable: true, width: "5rem" },
+      {
+        key: "rating", label: "Rating", sortable: true, width: "6rem", render: (r) => (r.rating ? "★".repeat(r.rating) : "—"),
+      },
       { key: "language", label: "Language", width: "7rem", render: (r) => <Badge>{r.language}</Badge> },
     ],
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
       { name: "author", label: "Author", type: "text", required: true },
-      { name: "category", label: "Category", type: "text", required: true, hint: "Comma-separated genres" },
+      {
+        name: "category", label: "Category", type: "select", options: BOOK_CATEGORIES, required: true,
+      },
       {
         name: "language", label: "Language", type: "select", options: ["English", "Marathi"], required: true,
       },
-      { name: "year", label: "Year", type: "number", required: true },
+      {
+        name: "year", label: "Year read", type: "number", required: true, hint: "Not the publication year — that is First published",
+      },
+      { name: "date_finished", label: "Date finished", type: "isoDate" },
+      {
+        name: "date_precision",
+        label: "Date precision",
+        type: "select",
+        options: ["year", "day"],
+        hint: "Set to day once the finish date is a real one, not a seeded placeholder",
+      },
+      {
+        name: "rating", label: "Rating", type: "number", hint: "1–5",
+      },
+      { name: "status", label: "Status", type: "select", options: BOOK_STATUSES },
+      { name: "format", label: "Format", type: "select", options: BOOK_FORMATS },
       { name: "translator", label: "Translator" },
+      { name: "publisher", label: "Publisher" },
+      { name: "first_published", label: "First published", type: "number" },
+      { name: "page_count", label: "Pages", type: "number" },
+      { name: "isbn", label: "ISBN" },
+      { name: "goodreads_url", label: "Goodreads link", type: "url" },
       { name: "blog_link", label: "Review link", type: "url" },
       { name: "blog_platform", label: "Review platform" },
+      {
+        name: "cover_url", label: "Cover", type: "image", span: "full", hint: "Full-size files are fine — they are compressed in the browser",
+      },
       {
         name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
       },
       { name: "description", label: "Description", type: "textarea", required: true, span: "full" },
+      {
+        name: "quote", label: "Pull-quote", type: "textarea", span: "full", hint: "A line worth surfacing on the card",
+      },
+      {
+        name: "note", label: "Personal note", type: "textarea", span: "full", hint: "Why this one mattered",
+      },
     ],
   },
   {

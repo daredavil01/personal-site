@@ -2,8 +2,27 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropTypes from 'prop-types';
 import routes from '../../data/routes';
 import contactData from '../../data/contact';
+
+// Files served out of /public (the Writing Ledger) are documents, not routes —
+// React Router cannot navigate to them.
+const DrawerLink = ({
+  route, className, onNavigate, children,
+}) => (route.external ? (
+  <a href={route.path} className={className} onClick={onNavigate}>{children}</a>
+) : (
+  <Link to={route.path} className={className} onClick={onNavigate}>{children}</Link>
+));
+
+DrawerLink.propTypes = {
+  route: PropTypes.shape({ path: PropTypes.string, external: PropTypes.bool }).isRequired,
+  className: PropTypes.string,
+  onNavigate: PropTypes.func,
+  children: PropTypes.node,
+};
+DrawerLink.defaultProps = { className: '', onNavigate: null, children: null };
 
 const Hamburger = () => {
   const [open, setOpen] = useState(false);
@@ -54,9 +73,9 @@ const Hamburger = () => {
               || (location.pathname.startsWith(l.path) && l.path !== '/');
             return (
               <div key={l.label}>
-                <Link
-                  to={l.path}
-                  onClick={() => setOpen(false)}
+                <DrawerLink
+                  route={l}
+                  onNavigate={() => setOpen(false)}
                   className={`flex items-center justify-between py-3 px-3 rounded-lg font-label text-sm uppercase tracking-widest font-bold transition-colors ${
                     isActive
                       ? 'text-secondary bg-secondary/10'
@@ -65,22 +84,22 @@ const Hamburger = () => {
                 >
                   {l.label}
                   {isActive && <span className="w-1.5 h-1.5 rounded-full bg-secondary" />}
-                </Link>
+                </DrawerLink>
                 {l.subRoutes && (
                   <div className="ml-4 mb-1 flex flex-col gap-0.5">
                     {l.subRoutes.map((sub) => {
                       const isSubActive = location.pathname === sub.path;
                       return (
-                        <Link
+                        <DrawerLink
                           key={sub.label}
-                          to={sub.path}
-                          onClick={() => setOpen(false)}
+                          route={sub}
+                          onNavigate={() => setOpen(false)}
                           className={`block py-2 px-3 rounded font-label text-xs uppercase tracking-widest transition-colors ${
                             isSubActive ? 'text-secondary' : 'text-stone-400 hover:text-white'
                           }`}
                         >
                           ↳ {sub.label}
-                        </Link>
+                        </DrawerLink>
                       );
                     })}
                   </div>

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { render as rtlRender, screen, within, act, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, within, act, cleanup, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ThemeProvider } from '../context/ThemeContext';
 import App from '../App';
@@ -81,10 +81,9 @@ describe('renders the app', () => {
   it('can navigate to /projects', async () => {
     render(<App />);
     const nav = await findPrimaryNav();
-    // Open dropdown
-    const moreButton = await within(nav).findByRole('button', { name: /More/i }, { timeout });
-    fireEvent.mouseEnter(moreButton);
-
+    // Projects lives under the "Work" group now. Group dropdowns stay mounted
+    // (they are hidden with opacity/visibility, not unmounted), so the link is
+    // reachable without opening anything.
     const projectsLink = await within(nav).findByRole('link', { name: /Projects/i }, { timeout });
     expect(projectsLink).toBeInTheDocument();
     await act(async () => {
@@ -106,14 +105,12 @@ describe('renders the app', () => {
     expect(window.location.pathname).toBe('/stats');
   });
 
-  it('can navigate to /contact', async () => {
+  // Contact is footerOnly — deliberately out of the top bar, reachable from the
+  // footer site map that every page carries.
+  it('can navigate to /contact from the footer site map', async () => {
     render(<App />);
-    const nav = await findPrimaryNav();
-    // Open dropdown
-    const moreButton = await within(nav).findByRole('button', { name: /More/i }, { timeout });
-    fireEvent.mouseEnter(moreButton);
-
-    const contactLink = await within(nav).findByRole('link', { name: /Contact/i }, { timeout });
+    const footer = await screen.findByRole('navigation', { name: /Site map/i }, { timeout });
+    const contactLink = await within(footer).findByRole('link', { name: /Contact/i }, { timeout });
     expect(contactLink).toBeInTheDocument();
     await act(async () => {
       await contactLink.click();
