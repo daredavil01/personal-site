@@ -22,7 +22,9 @@
     "images:upload": "node scripts/upload-images-to-supabase.mjs",
     "blogs:wordcount": "node scripts/blog-word-counts.mjs",
     "blogs:infographic": "node scripts/build-blog-infographic.mjs",
-    "books:backfill": "node scripts/backfill-books-metadata.mjs"
+    "books:backfill": "node scripts/backfill-books-metadata.mjs",
+    "books:template": "node scripts/make-books-template.mjs",
+    "books:apply": "node scripts/apply-books-metadata.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.3.0",

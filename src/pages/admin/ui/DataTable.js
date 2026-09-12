@@ -155,7 +155,14 @@ const DataTable = ({
                     ) : column.label}
                   </th>
                 ))}
-                {renderActions && <th scope="col" className="w-px px-3 py-2.5"><span className="sr-only">Actions</span></th>}
+                {/* Pinned right. Edit and delete are the reason this table
+                    exists, so they stay on screen however far the columns
+                    scroll. */}
+                {renderActions && (
+                  <th scope="col" className={`sticky right-0 z-10 w-px px-3 py-2.5 ${surface}`}>
+                    <span className="sr-only">Actions</span>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
@@ -183,7 +190,10 @@ const DataTable = ({
                       </td>
                     ))}
                     {renderActions && (
-                      <td className="px-3 py-2 align-middle text-right whitespace-nowrap">
+                      // Matches the pinned header. The row background has to be
+                      // repainted here, otherwise the scrolling cells show
+                      // through the sticky column.
+                      <td className={`sticky right-0 z-10 px-3 py-2 align-middle text-right whitespace-nowrap ${surface} group-hover:bg-stone-50 dark:group-hover:bg-stone-800/50 transition-colors`}>
                         <div className="inline-flex items-center gap-0.5">{renderActions(row)}</div>
                       </td>
                     )}
@@ -237,8 +247,13 @@ const DataTable = ({
     );
   }
 
+  // min-w-0 matters: this card is a flex item of ResourceManager's column
+  // container, so its default min-width:auto resolves to the table's
+  // min-content width. Without it the card grows past the viewport instead of
+  // shrinking, the inner overflow-x-auto never engages, and the whole page
+  // scrolls sideways — which pushed the actions column out of reach.
   return (
-    <div className={card}>
+    <div className={`${card} min-w-0`}>
       {(showSearch || toolbar) && (
         <div className={`flex flex-wrap items-center gap-2 px-3 py-2.5 border-b ${hairline}`}>
           {showSearch && (

@@ -24,6 +24,8 @@ patch for fixes and tweaks.
 - **Footer site map** (`src/components/Template/Footer.js`): every route, in columns under the same headings as the nav, built from `data/routes.js` so the two cannot drift apart. Contact and Changelog live here rather than in the top bar. Replaces a footer that was one copyright line and four social links.
 - **Writing Ledger is linked both ways** (`public/writing-ledger.html`, `src/data/routes.js`): the ledger now carries a link back to the site — it is served straight from `/public` and shared no chrome with the app, so it was a dead end with nothing on it saying where it came from — and it appears in the Writing group and the footer. Flagged `external: true` in the route data because React Router cannot navigate to a file in `/public`.
 
+- **Manual metadata fill** (`scripts/make-books-template.mjs`, `scripts/apply-books-metadata.mjs`): `npm run books:template` writes a JSON file listing every book still missing bibliographic data, and only the fields actually blank for each one; `npm run books:apply` reads it back. No book API indexes Marathi titles, so most of the shelf was never going to be reachable by the API backfill — this is the path for the rest. Unlike the API backfill, values here overwrite: this is a human correcting the robot. Blanks are skipped, so a half-filled file can be applied and topped up repeatedly.
+
 - **Filter hook tests** (`src/__tests__/components/useBookFilters.test.js`): covers the OR-across-axes behaviour, the search box still narrowing, tag OR-within-axis, the rating floor, and URL round-tripping.
 
 ### Changed
@@ -38,6 +40,8 @@ patch for fixes and tweaks.
 - **Books sort newest-read first** (`src/lib/api/books.js`): was ascending by `id`.
 
 ### Fixed
+
+- **Admin list tables scrolled the whole page** (`src/pages/admin/ui/DataTable.js`): on `/admin/books` and `/admin/projects` the row actions were unreachable — the table pushed the page sideways instead of scrolling inside its own box, and Edit sat past the right edge with no way to get to it. The card is a flex item of the resource column, so its default `min-width: auto` resolved to the table's min-content width: it grew past the viewport rather than shrinking, and the inner `overflow-x-auto` never engaged. Adding `min-w-0` restores it. The actions column is now also `sticky right-0`, so Edit and Delete stay on screen however far the other columns scroll.
 
 - **Dead field references** (`src/components/Books/DigitalLibrary.js`, removed): the featured hero and the detail modal both read `book.link`, a field no migration or mapper ever defined, so the "View on Goodreads" button could never appear. There is now a real `goodreads_url`.
 - **Migration history drift** (`supabase/migrations/`): `0005`, `0006` and `0007` had been applied by hand through the SQL editor and never recorded, so `supabase db push` would have re-run two files of `update public.projects set …` and overwritten every project edit made since v15.0.0. Repaired to `applied` before pushing `0008`.
