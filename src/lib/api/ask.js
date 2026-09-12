@@ -17,7 +17,9 @@ export function sessionId() {
   try {
     const existing = window.localStorage.getItem(SESSION_KEY);
     if (existing) return existing;
-    const fresh = (window.crypto?.randomUUID?.() || `s${Date.now()}${Math.random()}`)
+    const fresh = (
+      window.crypto?.randomUUID?.() || `s${Date.now()}${Math.random()}`
+    )
       .replace(/[^a-zA-Z0-9-]/g, "")
       .slice(0, 64);
     window.localStorage.setItem(SESSION_KEY, fresh);
@@ -38,9 +40,35 @@ export class AskError extends Error {
   }
 }
 
+// A generic "something went wrong" hides the two failures that actually happen
+// here, and both have a specific fix. Name them.
+function errorFor(res, body) {
+  if (body?.note || body?.error) {
+    return new AskError(body.note || body.error, {
+      status: res.status,
+      reason: body.reason || body.error,
+    });
+  }
+  // Cloudflare Access guards preview deployments: the endpoint answers with a
+  // cross-origin redirect to its login, which fetch cannot follow, so the
+  // response arrives opaque or as HTML rather than JSON.
+  if (res.redirected || res.type === "opaqueredirect" || res.status === 302) {
+    return new AskError(
+      "This preview deployment is behind Cloudflare Access, so the chat endpoint is not reachable from the browser. The live site works normally.",
+      { status: res.status, reason: "access" },
+    );
+  }
+  return new AskError(
+    `The chat endpoint returned ${res.status}. If this is a preview deployment, it is probably behind Cloudflare Access.`,
+    { status: res.status },
+  );
+}
+
 /** Limits, suggested questions and the on/off switch, for the empty state. */
 export async function getAskInfo() {
-  const res = await fetch(ENDPOINT, { headers: { Accept: "application/json" } });
+  const res = await fetch(ENDPOINT, {
+    headers: { Accept: "application/json" },
+  });
   if (!res.ok) throw new AskError("Ask is unavailable", { status: res.status });
   return res.json();
 }
@@ -49,12 +77,19 @@ export async function getAskInfo() {
  * `history` is [{ role: "user" | "assistant", content }] — the worker trims it
  * to the configured number of turns, so sending the whole thread is fine.
  */
-export async function askQuestion({ message, history = [], turnstileToken } = {}) {
+export async function askQuestion({
+  message,
+  history = [],
+  turnstileToken,
+} = {}) {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      message, history, turnstileToken, sessionId: sessionId(),
+      message,
+      history,
+      turnstileToken,
+      sessionId: sessionId(),
     }),
   });
 
@@ -65,12 +100,7 @@ export async function askQuestion({ message, history = [], turnstileToken } = {}
     body = null;
   }
 
-  if (!res.ok) {
-    throw new AskError(body?.note || body?.error || "Something went wrong.", {
-      status: res.status,
-      reason: body?.reason || body?.error,
-    });
-  }
+  if (!res.ok) throw errorFor(res, body);
   return body;
 }
 
@@ -93,9 +123,17 @@ export async function askQuestionStream({
   const res = await fetch(ENDPOINT, {
     method: "POST",
     signal,
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
     body: JSON.stringify({
-      message, history, types, turnstileToken, stream: true, sessionId: sessionId(),
+      message,
+      history,
+      types,
+      turnstileToken,
+      stream: true,
+      sessionId: sessionId(),
     }),
   });
 
@@ -106,10 +144,7 @@ export async function askQuestionStream({
     } catch (_) {
       body = null;
     }
-    throw new AskError(body?.note || body?.error || "Something went wrong.", {
-      status: res.status,
-      reason: body?.reason || body?.error,
-    });
+    throw errorFor(res, body);
   }
   if (!res.body) throw new AskError("Streaming is not supported here.");
 
