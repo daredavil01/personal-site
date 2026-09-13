@@ -9,6 +9,15 @@ patch for fixes and tweaks.
 
 ---
 
+## [v17.2.0] — 2026-09-14
+
+### Added
+
+- **Eval mode for Ask Conversations** (`src/pages/admin/AskConversations.js`, `src/lib/api/askConversations.js`): an "Eval mode" toggle (remembered per browser) opens an evaluation form under every answer — pass/fail verdict, 1–5 score, quick-pick and free issue tags, notes and an ideal answer — saved on click. Admin evaluations are stored apart from reader feedback, so neither overwrites the other. New Evaluation (evaluated / not evaluated / pass / fail) and Eval tag filters, Evaluated and Eval pass rate stats, an eval-tag breakdown, eval columns in CSV, and evaluated exchanges (with `ideal_answer`) in the evals JSONL export.
+- **Database** (`supabase/migrations/0017_ask_evals.sql`): `eval_verdict`, `eval_score`, `eval_tags`, `eval_notes`, `eval_ideal_answer` and `evaluated_at` on `ask_messages`, written through the existing owner-only RLS policy.
+
+---
+
 ## [v17.1.0] — 2026-09-13
 
 ### Added

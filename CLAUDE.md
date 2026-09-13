@@ -152,6 +152,10 @@ Natural-language chat over the whole content store.
   `ask_messages` row by `ask_feedback()`, which checks the browser session. The
   admin Conversations page filters and summarises the log and exports rated
   exchanges as evals JSONL.
+- **Admin evals** (`0017`): the Conversations page's "Eval mode" toggle adds a
+  per-answer form (verdict, 1–5 score, tags, notes, ideal answer) saved to the
+  `eval_*` columns on `ask_messages` — separate from reader `feedback_*`, written
+  directly under owner RLS. Filter by evaluated / not evaluated.
 - **Nightly:** `.github/workflows/ask-refresh.yml` (02:00 IST) runs
   `blogs:wordcount` + `ask:index` and commits the ledger JSON only when posts
   changed. Repo secrets: `SUPABASE_SERVICE_ROLE_KEY`, `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
