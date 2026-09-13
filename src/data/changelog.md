@@ -9,6 +9,17 @@ patch for fixes and tweaks.
 
 ---
 
+## [v18.1.0] — 2026-09-14
+
+### Changed
+
+- **Tag audit** (Supabase `tags`): consolidated 216 tags into 167. Merged typo, spacing and plural variants plus same-meaning groups through `merge_tags` (e.g. `digitalwellbeing` / `digital well-being` → `digital wellbeing`, the travelogue variants → `travel`, the dream tags → `dream`), fixed misspellings (`digital technology`, `nda marathon`), and deleted junk tags (emoji-only, single letters, `no`, `me`, `only me`, `why?`). Marathi tags were kept separate from their English equivalents. Old `/tags/<name>` URLs for merged or renamed tags no longer resolve.
+- **Single-use tag cleanup** (Supabase `tags`): deleted 69 tags that were used only once and were a common English or Marathi word or phrase (e.g. `mind`, `patience`, `घर`, `time is up`), leaving 98 tags. Places, named things and specific topics used once (e.g. `pegasus`, `three.js`, `kailasgad`) were kept.
+- **Tag categories** (Supabase `tags.category`): every tag now has one of eleven categories (Running & Fitness, Travel & Outdoors, Books & Reading, Writing & Blogging, Technology & Data, Digital Life, Society & Ideas, Mind & Life, People & Feelings, Arts & Culture, Personal), which powers the category filter on `/tags`.
+- **Docs + ask index** (`docs/tags.md`): regenerated with `npm run ask:index` so `/ask` chunks carry the new tag names.
+
+---
+
 ## [v18.0.1] — 2026-09-14
 
 ### Fixed
