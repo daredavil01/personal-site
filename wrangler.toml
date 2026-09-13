@@ -3,6 +3,10 @@
 # that does not exist.
 name = "daredavil"
 pages_build_output_dir = "build"
+# Without a date, Functions run on the oldest runtime defaults, where
+# `new ReadableStream()` is disabled — the streaming /api/ask path then threw
+# error 1101. Any date after 2022-11-30 enables streams_enable_constructors.
+compatibility_date = "2026-01-01"
 
 # Build-time environment variables (baked into the Vite bundle at deploy time).
 # VITE_* variables are safe to commit here — the publishable key is designed to

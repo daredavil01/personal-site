@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v17.0.1] — 2026-09-13
+
+### Fixed
+
+- **Ask streaming crash** (`wrangler.toml`): streaming answers from `/api/ask` failed in production with Cloudflare error 1101. The Pages project had no `compatibility_date`, so Functions ran on the oldest runtime defaults, where `new ReadableStream()` is disabled. Setting `compatibility_date = "2026-01-01"` enables the constructor. The non-streaming JSON path was never affected.
+
+---
+
 ## [v17.0.0] — 2026-09-12
 
 ### Added
