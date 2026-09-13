@@ -31,6 +31,7 @@ const TYPE_LABELS = {
   sport: "races",
   trek: "treks",
   project: "projects",
+  presentation: "decks",
 };
 
 const EMPTY_FORM = {

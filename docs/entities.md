@@ -64,6 +64,15 @@ sets because `set_entity_tags` replaces an entity's whole tag set.
 `problem` / `solution` / `outcome` are the only long prose in this table, which
 is why projects are the one content type the indexer splits into several chunks.
 
+## Presentations
+
+HTML slide decks — talks, feature dossiers, data stories — that live on their
+own host (GitHub Pages) and are embedded on the site by URL. The row holds only
+metadata; the deck is never copied into the repo or storage, so adding one is an
+`/admin` edit. `url` must be https and the host must allow iframes. `date` is
+optional; an undated deck buckets into the Monthly Digest by `created_at`. The
+indexer fetches each deck and indexes its slide text alongside the metadata.
+
 ## Races (`sports`)
 
 `date` is free text in "February 22, 2026" form and `time` is chip time as

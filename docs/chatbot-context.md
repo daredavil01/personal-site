@@ -14,7 +14,7 @@ below the facts block, or from these facts. Never invent a title, date or link.
 - **Blog posts** (60) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
-- **Projects** (13) — /projects/:id. Status: Live: 10, Archived: 3.
+- **Projects** (16) — /projects/:id. Status: Live: 12, Concept: 1, Archived: 3.
 - **Races** (25) — /sports/:id. Distances: 10K: 2, 21K: 7, 10 Kms: 1, 21 Kms: 11, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
@@ -31,13 +31,13 @@ below the facts block, or from these facts. Never invent a title, date or link.
 - 100 Days To Offload: 60 of 100 posts.
 - Micro posts: 1661; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 6 organisations, 12 projects, 12 certifications (latest: AWS Fundamentals Specialization).
+- Work: 6 organisations, 15 projects, 12 certifications (latest: AWS Fundamentals Specialization).
 - Based in Barshi, MH.
 
 ## Tags
 
-213 tags, shared across every content type, always lowercase.
-Most used: technology (26), life (24), 100_days_to_offload (22), ai (20), self-reflection (16), social (15), youtube (13), fiction (11), digitalwellbeing (10), philosophy (8), politics (7), भटकंती (7), marathons (6), non-fiction (6), running (6), खंडेराव (6), biography (5), history (5), marathon (5), psychology (5).
+216 tags, shared across every content type, always lowercase.
+Most used: technology (26), life (24), 100_days_to_offload (22), ai (20), self-reflection (16), social (15), youtube (13), fiction (11), digitalwellbeing (10), philosophy (8), politics (7), भटकंती (7), digital wellbeing (6), marathons (6), non-fiction (6), psychology (6), running (6), खंडेराव (6), biography (5), history (5).
 Tag pages live at /tags/:name.
 
 ## Answering rules

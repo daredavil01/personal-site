@@ -11,6 +11,7 @@ export const ADMIN_TABLES = [
   { table: "sports", label: "Races", path: "/admin/sports", titleColumns: ["title"] },
   { table: "treks", label: "Treks", path: "/admin/treks", titleColumns: ["fort_name"] },
   { table: "projects", label: "Projects", path: "/admin/projects", titleColumns: ["title"] },
+  { table: "presentations", label: "Presentations", path: "/admin/presentations", titleColumns: ["title"] },
   { table: "blogs", label: "100 Days", path: "/admin/blogs", titleColumns: ["blog_title"] },
   { table: "instagram", label: "Instagram", path: "/admin/instagram", titleColumns: ["title"] },
   { table: "microblog", label: "Micro posts", path: "/admin/microblog", titleColumns: ["title", "text"] },

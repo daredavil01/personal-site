@@ -14,6 +14,7 @@ const GROUPS = [
   { type: "sport", label: "Races", href: (id) => `/sports/${id}` },
   { type: "trek", label: "Treks", href: (id) => `/treks/${id}` },
   { type: "project", label: "Projects", href: (id) => `/projects/${id}` },
+  { type: "presentation", label: "Presentations", href: (id) => `/presentations/${id}` },
   { type: "microblog", label: "Micro-posts", href: (id) => `/micro-blog/${id}` },
   { type: "instagram", label: "Instagram", href: () => "/instagram" },
 ];

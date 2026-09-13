@@ -9,6 +9,30 @@ patch for fixes and tweaks.
 
 ---
 
+## [v18.0.1] — 2026-09-14
+
+### Fixed
+
+- **Nightly ask refresh** (`scripts/blog-word-counts.mjs`): Substack's archive API returns 403 to GitHub Actions runners, which failed `npm run blogs:wordcount` and the whole job. A Substack failure now reuses the Substack posts from the last committed `writing-ledger.json` (bodies from the text cache) and emits a workflow warning; WordPress, the ledger and `ask:index` still refresh.
+
+---
+
+## [v18.0.0] — 2026-09-14
+
+### Added
+
+- **Presentations page** (`src/pages/Presentations.js`, `/presentations`): a card grid of HTML slide decks, each with a live, scaled-down iframe preview that loads lazily as it scrolls into view.
+- **Presentation viewer** (`src/pages/PresentationPost.js`, `/presentations/:id`): the deck embedded full-width at 16:9, with Fullscreen, "Open original" and "All presentations" links, description, tags and related content.
+- **Plug-and-play decks** (`src/lib/api/presentations.js`, `src/pages/admin/resources.js`): add a deck from `/admin/presentations` by pasting its https URL. Nothing is copied into the repo and no deploy is needed; the deck stays on its own host (GitHub Pages) and is embedded by URL.
+- **Database** (`supabase/migrations/0018_presentations.sql`): `presentations` table with RLS, central-tag support (`presentation` entity type, `tag_names`, delete trigger, `tag_entities` arm), seeded with seven decks.
+- **Ask source** (`scripts/ask-sources/presentation.mjs`): indexes each deck's metadata plus its slide text, fetched at index time, so `/ask` can answer from presentations.
+
+### Changed
+
+- **Site-wide wiring**: presentations join the Work nav, homepage Explore grid, Monthly Digest, `/stats` (count), `/tags` pages and tag analysis, the admin overview, share-card middleware, `sitemap.xml` and `llms.txt`.
+
+---
+
 ## [v17.2.1] — 2026-09-14
 
 ### Fixed

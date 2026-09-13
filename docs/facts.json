@@ -25,12 +25,12 @@
     }
   },
   "counts": {
-    "tags": 213,
+    "tags": 216,
     "blogs": 60,
     "books": 51,
     "treks": 20,
     "sports": 25,
-    "projects": 13,
+    "projects": 16,
     "instagram": 11,
     "microblog": 1661
   },
@@ -61,15 +61,16 @@
   },
   "projects": {
     "by_status": {
-      "Live": 10,
+      "Live": 12,
+      "Concept": 1,
       "Archived": 3
     },
     "by_category": {
       "Tool": 2,
-      "Design": 1,
-      "Web App": 5,
+      "Design": 2,
+      "Web App": 6,
       "Website": 4,
-      "Data Story": 1
+      "Data Story": 2
     }
   },
   "top_tags": [
@@ -122,11 +123,19 @@
       "total": 7
     },
     {
+      "name": "digital wellbeing",
+      "total": 6
+    },
+    {
       "name": "marathons",
       "total": 6
     },
     {
       "name": "non-fiction",
+      "total": 6
+    },
+    {
+      "name": "psychology",
       "total": 6
     },
     {
@@ -150,10 +159,6 @@
       "total": 5
     },
     {
-      "name": "psychology",
-      "total": 5
-    },
-    {
       "name": "self-help",
       "total": 5
     },
@@ -163,10 +168,6 @@
     },
     {
       "name": "claude code",
-      "total": 4
-    },
-    {
-      "name": "digital wellbeing",
       "total": 4
     },
     {
@@ -200,7 +201,7 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-13T18:51:08.769812+00:00",
+  "generated_at": "2026-09-13T19:49:24.740978+00:00",
   "index_by_type": {
     "now": 13,
     "blog": 60,
@@ -217,6 +218,6 @@
     "microblog": 1661
   },
   "tags_by_category": {
-    "uncategorised": 213
+    "uncategorised": 216
   }
 }

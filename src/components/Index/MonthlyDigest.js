@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  useBlogs, useTreks, useSports, useBooks,
+  useBlogs, useTreks, useSports, useBooks, usePresentations,
 } from "../../context/ContentContext";
 import { getMicroblogMonths, getMicroblogByMonth } from "../../lib/api/microblog";
 import { itemMonthKey, monthLabel } from "../../lib/monthDigest";
@@ -79,6 +79,7 @@ const MonthlyDigest = () => {
   const { data: treksData, loading: treksLoading } = useTreks();
   const { data: sportsData, loading: sportsLoading } = useSports();
   const { data: booksData, loading: booksLoading } = useBooks();
+  const { data: decksData, loading: decksLoading } = usePresentations();
 
   const [microMonths, setMicroMonths] = useState([]);
   const [micro, setMicro] = useState({ rows: [], count: 0 });
@@ -100,8 +101,9 @@ const MonthlyDigest = () => {
     sportsData.forEach((s) => { const k = itemMonthKey(s, "sport"); if (k) set.add(k); });
     // Books have no month-precise date, so they bucket by created_at (fallback).
     booksData.forEach((b) => { const k = itemMonthKey(b, "book"); if (k) set.add(k); });
+    decksData.forEach((d) => { const k = itemMonthKey(d, "presentation"); if (k) set.add(k); });
     return [...set].sort().reverse();
-  }, [blogsData, treksData, sportsData, booksData, microMonths]);
+  }, [blogsData, treksData, sportsData, booksData, decksData, microMonths]);
 
   useEffect(() => {
     if (monthKeys.length && !monthKeys.includes(selectedMonth)) {
@@ -134,8 +136,12 @@ const MonthlyDigest = () => {
     () => booksData.filter((b) => itemMonthKey(b, "book") === selectedMonth),
     [booksData, selectedMonth]
   );
+  const monthDecks = useMemo(
+    () => decksData.filter((d) => itemMonthKey(d, "presentation") === selectedMonth),
+    [decksData, selectedMonth]
+  );
 
-  const anyLoading = blogsLoading || treksLoading || sportsLoading || booksLoading;
+  const anyLoading = blogsLoading || treksLoading || sportsLoading || booksLoading || decksLoading;
 
   if (!monthKeys.length) {
     if (anyLoading) {
@@ -151,7 +157,8 @@ const MonthlyDigest = () => {
   const hasTreks = monthTreks.length > 0;
   const hasSports = monthSports.length > 0;
   const hasBooks = monthBooks.length > 0;
-  const anySection = hasBlogs || hasMicro || hasTreks || hasSports || hasBooks;
+  const hasDecks = monthDecks.length > 0;
+  const anySection = hasBlogs || hasMicro || hasTreks || hasSports || hasBooks || hasDecks;
 
   return (
     <div className="rounded-xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 p-6 flex flex-col gap-6">
@@ -173,16 +180,17 @@ const MonthlyDigest = () => {
       </div>
 
       {/* KPI tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <StatTile value={monthBlogs.length} label="Blogs" active={hasBlogs} />
         <StatTile value={micro.count} label="Micro Posts" active={micro.count > 0} />
         <StatTile value={monthTreks.length} label="Treks" active={hasTreks} />
         <StatTile value={monthSports.length} label="Marathons" active={hasSports} />
         <StatTile value={monthBooks.length} label="Books" active={hasBooks} />
+        <StatTile value={monthDecks.length} label="Decks" active={hasDecks} />
       </div>
 
       {/* Per-type sections. Row 1: Blogs + Micro Posts. Row 2: Treks + Marathons.
-          Row 3: Books. Each row is its own 2-col grid so the pairing holds even
+          Row 3: Books + Presentations. Each row is its own 2-col grid so the pairing holds even
           when one side is empty for the month. */}
       {anySection ? (
         <div className="flex flex-col gap-6">
@@ -279,24 +287,44 @@ const MonthlyDigest = () => {
             </div>
           )}
 
-          {hasBooks && (
+          {(hasBooks || hasDecks) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <DigestSection
-                icon="auto_stories"
-                label="Books Read"
-                total={monthBooks.length}
-                viewAllTo="/books"
-              >
-                {monthBooks.slice(0, CAP).map((b) => (
-                  <ItemLink
-                    key={b.id}
-                    to={`/books/${b.id}`}
-                    title={b.title}
-                    meta={b.author ? `by ${b.author}` : ""}
-                    badges={b.language && <Badge>{b.language}</Badge>}
-                  />
-                ))}
-              </DigestSection>
+              {hasBooks && (
+                <DigestSection
+                  icon="auto_stories"
+                  label="Books Read"
+                  total={monthBooks.length}
+                  viewAllTo="/books"
+                >
+                  {monthBooks.slice(0, CAP).map((b) => (
+                    <ItemLink
+                      key={b.id}
+                      to={`/books/${b.id}`}
+                      title={b.title}
+                      meta={b.author ? `by ${b.author}` : ""}
+                      badges={b.language && <Badge>{b.language}</Badge>}
+                    />
+                  ))}
+                </DigestSection>
+              )}
+
+              {hasDecks && (
+                <DigestSection
+                  icon="co_present"
+                  label="Presentations"
+                  total={monthDecks.length}
+                  viewAllTo="/presentations"
+                >
+                  {monthDecks.slice(0, CAP).map((d) => (
+                    <ItemLink
+                      key={d.id}
+                      to={`/presentations/${d.id}`}
+                      title={d.title}
+                      meta={d.description}
+                    />
+                  ))}
+                </DigestSection>
+              )}
             </div>
           )}
         </div>

@@ -24,6 +24,8 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/sports/:id` | SportPost |
 | `/books/:id` | BookPost |
 | `/projects/:id` | ProjectPost |
+| `/presentations` | Presentations |
+| `/presentations/:id` | PresentationPost |
 | `/100-days-to-offload/:id` | BlogPost |
 | `/changelog` | Changelog |
 | `/treks` | TreksPage |

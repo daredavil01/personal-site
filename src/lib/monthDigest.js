@@ -6,6 +6,7 @@
 //   - trek  : date      "DD-MM-YYYY"  (day-first — NOT parseable by new Date())
 //   - sport : date      "Month DD, YYYY" (parseable by new Date())
 //   - micro : date      "YYYY-MM-DD" (Postgres date)
+//   - presentation: date "YYYY-MM-DD" (nullable — undated decks bucket by created_at)
 // created_at is used only as a defensive fallback (all date columns are NOT NULL).
 
 const MONTH_NAMES = [

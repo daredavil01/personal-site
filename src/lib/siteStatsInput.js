@@ -41,7 +41,7 @@ export async function loadSiteStatsInput({ url, key, fetchImpl = fetch }) {
 
   const [
     books, blogs, sports, treks, instagram, projects,
-    positions, degrees, certifications, skills, micro, tags,
+    positions, degrees, certifications, skills, micro, tags, presentations,
   ] = await Promise.all([
     get("books", "select=*,tag_names&order=date_finished.desc.nullslast,id.asc"),
     get("blogs", withTags),
@@ -63,6 +63,7 @@ export async function loadSiteStatsInput({ url, key, fetchImpl = fetch }) {
       if (!res.ok) throw new Error(`tags_with_counts ${res.status}`);
       return res.json();
     }),
+    get("presentations", withTags),
   ]);
 
   return {
@@ -72,6 +73,7 @@ export async function loadSiteStatsInput({ url, key, fetchImpl = fetch }) {
     treks,
     instagram,
     projects,
+    presentations,
     resume: { positions, degrees, certifications, skills },
     microDates: micro.map((r) => r.date),
     tags,

@@ -404,6 +404,28 @@ screenshot.
 
 ---
 
+### Presentations Page
+
+**Table:** `presentations` (`src/lib/api/presentations.js`), admin → **Presentations**. Collect:
+
+1. `title`, 2. `url` (required, https link to the HTML deck), 3. `date`
+(**YYYY-MM-DD**, optional), 4. `tags`, 5. `description`.
+
+- **Decks are embedded by URL, never copied.** The deck stays on its host
+  (GitHub Pages) and renders in an iframe on `/presentations` (live scaled
+  previews) and `/presentations/:id` (viewer). Adding a deck is an `/admin`
+  edit, not a deploy.
+- **The host must allow framing** — no `X-Frame-Options` / CSP
+  `frame-ancestors`. GitHub Pages sends neither. If an embed goes blank, the
+  viewer's "Open original" link still works.
+- **Supabase Storage can't host decks** — it serves `.html` as `text/plain`.
+- `/ask` indexes the deck's slide text (fetched by `scripts/ask-sources/presentation.mjs`)
+  on the next `npm run ask:index`.
+- Previews load every deck on the list page; switch to image thumbnails if the
+  list grows past ~20 decks.
+
+---
+
 ### 100 Days To Offload
 
 **Table:** `blogs` (`src/lib/api/blogs.js`), admin → **100 Days (Blogs)**. Collect:

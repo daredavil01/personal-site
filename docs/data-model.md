@@ -96,7 +96,7 @@ Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `im
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **13** · indexed as `project`
+Rows: **16** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -128,6 +128,25 @@ Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `sl
 Constraints:
 - `CHECK (((category IS NULL) OR (category = ANY (ARRAY['Web App'::text, 'Website'::text, 'Data Story'::text, 'Tool'::text, 'Design'::text, 'Other'::text]))))`
 - `CHECK (((status IS NULL) OR (status = ANY (ARRAY['Live'::text, 'In Progress'::text, 'Archived'::text, 'Concept'::text]))))`
+
+### `presentations`
+
+HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
+
+Rows: **7** · indexed as `presentation`
+
+| column | type | null | default |
+|---|---|---|---|
+| `id` | bigint | no | — |
+| `title` | text | no | — |
+| `description` | text | yes | — |
+| `url` | text | no | — |
+| `date` | date | yes | — |
+| `created_at` | timestamp with time zone | no | `now()` |
+| `updated_at` | timestamp with time zone | no | `now()` |
+
+Constraints:
+- `CHECK ((url ~ '^https://'::text))`
 
 ### `sports`
 
@@ -209,7 +228,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **213**
+Rows: **216**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -233,7 +252,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **471**
+Rows: **480**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -244,7 +263,7 @@ Rows: **471**
 | `created_at` | timestamp with time zone | no | `now()` |
 
 Constraints:
-- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text])))`
+- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text, 'presentation'::text])))`
 
 ### `content_chunks`
 

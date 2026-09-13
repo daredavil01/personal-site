@@ -34,6 +34,8 @@ const TrekPost = lazy(() => import("./pages/TrekPost"));
 const SportPost = lazy(() => import("./pages/SportPost"));
 const BookPost = lazy(() => import("./pages/BookPost"));
 const ProjectPost = lazy(() => import("./pages/ProjectPost"));
+const Presentations = lazy(() => import("./pages/Presentations"));
+const PresentationPost = lazy(() => import("./pages/PresentationPost"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const TreksPage = lazy(() => import("./pages/Treks"));
@@ -94,6 +96,8 @@ const App = () => (
               <Route path="/sports/:id" element={<SportPost />} />
               <Route path="/books/:id" element={<BookPost />} />
               <Route path="/projects/:id" element={<ProjectPost />} />
+              <Route path="/presentations" element={<Presentations />} />
+              <Route path="/presentations/:id" element={<PresentationPost />} />
               <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
               <Route path="/changelog" element={<Changelog />} />
               <Route path="/treks" element={<TreksPage />} />

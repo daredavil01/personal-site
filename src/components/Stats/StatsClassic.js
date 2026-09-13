@@ -38,6 +38,7 @@ const StatsClassic = () => {
     latestCert,
     orgCount,
     projectCount,
+    presentationCount,
     totalRaces,
     totalKmRun,
     bestMarathonTime,
@@ -396,6 +397,10 @@ const StatsClassic = () => {
                 <div className="font-headline text-4xl text-stone-900 dark:text-stone-100">{projectCount}</div>
                 <div className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1">Projects Built</div>
               </div>
+              <a href="/presentations" className="no-underline">
+                <div className="font-headline text-4xl text-stone-900 dark:text-stone-100">{presentationCount}</div>
+                <div className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1">Presentations</div>
+              </a>
               <div className="flex gap-2 flex-wrap justify-end">
                 {lists.topProjects.map((p) => (
                   <a

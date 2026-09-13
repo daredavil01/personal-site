@@ -6,7 +6,7 @@ import { supabase } from "../supabaseClient";
 // module owns the tags' own metadata plus the cross-entity queries.
 // Schema: supabase/migrations/0003_centralized_tags.sql.
 
-export const ENTITY_TYPES = ["book", "blog", "instagram", "microblog", "sport", "trek", "project"];
+export const ENTITY_TYPES = ["book", "blog", "instagram", "microblog", "sport", "trek", "project", "presentation"];
 
 // Encoded, not slugified — a slug would erase Devanagari names like भटकंती.
 export const tagPath = (name) => `/tags/${encodeURIComponent(String(name).toLowerCase())}`;

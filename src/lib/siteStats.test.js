@@ -38,6 +38,11 @@ describe("computeSiteStats", () => {
     expect(s.maxRacesInYear).toBe(1);
     expect(s.latestTrek).toBe("-");
   });
+
+  it("counts presentations", () => {
+    expect(computeSiteStats({ now }).presentationCount).toBe(0);
+    expect(computeSiteStats({ now, presentations: [{ id: 1 }, { id: 2 }] }).presentationCount).toBe(2);
+  });
 });
 
 it("microblogActivity finds the longest posting streak", () => {

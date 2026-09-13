@@ -91,6 +91,12 @@ export const PAGE_META = {
       "Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking, pace status, and interactive filtering of every post.",
     image: DEFAULT_IMAGE,
   },
+  "/presentations": {
+    title: "Presentations",
+    description:
+      "Talks, dossiers and data stories built as HTML slide decks — click through each one right on the page.",
+    image: DEFAULT_IMAGE,
+  },
   "/projects": {
     title: "Projects",
     description:
@@ -216,6 +222,14 @@ export function buildProjectMeta({ title, subtitle, description, image } = {}) {
     title,
     description:
       description || subtitle || `Detailed view of the project: ${title}.`,
+    image: image || DEFAULT_IMAGE,
+  };
+}
+
+export function buildPresentationMeta({ title, description, image } = {}) {
+  return {
+    title,
+    description: description || `A presentation: ${title}.`,
     image: image || DEFAULT_IMAGE,
   };
 }

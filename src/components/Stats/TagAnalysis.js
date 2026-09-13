@@ -22,6 +22,7 @@ const TYPES = [
   { key: "sport", label: "Races", swatch: "bg-[#e87ba4] dark:bg-[#d55181]" },
   { key: "trek", label: "Treks", swatch: "bg-[#008300] dark:bg-[#008300]" },
   { key: "project", label: "Projects", swatch: "bg-[#4a3aa7] dark:bg-[#9085e9]" },
+  { key: "presentation", label: "Presentations", swatch: "bg-stone-500 dark:bg-stone-400" },
 ];
 
 const TOP_THEMES = 12;

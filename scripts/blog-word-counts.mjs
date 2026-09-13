@@ -204,6 +204,26 @@ async function fetchSubstack() {
   });
 }
 
+// Substack answers 403 to GitHub Actions runner IPs (the same request works from
+// a home connection). Rather than fail the nightly job, reuse the Substack posts
+// from the last committed ledger; their bodies come from the text cache, since
+// `version` is rebuilt exactly as fetchSubstack builds it. New Substack posts
+// only land from a run on a machine Substack does not block.
+function substackFromLastLedger(err) {
+  if (!fs.existsSync(LEDGER_FILE)) throw err;
+  const posts = JSON.parse(fs.readFileSync(LEDGER_FILE, "utf8")).posts || [];
+  const kept = posts
+    .filter((p) => p.platform === "Substack")
+    .map(({ trackedInBlogsTable, blogId, challengeId, language, ...p }) => ({
+      ...p,
+      version: `${p.publishedAt}|${p.words}`,
+    }));
+  if (kept.length === 0) throw err;
+  const msg = `Substack unreachable (${err.message}); reusing ${kept.length} posts from the last ledger`;
+  console.log(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `  • ${msg}`);
+  return kept;
+}
+
 async function fetchWordPress() {
   const posts = [];
   for (let offset = 0; ; offset += WORDPRESS_PAGE) {
@@ -518,7 +538,10 @@ async function collectTexts(posts) {
 async function main() {
   console.log("\nCollecting blog word counts…\n");
 
-  const [substack, wordpress] = await Promise.all([fetchSubstack(), fetchWordPress()]);
+  const [substack, wordpress] = await Promise.all([
+    fetchSubstack().catch(substackFromLastLedger),
+    fetchWordPress(),
+  ]);
   console.log(`  ✓ substack:  ${substack.length} posts`);
   console.log(`  ✓ wordpress: ${wordpress.length} posts`);
 

@@ -14,6 +14,7 @@ import {
   buildBookMeta,
   buildBlogMeta,
   buildProjectMeta,
+  buildPresentationMeta,
 } from "../src/data/pageMeta";
 
 function escAttr(str) {
@@ -88,6 +89,7 @@ export async function onRequest(context) {
   const bookMatch = pathname.match(/^\/books\/(\d+)$/);
   const projectMatch = pathname.match(/^\/projects\/(\d+)$/);
   const blogMatch = pathname.match(/^\/100-days-to-offload\/(\d+)$/);
+  const presentationMatch = pathname.match(/^\/presentations\/(\d+)$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
   const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -234,6 +236,20 @@ export async function onRequest(context) {
       } catch (_) {
         // Ignored
       }
+    } else if (presentationMatch) {
+      try {
+        const deckRes = await fetch(
+          `${supabaseUrl}/rest/v1/presentations?id=eq.${presentationMatch[1]}&select=title,description&limit=1`,
+          { headers },
+        );
+        const decks = await deckRes.json();
+        const deck = decks?.[0];
+        if (deck) {
+          dynamicMeta = buildPresentationMeta({ title: deck.title, description: deck.description });
+        }
+      } catch (_) {
+        // Ignored
+      }
     } else if (blogMatch) {
       try {
         const blogRes = await fetch(
@@ -262,6 +278,7 @@ export async function onRequest(context) {
       [/^\/sports\/\d+$/, "/sports"],
       [/^\/books\/\d+$/, "/books"],
       [/^\/projects\/\d+$/, "/projects"],
+      [/^\/presentations\/\d+$/, "/presentations"],
       [/^\/100-days-to-offload\/\d+$/, "/100-days-to-offload"],
       [/^\/tags\/[^/]+$/, "/tags"],
     ];

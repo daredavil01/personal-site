@@ -18,40 +18,41 @@ Names are lowercase and URI-encoded rather than slugified.
 | `philosophy` | 8 | — |
 | `politics` | 7 | — |
 | `भटकंती` | 7 | — |
+| `digital wellbeing` | 6 | — |
 | `marathons` | 6 | — |
 | `non-fiction` | 6 | — |
+| `psychology` | 6 | — |
 | `running` | 6 | — |
 | `खंडेराव` | 6 | — |
 | `biography` | 5 | — |
 | `history` | 5 | — |
 | `marathon` | 5 | — |
-| `psychology` | 5 | — |
 | `self-help` | 5 | — |
 | `travel` | 5 | — |
 | `claude code` | 4 | — |
-| `digital wellbeing` | 4 | — |
 | `digitalnomad` | 4 | — |
 | `love` | 4 | — |
 | `marathi` | 4 | — |
+| `ngo` | 4 | — |
 | `bharatekkhoj` | 3 | — |
 | `bookreview` | 3 | — |
 | `dare_davil_01` | 3 | — |
+| `data` | 3 | — |
 | `digital well-being` | 3 | — |
 | `forts` | 3 | — |
 | `latepost` | 3 | — |
-| `ngo` | 3 | — |
 | `public-policy` | 3 | — |
 | `sports` | 3 | — |
 | `trekking` | 3 | — |
 | `adventure` | 2 | — |
 | `choices` | 2 | — |
-| `data` | 2 | — |
 | `data privacy` | 2 | — |
 | `digitalmonk` | 2 | — |
 | `nirman` | 2 | — |
 | `personaldevelopment` | 2 | — |
 | `privacy` | 2 | — |
 | `random_sanky` | 2 | — |
+| `social media` | 2 | — |
 | `socialmedia` | 2 | — |
 | `youth` | 2 | — |
 | `मन` | 2 | — |
@@ -83,6 +84,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `dance` | 1 | — |
 | `daredavil01` | 1 | — |
 | `data journalism` | 1 | — |
+| `data visualization` | 1 | — |
 | `desperate me` | 1 | — |
 | `desperate_me` | 1 | — |
 | `development` | 1 | — |
@@ -98,6 +100,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `floating_in_sea🌊` | 1 | — |
 | `freemind` | 1 | — |
 | `future` | 1 | — |
+| `game` | 1 | — |
 | `google sites` | 1 | — |
 | `habits` | 1 | — |
 | `harihareshwar` | 1 | — |
@@ -171,7 +174,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `semi-counductor` | 1 | — |
 | `semiconductors` | 1 | — |
 | `sexual-drama` | 1 | — |
-| `social media` | 1 | — |
 | `spirituality` | 1 | — |
 | `story` | 1 | — |
 | `surveillance` | 1 | — |
@@ -185,6 +187,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `the social dilemma` | 1 | — |
 | `the_trip` | 1 | — |
 | `thoughts` | 1 | — |
+| `three.js` | 1 | — |
 | `time is up` | 1 | — |
 | `traditionallook😍` | 1 | — |
 | `tranquility` | 1 | — |

@@ -30,6 +30,12 @@ const HOME_FEATURES = [
     icon: "terminal",
   },
   {
+    title: "Presentations",
+    desc: "Talks, feature dossiers and data stories built as HTML slide decks — open any one and click through it right here.",
+    path: "/presentations",
+    icon: "co_present",
+  },
+  {
     title: "Sports Log",
     desc: "A record of my endurance journey, featuring marathon results, training logs, and personal bests from 10K to Full Marathons.",
     path: "/sports",

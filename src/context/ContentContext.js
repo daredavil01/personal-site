@@ -5,6 +5,7 @@ import { getBooks } from "../lib/api/books";
 import { getSports } from "../lib/api/sports";
 import { getTreks } from "../lib/api/treks";
 import { getProjects } from "../lib/api/projects";
+import { getPresentations } from "../lib/api/presentations";
 import { getBlogs } from "../lib/api/blogs";
 import { getInstagram } from "../lib/api/instagram";
 import { getResume } from "../lib/api/resume";
@@ -20,6 +21,7 @@ const FETCHERS = {
   sports: getSports,
   treks: getTreks,
   projects: getProjects,
+  presentations: getPresentations,
   blogs: getBlogs,
   instagram: getInstagram,
   resume: getResume,
@@ -84,6 +86,7 @@ export const useBooks = () => useResource("books", EMPTY_ARRAY);
 export const useSports = () => useResource("sports", EMPTY_ARRAY);
 export const useTreks = () => useResource("treks", EMPTY_ARRAY);
 export const useProjects = () => useResource("projects", EMPTY_ARRAY);
+export const usePresentations = () => useResource("presentations", EMPTY_ARRAY);
 export const useBlogs = () => useResource("blogs", EMPTY_ARRAY);
 export const useInstagram = () => useResource("instagram", EMPTY_ARRAY);
 export const useResume = () => useResource("resume", EMPTY_RESUME);

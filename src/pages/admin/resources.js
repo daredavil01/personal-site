@@ -3,6 +3,7 @@ import books, { BOOK_CATEGORIES, BOOK_FORMATS, BOOK_STATUSES } from "../../lib/a
 import sports from "../../lib/api/sports";
 import treks from "../../lib/api/treks";
 import projects from "../../lib/api/projects";
+import presentations from "../../lib/api/presentations";
 import blogs from "../../lib/api/blogs";
 import instagram from "../../lib/api/instagram";
 import {
@@ -284,6 +285,42 @@ const resources = [
       { name: "solution", label: "Solution", type: "textarea", span: "full" },
       { name: "outcome", label: "Outcome", type: "textarea", span: "full" },
       { name: "slideImages", label: "Screenshots", type: "slideImages", span: "full" },
+    ],
+  },
+  {
+    key: "presentations",
+    label: "Presentations",
+    singular: "presentation",
+    api: presentations,
+    title: (r) => r.title,
+    searchKeys: ["title", "description", "url"],
+    viewPath: (r) => `/presentations/${r.id}`,
+    columns: [
+      { key: "title", label: "Title", sortable: true, primary: true },
+      {
+        key: "date",
+        label: "Date",
+        sortable: true,
+        width: "9rem",
+        sortValue: (r) => (r.date ? new Date(r.date).getTime() : null),
+      },
+      { key: "tags", label: "Tags", render: (r) => tagList(r.tags) },
+    ],
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true },
+      { name: "date", label: "Date", type: "isoDate", hint: "Optional — when it was presented or published" },
+      {
+        name: "url",
+        label: "Deck URL",
+        type: "url",
+        required: true,
+        span: "full",
+        hint: "https link to the HTML deck. The host must allow embedding in an iframe (GitHub Pages does)",
+      },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full", hint: "Topical tags, shared with /tags",
+      },
+      { name: "description", label: "Description", type: "textarea", span: "full" },
     ],
   },
   {

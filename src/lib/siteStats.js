@@ -19,7 +19,7 @@ import {
 /* eslint-enable import/extensions */
 
 export const OFFLOAD_TAG = "100_days_to_offload";
-export const TAG_TYPES = ["blog", "book", "microblog", "instagram", "sport", "trek", "project"];
+export const TAG_TYPES = ["blog", "book", "microblog", "instagram", "sport", "trek", "project", "presentation"];
 export const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -134,6 +134,7 @@ export function computeSiteStats({
   treks = [],
   instagram = [],
   projects = [],
+  presentations = [],
   resume = {},
   now = new Date(),
 } = {}) {
@@ -218,6 +219,7 @@ export function computeSiteStats({
     orgCount: positions.length,
     degreeCount: degrees.length,
     projectCount: projects.length,
+    presentationCount: presentations.length,
 
     totalRaces: sports.length,
     totalKmRun: sports.reduce(

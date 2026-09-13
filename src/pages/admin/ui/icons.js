@@ -39,6 +39,7 @@ export {
   MountainSnow,
   Pencil,
   Plus,
+  Presentation,
   Rss,
   Search,
   Sparkles,

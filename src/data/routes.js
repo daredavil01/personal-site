@@ -55,6 +55,7 @@ const routes = [
     path: "/projects",
     subRoutes: [
       { label: "Projects", path: "/projects" },
+      { label: "Presentations", path: "/presentations" },
       { label: "Resume", path: "/resume" },
     ],
   },
