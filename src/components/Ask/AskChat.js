@@ -6,7 +6,8 @@ import { entityLabel } from "../../data/askConfig";
 import { colorForTag } from "../../lib/generativeArt";
 import { useTagColors } from "../../context/ContentContext";
 import useTurnstile from "./useTurnstile";
-import AnswerBody from "./AnswerBody";
+import AnswerBody, { MediaStrip } from "./AnswerBody";
+import { hasInlineImage, isExternal } from "../../lib/askFormat";
 import AnswerActions from "./AnswerActions";
 import { clearThread, loadThread, saveThread } from "./askStorage";
 
@@ -23,6 +24,9 @@ const TYPE_FILTERS = [
   { id: "project", label: "Projects" },
   { id: "sport", label: "Races" },
   { id: "trek", label: "Treks" },
+  { id: "writing", label: "Essays" },
+  { id: "resume", label: "Résumé" },
+  { id: "stats", label: "Stats" },
 ];
 
 const SourceCard = ({ source, index, colors }) => {
@@ -30,27 +34,44 @@ const SourceCard = ({ source, index, colors }) => {
     source.tags?.[0] || source.entity_type,
     source.tags?.[0] ? colors.get(source.tags[0]) : null,
   );
-  return (
-    <Link
-      to={source.url || "/"}
-      className="group flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-800 px-3 py-2 hover:border-stone-400 dark:hover:border-stone-600 transition-colors"
-    >
-      <span
-        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-        style={{ backgroundColor: accent }}
-      >
-        {index}
-      </span>
+  const className = "group flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-800 px-3 py-2 hover:border-stone-400 dark:hover:border-stone-600 transition-colors";
+  const body = (
+    <>
+      {source.image ? (
+        <img
+          src={source.image}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-10 w-10 shrink-0 rounded-md object-cover"
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
+        />
+      ) : (
+        <span
+          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+          style={{ backgroundColor: accent }}
+        >
+          {index}
+        </span>
+      )}
       <span className="min-w-0">
         <span className="block text-[13px] font-medium truncate group-hover:underline">
+          {source.image ? `${index}. ` : ""}
           {source.title || "Untitled"}
         </span>
         <span className="block text-[11px] text-stone-500 dark:text-stone-400">
           {entityLabel(source.entity_type)}
           {source.date ? ` · ${source.date}` : ""}
+          {source.domain ? ` · ${source.domain} ↗` : ""}
         </span>
       </span>
-    </Link>
+    </>
+  );
+  // Essays with no ledger row link out to Substack or WordPress.
+  return isExternal(source.url) ? (
+    <a href={source.url} target="_blank" rel="noreferrer" className={className}>{body}</a>
+  ) : (
+    <Link to={source.url || "/"} className={className}>{body}</Link>
   );
 };
 
@@ -66,10 +87,14 @@ SourceCard.propTypes = {
   colors: PropTypes.instanceOf(Map).isRequired,
 };
 
-const Bubble = ({ turn, question, colors, onFollowup }) => {
+const Bubble = ({
+  turn, question, colors, onFollowup, onRetry, onFeedback,
+}) => {
   const mine = turn.role === "user";
   return (
-    <div className={`flex flex-col gap-2 ${mine ? "items-end" : "items-start"}`}>
+    <div
+      className={`flex flex-col gap-2 ${mine ? "items-end" : "items-start"}`}
+    >
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed ${
           mine
@@ -77,12 +102,18 @@ const Bubble = ({ turn, question, colors, onFollowup }) => {
             : "bg-stone-100 dark:bg-stone-900"
         }`}
       >
-        {mine ? turn.content : <AnswerBody text={turn.content} sources={turn.sources} />}
+        {mine ? (
+          turn.content
+        ) : (
+          <AnswerBody text={turn.content} sources={turn.sources} />
+        )}
         {turn.streaming && (
           <span className="inline-block w-1.5 h-3.5 ml-0.5 align-middle bg-current animate-pulse" />
         )}
         {turn.streaming && !turn.content && (
-          <span className="text-stone-500 dark:text-stone-400">Reading the archive…</span>
+          <span className="text-stone-500 dark:text-stone-400">
+            Reading the archive…
+          </span>
         )}
       </div>
 
@@ -113,8 +144,19 @@ const Bubble = ({ turn, question, colors, onFollowup }) => {
         </p>
       )}
 
-      {!mine && !turn.streaming && !!turn.content && (
-        <AnswerActions question={question} answer={turn.content} sources={turn.sources || []} />
+      {!mine && !turn.streaming && !!turn.media?.length && !hasInlineImage(turn.content) && (
+        <MediaStrip media={turn.media} />
+      )}
+
+      {!mine && !turn.streaming && !!turn.content && !turn.retry && (
+        <AnswerActions
+          question={question}
+          answer={turn.content}
+          sources={turn.sources || []}
+          messageId={turn.messageId || null}
+          feedback={turn.feedback || null}
+          onFeedback={onFeedback || (() => {})}
+        />
       )}
 
       {!mine && !turn.streaming && !!turn.followups?.length && (
@@ -132,8 +174,20 @@ const Bubble = ({ turn, question, colors, onFollowup }) => {
         </div>
       )}
 
+      {!mine && !turn.streaming && turn.retry && onRetry && (
+        <button
+          type="button"
+          onClick={() => onRetry(turn.retry)}
+          className="rounded-full border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-[12px] font-medium hover:border-stone-500 dark:hover:border-stone-500 transition-colors"
+        >
+          Verify and retry
+        </button>
+      )}
+
       {turn.note && (
-        <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0">{turn.note}</p>
+        <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0">
+          {turn.note}
+        </p>
       )}
     </div>
   );
@@ -152,9 +206,13 @@ Bubble.propTypes = {
   question: PropTypes.string,
   colors: PropTypes.instanceOf(Map).isRequired,
   onFollowup: PropTypes.func.isRequired,
+  onRetry: PropTypes.func,
+  onFeedback: PropTypes.func,
 };
 
-Bubble.defaultProps = { question: "" };
+Bubble.defaultProps = { question: "", onRetry: null, onFeedback: null };
+
+const VERIFY_FAILED = "Could not confirm this browser is not a bot — the check expired or was blocked by an extension.";
 
 const AskChat = ({ compact }) => {
   const [turns, setTurns] = useState(() => loadThread());
@@ -167,7 +225,10 @@ const AskChat = ({ compact }) => {
   const abortRef = useRef(null);
   const sendRef = useRef(null);
   const colors = useTagColors();
-  const turnstile = useTurnstile(info?.turnstileSiteKey, info?.turnstileRequired);
+  const turnstile = useTurnstile(
+    info?.turnstileSiteKey,
+    info?.turnstileRequired,
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -203,17 +264,35 @@ const AskChat = ({ compact }) => {
     abortRef.current = null;
   };
 
-  const send = async (text) => {
+  const send = async (text, { replaceFailed = false } = {}) => {
     const message = (text ?? draft).trim();
     if (!message || pending || blocked) return;
     setDraft("");
-    const history = turns.map((t) => ({ role: t.role, content: t.content }));
-    setTurns((prev) => [
-      ...prev,
+    // A retry replaces the failed question/answer pair rather than stacking a copy.
+    const base = replaceFailed ? turns.slice(0, -2) : turns;
+    const history = base.map((t) => ({ role: t.role, content: t.content }));
+    setTurns([
+      ...base,
       { role: "user", content: message },
       { role: "assistant", content: "", sources: [], streaming: true },
     ]);
     setPending(true);
+
+    // Chips, follow-ups and ?q= links can fire before the widget has solved;
+    // wait for a token instead of sending none and taking a 403.
+    let turnstileToken;
+    if (info?.turnstileRequired) {
+      turnstileToken = await turnstile.take();
+      if (!turnstileToken) {
+        patchLast(() => ({
+          streaming: false,
+          content: VERIFY_FAILED,
+          retry: message,
+        }));
+        setPending(false);
+        return;
+      }
+    }
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -223,7 +302,7 @@ const AskChat = ({ compact }) => {
         message,
         history,
         types,
-        turnstileToken: turnstile.consume(),
+        turnstileToken,
         signal: controller.signal,
         onSources: ({ sources, browse }) => patchLast(() => ({
           sources: sources || [],
@@ -238,7 +317,11 @@ const AskChat = ({ compact }) => {
         note: done.degraded
           ? "Answered from search alone — no model was available."
           : null,
-        content: last.content,
+        // The worker re-sends the finished answer cleaned (links and images
+        // checked against the sources); prefer it over the raw streamed text.
+        content: done.answer ?? last.content,
+        media: done.media || [],
+        messageId: done.messageId || null,
       }));
     } catch (err) {
       if (err.name === "AbortError") {
@@ -246,6 +329,13 @@ const AskChat = ({ compact }) => {
           streaming: false,
           content: last.content || "Stopped.",
           note: last.content ? "Stopped." : null,
+        }));
+      } else if (err.status === 403) {
+        turnstile.refresh();
+        patchLast(() => ({
+          streaming: false,
+          content: VERIFY_FAILED,
+          retry: message,
         }));
       } else {
         if (err.status === 429 || err.status === 503) setBlocked(err.message);
@@ -258,16 +348,29 @@ const AskChat = ({ compact }) => {
   };
   sendRef.current = send;
 
+  const retry = (message) => {
+    turnstile.refresh();
+    send(message, { replaceFailed: true });
+  };
+
+  // Kept on the turn itself, so a reload restores the reader's verdict.
+  const setFeedback = (index, feedback) => setTurns((prev) => prev.map(
+    (t, j) => (j === index ? { ...t, feedback } : t),
+  ));
+
   // ?q= makes a question shareable: the link lands pre-asked rather than
   // replaying a cached answer, so it always reflects the archive as it is now.
   useEffect(() => {
     const q = searchParams.get("q");
     if (!q || turns.length || !info) return;
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete("q");
-      return next;
-    }, { replace: true });
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("q");
+        return next;
+      },
+      { replace: true },
+    );
     sendRef.current(q);
     // Intentionally keyed on `info` alone — this fires once, when the
     // endpoint's limits are known, and must not re-fire as the thread grows.
@@ -280,9 +383,7 @@ const AskChat = ({ compact }) => {
     setBlocked(null);
   };
 
-  const toggleType = (id) => setTypes((prev) => (
-    prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
-  ));
+  const toggleType = (id) => setTypes((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]),);
 
   const max = info?.maxMessageChars || 500;
   const suggestions = info?.suggestedQuestions || [];
@@ -291,12 +392,14 @@ const AskChat = ({ compact }) => {
 
   return (
     <div className="flex flex-col gap-4 h-full min-h-0">
-      <div className={`flex-1 min-h-0 overflow-y-auto flex flex-col gap-5 ${compact ? "pr-1" : ""}`}>
+      <div
+        className={`flex-1 min-h-0 overflow-y-auto flex flex-col gap-5 ${compact ? "pr-1" : ""}`}
+      >
         {!turns.length && (
           <div className="flex flex-col gap-3">
             <p className="text-[14px] text-stone-600 dark:text-stone-300 mb-0">
-              Ask about the books, races, treks, projects and years of short posts
-              on this site. Answers link back to the pages they came from.
+              Ask about the books, races, treks, projects and years of short
+              posts on this site. Answers link back to the pages they came from.
             </p>
             <div className="flex flex-wrap gap-2">
               {suggestions.map((q) => (
@@ -323,6 +426,9 @@ const AskChat = ({ compact }) => {
             question={questionFor(i)}
             colors={colors}
             onFollowup={send}
+            onFeedback={(feedback) => setFeedback(i, feedback)}
+            // Only the newest turn can retry: a retry replaces the last pair.
+            onRetry={i === turns.length - 1 ? retry : null}
           />
         ))}
 
@@ -397,7 +503,7 @@ const AskChat = ({ compact }) => {
             ) : (
               <button
                 type="submit"
-                disabled={!draft.trim() || !turnstile.ready}
+                disabled={!draft.trim()}
                 className="rounded-xl bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 px-4 py-2 text-[13px] font-medium disabled:opacity-40"
               >
                 Ask

@@ -32,6 +32,13 @@ export const ENTITY_TYPES = {
   instagram: { label: "Instagram", list: "/instagram", path: () => "/instagram" },
   now: { label: "Now", list: "/now", path: () => "/now" },
   page: { label: "Page", list: "/", path: () => null },
+  // Types added by the source registry (scripts/ask-sources/). Their chunks
+  // carry their own url; `list` is where "browse everything" points.
+  resume: { label: "Résumé", list: "/resume", path: () => "/resume" },
+  writing: { label: "Essay", list: "/writing-ledger.html", path: () => null },
+  stats: { label: "Stats", list: "/stats", path: () => "/stats" },
+  tag: { label: "Tag", list: "/tags", path: () => null },
+  site: { label: "Site page", list: null, path: () => null },
 };
 
 export function entityUrl(type, id, fallback) {
@@ -56,10 +63,18 @@ export const ENTITY_PLURALS = {
   instagram: "photo sets",
   now: "now updates",
   page: "pages",
+  resume: "résumé entries",
+  writing: "essays",
+  stats: "stats",
+  tag: "tags",
+  site: "site pages",
 };
 
+// A source dropped into scripts/ask-sources/ without an entry above still
+// renders: "reading_list" becomes "Reading list".
 export function entityLabel(type) {
-  return ENTITY_TYPES[type]?.label || type;
+  return ENTITY_TYPES[type]?.label
+    || String(type || "").replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
 // Used when ask_settings is unreachable, so a Supabase blip degrades the answer

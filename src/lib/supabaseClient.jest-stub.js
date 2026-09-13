@@ -12,6 +12,8 @@ const makeQuery = () => new Proxy(
 );
 
 export const isSupabaseConfigured = false;
+export const SUPABASE_URL = "";
+export const SUPABASE_PUBLISHABLE_KEY = "";
 
 export const supabase = {
   from: () => makeQuery(),

@@ -1,148 +1,61 @@
 import React from "react";
 import personalData from "../../data/stats/personal";
-import { getPBRaw, formatHoursMinutes, formatMinutesSeconds } from "../../utils/raceStats";
-import {
-  useBooks, useBlogs, useSports, useInstagram, useTreks, useProjects, useResume,
-} from "../../context/ContentContext";
+import useSiteStats from "./useSiteStats";
 import { LoadingBlock, ErrorBlock } from "../common/AsyncStates";
 import TagAnalysis from "./TagAnalysis";
 
 // The pre-almanac Stats page, kept verbatim as the ?view=classic alternative.
 const StatsClassic = () => {
-  const { data: books, loading: booksLoading, error: booksError } = useBooks();
-  const { data: offloadData, loading: blogsLoading, error: blogsError } = useBlogs();
-  const { data: sportsData, loading: sportsLoading, error: sportsError } = useSports();
-  const { data: instagramPosts, loading: instaLoading, error: instaError } = useInstagram();
-  const { data: treksData, loading: treksLoading, error: treksError } = useTreks();
-  const { data: projects, loading: projectsLoading, error: projectsError } = useProjects();
-  const { data: resume, loading: resumeLoading, error: resumeError } = useResume();
-  const { positions, degrees, certifications, skills } = resume;
+  // One hourly-cached snapshot (GET /api/stats) instead of seven collection
+  // fetches; the numbers come from src/lib/siteStats.js, the same code the
+  // /ask chatbot's index is built from.
+  const { data, loading, error } = useSiteStats();
 
-  const isLoading = booksLoading || blogsLoading || sportsLoading || instaLoading
-    || treksLoading || projectsLoading || resumeLoading;
-  const hasError = booksError || blogsError || sportsError || instaError
-    || treksError || projectsError || resumeError;
+  if (loading) return <LoadingBlock label="Loading stats…" />;
+  if (error || !data) return <ErrorBlock />;
+
+  const { stats, lists, tags } = data;
+  const {
+    booksCount,
+    pagesTurnedK,
+    topGenres,
+    booksEnglish,
+    booksMarathi,
+    booksPerYearSorted,
+    maxBooksInYear,
+    topBookTags,
+    booksWithReviews,
+    booksReading,
+    readingPace,
+    offloadCount,
+    offloadPercentage,
+    topPlatforms,
+    topBlogTags,
+    blogEnglish,
+    blogMarathi,
+    topSkills,
+    certCount,
+    latestCert,
+    orgCount,
+    projectCount,
+    totalRaces,
+    totalKmRun,
+    bestMarathonTime,
+    bestHmTime,
+    bestTenKTime,
+    totalTreks,
+    hardTreks,
+    treksWithBlog,
+    trekYearsActive,
+    latestTrek,
+    instaPostCount,
+    totalPhotos,
+    topInstaTags,
+  } = stats;
 
   const ageComponent = personalData.find((item) => item.key === 'age')?.value;
   const location = personalData.find((item) => item.key === 'location')?.value || 'Pune, MH';
-
-  const booksCount = books.length;
-  // Approximation of pages based on an average of 330 pages per book
-  const pagesTurned = `${((booksCount * 330) / 1000).toFixed(1)}k`;
-
-  const genreCounts = {};
-  books.forEach((b) => {
-    if (b.category) {
-      b.category.split(',').forEach((c) => {
-        const cat = c.trim();
-        genreCounts[cat] = (genreCounts[cat] || 0) + 1;
-      });
-    }
-  });
-  const topGenres = Object.entries(genreCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map((entry) => entry[0]);
-
-  const offloadCount = offloadData.length;
-  const offloadPercentage = Math.round((offloadCount / 100) * 100);
-
-  const platformCounts = {};
-  offloadData.forEach((post) => {
-    if (post.blog_platform) {
-      platformCounts[post.blog_platform] = (platformCounts[post.blog_platform] || 0) + 1;
-    }
-  });
-  const topPlatforms = Object.entries(platformCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
-
-  // Take top 9 skills for the arsenal tags
-  const topSkills = [...skills].sort((a, b) => b.competency - a.competency).slice(0, 9).map((s) => s.title);
-
-  // Certifications
-  const certCount = certifications.length;
-  const latestCert = certifications[0]?.name || "AWS Architect Professional";
-
-  // Sports / Endurance
-  const totalRaces = sportsData.length;
-  const totalKmRun = sportsData.reduce((acc, curr) => acc + (parseFloat(curr.distance.replace(/[^\d.]/g, '')) || 0), 0);
-
-  const bestMarathonTime = formatHoursMinutes(getPBRaw(sportsData, '42')?.time);
-  const bestHmTime = formatHoursMinutes(getPBRaw(sportsData, '21')?.time);
-  const bestTenKTime = formatMinutesSeconds(getPBRaw(sportsData, '10')?.time);
-
-  // Treks
-  const parseTrekDate = (dateStr) => {
-    if (!dateStr) return new Date(0);
-    const [day, month, year] = dateStr.split('-').map(Number);
-    return new Date(year, month - 1, day);
-  };
-  const totalTreks = treksData.length;
-  const hardTreks = treksData.filter((t) => t.endurance_level === 'Hard').length;
-  const treksWithBlog = treksData.filter((t) => !!t.blog_link).length;
-  const trekYearsActive = new Set(treksData.map((t) => parseTrekDate(t.date).getFullYear())).size;
-  const latestTrek = [...treksData].sort((a, b) => parseTrekDate(b.date) - parseTrekDate(a.date))[0]?.fort_name || '-';
-
-  // Instagram / Digital Capture
-  const instaPostCount = instagramPosts.length;
-  const totalPhotos = instagramPosts.reduce((acc, post) => acc + (post.slideImages?.length || 0), 0);
-
-  const tagCounts = {};
-  instagramPosts.forEach((post) => {
-    if (post.tags) {
-      post.tags.forEach((t) => {
-        tagCounts[t] = (tagCounts[t] || 0) + 1;
-      });
-    }
-  });
-  const topInstaTags = Object.entries(tagCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map((entry) => entry[0]);
-
-  // Books: language split
-  const booksEnglish = books.filter((b) => b.language === 'English').length;
-  const booksMarathi = books.filter((b) => b.language === 'Marathi').length;
-
-  // Books: per year
-  const booksPerYear = {};
-  books.forEach((b) => {
-    if (b.year) booksPerYear[b.year] = (booksPerYear[b.year] || 0) + 1;
-  });
-  const booksPerYearSorted = Object.entries(booksPerYear).sort((a, b) => b[0] - a[0]);
-  const maxBooksInYear = Math.max(...Object.values(booksPerYear));
-
-  // Books: top tags
-  const bookTagCounts = {};
-  books.forEach((b) => {
-    (b.tags || []).forEach((t) => { bookTagCounts[t] = (bookTagCounts[t] || 0) + 1; });
-  });
-  const topBookTags = Object.entries(bookTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-
-  // Books: with reviews
-  const booksWithReviews = books.filter((b) => b.blog_link).length;
-
-  // Blog: top tags
-  const blogTagCounts = {};
-  offloadData.forEach((post) => {
-    (post.blog_tags || []).forEach((t) => {
-      if (t.toLowerCase() !== '100_days_to_offload') {
-        blogTagCounts[t] = (blogTagCounts[t] || 0) + 1;
-      }
-    });
-  });
-  const topBlogTags = Object.entries(blogTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
-
-  // Blog: language split
-  const blogEnglish = offloadData.filter((p) => p.language === 'English').length;
-  const blogMarathi = offloadData.filter((p) => p.language === 'Marathi').length;
-
-  // Projects
-  const projectCount = projects.length;
-
-  if (isLoading) return <LoadingBlock label="Loading stats…" />;
-  if (hasError) return <ErrorBlock />;
+  const pagesTurned = `${pagesTurnedK.toFixed(1)}k`;
 
   return (
     <div className="flex flex-col gap-16 w-full">
@@ -174,7 +87,7 @@ const StatsClassic = () => {
                 </div>
                 <div className="flex justify-between items-baseline border-b border-stone-50 dark:border-stone-800/50 pb-2">
                   <span className="text-stone-400 font-label text-xs uppercase tracking-widest">Orgs</span>
-                  <span className="text-stone-900 dark:text-stone-100 font-headline text-xl">{String(positions.length).padStart(2, '0')}</span>
+                  <span className="text-stone-900 dark:text-stone-100 font-headline text-xl">{String(orgCount).padStart(2, '0')}</span>
                 </div>
               </div>
             </div>
@@ -212,11 +125,11 @@ const StatsClassic = () => {
                   <span className="block font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Pages Turned</span>
                 </div>
                 <div>
-                  <span className="block font-headline text-5xl text-secondary">{(booksCount / (new Date().getMonth() + 1 || 1)).toFixed(1)}</span>
+                  <span className="block font-headline text-5xl text-secondary">{(readingPace).toFixed(1)}</span>
                   <span className="block font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Avg / Month</span>
                 </div>
                 <div>
-                  <span className="block font-headline text-5xl text-stone-900 dark:text-stone-100">{books.filter((b) => b.status === "reading").length || "01"}</span>
+                  <span className="block font-headline text-5xl text-stone-900 dark:text-stone-100">{booksReading || "01"}</span>
                   <span className="block font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 font-bold">Active WIP</span>
                 </div>
               </div>
@@ -462,7 +375,7 @@ const StatsClassic = () => {
             <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Background</span>
             <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-6">Education & Projects</h3>
             <div className="space-y-4 mb-6">
-              {degrees.map((d) => (
+              {lists.degrees.map((d) => (
                 <a
                   key={d.school}
                   href={d.link}
@@ -484,7 +397,7 @@ const StatsClassic = () => {
                 <div className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mt-1">Projects Built</div>
               </div>
               <div className="flex gap-2 flex-wrap justify-end">
-                {projects.slice(0, 3).map((p) => (
+                {lists.topProjects.map((p) => (
                   <a
                     key={p.title}
                     href={p.link}
@@ -503,7 +416,7 @@ const StatsClassic = () => {
           <div className="col-span-1 md:col-span-12 bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
             <span className="font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-600 mb-6 block font-bold">Themes Across Content</span>
             <h3 className="font-headline text-2xl text-stone-800 dark:text-stone-200 mb-8">Content Tags</h3>
-            <TagAnalysis />
+            <TagAnalysis tags={tags} />
           </div>
 
         </div>

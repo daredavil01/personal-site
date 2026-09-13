@@ -1,0 +1,32 @@
+// Books — one chunk per book.
+export default {
+  type: "book",
+  load: (ctx) => ctx.fetchAll("books"),
+  toChunks: (rows, { compose, entityUrl, storageUrl }) => rows.map((r) => ({
+    entity_type: "book",
+    entity_id: r.id,
+    chunk_index: 0,
+    title: r.title,
+    url: entityUrl("book", r.id),
+    chunk_date: r.date_finished || null,
+    tags: r.tag_names || [],
+    image_url: storageUrl(r.cover_url || r.cover || null),
+    body: compose([
+      ["Book", r.title],
+      ["Author", r.author],
+      ["Translator", r.translator],
+      ["Category", r.category],
+      ["Language", r.language],
+      ["Status", r.status],
+      ["Year read", r.year],
+      ["Rating", r.rating ? `${r.rating}/5` : null],
+      ["Publisher", r.publisher],
+      ["Format", r.format],
+      ["Tags", (r.tag_names || []).join(", ")],
+      [null, r.description],
+      ["Quote", r.quote],
+      ["Note", r.note],
+      ["Review", r.blog_link],
+    ]),
+  })),
+};

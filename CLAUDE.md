@@ -127,6 +127,35 @@ Natural-language chat over the whole content store.
   strip on every detail page from the same embeddings — no model call at read
   time.
 
+## Ask Sources, Stats Snapshot and Feedback
+
+- **Sources are files.** Every `scripts/ask-sources/*.mjs` is a source (`type`,
+  `load`, `toChunks`); the indexer loads the whole folder. Since `0016` no
+  migration is needed per type. How-to: `scripts/ask-sources/README.md`.
+- **Incremental by content.** `npm run ask:index` hashes each chunk: unchanged
+  rows are skipped, text that moved reuses its vector, only new text is embedded.
+  `-- --dry-run` prints the plan per type; `-- --full` re-embeds everything.
+- **Full blog text** (every Substack + WordPress post) comes from
+  `knowledge_base/blog-posts-text.json`, written by `npm run blogs:wordcount` as
+  a cache — only new or edited posts are downloaded. Never written to `public/`.
+- **/stats numbers have one implementation: `src/lib/siteStats.js`.** The page
+  renders from `GET /api/stats` (edge-cached for an hour, `src/lib/statsEndpoint.js`;
+  computed in the browser if the endpoint is unreachable), and the `/ask` facts
+  card and the `stats` source read the same snapshot. Never recompute a stat
+  inside a component — add it to `computeSiteStats`.
+- **Writing Ledger:** `public/writing-ledger.html` fetches
+  `public/data/writing-ledger.json`; month/year-to-date are recomputed at read
+  time (`src/lib/writingPeriod.js`). See `docs/writing-ledger.md`.
+- **Answers** may only link to, or show, URLs that came from retrieved items:
+  `sanitiseAnswer` (`src/lib/askFormat.js`) runs in the worker and in the UI.
+- **Feedback** (thumbs, reason tags, comment) is written onto the answer's
+  `ask_messages` row by `ask_feedback()`, which checks the browser session. The
+  admin Conversations page filters and summarises the log and exports rated
+  exchanges as evals JSONL.
+- **Nightly:** `.github/workflows/ask-refresh.yml` (02:00 IST) runs
+  `blogs:wordcount` + `ask:index` and commits the ledger JSON only when posts
+  changed. Repo secrets: `SUPABASE_SERVICE_ROLE_KEY`, `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
+
 ## Environment Variables
 
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — client (baked into the
@@ -164,9 +193,14 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
-| Second brain endpoint | `functions/ask.js` |
+| Second brain endpoint | `functions/api/ask.js` |
 | Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |
 | Ask UI | `src/pages/Ask.js`, `src/components/Ask/` |
+| Ask sources (plug-in registry) | `scripts/ask-sources/`, `scripts/lib/registry.mjs` |
+| /stats numbers + hourly snapshot | `src/lib/siteStats.js`, `functions/api/stats.js` |
+| Answer link/image rules | `src/lib/askFormat.js` |
+| Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
+| Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |

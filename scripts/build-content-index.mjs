@@ -1,30 +1,39 @@
 #!/usr/bin/env node
 /**
- * Builds `content_chunks` — the search index behind /ask — from every content
- * table plus the two hand-written markdown files, then regenerates docs/.
+ * Builds `content_chunks` — the search index behind /ask — from every source in
+ * scripts/ask-sources/ (see scripts/lib/registry.mjs), then regenerates docs/.
  *
- * Idempotent: upserts on (entity_type, entity_id, chunk_index) and skips rows
- * whose `updated_at` already matches the stored `source_updated_at`, so a
- * re-run after editing one book re-embeds one book.
+ * Incremental by content, not by time. Each chunk is hashed twice
+ * (scripts/lib/chunking.mjs) and sorted into:
+ *   unchanged — same text, same metadata: not written at all
+ *   metadata  — same text, new title/url/image: upserted, vector untouched
+ *   reuse     — text already embedded under another key (the changelog grew at
+ *               the top, so every chunk below shifted one index): vector copied
+ *   embed     — genuinely new text: the only thing sent to Workers AI
+ * Rows indexed before migration 0016 have no hashes; their bodies are hashed on
+ * the first run here, so upgrading does not re-embed the archive either.
  *
- * Embeddings come from Cloudflare Workers AI (@cf/baai/bge-m3, 1024 dims,
- * multilingual — the archive is part Marathi). The whole corpus is ~400k tokens,
- * which is well inside the free daily neuron allowance.
- *
- * Uses the SERVICE ROLE key (bypasses RLS) — run locally only.
+ * A source that fails to load is reported and its existing chunks are left
+ * alone — the run exits non-zero, but an outage never empties the index.
  *
  * Usage:
- *   1. Apply supabase/migrations/0009_second_brain.sql.
- *   2. .env needs SUPABASE_URL (or VITE_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY,
- *      CF_ACCOUNT_ID and CF_API_TOKEN (a token with Workers AI read access).
- *   3. npm run ask:index            (add --full to re-embed everything)
+ *   npm run ask:index                incremental
+ *   npm run ask:index -- --dry-run   what would change, per type; writes and embeds nothing
+ *   npm run ask:index -- --full      re-embed everything (after changing EMBEDDING_MODEL)
+ *
+ * .env: SUPABASE_URL (or VITE_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY,
+ * VITE_SUPABASE_PUBLISHABLE_KEY (stats fallback), and CF_ACCOUNT_ID + CF_API_TOKEN
+ * for embeddings (not needed for --dry-run). Service role key: local or CI only.
  */
 
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { buildDocs, makeClient } from "./build-docs.mjs";
 import { EMBEDDING_MODEL, entityUrl } from "../src/data/askConfig.js";
+import * as chunking from "./lib/chunking.mjs";
+import {
+  chunkKey, collectChunks, loadSources, planChunks, planOrphans,
+} from "./lib/registry.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const EMBED_BATCH = 32;
@@ -32,487 +41,252 @@ const EMBED_BATCH = 32;
 // counts every text in the batch PADDED to the longest one — so the cost of a
 // batch is (item count x longest item), not the sum of the items.
 const EMBED_TOKEN_BUDGET = 45000;
-const EMBED_MAX_CHARS = 4000;
 const UPSERT_BATCH = 200;
-const MAX_CHUNK_CHARS = 1200;
+const VECTOR_LOOKUP_BATCH = 50;
+const PAGE = 1000;
 const FULL = process.argv.includes("--full");
+const DRY_RUN = process.argv.includes("--dry-run");
 
 const supabase = makeClient();
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 
-const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
-const CF_API_TOKEN = process.env.CF_API_TOKEN;
-if (!CF_ACCOUNT_ID || !CF_API_TOKEN) {
-  console.error("Missing CF_ACCOUNT_ID / CF_API_TOKEN in .env (Workers AI embeddings).");
-  process.exit(1);
-}
-
-// --- helpers ----------------------------------------------------------------
-
-const clean = (v) =>
-  String(v ?? "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-// One flat labelled string per chunk. Metadata is inlined on purpose: the
-// keyword half of hybrid_search then matches on "Marathi" or "42 Kms" even
-// though those live in columns, not prose.
-function compose(parts) {
-  return parts
-    .filter(([, v]) => v !== null && v !== undefined && clean(v) !== "")
-    .map(([label, v]) => (label ? `${label}: ${clean(v)}` : clean(v)))
-    .join(" | ");
-}
-
-// Splits long prose on paragraph boundaries, never mid-sentence.
-//
-// Line endings are normalised first: the markdown files in src/data are CRLF,
-// and /\n{2,}/ does not match \r\n\r\n — without this the whole changelog comes
-// back as one 136KB "paragraph" and everything past its first 4000 characters
-// is dropped at embedding time.
-function splitProse(text, limit = MAX_CHUNK_CHARS) {
-  const paras = String(text || "")
-    .replace(/\r\n?/g, "\n")
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  const out = [];
-  let current = "";
-  const flush = () => {
-    if (current) out.push(current);
-    current = "";
-  };
-  for (const p of paras) {
-    if (p.length > limit) {
-      // One paragraph over the limit (a long changelog entry) still has to be
-      // cut somewhere; cut on a line break rather than mid-word.
-      flush();
-      let rest = p;
-      while (rest.length > limit) {
-        const cut = rest.lastIndexOf("\n", limit);
-        const at = cut > limit / 2 ? cut : limit;
-        out.push(rest.slice(0, at).trim());
-        rest = rest.slice(at).trim();
-      }
-      current = rest;
-    } else if (current && current.length + p.length + 2 > limit) {
-      flush();
-      current = p;
-    } else {
-      current = current ? `${current}\n\n${p}` : p;
-    }
-  }
-  flush();
-  return out.length ? out : [""];
-}
-
-// Free-text dates: "February 22, 2026" (sports) and "17-02-2019" (treks).
-function parseLooseDate(value) {
-  if (!value) return null;
-  const s = String(value).trim();
-  const dmy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-  if (dmy) return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
-  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (iso) return s;
-  const parsed = new Date(s);
-  if (!Number.isNaN(parsed.valueOf())) return parsed.toISOString().slice(0, 10);
-  return null;
-}
+// --- reads ------------------------------------------------------------------
 
 async function fetchAll(table, columns = "*, tag_names") {
   const rows = [];
-  const pageSize = 1000;
-  for (let from = 0; ; from += pageSize) {
+  for (let from = 0; ; from += PAGE) {
+    // eslint-disable-next-line no-await-in-loop
     const { data, error } = await supabase
       .from(table)
       .select(columns)
       .order("id", { ascending: true })
-      .range(from, from + pageSize - 1);
+      .range(from, from + PAGE - 1);
     if (error) throw new Error(`${table}: ${error.message}`);
     rows.push(...(data || []));
-    if (!data || data.length < pageSize) break;
+    if (!data || data.length < PAGE) break;
   }
   return rows;
 }
 
-// --- per-table chunk builders ----------------------------------------------
-//
-// Each returns [{ entity_type, entity_id, chunk_index, title, url, body,
-// chunk_date, tags, source_updated_at }].
-
-function bookChunks(rows) {
-  return rows.map((r) => ({
-    entity_type: "book",
-    entity_id: r.id,
-    chunk_index: 0,
-    title: r.title,
-    url: entityUrl("book", r.id),
-    chunk_date: r.date_finished || null,
-    tags: r.tag_names || [],
-    source_updated_at: r.updated_at,
-    body: compose([
-      ["Book", r.title],
-      ["Author", r.author],
-      ["Translator", r.translator],
-      ["Category", r.category],
-      ["Language", r.language],
-      ["Status", r.status],
-      ["Year read", r.year],
-      ["Rating", r.rating ? `${r.rating}/5` : null],
-      ["Publisher", r.publisher],
-      ["Format", r.format],
-      ["Tags", (r.tag_names || []).join(", ")],
-      [null, r.description],
-      ["Quote", r.quote],
-      ["Note", r.note],
-      ["Review", r.blog_link],
-    ]),
-  }));
+// Paginated: PostgREST caps an unbounded select at 1000 rows, and a truncated
+// picture of the index makes every run re-embed its tail.
+async function selectChunks(columns, narrow = (q) => q) {
+  const rows = [];
+  for (let from = 0; ; from += PAGE) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await narrow(
+      supabase.from("content_chunks").select(columns).order("id", { ascending: true }),
+    ).range(from, from + PAGE - 1);
+    if (error) throw new Error(`content_chunks: ${error.message}`);
+    rows.push(...(data || []));
+    if (!data || data.length < PAGE) break;
+  }
+  return rows;
 }
 
-function blogChunks(rows) {
-  return rows.map((r) => ({
-    entity_type: "blog",
-    entity_id: r.id,
-    chunk_index: 0,
-    title: r.blog_title,
-    url: entityUrl("blog", r.id),
-    chunk_date: parseLooseDate(r.blog_date),
-    tags: r.tag_names || [],
-    source_updated_at: r.updated_at,
-    body: compose([
-      ["Blog post", r.blog_title],
-      ["Published", r.blog_date],
-      ["Platform", r.blog_platform],
-      ["Language", r.language],
-      ["Tags", (r.tag_names || []).join(", ")],
-      [null, r.blog_description],
-      ["Link", r.blog_link],
-    ]),
-  }));
-}
-
-function microblogChunks(rows) {
-  return rows.map((r) => ({
-    entity_type: "microblog",
-    entity_id: r.id,
-    chunk_index: 0,
-    title: r.title || `${r.post_type} post`,
-    url: entityUrl("microblog", r.id),
-    chunk_date: r.date || null,
-    tags: r.tag_names || [],
-    source_updated_at: r.updated_at,
-    body: compose([
-      ["Micro post", r.title],
-      ["Date", r.date],
-      ["Type", r.post_type],
-      ["Tags", (r.tag_names || []).join(", ")],
-      [null, r.text],
-    ]),
-  }));
-}
-
-function projectChunks(rows) {
-  const out = [];
-  for (const r of rows.filter((p) => p.visible)) {
-    const head = compose([
-      ["Project", r.title],
-      ["Subtitle", r.subtitle],
-      ["Category", r.category],
-      ["Status", r.status],
-      ["Role", r.role],
-      ["Org", r.org],
-      ["Date", r.date],
-      ["Tech", (r.tech_stack || []).join(", ")],
-      ["Tags", (r.tag_names || []).join(", ")],
-      [null, r.description],
-      ["Highlights", (r.highlights || []).join(" · ")],
-    ]);
-    const detail = compose([
-      ["Problem", r.problem],
-      ["Solution", r.solution],
-      ["Outcome", r.outcome],
-    ]);
-    const bodies = [head, ...splitProse(detail).filter(Boolean)];
-    bodies.forEach((body, i) => {
-      out.push({
-        entity_type: "project",
-        entity_id: r.id,
-        chunk_index: i,
-        title: r.title,
-        url: entityUrl("project", r.id),
-        chunk_date: r.date || null,
-        tags: r.tag_names || [],
-        source_updated_at: r.updated_at,
-        body: i === 0 ? body : compose([["Project", r.title], [null, body]]),
-      });
+async function loadExisting() {
+  const rows = await selectChunks("id, entity_type, entity_id, chunk_index, content_hash, embed_hash");
+  if (rows.some((r) => !r.embed_hash)) {
+    const bodies = await selectChunks(
+      "id, body",
+      (q) => q.is("embed_hash", null).not("embedding", "is", null),
+    );
+    const byId = new Map(bodies.map((b) => [b.id, b.body]));
+    rows.forEach((r) => {
+      if (r.embed_hash || !byId.has(r.id)) return;
+      r.embed_hash = chunking.sha1(chunking.embedText({ body: byId.get(r.id) }));
+      r.legacy = true;
     });
   }
-  return out;
+  return rows;
 }
 
-function sportChunks(rows) {
-  return rows.map((r) => ({
-    entity_type: "sport",
-    entity_id: r.id,
-    chunk_index: 0,
-    title: r.title,
-    url: entityUrl("sport", r.id),
-    chunk_date: parseLooseDate(r.date),
-    tags: r.tag_names || [],
-    source_updated_at: r.updated_at,
-    body: compose([
-      ["Race", r.title],
-      ["Date", r.date],
-      ["Place", r.place],
-      ["Distance", r.distance],
-      ["Finish time", r.time],
-      ["Bib", r.bib_number],
-      ["Tags", (r.tag_names || []).join(", ")],
-      [null, r.description],
-    ]),
-  }));
-}
-
-function trekChunks(rows) {
-  return rows.map((r) => ({
-    entity_type: "trek",
-    entity_id: r.id,
-    chunk_index: 0,
-    title: r.fort_name,
-    url: entityUrl("trek", r.id),
-    chunk_date: parseLooseDate(r.date),
-    tags: r.tag_names || [],
-    source_updated_at: r.updated_at,
-    body: compose([
-      ["Trek", r.fort_name],
-      ["Date", r.date],
-      ["Duration", r.trek_time],
-      ["Endurance", r.endurance_level],
-      ["Tags", (r.tag_names || []).join(", ")],
-      ["Write-up", r.blog_link],
-    ]),
-  }));
-}
-
-function instagramChunks(rows) {
-  return rows.map((r) => ({
-    entity_type: "instagram",
-    entity_id: r.id,
-    chunk_index: 0,
-    title: r.title,
-    url: entityUrl("instagram", r.id),
-    chunk_date: null,
-    tags: r.tag_names || [],
-    source_updated_at: r.updated_at,
-    body: compose([
-      ["Instagram set", r.title],
-      ["Tags", (r.tag_names || []).join(", ")],
-      [null, r.caption],
-    ]),
-  }));
-}
-
-// The /now page: each month's `sections` blob flattened into readable prose.
-function nowChunks(rows) {
-  return rows.map((r) => {
-    const sections = r.sections || {};
-    const flat = Object.entries(sections)
-      .map(([key, value]) => {
-        const text = Array.isArray(value)
-          ? value
-              .map((item) =>
-                typeof item === "string" ? item : Object.values(item || {}).join(" "),
-              )
-              .join(" · ")
-          : typeof value === "object"
-            ? Object.values(value || {}).join(" · ")
-            : String(value ?? "");
-        return `${key}: ${clean(text)}`;
-      })
-      .filter((s) => s.split(": ")[1]);
-    return {
-      entity_type: "now",
-      entity_id: r.id,
-      chunk_index: 0,
-      title: `Now — ${r.month} ${r.year}`,
-      url: entityUrl("now", r.id),
-      chunk_date: null,
-      tags: [],
-      source_updated_at: r.updated_at,
-      body: compose([
-        ["Now update", `${r.month} ${r.year}`],
-        ["Current", r.is_current ? "yes" : "no"],
-        [null, flat.join(" | ")],
-      ]),
-    };
-  });
-}
-
-// Two hand-written files that are not in Postgres. Stable synthetic ids so the
-// unique key keeps working across runs.
-const PAGE_FILES = [
-  { id: 1, file: "src/data/about.md", title: "About", url: "/about" },
-  { id: 2, file: "src/data/changelog.md", title: "Changelog", url: "/changelog" },
-];
-
-function pageChunks() {
-  const out = [];
-  for (const spec of PAGE_FILES) {
-    const abs = path.join(ROOT, spec.file);
-    if (!fs.existsSync(abs)) continue;
-    const raw = fs.readFileSync(abs, "utf8").replace(/^---[\s\S]*?---\n/, "");
-    const stat = fs.statSync(abs);
-    splitProse(raw).forEach((body, i) => {
-      out.push({
-        entity_type: "page",
-        entity_id: spec.id,
-        chunk_index: i,
-        title: spec.title,
-        url: spec.url,
-        chunk_date: null,
-        tags: [],
-        source_updated_at: stat.mtime.toISOString(),
-        body: compose([[spec.title, null], [null, body]]) || body,
-      });
+async function loadVectors(hashes) {
+  const vectors = new Map();
+  for (let i = 0; i < hashes.length; i += VECTOR_LOOKUP_BATCH) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await supabase
+      .from("content_chunks")
+      .select("embed_hash, embedding")
+      .in("embed_hash", hashes.slice(i, i + VECTOR_LOOKUP_BATCH))
+      .not("embedding", "is", null);
+    if (error) throw new Error(`vector lookup: ${error.message}`);
+    (data || []).forEach((r) => {
+      if (!vectors.has(r.embed_hash)) vectors.set(r.embed_hash, r.embedding);
     });
   }
-  return out;
+  return vectors;
 }
 
 // --- embeddings -------------------------------------------------------------
 
 async function embed(texts) {
+  const { CF_ACCOUNT_ID, CF_API_TOKEN } = process.env;
+  if (!CF_ACCOUNT_ID || !CF_API_TOKEN) {
+    throw new Error("Missing CF_ACCOUNT_ID / CF_API_TOKEN in .env (Workers AI embeddings).");
+  }
   const res = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/run/${EMBEDDING_MODEL}`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${CF_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${CF_API_TOKEN}`, "Content-Type": "application/json" },
       body: JSON.stringify({ text: texts }),
     },
   );
   if (!res.ok) {
     throw new Error(`Workers AI ${res.status}: ${(await res.text()).slice(0, 300)}`);
   }
-  const json = await res.json();
-  const vectors = json?.result?.data;
+  const vectors = (await res.json())?.result?.data;
   if (!Array.isArray(vectors) || vectors.length !== texts.length) {
     throw new Error(`Workers AI returned ${vectors?.length ?? "no"} vectors for ${texts.length} texts`);
   }
   return vectors;
 }
 
-// --- main -------------------------------------------------------------------
-
-async function main() {
-  console.log(FULL ? "Rebuilding the whole index…" : "Indexing changed content…");
-
-  const [books, blogs, micro, projects, sports, treks, instagram, nowMonths] =
-    await Promise.all([
-      fetchAll("books"),
-      fetchAll("blogs"),
-      fetchAll("microblog"),
-      fetchAll("projects"),
-      fetchAll("sports"),
-      fetchAll("treks"),
-      fetchAll("instagram"),
-      fetchAll("now_months", "*"),
-    ]);
-
-  const chunks = [
-    ...bookChunks(books),
-    ...blogChunks(blogs),
-    ...microblogChunks(micro),
-    ...projectChunks(projects),
-    ...sportChunks(sports),
-    ...trekChunks(treks),
-    ...instagramChunks(instagram),
-    ...nowChunks(nowMonths),
-    ...pageChunks(),
-  ].filter((c) => clean(c.body).length > 0);
-
-  console.log(`  ${chunks.length} chunks composed`);
-
-  // What is already indexed, and at which source version.
-  // Paginated: PostgREST caps an unbounded select at 1000 rows, and a truncated
-  // picture here makes every run re-embed the tail of the index.
-  const existing = [];
-  const existingPage = 1000;
-  for (let from = 0; ; from += existingPage) {
-    // eslint-disable-next-line no-await-in-loop
-    const { data, error } = await supabase
-      .from("content_chunks")
-      .select("entity_type, entity_id, chunk_index, source_updated_at")
-      .order("id", { ascending: true })
-      .range(from, from + existingPage - 1);
-    if (error) throw error;
-    existing.push(...(data || []));
-    if (!data || data.length < existingPage) break;
-  }
-
-  const key = (c) => `${c.entity_type}:${c.entity_id}:${c.chunk_index}`;
-  // Compared as instants, not strings: Postgres hands back "...479+00:00" where
-  // Node wrote "...479Z", and a string compare marks those rows stale forever.
-  const stamp = (v) => (v ? Date.parse(v) : null);
-  const seen = new Map(existing.map((r) => [key(r), stamp(r.source_updated_at)]));
-
-  const stale = FULL
-    ? chunks
-    : chunks.filter((c) => seen.get(key(c)) !== stamp(c.source_updated_at));
-  console.log(`  ${stale.length} need embedding`);
-
-  // Batches are packed against the padded cost above, not a simple sum, and the
-  // per-text estimate is deliberately pessimistic (2 chars/token) because
-  // Devanagari tokenises far worse than English and half this archive is Marathi.
+// Batches are packed against the padded cost above, and the per-text estimate
+// is deliberately pessimistic (2 chars/token) because Devanagari tokenises far
+// worse than English and a good part of this archive is Marathi.
+async function embedAll(chunks) {
   let done = 0;
   let cursor = 0;
-  while (cursor < stale.length) {
+  while (cursor < chunks.length) {
     const batch = [];
     let longest = 0;
-    while (cursor < stale.length && batch.length < EMBED_BATCH) {
-      const text = stale[cursor].body.slice(0, EMBED_MAX_CHARS);
+    while (cursor < chunks.length && batch.length < EMBED_BATCH) {
+      const text = chunking.embedText(chunks[cursor]);
       const estimate = Math.ceil(text.length / 2);
-      const padded = Math.max(longest, estimate) * (batch.length + 1);
-      if (batch.length && padded > EMBED_TOKEN_BUDGET) break;
-      batch.push({ chunk: stale[cursor], text });
+      if (batch.length && Math.max(longest, estimate) * (batch.length + 1) > EMBED_TOKEN_BUDGET) break;
+      batch.push({ chunk: chunks[cursor], text });
       longest = Math.max(longest, estimate);
       cursor += 1;
     }
     // eslint-disable-next-line no-await-in-loop
     const vectors = await embed(batch.map((b) => b.text));
-    batch.forEach((b, j) => {
-      b.chunk.embedding = vectors[j];
-    });
+    batch.forEach((b, j) => { b.chunk.embedding = vectors[j]; });
     done += batch.length;
-    process.stdout.write(`\r  embedded ${done}/${stale.length}`);
+    process.stdout.write(`\r  embedded ${done}/${chunks.length}`);
   }
-  if (stale.length) process.stdout.write("\n");
+  if (chunks.length) process.stdout.write("\n");
+}
 
-  for (let i = 0; i < stale.length; i += UPSERT_BATCH) {
-    const batch = stale.slice(i, i + UPSERT_BATCH);
+// --- writes -----------------------------------------------------------------
+
+const toRow = (c, withEmbedding) => ({
+  entity_type: c.entity_type,
+  entity_id: c.entity_id,
+  chunk_index: c.chunk_index,
+  title: c.title || "",
+  url: c.url || "",
+  body: c.body,
+  chunk_date: c.chunk_date || null,
+  tags: c.tags || [],
+  image_url: c.image_url || null,
+  content_hash: c.content_hash,
+  embed_hash: c.embed_hash,
+  updated_at: new Date().toISOString(),
+  ...(withEmbedding ? { embedding: c.embedding } : {}),
+});
+
+// Rows with and without a vector go in separate batches: a bulk upsert takes the
+// union of its rows' keys, and a missing `embedding` would overwrite with null.
+async function upsert(chunks, withEmbedding) {
+  for (let i = 0; i < chunks.length; i += UPSERT_BATCH) {
+    // eslint-disable-next-line no-await-in-loop
     const { error } = await supabase
       .from("content_chunks")
-      .upsert(batch, { onConflict: "entity_type,entity_id,chunk_index" });
-    if (error) throw error;
+      .upsert(chunks.slice(i, i + UPSERT_BATCH).map((c) => toRow(c, withEmbedding)), {
+        onConflict: "entity_type,entity_id,chunk_index",
+      });
+    if (error) throw new Error(`upsert: ${error.message}`);
+  }
+}
+
+async function removeRows(rows) {
+  const ids = rows.map((r) => r.id);
+  for (let i = 0; i < ids.length; i += UPSERT_BATCH) {
+    // eslint-disable-next-line no-await-in-loop
+    const { error } = await supabase.from("content_chunks").delete().in("id", ids.slice(i, i + UPSERT_BATCH));
+    if (error) throw new Error(`delete: ${error.message}`);
+  }
+}
+
+// --- main -------------------------------------------------------------------
+
+async function main() {
+  const mode = FULL ? "rebuilding the whole index" : "indexing changed content";
+  console.log(`${DRY_RUN ? "Dry run — " : ""}${mode}…`);
+
+  const sources = await loadSources();
+  const ctx = {
+    ROOT,
+    supabase,
+    fetchAll,
+    entityUrl,
+    ...chunking,
+    storageUrl: (v) => chunking.storageUrl(v, SUPABASE_URL),
+    firstImage: (slides) => chunking.firstImage(slides, SUPABASE_URL),
+  };
+  const { chunks: raw, failedTypes, report } = await collectChunks(sources, ctx);
+  report.forEach((r) => console.log(
+    r.error ? `  ✗ ${r.type.padEnd(10)} ${r.error}` : `  ✓ ${r.type.padEnd(10)} ${r.chunks} chunks`,
+  ));
+
+  const keys = new Set();
+  raw.forEach((c) => {
+    const key = chunkKey(c);
+    if (keys.has(key)) throw new Error(`Two chunks share the key ${key} — check the sources' ids`);
+    keys.add(key);
+  });
+  const chunks = raw.map((c) => ({ ...c, ...chunking.hashChunk(c) }));
+
+  const existing = await loadExisting();
+  const plan = planChunks(chunks, existing, { full: FULL });
+  const orphans = planOrphans(existing, chunks, failedTypes);
+
+  console.log(
+    `  ${chunks.length} chunks: ${plan.unchanged.length} unchanged · ${plan.metadata.length} metadata-only · `
+    + `${plan.reuse.length} reuse a vector · ${plan.embed.length} to embed · ${orphans.length} to remove`,
+  );
+
+  if (DRY_RUN) {
+    const byType = {};
+    Object.entries(plan).forEach(([outcome, list]) => list.forEach((c) => {
+      byType[c.entity_type] = byType[c.entity_type] || { unchanged: 0, metadata: 0, reuse: 0, embed: 0, remove: 0 };
+      byType[c.entity_type][outcome] += 1;
+    }));
+    orphans.forEach((r) => {
+      byType[r.entity_type] = byType[r.entity_type] || { unchanged: 0, metadata: 0, reuse: 0, embed: 0, remove: 0 };
+      byType[r.entity_type].remove += 1;
+    });
+    console.table(byType);
+    if (failedTypes.size) process.exitCode = 1;
+    return;
   }
 
-  // Drop chunks whose source row is gone (deleted book, hidden project, a
-  // changelog that got shorter). Cheap at this size: compare the full key set.
-  const live = new Set(chunks.map(key));
-  const orphans = existing.filter((r) => !live.has(key(r)));
-  for (const o of orphans) {
-    await supabase
-      .from("content_chunks")
-      .delete()
-      .match({
-        entity_type: o.entity_type,
-        entity_id: o.entity_id,
-        chunk_index: o.chunk_index,
-      });
+  const vectors = plan.reuse.length
+    ? await loadVectors([...new Set(plan.reuse.map((c) => c.embed_hash))])
+    : new Map();
+  const reused = [];
+  const toEmbed = [...plan.embed];
+  plan.reuse.forEach((c) => {
+    const vector = vectors.get(c.embed_hash);
+    if (vector) reused.push({ ...c, embedding: vector });
+    else toEmbed.push(c);
+  });
+
+  await embedAll(toEmbed);
+  await upsert([...toEmbed, ...reused], true);
+  await upsert(plan.metadata, false);
+  await removeRows(orphans);
+
+  console.log(
+    `  embedded ${toEmbed.length} · reused ${reused.length} · updated ${plan.metadata.length} · `
+    + `unchanged ${plan.unchanged.length} · removed ${orphans.length}`,
+  );
+  if (failedTypes.size) {
+    console.warn(`  ! kept existing chunks for failed sources: ${[...failedTypes].join(", ")}`);
+    process.exitCode = 1;
   }
-  if (orphans.length) console.log(`  removed ${orphans.length} orphaned chunks`);
 
   console.log("Regenerating docs/…");
   const { approxTokens } = await buildDocs(supabase);

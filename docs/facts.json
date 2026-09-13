@@ -34,6 +34,20 @@
     "instagram": 11,
     "microblog": 1661
   },
+  "resume": {
+    "skills": 30,
+    "degrees": 2,
+    "companies": [
+      "Bridgenext",
+      "Emtec Inc.",
+      "RIT MEDIA CELL",
+      "TEDxRajarambapuIT",
+      "The Takshashila Institution",
+      "VivekVahini"
+    ],
+    "positions": 6,
+    "certifications": 12
+  },
   "sports": {
     "by_distance": {
       "10K": 2,
@@ -166,6 +180,17 @@
       "photo": 953,
       "quote": 237
     },
+    "by_year": {
+      "2018": 232,
+      "2019": 230,
+      "2020": 535,
+      "2021": 280,
+      "2022": 112,
+      "2023": 56,
+      "2024": 66,
+      "2025": 58,
+      "2026": 92
+    },
     "date_range": {
       "max": "2026-09-10",
       "min": "2018-03-19"
@@ -175,5 +200,23 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-12T11:14:13.630329+00:00"
+  "generated_at": "2026-09-13T17:19:26.829733+00:00",
+  "index_by_type": {
+    "now": 13,
+    "blog": 60,
+    "book": 51,
+    "page": 2,
+    "site": 20,
+    "trek": 20,
+    "sport": 25,
+    "stats": 10,
+    "resume": 21,
+    "project": 12,
+    "writing": 44,
+    "instagram": 11,
+    "microblog": 1661
+  },
+  "tags_by_category": {
+    "uncategorised": 213
+  }
 }

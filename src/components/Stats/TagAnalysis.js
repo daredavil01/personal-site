@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
+import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTags } from "../../context/ContentContext";
 import { tagPath } from "../../lib/api/tags";
+import { tagAnalysis } from "../../lib/siteStats";
 
 // The Stats page's tag appendix, read from the central tag tables
 // (tags_with_counts) rather than three per-table tag dumps: how many themes,
@@ -25,42 +27,23 @@ const TYPES = [
 const TOP_THEMES = 12;
 const TOP_BRIDGES = 8;
 
-// The challenge's own marker tag is on every 100 Days post; it's bookkeeping,
-// not a theme, so it would only drown the chart.
-const isChallengeTag = (name) => name === "100_days_to_offload";
-
 const labelOf = (t) => t.displayName || t.name;
 const typesOf = (t) => TYPES.filter((type) => t.counts[type.key] > 0);
 
 const overline = "font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-500 font-bold mb-4";
 
-const TagAnalysis = () => {
-  const { data: tags, loading, error } = useTags();
-
+const TagAnalysisView = ({ tags, loading, error }) => {
+  // The counting lives in src/lib/siteStats.js, shared with /api/stats and the
+  // /ask indexer; this component only adds the per-type labels and swatches.
   const stats = useMemo(() => {
-    const used = tags.filter((t) => t.total > 0 && !isChallengeTag(t.name));
-    const links = used.reduce((n, t) => n + t.total, 0);
-    const bridges = used
-      .filter((t) => typesOf(t).length >= 2)
-      .sort((a, b) => typesOf(b).length - typesOf(a).length || b.total - a.total);
-    const perType = TYPES.map((type) => {
-      const withType = used
-        .filter((t) => t.counts[type.key] > 0)
-        .sort((a, b) => b.counts[type.key] - a.counts[type.key]);
-      return {
-        ...type,
-        tags: withType.length,
-        links: withType.reduce((n, t) => n + t.counts[type.key], 0),
-        top: withType.slice(0, 3),
-      };
-    }).filter((type) => type.tags > 0);
+    const a = tagAnalysis(tags, { topThemes: TOP_THEMES, typeKeys: TYPES.map((t) => t.key) });
     return {
-      used,
-      links,
-      bridges,
-      perType,
-      once: used.filter((t) => t.total === 1).length,
-      top: used.slice(0, TOP_THEMES), // already sorted by total
+      used: a.used,
+      links: a.links,
+      bridges: a.bridges,
+      perType: a.perType.map((type) => ({ ...TYPES.find((t) => t.key === type.key), ...type })),
+      once: a.once,
+      top: a.top,
     };
   }, [tags]);
 
@@ -215,5 +198,26 @@ const TagAnalysis = () => {
     </div>
   );
 };
+
+TagAnalysisView.propTypes = {
+  tags: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+};
+TagAnalysisView.defaultProps = { loading: false, error: null };
+
+// Reads tags from the content context unless the caller already has them
+// (the Stats page receives them inside the /api/stats snapshot).
+const TagAnalysisFromContext = () => {
+  const { data, loading, error } = useTags();
+  return <TagAnalysisView tags={data} loading={loading} error={error} />;
+};
+
+const TagAnalysis = ({ tags }) => (
+  tags ? <TagAnalysisView tags={tags} /> : <TagAnalysisFromContext />
+);
+
+TagAnalysis.propTypes = { tags: PropTypes.arrayOf(PropTypes.shape({})) };
+TagAnalysis.defaultProps = { tags: null };
 
 export default TagAnalysis;

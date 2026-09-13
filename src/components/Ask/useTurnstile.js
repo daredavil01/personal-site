@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // after every question rather than solved once per session.
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const TOKEN_WAIT_MS = 10000;
 
 function loadScript() {
   if (window.turnstile) return Promise.resolve();
@@ -31,7 +32,16 @@ function loadScript() {
 export default function useTurnstile(siteKey, required) {
   const containerRef = useRef(null);
   const widgetIdRef = useRef(null);
+  // The ref is the source of truth for take(); state only drives re-renders.
+  const tokenRef = useRef(null);
+  const waitersRef = useRef([]);
   const [token, setToken] = useState(null);
+
+  const deliver = useCallback((next) => {
+    tokenRef.current = next;
+    setToken(next);
+    if (next) waitersRef.current.splice(0).forEach((wake) => wake());
+  }, []);
 
   useEffect(() => {
     if (!required || !siteKey || !containerRef.current) return undefined;
@@ -42,13 +52,13 @@ export default function useTurnstile(siteKey, required) {
         if (cancelled || !containerRef.current || widgetIdRef.current !== null) return;
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
-          callback: setToken,
-          "expired-callback": () => setToken(null),
-          "error-callback": () => setToken(null),
+          callback: deliver,
+          "expired-callback": () => deliver(null),
+          "error-callback": () => deliver(null),
           appearance: "interaction-only",
         });
       })
-      .catch(() => setToken(null));
+      .catch(() => deliver(null));
 
     return () => {
       cancelled = true;
@@ -57,17 +67,40 @@ export default function useTurnstile(siteKey, required) {
         widgetIdRef.current = null;
       }
     };
-  }, [siteKey, required]);
+  }, [siteKey, required, deliver]);
 
-  // Tokens are single-use: burn this one and ask the widget for the next.
-  const consume = useCallback(() => {
-    const used = token;
+  // Throws away the current token and asks the widget to solve again.
+  const refresh = useCallback(() => {
+    tokenRef.current = null;
+    setToken(null);
     if (widgetIdRef.current !== null && window.turnstile) {
       window.turnstile.reset(widgetIdRef.current);
-      setToken(null);
     }
-    return used;
-  }, [token]);
+  }, []);
 
-  return { containerRef, token, consume, ready: !required || !!token };
+  // Resolves with a fresh single-use token, waiting for the widget if it has
+  // not produced one yet (a suggestion chip tapped the moment the panel opens).
+  // Resolves null on timeout — script blocked, or a challenge left unsolved.
+  const take = useCallback(() => {
+    const burn = () => {
+      const used = tokenRef.current;
+      refresh();
+      return used;
+    };
+    if (tokenRef.current) return Promise.resolve(burn());
+    return new Promise((resolve) => {
+      let timer;
+      const wake = () => {
+        clearTimeout(timer);
+        resolve(burn());
+      };
+      timer = setTimeout(() => {
+        waitersRef.current = waitersRef.current.filter((w) => w !== wake);
+        resolve(null);
+      }, TOKEN_WAIT_MS);
+      waitersRef.current.push(wake);
+    });
+  }, [refresh]);
+
+  return { containerRef, token, take, refresh };
 }

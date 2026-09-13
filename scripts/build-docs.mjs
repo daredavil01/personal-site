@@ -25,6 +25,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
+import { getStatsPayload } from "./lib/statsSource.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = path.join(ROOT, "docs");
@@ -176,7 +177,28 @@ async function buildTags(supabase) {
 // it rides along on every single question.
 const CONTEXT_TOKEN_BUDGET = 1200;
 
-function buildChatbotContext(facts) {
+// Every figure on /stats, from the same hourly snapshot the page renders. One
+// line per chapter: this card rides along on every question.
+function statsSection(p) {
+  if (!p?.stats) return "";
+  const s = p.stats;
+  const m = p.micro || {};
+  const pb = (r) => (r ? `${r.time} (${r.title})` : "—");
+  return `## Headline stats (the numbers on /stats, refreshed hourly)
+
+- Reading: ${s.booksCount} books, ~${s.pagesTurnedK.toFixed(1)}k pages, ${s.booksEnglish} English / ${s.booksMarathi} Marathi; top genres ${s.topGenres.join(", ")}.
+- Running: ${s.totalRaces} races, ${Math.round(s.totalKmRun)} km. PBs: marathon ${pb(s.pbMarathon)}, half ${pb(s.pbHalf)}, 10K ${pb(s.pbTenK)}.
+- Treks: ${s.totalTreks} (${s.hardTreks} hard) over ${s.trekYearsActive} years; latest ${s.latestTrek}.
+- 100 Days To Offload: ${s.offloadCount} of 100 posts.
+- Micro posts: ${m.total ?? "?"}; longest daily streak ${m.longestStreak ?? "?"} days.
+- Photos: ${s.instaPostCount} Instagram sets, ${s.totalPhotos} photos.
+- Work: ${s.orgCount} organisations, ${s.projectCount} projects, ${s.certCount} certifications (latest: ${s.latestCert}).
+- Based in ${p.personal?.city || "?"}.
+
+`;
+}
+
+function buildChatbotContext(facts, statsPayload) {
   const c = facts?.counts || {};
   const topTags = (facts?.top_tags || [])
     .slice(0, 20)
@@ -199,14 +221,18 @@ below the facts block, or from these facts. Never invent a title, date or link.
   ${facts?.microblog?.date_range?.min || "?"} → ${facts?.microblog?.date_range?.max || "?"},
   English and Marathi, short and unedited. Many are photo posts with no text.
 - **Blog posts** (${c.blogs ?? "?"}) — /100-days-to-offload/:id. Ledger rows that link out
-  to Substack/WordPress; the full text is NOT in this archive.
+  to Substack/WordPress. Their full text is indexed too; published essays with
+  no ledger row are the **writing** type and link straight to the post.
 - **Projects** (${c.projects ?? "?"}) — /projects/:id. Status: ${fmt(facts?.projects?.by_status)}.
 - **Races** (${c.sports ?? "?"}) — /sports/:id. Distances: ${fmt(facts?.sports?.by_distance)}.
 - **Treks** (${c.treks ?? "?"}) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (${c.instagram ?? "?"}) — /instagram (no detail page).
 - **Now** — /now. Current entry: ${facts?.now_current?.month || "?"} ${facts?.now_current?.year || ""}.
+- **Résumé** — /resume. Positions, degrees, certifications and skills.
+- **Stats** — /stats and /writing-ledger.html. Every figure on those pages.
+- **Tags, site pages, contact** — what each tag and page is, and how to reach him.
 
-## Tags
+${statsSection(statsPayload)}## Tags
 
 ${c.tags ?? "?"} tags, shared across every content type, always lowercase.
 Most used: ${topTags}.
@@ -263,7 +289,9 @@ export async function buildDocs(supabase) {
   );
   written.push(path.join(DOCS, "facts.json"));
 
-  const context = buildChatbotContext(facts);
+  // Same hourly snapshot the /stats page renders; a docs run never fails on it.
+  const statsPayload = await getStatsPayload().then((r) => r.payload).catch(() => null);
+  const context = buildChatbotContext(facts, statsPayload);
   fs.writeFileSync(path.join(DOCS, "chatbot-context.md"), `${context}\n`, "utf8");
   written.push(path.join(DOCS, "chatbot-context.md"));
 
