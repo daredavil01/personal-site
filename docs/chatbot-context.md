@@ -36,8 +36,8 @@ below the facts block, or from these facts. Never invent a title, date or link.
 
 ## Tags
 
-216 tags, shared across every content type, always lowercase.
-Most used: technology (26), life (24), 100_days_to_offload (22), ai (20), self-reflection (16), social (15), youtube (13), fiction (11), digitalwellbeing (10), philosophy (8), politics (7), भटकंती (7), digital wellbeing (6), marathons (6), non-fiction (6), psychology (6), running (6), खंडेराव (6), biography (5), history (5).
+98 tags, shared across every content type, always lowercase.
+Most used: life (26), technology (26), 100_days_to_offload (22), ai (20), digital wellbeing (19), self-reflection (18), social (15), youtube (13), fiction (11), marathon (11), travel (11), philosophy (9), politics (7), भटकंती (7), claude code (6), non-fiction (6), psychology (6), running (6), खंडेराव (6), biography (5).
 Tag pages live at /tags/:name.
 
 ## Answering rules

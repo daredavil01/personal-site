@@ -25,7 +25,7 @@
     }
   },
   "counts": {
-    "tags": 216,
+    "tags": 98,
     "blogs": 60,
     "books": 51,
     "treks": 20,
@@ -75,12 +75,12 @@
   },
   "top_tags": [
     {
-      "name": "technology",
+      "name": "life",
       "total": 26
     },
     {
-      "name": "life",
-      "total": 24
+      "name": "technology",
+      "total": 26
     },
     {
       "name": "100_days_to_offload",
@@ -91,8 +91,12 @@
       "total": 20
     },
     {
+      "name": "digital wellbeing",
+      "total": 19
+    },
+    {
       "name": "self-reflection",
-      "total": 16
+      "total": 18
     },
     {
       "name": "social",
@@ -107,12 +111,16 @@
       "total": 11
     },
     {
-      "name": "digitalwellbeing",
-      "total": 10
+      "name": "marathon",
+      "total": 11
+    },
+    {
+      "name": "travel",
+      "total": 11
     },
     {
       "name": "philosophy",
-      "total": 8
+      "total": 9
     },
     {
       "name": "politics",
@@ -123,11 +131,7 @@
       "total": 7
     },
     {
-      "name": "digital wellbeing",
-      "total": 6
-    },
-    {
-      "name": "marathons",
+      "name": "claude code",
       "total": 6
     },
     {
@@ -155,23 +159,19 @@
       "total": 5
     },
     {
-      "name": "marathon",
-      "total": 5
-    },
-    {
       "name": "self-help",
       "total": 5
     },
     {
-      "name": "travel",
-      "total": 5
-    },
-    {
-      "name": "claude code",
+      "name": "bharatekkhoj",
       "total": 4
     },
     {
-      "name": "digitalnomad",
+      "name": "book review",
+      "total": 4
+    },
+    {
+      "name": "daredavil01",
       "total": 4
     }
   ],
@@ -201,23 +201,35 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-13T19:49:24.740978+00:00",
+  "generated_at": "2026-09-13T20:15:34.225238+00:00",
   "index_by_type": {
     "now": 13,
+    "tag": 98,
     "blog": 60,
     "book": 51,
     "page": 2,
-    "site": 20,
+    "site": 21,
     "trek": 20,
     "sport": 25,
     "stats": 10,
     "resume": 21,
-    "project": 12,
+    "project": 15,
     "writing": 44,
     "instagram": 11,
-    "microblog": 1661
+    "microblog": 1661,
+    "presentation": 8
   },
   "tags_by_category": {
-    "uncategorised": 216
+    "Personal": 2,
+    "Mind & Life": 8,
+    "Digital Life": 13,
+    "Arts & Culture": 2,
+    "Books & Reading": 9,
+    "Society & Ideas": 15,
+    "People & Feelings": 2,
+    "Running & Fitness": 4,
+    "Technology & Data": 9,
+    "Travel & Outdoors": 27,
+    "Writing & Blogging": 7
   }
 }

@@ -133,7 +133,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **7** · indexed as `presentation`
+Rows: **8** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -228,7 +228,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **216**
+Rows: **98**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -252,7 +252,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **480**
+Rows: **389**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -269,7 +269,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2702**
+Rows: **2913**
 
 | column | type | null | default |
 |---|---|---|---|
