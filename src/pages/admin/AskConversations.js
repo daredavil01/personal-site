@@ -153,6 +153,7 @@ const EvalForm = ({ answer: a, onSaved }) => {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <div className="flex flex-col gap-1">
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor={idFor("verdict")} className={labelClass}>Verdict</label>
           <Select id={idFor("verdict")} value={form.verdict} onChange={(e) => set("verdict")(e.target.value)}>
             <option value="">—</option>
@@ -161,6 +162,7 @@ const EvalForm = ({ answer: a, onSaved }) => {
           </Select>
         </div>
         <div className="flex flex-col gap-1">
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor={idFor("score")} className={labelClass}>Score</label>
           <Select id={idFor("score")} value={form.score} onChange={(e) => set("score")(e.target.value)}>
             <option value="">—</option>
@@ -168,6 +170,7 @@ const EvalForm = ({ answer: a, onSaved }) => {
           </Select>
         </div>
         <div className="flex flex-col gap-1 col-span-2">
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor={idFor("extra")} className={labelClass}>Other tags (comma-separated)</label>
           <Input id={idFor("extra")} value={form.extraTags} placeholder="stale-data" onChange={(e) => set("extraTags")(e.target.value)} />
         </div>
@@ -194,10 +197,12 @@ const EvalForm = ({ answer: a, onSaved }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor={idFor("notes")} className={labelClass}>Notes</label>
           <Textarea id={idFor("notes")} value={form.notes} maxLength={4000} onChange={(e) => set("notes")(e.target.value)} />
         </div>
         <div className="flex flex-col gap-1">
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor={idFor("ideal")} className={labelClass}>Ideal answer</label>
           <Textarea id={idFor("ideal")} value={form.idealAnswer} maxLength={8000} onChange={(e) => set("idealAnswer")(e.target.value)} />
         </div>
@@ -345,6 +350,7 @@ const AskConversations = () => {
         description="Every question asked of the second brain, what answered it, how long it took, and what readers thought of it."
         actions={(
           <div className="flex flex-wrap items-center gap-2">
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label htmlFor="ask-eval-mode" className="flex items-center gap-2 text-[13px] font-medium cursor-pointer mr-2 mb-0">
               <Checkbox id="ask-eval-mode" checked={evalMode} onChange={(e) => toggleEvalMode(e.target.checked)} />
               Eval mode

@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v17.2.1] — 2026-09-14
+
+### Fixed
+
+- **Lint** (`src/pages/admin/AskConversations.js`, `src/lib/api/askConversations.js`): cleared the `jsx-a11y/label-has-associated-control` and `newline-per-chained-call` errors from the v17.2.0 eval form, so `npm run lint` passes again. Labels already point at their controls with `htmlFor`; the rule just can't see through the admin `Select`/`Input`/`Textarea`/`Checkbox` wrappers, so they use the same inline disable as the other admin forms.
+
+---
+
 ## [v17.2.0] — 2026-09-14
 
 ### Added

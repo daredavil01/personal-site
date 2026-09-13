@@ -98,7 +98,11 @@ export async function saveEvaluation(messageId, { verdict, score, tags, notes, i
   row.evaluated_at = empty ? null : new Date().toISOString();
 
   const { data, error } = await supabase
-    .from("ask_messages").update(row).eq("id", messageId).select().single();
+    .from("ask_messages")
+    .update(row)
+    .eq("id", messageId)
+    .select()
+    .single();
   if (error) throw error;
   const saved = messageFromRow(data);
   return {
