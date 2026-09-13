@@ -11,6 +11,7 @@
 // when the user turns "Timestamp" off in the editor.
 
 import { SITE_URL } from "../../data/pageMeta";
+import { stripMarkdownImages } from "../../lib/askFormat";
 import { sourceLabels } from "../MicroBlog/constants";
 
 // Domain shown on the exported card's footer (without protocol).
@@ -126,7 +127,10 @@ const ask = (item) => ({
   eyebrow: "Ask the Archive",
   title: clean(item.question),
   metaRows: [],
-  body: clean(item.answer).replace(/\[(\d{1,2})\]/g, ""),
+  // Images and link targets are for the page, not the card.
+  body: clean(stripMarkdownImages(item.answer))
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\[(\d{1,2})\]/g, ""),
   tags: (item.sources || []).slice(0, 4).map((s) => clean(s.title)).filter(Boolean),
   imageUrl: null,
   footerUrl: `${SITE_DOMAIN}/ask`,

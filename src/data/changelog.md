@@ -9,6 +9,41 @@ patch for fixes and tweaks.
 
 ---
 
+## [v17.1.0] — 2026-09-13
+
+### Added
+
+- **Plug-in ask sources** (`scripts/ask-sources/`, `scripts/lib/registry.mjs`): every file in the folder is a source for the `/ask` index, so a new kind of content is one file rather than a code change and a migration. The nine existing builders moved there unchanged, and five new sources close the gaps found in the audit: the résumé, the full text of every Substack and WordPress post (`writing`), every figure on `/stats` (`stats`), tag descriptions (`tag`), and what each page is plus how to get in touch (`site`). A source that fails keeps its existing chunks instead of emptying them.
+- **Incremental indexing** (`scripts/build-content-index.mjs`, `scripts/lib/chunking.mjs`): chunks are compared by content hash, not by timestamp. Unchanged rows are skipped, text that only moved reuses its stored vector (a new changelog entry no longer re-embeds the whole file), and only genuinely new text is sent to Workers AI. `--dry-run` prints the plan per type.
+- **Hourly stats snapshot** (`functions/api/stats.js`, `src/lib/siteStats.js`, `src/lib/statsEndpoint.js`): every number on `/stats` is computed in one shared module and served from an edge cache refreshed at most once an hour. The Stats page, the `/ask` facts card and the index all read it, so the chatbot and the page can never disagree.
+- **Links and pictures in answers** (`src/components/Ask/AnswerBody.js`, `src/lib/askFormat.js`): named items render as highlighted link chips, archive photos appear inline or as a strip under the answer, and source cards show a thumbnail. Any link or image whose URL did not come from a retrieved item is stripped, in the worker and in the page.
+- **Answer feedback** (`src/components/Ask/AnswerActions.js`, `ask_feedback()` in `0016`): thumbs up or down, reason tags and an optional comment, stored on the answer's row in the conversation log as evals data.
+- **Nightly refresh** (`.github/workflows/ask-refresh.yml`): re-counts the Writing Ledger, indexes new content and commits the ledger data only when a post changed.
+
+### Fixed
+
+- **Long micro posts half-embedded** (`scripts/ask-sources/microblog.mjs`): a micro post was always one chunk, and the embedding model only reads the first 4,000 characters, so the tail of the few very long posts was keyword-searchable but invisible to semantic search. Posts over 3,000 characters are now split on paragraphs like other prose.
+- **Micro-blog activity undercount** (`src/lib/api/microblog.js`): the activity query was unpaged, so PostgREST's 1,000-row cap silently dropped every micro post after the first thousand — the Micro Blog activity strip and the Stats page pulse stopped in 2021. It now pages through all 1,600+ posts; `/stats` shows 2022–2024 again.
+
+### Changed
+
+- **Ask Conversations admin** (`src/pages/admin/AskConversations.js`, `src/lib/api/askConversations.js`): every chat is shown in full, newest first, with a browser's questions grouped until it goes quiet for 30 minutes. Filters for date range, search, feedback, reason, tier, model, provider, cited content type, degraded, keyword-only, errors, no sources and session; headline numbers for the filtered set (satisfaction, latency by stage, tiers, reasons, content cited, index coverage); CSV, JSON and evals JSONL export.
+- **Writing Ledger** (`public/writing-ledger.html`, `scripts/blog-word-counts.mjs`): the page fetches `public/data/writing-ledger.json` instead of carrying its data inline, and recomputes month- and year-to-date for today. One command refreshes it; `build-blog-infographic.mjs` and its template are gone.
+- **Stats page** (`src/components/Stats/`): both layouts render from the hourly snapshot in one request instead of seven collection fetches plus 1,600 micro-post dates. Personal facts moved to `src/data/stats/personalFacts.js`.
+- **Ask facts card** (`functions/api/ask.js`, `scripts/build-docs.mjs`): now carries every `/stats` figure and the Writing Ledger totals, and tells the model that blog text is indexed.
+- **Database** (`supabase/migrations/0016_ask_sources_and_feedback.sql`): open entity types, content and embedding hashes and an image column on `content_chunks`; résumé, micro-post-by-year, tag-category and index coverage in `site_facts()`; message id and feedback columns on `ask_messages`.
+
+---
+
+## [v17.0.2] — 2026-09-13
+
+### Fixed
+
+- **Ask verification failures** (`src/components/Ask/useTurnstile.js`, `src/components/Ask/AskChat.js`): suggestion chips, follow-up chips and `?q=` links sent the question before Turnstile had produced a token, so with verification switched on the chat bubble answered "verification failed". A question now waits up to 10 seconds for a fresh token. If verification still fails, whether the token is missing or rejected with a 403, the answer offers a **Verify and retry** button that resets the widget and re-asks in place of the failed exchange.
+- **Clearer rejection** (`functions/api/ask.js`): the 403 now carries a `reason` and a readable `note` instead of a bare error string.
+
+---
+
 ## [v17.0.1] — 2026-09-13
 
 ### Fixed

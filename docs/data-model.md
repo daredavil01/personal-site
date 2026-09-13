@@ -250,7 +250,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2022**
+Rows: **2702**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -268,9 +268,13 @@ Rows: **2022**
 | `source_updated_at` | timestamp with time zone | yes | — |
 | `created_at` | timestamp with time zone | no | `now()` |
 | `updated_at` | timestamp with time zone | no | `now()` |
+| `content_hash` | text | yes | — |
+| `embed_hash` | text | yes | — |
+| `image_url` | text | yes | — |
 
 Constraints:
-- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text, 'now'::text, 'page'::text])))`
+- `CHECK ((entity_type ~ '^[a-z][a-z0-9_]*
+::text))`
 
 ### `ask_settings`
 

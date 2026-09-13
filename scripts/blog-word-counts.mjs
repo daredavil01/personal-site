@@ -29,10 +29,18 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { currentPeriod } from "../src/lib/writingPeriod.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const OUT_DIR = path.join(ROOT, "knowledge_base");
-const OUT_FILE = path.join(OUT_DIR, "blog-word-counts.json");
+// The ledger report — no post text — served at /data/writing-ledger.json and read
+// by /writing-ledger.html and the /ask worker. Committed.
+const LEDGER_FILE = path.join(ROOT, "public", "data", "writing-ledger.json");
+// Full post text for the /ask index (scripts/ask-sources/writing.mjs). Gitignored.
+// Doubles as a cache: a Substack body is downloaded again only when the post's
+// version (publish date + word count) changes; WordPress bodies arrive with the
+// listing anyway.
+const TEXT_FILE = path.join(ROOT, "knowledge_base", "blog-posts-text.json");
+const SUBSTACK_BODY_DELAY_MS = 300;
 
 const SUBSTACK_HOST = "https://sankettambare.substack.com";
 const WORDPRESS_SITE = "daredavil453624413.wordpress.com";
@@ -125,6 +133,25 @@ function countHtmlWords(html) {
   return words ? words.split(" ").length : 0;
 }
 
+/**
+ * HTML body → plain text for the /ask index, keeping paragraph breaks so the
+ * indexer can split on them. Word counts still come from countHtmlWords, so
+ * this never moves a ledger number.
+ */
+function htmlToText(html) {
+  if (!html) return "";
+  return decodeEntities(
+    html
+      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<\/(p|h[1-6]|li|blockquote|figcaption|pre)>|<br\s*\/?>/gi, "\n\n")
+      .replace(/<[^>]+>/g, " "),
+  )
+    .split(/\n{2,}/)
+    .map((para) => para.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 /** Normalise a post URL for cross-source matching. */
 function normaliseUrl(url) {
   if (!url) return null;
@@ -168,6 +195,11 @@ async function fetchSubstack() {
       tags: (p.postTags || []).map((t) => t.slug),
       audience: p.audience || null,
       type: p.type || null,
+      image: p.cover_image || null,
+      slug: p.slug,
+      // The archive listing has no updated_at; an edit almost always moves the
+      // word count, so this pair decides whether the cached body is stale.
+      version: `${p.post_date}|${p.wordcount}`,
     };
   });
 }
@@ -201,6 +233,9 @@ async function fetchWordPress() {
       tags: Object.keys(p.tags || {}),
       audience: null,
       type: p.type || null,
+      image: p.featured_image || null,
+      version: p.modified || p.date,
+      text: htmlToText(p.content),
     };
   });
 }
@@ -330,75 +365,9 @@ function buildReport(posts, tracked) {
   const busiestYear = [...byYear].sort((a, b) => b.words - a.words)[0] || null;
 
   // --- month-to-date / year-to-date ---------------------------------------
-  // "Now" is the generating machine's clock read in IST, so MTD/YTD line up
-  // with the same timezone the posts were bucketed in.
-  const now = istParts(new Date().toISOString());
-  const thisMonth = now.monthKey;
-  const thisYear = now.year;
-  const monthDay = now.iso.slice(5); // MM-DD, for the same-period-last-year cut
-
-  const tally = (rows) => ({
-    posts: rows.length,
-    words: rows.reduce((s, p) => s + (p.words || 0), 0),
-  });
-  const pctChange = (current, prior) =>
-    prior > 0 ? Math.round(((current - prior) / prior) * 1000) / 10 : null;
-
-  const mtdRows = sorted.filter((p) => p.date && p.date.slice(0, 7) === thisMonth);
-  const ytdRows = sorted.filter((p) => p.date && p.date.slice(0, 4) === thisYear);
-
-  // Previous calendar month, in full.
-  const prevMonthDate = new Date(Date.UTC(Number(thisYear), Number(thisMonth.slice(5, 7)) - 1, 1));
-  prevMonthDate.setUTCMonth(prevMonthDate.getUTCMonth() - 1);
-  const prevMonthKey = `${prevMonthDate.getUTCFullYear()}-${String(prevMonthDate.getUTCMonth() + 1).padStart(2, "0")}`;
-  const prevMonthRows = sorted.filter((p) => p.date && p.date.slice(0, 7) === prevMonthKey);
-
-  // Last year, cut at the same month/day — the only fair YoY comparison.
-  const lastYear = String(Number(thisYear) - 1);
-  const priorYtdRows = sorted.filter(
-    (p) => p.date && p.date.slice(0, 4) === lastYear && p.date.slice(5) <= monthDay,
-  );
-
-  const daysIntoMonth = Number(now.iso.slice(8, 10));
-  const daysIntoYear =
-    Math.floor(
-      (Date.UTC(Number(thisYear), Number(thisMonth.slice(5, 7)) - 1, daysIntoMonth) -
-        Date.UTC(Number(thisYear), 0, 1)) /
-        86400000,
-    ) + 1;
-
-  const mtd = tally(mtdRows);
-  const ytd = tally(ytdRows);
-  const priorYtd = tally(priorYtdRows);
-  const prevMonth = tally(prevMonthRows);
-
-  const currentPeriod = {
-    asOf: now.iso,
-    monthToDate: {
-      month: thisMonth,
-      label: now.label,
-      posts: mtd.posts,
-      words: mtd.words,
-      daysElapsed: daysIntoMonth,
-      wordsPerDay: Math.round(mtd.words / daysIntoMonth),
-      previousMonth: { month: prevMonthKey, posts: prevMonth.posts, words: prevMonth.words },
-      changeVsPreviousMonth: pctChange(mtd.words, prevMonth.words),
-    },
-    yearToDate: {
-      year: thisYear,
-      posts: ytd.posts,
-      words: ytd.words,
-      daysElapsed: daysIntoYear,
-      wordsPerDay: Math.round(ytd.words / daysIntoYear),
-      priorYearSamePeriod: {
-        year: lastYear,
-        posts: priorYtd.posts,
-        words: priorYtd.words,
-        throughDate: `${lastYear}-${monthDay}`,
-      },
-      changeVsPriorYear: pctChange(ytd.words, priorYtd.words),
-    },
-  };
+  // Shared with /writing-ledger.html and the /ask worker, which recompute it at
+  // read time so the numbers stay right on days this file was not regenerated.
+  const period = currentPeriod(sorted);
 
   // --- anomalies (reported, never fixed — this script does not write) ------
   const anomalies = [];
@@ -471,7 +440,7 @@ function buildReport(posts, tracked) {
       busiestYear,
       activeMonths: byMonth.length,
     },
-    currentPeriod,
+    currentPeriod: period,
     byPlatform,
     byYear,
     byMonth,
@@ -484,6 +453,64 @@ function buildReport(posts, tracked) {
     posts: sorted,
     anomalies,
   };
+}
+
+// --- post text (for the /ask index) ----------------------------------------
+
+async function collectTexts(posts) {
+  const cache = new Map();
+  if (fs.existsSync(TEXT_FILE)) {
+    try {
+      for (const p of JSON.parse(fs.readFileSync(TEXT_FILE, "utf8")).posts || []) cache.set(p.url, p);
+    } catch (err) {
+      console.log(`  • text cache unreadable (${err.message}) — rebuilding it`);
+    }
+  }
+
+  let downloaded = 0;
+  let fromCache = 0;
+  const failed = [];
+  const out = [];
+  for (const p of posts) {
+    let text = p.text || null; // WordPress bodies came with the listing
+    const hit = cache.get(p.url);
+    if (!text && hit?.text && hit.version === p.version) {
+      text = hit.text;
+      fromCache += 1;
+    } else if (!text && p.platform === "Substack" && p.slug) {
+      try {
+        const full = await getJson(`${SUBSTACK_HOST}/api/v1/posts/${p.slug}`);
+        text = htmlToText(full.body_html);
+        downloaded += 1;
+        await new Promise((resolve) => setTimeout(resolve, SUBSTACK_BODY_DELAY_MS));
+      } catch (err) {
+        failed.push(`${p.title}: ${err.message}`);
+        text = hit?.text || null; // a stale body beats a missing one
+      }
+    }
+    if (text) {
+      out.push({
+        url: p.url,
+        version: p.version,
+        blogId: p.blogId,
+        title: p.title,
+        date: p.date,
+        platform: p.platform,
+        language: p.language,
+        tags: p.tags,
+        image: p.image,
+        words: p.words,
+        text,
+      });
+    }
+  }
+
+  console.log(
+    `  ✓ post text: ${out.length} posts (${downloaded} downloaded, ${fromCache} from cache`
+      + `${failed.length ? `, ${failed.length} failed` : ""})`,
+  );
+  failed.forEach((f) => console.log(`    • ${f}`));
+  return out;
 }
 
 // --- main ------------------------------------------------------------------
@@ -520,10 +547,21 @@ async function main() {
     };
   });
 
-  const report = buildReport(posts, tracked);
+  const texts = await collectTexts(posts);
+  // Text and fetch bookkeeping stay out of the public report.
+  const report = buildReport(
+    posts.map(({ text, slug, version, ...rest }) => rest),
+    tracked,
+  );
 
-  fs.mkdirSync(OUT_DIR, { recursive: true });
-  fs.writeFileSync(OUT_FILE, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+  fs.mkdirSync(path.dirname(LEDGER_FILE), { recursive: true });
+  fs.writeFileSync(LEDGER_FILE, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+  fs.mkdirSync(path.dirname(TEXT_FILE), { recursive: true });
+  fs.writeFileSync(
+    TEXT_FILE,
+    `${JSON.stringify({ generatedAt: report.generatedAt, posts: texts })}\n`,
+    "utf8",
+  );
 
   // --- summary -------------------------------------------------------------
   const n = (v) => v.toLocaleString("en-IN");
@@ -566,7 +604,7 @@ async function main() {
     console.log(`    blogs id ${a.blogId} — ${JSON.stringify(a.value)} (${a.title})`);
   }
 
-  console.log(`\nWrote ${path.relative(ROOT, OUT_FILE)}\n`);
+  console.log(`\nWrote ${path.relative(ROOT, LEDGER_FILE)} and ${path.relative(ROOT, TEXT_FILE)}\n`);
 }
 
 main().catch((err) => {

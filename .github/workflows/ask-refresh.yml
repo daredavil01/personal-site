@@ -1,0 +1,96 @@
+# Nightly refresh of the /ask second brain and the Writing Ledger data.
+#
+#   1. blogs:wordcount — re-counts every Substack/WordPress post and refreshes
+#      the post-text cache (only new or edited posts are downloaded).
+#   2. ask:index       — re-indexes every source; only new text is embedded.
+#   3. Commits public/data/writing-ledger.json when its contents changed — not
+#      when only the generation date moved — which triggers a Pages deploy.
+#
+# Repository secrets: SUPABASE_SERVICE_ROLE_KEY, CF_ACCOUNT_ID, CF_API_TOKEN.
+# If `main` is branch-protected against bot pushes, the commit step fails;
+# switch it to opening a pull request.
+
+name: Ask refresh
+
+on:
+  schedule:
+    - cron: "30 20 * * *" # 02:00 IST
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: show what would be indexed; write and commit nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ask-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Public values, the same ones committed in wrangler.toml [vars].
+      VITE_SUPABASE_URL: https://xjqbvvurlmbslikiukdm.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8FUmeJKKuTHvy3JFNPLfnQ_9TY6P2GG
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The post-text cache lives in gitignored knowledge_base/. Restoring the
+      # latest copy is what keeps a run from re-downloading every post body.
+      - uses: actions/cache@v4
+        with:
+          path: knowledge_base/blog-posts-text.json
+          key: blog-text-${{ github.run_id }}
+          restore-keys: blog-text-
+
+      - name: Count words and refresh post text
+        run: npm run blogs:wordcount
+
+      - name: Index new content
+        run: npm run ask:index -- ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Commit the ledger data if it changed
+        if: ${{ !cancelled() && !inputs.dry_run }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const { execSync } = require("child_process");
+            const file = "public/data/writing-ledger.json";
+            const strip = (text) => {
+              const j = JSON.parse(text);
+              delete j.generatedAt;
+              delete j.currentPeriod; // recomputed by every reader
+              return JSON.stringify(j);
+            };
+            let before = "";
+            try { before = execSync(`git show HEAD:${file}`, { encoding: "utf8", maxBuffer: 1e8 }); } catch (_) {}
+            const changed = !before || strip(before) !== strip(fs.readFileSync(file, "utf8"));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);
+            console.log(changed ? "Ledger data changed." : "Ledger data unchanged apart from dates.");
+          ' > /dev/null
+          if git diff --quiet -- public/data/writing-ledger.json || \
+             ! grep -q "changed=true" "$GITHUB_OUTPUT"; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/writing-ledger.json
+          git commit -m "chore(ledger): refresh writing ledger data"
+          git push

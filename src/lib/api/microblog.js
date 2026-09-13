@@ -1,5 +1,6 @@
 import createResource from "./_crud";
 import { supabase, toStorageUrl } from "../supabaseClient";
+import { microblogActivity } from "../siteStats";
 import { monthRange } from "../monthDigest";
 
 // Explicit column list so the generated `search_tsv` tsvector is never shipped
@@ -185,40 +186,23 @@ export async function getMicroblogMonths() {
  *          monthCounts sorted ascending (oldest first)
  */
 export async function getMicroblogActivity() {
-  const { data, error } = await supabase
-    .from("microblog")
-    .select("date")
-    .order("date", { ascending: true });
-  if (error) throw error;
-
-  const counts = new Map();
-  const days = new Set();
-  (data ?? []).forEach((row) => {
-    if (typeof row.date !== "string" || row.date.length < 10) return;
-    const key = row.date.slice(0, 7);
-    counts.set(key, (counts.get(key) || 0) + 1);
-    days.add(row.date.slice(0, 10));
-  });
-
-  let longestStreak = 0;
-  days.forEach((day) => {
-    const prev = new Date(`${day}T00:00:00Z`);
-    prev.setUTCDate(prev.getUTCDate() - 1);
-    if (days.has(prev.toISOString().slice(0, 10))) return; // not a streak start
-    let run = 1;
-    const cursor = new Date(`${day}T00:00:00Z`);
-    for (;;) {
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-      if (!days.has(cursor.toISOString().slice(0, 10))) break;
-      run += 1;
-    }
-    if (run > longestStreak) longestStreak = run;
-  });
-
-  return {
-    monthCounts: [...counts.entries()].map(([key, count]) => ({ key, count })),
-    longestStreak,
-  };
+  // Paged: an unbounded select stops at PostgREST's 1000-row cap, which
+  // silently dropped every post after the first thousand.
+  const dates = [];
+  for (let from = 0; ; from += 1000) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await supabase
+      .from("microblog")
+      .select("date")
+      .order("date", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + 999);
+    if (error) throw error;
+    dates.push(...(data ?? []).map((row) => row.date));
+    if (!data || data.length < 1000) break;
+  }
+  // Same computation as /api/stats and the /ask indexer (src/lib/siteStats.js).
+  return microblogActivity(dates);
 }
 
 /**

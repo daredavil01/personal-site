@@ -7,6 +7,8 @@
 // Not a createResource — there is no table behind it. The worker holds the API
 // keys, enforces the quota and does the retrieval; the browser only asks.
 
+import { supabase } from "../supabaseClient";
+
 const ENDPOINT = "/api/ask";
 const SESSION_KEY = "ask.sessionId";
 
@@ -62,6 +64,35 @@ function errorFor(res, body) {
     `The chat endpoint returned ${res.status}. If this is a preview deployment, it is probably behind Cloudflare Access.`,
     { status: res.status },
   );
+}
+
+/**
+ * Rates one answer. Only this browser's session can rate it (ask_feedback checks
+ * the session id against the log). Calling again replaces the rating; a null
+ * rating with no tags or comment clears it.
+ *
+ * Resolves true once stored. The worker writes the log row just after the answer
+ * is sent, so a very quick click can arrive first — retried once after 2s.
+ */
+export async function sendAskFeedback({
+  messageId, rating = null, tags = [], comment = "",
+}) {
+  const args = {
+    p_message_uuid: messageId,
+    p_session: sessionId(),
+    p_rating: rating,
+    p_tags: tags,
+    p_comment: comment || null,
+  };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await supabase.rpc("ask_feedback", args);
+    if (error) throw new AskError(error.message);
+    if (data) return true;
+    // eslint-disable-next-line no-await-in-loop
+    if (attempt === 0) await new Promise((resolve) => { setTimeout(resolve, 2000); });
+  }
+  return false;
 }
 
 /** Limits, suggested questions and the on/off switch, for the empty state. */

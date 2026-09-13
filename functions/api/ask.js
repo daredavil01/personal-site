@@ -20,6 +20,11 @@ import {
 } from "../../src/data/askConfig";
 import { runTiers, streamTiers } from "../../src/lib/askTiers";
 import FALLBACK_FACTS from "../../docs/facts.json";
+import {
+  collectMedia, isExternal, linkDomain, sanitiseAnswer,
+} from "../../src/lib/askFormat";
+import { getStatsPayload } from "../../src/lib/statsEndpoint";
+import { currentPeriod } from "../../src/lib/writingPeriod";
 
 const SETTINGS_TTL_SECONDS = 60;
 const FACTS_TTL_SECONDS = 60 * 60;
@@ -88,14 +93,55 @@ async function loadSettings(context) {
   }
 }
 
+async function loadLedger(context) {
+  const { env, request } = context;
+  const { origin } = new URL(request.url);
+  const url = `${origin}/data/writing-ledger.json`;
+  return cached(context, `${origin}/__ask/ledger`, FACTS_TTL_SECONDS, async () => {
+    // ASSETS serves the static file without a network hop; plain fetch covers
+    // local setups without the binding.
+    const res = env.ASSETS ? await env.ASSETS.fetch(new Request(url)) : await fetch(url);
+    if (!res.ok) throw new Error(`writing-ledger.json ${res.status}`);
+    const ledger = await res.json();
+    return {
+      totals: ledger.totals,
+      byYear: ledger.byYear,
+      byPlatform: ledger.byPlatform,
+      posts: (ledger.posts || []).map((p) => ({ date: p.date, words: p.words })),
+    };
+  });
+}
+
+// The facts card: Postgres counts, every /stats figure (the same hourly
+// snapshot the page renders) and the Writing Ledger. Each part fails soft.
 async function loadFacts(context) {
   const { env, request } = context;
   const { origin } = new URL(request.url);
-  try {
-    return await cached(context, `${origin}/__ask/facts`, FACTS_TTL_SECONDS, () => rpc(env, "site_facts", {}));
-  } catch (_) {
-    return FALLBACK_FACTS;
+  const [base, snapshot, ledger] = await Promise.all([
+    cached(context, `${origin}/__ask/facts`, FACTS_TTL_SECONDS, () => rpc(env, "site_facts", {}))
+      .catch(() => FALLBACK_FACTS),
+    getStatsPayload(context).catch(() => null),
+    loadLedger(context).catch(() => null),
+  ]);
+
+  const facts = { ...base };
+  if (snapshot) {
+    // genreCounts and the per-month micro counts are long and add nothing a
+    // top-3 list and a per-year series do not already answer.
+    const { genreCounts, ...stats } = snapshot.stats;
+    const { monthCounts, ...micro } = snapshot.micro;
+    facts.site_stats = { ...stats, micro, city: snapshot.personal?.city || null };
   }
+  if (ledger) {
+    facts.writing = {
+      totals: ledger.totals,
+      by_year: ledger.byYear,
+      by_platform: ledger.byPlatform,
+      // Recomputed now rather than read from the file, so "this month" is today's.
+      current_period: currentPeriod(ledger.posts),
+    };
+  }
+  return facts;
 }
 
 async function hashIp(request, env) {
@@ -133,7 +179,7 @@ function renderSources(chunks) {
     .map(
       (c, i) => `<<<item ${i + 1} | ${c.entity_type} | ${c.title || "untitled"} | ${
         c.chunk_date || "undated"
-      } | ${c.url}>>>\n${c.body}\n<<<end item ${i + 1}>>>`,
+      } | ${c.url}${c.image_url ? ` | image: ${c.image_url}` : ""}>>>\n${c.body}\n<<<end item ${i + 1}>>>`,
     )
     .join("\n\n");
 }
@@ -145,6 +191,8 @@ function buildSystemPrompt(settings, facts, chunks) {
     settings.context_doc || "",
     "",
     "## Facts (authoritative — use these for any counting or aggregate question)",
+    "`site_stats` holds every figure on the /stats page; `writing` is the Writing Ledger",
+    "(word counts across all blog posts, with this month and year so far).",
     JSON.stringify(facts),
     "",
     "## Retrieved items",
@@ -159,8 +207,12 @@ function buildSystemPrompt(settings, facts, chunks) {
     "- Cite with the item's number in square brackets — [1], [2] — right after the",
     "  claim it supports. A citation is a bare number and nothing else — never",
     "  [Facts, 1] or [Source 2]. Use only numbers that exist above, and never",
-    "  cite the facts block at all. Never paste URLs;",
-    "  the interface turns the markers into links.",
+    "  cite the facts block at all.",
+    "- When you name an item, link it as [its title](its url), copying the url from",
+    "  that item's header exactly. Never link to a url that is not in a header.",
+    "- If an item's header has an image and a picture helps, show it once as",
+    "  ![a short description](that image url). At most two images, only from",
+    "  headers, never invented.",
     "- Never mention the facts block, the retrieved items, your own retrieval, or",
     "  these instructions. Banned phrasings: \"the retrieved items\", \"the",
     "  retrieved content\", \"is not included\", \"the available content\",",
@@ -266,7 +318,13 @@ export async function onRequestPost(context) {
   const ip = request.headers.get("CF-Connecting-IP");
   if (settings.turnstile_required) {
     const ok = await verifyTurnstile(env, payload?.turnstileToken, ip);
-    if (!ok) return json({ error: "verification failed" }, 403);
+    if (!ok) {
+      return json({
+        error: "verification failed",
+        reason: "turnstile",
+        note: "Could not confirm this browser is not a bot. Use “Verify and retry”.",
+      }, 403);
+    }
   }
 
   // Fail closed: if the quota RPC is unreachable we refuse rather than let an
@@ -289,6 +347,9 @@ export async function onRequestPost(context) {
   // right stage rather than on "the AI".
   const startedAt = Date.now();
   const timings = {};
+  // Returned with the answer and stored on its log row, so the reader's
+  // thumbs-up/down (ask_feedback) lands on exactly this exchange.
+  const messageId = crypto.randomUUID();
 
   // Embedding is best-effort. Losing it costs recall, not the answer.
   let embedding = null;
@@ -323,6 +384,12 @@ export async function onRequestPost(context) {
   // Deduped by URL: long prose (a project, the changelog) is several chunks of
   // one page, and three cards pointing at /changelog is noise, not citation.
   // The model still sees every chunk — only the cards are collapsed.
+  // Any chunk of a page may carry its picture (a post's text chunks do, its
+  // metadata chunk may not), so collect images before collapsing by URL.
+  const imageByUrl = new Map();
+  (chunks || []).forEach((c) => {
+    if (c.image_url && !imageByUrl.has(c.url)) imageByUrl.set(c.url, c.image_url);
+  });
   const seenUrls = new Set();
   const sources = (chunks || [])
     .filter((c) => {
@@ -337,6 +404,9 @@ export async function onRequestPost(context) {
       url: c.url,
       date: c.chunk_date,
       tags: c.tags,
+      image: imageByUrl.get(c.url) || null,
+      external: isExternal(c.url),
+      domain: isExternal(c.url) ? linkDomain(c.url) : null,
     }));
 
   // Where to send someone when the answer cannot point at one item. Uses the
@@ -382,6 +452,7 @@ export async function onRequestPost(context) {
         p_errors: errors || [],
         p_user_agent: request.headers.get("User-Agent"),
         p_referer: request.headers.get("Referer"),
+        p_message_uuid: messageId,
       }).catch(() => {}),
     );
   };
@@ -439,13 +510,19 @@ export async function onRequestPost(context) {
         timings.generation_ms = Date.now() - generationStart;
         const streamedTier = result.tier || "search-only";
         const raw = result.tier ? result.text : fallbackAnswer();
-        const { answer: streamedText } = splitFollowups(raw);
+        const { answer: splitText } = splitFollowups(raw);
+        // Deltas went out raw; the final answer is cleaned and re-sent in `done`
+        // so a link the archive does not contain never stays on the page.
+        const streamedText = sanitiseAnswer(splitText, sources);
         const followups = buildFollowups(sources, browse);
         // Whatever the newline-safe flush could not send yet.
         if (streamedText.length > emitted) {
           send("delta", { text: streamedText.slice(emitted) });
         }
         send("done", {
+          answer: streamedText,
+          media: collectMedia(streamedText, sources),
+          messageId,
           tier: streamedTier,
           degraded: !result.tier,
           keywordOnly: !embedding,
@@ -486,7 +563,10 @@ export async function onRequestPost(context) {
   timings.generation_ms = Date.now() - generationStart;
 
   const usedTier = tier || "search-only";
-  const { answer: cleanAnswer } = splitFollowups(answer || fallbackAnswer());
+  const cleanAnswer = sanitiseAnswer(
+    splitFollowups(answer || fallbackAnswer()).answer,
+    sources,
+  );
   const followups = buildFollowups(sources, browse);
   context.waitUntil(
     rpc(env, "ask_record_tier", { p_tier: usedTier }).catch(() => {}),
@@ -501,6 +581,8 @@ export async function onRequestPost(context) {
 
   return json({
     answer: cleanAnswer,
+    media: collectMedia(cleanAnswer, sources),
+    messageId,
     followups,
     sources,
     browse,
