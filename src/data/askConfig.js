@@ -94,6 +94,10 @@ export const DEFAULT_ASK_SETTINGS = {
   match_count: 8,
   full_text_weight: 1,
   semantic_weight: 1,
+  // Minimum cosine similarity for a semantic match. Without a floor the
+  // semantic half of hybrid_search returns its nearest rows however far away
+  // they are, which is how a narrowed search came back confident and wrong.
+  semantic_floor: 0.35,
   tiers: [
     {
       name: "gemini-flash-lite",
@@ -117,15 +121,94 @@ export const DEFAULT_ASK_SETTINGS = {
       timeout_ms: 8000,
     },
   ],
-  system_persona: "",
-  refusal_note: "I could not find that in the archive.",
+  // The live value lives in ask_settings and is edited at /admin/ask/settings;
+  // this is the copy that answers when Supabase is unreachable. Keep the two in
+  // step — migration 0019 seeds the same text.
+  system_persona: `You are the second brain of Sanket Tambare's personal site — a librarian for his archive of books, running, treks, projects, writing and micro-posts.
+
+Voice: concise, warm, factual. Third person about Sanket ("he ran…", "the archive has…"). Never impersonate him and never speculate about his opinions or private life.
+
+Answer in the language the question was asked in. A Marathi question gets a Marathi answer, including when the answer is that you do not have it.
+
+Two sources of truth, used differently:
+- The facts block is authoritative for every count, total, personal best, date range, roster and latest item. Never count the retrieved items to answer "how many". Its rosters list every book, trek, race, project, deck and photo set, newest first, as {t: title, d: date, u: url} — use them to name and link things in full, and treat the first entry of a roster as the latest one. The facts refresh hourly, so something added in the last hour may be missing.
+- The retrieved items are authoritative for specifics: what a book was about, how a race went, what a post said.
+
+Answer if either one can. Say you could not find it only when neither the facts nor the items contain it — if the facts give a count, a roster, a latest item or a personal best, lead with that instead of refusing. If you can answer part of the question, answer that part and stop rather than apologising for the rest.
+
+Dates: the archive's "now" is the current Now entry named in the facts. Say "as of <that month>" rather than implying today.
+
+A micro-post is a passing thought from years ago, sometimes a reblog of someone else — not a considered position. Say so when you quote one as an opinion.`,
+  refusal_note: "Nothing in the archive answers that.",
   disabled_note: "The second brain is switched off right now.",
   quota_note:
     "The second brain has answered its quota of questions for today — it wakes up again at midnight UTC.",
-  suggested_questions: [],
+  // Shown only when question_pool is empty — a bad edit at /admin degrades to
+  // six good questions rather than none.
+  suggested_questions: [
+    "What kind of books does he read?",
+    "What is he working on right now?",
+    "What are his personal bests across distances?",
+    "Which forts has he trekked?",
+    "What does he think about privacy and surveillance?",
+    "Tell me about the 50K ultra at Lonavala",
+  ],
+  question_pool: [],
   context_doc: "",
   turnstile_required: false,
 };
+
+// The subject axis for starter questions. Four chips are drawn per page load,
+// one from each of four random categories — a flat shuffle of the pool below
+// would regularly offer four reading questions at once, and the chips are the
+// only advertisement the archive's breadth gets.
+export const QUESTION_CATEGORIES = [
+  "reading", "running", "treks", "writing", "work", "site",
+];
+
+// Every question here is a shape the conversation log shows the archive answers
+// well: thematic, single-item, facts-backed, or roster-backed. Superlatives the
+// data does not record ("his favourite book") are deliberately absent — they
+// refuse, and a chip that refuses reads as a broken feature.
+//
+// The live pool is ask_settings.question_pool, edited at /admin/ask/settings;
+// migration 0020 seeds it from this exact list.
+export const DEFAULT_QUESTION_POOL = [
+  { q: "What kind of books does he read?", c: "reading" },
+  { q: "What has he read in Marathi?", c: "reading" },
+  { q: "What does he read about technology?", c: "reading" },
+  { q: "Has he written reviews of the books he's read?", c: "reading" },
+  { q: "मराठी पुस्तकांविषयी सांग.", c: "reading" },
+
+  { q: "What are his personal bests across distances?", c: "running" },
+  { q: "Tell me about the 50K ultra at Lonavala", c: "running" },
+  { q: "How far has he run in total?", c: "running" },
+  { q: "What has running taught him?", c: "running" },
+  { q: "How does he train for a marathon?", c: "running" },
+  { q: "त्याने पळालेल्या मॅरेथॉनविषयी सांग.", c: "running" },
+
+  { q: "Which forts has he trekked?", c: "treks" },
+  { q: "Which of his treks was the hardest?", c: "treks" },
+  { q: "Which trek would he recommend to a beginner?", c: "treks" },
+  { q: "Tell me about the Harishchandragad trek", c: "treks" },
+  { q: "त्याने केलेल्या ट्रेकबद्दल माहिती दे.", c: "treks" },
+
+  { q: "What is the 100 Days to Offload challenge?", c: "writing" },
+  { q: "What does he write about most?", c: "writing" },
+  { q: "What does he think about privacy and surveillance?", c: "writing" },
+  { q: "What does he think about AI and writing?", c: "writing" },
+  { q: "What does he think about digital wellbeing?", c: "writing" },
+
+  { q: "What is he working on right now?", c: "work" },
+  { q: "What does he do for a living?", c: "work" },
+  { q: "Tell me about the E20 data story", c: "work" },
+  { q: "What are his strongest skills?", c: "work" },
+  { q: "Which projects has he built?", c: "work" },
+
+  { q: "How was this second brain built?", c: "site" },
+  { q: "What is this site, in one minute?", c: "site" },
+  { q: "Which themes connect his books, runs and writing?", c: "site" },
+];
 
 export const ASK_PROVIDERS = ["gemini", "workers-ai"];
 

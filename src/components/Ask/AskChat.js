@@ -10,13 +10,18 @@ import AnswerBody, { MediaStrip } from "./AnswerBody";
 import { hasInlineImage, isExternal } from "../../lib/askFormat";
 import AnswerActions from "./AnswerActions";
 import { clearThread, loadThread, saveThread } from "./askStorage";
+import { pickQuestions } from "../../lib/askQuestions";
+import useShareThread from "./useShareThread";
 
 // The one chat component. /ask renders it full-page; AskLauncher renders the
 // same thing in a corner panel, so there is exactly one implementation of the
 // conversation to keep working.
 
-// Scopes retrieval to one kind of content. The values are entity_type values in
-// content_chunks — the RPC already takes a p_types filter.
+// Prefers one kind of content. The values are entity_type values in
+// content_chunks. They no longer scope the search itself: the worker searches
+// everything and re-ranks with these, then says so quietly when a chip found
+// nothing and had to be ignored. A chip that hard-filtered the query returned
+// eight books for "which forts has he trekked?".
 const TYPE_FILTERS = [
   { id: "book", label: "Books" },
   { id: "microblog", label: "Micro posts" },
@@ -88,7 +93,7 @@ SourceCard.propTypes = {
 };
 
 const Bubble = ({
-  turn, question, colors, onFollowup, onRetry, onFeedback,
+  turn, question, colors, onFollowup, onRetry, onFeedback, onShareThread, shareStatus,
 }) => {
   const mine = turn.role === "user";
   return (
@@ -105,7 +110,7 @@ const Bubble = ({
         {mine ? (
           turn.content
         ) : (
-          <AnswerBody text={turn.content} sources={turn.sources} />
+          <AnswerBody text={turn.content} sources={turn.sources} linkable={turn.linkable} />
         )}
         {turn.streaming && (
           <span className="inline-block w-1.5 h-3.5 ml-0.5 align-middle bg-current animate-pulse" />
@@ -156,6 +161,8 @@ const Bubble = ({
           messageId={turn.messageId || null}
           feedback={turn.feedback || null}
           onFeedback={onFeedback || (() => {})}
+          onShareThread={onShareThread}
+          shareStatus={shareStatus}
         />
       )}
 
@@ -184,6 +191,12 @@ const Bubble = ({
         </button>
       )}
 
+      {!mine && !turn.streaming && turn.widened && (
+        <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0">
+          {`Searched everything — nothing in ${turn.scope} matched.`}
+        </p>
+      )}
+
       {turn.note && (
         <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0">
           {turn.note}
@@ -199,6 +212,9 @@ Bubble.propTypes = {
     content: PropTypes.string,
     note: PropTypes.string,
     streaming: PropTypes.bool,
+    widened: PropTypes.bool,
+    scope: PropTypes.string,
+    linkable: PropTypes.arrayOf(PropTypes.string),
     followups: PropTypes.arrayOf(PropTypes.string),
     browse: PropTypes.arrayOf(PropTypes.shape({})),
     sources: PropTypes.arrayOf(PropTypes.shape({})),
@@ -208,11 +224,28 @@ Bubble.propTypes = {
   onFollowup: PropTypes.func.isRequired,
   onRetry: PropTypes.func,
   onFeedback: PropTypes.func,
+  onShareThread: PropTypes.func,
+  shareStatus: PropTypes.string,
 };
 
-Bubble.defaultProps = { question: "", onRetry: null, onFeedback: null };
+Bubble.defaultProps = {
+  question: "", onRetry: null, onFeedback: null, onShareThread: null, shareStatus: null,
+};
 
 const VERIFY_FAILED = "Could not confirm this browser is not a bot — the check expired or was blocked by an extension.";
+
+// What the share control says while it is working. "Link copied" rather than
+// "Shared", because on desktop that is literally what happened.
+const SHARE_LABELS = {
+  sharing: "Sharing…",
+  copied: "Link copied",
+  shared: "Shared",
+  manual: "Copy this link",
+  error: "Could not share",
+};
+
+// The launcher panel is 420px (AskLauncher.js), the /ask page is full width.
+const CHIP_COUNT = { page: 4, compact: 3 };
 
 const AskChat = ({ compact }) => {
   const [turns, setTurns] = useState(() => loadThread());
@@ -221,6 +254,9 @@ const AskChat = ({ compact }) => {
   const [info, setInfo] = useState(null);
   const [blocked, setBlocked] = useState(null);
   const [types, setTypes] = useState([]);
+  // Drawn once per mount, never in render: sampling inline would reshuffle the
+  // chips on every keystroke, under the reader's cursor.
+  const [starters, setStarters] = useState([]);
   const endRef = useRef(null);
   const abortRef = useRef(null);
   const sendRef = useRef(null);
@@ -230,14 +266,28 @@ const AskChat = ({ compact }) => {
     info?.turnstileRequired,
   );
   const [searchParams, setSearchParams] = useSearchParams();
+  const shareThread = useShareThread();
+
+  // One draw per page load, from a pool of ~30 across six subjects. A returning
+  // visitor gets a different four, and never four about the same thing.
+  const drawStarters = (i) => {
+    const count = compact ? CHIP_COUNT.compact : CHIP_COUNT.page;
+    const drawn = pickQuestions(i?.questionPool, count);
+    // An empty or unseeded pool falls back to the fixed list rather than to
+    // nothing — a blank empty state reads as a broken page.
+    setStarters(drawn.length ? drawn : (i?.suggestedQuestions || []).slice(0, count));
+  };
 
   useEffect(() => {
     getAskInfo()
       .then((i) => {
         setInfo(i);
+        drawStarters(i);
         if (!i.enabled) setBlocked(i.note || "The second brain is off right now.");
       })
       .catch(() => setInfo({ maxMessageChars: 500, suggestedQuestions: [] }));
+    // Intentionally mount-only: re-running this would redraw the chips while
+    // someone is reading them.
   }, []);
 
   useEffect(() => {
@@ -264,7 +314,10 @@ const AskChat = ({ compact }) => {
     abortRef.current = null;
   };
 
-  const send = async (text, { replaceFailed = false } = {}) => {
+  // `scope` overrides the chips for this one question — `setTypes` does not
+  // reach the `types` this closure captured, so a follow-up has to say so here.
+  const send = async (text, { replaceFailed = false, scope } = {}) => {
+    const askTypes = scope ?? types;
     const message = (text ?? draft).trim();
     if (!message || pending || blocked) return;
     setDraft("");
@@ -276,6 +329,10 @@ const AskChat = ({ compact }) => {
       { role: "user", content: message },
       { role: "assistant", content: "", sources: [], streaming: true },
     ]);
+    // The stored snapshot is of the thread as it was; another turn makes it
+    // stale, so the next Share creates a new one rather than re-sending a link
+    // to half the conversation.
+    shareThread.reset();
     setPending(true);
 
     // Chips, follow-ups and ?q= links can fire before the widget has solved;
@@ -301,12 +358,15 @@ const AskChat = ({ compact }) => {
       const done = await askQuestionStream({
         message,
         history,
-        types,
+        types: askTypes,
         turnstileToken,
         signal: controller.signal,
-        onSources: ({ sources, browse }) => patchLast(() => ({
-          sources: sources || [],
-          browse: browse || [],
+        onSources: (event) => patchLast(() => ({
+          sources: event.sources || [],
+          browse: event.browse || [],
+          linkable: event.linkable || [],
+          widened: !!event.widened,
+          scope: event.scope || "",
         })),
         onDelta: (chunk) => patchLast((last) => ({ content: last.content + chunk })),
       });
@@ -322,6 +382,9 @@ const AskChat = ({ compact }) => {
         content: done.answer ?? last.content,
         media: done.media || [],
         messageId: done.messageId || null,
+        linkable: done.linkable || last.linkable || [],
+        widened: done.widened ?? last.widened ?? false,
+        scope: done.scope || last.scope || "",
       }));
     } catch (err) {
       if (err.name === "AbortError") {
@@ -347,6 +410,13 @@ const AskChat = ({ compact }) => {
     }
   };
   sendRef.current = send;
+
+  // Follow-ups name things the last answer already showed. Leaving a chip on
+  // would scope the search away from exactly what was just offered.
+  const askFollowup = (question) => {
+    setTypes([]);
+    send(question, { scope: [] });
+  };
 
   const retry = (message) => {
     turnstile.refresh();
@@ -381,12 +451,21 @@ const AskChat = ({ compact }) => {
     clearThread();
     setTurns([]);
     setBlocked(null);
+    // The chips used to survive a clear, so the next question was silently
+    // scoped by a filter the reader thought they had just dismissed.
+    setTypes([]);
+    shareThread.reset();
   };
 
   const toggleType = (id) => setTypes((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]),);
 
   const max = info?.maxMessageChars || 500;
-  const suggestions = info?.suggestedQuestions || [];
+  const shareable = turns.some((t) => t.role === "assistant" && !t.streaming && t.content);
+  const doShare = () => shareThread.share({
+    turns,
+    types,
+    turnstileToken: undefined,
+  });
   // The question each answer belongs to, for its copy / permalink / share row.
   const questionFor = (i) => turns[i - 1]?.content || "";
 
@@ -401,8 +480,8 @@ const AskChat = ({ compact }) => {
               Ask about the books, races, treks, projects and years of short
               posts on this site. Answers link back to the pages they came from.
             </p>
-            <div className="flex flex-wrap gap-2">
-              {suggestions.map((q) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {starters.map((q) => (
                 <button
                   key={q}
                   type="button"
@@ -412,6 +491,17 @@ const AskChat = ({ compact }) => {
                   {q}
                 </button>
               ))}
+              {/* Re-rolls without a reload — "none of these interest me" should
+                  cost a click, not a refresh. */}
+              {starters.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => drawStarters(info)}
+                  className="text-[12px] text-stone-500 dark:text-stone-400 hover:underline px-1"
+                >
+                  Try others ↻
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -425,8 +515,12 @@ const AskChat = ({ compact }) => {
             turn={turn}
             question={questionFor(i)}
             colors={colors}
-            onFollowup={send}
+            onFollowup={askFollowup}
             onFeedback={(feedback) => setFeedback(i, feedback)}
+            // Only the newest answer offers it: it shares the whole thread, and
+            // an older one would imply it shares up to that point.
+            onShareThread={i === turns.length - 1 ? doShare : null}
+            shareStatus={i === turns.length - 1 ? shareThread.status : null}
             // Only the newest turn can retry: a retry replaces the last pair.
             onRetry={i === turns.length - 1 ? retry : null}
           />
@@ -462,16 +556,32 @@ const AskChat = ({ compact }) => {
                 {f.label}
               </button>
             ))}
+            {shareable && (
+              <button
+                type="button"
+                onClick={doShare}
+                disabled={shareThread.status === "sharing"}
+                className="ml-auto text-[11px] text-stone-500 dark:text-stone-400 hover:underline disabled:opacity-50"
+              >
+                {SHARE_LABELS[shareThread.status] || "Share conversation"}
+              </button>
+            )}
             {!!turns.length && (
               <button
                 type="button"
                 onClick={reset}
-                className="ml-auto text-[11px] text-stone-500 dark:text-stone-400 hover:underline"
+                className={`${shareable ? "" : "ml-auto "}text-[11px] text-stone-500 dark:text-stone-400 hover:underline`}
               >
                 Clear
               </button>
             )}
           </div>
+
+          {shareThread.note && (
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0 break-all">
+              {shareThread.note}
+            </p>
+          )}
 
           {/* Only rendered when /admin has verification on; "interaction-only"
               means most visitors never see a challenge. */}

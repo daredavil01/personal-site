@@ -239,6 +239,9 @@ const Exchange = ({ exchange, onSession, evalMode, onEvalSaved }) => {
         {a.degraded && <Badge tone="warning">degraded</Badge>}
         {a.keywordOnly && <Badge tone="warning">keyword-only</Badge>}
         {!a.sourceCount && <Badge tone="danger">no sources</Badge>}
+        {/* Which chips were on. A scoped question that answered badly is a
+            different problem from an open one that did. */}
+        {!!a.types?.length && <Badge tone="accent">{`scoped: ${a.types.join(", ")}`}</Badge>}
         {a.streamed && <Badge>streamed</Badge>}
         <span className={`text-[11px] ${faintText}`}>
           {`total ${ms(a.totalMs)} · embed ${ms(a.embedMs)} · retrieval ${ms(a.retrievalMs)} · generation ${ms(a.generationMs)}`}

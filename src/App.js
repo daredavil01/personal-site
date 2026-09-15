@@ -16,6 +16,7 @@ const { PUBLIC_URL } = process.env;
 // which pages are lazy loaded in the future.
 const About = lazy(() => import("./pages/About"));
 const Ask = lazy(() => import("./pages/Ask"));
+const AskShare = lazy(() => import("./pages/AskShare"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/" element={<HomeRoute />} />
               <Route path="/about" element={<About />} />
               <Route path="/ask" element={<Ask />} />
+              <Route path="/ask/s/:token" element={<AskShare />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/stats" element={<Stats />} />
               <Route path="/contact" element={<Contact />} />

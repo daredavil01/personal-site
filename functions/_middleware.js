@@ -15,6 +15,7 @@ import {
   buildBlogMeta,
   buildProjectMeta,
   buildPresentationMeta,
+  buildShareMeta,
 } from "../src/data/pageMeta";
 
 function escAttr(str) {
@@ -90,6 +91,7 @@ export async function onRequest(context) {
   const projectMatch = pathname.match(/^\/projects\/(\d+)$/);
   const blogMatch = pathname.match(/^\/100-days-to-offload\/(\d+)$/);
   const presentationMatch = pathname.match(/^\/presentations\/(\d+)$/);
+  const shareMatch = pathname.match(/^\/ask\/s\/([A-Za-z0-9]{8,64})$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
   const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -249,6 +251,23 @@ export async function onRequest(context) {
         }
       } catch (_) {
         // Ignored
+      }
+    } else if (shareMatch) {
+      try {
+        // An RPC rather than a table select: ask_shares is owner-only, because
+        // an anon select policy would let anyone list every shared conversation.
+        // get_ask_share is token-gated and read-only, so an unfurl is not a view.
+        const shareRes = await fetch(`${supabaseUrl}/rest/v1/rpc/get_ask_share`, {
+          method: "POST",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({ p_token: shareMatch[1] }),
+        });
+        const share = await shareRes.json();
+        if (share?.title) {
+          dynamicMeta = buildShareMeta({ title: share.title, summary: share.summary });
+        }
+      } catch (_) {
+        // Ignored — a revoked or unknown token falls back to the default card.
       }
     } else if (blogMatch) {
       try {

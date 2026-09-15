@@ -24,6 +24,22 @@ describe("sanitiseAnswer", () => {
   it("leaves bare citations alone", () => {
     expect(sanitiseAnswer("He ran it [1].", sources)).toBe("He ran it [1].");
   });
+
+  it("refuses to use an item's photo as a link target", () => {
+    // With the Books chip on, one answer linked "Ghangad Fort" to a book cover.
+    const text = `[Ghangad Fort](${sources[0].image})`;
+    expect(sanitiseAnswer(text, sources)).toBe("Ghangad Fort");
+  });
+
+  it("refuses to show a page url as a picture", () => {
+    expect(sanitiseAnswer("![race](/sports/4)", sources)).toBe("");
+  });
+
+  it("allows roster urls from the facts card", () => {
+    const text = "He climbed [Jivdhan](/treks/7).";
+    expect(sanitiseAnswer(text, sources, ["/treks/7"])).toBe(text);
+    expect(sanitiseAnswer(text, sources)).toBe("He climbed Jivdhan.");
+  });
 });
 
 describe("collectMedia", () => {

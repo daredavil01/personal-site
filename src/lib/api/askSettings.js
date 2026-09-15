@@ -19,12 +19,14 @@ function fromRow(r) {
     matchCount: r.match_count ?? 8,
     fullTextWeight: r.full_text_weight ?? 1,
     semanticWeight: r.semantic_weight ?? 1,
+    semanticFloor: r.semantic_floor ?? 0.35,
     tiers: Array.isArray(r.tiers) ? r.tiers : [],
     systemPersona: r.system_persona ?? "",
     refusalNote: r.refusal_note ?? "",
     disabledNote: r.disabled_note ?? "",
     quotaNote: r.quota_note ?? "",
     suggestedQuestions: r.suggested_questions ?? [],
+    questionPool: Array.isArray(r.question_pool) ? r.question_pool : [],
     contextDoc: r.context_doc ?? "",
     contextDocUpdatedAt: r.context_doc_updated_at ?? null,
   };
@@ -42,12 +44,21 @@ function toRow(v) {
     match_count: Number(v.matchCount) || 8,
     full_text_weight: Number(v.fullTextWeight) || 0,
     semantic_weight: Number(v.semanticWeight) || 0,
+    // 0 is a legitimate value (no floor), so this cannot use `|| default`.
+    semantic_floor: Number.isFinite(Number(v.semanticFloor)) ? Number(v.semanticFloor) : 0.35,
     tiers: Array.isArray(v.tiers) ? v.tiers : [],
     system_persona: v.systemPersona ?? "",
     refusal_note: v.refusalNote ?? "",
     disabled_note: v.disabledNote ?? "",
     quota_note: v.quotaNote ?? "",
     suggested_questions: v.suggestedQuestions ?? [],
+    // Rows with no question text are half-finished edits, not content. An
+    // unset category is kept as "" rather than guessed at: pickQuestions treats
+    // uncategorised questions as their own group, which beats filing them under
+    // a subject they are not about.
+    question_pool: (Array.isArray(v.questionPool) ? v.questionPool : [])
+      .filter((row) => row?.q?.trim())
+      .map((row) => ({ q: row.q.trim(), c: row.c || "" })),
   };
 }
 

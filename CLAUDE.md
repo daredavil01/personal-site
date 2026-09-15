@@ -103,12 +103,26 @@ Natural-language chat over the whole content store.
   `CF_ACCOUNT_ID` / `CF_API_TOKEN` for Workers AI embeddings.
 - **Retrieval:** `hybrid_search()` fuses tsvector keyword ranking with pgvector
   semantic ranking via RRF, and runs keyword-only when the caller passes a null
-  embedding. `site_facts()` supplies the counting/aggregate answers.
+  embedding. It returns `match_score` / `match_kind` and drops semantic matches
+  below `min_similarity` (the `semantic_floor` setting) — without that floor the
+  semantic half always returns its nearest rows however unrelated. It returns
+  **no** `embedding` or `fts` column: nothing reads them and they dominated the
+  payload. `site_facts()` supplies the counting/aggregate answers, plus `roster`
+  (every book, trek, race, project, deck and photo set as `{t,d,u}`, newest
+  first) and `latest` for the types too big to list. Enumeration and recency are
+  answered from those, never from search.
+- **Type chips re-rank, they do not scope.** The worker over-fetches unscoped
+  (`match_count * 3`) and `src/lib/askRetrieval.js` picks from that: it keeps the
+  chosen types, widens back to everything when fewer than three survive, sinks
+  `site`/`page` chunks unless the question is about the site, and caps chunks per
+  entity. Passing the chips as `p_types` filtered *before* ranking, which is why
+  a scoped question used to return eight confident, unrelated items.
 - **Endpoint:** `functions/api/ask.js` — `/api/ask`, **not** `/ask`: a Function
   at `/ask` would shadow the `/ask` page. Streams SSE (sources first, then the
   answer); `?stream` off falls back to one JSON response. Shared helpers live in
-  `src/data/askConfig.js` and `src/lib/askTiers.js` — NOT under `functions/`,
-  because Pages routes every file there.
+  `src/data/askConfig.js`, `src/lib/askTiers.js`, `src/lib/askRetrieval.js` and
+  `src/lib/askFormat.js` — NOT under `functions/`, because Pages routes every
+  file there.
 - **Model ladder:** Gemini → Workers AI → Workers AI → search-only. Order and
   model ids are rows in `ask_settings`, not constants — a retired model is an
   `/admin` edit. The one hard-coded model is the **embedding** model
@@ -120,9 +134,29 @@ Natural-language chat over the whole content store.
 - **UI:** `src/pages/Ask.js` (`/ask`) and `src/components/Ask/AskLauncher.js`
   (site-wide, mounted in `Main.js`), both rendering `AskChat.js`. Local dev
   needs `npm run dev:ask` beside `npm run dev` — Vite proxies `/api` to it.
+- **Starter chips** come from `ask_settings.question_pool` (jsonb `[{q, c}]`,
+  edited at `/admin/ask/settings`), sampled by `src/lib/askQuestions.js`: one
+  question from each of four random categories per page load, four chips on
+  `/ask` and three in the launcher. Stratified rather than shuffled, because a
+  flat draw keeps offering four book questions at once. `GET /api/ask` appends
+  one or two chips built from the facts roster, so they name whatever is newest.
+  An empty pool falls back to `suggested_questions`. Only add a question the
+  archive answers well — a chip that refuses reads as a broken feature.
 - **Conversation log:** `ask_conversations` / `ask_messages`, written by the
   `ask_log()` RPC from `waitUntil()` so it can never slow an answer. Owner-only;
   read and exported at `/admin/ask/conversations`.
+- **Shared conversations** (`0021`): a reader presses Share and the thread is
+  snapshotted into `ask_shares`, served read-only at `/ask/s/<token>`.
+  **`ask_shares` is owner-only RLS on purpose** — an anon select policy would let
+  anyone `GET /rest/v1/ask_shares?select=*` and enumerate every shared
+  conversation, so "unlisted" would be a fiction. The public reaches it only
+  through `get_ask_share(token)` / `bump_ask_share_view(token)`, both SECURITY
+  DEFINER and token-gated. `create_ask_share` is **service-role only** and called
+  from `functions/api/share.js`: the per-IP daily cap (`daily_share_cap`) is
+  meaningless if the caller can pick its own `ip_hash`, and only the edge knows
+  the real address. Snapshot shape and the derived columns come from
+  `src/lib/askShareSnapshot.js`. Managed at `/admin/ask/shares` — filter, search
+  the stored text, open, revoke (reversible, keeps the record) or delete.
 - **Related content:** `related_content_ranked()` powers the "more like this"
   strip on every detail page from the same embeddings — no model call at read
   time.
@@ -146,8 +180,11 @@ Natural-language chat over the whole content store.
 - **Writing Ledger:** `public/writing-ledger.html` fetches
   `public/data/writing-ledger.json`; month/year-to-date are recomputed at read
   time (`src/lib/writingPeriod.js`). See `docs/writing-ledger.md`.
-- **Answers** may only link to, or show, URLs that came from retrieved items:
+- **Answers** may only link to, or show, URLs the archive supplied:
   `sanitiseAnswer` (`src/lib/askFormat.js`) runs in the worker and in the UI.
+  Links and images are **separate** allow-lists — a retrieved item's photo is not
+  a valid link target — and the worker passes the roster urls as extra allowed
+  links, so the UI pass needs the same list (`linkable`) or it strips them.
 - **Feedback** (thumbs, reason tags, comment) is written onto the answer's
   `ask_messages` row by `ask_feedback()`, which checks the browser session. The
   admin Conversations page filters and summarises the log and exports rated

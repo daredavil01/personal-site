@@ -226,6 +226,18 @@ export function buildProjectMeta({ title, subtitle, description, image } = {}) {
   };
 }
 
+// A shared /ask conversation. Title is the question that opened it, so the link
+// unfurls as the thing someone actually wanted to pass on rather than as the
+// site's name. No per-share image: the card is text, and DEFAULT_IMAGE carries
+// the branding.
+export function buildShareMeta({ title, summary } = {}) {
+  return {
+    title: title || "A conversation with the archive",
+    description: summary || "A conversation with Sanket Tambare's archive.",
+    image: DEFAULT_IMAGE,
+  };
+}
+
 export function buildPresentationMeta({ title, description, image } = {}) {
   return {
     title,
