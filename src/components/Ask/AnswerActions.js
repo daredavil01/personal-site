@@ -16,6 +16,14 @@ import { sendAskFeedback } from "../../lib/api/ask";
 // (ask_feedback), where it doubles as evals data for tuning the prompt and
 // deciding what to ingest next.
 
+const THREAD_SHARE_LABELS = {
+  sharing: "Sharing…",
+  copied: "Link copied",
+  shared: "Shared",
+  manual: "Copy the link",
+  error: "Failed",
+};
+
 export const FEEDBACK_TAGS = [
   "Wrong facts",
   "Missing data",
@@ -58,7 +66,7 @@ Action.propTypes = {
 Action.defaultProps = { children: null, title: undefined, pressed: undefined };
 
 const AnswerActions = ({
-  question, answer, sources, messageId, feedback, onFeedback,
+  question, answer, sources, messageId, feedback, onFeedback, onShareThread, shareStatus,
 }) => {
   const [copied, setCopied] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -122,6 +130,17 @@ const AnswerActions = ({
         <Action icon="image" onClick={() => setShareOpen(true)} title="Share as image">
           Image
         </Action>
+        {/* Shares the whole conversation, not this answer — which is why it
+            only appears under the newest one. */}
+        {onShareThread && (
+          <Action
+            icon="ios_share"
+            onClick={onShareThread}
+            title="Share this whole conversation as a link"
+          >
+            {THREAD_SHARE_LABELS[shareStatus] || "Share chat"}
+          </Action>
+        )}
         {messageId && (
           <>
             <Action icon="thumb_up" title="Good answer" pressed={rating === 1} onClick={() => rate(1)} />
@@ -215,6 +234,8 @@ AnswerActions.propTypes = {
     comment: PropTypes.string,
   }),
   onFeedback: PropTypes.func,
+  onShareThread: PropTypes.func,
+  shareStatus: PropTypes.string,
 };
 
 AnswerActions.defaultProps = {
@@ -222,6 +243,8 @@ AnswerActions.defaultProps = {
   messageId: null,
   feedback: null,
   onFeedback: () => {},
+  onShareThread: null,
+  shareStatus: null,
 };
 
 export default AnswerActions;

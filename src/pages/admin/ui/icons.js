@@ -42,6 +42,7 @@ export {
   Presentation,
   Rss,
   Search,
+  Share2,
   Sparkles,
   Sun,
   Tags,

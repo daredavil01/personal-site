@@ -27,36 +27,12 @@ import {
 } from "../../src/lib/askFormat";
 import { getStatsPayload } from "../../src/lib/statsEndpoint";
 import { currentPeriod } from "../../src/lib/writingPeriod";
+import {
+  hashIp, json, restHeaders, rpc, verifyTurnstile,
+} from "../../src/lib/askServer";
 
 const SETTINGS_TTL_SECONDS = 60;
 const FACTS_TTL_SECONDS = 60 * 60;
-
-function json(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
-}
-
-function restHeaders(env) {
-  const key = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-}
-
-async function rpc(env, name, args) {
-  const res = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/rpc/${name}`, {
-    method: "POST",
-    headers: restHeaders(env),
-    body: JSON.stringify(args || {}),
-  });
-  if (!res.ok) throw new Error(`${name} ${res.status}`);
-  return res.json();
-}
 
 // Reads a value through the edge cache. `cacheKey` must be a URL string.
 async function cached(context, cacheKey, ttl, load) {
@@ -144,34 +120,6 @@ async function loadFacts(context) {
     };
   }
   return facts;
-}
-
-async function hashIp(request, env) {
-  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  const data = new TextEncoder().encode(`${ip}:${env.ASK_IP_SALT || "ask"}`);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)]
-    .slice(0, 16)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function verifyTurnstile(env, token, ip) {
-  if (!env.TURNSTILE_SECRET_KEY) return true; // not configured yet — do not lock people out
-  const body = new FormData();
-  body.append("secret", env.TURNSTILE_SECRET_KEY);
-  body.append("response", token || "");
-  if (ip) body.append("remoteip", ip);
-  try {
-    const res = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      { method: "POST", body },
-    );
-    const out = await res.json();
-    return !!out.success;
-  } catch (_) {
-    return false;
-  }
 }
 
 // Retrieved rows are DATA, never instructions. The microblog table is a Tumblr

@@ -13,6 +13,7 @@ import {
   MountainSnow,
   Presentation,
   Rss,
+  Share2,
   Sparkles,
   Tags,
   Wrench,
@@ -64,6 +65,7 @@ export const NAV_GROUPS = [
     items: [
       { to: "/admin/ask/settings", label: "Settings", icon: MessageCircle },
       { to: "/admin/ask/conversations", label: "Conversations", icon: MessagesSquare },
+      { to: "/admin/ask/shares", label: "Shares", icon: Share2 },
     ],
   },
   {

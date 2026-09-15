@@ -145,6 +145,18 @@ Natural-language chat over the whole content store.
 - **Conversation log:** `ask_conversations` / `ask_messages`, written by the
   `ask_log()` RPC from `waitUntil()` so it can never slow an answer. Owner-only;
   read and exported at `/admin/ask/conversations`.
+- **Shared conversations** (`0021`): a reader presses Share and the thread is
+  snapshotted into `ask_shares`, served read-only at `/ask/s/<token>`.
+  **`ask_shares` is owner-only RLS on purpose** — an anon select policy would let
+  anyone `GET /rest/v1/ask_shares?select=*` and enumerate every shared
+  conversation, so "unlisted" would be a fiction. The public reaches it only
+  through `get_ask_share(token)` / `bump_ask_share_view(token)`, both SECURITY
+  DEFINER and token-gated. `create_ask_share` is **service-role only** and called
+  from `functions/api/share.js`: the per-IP daily cap (`daily_share_cap`) is
+  meaningless if the caller can pick its own `ip_hash`, and only the edge knows
+  the real address. Snapshot shape and the derived columns come from
+  `src/lib/askShareSnapshot.js`. Managed at `/admin/ask/shares` — filter, search
+  the stored text, open, revoke (reversible, keeps the record) or delete.
 - **Related content:** `related_content_ranked()` powers the "more like this"
   strip on every detail page from the same embeddings — no model call at read
   time.

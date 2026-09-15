@@ -11,6 +11,7 @@ import { hasInlineImage, isExternal } from "../../lib/askFormat";
 import AnswerActions from "./AnswerActions";
 import { clearThread, loadThread, saveThread } from "./askStorage";
 import { pickQuestions } from "../../lib/askQuestions";
+import useShareThread from "./useShareThread";
 
 // The one chat component. /ask renders it full-page; AskLauncher renders the
 // same thing in a corner panel, so there is exactly one implementation of the
@@ -92,7 +93,7 @@ SourceCard.propTypes = {
 };
 
 const Bubble = ({
-  turn, question, colors, onFollowup, onRetry, onFeedback,
+  turn, question, colors, onFollowup, onRetry, onFeedback, onShareThread, shareStatus,
 }) => {
   const mine = turn.role === "user";
   return (
@@ -160,6 +161,8 @@ const Bubble = ({
           messageId={turn.messageId || null}
           feedback={turn.feedback || null}
           onFeedback={onFeedback || (() => {})}
+          onShareThread={onShareThread}
+          shareStatus={shareStatus}
         />
       )}
 
@@ -221,11 +224,25 @@ Bubble.propTypes = {
   onFollowup: PropTypes.func.isRequired,
   onRetry: PropTypes.func,
   onFeedback: PropTypes.func,
+  onShareThread: PropTypes.func,
+  shareStatus: PropTypes.string,
 };
 
-Bubble.defaultProps = { question: "", onRetry: null, onFeedback: null };
+Bubble.defaultProps = {
+  question: "", onRetry: null, onFeedback: null, onShareThread: null, shareStatus: null,
+};
 
 const VERIFY_FAILED = "Could not confirm this browser is not a bot — the check expired or was blocked by an extension.";
+
+// What the share control says while it is working. "Link copied" rather than
+// "Shared", because on desktop that is literally what happened.
+const SHARE_LABELS = {
+  sharing: "Sharing…",
+  copied: "Link copied",
+  shared: "Shared",
+  manual: "Copy this link",
+  error: "Could not share",
+};
 
 // The launcher panel is 420px (AskLauncher.js), the /ask page is full width.
 const CHIP_COUNT = { page: 4, compact: 3 };
@@ -249,6 +266,7 @@ const AskChat = ({ compact }) => {
     info?.turnstileRequired,
   );
   const [searchParams, setSearchParams] = useSearchParams();
+  const shareThread = useShareThread();
 
   // One draw per page load, from a pool of ~30 across six subjects. A returning
   // visitor gets a different four, and never four about the same thing.
@@ -311,6 +329,10 @@ const AskChat = ({ compact }) => {
       { role: "user", content: message },
       { role: "assistant", content: "", sources: [], streaming: true },
     ]);
+    // The stored snapshot is of the thread as it was; another turn makes it
+    // stale, so the next Share creates a new one rather than re-sending a link
+    // to half the conversation.
+    shareThread.reset();
     setPending(true);
 
     // Chips, follow-ups and ?q= links can fire before the widget has solved;
@@ -432,11 +454,18 @@ const AskChat = ({ compact }) => {
     // The chips used to survive a clear, so the next question was silently
     // scoped by a filter the reader thought they had just dismissed.
     setTypes([]);
+    shareThread.reset();
   };
 
   const toggleType = (id) => setTypes((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]),);
 
   const max = info?.maxMessageChars || 500;
+  const shareable = turns.some((t) => t.role === "assistant" && !t.streaming && t.content);
+  const doShare = () => shareThread.share({
+    turns,
+    types,
+    turnstileToken: undefined,
+  });
   // The question each answer belongs to, for its copy / permalink / share row.
   const questionFor = (i) => turns[i - 1]?.content || "";
 
@@ -488,6 +517,10 @@ const AskChat = ({ compact }) => {
             colors={colors}
             onFollowup={askFollowup}
             onFeedback={(feedback) => setFeedback(i, feedback)}
+            // Only the newest answer offers it: it shares the whole thread, and
+            // an older one would imply it shares up to that point.
+            onShareThread={i === turns.length - 1 ? doShare : null}
+            shareStatus={i === turns.length - 1 ? shareThread.status : null}
             // Only the newest turn can retry: a retry replaces the last pair.
             onRetry={i === turns.length - 1 ? retry : null}
           />
@@ -523,16 +556,32 @@ const AskChat = ({ compact }) => {
                 {f.label}
               </button>
             ))}
+            {shareable && (
+              <button
+                type="button"
+                onClick={doShare}
+                disabled={shareThread.status === "sharing"}
+                className="ml-auto text-[11px] text-stone-500 dark:text-stone-400 hover:underline disabled:opacity-50"
+              >
+                {SHARE_LABELS[shareThread.status] || "Share conversation"}
+              </button>
+            )}
             {!!turns.length && (
               <button
                 type="button"
                 onClick={reset}
-                className="ml-auto text-[11px] text-stone-500 dark:text-stone-400 hover:underline"
+                className={`${shareable ? "" : "ml-auto "}text-[11px] text-stone-500 dark:text-stone-400 hover:underline`}
               >
                 Clear
               </button>
             )}
           </div>
+
+          {shareThread.note && (
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0 break-all">
+              {shareThread.note}
+            </p>
+          )}
 
           {/* Only rendered when /admin has verification on; "interaction-only"
               means most visitors never see a challenge. */}
