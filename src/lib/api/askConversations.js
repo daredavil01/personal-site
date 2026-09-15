@@ -34,6 +34,10 @@ function messageFromRow(r) {
     totalMs: r.total_ms,
     sourceCount: r.source_count ?? 0,
     sources: r.sources || [],
+    // Which content-type chips were on. A bad answer to a scoped question is a
+    // different bug from a bad answer to an open one, and without this the log
+    // cannot tell them apart.
+    types: r.types || [],
     tierErrors: r.tier_errors || [],
     messageUuid: r.message_uuid || null,
     feedback: r.feedback ?? null,
@@ -324,6 +328,7 @@ const CSV_COLUMNS = [
   ["totalMs", (e) => e.answer.totalMs],
   ["sourceCount", (e) => e.answer.sourceCount],
   ["sourceTypes", (e) => [...new Set(e.answer.sources.map((s) => s.entity_type))].join("|")],
+  ["filterTypes", (e) => (e.answer.types || []).join("|")],
   ["feedback", (e) => e.answer.feedback],
   ["feedbackTags", (e) => e.answer.feedbackTags.join("|")],
   ["feedbackComment", (e) => e.answer.feedbackComment],
@@ -360,6 +365,7 @@ export function toEvalsJsonl(exchanges) {
       question: e.question,
       answer: e.answer.content,
       sources: e.answer.sources,
+      filter_types: e.answer.types || [],
       tier: e.answer.tier,
       model: e.answer.model,
       keyword_only: e.answer.keywordOnly,

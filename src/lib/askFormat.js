@@ -5,10 +5,16 @@
 // under functions/. Dependency-free by contract — esbuild bundles it into the
 // worker and Vite into the page.
 //
-// The one rule that matters: an answer may only link to, or show, a URL that
-// appeared in a retrieved item. The microblog is a Tumblr import full of
-// reblogged third-party text, so a link the model "found" is as likely to be an
-// injected instruction as a hallucination. Either way it never renders.
+// The one rule that matters: an answer may only link to, or show, a URL the
+// archive gave it. The microblog is a Tumblr import full of reblogged
+// third-party text, so a link the model "found" is as likely to be an injected
+// instruction as a hallucination. Either way it never renders.
+//
+// Links and images are checked against SEPARATE lists. Pooling them let an
+// answer use a retrieved item's photo as the target of a link: with the Books
+// chip on, one answer rendered "Ghangad Fort" as a link to a book cover. A page
+// url is a place to go; an image url is a thing to show. They are not
+// interchangeable.
 
 export const SITE_ORIGIN = "https://sankettambare.in";
 export const MAX_MEDIA = 4;
@@ -36,29 +42,47 @@ export function linkDomain(url) {
   }
 }
 
-export function allowedUrls(sources) {
+/**
+ * Pages an answer may link to: the retrieved items, plus `extra` — the urls in
+ * the facts card's rosters, which name every book, trek, race and project
+ * whether or not retrieval surfaced them.
+ */
+export function allowedUrls(sources, extra) {
   const set = new Set();
   (sources || []).forEach((s) => {
     if (s?.url) set.add(normaliseUrl(s.url));
+  });
+  (extra || []).forEach((u) => {
+    if (u) set.add(normaliseUrl(u));
+  });
+  return set;
+}
+
+/** Pictures an answer may show: only the images the retrieved items carry. */
+export function allowedImages(sources) {
+  const set = new Set();
+  (sources || []).forEach((s) => {
     if (s?.image) set.add(normaliseUrl(s.image));
   });
   return set;
 }
 
-/** Drops every link and image whose URL is not in `sources`; keeps link text. */
-export function sanitiseAnswer(text, sources) {
-  const ok = allowedUrls(sources);
-  const allowed = (url) => ok.has(normaliseUrl(url));
+/** Drops every link and image the archive did not supply; keeps link text. */
+export function sanitiseAnswer(text, sources, extra) {
+  const links = allowedUrls(sources, extra);
+  const images = allowedImages(sources);
+  const isLink = (url) => links.has(normaliseUrl(url));
+  const isImage = (url) => images.has(normaliseUrl(url));
   return String(text || "")
-    .replace(IMAGE_RE, (m, alt, url) => (allowed(url) ? `![${alt}](${normaliseUrl(url)})` : ""))
+    .replace(IMAGE_RE, (m, alt, url) => (isImage(url) ? `![${alt}](${normaliseUrl(url)})` : ""))
     .replace(LINK_RE, (m, pre, label, url) => (
-      allowed(url) ? `${pre}[${label}](${normaliseUrl(url)})` : `${pre}${label}`
+      isLink(url) ? `${pre}[${label}](${normaliseUrl(url)})` : `${pre}${label}`
     ))
     .replace(BARE_RE, (m, pre, raw) => {
       // Sentence punctuation is not part of the URL.
       const url = raw.replace(/[.,;:!?]+$/, "");
       const tail = raw.slice(url.length);
-      return allowed(url) ? `${pre}${url}${tail}` : `${pre}${tail}`;
+      return isLink(url) || isImage(url) ? `${pre}${url}${tail}` : `${pre}${tail}`;
     })
     // Removing a link can strand the spaces around it.
     .replace(/[ \t]{2,}/g, " ")

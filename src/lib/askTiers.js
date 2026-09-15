@@ -25,7 +25,7 @@ const PROVIDERS = {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents: user,
-          generationConfig: { temperature: 0.3, maxOutputTokens: 1000 },
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1000 },
         }),
       },
     );
@@ -151,7 +151,7 @@ const STREAMERS = {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents: user,
-          generationConfig: { temperature: 0.3, maxOutputTokens: 1000 },
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1000 },
         }),
       },
     );

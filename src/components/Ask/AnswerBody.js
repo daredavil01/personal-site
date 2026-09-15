@@ -150,7 +150,11 @@ MarkdownImage.propTypes = {
 };
 MarkdownImage.defaultProps = { src: "", alt: "", sources: [] };
 
-const AnswerBody = ({ text, sources }) => {
+// `linkable` is the urls of every page the facts card's rosters name. The
+// worker already sanitised against them; this pass repeats the check in the
+// browser, so without the same list a roster link would survive the worker and
+// then be stripped here.
+const AnswerBody = ({ text, sources, linkable }) => {
   const options = useMemo(() => ({
     forceBlock: true,
     overrides: {
@@ -169,7 +173,7 @@ const AnswerBody = ({ text, sources }) => {
   if (!text) return null;
   return (
     <Markdown options={options}>
-      {linkCitations(sanitiseAnswer(text, sources), sources)}
+      {linkCitations(sanitiseAnswer(text, sources, linkable), sources)}
     </Markdown>
   );
 };
@@ -177,8 +181,9 @@ const AnswerBody = ({ text, sources }) => {
 AnswerBody.propTypes = {
   text: PropTypes.string,
   sources: PropTypes.arrayOf(PropTypes.shape({ url: PropTypes.string, image: PropTypes.string })),
+  linkable: PropTypes.arrayOf(PropTypes.string),
 };
 
-AnswerBody.defaultProps = { text: "", sources: [] };
+AnswerBody.defaultProps = { text: "", sources: [], linkable: [] };
 
 export default AnswerBody;

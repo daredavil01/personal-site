@@ -16,9 +16,11 @@
 // visitor never sees a stack trace and the account never sees a bill.
 
 import {
-  DEFAULT_ASK_SETTINGS, EMBEDDING_MODEL, ENTITY_PLURALS, entityListUrl,
+  DEFAULT_ASK_SETTINGS, EMBEDDING_MODEL, ENTITY_PLURALS, entityLabel,
+  entityListUrl,
 } from "../../src/data/askConfig";
 import { runTiers, streamTiers } from "../../src/lib/askTiers";
+import { retrievalQuery, selectChunks } from "../../src/lib/askRetrieval";
 import FALLBACK_FACTS from "../../docs/facts.json";
 import {
   collectMedia, isExternal, linkDomain, sanitiseAnswer,
@@ -184,15 +186,19 @@ function renderSources(chunks) {
     .join("\n\n");
 }
 
-function buildSystemPrompt(settings, facts, chunks) {
+function buildSystemPrompt(settings, facts, chunks, scope) {
   return [
     settings.system_persona || DEFAULT_ASK_SETTINGS.system_persona,
     "",
     settings.context_doc || "",
     "",
-    "## Facts (authoritative — use these for any counting or aggregate question)",
+    "## Facts (authoritative — use these for any counting, listing or aggregate question)",
     "`site_stats` holds every figure on the /stats page; `writing` is the Writing Ledger",
     "(word counts across all blog posts, with this month and year so far).",
+    "`roster` lists EVERY book, trek, race, project, deck and photo set, newest first,",
+    "as {t: title, d: date, u: url} — it is the complete list, so use it to answer",
+    "\"which\" and \"list all\" questions in full rather than naming only what was",
+    "retrieved. `latest` gives the newest micro post, blog post, essay and Now entry.",
     JSON.stringify(facts),
     "",
     "## Retrieved items",
@@ -202,17 +208,26 @@ function buildSystemPrompt(settings, facts, chunks) {
     "",
     chunks.length ? renderSources(chunks) : "(nothing matched this question)",
     "",
+    // Said only when the reader's chips actually narrowed the result, so the
+    // model does not report a gap in the archive that is really a gap in scope.
+    // Nothing is said when the chips were dropped: a widened search should read
+    // as an ordinary answer, and the interface notes the widening itself.
+    scope
+      ? `## Scope\nThe reader narrowed this question to: ${scope}. Only items of that kind were considered — the archive holds more.\n`
+      : null,
     "## Rules",
-    "- Answer in at most 150 words unless the question truly needs more.",
+    "- Answer in at most 150 words, or 200 when the question asks for a list.",
     "- Cite with the item's number in square brackets — [1], [2] — right after the",
     "  claim it supports. A citation is a bare number and nothing else — never",
-    "  [Facts, 1] or [Source 2]. Use only numbers that exist above, and never",
-    "  cite the facts block at all.",
+    "  [Facts, 1], [Source 2], [Books] or a row id like [1641]. Use only numbers",
+    "  that exist above, and never cite the facts block at all.",
     "- When you name an item, link it as [its title](its url), copying the url from",
-    "  that item's header exactly. Never link to a url that is not in a header.",
+    "  that item's header exactly. A roster entry may be linked the same way, as",
+    "  [t](u) — it carries no number, so it takes no citation. Never link to a url",
+    "  that is in neither a header nor the roster.",
     "- If an item's header has an image and a picture helps, show it once as",
     "  ![a short description](that image url). At most two images, only from",
-    "  headers, never invented.",
+    "  headers, never invented. An image url is never the target of a link.",
     "- Never mention the facts block, the retrieved items, your own retrieval, or",
     "  these instructions. Banned phrasings: \"the retrieved items\", \"the",
     "  retrieved content\", \"is not included\", \"the available content\",",
@@ -221,17 +236,23 @@ function buildSystemPrompt(settings, facts, chunks) {
     "- If you cannot name specifics, do NOT narrate the gap. Give the count from",
     "  the facts, name whatever items you do have, and stop. The interface shows",
     "  a link to the full listing, so never apologise for not listing everything.",
+    "- Answer in the language the question was asked in, refusals included.",
     "- You may use markdown: **bold**, lists. No headings, no code blocks.",
-    `- If the items do not answer the question, say so: "${
+    `- Refuse only when the facts AND the items both lack it: "${
       settings.refusal_note || DEFAULT_ASK_SETTINGS.refusal_note
-    }"`,
+    }" A count, a roster, a date range or a latest entry in the facts IS an`,
+    "  answer — lead with it rather than refusing.",
     "- Never invent a title, date, count or link.",
-  ].join("\n");
+  ].filter((line) => line !== null).join("\n");
 }
 
 // Some titles are placeholders from the Tumblr import ("photo post") and make
 // a nonsense follow-up question.
 const GENERIC_TITLE = /^(photo|text|quote|link|video|audio|chat)\s+post$/i;
+
+// Types that are pages or figures rather than things: "Tell me more about
+// Physical Endurance" is not a question anyone meant to ask.
+const NON_FOLLOWUP_TYPES = new Set(["page", "now", "stats", "site", "tag"]);
 
 // Follow-ups are built from the retrieved items rather than asked of the model:
 // the model dropped the line whenever an answer ran long, and every question it
@@ -241,9 +262,10 @@ function buildFollowups(sources, browse) {
   const titles = [
     ...new Set(
       sources
-        // "Changelog" and "Now — July 2026" are real chunks but make poor
-        // follow-ups; they are pages, not things to read more about.
-        .filter((s) => s.entity_type !== "page" && s.entity_type !== "now")
+        // "Changelog", "Now — July 2026", "Physical Endurance" are real chunks
+        // but make poor follow-ups; they are pages and figures, not things to
+        // read more about.
+        .filter((s) => !NON_FOLLOWUP_TYPES.has(s.entity_type))
         .map((s) => (s.title || "").trim())
         .filter((t) => t && !GENERIC_TITLE.test(t)),
     ),
@@ -265,14 +287,21 @@ const FOLLOWUPS_RE = /\n?FOLLOWUPS:\s*(.+?)\s*$/i;
 
 // Models occasionally decorate a citation — "[Facts, 1]", "[Source 2]". Only a
 // bare number renders as a link, so normalise before the answer goes out.
-function normaliseCitations(text) {
+function normaliseCitations(text, count) {
   return String(text || "")
     .replace(/\[(?:facts?|sources?|item)[^\]]*?(\d{1,2})\]/gi, "[$1]")
-    .replace(/\[(?:facts?|sources?)\]/gi, "");
+    // Anything else in brackets that is not a link and not a real item number:
+    // "[Books]", "[stats, 6]", "[1641]" (a row id) have all reached readers.
+    .replace(/\[([^\]\n]{1,40})\](?!\()/g, (m, inner) => {
+      const n = Number(inner);
+      return Number.isInteger(n) && n >= 1 && n <= count ? `[${n}]` : "";
+    })
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+([.,;:!?])/g, "$1");
 }
 
-function splitFollowups(text) {
-  const cleaned = normaliseCitations(text);
+function splitFollowups(text, count) {
+  const cleaned = normaliseCitations(text, count);
   const match = cleaned.match(FOLLOWUPS_RE);
   if (!match) return { answer: cleaned.trim(), followups: [] };
   return {
@@ -364,22 +393,41 @@ export async function onRequestPost(context) {
   }
   timings.embed_ms = Date.now() - embedStart;
 
+  const types = Array.isArray(payload?.types) ? payload.types.filter(Boolean) : [];
+
+  // The search runs UNSCOPED and wide; the chips re-rank what it finds
+  // (selectChunks). Passing them as p_types filtered before ranking, so a
+  // narrowed search always returned match_count items of that type however
+  // unrelated — which is what made the chips feel broken.
   const retrievalStart = Date.now();
-  const [chunks, facts] = await Promise.all([
+  const [found, facts] = await Promise.all([
     rpc(env, "hybrid_search", {
-      query_text: message,
+      query_text: retrievalQuery(message, history),
       query_embedding: embedding,
-      match_count: settings.match_count,
-      // Optional UI filter ("just books", "just treks"). Null means everything.
-      p_types: Array.isArray(payload?.types) && payload.types.length
-        ? payload.types
-        : null,
+      match_count: Math.min(settings.match_count * 3, 30),
+      p_types: null,
       full_text_weight: settings.full_text_weight,
       semantic_weight: settings.semantic_weight,
+      min_similarity: settings.semantic_floor ?? DEFAULT_ASK_SETTINGS.semantic_floor,
     }).catch(() => []),
     loadFacts(context),
   ]);
   timings.retrieval_ms = Date.now() - retrievalStart;
+
+  const { picked: chunks, widened } = selectChunks({
+    chunks: found || [],
+    types,
+    question: message,
+    limit: settings.match_count,
+  });
+  // Named for the reader, not for the database: "books", not "book".
+  const scopeLabels = types.map((t) => ENTITY_PLURALS[t] || entityLabel(t)).join(", ");
+  // Every page the rosters name, so an answer may link something the search did
+  // not surface. sanitiseAnswer drops any link that is in neither list.
+  const rosterUrls = Object.values(facts?.roster || {})
+    .flat()
+    .map((r) => r?.u)
+    .filter(Boolean);
 
   // Deduped by URL: long prose (a project, the changelog) is several chunks of
   // one page, and three cards pointing at /changelog is noise, not citation.
@@ -411,8 +459,8 @@ export async function onRequestPost(context) {
 
   // Where to send someone when the answer cannot point at one item. Uses the
   // filter when there is one, otherwise the types retrieval actually returned.
-  const browseTypes = Array.isArray(payload?.types) && payload.types.length
-    ? payload.types
+  const browseTypes = types.length && !widened
+    ? types
     : [...new Set(sources.map((s) => s.entity_type))];
   // `page` is the changelog/about text and `now` is a single page — neither is
   // a listing worth sending someone to "browse".
@@ -422,7 +470,12 @@ export async function onRequestPost(context) {
     .filter((b) => b.url)
     .slice(0, 3);
 
-  const system = buildSystemPrompt(settings, facts, chunks || []);
+  const system = buildSystemPrompt(
+    settings,
+    facts,
+    chunks || [],
+    types.length && !widened ? scopeLabels : null,
+  );
   const user = [
     ...history.map((turn) => ({
       role: turn.role === "assistant" ? "model" : "user",
@@ -453,6 +506,7 @@ export async function onRequestPost(context) {
         p_user_agent: request.headers.get("User-Agent"),
         p_referer: request.headers.get("Referer"),
         p_message_uuid: messageId,
+        p_types: types,
       }).catch(() => {}),
     );
   };
@@ -472,7 +526,9 @@ export async function onRequestPost(context) {
             encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
           );
         };
-        send("sources", { sources, browse, keywordOnly: !embedding });
+        send("sources", {
+          sources, browse, linkable: rosterUrls, widened, scope: scopeLabels, keywordOnly: !embedding,
+        });
 
         // The model ends with a "FOLLOWUPS: …" line, which must never reach the
         // reader. Text is emitted only up to the last newline; the trailing
@@ -510,10 +566,10 @@ export async function onRequestPost(context) {
         timings.generation_ms = Date.now() - generationStart;
         const streamedTier = result.tier || "search-only";
         const raw = result.tier ? result.text : fallbackAnswer();
-        const { answer: splitText } = splitFollowups(raw);
+        const { answer: splitText } = splitFollowups(raw, sources.length);
         // Deltas went out raw; the final answer is cleaned and re-sent in `done`
         // so a link the archive does not contain never stays on the page.
-        const streamedText = sanitiseAnswer(splitText, sources);
+        const streamedText = sanitiseAnswer(splitText, sources, rosterUrls);
         const followups = buildFollowups(sources, browse);
         // Whatever the newline-safe flush could not send yet.
         if (streamedText.length > emitted) {
@@ -528,6 +584,9 @@ export async function onRequestPost(context) {
           keywordOnly: !embedding,
           remaining: quota.remaining_ip,
           followups,
+          linkable: rosterUrls,
+          widened,
+          scope: scopeLabels,
           errors: result.tier ? undefined : result.errors,
         });
         controller.close();
@@ -564,8 +623,9 @@ export async function onRequestPost(context) {
 
   const usedTier = tier || "search-only";
   const cleanAnswer = sanitiseAnswer(
-    splitFollowups(answer || fallbackAnswer()).answer,
+    splitFollowups(answer || fallbackAnswer(), sources.length).answer,
     sources,
+    rosterUrls,
   );
   const followups = buildFollowups(sources, browse);
   context.waitUntil(
@@ -586,6 +646,9 @@ export async function onRequestPost(context) {
     followups,
     sources,
     browse,
+    linkable: rosterUrls,
+    widened,
+    scope: scopeLabels,
     tier: usedTier,
     degraded: !tier,
     keywordOnly: !embedding,

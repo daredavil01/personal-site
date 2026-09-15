@@ -38,6 +38,12 @@ const RETRIEVAL = [
   { name: "matchCount", label: "Items retrieved", type: "number", hint: "1–30" },
   { name: "fullTextWeight", label: "Keyword weight", type: "number" },
   { name: "semanticWeight", label: "Meaning weight", type: "number" },
+  {
+    name: "semanticFloor",
+    label: "Meaning floor",
+    type: "number",
+    hint: "0–1 similarity. Raise it if answers cite loosely related items; lower it if good questions come back empty",
+  },
 ];
 
 const COPY = [

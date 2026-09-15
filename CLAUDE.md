@@ -103,12 +103,26 @@ Natural-language chat over the whole content store.
   `CF_ACCOUNT_ID` / `CF_API_TOKEN` for Workers AI embeddings.
 - **Retrieval:** `hybrid_search()` fuses tsvector keyword ranking with pgvector
   semantic ranking via RRF, and runs keyword-only when the caller passes a null
-  embedding. `site_facts()` supplies the counting/aggregate answers.
+  embedding. It returns `match_score` / `match_kind` and drops semantic matches
+  below `min_similarity` (the `semantic_floor` setting) — without that floor the
+  semantic half always returns its nearest rows however unrelated. It returns
+  **no** `embedding` or `fts` column: nothing reads them and they dominated the
+  payload. `site_facts()` supplies the counting/aggregate answers, plus `roster`
+  (every book, trek, race, project, deck and photo set as `{t,d,u}`, newest
+  first) and `latest` for the types too big to list. Enumeration and recency are
+  answered from those, never from search.
+- **Type chips re-rank, they do not scope.** The worker over-fetches unscoped
+  (`match_count * 3`) and `src/lib/askRetrieval.js` picks from that: it keeps the
+  chosen types, widens back to everything when fewer than three survive, sinks
+  `site`/`page` chunks unless the question is about the site, and caps chunks per
+  entity. Passing the chips as `p_types` filtered *before* ranking, which is why
+  a scoped question used to return eight confident, unrelated items.
 - **Endpoint:** `functions/api/ask.js` — `/api/ask`, **not** `/ask`: a Function
   at `/ask` would shadow the `/ask` page. Streams SSE (sources first, then the
   answer); `?stream` off falls back to one JSON response. Shared helpers live in
-  `src/data/askConfig.js` and `src/lib/askTiers.js` — NOT under `functions/`,
-  because Pages routes every file there.
+  `src/data/askConfig.js`, `src/lib/askTiers.js`, `src/lib/askRetrieval.js` and
+  `src/lib/askFormat.js` — NOT under `functions/`, because Pages routes every
+  file there.
 - **Model ladder:** Gemini → Workers AI → Workers AI → search-only. Order and
   model ids are rows in `ask_settings`, not constants — a retired model is an
   `/admin` edit. The one hard-coded model is the **embedding** model
@@ -146,8 +160,11 @@ Natural-language chat over the whole content store.
 - **Writing Ledger:** `public/writing-ledger.html` fetches
   `public/data/writing-ledger.json`; month/year-to-date are recomputed at read
   time (`src/lib/writingPeriod.js`). See `docs/writing-ledger.md`.
-- **Answers** may only link to, or show, URLs that came from retrieved items:
+- **Answers** may only link to, or show, URLs the archive supplied:
   `sanitiseAnswer` (`src/lib/askFormat.js`) runs in the worker and in the UI.
+  Links and images are **separate** allow-lists — a retrieved item's photo is not
+  a valid link target — and the worker passes the roster urls as extra allowed
+  links, so the UI pass needs the same list (`linkable`) or it strips them.
 - **Feedback** (thumbs, reason tags, comment) is written onto the answer's
   `ask_messages` row by `ask_feedback()`, which checks the browser session. The
   admin Conversations page filters and summarises the log and exports rated

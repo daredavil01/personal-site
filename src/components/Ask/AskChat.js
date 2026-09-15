@@ -15,8 +15,11 @@ import { clearThread, loadThread, saveThread } from "./askStorage";
 // same thing in a corner panel, so there is exactly one implementation of the
 // conversation to keep working.
 
-// Scopes retrieval to one kind of content. The values are entity_type values in
-// content_chunks — the RPC already takes a p_types filter.
+// Prefers one kind of content. The values are entity_type values in
+// content_chunks. They no longer scope the search itself: the worker searches
+// everything and re-ranks with these, then says so quietly when a chip found
+// nothing and had to be ignored. A chip that hard-filtered the query returned
+// eight books for "which forts has he trekked?".
 const TYPE_FILTERS = [
   { id: "book", label: "Books" },
   { id: "microblog", label: "Micro posts" },
@@ -105,7 +108,7 @@ const Bubble = ({
         {mine ? (
           turn.content
         ) : (
-          <AnswerBody text={turn.content} sources={turn.sources} />
+          <AnswerBody text={turn.content} sources={turn.sources} linkable={turn.linkable} />
         )}
         {turn.streaming && (
           <span className="inline-block w-1.5 h-3.5 ml-0.5 align-middle bg-current animate-pulse" />
@@ -184,6 +187,12 @@ const Bubble = ({
         </button>
       )}
 
+      {!mine && !turn.streaming && turn.widened && (
+        <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0">
+          {`Searched everything — nothing in ${turn.scope} matched.`}
+        </p>
+      )}
+
       {turn.note && (
         <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-0">
           {turn.note}
@@ -199,6 +208,9 @@ Bubble.propTypes = {
     content: PropTypes.string,
     note: PropTypes.string,
     streaming: PropTypes.bool,
+    widened: PropTypes.bool,
+    scope: PropTypes.string,
+    linkable: PropTypes.arrayOf(PropTypes.string),
     followups: PropTypes.arrayOf(PropTypes.string),
     browse: PropTypes.arrayOf(PropTypes.shape({})),
     sources: PropTypes.arrayOf(PropTypes.shape({})),
@@ -264,7 +276,10 @@ const AskChat = ({ compact }) => {
     abortRef.current = null;
   };
 
-  const send = async (text, { replaceFailed = false } = {}) => {
+  // `scope` overrides the chips for this one question — `setTypes` does not
+  // reach the `types` this closure captured, so a follow-up has to say so here.
+  const send = async (text, { replaceFailed = false, scope } = {}) => {
+    const askTypes = scope ?? types;
     const message = (text ?? draft).trim();
     if (!message || pending || blocked) return;
     setDraft("");
@@ -301,12 +316,15 @@ const AskChat = ({ compact }) => {
       const done = await askQuestionStream({
         message,
         history,
-        types,
+        types: askTypes,
         turnstileToken,
         signal: controller.signal,
-        onSources: ({ sources, browse }) => patchLast(() => ({
-          sources: sources || [],
-          browse: browse || [],
+        onSources: (event) => patchLast(() => ({
+          sources: event.sources || [],
+          browse: event.browse || [],
+          linkable: event.linkable || [],
+          widened: !!event.widened,
+          scope: event.scope || "",
         })),
         onDelta: (chunk) => patchLast((last) => ({ content: last.content + chunk })),
       });
@@ -322,6 +340,9 @@ const AskChat = ({ compact }) => {
         content: done.answer ?? last.content,
         media: done.media || [],
         messageId: done.messageId || null,
+        linkable: done.linkable || last.linkable || [],
+        widened: done.widened ?? last.widened ?? false,
+        scope: done.scope || last.scope || "",
       }));
     } catch (err) {
       if (err.name === "AbortError") {
@@ -347,6 +368,13 @@ const AskChat = ({ compact }) => {
     }
   };
   sendRef.current = send;
+
+  // Follow-ups name things the last answer already showed. Leaving a chip on
+  // would scope the search away from exactly what was just offered.
+  const askFollowup = (question) => {
+    setTypes([]);
+    send(question, { scope: [] });
+  };
 
   const retry = (message) => {
     turnstile.refresh();
@@ -381,6 +409,9 @@ const AskChat = ({ compact }) => {
     clearThread();
     setTurns([]);
     setBlocked(null);
+    // The chips used to survive a clear, so the next question was silently
+    // scoped by a filter the reader thought they had just dismissed.
+    setTypes([]);
   };
 
   const toggleType = (id) => setTypes((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]),);
@@ -425,7 +456,7 @@ const AskChat = ({ compact }) => {
             turn={turn}
             question={questionFor(i)}
             colors={colors}
-            onFollowup={send}
+            onFollowup={askFollowup}
             onFeedback={(feedback) => setFeedback(i, feedback)}
             // Only the newest turn can retry: a retry replaces the last pair.
             onRetry={i === turns.length - 1 ? retry : null}

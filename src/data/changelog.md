@@ -9,7 +9,24 @@ patch for fixes and tweaks.
 
 ---
 
-## [v18.1.0] — 2026-09-14
+## [v18.1.0] — 2026-09-15
+
+### Changed
+
+- **/ask content-type chips now re-rank instead of scoping** (`src/lib/askRetrieval.js`, `functions/api/ask.js`, `src/components/Ask/AskChat.js`): the chips were passed to `hybrid_search` as `p_types`, which filtered before ranking, so a narrowed search always returned `match_count` items of that type however unrelated the question — "Which forts has he trekked?" with **Books** on came back with eight books and either a refusal or a fort linked to a book cover. The search now runs unscoped and wide and the chips pick from the result; when fewer than three in-scope items survive the answer comes from everything, with one quiet line saying so. `Clear` resets the chips, and clicking a follow-up clears them too, since follow-ups name things the last answer showed.
+- **Retrieval floor and lighter payload** (`supabase/migrations/0019_ask_retrieval_and_prompt.sql`): `hybrid_search` takes a `min_similarity` cutoff (the new `semantic_floor` setting, editable at `/admin/ask/settings`) and returns `match_score` / `match_kind`. It no longer returns `embedding` or `fts` — 1024 floats and a tsvector per row that no caller read.
+- **Rosters and latest items in the facts card** (`site_facts()`): every book, trek, race, project, deck and photo set as `{t,d,u}`, newest first, plus the latest micro post, blog post, essay and Now entry. Enumeration and recency are not retrievable by embedding — "which forts" never named more than three of twenty, and seven logged questions about the latest micro post all failed.
+- **New system prompt and starter questions** (`ask_settings`, `src/data/askConfig.js`): answers now mirror the question's language, refuse only when the facts *and* the items both lack the answer, and treat the roster as linkable. The starter chips drop the two enumerations that retrieval could not serve and add thematic, personal-best and single-item questions.
+- **Retrieval reads the conversation** (`src/lib/askRetrieval.js`): a short follow-up like "Tell me more about Skills" now searches with the previous question attached instead of on two words. Results are also capped per entity, so one long project can no longer fill every slot.
+- **Steadier answers** (`src/lib/askTiers.js`): generation temperature 0.3 → 0.1. The same question was asked ten times and cited a different set of books each time.
+- **Scoped questions are visible in the log** (`ask_log`, `src/pages/admin/AskConversations.js`): which chips were on is stored on the message, badged on the admin Conversations page and exported with the evals, so a bad answer to a scoped question can be told apart from a bad answer to an open one.
+
+### Fixed
+
+- **An item's photo could be used as a link target** (`src/lib/askFormat.js`): links and images now check against separate allow-lists. One answer rendered "Ghangad Fort" as a link to a book cover.
+- **Stray citations reaching readers** (`functions/api/ask.js`): `[Books]`, `[stats, 6]` and row ids like `[1641]` are dropped; only real item numbers survive.
+- **Nonsense follow-up chips** (`functions/api/ask.js`): `stats`, `site` and `tag` chunks no longer become "Tell me more about Physical Endurance".
+- **Duplicate race-distance labels** (Supabase `sports`): `10K` → `10 Kms` and `21K` → `21 Kms`. The two spellings split the half-marathon count across two keys in the facts block, which is why "how many marathons has he run?" answered differently every time.
 
 ### Changed
 
