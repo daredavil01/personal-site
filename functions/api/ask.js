@@ -659,13 +659,34 @@ export async function onRequestPost(context) {
   });
 }
 
+// Two starter chips that name whatever is newest, so the pool does not go stale
+// as content is added. Built from the facts card the POST path already loads, and
+// skipped in silence when that is the fallback copy and has no roster.
+function rosterQuestions(facts) {
+  const out = [];
+  const newestTrek = facts?.roster?.trek?.[0]?.t;
+  if (newestTrek) out.push({ q: `Tell me about ${newestTrek}`, c: "treks" });
+  if (facts?.roster?.book?.[0]?.t) {
+    out.push({ q: "What did he read most recently?", c: "reading" });
+  }
+  return out;
+}
+
 // A GET is handy for a health check and for the UI to read its own limits
-// before the first question (suggested chips, character counter).
+// before the first question (starter chips, character counter).
 export async function onRequestGet(context) {
   const settings = await loadSettings(context);
+  // The chips are drawn in the browser, not here: it lets the page re-roll
+  // without a refetch, and keeps this response the same for every visitor.
+  const facts = await loadFacts(context).catch(() => null);
+  const pool = Array.isArray(settings.question_pool) ? settings.question_pool : [];
+
   return json({
     enabled: settings.enabled,
     maxMessageChars: settings.max_message_chars,
+    questionPool: pool.length ? [...pool, ...rosterQuestions(facts)] : [],
+    // The fallback when the pool is empty — a bad edit at /admin should cost
+    // rotation, not the chips themselves.
     suggestedQuestions: settings.suggested_questions || [],
     turnstileRequired: settings.turnstile_required,
     turnstileSiteKey: context.env.TURNSTILE_SITE_KEY || null,

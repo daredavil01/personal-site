@@ -10,6 +10,7 @@ import AnswerBody, { MediaStrip } from "./AnswerBody";
 import { hasInlineImage, isExternal } from "../../lib/askFormat";
 import AnswerActions from "./AnswerActions";
 import { clearThread, loadThread, saveThread } from "./askStorage";
+import { pickQuestions } from "../../lib/askQuestions";
 
 // The one chat component. /ask renders it full-page; AskLauncher renders the
 // same thing in a corner panel, so there is exactly one implementation of the
@@ -226,6 +227,9 @@ Bubble.defaultProps = { question: "", onRetry: null, onFeedback: null };
 
 const VERIFY_FAILED = "Could not confirm this browser is not a bot — the check expired or was blocked by an extension.";
 
+// The launcher panel is 420px (AskLauncher.js), the /ask page is full width.
+const CHIP_COUNT = { page: 4, compact: 3 };
+
 const AskChat = ({ compact }) => {
   const [turns, setTurns] = useState(() => loadThread());
   const [draft, setDraft] = useState("");
@@ -233,6 +237,9 @@ const AskChat = ({ compact }) => {
   const [info, setInfo] = useState(null);
   const [blocked, setBlocked] = useState(null);
   const [types, setTypes] = useState([]);
+  // Drawn once per mount, never in render: sampling inline would reshuffle the
+  // chips on every keystroke, under the reader's cursor.
+  const [starters, setStarters] = useState([]);
   const endRef = useRef(null);
   const abortRef = useRef(null);
   const sendRef = useRef(null);
@@ -243,13 +250,26 @@ const AskChat = ({ compact }) => {
   );
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // One draw per page load, from a pool of ~30 across six subjects. A returning
+  // visitor gets a different four, and never four about the same thing.
+  const drawStarters = (i) => {
+    const count = compact ? CHIP_COUNT.compact : CHIP_COUNT.page;
+    const drawn = pickQuestions(i?.questionPool, count);
+    // An empty or unseeded pool falls back to the fixed list rather than to
+    // nothing — a blank empty state reads as a broken page.
+    setStarters(drawn.length ? drawn : (i?.suggestedQuestions || []).slice(0, count));
+  };
+
   useEffect(() => {
     getAskInfo()
       .then((i) => {
         setInfo(i);
+        drawStarters(i);
         if (!i.enabled) setBlocked(i.note || "The second brain is off right now.");
       })
       .catch(() => setInfo({ maxMessageChars: 500, suggestedQuestions: [] }));
+    // Intentionally mount-only: re-running this would redraw the chips while
+    // someone is reading them.
   }, []);
 
   useEffect(() => {
@@ -417,7 +437,6 @@ const AskChat = ({ compact }) => {
   const toggleType = (id) => setTypes((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]),);
 
   const max = info?.maxMessageChars || 500;
-  const suggestions = info?.suggestedQuestions || [];
   // The question each answer belongs to, for its copy / permalink / share row.
   const questionFor = (i) => turns[i - 1]?.content || "";
 
@@ -432,8 +451,8 @@ const AskChat = ({ compact }) => {
               Ask about the books, races, treks, projects and years of short
               posts on this site. Answers link back to the pages they came from.
             </p>
-            <div className="flex flex-wrap gap-2">
-              {suggestions.map((q) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {starters.map((q) => (
                 <button
                   key={q}
                   type="button"
@@ -443,6 +462,17 @@ const AskChat = ({ compact }) => {
                   {q}
                 </button>
               ))}
+              {/* Re-rolls without a reload — "none of these interest me" should
+                  cost a click, not a refresh. */}
+              {starters.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => drawStarters(info)}
+                  className="text-[12px] text-stone-500 dark:text-stone-400 hover:underline px-1"
+                >
+                  Try others ↻
+                </button>
+              )}
             </div>
           </div>
         )}

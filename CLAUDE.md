@@ -134,6 +134,14 @@ Natural-language chat over the whole content store.
 - **UI:** `src/pages/Ask.js` (`/ask`) and `src/components/Ask/AskLauncher.js`
   (site-wide, mounted in `Main.js`), both rendering `AskChat.js`. Local dev
   needs `npm run dev:ask` beside `npm run dev` — Vite proxies `/api` to it.
+- **Starter chips** come from `ask_settings.question_pool` (jsonb `[{q, c}]`,
+  edited at `/admin/ask/settings`), sampled by `src/lib/askQuestions.js`: one
+  question from each of four random categories per page load, four chips on
+  `/ask` and three in the launcher. Stratified rather than shuffled, because a
+  flat draw keeps offering four book questions at once. `GET /api/ask` appends
+  one or two chips built from the facts roster, so they name whatever is newest.
+  An empty pool falls back to `suggested_questions`. Only add a question the
+  archive answers well — a chip that refuses reads as a broken feature.
 - **Conversation log:** `ask_conversations` / `ask_messages`, written by the
   `ask_log()` RPC from `waitUntil()` so it can never slow an answer. Owner-only;
   read and exported at `/admin/ask/conversations`.

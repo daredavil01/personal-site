@@ -13,6 +13,7 @@ patch for fixes and tweaks.
 
 ### Changed
 
+- **Rotating starter questions on /ask** (`src/lib/askQuestions.js`, `supabase/migrations/0020_ask_question_pool.sql`, `src/components/Ask/AskChat.js`): the six fixed chips become a pool of 29 questions tagged by subject — reading, running, treks, writing, work, site — drawn fresh on every page load, one from each of four random categories. Stratified rather than shuffled: a flat draw of a pool weighted towards books keeps offering four book questions at once, and these chips are the only advertisement the archive's breadth gets. Four chips on `/ask`, three in the launcher panel, a "Try others ↻" link to re-roll without a reload, and three Marathi questions in the mix. Two chips are built from the facts roster at request time, so they name the newest trek and read without anyone editing them. The pool is edited at `/admin/ask/settings`; an empty one falls back to the six questions from `0019`.
 - **/ask content-type chips now re-rank instead of scoping** (`src/lib/askRetrieval.js`, `functions/api/ask.js`, `src/components/Ask/AskChat.js`): the chips were passed to `hybrid_search` as `p_types`, which filtered before ranking, so a narrowed search always returned `match_count` items of that type however unrelated the question — "Which forts has he trekked?" with **Books** on came back with eight books and either a refusal or a fort linked to a book cover. The search now runs unscoped and wide and the chips pick from the result; when fewer than three in-scope items survive the answer comes from everything, with one quiet line saying so. `Clear` resets the chips, and clicking a follow-up clears them too, since follow-ups name things the last answer showed.
 - **Retrieval floor and lighter payload** (`supabase/migrations/0019_ask_retrieval_and_prompt.sql`): `hybrid_search` takes a `min_similarity` cutoff (the new `semantic_floor` setting, editable at `/admin/ask/settings`) and returns `match_score` / `match_kind`. It no longer returns `embedding` or `fts` — 1024 floats and a tsvector per row that no caller read.
 - **Rosters and latest items in the facts card** (`site_facts()`): every book, trek, race, project, deck and photo set as `{t,d,u}`, newest first, plus the latest micro post, blog post, essay and Now entry. Enumeration and recency are not retrievable by embedding — "which forts" never named more than three of twenty, and seven logged questions about the latest micro post all failed.
@@ -20,6 +21,10 @@ patch for fixes and tweaks.
 - **Retrieval reads the conversation** (`src/lib/askRetrieval.js`): a short follow-up like "Tell me more about Skills" now searches with the previous question attached instead of on two words. Results are also capped per entity, so one long project can no longer fill every slot.
 - **Steadier answers** (`src/lib/askTiers.js`): generation temperature 0.3 → 0.1. The same question was asked ten times and cited a different set of books each time.
 - **Scoped questions are visible in the log** (`ask_log`, `src/pages/admin/AskConversations.js`): which chips were on is stored on the message, badged on the admin Conversations page and exported with the evals, so a bad answer to a scoped question can be told apart from a bad answer to an open one.
+- **Tag audit** (Supabase `tags`): consolidated 216 tags into 167. Merged typo, spacing and plural variants plus same-meaning groups through `merge_tags` (e.g. `digitalwellbeing` / `digital well-being` → `digital wellbeing`, the travelogue variants → `travel`, the dream tags → `dream`), fixed misspellings (`digital technology`, `nda marathon`), and deleted junk tags (emoji-only, single letters, `no`, `me`, `only me`, `why?`). Marathi tags were kept separate from their English equivalents. Old `/tags/<name>` URLs for merged or renamed tags no longer resolve.
+- **Single-use tag cleanup** (Supabase `tags`): deleted 69 tags that were used only once and were a common English or Marathi word or phrase (e.g. `mind`, `patience`, `घर`, `time is up`), leaving 98 tags. Places, named things and specific topics used once (e.g. `pegasus`, `three.js`, `kailasgad`) were kept.
+- **Tag categories** (Supabase `tags.category`): every tag now has one of eleven categories (Running & Fitness, Travel & Outdoors, Books & Reading, Writing & Blogging, Technology & Data, Digital Life, Society & Ideas, Mind & Life, People & Feelings, Arts & Culture, Personal), which powers the category filter on `/tags`.
+- **Docs + ask index** (`docs/tags.md`): regenerated with `npm run ask:index` so `/ask` chunks carry the new tag names.
 
 ### Fixed
 
@@ -27,13 +32,6 @@ patch for fixes and tweaks.
 - **Stray citations reaching readers** (`functions/api/ask.js`): `[Books]`, `[stats, 6]` and row ids like `[1641]` are dropped; only real item numbers survive.
 - **Nonsense follow-up chips** (`functions/api/ask.js`): `stats`, `site` and `tag` chunks no longer become "Tell me more about Physical Endurance".
 - **Duplicate race-distance labels** (Supabase `sports`): `10K` → `10 Kms` and `21K` → `21 Kms`. The two spellings split the half-marathon count across two keys in the facts block, which is why "how many marathons has he run?" answered differently every time.
-
-### Changed
-
-- **Tag audit** (Supabase `tags`): consolidated 216 tags into 167. Merged typo, spacing and plural variants plus same-meaning groups through `merge_tags` (e.g. `digitalwellbeing` / `digital well-being` → `digital wellbeing`, the travelogue variants → `travel`, the dream tags → `dream`), fixed misspellings (`digital technology`, `nda marathon`), and deleted junk tags (emoji-only, single letters, `no`, `me`, `only me`, `why?`). Marathi tags were kept separate from their English equivalents. Old `/tags/<name>` URLs for merged or renamed tags no longer resolve.
-- **Single-use tag cleanup** (Supabase `tags`): deleted 69 tags that were used only once and were a common English or Marathi word or phrase (e.g. `mind`, `patience`, `घर`, `time is up`), leaving 98 tags. Places, named things and specific topics used once (e.g. `pegasus`, `three.js`, `kailasgad`) were kept.
-- **Tag categories** (Supabase `tags.category`): every tag now has one of eleven categories (Running & Fitness, Travel & Outdoors, Books & Reading, Writing & Blogging, Technology & Data, Digital Life, Society & Ideas, Mind & Life, People & Feelings, Arts & Culture, Personal), which powers the category filter on `/tags`.
-- **Docs + ask index** (`docs/tags.md`): regenerated with `npm run ask:index` so `/ask` chunks carry the new tag names.
 
 ---
 

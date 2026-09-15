@@ -143,6 +143,8 @@ A micro-post is a passing thought from years ago, sometimes a reblog of someone 
   disabled_note: "The second brain is switched off right now.",
   quota_note:
     "The second brain has answered its quota of questions for today — it wakes up again at midnight UTC.",
+  // Shown only when question_pool is empty — a bad edit at /admin degrades to
+  // six good questions rather than none.
   suggested_questions: [
     "What kind of books does he read?",
     "What is he working on right now?",
@@ -151,9 +153,62 @@ A micro-post is a passing thought from years ago, sometimes a reblog of someone 
     "What does he think about privacy and surveillance?",
     "Tell me about the 50K ultra at Lonavala",
   ],
+  question_pool: [],
   context_doc: "",
   turnstile_required: false,
 };
+
+// The subject axis for starter questions. Four chips are drawn per page load,
+// one from each of four random categories — a flat shuffle of the pool below
+// would regularly offer four reading questions at once, and the chips are the
+// only advertisement the archive's breadth gets.
+export const QUESTION_CATEGORIES = [
+  "reading", "running", "treks", "writing", "work", "site",
+];
+
+// Every question here is a shape the conversation log shows the archive answers
+// well: thematic, single-item, facts-backed, or roster-backed. Superlatives the
+// data does not record ("his favourite book") are deliberately absent — they
+// refuse, and a chip that refuses reads as a broken feature.
+//
+// The live pool is ask_settings.question_pool, edited at /admin/ask/settings;
+// migration 0020 seeds it from this exact list.
+export const DEFAULT_QUESTION_POOL = [
+  { q: "What kind of books does he read?", c: "reading" },
+  { q: "What has he read in Marathi?", c: "reading" },
+  { q: "What does he read about technology?", c: "reading" },
+  { q: "Has he written reviews of the books he's read?", c: "reading" },
+  { q: "मराठी पुस्तकांविषयी सांग.", c: "reading" },
+
+  { q: "What are his personal bests across distances?", c: "running" },
+  { q: "Tell me about the 50K ultra at Lonavala", c: "running" },
+  { q: "How far has he run in total?", c: "running" },
+  { q: "What has running taught him?", c: "running" },
+  { q: "How does he train for a marathon?", c: "running" },
+  { q: "त्याने पळालेल्या मॅरेथॉनविषयी सांग.", c: "running" },
+
+  { q: "Which forts has he trekked?", c: "treks" },
+  { q: "Which of his treks was the hardest?", c: "treks" },
+  { q: "Which trek would he recommend to a beginner?", c: "treks" },
+  { q: "Tell me about the Harishchandragad trek", c: "treks" },
+  { q: "त्याने केलेल्या ट्रेकबद्दल माहिती दे.", c: "treks" },
+
+  { q: "What is the 100 Days to Offload challenge?", c: "writing" },
+  { q: "What does he write about most?", c: "writing" },
+  { q: "What does he think about privacy and surveillance?", c: "writing" },
+  { q: "What does he think about AI and writing?", c: "writing" },
+  { q: "What does he think about digital wellbeing?", c: "writing" },
+
+  { q: "What is he working on right now?", c: "work" },
+  { q: "What does he do for a living?", c: "work" },
+  { q: "Tell me about the E20 data story", c: "work" },
+  { q: "What are his strongest skills?", c: "work" },
+  { q: "Which projects has he built?", c: "work" },
+
+  { q: "How was this second brain built?", c: "site" },
+  { q: "What is this site, in one minute?", c: "site" },
+  { q: "Which themes connect his books, runs and writing?", c: "site" },
+];
 
 export const ASK_PROVIDERS = ["gemini", "workers-ai"];
 

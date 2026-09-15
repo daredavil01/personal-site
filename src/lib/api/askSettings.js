@@ -26,6 +26,7 @@ function fromRow(r) {
     disabledNote: r.disabled_note ?? "",
     quotaNote: r.quota_note ?? "",
     suggestedQuestions: r.suggested_questions ?? [],
+    questionPool: Array.isArray(r.question_pool) ? r.question_pool : [],
     contextDoc: r.context_doc ?? "",
     contextDocUpdatedAt: r.context_doc_updated_at ?? null,
   };
@@ -51,6 +52,13 @@ function toRow(v) {
     disabled_note: v.disabledNote ?? "",
     quota_note: v.quotaNote ?? "",
     suggested_questions: v.suggestedQuestions ?? [],
+    // Rows with no question text are half-finished edits, not content. An
+    // unset category is kept as "" rather than guessed at: pickQuestions treats
+    // uncategorised questions as their own group, which beats filing them under
+    // a subject they are not about.
+    question_pool: (Array.isArray(v.questionPool) ? v.questionPool : [])
+      .filter((row) => row?.q?.trim())
+      .map((row) => ({ q: row.q.trim(), c: row.c || "" })),
   };
 }
 

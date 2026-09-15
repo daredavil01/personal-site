@@ -5,7 +5,7 @@ import {
   updateAskSettings,
   getAskUsage,
 } from "../../lib/api/askSettings";
-import { ASK_PROVIDERS } from "../../data/askConfig";
+import { ASK_PROVIDERS, QUESTION_CATEGORIES } from "../../data/askConfig";
 import PageHeader from "./ui/PageHeader";
 import Card from "./ui/Card";
 import Field from "./ui/Field";
@@ -16,6 +16,7 @@ import { useToast } from "./ui/ToastContext";
 import useUnsavedGuard from "./ui/useUnsavedGuard";
 import ConfirmDialog from "./ui/ConfirmDialog";
 import { hairline, mutedText, surface } from "./ui/tokens";
+import { RepeatableRows } from "./now/SectionEditors";
 
 const SWITCHES = [
   { name: "enabled", label: "Second brain enabled", type: "boolean" },
@@ -45,6 +46,16 @@ const RETRIEVAL = [
     hint: "0–1 similarity. Raise it if answers cite loosely related items; lower it if good questions come back empty",
   },
 ];
+
+// One starter chip. `c` is the subject the draw stratifies by, so a question
+// filed under the wrong category quietly skews what visitors are offered.
+const QUESTION_POOL_SPEC = {
+  label: "question",
+  fields: [
+    { name: "q", label: "Question", type: "text", full: true },
+    { name: "c", label: "Category", type: "select", options: QUESTION_CATEGORIES },
+  ],
+};
 
 const COPY = [
   {
@@ -252,7 +263,22 @@ const AskSettingsEditor = () => {
               <FormField field={field} value={form[field.name]} onChange={onField} />
             </Field>
           ))}
-          <Field label="Suggested questions" hint="Shown as chips on the empty /ask page" span="full">
+          <Field
+            label="Question pool"
+            hint="Four chips are drawn per page load, one from each of four random categories — so the category matters as much as the wording"
+            span="full"
+          >
+            <RepeatableRows
+              spec={QUESTION_POOL_SPEC}
+              value={form.questionPool}
+              onChange={(rows) => onField("questionPool", rows)}
+            />
+          </Field>
+          <Field
+            label="Fallback questions"
+            hint="Shown only when the pool above is empty"
+            span="full"
+          >
             <FormField
               field={{ name: "suggestedQuestions", type: "stringList" }}
               value={form.suggestedQuestions}
