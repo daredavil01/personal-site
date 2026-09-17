@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T23:11:41.602Z",
+  "generatedAt": "2026-09-17T22:59:48.177Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
@@ -32,14 +32,14 @@
     "activeMonths": 34
   },
   "currentPeriod": {
-    "asOf": "2026-09-17",
+    "asOf": "2026-09-18",
     "monthToDate": {
       "month": "2026-09",
       "label": "September 2026",
       "posts": 5,
       "words": 6555,
-      "daysElapsed": 17,
-      "wordsPerDay": 386,
+      "daysElapsed": 18,
+      "wordsPerDay": 364,
       "previousMonth": {
         "month": "2026-08",
         "posts": 6,
@@ -51,13 +51,13 @@
       "year": "2026",
       "posts": 61,
       "words": 67258,
-      "daysElapsed": 260,
-      "wordsPerDay": 259,
+      "daysElapsed": 261,
+      "wordsPerDay": 258,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7827,
-        "throughDate": "2025-09-17"
+        "throughDate": "2025-09-18"
       },
       "changeVsPriorYear": 759.3
     }
@@ -3829,6 +3829,13 @@
       "blogId": 61,
       "title": "The Second Brain: Decoding the complex anatomy of this digital self!",
       "url": "https://sankettambare.substack.com/p/decoding-the-second-brain",
+      "note": "Row in `blogs` matches no post on either platform."
+    },
+    {
+      "kind": "unmatched_blogs_row",
+      "blogId": 62,
+      "title": "Patience in the game of uncertainty!",
+      "url": "https://sankettambare.substack.com/p/patience-in-the-game-of-uncertainty",
       "note": "Row in `blogs` matches no post on either platform."
     }
   ]
