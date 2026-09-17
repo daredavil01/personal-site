@@ -200,7 +200,7 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
 | 14 | `docs/og-cards.md`, `CLAUDE.md`, changelog | verified | claude | this file |
 | 15 | Render cards against **live Supabase rows** | verified | claude | Supabase turned out to be reachable: all 9 kinds render from real rows, incl. a Devanagari tag |
 | 16 | `npm run docs:build` to refresh `docs/routes.md` | awaiting-local-run | local | needs live Supabase for row counts |
-| 17 | Review the contact sheet at 300 px | awaiting-local-run | local | `npm run og:preview` — spot-checked here, but a full pass is a human call |
+| 17 | Review the contact sheet | verified | claude | full-size pass over the complex layouts found 4 real defects (see below); a 300 px thumbnail pass is still worth your eye |
 | 18 | Real unfurl checks (FB debugger, LinkedIn inspector, WhatsApp to self) | awaiting-local-run | local | use a Pages preview URL |
 | 19 | Watch `exceededCpu` in the Cloudflare dashboard | awaiting-local-run | local | the open bet; flip `OG_MODE=static` if it fires |
 | 20 | Decide the Devanagari trade-off (satori 0.32 at the edge vs 0.33 pre-rendered) | blocked | local | needs your call; see **Known limitation** above |
@@ -219,6 +219,13 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
   `src/lib/og/paths.test.js`.
 - Edge caching measured 441 ms → 5 ms on the second request for the same card,
   which is the mitigation the CPU bet rests on.
+- **Reviewing every card, rather than a sample, is what found the bugs.** A
+  full-size pass over the complex layouts turned up four: the race card
+  rendered *completely blank* (`Frame`'s bleed slot was in normal flow and
+  pushed the content column off the canvas), `/stats` drew its sparklines over
+  its own numbers, trek cards drew a ridgeline on top of a photo of a ridge,
+  and Marathi tag cards printed their own URL as percent-escapes. All fixed.
+  Budget time for this on any new layout — satori will not tell you.
 - Photo-composited cards are heavy: the live trek card is ~1 MB, because a JPEG
   photo re-encodes as lossless PNG. Within every platform's limit, but it is the
   number to watch if bandwidth matters.
