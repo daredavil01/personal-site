@@ -1,11 +1,10 @@
 // Renders a card: satori lays out the element tree into SVG, then a rasteriser
 // turns that into PNG bytes.
 //
-// `satori` and `rasterise` are INJECTED rather than imported. That is what lets
-// the same layouts serve the Worker (resvg compiled from a bundled WASM module)
-// and `npm run og:preview` (the same WASM, instantiated under Node), and it is
-// the seam a pre-render build step would plug into if on-demand rendering ever
-// proves too expensive. No layout file imports a renderer.
+// `satori` and `rasterise` are INJECTED rather than imported, so no layout file
+// and nothing under src/ pulls in a renderer: only scripts/og-preview.mjs does,
+// which is what keeps satori and resvg out of the browser bundle and out of the
+// Worker entirely.
 
 import { CARD } from "./tokens.js";
 

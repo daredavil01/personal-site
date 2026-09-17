@@ -1,13 +1,9 @@
-// Design tokens for share cards. Pure data — no imports — so the Worker, the
-// preview script and Jest all read the same values.
+// Design tokens for share cards. Pure data — no imports — so the generator and
+// Jest read the same values.
 //
 // The palette is lifted from `public/images/logo.svg` so a card is recognisably
 // this site: a near-black ground, a lifted panel, and the violet → teal → blue
 // ribbon that runs through the mark.
-
-// Bump when a layout changes shape. It is part of the cache key, so bumping it
-// is what makes already-cached cards re-render (see functions/api/og/[[path]].js).
-export const LAYOUT_VERSION = 1;
 
 // Facebook/X/LinkedIn/Slack/WhatsApp all crop to ~1.91:1. 1200x630 is the size
 // they all accept without re-cropping.
@@ -106,4 +102,4 @@ export const TYPE = {
 
 export const accentFor = (key) => ACCENTS[key] || COLORS.violetLight;
 
-export default { LAYOUT_VERSION, CARD, SAFE, COLORS, RIBBON, ACCENTS, FONTS, TITLE_STEPS, TYPE, accentFor };
+export default { CARD, SAFE, COLORS, RIBBON, ACCENTS, FONTS, TITLE_STEPS, TYPE, accentFor };

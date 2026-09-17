@@ -6,18 +6,25 @@
 // `hashString`, the same FNV-1a used by the micro-blog pinboard. The same fort
 // list always draws the same ridge.
 
-import { hashString, seededRandom } from "../../generativeArt.js";
+import { hashString, seededRandom, colorForTag } from "../../generativeArt.js";
 import { COLORS, RIBBON } from "../tokens.js";
 
 const esc = (value) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-// --- /books, /books/:id -----------------------------------------------------
+// --- /books ------------------------------------------------------------------
 
 // Vertical book spines. Widths and heights are hashed per title, so the shelf
 // is stable for a given library and looks like a shelf rather than a bar chart.
 export const spineStack = (titles, { width = 560, height = 420, colors = [] } = {}) => {
-  const list = (titles || []).slice(0, 14);
-  if (!list.length) return "";
+  const given = (titles || []).map(String).filter(Boolean);
+  if (!given.length) return "";
+  // A shelf has to read as a shelf: /stats gives eight top genres, and eight
+  // bars this wide read as a column chart instead. Expand a short list the way
+  // `ridgeline` does — hash the name with an index — so the shelf is still
+  // derived from this library and still deterministic.
+  const list = given.length >= 12
+    ? given.slice(0, 16)
+    : Array.from({ length: 15 }, (_, i) => `${given[i % given.length]}-${i}`);
   const gap = 7;
   const slot = (width - gap * (list.length - 1)) / list.length;
   const shelfY = height - 8;
@@ -46,23 +53,7 @@ export const spineStack = (titles, { width = 560, height = 420, colors = [] } = 
   ].join("");
 };
 
-// A single generated spine/plate for one book, hue derived from its own title.
-export const bookPlate = (title, { width = 300, height = 420, accent = COLORS.amber } = {}) => {
-  const rnd = seededRandom(hashString(String(title || "book")));
-  const bands = Array.from({ length: 3 }, (_, i) => {
-    const y = height * (0.26 + i * 0.2) + rnd() * 18;
-    return `<rect x="0" y="${y.toFixed(1)}" width="${width}" height="3" fill="${COLORS.text}" opacity="0.16"/>`;
-  }).join("");
-  return [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
-    `<rect x="0" y="0" width="${width}" height="${height}" rx="6" fill="${accent}" opacity="0.9"/>`,
-    `<rect x="0" y="0" width="16" height="${height}" fill="${COLORS.ink}" opacity="0.28"/>`,
-    bands,
-    `</svg>`,
-  ].join("");
-};
-
-// --- /treks, /treks/:id -----------------------------------------------------
+// --- /treks ------------------------------------------------------------------
 
 // A summit ridge. Peak heights are hashed from the fort names, so the skyline
 // is this trek log's skyline and not a generic mountain.
@@ -141,8 +132,13 @@ export const progressBar = (pct, { width = 900, height = 48, accent = COLORS.ora
 
 // --- /tags ------------------------------------------------------------------
 
-// Swatch cloud. Sizes come from each tag's item count, colours from the tag's
-// own stored colour, so the cloud is the tag vocabulary's actual palette.
+// Swatch cloud. Sizes come from each tag's item count, colours from
+// `colorForTag` — the same resolution /tags and the micro-blog pinboard use, so
+// the cloud is the vocabulary's actual palette.
+//
+// It has to go through colorForTag rather than read `tag.color`: almost no tag
+// has a colour stored, so taking `color || violet` painted all 44 swatches one
+// shade and the card lost the only thing it was drawing.
 export const swatchCloud = (tags, { width = 1072, height = 300 } = {}) => {
   const list = (tags || []).slice(0, 44);
   if (!list.length) return "";
@@ -150,24 +146,29 @@ export const swatchCloud = (tags, { width = 1072, height = 300 } = {}) => {
   let x = 0;
   let y = 0;
   let rowH = 0;
-  const cells = list.map((tag) => {
+  let row = 0;
+  const placed = [];
+  list.forEach((tag) => {
     const weight = (Number(tag.total) || 1) / max;
     const size = 26 + Math.round(weight * 64);
-    if (x + size > width) { x = 0; y += rowH + 12; rowH = 0; }
-    const cell = `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="8" fill="${tag.color || COLORS.violetLight}" opacity="0.88"/>`;
+    if (x + size > width) { x = 0; y += rowH + 12; rowH = 0; row += 1; }
+    if (y + size <= height) {
+      placed.push({
+        row,
+        svg: `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="8" fill="${colorForTag(tag.name, tag.color)}" opacity="0.88"/>`,
+      });
+    }
     x += size + 12;
     rowH = Math.max(rowH, size);
-    return y + size <= height ? cell : "";
-  }).join("");
+  });
+  // A last row holding one or two swatches reads as a stray dot under the
+  // block rather than as part of the cloud, so drop it.
+  const lastRow = placed.length ? placed[placed.length - 1].row : 0;
+  const tail = placed.filter((c) => c.row === lastRow).length;
+  const cells = (tail < 3 && lastRow > 0 ? placed.filter((c) => c.row !== lastRow) : placed)
+    .map((c) => c.svg).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${cells}</svg>`;
 };
-
-// A single tag's hero watermark: an oversized # in the tag's colour.
-export const hashMark = (color, { size = 300 } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100">`
-  + `<g stroke="${color}" stroke-width="9" stroke-linecap="round" opacity="0.55">`
-  + `<line x1="34" y1="12" x2="26" y2="88"/><line x1="66" y1="12" x2="58" y2="88"/>`
-  + `<line x1="14" y1="36" x2="88" y2="36"/><line x1="12" y1="64" x2="86" y2="64"/>`
-  + `</g></svg>`;
 
 // --- /mindmap, /interactive-me ---------------------------------------------
 
@@ -281,7 +282,7 @@ export const timelineRail = (count, { width = 60, height = 380, accent = COLORS.
   ].join("");
 };
 
-// --- /ask, /ask/s/:token ----------------------------------------------------
+// --- /ask --------------------------------------------------------------------
 
 // Two chat bubbles. `lines` sets how many answer lines to suggest.
 export const chatBubbles = ({ width = 1000, height = 300, accent = COLORS.cyan, lines = 3 } = {}) => {
@@ -309,16 +310,5 @@ export const versionStack = ({ width = 420, height = 260, accent = COLORS.textFa
   }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${rows}</svg>`;
 };
-
-// --- /projects/:id ----------------------------------------------------------
-
-// Browser chrome to frame a project screenshot.
-export const browserChrome = ({ width = 640, height = 400, accent = COLORS.blueDeep } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
-  + `<rect x="0" y="0" width="${width}" height="${height}" rx="14" fill="none" stroke="${accent}" stroke-width="3"/>`
-  + `<line x1="0" y1="40" x2="${width}" y2="40" stroke="${accent}" stroke-width="3"/>`
-  + `<circle cx="26" cy="20" r="7" fill="${COLORS.red}" opacity="0.8"/>`
-  + `<circle cx="52" cy="20" r="7" fill="${COLORS.amber}" opacity="0.8"/>`
-  + `<circle cx="78" cy="20" r="7" fill="${COLORS.teal}" opacity="0.8"/>`
-  + `</svg>`;
 
 export { esc };

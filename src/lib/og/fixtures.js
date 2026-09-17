@@ -1,97 +1,10 @@
-// Representative rows for every card kind, shared by `npm run og:preview` and
-// the Jest layout tests so both exercise the same shapes.
+// A stats payload for rendering cards offline.
 //
-// These are deliberately awkward: a long Marathi title, a missing photo, an
-// absent description, a 260-character micro-post. A fixture that renders
-// prettily tells you nothing — these are here to catch a title that overflows
-// and a Devanagari conjunct that silently fails to shape.
+// `npm run og:fallbacks` normally pulls the real snapshot from the live
+// /api/stats so the committed cards carry true numbers. This stands in when
+// that is unreachable, and it is what the Jest layout tests use, so a card is
+// always exercised against plausible figures rather than empty ones.
 
-export const ENTITY_FIXTURES = {
-  book: {
-    id: 12,
-    title: "व्यक्ती आणि वल्ली",
-    author: "पु. ल. देशपांडे",
-    category: "Marathi Literature",
-    language: "Marathi",
-    year: 1966,
-    description: "Character sketches that turned ordinary Pune neighbours into permanent residents of Marathi memory.",
-    tag_names: ["मराठी", "humour", "classics"],
-  },
-  blog: {
-    id: 48,
-    blog_title: "Why I stopped optimising my morning routine",
-    blog_description: "Six months of habit stacking, and the one change that actually held.",
-    blog_date: "2026-03-14",
-    blog_platform: "Substack",
-    language: "English",
-    tag_names: ["100_days_to_offload", "habits", "writing"],
-  },
-  sport: {
-    id: 9,
-    title: "Tata Mumbai Marathon",
-    date: "January 21, 2026",
-    place: "Mumbai",
-    distance: "42 Kms",
-    time: "04:38:12",
-    bib_number: "T14882",
-    slide_images: [],
-  },
-  trek: {
-    id: 3,
-    fort_name: "Harishchandragad",
-    trek_time: "7 Hrs",
-    endurance_level: "Hard",
-    date: "17-02-2019",
-    slide_images: [],
-  },
-  project: {
-    id: 5,
-    title: "Wanderer's Atlas",
-    subtitle: "An interactive globe of every trek and race, built on three.js",
-    description: "A WebGL globe that plots a decade of routes and lets you fly between them.",
-    status: "Live",
-    tech_stack: ["React", "three.js", "Supabase", "Cloudflare"],
-    image: null,
-    slide_images: [],
-  },
-  presentation: {
-    id: 2,
-    title: "Reading 100 books and what it did to my attention span",
-    description: "A talk given at a local meetup, built as an HTML deck.",
-    date: "2026-05-02",
-    tag_names: ["reading", "talks"],
-  },
-  microblog: {
-    id: 1487,
-    title: null,
-    text: "The fort was fogged in by the time we reached the plateau, so we sat with tea and waited. Half an hour later the whole Konkan opened up underneath us, and nobody said anything for a while.",
-    date: "2019-08-11",
-    post_type: "text",
-    source: "tumblr",
-    image_url: null,
-    tag_names: ["treks", "monsoon"],
-  },
-  tag: {
-    id: 42,
-    name: "मराठी",
-    display_name: "मराठी",
-    description: "Everything written in or about Marathi — books, posts and translations.",
-    category: "language",
-    color: "#f97316",
-    counts: { book: 41, microblog: 18, blog: 6 },
-    total: 65,
-  },
-  "ask-share": {
-    token: "a1b2c3d4",
-    title: "Which forts has he trekked in the monsoon, and which one was hardest?",
-    summary: "Eight monsoon treks, with Harishchandragad the hardest by endurance grade.",
-    turn_count: 4,
-    source_count: 7,
-  },
-};
-
-// A stats payload shaped like `GET /api/stats`, with enough filled in that
-// every fixed-page card has something real to render.
 export const STATS_FIXTURE = {
   version: 1,
   stats: {
@@ -149,4 +62,4 @@ export const STATS_FIXTURE = {
   ],
 };
 
-export default { ENTITY_FIXTURES, STATS_FIXTURE };
+export default STATS_FIXTURE;

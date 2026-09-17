@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import {
   SITE_URL, PAGE_META, DEFAULT_META, OG_IMAGE, composeTitle,
 } from "../../data/pageMeta";
-import { ogCardUrl } from "../../lib/og/paths";
+import { isCardImage } from "../../lib/og/paths";
 
 // The single Helmet block for every shell (§4.3). Extracted from layouts/
 // Main.js so the classic shell and the atlas RegionShell consume the exact
@@ -27,14 +27,13 @@ const PageMeta = (props) => {
   const title = props.title || pageMeta.title;
   const description = props.description || pageMeta.description;
   const canonicalUrl = `${SITE_URL}${pathKey === "/" ? "" : pathKey}`;
-  // A fixed route renders its card on demand from its ogSlug; a detail page
-  // passes the card URL down as `image`. Either way `pageMeta.image` is the
-  // committed fallback, so there is always a real 1200x630 image.
-  const ogImage = props.image
-    || (pageMeta.ogSlug
-      ? ogCardUrl({ kind: "page", id: pageMeta.ogSlug, fallbackSlug: pageMeta.ogSlug, siteUrl: SITE_URL })
-      : pageMeta.image);
+  // A fixed route's card is `pageMeta.image`, a committed public/og/*.png. A
+  // detail page passes `image` down: the row's own photo when it has one, and
+  // its section's card when it does not (each build*Meta falls back for it).
+  const ogImage = props.image || pageMeta.image;
   const imageAlt = props.imageAlt || pageMeta.imageAlt || description;
+  // Declared only for our own 1200x630 cards — see functions/_middleware.js.
+  const sized = isCardImage(ogImage);
   const ogType = props.ogType || pageMeta.type || "website";
   const ogTitle = composeTitle(title);
 
@@ -53,8 +52,8 @@ const PageMeta = (props) => {
       <meta property="og:title" content={ogTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:image:width" content={String(OG_IMAGE.width)} />
-      <meta property="og:image:height" content={String(OG_IMAGE.height)} />
+      {sized && <meta property="og:image:width" content={String(OG_IMAGE.width)} />}
+      {sized && <meta property="og:image:height" content={String(OG_IMAGE.height)} />}
       <meta property="og:image:alt" content={imageAlt} />
       {props.publishedTime && <meta property="article:published_time" content={props.publishedTime} />}
       <meta name="twitter:card" content="summary_large_image" />

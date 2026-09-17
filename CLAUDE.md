@@ -95,9 +95,17 @@ outside them survives. See `docs/README.md`.
 
 ## Per-Route Meta and OG Cards
 
-**Every route carries its own 1200×630 share card. A new route is not shippable
-until it does** — a route that unfurls as a generic logo is a bug, and
+**Every route unfurls with a real 1200×630 image, and a new route is not
+shippable until it does** — a route that unfurls as a generic logo is a bug, and
 `src/data/routeManifest.test.js` fails the build if one ships.
+
+Two kinds of image, and **nothing renders at request time**:
+
+- **A fixed route** advertises its own generated card, committed to
+  `public/og/<slug>.png`.
+- **A detail route** advertises **the row's own photo** when it has one (treks,
+  races, projects, photo micro-posts) and its section's committed card when it
+  does not (books, blogs, decks, tags, shares — none of which have an image).
 
 Three files move together when you add a route to `src/App.js`:
 
@@ -107,44 +115,51 @@ Three files move together when you add a route to `src/App.js`:
    this list fails. `docs/routes.md` is generated from it.
 2. **`src/data/pageMeta.js`** — `title`, `description`, `image`, `imageAlt`,
    `ogSlug` and `type` for a fixed route; a `build<Thing>Meta` builder for a
-   parameterised one. **This module must stay import-free** (no imports, no
-   `process.env`, plain literals) because esbuild bundles it into the Worker.
-   It is read by `src/components/Template/PageMeta.js` (client) *and*
-   `functions/_middleware.js` (crawlers) — never add a tag to one without the
-   other. `og:site_name` belongs to neither: `index.html` carries it globally.
-3. **The card.** Add a layout in `src/lib/og/layouts/`, register the kind in
-   `src/lib/og/registry.js`, then `npm run og:fallbacks` and commit the
-   resulting `public/og/<slug>.png`.
+   parameterised one, whose `image` argument is the row's photo and whose
+   fallback is the section card. **This module must stay import-free** (no
+   imports, no `process.env`, plain literals) because esbuild bundles it into
+   the Worker. It is read by `src/components/Template/PageMeta.js` (client)
+   *and* `functions/_middleware.js` (crawlers) — never add a tag to one without
+   the other. `og:site_name` belongs to neither: `index.html` carries it
+   globally.
+3. **The card.** Add a layout to `FIGURES` in `src/lib/og/layouts/page.js`, its
+   slug to `PAGE_SLUGS` in `src/lib/og/model.js`, then `npm run og:fallbacks`
+   and commit the resulting `public/og/<slug>.png`.
 
-**Each section gets its own layout, not a shared template** — the card should be
+**Each section gets its own figure, not a shared template** — the card should be
 recognisable as that section before the text is readable. Cards must survive a
 WhatsApp thumbnail (~300 px): headline ≤ 6 words at ≥ 64 px, at most three
 numbers, one accent colour, photos duotoned. Read stats from `computeSiteStats`,
-colours from `colorForTag`, art from `postArt` — never recompute. A stat with no
-value is **omitted**, never rendered as `0`.
+colours from `colorForTag`, art from `postArt` — never recompute, and never
+hardcode a number into a figure. A stat with no value is **omitted**, never
+rendered as `0`; a figure with no data renders **nothing**, never a placeholder.
 
 Layout code lives in `src/lib/og/`, **not** under `functions/` (Pages routes
 every file there), and contains **no JSX and no React** — satori trees are built
-with the `h()` hyperscript in `src/lib/og/h.js`, because the Pages Functions
-bundler does not transform JSX.
+with the `h()` hyperscript in `src/lib/og/h.js`.
 
-**Cards render on demand** at `/api/og/<kind>/<id>.png` and are edge-cached for
-a day. Two things to know before touching that:
+Four things to know before touching this:
 
-- **Workers Free allows 10 ms CPU per request and a render takes ~436 ms**, so
-  this may return error 1102 in production. `wrangler pages dev` does not
-  enforce the limit, so local success proves nothing. `OG_MODE=static` in the
-  Pages environment is the one-variable retreat to the committed cards.
-- **satori is pinned to 0.32.0 on purpose.** 0.33+ adds HarfBuzz (correct
-  Devanagari conjuncts) but cannot run on Workers at all. The cost is that
-  Marathi conjuncts render wrong. Do not upgrade satori without reading
-  `docs/og-cards.md`.
+- **Do not move rendering back to the edge.** It was there, on demand at
+  `/api/og/…`; Workers Free allows 10 ms CPU per request and a render costs
+  ~400 ms, so production returned 1102 and links unfurled with **no image at
+  all**. `wrangler pages dev` does not enforce the limit, so local success
+  proves nothing. satori and resvg are devDependencies for that reason.
+- **The numbers are baked in and go stale.** Re-run `npm run og:fallbacks`
+  after content moves, the way `npm run blogs:wordcount` is re-run. There is no
+  nightly job by choice.
+- **resvg cannot decode WebP**, and `/admin` uploads `.webp` whenever a source
+  image has transparency — satori embeds it and resvg silently draws nothing.
+  The generator only inlines `image/(jpeg|png|gif)`.
+- **satori is pinned to 0.32.0.** 0.33+ adds HarfBuzz (correct Devanagari
+  conjuncts) but could not run on Workers. That constraint is gone now that
+  nothing renders at the edge, so it is upgradable — read `docs/og-cards.md`
+  first.
 
-Bump `LAYOUT_VERSION` in `src/lib/og/tokens.js` when a layout changes — it is
-part of the edge cache key, so bumping it is what makes cached cards re-render.
-
-`og:image` is always **PNG at 1200×630**. SVG is rejected by WhatsApp, Facebook,
-LinkedIn, X, Slack and iMessage.
+`og:image` is always **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
+LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**
+for our own cards (`isCardImage`), never for a row's photo — asserting a size we
+do not know makes every platform crop it wrong.
 
 ## Second Brain (/ask)
 
@@ -287,8 +302,9 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
 | Route manifest (meta + card guard) | `src/data/routeManifest.js` |
 | OG card layouts / models / figures | `src/lib/og/` |
-| OG card endpoint (on demand) | `functions/api/og/[[path]].js` |
-| Committed fallback cards + card fonts | `public/og/` |
+| OG card generator | `scripts/og-preview.mjs` (`npm run og:fallbacks`) |
+| The committed share cards | `public/og/*.png` |
+| Card fonts (build-time only) | `scripts/og-fonts/` |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Second brain endpoint | `functions/api/ask.js` |

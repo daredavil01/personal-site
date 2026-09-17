@@ -102,23 +102,35 @@ const FIGURES = {
 
   notfound: () => band(lostTrail(CARD.width, 280), CARD.width, 280, { bottom: 84, opacity: 0.9 }),
 
-  "writing-ledger": (m) => inset(sparkBars([9, 14, 7, 18, 11], { width: 380, height: 150, accent: m.accent }), 380, 150, { right: 72, bottom: 150 }),
+  "writing-ledger": (m) => {
+    const months = (m.figure && m.figure.months) || [];
+    if (months.length < 2) return null;
+    return inset(sparkBars(months, { width: 420, height: 150, accent: m.accent }), 420, 150, { right: 72, bottom: 150 });
+  },
 };
 
-// A contact sheet of six duotone tiles for /instagram and /projects.
-const tileGrid = (photos, { accent, columns = 3, tile = 150, gap = 12 }) => h("div", {
-  style: {
-    position: "absolute",
-    right: 64,
-    bottom: 110,
-    display: "flex",
-    flexWrap: "wrap",
-    width: columns * tile + (columns - 1) * gap,
-    gap,
-  },
-}, Array.from({ length: columns * 2 }, (_, i) => PhotoPanel((photos || [])[i] || null, {
-  width: tile, height: tile, accent, opacity: 0.8, scrim: "to top", radius: 8,
-})));
+// A contact sheet of duotone tiles for /instagram and /projects.
+//
+// Only real photos get a tile. Padding the grid out to six drew empty rounded
+// rectangles, which read as a gallery that had failed to load — worse than no
+// figure at all on the two cards whose subject is images.
+const tileGrid = (photos, { accent, columns = 3, tile = 150, gap = 12 }) => {
+  const list = (photos || []).filter(Boolean).slice(0, columns * 2);
+  if (!list.length) return null;
+  return h("div", {
+    style: {
+      position: "absolute",
+      right: 64,
+      bottom: 110,
+      display: "flex",
+      flexWrap: "wrap",
+      width: columns * tile + (columns - 1) * gap,
+      gap,
+    },
+  }, list.map((photo) => PhotoPanel(photo, {
+    width: tile, height: tile, accent, opacity: 0.8, scrim: "to top", radius: 8,
+  })));
+};
 
 FIGURES.instagram = (m) => tileGrid(m.photos, { accent: m.accent });
 FIGURES.projects = (m) => tileGrid(m.photos, { accent: m.accent, columns: 2, tile: 170 });

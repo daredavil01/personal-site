@@ -17,9 +17,9 @@
 //   meta       — for a parameterised route, the `build*Meta` export in
 //                src/data/pageMeta.js that produces its tags
 //   og.strategy
-//     "page"   — a fixed card, rendered from `og.slug` and committed to
-//                public/og/<slug>.png as the fallback
-//     "entity" — a per-item card, rendered from `og.kind` + the row id
+//     "page"   — a generated card, committed to public/og/<og.slug>.png
+//     "entity" — the row's own photo when it has one, else the section card
+//                that CARD_FALLBACKS maps `og.kind` to
 //     "none"   — deliberately no card; must also be `indexable: false`
 //   indexable  — whether the route should carry real, indexable meta
 //

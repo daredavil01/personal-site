@@ -26,6 +26,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { readRoutes } from "./lib/routes.mjs";
 import { manifestFor } from "../src/data/routeManifest.js";
+import { CARD_FALLBACKS } from "../src/lib/og/paths.js";
 import { createClient } from "@supabase/supabase-js";
 import { getStatsPayload } from "./lib/statsSource.mjs";
 
@@ -165,9 +166,11 @@ function buildRoutes() {
   // can never disagree about what routes exist.
   const rows = readRoutes(ROOT).map(({ route, component }) => {
     const entry = manifestFor(route);
+    // Spelled out rather than shown as the strategy name: "entity" does not
+    // say that the row's own photo wins and the section card is the fallback.
     const og = entry
-      ? (entry.og.strategy === "page" && `page · ${entry.og.slug}`)
-        || (entry.og.strategy === "entity" && `entity · ${entry.og.kind}`)
+      ? (entry.og.strategy === "page" && `\`/og/${entry.og.slug}.png\``)
+        || (entry.og.strategy === "entity" && `the row's photo, else \`/og/${CARD_FALLBACKS[entry.og.kind]}.png\``)
         || "none"
       : "— (missing from routeManifest.js)";
     return `| \`${route}\` | ${component} | ${og} |`;

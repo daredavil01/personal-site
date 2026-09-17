@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
-import { SITE_URL, buildBookMeta } from "../data/pageMeta";
-import { ogCardUrl } from "../lib/og/paths";
+import { buildBookMeta } from "../data/pageMeta";
 import { useBooks } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
@@ -63,12 +62,11 @@ const BookPost = () => {
   }
 
   // Shared with the Cloudflare middleware so crawler + client OG tags match.
-  const meta = buildBookMeta({ title: book.title,
+  // No image argument: books have no photo, so this unfurls as the shelf card.
+  const meta = buildBookMeta({
+    title: book.title,
     author: book.author,
     description: book.description,
-    image: ogCardUrl({
-      kind: "book", id: book.id, fallbackSlug: "books", siteUrl: SITE_URL,
-    }),
   });
 
   // The bibliographic line. Most of these come from the metadata backfill and

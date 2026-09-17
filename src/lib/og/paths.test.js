@@ -1,85 +1,49 @@
+import fs from "fs";
+import path from "path";
+
 import {
-  ogCardUrl, ogStaticUrl, ogRenderUrl, ogMode, parseCardPath, storageUrl, firstSlideImage,
-  CARD_FALLBACKS, OG_MODE_STATIC, OG_MODE_DYNAMIC,
+  ogStaticUrl, isCardImage, storageUrl, firstSlideImage, CARD_FALLBACKS,
 } from "./paths.js";
-import { OG_CARDS } from "./registry.js";
+import { PAGE_SLUGS } from "./model.js";
 
 const SITE = "https://sankettambare.in";
+const ROOT = path.resolve(__dirname, "..", "..", "..");
 
-describe("ogCardUrl", () => {
-  it("points at the on-demand endpoint by default", () => {
-    expect(ogCardUrl({ kind: "book", id: 12, fallbackSlug: "books", siteUrl: SITE }))
-      .toBe(`${SITE}/api/og/book/12.png`);
-  });
-
-  // The kill-switch for the Workers Free 10ms CPU limit: one env var and every
-  // og:image reverts to a committed file, with no rendering at all.
-  it("reverts to the committed card when OG_MODE=static", () => {
-    expect(ogCardUrl({
-      kind: "book", id: 12, fallbackSlug: "books", siteUrl: SITE, mode: OG_MODE_STATIC,
-    })).toBe(`${SITE}/og/books.png`);
-  });
-
-  it("falls back when there is no id, rather than building a broken url", () => {
-    expect(ogCardUrl({ kind: "book", id: null, fallbackSlug: "books", siteUrl: SITE }))
-      .toBe(`${SITE}/og/books.png`);
-    expect(ogCardUrl({ kind: "book", id: "", fallbackSlug: "books", siteUrl: SITE }))
-      .toBe(`${SITE}/og/books.png`);
-  });
-
-  it("encodes the id so a non-ASCII value cannot break the path", () => {
-    expect(ogRenderUrl("tag", "मराठी", SITE)).toBe(`${SITE}/api/og/tag/%E0%A4%AE%E0%A4%B0%E0%A4%BE%E0%A4%A0%E0%A5%80.png`);
-  });
-});
-
-describe("ogMode", () => {
-  it("only accepts the exact static value, defaulting to dynamic", () => {
-    expect(ogMode({ OG_MODE: "static" })).toBe(OG_MODE_STATIC);
-    expect(ogMode({ OG_MODE: "dynamic" })).toBe(OG_MODE_DYNAMIC);
-    expect(ogMode({ OG_MODE: "" })).toBe(OG_MODE_DYNAMIC);
-    expect(ogMode({})).toBe(OG_MODE_DYNAMIC);
-    expect(ogMode(undefined)).toBe(OG_MODE_DYNAMIC);
-  });
-});
-
-describe("parseCardPath", () => {
-  it("splits <kind>/<id>.png", () => {
-    expect(parseCardPath("book/12.png")).toEqual({ kind: "book", id: "12" });
-    expect(parseCardPath("/page/books.png")).toEqual({ kind: "page", id: "books" });
-    expect(parseCardPath("ask-share/a1b2c3d4.png")).toEqual({ kind: "ask-share", id: "a1b2c3d4" });
-  });
-
-  it("decodes a percent-encoded id", () => {
-    expect(parseCardPath("tag/%E0%A4%98%E0%A4%B0.png")).toEqual({ kind: "tag", id: "घर" });
-  });
-
-  // The endpoint 404s on anything it cannot parse rather than guessing, so
-  // these must come back null.
-  it("rejects anything that is not exactly one kind and one id", () => {
-    expect(parseCardPath("book/12")).toBeNull();
-    expect(parseCardPath("book.png")).toBeNull();
-    expect(parseCardPath("a/b/c.png")).toBeNull();
-    expect(parseCardPath("")).toBeNull();
-    expect(parseCardPath(null)).toBeNull();
-  });
-
-  it("does not let a traversal attempt through", () => {
-    expect(parseCardPath("book/%2F..%2Fetc.png")).toBeNull();
+describe("ogStaticUrl", () => {
+  it("builds the committed card path", () => {
+    expect(ogStaticUrl("treks", SITE)).toBe(`${SITE}/og/treks.png`);
+    expect(ogStaticUrl("treks")).toBe("/og/treks.png");
   });
 });
 
 describe("CARD_FALLBACKS", () => {
-  // It is duplicated from the registry so functions/_middleware.js need not
-  // import the layout tree on every html request. This is the check that keeps
-  // the copy honest.
-  it("agrees with every registry fallbackSlug", () => {
-    Object.entries(OG_CARDS).forEach(([kind, spec]) => {
-      expect(CARD_FALLBACKS[kind]).toBe(spec.fallbackSlug);
+  // Every kind promises a file. A detail route whose section card was never
+  // generated would unfurl as a 404 image, which no platform shows at all.
+  it("names a generated card slug for every entity kind", () => {
+    Object.entries(CARD_FALLBACKS).forEach(([kind, slug]) => {
+      expect(PAGE_SLUGS).toContain(slug);
+      const file = path.join(ROOT, "public", "og", `${slug}.png`);
+      expect({ kind, exists: fs.existsSync(file) }).toEqual({ kind, exists: true });
     });
   });
+});
 
-  it("covers every registered kind", () => {
-    expect(Object.keys(CARD_FALLBACKS).sort()).toEqual(Object.keys(OG_CARDS).sort());
+describe("isCardImage", () => {
+  // This is what decides whether og:image:width/height are DECLARED. Getting it
+  // wrong in the false-positive direction tells every platform a portrait photo
+  // is 1200x630 and makes them all crop it wrong.
+  it("recognises our own cards", () => {
+    expect(isCardImage(`${SITE}/og/treks.png`)).toBe(true);
+    expect(isCardImage("/og/home.png")).toBe(true);
+  });
+
+  it("rejects a row's own photo", () => {
+    expect(isCardImage("https://db.co/storage/v1/object/public/media/treks/a.jpg")).toBe(false);
+    // A stored file could be called anything, including this.
+    expect(isCardImage("https://db.co/storage/v1/object/public/media/og/a.jpg")).toBe(false);
+    expect(isCardImage(`${SITE}/images/me.jpg`)).toBe(false);
+    expect(isCardImage(null)).toBe(false);
+    expect(isCardImage(undefined)).toBe(false);
   });
 });
 
@@ -93,6 +57,13 @@ describe("storage urls", () => {
     expect(storageUrl(null, "https://db.co")).toBeNull();
   });
 
+  // The detail pages call these with no supabaseUrl, because toStorageImages
+  // has already absolutised a client row. That has to pass through untouched.
+  it("passes a client row's absolute urls through with no base", () => {
+    expect(firstSlideImage([{ url: "https://db.co/x/a.jpg" }])).toBe("https://db.co/x/a.jpg");
+    expect(storageUrl("https://db.co/x/a.jpg")).toBe("https://db.co/x/a.jpg");
+  });
+
   it("reads both slide_images shapes", () => {
     expect(firstSlideImage([{ url: "/a.jpg" }], "https://db.co"))
       .toBe("https://db.co/storage/v1/object/public/media/a.jpg");
@@ -102,28 +73,5 @@ describe("storage urls", () => {
       .toBe("https://db.co/storage/v1/object/public/media/c.jpg");
     expect(firstSlideImage([], "https://db.co")).toBeNull();
     expect(firstSlideImage(null, "https://db.co")).toBeNull();
-  });
-});
-
-describe("ogStaticUrl", () => {
-  it("builds the committed card path", () => {
-    expect(ogStaticUrl("treks", SITE)).toBe(`${SITE}/og/treks.png`);
-    expect(ogStaticUrl("treks")).toBe("/og/treks.png");
-  });
-});
-
-describe("page cards fall back to themselves", () => {
-  // Regression: the middleware passed CARD_FALLBACKS.page ("home") as the
-  // fallback for every fixed route, so under OG_MODE=static /treks advertised
-  // /og/home.png instead of /og/treks.png. A page's fallback is its own card.
-  it("uses the page's own slug, not the generic home card", () => {
-    expect(ogCardUrl({
-      kind: "page", id: "treks", fallbackSlug: "treks", siteUrl: SITE, mode: OG_MODE_STATIC,
-    })).toBe(`${SITE}/og/treks.png`);
-  });
-
-  it("still routes to the endpoint in dynamic mode", () => {
-    expect(ogCardUrl({ kind: "page", id: "treks", fallbackSlug: "treks", siteUrl: SITE }))
-      .toBe(`${SITE}/api/og/page/treks.png`);
   });
 });

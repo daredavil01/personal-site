@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
-import { SITE_URL, buildBlogMeta } from "../data/pageMeta";
-import { ogCardUrl } from "../lib/og/paths";
+import { buildBlogMeta } from "../data/pageMeta";
 import { useBlogs } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
@@ -70,11 +69,9 @@ const BlogPost = () => {
   const visibleTags = (blog.blog_tags || []).filter((t) => t.toLowerCase() !== CHALLENGE_TAG);
 
   // Shared with the Cloudflare middleware so crawler + client OG tags match.
-  const meta = buildBlogMeta({ title: blog.blog_title,
+  const meta = buildBlogMeta({
+    title: blog.blog_title,
     description: blog.blog_description,
-    image: ogCardUrl({
-      kind: "blog", id: blog.id, fallbackSlug: "100-days-to-offload", siteUrl: SITE_URL,
-    }),
   });
 
   return (

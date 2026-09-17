@@ -1,8 +1,10 @@
 # OG card fonts
 
-The faces `src/lib/og/fonts.js` loads when rendering a share card. They are
-**only** used by `functions/api/og/[[path]].js`; nothing in `index.html`
-references them, so page weight is unchanged.
+The faces `src/lib/og/fonts.js` declares. They are read **only** by
+`npm run og:fallbacks` (`scripts/og-preview.mjs`), which renders the cards under
+Node and commits them as PNGs — so these never reach a browser and are not part
+of the site's page weight. That is also why they live here rather than in
+`public/`: nothing serves them.
 
 Satori accepts **TTF, OTF and WOFF — not WOFF2**, which is why these are `.woff`.
 They are Fontsource's per-unicode-subset builds, so no subsetting step is needed.

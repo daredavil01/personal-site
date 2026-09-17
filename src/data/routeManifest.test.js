@@ -11,7 +11,6 @@ import { ROUTE_MANIFEST, OG_EXEMPT_PATHS, manifestFor } from "./routeManifest";
 import * as pageMeta from "./pageMeta";
 import { scrapeRoutes } from "./routeScrape";
 import { PAGE_SLUGS } from "../lib/og/model";
-import { OG_CARDS } from "../lib/og/registry";
 import { CARD_FALLBACKS } from "../lib/og/paths";
 import NAV_ROUTES from "./routes";
 
@@ -55,22 +54,29 @@ describe("every route has a share card", () => {
     });
   });
 
-  // The teeth: a "page" strategy promises a committed 1200x630 PNG exists.
-  it("has a committed fallback PNG for every page card", () => {
-    ROUTE_MANIFEST.filter((e) => e.og.strategy === "page").forEach((entry) => {
-      expect(PAGE_SLUGS).toContain(entry.og.slug);
-      const file = path.join(ROOT, "public", "og", `${entry.og.slug}.png`);
-      expect(fs.existsSync(file)).toBe(true);
-      // A truncated or placeholder file is worse than a missing one, because
-      // nothing would flag it.
-      expect(fs.statSync(file).size).toBeGreaterThan(5000);
-    });
+  // The teeth. Every route's og:image is a file in the repo — a page card
+  // directly, an entity route when the row has no photo of its own — so the
+  // guard is simply that the file is there and is a real PNG.
+  const expectCard = (slug) => {
+    expect(PAGE_SLUGS).toContain(slug);
+    const file = path.join(ROOT, "public", "og", `${slug}.png`);
+    expect({ slug, exists: fs.existsSync(file) }).toEqual({ slug, exists: true });
+    // A truncated or placeholder file is worse than a missing one, because
+    // nothing would flag it.
+    expect(fs.statSync(file).size).toBeGreaterThan(5000);
+  };
+
+  it("has a committed PNG for every page card", () => {
+    ROUTE_MANIFEST
+      .filter((e) => e.og.strategy === "page")
+      .forEach((entry) => expectCard(entry.og.slug));
   });
 
-  it("has a registered card kind for every entity card", () => {
+  it("has a committed PNG behind every entity route", () => {
     ROUTE_MANIFEST.filter((e) => e.og.strategy === "entity").forEach((entry) => {
-      expect(Object.keys(OG_CARDS)).toContain(entry.og.kind);
-      expect(CARD_FALLBACKS[entry.og.kind]).toBeTruthy();
+      const slug = CARD_FALLBACKS[entry.og.kind];
+      expect({ kind: entry.og.kind, slug }).toEqual({ kind: entry.og.kind, slug: expect.any(String) });
+      expectCard(slug);
     });
   });
 });

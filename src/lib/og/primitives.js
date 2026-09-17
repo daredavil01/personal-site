@@ -216,20 +216,6 @@ export const PhotoPanel = (url, {
   })
 );
 
-// Renders `postArt`'s shape descriptors (src/lib/generativeArt.js) as an SVG
-// image. Reused UNCHANGED from the micro-blog pinboard: the shapes are already
-// in a 100x100 viewBox, so only a scale is needed.
-export const ArtField = (shapes, { width, height, opacity = 1 } = {}) => {
-  const inner = (shapes || []).map((s) => {
-    if (s.kind === "circle") {
-      return `<circle cx="${s.cx}" cy="${s.cy}" r="${s.r}" fill="${s.fill}" opacity="${s.opacity}"/>`;
-    }
-    return `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" fill="${s.fill}" opacity="${s.opacity}" transform="rotate(${s.rotate} ${s.x + s.w / 2} ${s.y + s.h / 2})"/>`;
-  }).join("");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 100 100" preserveAspectRatio="none">${inner}</svg>`;
-  return svgImg(svg, { width, height, opacity });
-};
-
 // --- frame ------------------------------------------------------------------
 
 export const Ribbon = ({ width = CARD.width, height = 8 } = {}) => h("div", {

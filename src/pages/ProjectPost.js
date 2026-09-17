@@ -3,8 +3,7 @@ import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
-import { SITE_URL, buildProjectMeta } from "../data/pageMeta";
-import { ogCardUrl } from "../lib/og/paths";
+import { buildProjectMeta } from "../data/pageMeta";
 import { useProjects } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
@@ -83,9 +82,8 @@ const ProjectPost = () => {
     title: project.title,
     subtitle: project.subtitle,
     description: project.desc,
-    image: ogCardUrl({
-      kind: "project", id: project.id, fallbackSlug: "projects", siteUrl: SITE_URL,
-    }),
+    // The same cover the page shows, so a share never disagrees with the page.
+    image: cover,
   });
 
   const metaLine = [project.category, project.org, project.role, formatProjectDate(project.date)]

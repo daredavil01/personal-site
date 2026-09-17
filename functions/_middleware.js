@@ -18,10 +18,10 @@ import {
   buildShareMeta,
   buildTagMeta,
 } from "../src/data/pageMeta";
-// Share-card URLs. An item's og:image is derived from its kind and id, so this
-// layer needs no image columns and no extra requests — the photo is composited
-// INTO the card by functions/api/og, not referenced raw.
-import { ogCardUrl, ogMode, CARD_FALLBACKS } from "../src/lib/og/paths";
+// Share-card URLs. A fixed route's og:image is its committed card (carried on
+// the meta entry); a detail route's is the ROW'S OWN photo when it has one,
+// which is what these helpers resolve out of a PostgREST row.
+import { isCardImage, storageUrl, firstSlideImage } from "../src/lib/og/paths";
 
 function escAttr(str) {
   return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -88,10 +88,6 @@ export async function onRequest(context) {
 
   // Dynamic routes — resolve per-item OG meta.
   let dynamicMeta = null;
-  // Which share card this route's og:image should point at, as { kind, id }.
-  // Set alongside dynamicMeta so the image URL is derived once, below, instead
-  // of in each of the nine branches.
-  let cardRef = null;
 
   const mbMatch = pathname.match(/^\/micro-blog\/(\d+)$/);
   const trekMatch = pathname.match(/^\/treks\/(\d+)$/);
@@ -119,17 +115,17 @@ export async function onRequest(context) {
     if (mbMatch) {
       try {
         const postRes = await fetch(
-          `${supabaseUrl}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date&limit=1`,
+          `${supabaseUrl}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date,image_url&limit=1`,
           { headers },
         );
         const posts = await postRes.json();
         const post = posts?.[0];
         if (post) {
-          cardRef = { kind: "microblog", id: mbMatch[1] };
           dynamicMeta = buildMicroblogMeta({
             title: post.title,
             text: post.text,
             date: post.date,
+            image: storageUrl(post.image_url, supabaseUrl),
           });
         }
       } catch (_) {
@@ -138,18 +134,18 @@ export async function onRequest(context) {
     } else if (trekMatch) {
       try {
         const trekRes = await fetch(
-          `${supabaseUrl}/rest/v1/treks?id=eq.${trekMatch[1]}&select=fort_name,trek_time,endurance_level,date&limit=1`,
+          `${supabaseUrl}/rest/v1/treks?id=eq.${trekMatch[1]}&select=fort_name,trek_time,endurance_level,date,slide_images&limit=1`,
           { headers },
         );
         const treks = await trekRes.json();
         const trek = treks?.[0];
         if (trek) {
-          cardRef = { kind: "trek", id: trekMatch[1] };
           dynamicMeta = buildTrekMeta({
             fortName: trek.fort_name,
             enduranceLevel: trek.endurance_level,
             trekTime: trek.trek_time,
             date: trek.date,
+            image: firstSlideImage(trek.slide_images, supabaseUrl),
           });
         }
       } catch (_) {
@@ -158,13 +154,12 @@ export async function onRequest(context) {
     } else if (sportMatch) {
       try {
         const sportRes = await fetch(
-          `${supabaseUrl}/rest/v1/sports?id=eq.${sportMatch[1]}&select=title,date,description,place,distance,time&limit=1`,
+          `${supabaseUrl}/rest/v1/sports?id=eq.${sportMatch[1]}&select=title,date,description,place,distance,time,slide_images&limit=1`,
           { headers },
         );
         const sports = await sportRes.json();
         const race = sports?.[0];
         if (race) {
-          cardRef = { kind: "sport", id: sportMatch[1] };
           dynamicMeta = buildSportMeta({
             title: race.title,
             distance: race.distance,
@@ -172,6 +167,7 @@ export async function onRequest(context) {
             date: race.date,
             time: race.time,
             description: race.description,
+            image: firstSlideImage(race.slide_images, supabaseUrl),
           });
         }
       } catch (_) {
@@ -186,7 +182,8 @@ export async function onRequest(context) {
         const books = await bookRes.json();
         const book = books?.[0];
         if (book) {
-          cardRef = { kind: "book", id: bookMatch[1] };
+          // Books have no photo of any kind, so this always unfurls as the
+          // shelf card — the builder's own fallback.
           dynamicMeta = buildBookMeta({
             title: book.title,
             author: book.author,
@@ -199,7 +196,7 @@ export async function onRequest(context) {
     } else if (projectMatch) {
       try {
         const projectRes = await fetch(
-          `${supabaseUrl}/rest/v1/projects?id=eq.${projectMatch[1]}&select=title,subtitle,description&limit=1`,
+          `${supabaseUrl}/rest/v1/projects?id=eq.${projectMatch[1]}&select=title,subtitle,description,image,slide_images&limit=1`,
           { headers },
         );
         const projects = await projectRes.json();
@@ -207,15 +204,14 @@ export async function onRequest(context) {
         // draft never leaks its title into a crawler's card.
         const project = projects?.[0];
         if (project) {
-          // The cover / first screenshot is no longer resolved here: the share
-          // card composites it itself (src/lib/og/model.js does the same
-          // image || first-slide fallback the client's coverFor() does), so
-          // this layer only needs text.
-          cardRef = { kind: "project", id: projectMatch[1] };
           dynamicMeta = buildProjectMeta({
             title: project.title,
             subtitle: project.subtitle,
             description: project.description,
+            // Cover, else first screenshot — the same order as coverFor() in
+            // src/components/Projects/projectMedia.js.
+            image: storageUrl(project.image, supabaseUrl)
+              || firstSlideImage(project.slide_images, supabaseUrl),
           });
         }
       } catch (_) {
@@ -230,7 +226,6 @@ export async function onRequest(context) {
         const decks = await deckRes.json();
         const deck = decks?.[0];
         if (deck) {
-          cardRef = { kind: "presentation", id: presentationMatch[1] };
           dynamicMeta = buildPresentationMeta({ title: deck.title, description: deck.description });
         }
       } catch (_) {
@@ -248,7 +243,6 @@ export async function onRequest(context) {
         });
         const share = await shareRes.json();
         if (share?.title) {
-          cardRef = { kind: "ask-share", id: shareMatch[1] };
           dynamicMeta = buildShareMeta({ title: share.title, summary: share.summary });
         }
       } catch (_) {
@@ -263,7 +257,6 @@ export async function onRequest(context) {
         const blogs = await blogRes.json();
         const blog = blogs?.[0];
         if (blog) {
-          cardRef = { kind: "blog", id: blogMatch[1] };
           dynamicMeta = buildBlogMeta({
             title: blog.blog_title,
             description: blog.blog_description,
@@ -278,15 +271,12 @@ export async function onRequest(context) {
         // percent-encoded, so decode before matching.
         const name = decodeURIComponent(tagMatch[1]).toLowerCase();
         const tagRes = await fetch(
-          `${supabaseUrl}/rest/v1/tags?name=eq.${encodeURIComponent(name)}&select=id,name,display_name,description,category&limit=1`,
+          `${supabaseUrl}/rest/v1/tags?name=eq.${encodeURIComponent(name)}&select=name,display_name,description,category&limit=1`,
           { headers },
         );
         const tags = await tagRes.json();
         const tag = tags?.[0];
         if (tag) {
-          // The card is keyed on the tag's numeric id, not its name: that keeps
-          // the image path ASCII while the route keeps its Devanagari name.
-          cardRef = { kind: "tag", id: tag.id };
           dynamicMeta = buildTagMeta({
             name: tag.name,
             displayName: tag.display_name,
@@ -322,36 +312,22 @@ export async function onRequest(context) {
   const fullTitle = composeTitle(meta.title);
   const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
-  // The share card. `meta.image` is always the committed fallback, so this only
-  // ever upgrades it to the on-demand URL — and OG_MODE=static skips the
-  // upgrade, which is the whole kill-switch. The static URL is emitted DIRECTLY
-  // rather than relying on the endpoint's redirect, because several image
-  // scrapers do not follow redirects.
-  const mode = ogMode(env);
-  const cardTarget = cardRef
-    || (meta.ogSlug ? { kind: "page", id: meta.ogSlug } : null);
-  const imageUrl = cardTarget
-    ? ogCardUrl({
-      kind: cardTarget.kind,
-      id: cardTarget.id,
-      // A fixed page falls back to its OWN card; an entity falls back to its
-      // section's. CARD_FALLBACKS.page is "home", which is only correct when
-      // the slug is unknown.
-      fallbackSlug: cardTarget.kind === "page"
-        ? cardTarget.id
-        : (CARD_FALLBACKS[cardTarget.kind] || "home"),
-      siteUrl: SITE_URL,
-      mode,
-    })
-    : meta.image;
+  // The share image, already resolved: a fixed route's PAGE_META entry carries
+  // its committed card, and each builder above fell back to its section's card
+  // when the row had no photo. There is nothing to render and nothing to fetch.
+  const imageUrl = meta.image;
   const imageAlt = meta.imageAlt || meta.description;
   const ogType = meta.type || "website";
 
+  // Dimensions are declared only for our own 1200x630 cards. A row's photo is
+  // whatever shape it was shot in, and asserting 1200x630 over a 900px-tall
+  // portrait makes every platform crop it wrong; undeclared, they measure it.
+  const sized = isCardImage(imageUrl);
+
   // Must stay tag-for-tag identical to src/components/Template/PageMeta.js.
-  // og:image:width/height stop platforms guessing at the crop; og:type was
-  // hardcoded "website" for every route on the site, including articles.
-  // og:site_name is deliberately absent: index.html carries it globally, and
-  // emitting it here too puts two of them in every page's head.
+  // og:type was hardcoded "website" for every route on the site, including
+  // articles. og:site_name is deliberately absent: index.html carries it
+  // globally, and emitting it here too puts two of them in every page's head.
   const tags = `
     <link rel="canonical" href="${escAttr(canonicalUrl)}">
     <meta name="description" content="${escAttr(meta.description)}">
@@ -359,9 +335,9 @@ export async function onRequest(context) {
     <meta property="og:url" content="${escAttr(canonicalUrl)}">
     <meta property="og:title" content="${escAttr(fullTitle)}">
     <meta property="og:description" content="${escAttr(meta.description)}">
-    <meta property="og:image" content="${escAttr(imageUrl)}">
+    <meta property="og:image" content="${escAttr(imageUrl)}">${sized ? `
     <meta property="og:image:width" content="${OG_IMAGE.width}">
-    <meta property="og:image:height" content="${OG_IMAGE.height}">
+    <meta property="og:image:height" content="${OG_IMAGE.height}">` : ""}
     <meta property="og:image:alt" content="${escAttr(imageAlt)}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escAttr(fullTitle)}">

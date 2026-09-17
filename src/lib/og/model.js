@@ -1,26 +1,15 @@
-// Row → card model. One adapter per card kind; layouts read the model and never
-// touch a raw row, so a column rename lands in exactly one place.
+// Row → card model.
 //
-// These deliberately do NOT reuse `src/components/share/shareCardConfig.js`.
-// That module adapts CLIENT rows (camelCase, already run through each api
-// module's `fromRow`) into a portrait share-sheet card. The OG endpoint reads
-// PostgREST rows directly (snake_case, `tag_names`, relative image paths) and
-// builds a landscape card with different anatomy — stats and figures rather
-// than a body paragraph. Bridging the two would mean a casing shim plus an
-// anatomy shim on top of a module whose tests pin the other shape.
+// Only fixed-page cards are modelled here, because only fixed pages have a
+// generated card. A detail route unfurls with the row's OWN photo when it has
+// one and its section's committed card when it does not, which is resolved in
+// `functions/_middleware.js` — no layout, no render, nothing to model.
+//
+// (Nine per-entity layouts lived here until the on-demand renderer was removed;
+// they are in git history at 005f844 if per-entity cards are ever pre-rendered
+// under Node instead.)
 
-import { postArt } from "../generativeArt.js";
 import { accentFor } from "./tokens.js";
-import { storageUrl, firstSlideImage } from "./paths.js";
-
-const clean = (value) => (value == null ? "" : String(value).replace(/\s+/g, " ").trim());
-
-const truncate = (value, max) => {
-  const str = clean(value);
-  return str.length > max ? `${str.slice(0, max - 1)}…` : str;
-};
-
-const tagsOf = (row) => (Array.isArray(row?.tag_names) ? row.tag_names.filter(Boolean) : []);
 
 const num = (value) => {
   const n = Number(value);
@@ -36,9 +25,9 @@ export const compact = (value) => {
   return String(n);
 };
 
-// A stat tile, or nothing. `/api/stats` can be unreachable, and the committed
-// fallback cards are rendered with no payload at all — in both cases the card
-// must omit the figure rather than assert a zero.
+// A stat tile, or nothing. The generator renders offline when the stats
+// snapshot is unreachable, and a card that asserted "0 books" would be worse
+// than one with no number at all — so a tile with no real value is dropped.
 const stat = (value, label) => {
   if (value == null || value === "" || value === "—") return null;
   const n = Number(value);
@@ -46,158 +35,25 @@ const stat = (value, label) => {
   return { value: String(value), label };
 };
 
-// --- entity adapters --------------------------------------------------------
-
-const book = (row) => ({
-  kind: "book",
-  eyebrow: "From the Library",
-  title: clean(row.title),
-  subtitle: row.author ? `by ${clean(row.author)}` : "",
-  lede: truncate(row.description, 160),
-  meta: [row.category, row.language, row.year && String(row.year)].filter(Boolean).map(clean),
-  chips: tagsOf(row).slice(0, 3),
-  path: `/books/${row.id}`,
-});
-
-const blog = (row) => ({
-  kind: "blog",
-  eyebrow: "100 Days To Offload",
-  title: clean(row.blog_title),
-  lede: truncate(row.blog_description, 170),
-  meta: [row.blog_date, row.blog_platform, row.language].filter(Boolean).map(clean),
-  // Every row carries the challenge tag; it is noise on the card.
-  chips: tagsOf(row).filter((t) => t.toLowerCase() !== "100_days_to_offload").slice(0, 3),
-  path: `/100-days-to-offload/${row.id}`,
-});
-
-const sport = (row, ctx) => ({
-  kind: "sport",
-  eyebrow: "Physical Endurance",
-  title: clean(row.title),
-  subtitle: clean(row.place),
-  stats: [
-    row.distance ? { value: clean(row.distance), label: "Distance" } : null,
-    row.time ? { value: clean(row.time), label: "Finish" } : null,
-    row.bib_number ? { value: `#${clean(row.bib_number)}`, label: "Bib" } : null,
-  ].filter(Boolean),
-  meta: [row.date].filter(Boolean).map(clean),
-  photo: firstSlideImage(row.slide_images, ctx.supabaseUrl),
-  path: `/sports/${row.id}`,
-});
-
-const trek = (row, ctx) => ({
-  kind: "trek",
-  eyebrow: "My Treks",
-  title: clean(row.fort_name),
-  subtitle: row.endurance_level ? `${clean(row.endurance_level)} endurance` : "",
-  meta: [row.date, row.trek_time].filter(Boolean).map(clean),
-  badge: clean(row.endurance_level),
-  photo: firstSlideImage(row.slide_images, ctx.supabaseUrl),
-  figure: { names: [clean(row.fort_name) || "ridge"] },
-  path: `/treks/${row.id}`,
-});
-
-const project = (row, ctx) => ({
-  kind: "project",
-  eyebrow: "Projects",
-  title: clean(row.title),
-  subtitle: truncate(row.subtitle, 90),
-  lede: truncate(row.description, 140),
-  badge: clean(row.status),
-  chips: (Array.isArray(row.tech_stack) ? row.tech_stack : []).slice(0, 4).map(clean),
-  photo: storageUrl(row.image, ctx.supabaseUrl) || firstSlideImage(row.slide_images, ctx.supabaseUrl),
-  path: `/projects/${row.id}`,
-});
-
-const presentation = (row) => ({
-  kind: "presentation",
-  eyebrow: "Presentations",
-  title: clean(row.title),
-  lede: truncate(row.description, 150),
-  meta: [row.date].filter(Boolean).map(clean),
-  chips: tagsOf(row).slice(0, 3),
-  path: `/presentations/${row.id}`,
-});
-
-const microblog = (row, ctx) => {
-  const body = clean(row.text || row.title);
-  const tags = tagsOf(row);
-  // The pinboard's own art, unchanged — same function, same seed, so a post's
-  // card and its card on /micro-blog draw the same picture.
-  const colorByName = ctx.tagColors instanceof Map ? ctx.tagColors : new Map(tags.map((t) => [t, null]));
-  return {
-    kind: "microblog",
-    eyebrow: "Micro Blog",
-    title: "",
-    body: truncate(body, 260),
-    quote: row.post_type === "quote",
-    meta: [row.date, row.post_type].filter(Boolean).map(clean),
-    chips: tags.slice(0, 3),
-    photo: storageUrl(row.image_url, ctx.supabaseUrl),
-    art: postArt({ id: row.id, tags }, colorByName),
-    footerNote: row.source ? `via ${clean(row.source)}` : "",
-    path: `/micro-blog/${row.id}`,
-  };
-};
-
-const tag = (row) => {
-  const counts = row.counts && typeof row.counts === "object" ? row.counts : {};
-  const total = num(row.total) || Object.values(counts).reduce((sum, n) => sum + num(n), 0);
-  return {
-    kind: "tag",
-    eyebrow: "Tag",
-    // display_name preserves the author's casing and script; `name` is stored
-    // lowercased for lookups and would read wrong on a card.
-    title: `#${clean(row.display_name || row.name)}`,
-    lede: truncate(row.description, 150),
-    subtitle: clean(row.category),
-    color: row.color || null,
-    stats: Object.entries(counts)
-      .filter(([, n]) => num(n) > 0)
-      .sort((a, b) => num(b[1]) - num(a[1]))
-      .slice(0, 3)
-      .map(([label, n]) => ({ value: compact(n), label })),
-    footerNote: total ? `${total} item${total === 1 ? "" : "s"}` : "",
-    // `path` is display text in the card footer, never a link target, so it
-    // carries the readable name. Percent-encoding it here printed
-    // "/tags/%E0%A4%AE%E0%A4%B0..." across the bottom of every Marathi tag card.
-    path: `/tags/${clean(row.display_name || row.name)}`,
-  };
-};
-
-// A shared /ask conversation. Rendering on demand is what makes this card
-// possible at all: a share is created by a reader and pasted into a chat
-// seconds later, so nothing generated ahead of time could ever include it.
-const askShare = (row) => ({
-  kind: "ask-share",
-  eyebrow: "Ask the Archive",
-  title: truncate(row.title || row.question || "A conversation with the archive", 110),
-  lede: truncate(row.summary || row.excerpt, 150),
-  stats: [
-    num(row.turn_count) ? { value: String(row.turn_count), label: "Turns" } : null,
-    num(row.source_count) ? { value: String(row.source_count), label: "Sources" } : null,
-  ].filter(Boolean),
-  path: "/ask",
-});
-
-export const ENTITY_ADAPTERS = {
-  book, blog, sport, trek, project, presentation, microblog, tag, "ask-share": askShare,
-};
-
 // --- fixed pages ------------------------------------------------------------
 
-// Fixed-page cards read the `/api/stats` payload, which is already edge-cached
-// for an hour. Never recompute a stat here: CLAUDE.md puts every site number in
-// computeSiteStats, and a card that did its own arithmetic would drift from
-// /stats.
-export function pageModel(slug, payload, { siteUrl = "", portrait: portraitOverride = null } = {}) {
+// Fixed-page cards read the `/api/stats` payload — the same snapshot the /stats
+// page renders, fetched by the generator at build time. Never recompute a stat
+// here: CLAUDE.md puts every site number in computeSiteStats, and a card that
+// did its own arithmetic would drift from the page it summarises.
+export function pageModel(slug, payload, {
+  siteUrl = "", portrait: portraitOverride = null, photos = {}, ledger = null,
+} = {}) {
   const s = (payload && payload.stats) || {};
   const micro = (payload && payload.micro) || {};
   const tags = (payload && payload.tags) || [];
+  // public/data/writing-ledger.json, the same file the ledger page fetches.
+  const months = (ledger && Array.isArray(ledger.byMonth) ? ledger.byMonth : []).slice(-12);
+  const ledgerTotals = (ledger && ledger.totals) || {};
 
-  // The three identity cards carry the portrait. `portraitOverride` lets
-  // og:preview inline the real file as a data URI so the contact sheet shows
-  // what ships; the endpoint just points at the site's own asset.
+  // The three identity cards carry the portrait. The generator passes it as an
+  // inlined data URI, since satori has to read the pixels to composite them —
+  // `siteUrl` is only the fallback for a caller that can fetch over HTTP.
   const portrait = portraitOverride || (siteUrl ? `${siteUrl}/images/me.jpg` : null);
   const base = { kind: "page", slug, accent: accentFor(slug), path: slug === "home" ? "" : `/${slug}` };
 
@@ -232,7 +88,12 @@ export function pageModel(slug, payload, { siteUrl = "", portrait: portraitOverr
         stat(s.booksMarathi, "Marathi"),
         stat(s.booksWithReviews, "Reviewed"),
       ].filter(Boolean),
-      figure: { titles: (s.topBookTags || []).map((t) => t.name || t), genres: s.topGenres || [] },
+      // topBookTags is [[name, count], ...]. Reading `.name` off a pair yields
+      // the pair itself, which still hashed to a stable spine — but by accident.
+      figure: {
+        titles: (s.topBookTags || []).map((t) => (Array.isArray(t) ? t[0] : (t && t.name) || t)),
+        genres: s.topGenres || [],
+      },
     },
     challenges: {
       eyebrow: "Challenges",
@@ -252,6 +113,9 @@ export function pageModel(slug, payload, { siteUrl = "", portrait: portraitOverr
     },
     instagram: {
       eyebrow: "Instagram",
+      // The card for a photo gallery has to show photos; `photos` is empty when
+      // the generator ran without Supabase, and then the grid is simply absent.
+      photos: photos.instagram || [],
       title: "A visual archive",
       stats: [
         stat(s.instaPostCount, "Sets"),
@@ -298,6 +162,7 @@ export function pageModel(slug, payload, { siteUrl = "", portrait: portraitOverr
     },
     projects: {
       eyebrow: "Projects",
+      photos: photos.projects || [],
       title: "Things built and shipped",
       stats: [stat(s.projectCount, "Projects")].filter(Boolean),
       chips: (s.topSkills || []).slice(0, 3),
@@ -363,7 +228,14 @@ export function pageModel(slug, payload, { siteUrl = "", portrait: portraitOverr
     "writing-ledger": {
       eyebrow: "Writing Ledger",
       title: "Words, month by month",
-      lede: "Every published word, counted and dated.",
+      stats: [
+        stat(ledgerTotals.words, "Words"),
+        stat(ledgerTotals.posts, "Posts"),
+        stat(ledgerTotals.averageWords, "Avg words"),
+      ].filter(Boolean),
+      // Real months. This card drew a hardcoded five-bar series until now,
+      // which is the one thing a card about counting words must not do.
+      figure: { months: months.map((m) => m.words) },
     },
     notfound: {
       eyebrow: "404",
@@ -384,8 +256,9 @@ export function pageModel(slug, payload, { siteUrl = "", portrait: portraitOverr
   return { ...base, ...page };
 }
 
-// Every fixed-page card slug. `src/data/routeManifest.test.js` asserts that each
-// route with `og.strategy === "page"` names one of these, so a new page route
+// Every fixed-page card slug, and so every file `npm run og:fallbacks` writes.
+// `src/data/routeManifest.test.js` asserts each route with `og.strategy ===
+// "page"` names one of these AND that the PNG exists, so a new page route
 // cannot ship without a card.
 export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "contact", "instagram",
@@ -394,14 +267,4 @@ export const PAGE_SLUGS = [
   "ask-share",
 ];
 
-// The one entry point. `kind` is "page" for a fixed route (with `id` as the
-// slug) or an entity kind (with `id` as the row id).
-export function ogModelFor(kind, row, ctx = {}) {
-  if (kind === "page") return pageModel(row, ctx.stats, { siteUrl: ctx.siteUrl, portrait: ctx.portrait });
-  const adapter = ENTITY_ADAPTERS[kind];
-  if (!adapter || !row) return null;
-  const model = adapter(row, ctx);
-  return { accent: accentFor(kind), ...model };
-}
-
-export default ogModelFor;
+export default pageModel;
