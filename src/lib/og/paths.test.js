@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import {
-  ogStaticUrl, isCardImage, storageUrl, firstSlideImage, CARD_FALLBACKS,
+  ogStaticUrl, isCardImage, cardUrlForOrigin, storageUrl, firstSlideImage, CARD_FALLBACKS,
 } from "./paths.js";
 import { PAGE_SLUGS } from "./model.js";
 
@@ -44,6 +44,49 @@ describe("isCardImage", () => {
     expect(isCardImage(`${SITE}/images/me.jpg`)).toBe(false);
     expect(isCardImage(null)).toBe(false);
     expect(isCardImage(undefined)).toBe(false);
+  });
+});
+
+describe("cardUrlForOrigin", () => {
+  const PREVIEW = "https://claude-branch.daredavil.pages.dev";
+
+  it("moves a card onto the serving origin", () => {
+    expect(cardUrlForOrigin(`${SITE}/og/books.png`, PREVIEW, SITE))
+      .toBe(`${PREVIEW}/og/books.png`);
+  });
+
+  it("leaves a card alone on the real site", () => {
+    expect(cardUrlForOrigin(`${SITE}/og/books.png`, SITE, SITE))
+      .toBe(`${SITE}/og/books.png`);
+  });
+
+  // A row's photo lives on Supabase and is correct from any host; rewriting it
+  // would point at a storage path that does not exist on the site.
+  it("never touches anything that is not one of our cards", () => {
+    const photo = "https://db.co/storage/v1/object/public/media/treks/a.jpeg";
+    expect(cardUrlForOrigin(photo, PREVIEW, SITE)).toBe(photo);
+    expect(cardUrlForOrigin(`${SITE}/images/me.jpg`, PREVIEW, SITE))
+      .toBe(`${SITE}/images/me.jpg`);
+  });
+
+  it("is a no-op when the origin is unknown", () => {
+    expect(cardUrlForOrigin(`${SITE}/og/books.png`, "", SITE)).toBe(`${SITE}/og/books.png`);
+    expect(cardUrlForOrigin(`${SITE}/og/books.png`, undefined, SITE)).toBe(`${SITE}/og/books.png`);
+  });
+});
+
+describe("every generated card is committed", () => {
+  // `npm run og:fallbacks` writes exactly PAGE_SLUGS, and a missing file does
+  // NOT 404: Cloudflare Pages answers an unknown path with the SPA shell, so a
+  // card that was never generated unfurls as `200 text/html` and every platform
+  // silently shows no image. routeManifest.test.js covers the slugs a route
+  // names; this covers the rest (writing-ledger has no React route at all).
+  it("has a PNG on disk for every slug the generator writes", () => {
+    PAGE_SLUGS.forEach((slug) => {
+      const file = path.join(ROOT, "public", "og", `${slug}.png`);
+      expect({ slug, exists: fs.existsSync(file) }).toEqual({ slug, exists: true });
+      expect(fs.statSync(file).size).toBeGreaterThan(5000);
+    });
   });
 });
 

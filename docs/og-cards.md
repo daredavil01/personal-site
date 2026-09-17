@@ -54,6 +54,32 @@ in git history at `005f844` if per-entity cards are ever wanted; the way to get
 them is to pre-render them under Node with the generator, not to render them at
 the edge.
 
+## A preview deployment must advertise its own cards
+
+`src/data/pageMeta.js` is import-free by contract, so it hard-codes `SITE_URL`
+and every card URL comes out as `https://sankettambare.in/og/<slug>.png`.
+
+On a Cloudflare Pages **preview** that URL is wrong, and it fails silently in
+the worst way: the card exists on the preview but not yet in production, and a
+path with no file behind it **does not 404** — Pages answers it with the SPA
+shell, `200 text/html`. So a scraper fetches an HTML page where an image should
+be and shows no image at all, which is indistinguishable from the card being
+broken. A preview could never be used to check its own cards.
+
+`cardUrlForOrigin` (`src/lib/og/paths.js`) re-hosts a card onto the origin
+actually serving the request — `url.origin` in the middleware,
+`window.location.origin` on the client. Two things it deliberately does not
+touch:
+
+- **A row's own photo**, which is an absolute Supabase URL, correct from any
+  host. Rewriting it would point at a storage path the site does not have.
+- **`canonical` and `og:url`**, which stay on `SITE_URL` so a preview never
+  advertises itself as the canonical home of a page.
+
+`public/writing-ledger.html` is the exception: it is a static file with no way
+to know its host, so its card URL stays production's and it is the one page
+whose image cannot be checked from a preview.
+
 ## PNG, not SVG
 
 Cards are authored as SVG (satori builds it, resvg rasterises it) but **always
@@ -146,6 +172,31 @@ exception), one accent colour, photos duotoned.
 six tiles drew empty rounded rectangles that read as a gallery which had failed
 to load — worse than no figure at all. Same rule everywhere: no data, no figure.
 
+## Open issue: the photo cards are heavy
+
+`about.png` (613 KB), `home.png` (536 KB) and `instagram.png` (409 KB) are over
+the **300 KB** this site treats as its hard cap for a mobile-network audience
+(`src/lib/imageCompress.js`, and the Image Compression section of `CLAUDE.md`).
+It is also the figure usually reported as the ceiling above which WhatsApp stops
+rendering a link preview, so the two most-shared URLs on the site are the two
+most at risk.
+
+The cause is the container, not the layout: resvg only emits **lossless PNG**,
+and a photograph at 1200×630 does not compress. Measured, for `about.png`:
+
+| approach | result |
+|---|---|
+| as committed | 613 KB |
+| portrait downsampled to 520 px first | 549 KB — 10%, not worth the softer photo |
+| JPEG at ~q82 | not implemented; would be ~120 KB |
+
+The fix is to emit those three as JPEG, which every platform accepts for
+`og:image`. `Resvg#render()` exposes raw RGBA via `.pixels` (verified), so a
+pure-JS encoder such as `jpeg-js` is enough — no native dependency. It is not
+done yet because it means mixed extensions across `pageMeta.js`, `isCardImage`
+and both guards, and the 20 text-only cards (119–157 KB) should stay PNG, where
+hard-edged type has no ringing.
+
 ## og:image:width / height
 
 Declared **only** for our own cards, which are exactly 1200×630, and never for
@@ -206,7 +257,9 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
 | 5 | On-demand endpoint removed | verified | claude | `functions/api/og/` and the 2.4 MB vendored wasm deleted; worker bundle 104 KB |
 | 6 | satori + resvg moved to devDependencies | verified | claude | confirmed absent from the Pages Functions bundle |
 | 7 | Card fonts moved to `scripts/og-fonts/` | verified | claude | no longer shipped to browsers |
-| 8 | `_middleware.js`: row photo, else section card | verified | claude | 11 tests in `functions/_middleware.test.js` |
+| 8 | `_middleware.js`: row photo, else section card | verified | claude | 14 tests in `functions/_middleware.test.js` |
+| 8b | Cards re-hosted onto the serving origin | verified | claude | `cardUrlForOrigin`; found by a real WhatsApp unfurl on a preview |
+| 8c | `public/writing-ledger.html` points at its card | verified | claude | was still on the 400×400 `logo.png` |
 | 9 | `og:image:width/height` only for cards | verified | claude | `isCardImage`, tested both directions |
 | 10 | `PageMeta.js` client parity | verified | claude | same tag set as the middleware |
 | 11 | 9 detail pages pass their own photo | verified | claude | trek/sport/project/microblog photos; the other five have none |
@@ -217,6 +270,7 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
 | 16 | Real unfurl checks (FB debugger, LinkedIn inspector, WhatsApp to self) | awaiting-local-run | local | use a Pages preview URL |
 | 17 | Re-run `npm run og:fallbacks` when content moves | awaiting-local-run | local | the numbers are baked in; no nightly job by choice |
 | 18 | Upgrade satori past 0.32 for Devanagari | not-started | local | now unblocked — nothing renders it at the edge any more |
+| 19 | Emit the three photo cards as JPEG | not-started | claude | they are 409–613 KB against a 300 KB cap; see **Open issue** above |
 <!-- og-status end -->
 
 ### Notes from verification
@@ -235,6 +289,13 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
   to a stable spine — correct by accident. Now handled explicitly.
 - The two contact-sheet cards are the heaviest at ~400 KB and ~210 KB, because
   JPEG photos re-encode as lossless PNG. Well inside every platform's limit.
+- **The first real unfurl found what no test could.** A WhatsApp share of a
+  preview URL showed the text resolving correctly but **no image** on every
+  card-backed route, while a micro-post with its own photo unfurled fine. That
+  asymmetry was the whole diagnosis: the photo is an absolute Supabase URL, the
+  card was an absolute *production* URL, and production has no `/og/` yet. Every
+  test passed throughout, because they all requested the production host — they
+  now request a preview host too.
 - `wrangler pages dev` could not be run in the container that built this (it
   now demands a `CLOUDFLARE_API_TOKEN` for its remote-proxy session), which is
   why `functions/_middleware.test.js` exists: it stubs `HTMLRewriter` and pins
@@ -246,7 +307,14 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
 2. `npm run og:preview` → open `knowledge_base/og-preview/index.html` and check
    the 300 px column.
 3. `npm run docs:build` to refresh `docs/routes.md`.
-4. Deploy, then confirm a real unfurl: Facebook's Sharing Debugger and
-   LinkedIn's Post Inspector both work against a Pages preview URL. For
-   WhatsApp, X, Slack and iMessage the only ground truth is sending yourself the
-   link — and the first share is the one that sticks.
+4. Confirm a real unfurl from the **preview** URL — which now works, since the
+   preview advertises its own cards. Facebook's Sharing Debugger and LinkedIn's
+   Post Inspector both accept a Pages preview URL. For WhatsApp, X, Slack and
+   iMessage the only ground truth is sending yourself the link, and the first
+   share is the one that sticks, so use a throwaway path first.
+   `public/writing-ledger.html` is the one page that still needs production.
+5. Sanity-check the image itself resolves, not just the tag:
+   ```bash
+   curl -sI <preview-url>/og/home.png | head -2   # expect image/png, NOT text/html
+   ```
+   `200 text/html` means the file is missing and the SPA answered instead.

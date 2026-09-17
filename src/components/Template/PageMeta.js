@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import {
   SITE_URL, PAGE_META, DEFAULT_META, OG_IMAGE, composeTitle,
 } from "../../data/pageMeta";
-import { isCardImage } from "../../lib/og/paths";
+import { isCardImage, cardUrlForOrigin } from "../../lib/og/paths";
 
 // The single Helmet block for every shell (§4.3). Extracted from layouts/
 // Main.js so the classic shell and the atlas RegionShell consume the exact
@@ -30,7 +30,11 @@ const PageMeta = (props) => {
   // A fixed route's card is `pageMeta.image`, a committed public/og/*.png. A
   // detail page passes `image` down: the row's own photo when it has one, and
   // its section's card when it does not (each build*Meta falls back for it).
-  const ogImage = props.image || pageMeta.image;
+  // Re-hosted onto whatever origin is serving the page, so a Pages preview
+  // shows its own cards instead of production's (see cardUrlForOrigin). The
+  // canonical URL deliberately stays on SITE_URL.
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const ogImage = cardUrlForOrigin(props.image || pageMeta.image, origin, SITE_URL);
   const imageAlt = props.imageAlt || pageMeta.imageAlt || description;
   // Declared only for our own 1200x630 cards — see functions/_middleware.js.
   const sized = isCardImage(ogImage);

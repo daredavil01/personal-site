@@ -34,6 +34,25 @@ export const CARD_FALLBACKS = {
 // portrait makes every platform crop it wrong. Undeclared, they measure it.
 export const isCardImage = (url) => /\/og\/[^/]+\.png$/.test(String(url || ""));
 
+// Re-hosts a card URL onto the origin actually serving the page.
+//
+// `src/data/pageMeta.js` has to hard-code SITE_URL, because it is import-free
+// and has no way to know the host. That made every Cloudflare Pages PREVIEW
+// advertise `https://sankettambare.in/og/<slug>.png` — a card that only exists
+// once the branch is in production. Until then that path falls through to the
+// SPA, which answers `200 text/html`, so a scraper fetches an HTML page where
+// an image should be and shows nothing at all. A preview could never show its
+// own cards, which is exactly when you want to check them.
+//
+// Only OUR cards are moved. A row's photo is an absolute Supabase URL that is
+// already correct everywhere, and the canonical/og:url stay on SITE_URL so a
+// preview never advertises itself as the canonical home of a page.
+export function cardUrlForOrigin(imageUrl, origin, siteUrl) {
+  if (!origin || !siteUrl || origin === siteUrl) return imageUrl;
+  if (!isCardImage(imageUrl)) return imageUrl;
+  return String(imageUrl).replace(siteUrl, origin);
+}
+
 // Resolves a stored image path to a public URL. PostgREST rows hold RELATIVE
 // paths for anything uploaded through /admin (see toStorageUrl in
 // src/lib/supabaseClient.js, which does the same job on the client but cannot

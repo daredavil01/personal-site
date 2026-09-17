@@ -50,7 +50,7 @@ class FakeRewriter {
 const HTML_RESPONSE = () => ({ headers: { get: () => "text/html; charset=utf-8" } });
 
 // `rows` maps a PostgREST path fragment to the array that query returns.
-const run = async (pathname, rows = {}) => {
+const run = async (pathname, rows = {}, origin = "https://sankettambare.in") => {
   global.HTMLRewriter = FakeRewriter;
   global.fetch = jest.fn(async (url) => {
     const match = Object.keys(rows).find((key) => String(url).includes(key));
@@ -60,7 +60,7 @@ const run = async (pathname, rows = {}) => {
   // eslint-disable-next-line global-require
   const { onRequest } = require("./_middleware");
   return onRequest({
-    request: { url: `https://sankettambare.in${pathname}` },
+    request: { url: `${origin}${pathname}` },
     next: async () => HTML_RESPONSE(),
     env: {
       VITE_SUPABASE_URL: "https://db.co",
@@ -198,6 +198,42 @@ describe("when the row cannot be read", () => {
     // Asserted against PAGE_META rather than a literal: the invariant is that
     // an unreadable row inherits its parent page, not any particular wording.
     expect(tag(injected, "og:description")).toBe(PAGE_META["/books"].description);
+  });
+});
+
+describe("on a Pages preview deployment", () => {
+  const PREVIEW = "https://claude-branch.daredavil.pages.dev";
+
+  // The bug this pins: og:image was hard-coded to SITE_URL, so a preview
+  // advertised production's card — a path that does not exist there until the
+  // branch ships, and which the SPA answers with `200 text/html`. Scrapers
+  // fetched an HTML page where an image should be and showed nothing, so a
+  // preview could never be used to check its own cards.
+  it("advertises the card on the origin actually serving the page", async () => {
+    const { injected } = await run("/micro-blog", {}, PREVIEW);
+    expect(tag(injected, "og:image")).toBe(`${PREVIEW}/og/micro-blog.png`);
+    expect(tag(injected, "twitter:image")).toBe(`${PREVIEW}/og/micro-blog.png`);
+  });
+
+  // A preview must never claim to be the canonical home of a page.
+  it("keeps canonical and og:url on the real site", async () => {
+    const { injected } = await run("/micro-blog", {}, PREVIEW);
+    expect(tag(injected, "og:url")).toBe("https://sankettambare.in/micro-blog");
+    expect(injected).toContain('<link rel="canonical" href="https://sankettambare.in/micro-blog">');
+  });
+
+  it("leaves a row's own photo alone, since it is host-independent", async () => {
+    const { injected } = await run("/treks/7", {
+      "treks?id=eq.7": [{
+        fort_name: "Ghangad",
+        endurance_level: "Hard",
+        trek_time: "3 Hrs",
+        date: "17-02-2019",
+        slide_images: [{ url: "/treks/ghangad.jpeg" }],
+      }],
+    }, PREVIEW);
+    expect(tag(injected, "og:image"))
+      .toBe("https://db.co/storage/v1/object/public/media/treks/ghangad.jpeg");
   });
 });
 

@@ -156,10 +156,21 @@ Four things to know before touching this:
   nothing renders at the edge, so it is upgradable — read `docs/og-cards.md`
   first.
 
-`og:image` is always **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
+**Card URLs are re-hosted onto the serving origin** by `cardUrlForOrigin`
+(`src/lib/og/paths.js`) — `url.origin` in the middleware, `window.location.origin`
+on the client. `pageMeta.js` has to hard-code `SITE_URL`, so without this a Pages
+**preview** advertises production's card; and a missing `/og/*.png` does not 404,
+it gets the SPA shell as `200 text/html`, so the unfurl silently shows no image.
+`canonical` and `og:url` stay on `SITE_URL`, and a row's own photo is never
+rewritten. `public/writing-ledger.html` authors its tags by hand (the middleware
+skips any path with a dot) and so cannot re-host.
+
+`og:image` is **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
 LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**
 for our own cards (`isCardImage`), never for a row's photo — asserting a size we
-do not know makes every platform crop it wrong.
+do not know makes every platform crop it wrong. Keep a card **under 300 KB**, the
+same cap as any other image on the site; the three portrait/photo cards are
+currently over it (see `docs/og-cards.md`).
 
 ## Second Brain (/ask)
 

@@ -21,7 +21,9 @@ import {
 // Share-card URLs. A fixed route's og:image is its committed card (carried on
 // the meta entry); a detail route's is the ROW'S OWN photo when it has one,
 // which is what these helpers resolve out of a PostgREST row.
-import { isCardImage, storageUrl, firstSlideImage } from "../src/lib/og/paths";
+import {
+  isCardImage, cardUrlForOrigin, storageUrl, firstSlideImage,
+} from "../src/lib/og/paths";
 
 function escAttr(str) {
   return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -315,7 +317,10 @@ export async function onRequest(context) {
   // The share image, already resolved: a fixed route's PAGE_META entry carries
   // its committed card, and each builder above fell back to its section's card
   // when the row had no photo. There is nothing to render and nothing to fetch.
-  const imageUrl = meta.image;
+  //
+  // It is re-hosted onto the origin serving this request, so a Pages preview
+  // advertises its OWN cards rather than production's — see cardUrlForOrigin.
+  const imageUrl = cardUrlForOrigin(meta.image, url.origin, SITE_URL);
   const imageAlt = meta.imageAlt || meta.description;
   const ogType = meta.type || "website";
 
