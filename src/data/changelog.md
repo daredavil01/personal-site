@@ -9,7 +9,32 @@ patch for fixes and tweaks.
 
 ---
 
-## [v18.1.0] — 2026-09-15
+## [v18.1.0] — 2026-09-17
+
+### Added
+
+- **A custom share card for every route** (`src/lib/og/`, `functions/api/og/[[path]].js`, `public/og/`): 17 of the 20 routes in `pageMeta.js` unfurled with the same 400×400 `logo.png`, `/`, `/about` and `/resume` shared one 889×889 portrait, and `/tags/:name` was indistinguishable from `/tags` — all of it square, while the site declared `twitter:card=summary_large_image`, so every platform that crops to 1.91:1 letterboxed it. Every route now has its own 1200×630 card, rendered on demand at `/api/og/<kind>/<id>.png` and edge-cached for a day.
+  Each section gets a bespoke figure rather than a shared template, so a card is recognisable before its text is readable: a shelf of spines for books, a ridgeline hashed from fort names for treks, a distance dial and a bib with the finish time for races, a swatch cloud for tags, a hundred-dot grid for the offload challenge, and the micro-blog pinboard's own `postArt` reused unchanged. Trek, race, project and micro-blog cards composite the item's photo as a duotone panel; where there is no photo the layout still reads. `/ask/s/:token` gets a real card too — the one card only on-demand rendering makes possible, since a share is created by a reader and pasted into a chat seconds later.
+  Cards are built with a small `h()` hyperscript rather than JSX, because the Pages Functions bundler does not transform JSX. Photos are fetched and inlined by the endpoint so a slow image degrades the card instead of failing it, and a stat with no value is omitted rather than rendered as `0`.
+- **`OG_MODE`, a one-variable retreat** (`src/lib/og/paths.js`, `wrangler.toml`): rendering at the edge is a bet. Workers Free allows 10 ms CPU per request and a card takes ~436 ms, so this can return error 1102 — and `wrangler pages dev` does not enforce the limit, so local success proves nothing. Setting `OG_MODE=static` in the Pages environment reverts every `og:image` to a committed `public/og/*.png` with no rendering at all, no deploy needed. The 23 fallback cards ship with this change, so the retreat is wired rather than hypothetical.
+- **A guard that stops a route shipping without meta or a card** (`src/data/routeManifest.js`, `src/data/routeManifest.test.js`, `src/data/routeScrape.js`): one declarative entry per route, asserted by set equality against `src/App.js`, so adding *or deleting* a route without updating the manifest fails CI. It also checks that every page card has a committed PNG on disk, that every entity card names a registered kind, and that no nav entry points at a route that does not exist. Jest with no network, deliberately: `docs:build` needs live Supabase credentials and so cannot run in CI, which is how `docs/routes.md` drifted out of date in the first place.
+- **`docs/og-cards.md`**: how the cards render, the CPU bet and where to watch for it, the Devanagari limitation, and a machine-readable development-status block.
+
+### Changed
+
+- **`/tags/:name` finally has its own metadata** (`functions/_middleware.js`, `buildTagMeta`): it was only ever in the static-parent fallback list, so every tag page unfurled with `/tags`'s title, description and image. It now resolves the tag row and builds real meta. The route keeps its URI-encoded, un-slugified name while the card is keyed on the tag's numeric id, so the image path stays ASCII and Devanagari survives in the URL.
+- **`og:type` is derived instead of hardcoded** (`src/data/pageMeta.js`, `functions/_middleware.js`, `src/components/Template/PageMeta.js`): both layers emitted `website` for every route on the site, including every article. Detail pages are now `article` and `/`, `/about`, `/resume` are `profile`.
+- **`og:image:width`, `og:image:height`, `og:image:alt` and `twitter:image:alt` are now emitted** by both meta layers. Without dimensions, platforms guess at the crop; without alt text a card is invisible to a screen reader. `og:site_name` is deliberately emitted by neither, because `index.html` already carries it and a second copy was appearing on every page.
+- **`buildShareMeta` takes an image** (`src/data/pageMeta.js`): it had no `image` parameter at all and hardcoded the logo. Every builder now returns a complete `{ title, description, image, imageAlt, type }`, and each falls back to its own section card rather than to a generic logo — so a failed lookup still unfurls as the right section.
+- **The middleware stopped fetching image columns** (`functions/_middleware.js`): an item's `og:image` is derived from its kind and id, so the per-route selects no longer ask for `image_url`, `slide_images` or `image`, and the storage-URL string-building that was duplicated inline five times is gone. The photo is composited into the card instead.
+- **`seededRandom` is exported from `src/lib/generativeArt.js`** so card figures seed themselves the same way post art does, instead of shipping a second copy of the PRNG.
+- **`docs/routes.md` is generated from the route manifest** and gains a share-card column; `scripts/build-docs.mjs` and the guard test now share one route scraper.
+- **satori is pinned to 0.32.0, knowingly** (`package.json`): 0.33 added HarfBuzz and renders Marathi conjuncts correctly, but cannot run on Workers at all — its Emscripten glue resolves its own wasm from a script directory that does not exist there, and Workers prohibit compiling fetched wasm. The cost of staying at the edge is that Devanagari conjuncts render with visible viramas (`व् य क् ती` instead of `व्यक्ती`). `docs/og-cards.md` records the trade-off; correct Marathi means pre-rendering under Node.
+
+### Fixed
+
+- **`.dev.vars` is now gitignored** — wrangler reads it for local Function environment variables and it can hold secrets, but nothing was stopping it being committed.
+- **`wrangler` is a declared devDependency** — `npm run dev:ask` has always assumed it was installed without the repo ever saying so.
 
 ### Added
 

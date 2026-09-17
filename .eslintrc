@@ -72,6 +72,12 @@
       }
     },
     {
+      "files": ["src/lib/og/**/*.js"],
+      "rules": {
+        "import/extensions": ["error", "always", { "ignorePackages": true }]
+      }
+    },
+    {
       "files": ["functions/**/*.js"],
       "globals": {
         "HTMLRewriter": "readonly"

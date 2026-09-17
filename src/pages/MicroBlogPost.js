@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { getMicroblogPost } from "../lib/api/microblog";
-import { buildMicroblogMeta } from "../data/pageMeta";
+import { SITE_URL, buildMicroblogMeta } from "../data/pageMeta";
+import { ogCardUrl } from "../lib/og/paths";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import ExportImageButton from "../components/MicroBlog/ExportImageButton";
 import TagLinks from "../components/common/TagLinks";
@@ -48,7 +49,16 @@ const MicroBlogPost = () => {
   const body = post?.text || post?.title || "";
   // Shared with the Cloudflare middleware so crawler + client OG tags match.
   const meta = post
-    ? buildMicroblogMeta({ title: post.title, text: post.text, date: post.date, image: post.imageUrl })
+    ? buildMicroblogMeta({
+      title: post.title,
+      text: post.text,
+      date: post.date,
+      // The post's own photo is composited INTO the card by functions/api/og,
+      // so this points at the card, not at the raw image.
+      image: ogCardUrl({
+        kind: "microblog", id: post.id, fallbackSlug: "micro-blog", siteUrl: SITE_URL,
+      }),
+    })
     : { title: "Post", description: "A micro-blog post.", image: undefined };
 
   return (

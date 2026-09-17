@@ -2,7 +2,8 @@ import React, { useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
-import { buildPresentationMeta } from "../data/pageMeta";
+import { SITE_URL, buildPresentationMeta } from "../data/pageMeta";
+import { ogCardUrl } from "../lib/og/paths";
 import { usePresentations } from "../context/ContentContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import TagLinks from "../components/common/TagLinks";
@@ -35,7 +36,12 @@ const PresentationPost = () => {
     );
   }
 
-  const meta = buildPresentationMeta({ title: deck.title, description: deck.description });
+  const meta = buildPresentationMeta({ title: deck.title,
+    description: deck.description,
+    image: ogCardUrl({
+      kind: "presentation", id: deck.id, fallbackSlug: "presentations", siteUrl: SITE_URL,
+    }),
+  });
   const fullscreen = () => frameWrap.current?.requestFullscreen?.();
 
   return (

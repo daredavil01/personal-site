@@ -1,0 +1,152 @@
+// Representative rows for every card kind, shared by `npm run og:preview` and
+// the Jest layout tests so both exercise the same shapes.
+//
+// These are deliberately awkward: a long Marathi title, a missing photo, an
+// absent description, a 260-character micro-post. A fixture that renders
+// prettily tells you nothing — these are here to catch a title that overflows
+// and a Devanagari conjunct that silently fails to shape.
+
+export const ENTITY_FIXTURES = {
+  book: {
+    id: 12,
+    title: "व्यक्ती आणि वल्ली",
+    author: "पु. ल. देशपांडे",
+    category: "Marathi Literature",
+    language: "Marathi",
+    year: 1966,
+    description: "Character sketches that turned ordinary Pune neighbours into permanent residents of Marathi memory.",
+    tag_names: ["मराठी", "humour", "classics"],
+  },
+  blog: {
+    id: 48,
+    blog_title: "Why I stopped optimising my morning routine",
+    blog_description: "Six months of habit stacking, and the one change that actually held.",
+    blog_date: "2026-03-14",
+    blog_platform: "Substack",
+    language: "English",
+    tag_names: ["100_days_to_offload", "habits", "writing"],
+  },
+  sport: {
+    id: 9,
+    title: "Tata Mumbai Marathon",
+    date: "January 21, 2026",
+    place: "Mumbai",
+    distance: "42 Kms",
+    time: "04:38:12",
+    bib_number: "T14882",
+    slide_images: [],
+  },
+  trek: {
+    id: 3,
+    fort_name: "Harishchandragad",
+    trek_time: "7 Hrs",
+    endurance_level: "Hard",
+    date: "17-02-2019",
+    slide_images: [],
+  },
+  project: {
+    id: 5,
+    title: "Wanderer's Atlas",
+    subtitle: "An interactive globe of every trek and race, built on three.js",
+    description: "A WebGL globe that plots a decade of routes and lets you fly between them.",
+    status: "Live",
+    tech_stack: ["React", "three.js", "Supabase", "Cloudflare"],
+    image: null,
+    slide_images: [],
+  },
+  presentation: {
+    id: 2,
+    title: "Reading 100 books and what it did to my attention span",
+    description: "A talk given at a local meetup, built as an HTML deck.",
+    date: "2026-05-02",
+    tag_names: ["reading", "talks"],
+  },
+  microblog: {
+    id: 1487,
+    title: null,
+    text: "The fort was fogged in by the time we reached the plateau, so we sat with tea and waited. Half an hour later the whole Konkan opened up underneath us, and nobody said anything for a while.",
+    date: "2019-08-11",
+    post_type: "text",
+    source: "tumblr",
+    image_url: null,
+    tag_names: ["treks", "monsoon"],
+  },
+  tag: {
+    id: 42,
+    name: "मराठी",
+    display_name: "मराठी",
+    description: "Everything written in or about Marathi — books, posts and translations.",
+    category: "language",
+    color: "#f97316",
+    counts: { book: 41, microblog: 18, blog: 6 },
+    total: 65,
+  },
+  "ask-share": {
+    token: "a1b2c3d4",
+    title: "Which forts has he trekked in the monsoon, and which one was hardest?",
+    summary: "Eight monsoon treks, with Harishchandragad the hardest by endurance grade.",
+    turn_count: 4,
+    source_count: 7,
+  },
+};
+
+// A stats payload shaped like `GET /api/stats`, with enough filled in that
+// every fixed-page card has something real to render.
+export const STATS_FIXTURE = {
+  version: 1,
+  stats: {
+    booksCount: 118,
+    booksMarathi: 41,
+    booksEnglish: 77,
+    booksWithReviews: 23,
+    topGenres: [{ name: "philosophy" }, { name: "fiction" }, { name: "technology" }],
+    topBookTags: [
+      { name: "philosophy" }, { name: "marathi" }, { name: "fiction" }, { name: "technology" },
+      { name: "history" }, { name: "essays" }, { name: "biography" }, { name: "poetry" },
+    ],
+    booksPerYearSorted: [[2021, 12], [2022, 19], [2023, 24], [2024, 28], [2025, 21], [2026, 14]],
+    offloadCount: 63,
+    offloadPercentage: 63,
+    topPlatforms: [{ name: "Substack" }],
+    blogMonthCounts: [4, 6, 9, 5, 7, 3, 8, 6, 5, 9, 4, 7],
+    totalRaces: 17,
+    totalKmRun: 612,
+    bestTenKTime: "00:52:41",
+    bestHmTime: "02:01:19",
+    bestMarathonTime: "04:38:12",
+    racesPerYearSorted: [[2023, 3], [2024, 6], [2025, 5], [2026, 3]],
+    totalTreks: 21,
+    hardTreks: 6,
+    trekYearsActive: 7,
+    latestTrek: "Harishchandragad",
+    instaPostCount: 34,
+    totalPhotos: 212,
+    projectCount: 9,
+    presentationCount: 4,
+    certCount: 6,
+    orgCount: 3,
+    degreeCount: 2,
+    topSkills: ["React", "Node.js", "Cloudflare", "Postgres", "Python"],
+  },
+  micro: { total: 1643, longestStreak: 31, activeDays: 742, perYear: [120, 260, 410, 380, 290, 183] },
+  tags: [
+    { id: 1, name: "मराठी", color: "#f97316", total: 65 },
+    { id: 2, name: "treks", color: "#14b8a6", total: 48 },
+    { id: 3, name: "philosophy", color: "#a78bfa", total: 37 },
+    { id: 4, name: "running", color: "#dc2626", total: 31 },
+    { id: 5, name: "writing", color: "#3b82f6", total: 28 },
+    { id: 6, name: "books", color: "#fbbf24", total: 24 },
+    { id: 7, name: "monsoon", color: "#67e8f9", total: 19 },
+    { id: 8, name: "habits", color: "#7c3aed", total: 16 },
+    { id: 9, name: "forts", color: "#14b8a6", total: 14 },
+    { id: 10, name: "technology", color: "#1d4ed8", total: 12 },
+    { id: 11, name: "poetry", color: "#f97316", total: 11 },
+    { id: 12, name: "essays", color: "#a78bfa", total: 9 },
+    { id: 13, name: "cricket", color: "#14b8a6", total: 8 },
+    { id: 14, name: "design", color: "#3b82f6", total: 7 },
+    { id: 15, name: "travel", color: "#fbbf24", total: 6 },
+    { id: 16, name: "घर", color: "#dc2626", total: 5 },
+  ],
+};
+
+export default { ENTITY_FIXTURES, STATS_FIXTURE };

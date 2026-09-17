@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
-import { buildTrekMeta } from "../data/pageMeta";
+import { SITE_URL, buildTrekMeta } from "../data/pageMeta";
+import { ogCardUrl } from "../lib/og/paths";
 import { useTreks } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
@@ -73,7 +74,9 @@ const TrekPost = () => {
     enduranceLevel: trek.endurance_level,
     trekTime: trek.trek_time,
     date: trek.date,
-    image: trek.slideImages?.[0]?.url,
+    image: ogCardUrl({
+      kind: "trek", id: trek.id, fallbackSlug: "treks", siteUrl: SITE_URL,
+    }),
   });
 
   return (

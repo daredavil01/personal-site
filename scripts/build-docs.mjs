@@ -24,6 +24,8 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { readRoutes } from "./lib/routes.mjs";
+import { manifestFor } from "../src/data/routeManifest.js";
 import { createClient } from "@supabase/supabase-js";
 import { getStatsPayload } from "./lib/statsSource.mjs";
 
@@ -158,11 +160,19 @@ async function buildDataModel(supabase) {
 }
 
 function buildRoutes() {
-  const app = fs.readFileSync(path.join(ROOT, "src", "App.js"), "utf8");
-  const rows = [...app.matchAll(/<Route\s+path="([^"]+)"\s+element={<(\w+)/g)].map(
-    (m) => `| \`${m[1]}\` | ${m[2]} |`,
-  );
-  return ["| route | component |", "|---|---|", ...rows].join("\n");
+  // Scraped with the shared parser (src/data/routeScrape.js) that
+  // src/data/routeManifest.test.js also uses, so this table and the guard test
+  // can never disagree about what routes exist.
+  const rows = readRoutes(ROOT).map(({ route, component }) => {
+    const entry = manifestFor(route);
+    const og = entry
+      ? (entry.og.strategy === "page" && `page · ${entry.og.slug}`)
+        || (entry.og.strategy === "entity" && `entity · ${entry.og.kind}`)
+        || "none"
+      : "— (missing from routeManifest.js)";
+    return `| \`${route}\` | ${component} | ${og} |`;
+  });
+  return ["| route | component | share card |", "|---|---|---|", ...rows].join("\n");
 }
 
 async function buildTags(supabase) {

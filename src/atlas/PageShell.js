@@ -15,14 +15,21 @@ import useViewMode from "./useViewMode";
 const RegionShell = React.lazy(() => import("./regions/RegionShell"));
 
 const PageShell = ({
-  region, title, description, image, children,
+  region, title, description, image, imageAlt, ogType, children,
 }) => {
   const mode = useViewMode();
 
   if (mode === "atlas") {
     return (
       <Suspense fallback={null}>
-        <RegionShell region={region} title={title} description={description} image={image}>
+        <RegionShell
+          region={region}
+          title={title}
+          description={description}
+          image={image}
+          imageAlt={imageAlt}
+          ogType={ogType}
+        >
           {children}
         </RegionShell>
       </Suspense>
@@ -30,7 +37,7 @@ const PageShell = ({
   }
 
   return (
-    <Main title={title} description={description} image={image}>
+    <Main title={title} description={description} image={image} imageAlt={imageAlt} ogType={ogType}>
       {children}
     </Main>
   );
@@ -41,6 +48,8 @@ PageShell.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
   image: PropTypes.string,
+  imageAlt: PropTypes.string,
+  ogType: PropTypes.string,
   children: PropTypes.node,
 };
 

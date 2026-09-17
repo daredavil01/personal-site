@@ -13,7 +13,13 @@ import "../styles/classic.css"; // bare-element defaults, scoped to .classic-roo
 const Main = (props) => (
   <>
     <ScrollToTop />
-    <PageMeta title={props.title} description={props.description} image={props.image} />
+    <PageMeta
+      title={props.title}
+      description={props.description}
+      image={props.image}
+      imageAlt={props.imageAlt}
+      ogType={props.ogType}
+    />
 
     <div className="classic-root flex flex-col min-h-screen bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-body transition-colors duration-300">
       <a href="#main" className="skip-link">Skip to main content</a>
@@ -41,6 +47,8 @@ Main.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
   image: PropTypes.string,
+  imageAlt: PropTypes.string,
+  ogType: PropTypes.string,
 };
 
 Main.defaultProps = {
@@ -48,6 +56,8 @@ Main.defaultProps = {
   title: null,
   description: null,
   image: null,
+  imageAlt: null,
+  ogType: null,
 };
 
 export default Main;

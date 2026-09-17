@@ -6,7 +6,7 @@ import {
   SITE_URL,
   PAGE_META,
   DEFAULT_META,
-  DEFAULT_IMAGE,
+  OG_IMAGE,
   composeTitle,
   buildMicroblogMeta,
   buildTrekMeta,
@@ -16,7 +16,12 @@ import {
   buildProjectMeta,
   buildPresentationMeta,
   buildShareMeta,
+  buildTagMeta,
 } from "../src/data/pageMeta";
+// Share-card URLs. An item's og:image is derived from its kind and id, so this
+// layer needs no image columns and no extra requests — the photo is composited
+// INTO the card by functions/api/og, not referenced raw.
+import { ogCardUrl, ogMode, CARD_FALLBACKS } from "../src/lib/og/paths";
 
 function escAttr(str) {
   return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -83,6 +88,10 @@ export async function onRequest(context) {
 
   // Dynamic routes — resolve per-item OG meta.
   let dynamicMeta = null;
+  // Which share card this route's og:image should point at, as { kind, id }.
+  // Set alongside dynamicMeta so the image URL is derived once, below, instead
+  // of in each of the nine branches.
+  let cardRef = null;
 
   const mbMatch = pathname.match(/^\/micro-blog\/(\d+)$/);
   const trekMatch = pathname.match(/^\/treks\/(\d+)$/);
@@ -92,6 +101,10 @@ export async function onRequest(context) {
   const blogMatch = pathname.match(/^\/100-days-to-offload\/(\d+)$/);
   const presentationMatch = pathname.match(/^\/presentations\/(\d+)$/);
   const shareMatch = pathname.match(/^\/ask\/s\/([A-Za-z0-9]{8,64})$/);
+  // `/tags/:name` carries a URI-encoded, deliberately UN-slugified name so
+  // Devanagari survives (see tagPath in src/lib/api/tags.js). Until now this
+  // route had no per-item meta at all and every tag page unfurled as /tags.
+  const tagMatch = pathname.match(/^\/tags\/([^/]+)$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
   const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -106,23 +119,17 @@ export async function onRequest(context) {
     if (mbMatch) {
       try {
         const postRes = await fetch(
-          `${supabaseUrl}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date,image_url&limit=1`,
+          `${supabaseUrl}/rest/v1/microblog?id=eq.${mbMatch[1]}&select=title,text,date&limit=1`,
           { headers },
         );
         const posts = await postRes.json();
         const post = posts?.[0];
         if (post) {
-          let imageUrl = DEFAULT_IMAGE;
-          if (post.image_url) {
-            imageUrl = post.image_url.startsWith("http")
-              ? post.image_url
-              : `${supabaseUrl}/storage/v1/object/public/media${post.image_url}`;
-          }
+          cardRef = { kind: "microblog", id: mbMatch[1] };
           dynamicMeta = buildMicroblogMeta({
             title: post.title,
             text: post.text,
             date: post.date,
-            image: imageUrl,
           });
         }
       } catch (_) {
@@ -131,27 +138,18 @@ export async function onRequest(context) {
     } else if (trekMatch) {
       try {
         const trekRes = await fetch(
-          `${supabaseUrl}/rest/v1/treks?id=eq.${trekMatch[1]}&select=fort_name,trek_time,endurance_level,date,slide_images&limit=1`,
+          `${supabaseUrl}/rest/v1/treks?id=eq.${trekMatch[1]}&select=fort_name,trek_time,endurance_level,date&limit=1`,
           { headers },
         );
         const treks = await trekRes.json();
         const trek = treks?.[0];
         if (trek) {
-          let imageUrl = DEFAULT_IMAGE;
-          if (trek.slide_images && trek.slide_images.length > 0) {
-            const firstImg = trek.slide_images[0].url || trek.slide_images[0];
-            if (typeof firstImg === "string") {
-              imageUrl = firstImg.startsWith("http")
-                ? firstImg
-                : `${supabaseUrl}/storage/v1/object/public/media${firstImg}`;
-            }
-          }
+          cardRef = { kind: "trek", id: trekMatch[1] };
           dynamicMeta = buildTrekMeta({
             fortName: trek.fort_name,
             enduranceLevel: trek.endurance_level,
             trekTime: trek.trek_time,
             date: trek.date,
-            image: imageUrl,
           });
         }
       } catch (_) {
@@ -160,21 +158,13 @@ export async function onRequest(context) {
     } else if (sportMatch) {
       try {
         const sportRes = await fetch(
-          `${supabaseUrl}/rest/v1/sports?id=eq.${sportMatch[1]}&select=title,date,description,place,distance,time,slide_images&limit=1`,
+          `${supabaseUrl}/rest/v1/sports?id=eq.${sportMatch[1]}&select=title,date,description,place,distance,time&limit=1`,
           { headers },
         );
         const sports = await sportRes.json();
         const race = sports?.[0];
         if (race) {
-          let imageUrl = DEFAULT_IMAGE;
-          if (race.slide_images && race.slide_images.length > 0) {
-            const firstImg = race.slide_images[0].url || race.slide_images[0];
-            if (typeof firstImg === "string") {
-              imageUrl = firstImg.startsWith("http")
-                ? firstImg
-                : `${supabaseUrl}/storage/v1/object/public/media${firstImg}`;
-            }
-          }
+          cardRef = { kind: "sport", id: sportMatch[1] };
           dynamicMeta = buildSportMeta({
             title: race.title,
             distance: race.distance,
@@ -182,7 +172,6 @@ export async function onRequest(context) {
             date: race.date,
             time: race.time,
             description: race.description,
-            image: imageUrl,
           });
         }
       } catch (_) {
@@ -197,6 +186,7 @@ export async function onRequest(context) {
         const books = await bookRes.json();
         const book = books?.[0];
         if (book) {
+          cardRef = { kind: "book", id: bookMatch[1] };
           dynamicMeta = buildBookMeta({
             title: book.title,
             author: book.author,
@@ -209,7 +199,7 @@ export async function onRequest(context) {
     } else if (projectMatch) {
       try {
         const projectRes = await fetch(
-          `${supabaseUrl}/rest/v1/projects?id=eq.${projectMatch[1]}&select=title,subtitle,description,image,slide_images&limit=1`,
+          `${supabaseUrl}/rest/v1/projects?id=eq.${projectMatch[1]}&select=title,subtitle,description&limit=1`,
           { headers },
         );
         const projects = await projectRes.json();
@@ -217,22 +207,15 @@ export async function onRequest(context) {
         // draft never leaks its title into a crawler's card.
         const project = projects?.[0];
         if (project) {
-          // `image` is optional since 0005; the first screenshot stands in for it,
-          // matching coverFor() on the client so both cards show the same picture.
-          const cover = project.image
-            || (project.slide_images ?? []).find((s) => s?.url)?.url
-            || "";
-          let imageUrl = DEFAULT_IMAGE;
-          if (cover) {
-            imageUrl = cover.startsWith("http")
-              ? cover
-              : `${supabaseUrl}/storage/v1/object/public/media${cover}`;
-          }
+          // The cover / first screenshot is no longer resolved here: the share
+          // card composites it itself (src/lib/og/model.js does the same
+          // image || first-slide fallback the client's coverFor() does), so
+          // this layer only needs text.
+          cardRef = { kind: "project", id: projectMatch[1] };
           dynamicMeta = buildProjectMeta({
             title: project.title,
             subtitle: project.subtitle,
             description: project.description,
-            image: imageUrl,
           });
         }
       } catch (_) {
@@ -247,6 +230,7 @@ export async function onRequest(context) {
         const decks = await deckRes.json();
         const deck = decks?.[0];
         if (deck) {
+          cardRef = { kind: "presentation", id: presentationMatch[1] };
           dynamicMeta = buildPresentationMeta({ title: deck.title, description: deck.description });
         }
       } catch (_) {
@@ -264,6 +248,7 @@ export async function onRequest(context) {
         });
         const share = await shareRes.json();
         if (share?.title) {
+          cardRef = { kind: "ask-share", id: shareMatch[1] };
           dynamicMeta = buildShareMeta({ title: share.title, summary: share.summary });
         }
       } catch (_) {
@@ -278,9 +263,35 @@ export async function onRequest(context) {
         const blogs = await blogRes.json();
         const blog = blogs?.[0];
         if (blog) {
+          cardRef = { kind: "blog", id: blogMatch[1] };
           dynamicMeta = buildBlogMeta({
             title: blog.blog_title,
             description: blog.blog_description,
+          });
+        }
+      } catch (_) {
+        // Ignored
+      }
+    } else if (tagMatch) {
+      try {
+        // Names are stored lowercased (CLAUDE.md), and url.pathname arrives
+        // percent-encoded, so decode before matching.
+        const name = decodeURIComponent(tagMatch[1]).toLowerCase();
+        const tagRes = await fetch(
+          `${supabaseUrl}/rest/v1/tags?name=eq.${encodeURIComponent(name)}&select=id,name,display_name,description,category&limit=1`,
+          { headers },
+        );
+        const tags = await tagRes.json();
+        const tag = tags?.[0];
+        if (tag) {
+          // The card is keyed on the tag's numeric id, not its name: that keeps
+          // the image path ASCII while the route keeps its Devanagari name.
+          cardRef = { kind: "tag", id: tag.id };
+          dynamicMeta = buildTagMeta({
+            name: tag.name,
+            displayName: tag.display_name,
+            description: tag.description,
+            category: tag.category,
           });
         }
       } catch (_) {
@@ -311,18 +322,52 @@ export async function onRequest(context) {
   const fullTitle = composeTitle(meta.title);
   const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
+  // The share card. `meta.image` is always the committed fallback, so this only
+  // ever upgrades it to the on-demand URL — and OG_MODE=static skips the
+  // upgrade, which is the whole kill-switch. The static URL is emitted DIRECTLY
+  // rather than relying on the endpoint's redirect, because several image
+  // scrapers do not follow redirects.
+  const mode = ogMode(env);
+  const cardTarget = cardRef
+    || (meta.ogSlug ? { kind: "page", id: meta.ogSlug } : null);
+  const imageUrl = cardTarget
+    ? ogCardUrl({
+      kind: cardTarget.kind,
+      id: cardTarget.id,
+      // A fixed page falls back to its OWN card; an entity falls back to its
+      // section's. CARD_FALLBACKS.page is "home", which is only correct when
+      // the slug is unknown.
+      fallbackSlug: cardTarget.kind === "page"
+        ? cardTarget.id
+        : (CARD_FALLBACKS[cardTarget.kind] || "home"),
+      siteUrl: SITE_URL,
+      mode,
+    })
+    : meta.image;
+  const imageAlt = meta.imageAlt || meta.description;
+  const ogType = meta.type || "website";
+
+  // Must stay tag-for-tag identical to src/components/Template/PageMeta.js.
+  // og:image:width/height stop platforms guessing at the crop; og:type was
+  // hardcoded "website" for every route on the site, including articles.
+  // og:site_name is deliberately absent: index.html carries it globally, and
+  // emitting it here too puts two of them in every page's head.
   const tags = `
     <link rel="canonical" href="${escAttr(canonicalUrl)}">
     <meta name="description" content="${escAttr(meta.description)}">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="${escAttr(ogType)}">
     <meta property="og:url" content="${escAttr(canonicalUrl)}">
     <meta property="og:title" content="${escAttr(fullTitle)}">
     <meta property="og:description" content="${escAttr(meta.description)}">
-    <meta property="og:image" content="${escAttr(meta.image)}">
+    <meta property="og:image" content="${escAttr(imageUrl)}">
+    <meta property="og:image:width" content="${OG_IMAGE.width}">
+    <meta property="og:image:height" content="${OG_IMAGE.height}">
+    <meta property="og:image:alt" content="${escAttr(imageAlt)}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escAttr(fullTitle)}">
     <meta name="twitter:description" content="${escAttr(meta.description)}">
-    <meta name="twitter:image" content="${escAttr(meta.image)}">`;
+    <meta name="twitter:image" content="${escAttr(imageUrl)}">
+    <meta name="twitter:image:alt" content="${escAttr(imageAlt)}">`;
 
   return new HTMLRewriter()
     .on("title", new TitleRewriter(fullTitle))

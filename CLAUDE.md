@@ -93,6 +93,59 @@ Regenerate with `npm run docs:build` (or `npm run ask:index`, which calls it).
 Generated blocks live between `<!-- generated:NAME start/end -->` markers; prose
 outside them survives. See `docs/README.md`.
 
+## Per-Route Meta and OG Cards
+
+**Every route carries its own 1200×630 share card. A new route is not shippable
+until it does** — a route that unfurls as a generic logo is a bug, and
+`src/data/routeManifest.test.js` fails the build if one ships.
+
+Three files move together when you add a route to `src/App.js`:
+
+1. **`src/data/routeManifest.js`** — one declarative entry (`path`, `component`,
+   `meta`, `og.strategy`, `indexable`). The guard test asserts **set equality**
+   against `src/App.js`, so a route that is added *or deleted* without updating
+   this list fails. `docs/routes.md` is generated from it.
+2. **`src/data/pageMeta.js`** — `title`, `description`, `image`, `imageAlt`,
+   `ogSlug` and `type` for a fixed route; a `build<Thing>Meta` builder for a
+   parameterised one. **This module must stay import-free** (no imports, no
+   `process.env`, plain literals) because esbuild bundles it into the Worker.
+   It is read by `src/components/Template/PageMeta.js` (client) *and*
+   `functions/_middleware.js` (crawlers) — never add a tag to one without the
+   other. `og:site_name` belongs to neither: `index.html` carries it globally.
+3. **The card.** Add a layout in `src/lib/og/layouts/`, register the kind in
+   `src/lib/og/registry.js`, then `npm run og:fallbacks` and commit the
+   resulting `public/og/<slug>.png`.
+
+**Each section gets its own layout, not a shared template** — the card should be
+recognisable as that section before the text is readable. Cards must survive a
+WhatsApp thumbnail (~300 px): headline ≤ 6 words at ≥ 64 px, at most three
+numbers, one accent colour, photos duotoned. Read stats from `computeSiteStats`,
+colours from `colorForTag`, art from `postArt` — never recompute. A stat with no
+value is **omitted**, never rendered as `0`.
+
+Layout code lives in `src/lib/og/`, **not** under `functions/` (Pages routes
+every file there), and contains **no JSX and no React** — satori trees are built
+with the `h()` hyperscript in `src/lib/og/h.js`, because the Pages Functions
+bundler does not transform JSX.
+
+**Cards render on demand** at `/api/og/<kind>/<id>.png` and are edge-cached for
+a day. Two things to know before touching that:
+
+- **Workers Free allows 10 ms CPU per request and a render takes ~436 ms**, so
+  this may return error 1102 in production. `wrangler pages dev` does not
+  enforce the limit, so local success proves nothing. `OG_MODE=static` in the
+  Pages environment is the one-variable retreat to the committed cards.
+- **satori is pinned to 0.32.0 on purpose.** 0.33+ adds HarfBuzz (correct
+  Devanagari conjuncts) but cannot run on Workers at all. The cost is that
+  Marathi conjuncts render wrong. Do not upgrade satori without reading
+  `docs/og-cards.md`.
+
+Bump `LAYOUT_VERSION` in `src/lib/og/tokens.js` when a layout changes — it is
+part of the edge cache key, so bumping it is what makes cached cards re-render.
+
+`og:image` is always **PNG at 1200×630**. SVG is rejected by WhatsApp, Facebook,
+LinkedIn, X, Slack and iMessage.
+
 ## Second Brain (/ask)
 
 Natural-language chat over the whole content store.
@@ -232,6 +285,10 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Tag API / admin / public pages | `src/lib/api/tags.js`, `src/pages/admin/TagManager.js`, `src/pages/TagsHub.js`, `src/pages/TagDetail.js` |
 | Tag colors + micro-blog art | `src/lib/generativeArt.js` |
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
+| Route manifest (meta + card guard) | `src/data/routeManifest.js` |
+| OG card layouts / models / figures | `src/lib/og/` |
+| OG card endpoint (on demand) | `functions/api/og/[[path]].js` |
+| Committed fallback cards + card fonts | `public/og/` |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Second brain endpoint | `functions/api/ask.js` |
@@ -261,7 +318,7 @@ monthly digest of blogs / treks / marathons / micro-posts — uses
 
 - Add the entry to the **top** of the file following the versioning rules below.
 - Choose the version bump:
-  - **Major** (e.g. `v5.0.0` → `v6.0.0`): new page addition, major code refactor, or full redesign.
+  - **Major** (e.g. `v5.0.0` → `v6.0.0`): new page addition, major code refactor, or full redesign. A new route counts as a new page — and it also needs its own share card (see **Per-Route Meta and OG Cards**).
   - **Minor** (e.g. `v5.1.0` → `v5.2.0`): new features, new components, data updates, content additions.
   - **Patch** (e.g. `v5.1.0` → `v5.1.1`): bug fixes, copy/style tweaks, metadata changes, documentation updates.
 

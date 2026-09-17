@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import { useTags } from "../context/ContentContext";
 import { getTagEntities } from "../lib/api/tags";
+import { SITE_URL } from "../data/pageMeta";
+import { ogCardUrl } from "../lib/og/paths";
 import { colorForTag } from "../lib/generativeArt";
 import { ErrorBlock, LoadingBlock } from "../components/common/AsyncStates";
 
@@ -69,6 +71,12 @@ const TagDetail = () => {
       region="person"
       title={`#${label}`}
       description={tag?.description || `Everything on the site tagged #${label} — ${items.length} item${items.length === 1 ? "" : "s"}.`}
+      imageAlt={`Tag card for ${label}`}
+      // Keyed on the tag's numeric id so the image path stays ASCII while the
+      // route keeps its un-slugified (often Devanagari) name.
+      image={tag?.id
+        ? ogCardUrl({ kind: "tag", id: tag.id, fallbackSlug: "tags", siteUrl: SITE_URL })
+        : undefined}
     >
       <article className="flex flex-col gap-10 w-full max-w-3xl">
         <BackLink />

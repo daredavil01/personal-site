@@ -20,7 +20,9 @@ export function hashString(str) {
 }
 
 // mulberry32: a tiny seeded PRNG returning floats in [0, 1).
-function seededRandom(seed) {
+// Exported for src/lib/og/layouts/figures.js, which seeds card figures the same
+// way this file seeds post art, so a fort list always draws the same ridge.
+export function seededRandom(seed) {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
