@@ -33,6 +33,10 @@ patch for fixes and tweaks.
 
 ### Fixed
 
+- **The race card rendered completely blank** (`src/lib/og/primitives.js`): `Frame`'s bleed slot was in normal flow, so a layout that passed a full-size `position: relative` element there — `sportCard` and the photo branch of `microblogCard` both did — consumed the frame's flex row and pushed the entire content column off the canvas. The slot is now always taken out of flow and sized to the card, so no layout has to remember.
+- **`/stats` drew its sparklines on top of its numbers** (`src/lib/og/layouts/page.js`): the six-tile number wall was 1000px wide while the charts sat at `right: 64`, so the third column ran underneath them and "CERTS" was unreadable. The wall is constrained to the left column and the charts are narrower.
+- **Trek cards fought themselves** (`src/lib/og/layouts/entity.js`): the ridgeline was drawn over the photo, putting two competing mountain silhouettes on one card, and the upward scrim left the headline on the bright part of the sky. With a photo the photo is the mountain (and the scrim runs sideways, behind the text); without one the ridge carries the card.
+- **Marathi tag cards printed their own URL as percent-escapes** (`src/lib/og/model.js`): the footer showed `sankettambare.in/tags/%E0%A4%AE%E0%A4%B0...` because the display path was URI-encoded. The footer is display text, never a link target, so it now carries the readable name — and a long one no longer runs under the item count.
 - **`.dev.vars` is now gitignored** — wrangler reads it for local Function environment variables and it can hold secrets, but nothing was stopping it being committed.
 - **`wrangler` is a declared devDependency** — `npm run dev:ask` has always assumed it was installed without the repo ever saying so.
 

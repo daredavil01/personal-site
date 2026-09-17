@@ -297,7 +297,23 @@ export const Frame = ({ accent = COLORS.violetLight, background, children, bleed
       overflow: "hidden",
     },
   },
-  bleed,
+  // The bleed slot is always taken out of flow. A layout that passed a
+  // `position: relative` element here (PhotoPanel at full card size, say) would
+  // otherwise consume the frame's flex row and push the content column off the
+  // canvas — which rendered the race card completely blank. Sized to the full
+  // card so absolutely-positioned figures inside still offset against it.
+  bleed
+    ? h("div", {
+      style: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        display: "flex",
+        width: CARD.width,
+        height: CARD.height,
+      },
+    }, bleed)
+    : null,
   h("div", {
     style: {
       display: "flex",

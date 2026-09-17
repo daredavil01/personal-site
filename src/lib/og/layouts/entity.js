@@ -76,7 +76,11 @@ const bookCard = (m) => Frame({
   ],
 });
 
-// Numbered essay plate: the challenge day as an oversized outline numeral.
+// Essay plate with the challenge's "100" as an oversized watermark.
+//
+// Deliberately the challenge mark, not a per-post day number: a `blogs` row has
+// no position in the sequence, and deriving one would mean counting every
+// earlier post on the crawler path. The eyebrow already says which challenge.
 const blogCard = (m) => Frame({
   accent: m.accent,
   bleed: h("div", {
@@ -92,7 +96,7 @@ const blogCard = (m) => Frame({
       color: m.accent,
       opacity: 0.14,
     },
-  }, m.dayLabel || "100"),
+  }, "100"),
   children: [
     col(20, Eyebrow(m.eyebrow, m.accent), TitleBlock(m.title, { clamp: 3 })),
     col(

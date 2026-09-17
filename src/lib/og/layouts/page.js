@@ -92,11 +92,11 @@ const FIGURES = {
     const charts = series.map(normalise).filter((s) => s.length > 1).slice(0, 4);
     if (!charts.length) return null;
     return h("div", {
-      style: { position: "absolute", right: 64, bottom: 118, display: "flex", gap: 22 },
+      style: { position: "absolute", right: 64, bottom: 124, display: "flex", gap: 16 },
     }, charts.map((values, i) => svgShape(
-      sparkBars(values, { width: 120, height: 84, accent: [COLORS.cyan, COLORS.teal, COLORS.amber, COLORS.violetLight][i] }),
-      120,
-      84,
+      sparkBars(values, { width: 92, height: 76, accent: [COLORS.cyan, COLORS.teal, COLORS.amber, COLORS.violetLight][i] }),
+      92,
+      76,
     )));
   },
 
@@ -128,10 +128,10 @@ FIGURES.projects = (m) => tileGrid(m.photos, { accent: m.accent, columns: 2, til
 // to read as texture rather than as six separate figures.
 const NumberWall = (stats, accent) => h(
   "div",
-  { style: { display: "flex", flexWrap: "wrap", width: 1000, gap: 18 } },
+  { style: { display: "flex", flexWrap: "wrap", width: 600, gap: 18 } },
   stats.slice(0, 6).map((stat, i) => h(
     "div",
-    { key: i, style: { display: "flex", flexDirection: "column", gap: 2, width: 300 } },
+    { key: i, style: { display: "flex", flexDirection: "column", gap: 2, width: 188 } },
     h("div", {
       style: {
         display: "flex", fontFamily: FONTS.body, fontWeight: 700, fontSize: 44, lineHeight: 1, color: accent,
