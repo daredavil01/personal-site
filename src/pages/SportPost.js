@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildSportMeta } from "../data/pageMeta";
+import { firstSlideImage } from "../lib/og/paths";
 import { useSports } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
@@ -66,7 +67,7 @@ const SportPost = () => {
     date: race.date,
     time: race.time,
     description: race.description,
-    image: race.slideImages?.[0]?.url,
+    image: firstSlideImage(race.slideImages),
   });
 
   return (

@@ -62,7 +62,12 @@ const BookPost = () => {
   }
 
   // Shared with the Cloudflare middleware so crawler + client OG tags match.
-  const meta = buildBookMeta({ title: book.title, author: book.author, description: book.description });
+  // No image argument: books have no photo, so this unfurls as the shelf card.
+  const meta = buildBookMeta({
+    title: book.title,
+    author: book.author,
+    description: book.description,
+  });
 
   // The bibliographic line. Most of these come from the metadata backfill and
   // are missing for the Marathi half of the shelf, so build it from what exists.

@@ -35,7 +35,10 @@ const PresentationPost = () => {
     );
   }
 
-  const meta = buildPresentationMeta({ title: deck.title, description: deck.description });
+  const meta = buildPresentationMeta({
+    title: deck.title,
+    description: deck.description,
+  });
   const fullscreen = () => frameWrap.current?.requestFullscreen?.();
 
   return (

@@ -36,3 +36,5 @@ paragraph matters, keep it outside.
 
 `npm run ask:index` runs this as its last step, so rebuilding the search index
 and refreshing the docs are the same command.
+
+- `og-cards.md` — the per-route share cards: how they render, the Workers CPU bet, the Devanagari limitation, and development status.

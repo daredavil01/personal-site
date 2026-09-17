@@ -48,7 +48,13 @@ const MicroBlogPost = () => {
   const body = post?.text || post?.title || "";
   // Shared with the Cloudflare middleware so crawler + client OG tags match.
   const meta = post
-    ? buildMicroblogMeta({ title: post.title, text: post.text, date: post.date, image: post.imageUrl })
+    ? buildMicroblogMeta({
+      title: post.title,
+      text: post.text,
+      date: post.date,
+      // Photo posts unfurl as the photo; the rest as the micro-blog card.
+      image: post.imageUrl,
+    })
     : { title: "Post", description: "A micro-blog post.", image: undefined };
 
   return (

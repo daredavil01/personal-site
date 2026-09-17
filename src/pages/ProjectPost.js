@@ -82,6 +82,7 @@ const ProjectPost = () => {
     title: project.title,
     subtitle: project.subtitle,
     description: project.desc,
+    // The same cover the page shows, so a share never disagrees with the page.
     image: cover,
   });
 

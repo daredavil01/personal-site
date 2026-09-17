@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Main from "../layouts/Main";
+import { SITE_URL } from "../data/pageMeta";
+import { ogStaticUrl, CARD_FALLBACKS } from "../lib/og/paths";
 import AnswerBody from "../components/Ask/AnswerBody";
 import { entityLabel } from "../data/askConfig";
 import { bumpShareView, getShare } from "../lib/api/askShares";
@@ -145,6 +147,9 @@ const AskShare = () => {
     <Main
       title={share?.title ? `${share.title} · Ask the archive` : "A shared conversation"}
       description={share?.summary || "A conversation with Sanket Tambare's archive."}
+      imageAlt="A shared conversation with the archive"
+      ogType="article"
+      image={ogStaticUrl(CARD_FALLBACKS["ask-share"], SITE_URL)}
     >
       <article className="flex flex-col gap-6 max-w-3xl">
         <header className="flex flex-col gap-2">

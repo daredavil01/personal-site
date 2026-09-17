@@ -14,11 +14,19 @@
 <meta property="og:title" content="The Writing Ledger — a six-year word count" />
 <meta property="og:description" content="Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform." />
 <meta property="og:url" content="https://sankettambare.in/writing-ledger.html" />
-<meta property="og:image" content="https://sankettambare.in/images/logo.png" />
+<!-- The generated card, the same one every other route carries. This is a
+     static file with no way to know which host is serving it, so unlike the
+     React routes it cannot re-host onto a preview origin (cardUrlForOrigin in
+     src/lib/og/paths.js) — on a Pages preview this stays production's URL. -->
+<meta property="og:image" content="https://sankettambare.in/og/writing-ledger.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Six years of published words, counted month by month" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="The Writing Ledger — a six-year word count" />
 <meta name="twitter:description" content="Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform." />
-<meta name="twitter:image" content="https://sankettambare.in/images/logo.png" />
+<meta name="twitter:image" content="https://sankettambare.in/og/writing-ledger.png" />
+<meta name="twitter:image:alt" content="Six years of published words, counted month by month" />
 <style>
   /* This page is served straight from /public and shares no CSS with the React
      app, so the link back to the site is styled here from the page's own

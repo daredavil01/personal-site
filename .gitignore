@@ -61,3 +61,6 @@ supabase/.temp/
 
 # wrangler pages dev local state
 .wrangler/
+
+# Local Pages Functions env (wrangler reads this; may hold secrets)
+.dev.vars

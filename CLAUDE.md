@@ -93,6 +93,85 @@ Regenerate with `npm run docs:build` (or `npm run ask:index`, which calls it).
 Generated blocks live between `<!-- generated:NAME start/end -->` markers; prose
 outside them survives. See `docs/README.md`.
 
+## Per-Route Meta and OG Cards
+
+**Every route unfurls with a real 1200×630 image, and a new route is not
+shippable until it does** — a route that unfurls as a generic logo is a bug, and
+`src/data/routeManifest.test.js` fails the build if one ships.
+
+Two kinds of image, and **nothing renders at request time**:
+
+- **A fixed route** advertises its own generated card, committed to
+  `public/og/<slug>.png`.
+- **A detail route** advertises **the row's own photo** when it has one (treks,
+  races, projects, photo micro-posts) and its section's committed card when it
+  does not (books, blogs, decks, tags, shares — none of which have an image).
+
+Three files move together when you add a route to `src/App.js`:
+
+1. **`src/data/routeManifest.js`** — one declarative entry (`path`, `component`,
+   `meta`, `og.strategy`, `indexable`). The guard test asserts **set equality**
+   against `src/App.js`, so a route that is added *or deleted* without updating
+   this list fails. `docs/routes.md` is generated from it.
+2. **`src/data/pageMeta.js`** — `title`, `description`, `image`, `imageAlt`,
+   `ogSlug` and `type` for a fixed route; a `build<Thing>Meta` builder for a
+   parameterised one, whose `image` argument is the row's photo and whose
+   fallback is the section card. **This module must stay import-free** (no
+   imports, no `process.env`, plain literals) because esbuild bundles it into
+   the Worker. It is read by `src/components/Template/PageMeta.js` (client)
+   *and* `functions/_middleware.js` (crawlers) — never add a tag to one without
+   the other. `og:site_name` belongs to neither: `index.html` carries it
+   globally.
+3. **The card.** Add a layout to `FIGURES` in `src/lib/og/layouts/page.js`, its
+   slug to `PAGE_SLUGS` in `src/lib/og/model.js`, then `npm run og:fallbacks`
+   and commit the resulting `public/og/<slug>.png`.
+
+**Each section gets its own figure, not a shared template** — the card should be
+recognisable as that section before the text is readable. Cards must survive a
+WhatsApp thumbnail (~300 px): headline ≤ 6 words at ≥ 64 px, at most three
+numbers, one accent colour, photos duotoned. Read stats from `computeSiteStats`,
+colours from `colorForTag`, art from `postArt` — never recompute, and never
+hardcode a number into a figure. A stat with no value is **omitted**, never
+rendered as `0`; a figure with no data renders **nothing**, never a placeholder.
+
+Layout code lives in `src/lib/og/`, **not** under `functions/` (Pages routes
+every file there), and contains **no JSX and no React** — satori trees are built
+with the `h()` hyperscript in `src/lib/og/h.js`.
+
+Four things to know before touching this:
+
+- **Do not move rendering back to the edge.** It was there, on demand at
+  `/api/og/…`; Workers Free allows 10 ms CPU per request and a render costs
+  ~400 ms, so production returned 1102 and links unfurled with **no image at
+  all**. `wrangler pages dev` does not enforce the limit, so local success
+  proves nothing. satori and resvg are devDependencies for that reason.
+- **The numbers are baked in and go stale.** Re-run `npm run og:fallbacks`
+  after content moves, the way `npm run blogs:wordcount` is re-run. There is no
+  nightly job by choice.
+- **resvg cannot decode WebP**, and `/admin` uploads `.webp` whenever a source
+  image has transparency — satori embeds it and resvg silently draws nothing.
+  The generator only inlines `image/(jpeg|png|gif)`.
+- **satori is pinned to 0.32.0.** 0.33+ adds HarfBuzz (correct Devanagari
+  conjuncts) but could not run on Workers. That constraint is gone now that
+  nothing renders at the edge, so it is upgradable — read `docs/og-cards.md`
+  first.
+
+**Card URLs are re-hosted onto the serving origin** by `cardUrlForOrigin`
+(`src/lib/og/paths.js`) — `url.origin` in the middleware, `window.location.origin`
+on the client. `pageMeta.js` has to hard-code `SITE_URL`, so without this a Pages
+**preview** advertises production's card; and a missing `/og/*.png` does not 404,
+it gets the SPA shell as `200 text/html`, so the unfurl silently shows no image.
+`canonical` and `og:url` stay on `SITE_URL`, and a row's own photo is never
+rewritten. `public/writing-ledger.html` authors its tags by hand (the middleware
+skips any path with a dot) and so cannot re-host.
+
+`og:image` is **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
+LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**
+for our own cards (`isCardImage`), never for a row's photo — asserting a size we
+do not know makes every platform crop it wrong. Keep a card **under 300 KB**, the
+same cap as any other image on the site; the three portrait/photo cards are
+currently over it (see `docs/og-cards.md`).
+
 ## Second Brain (/ask)
 
 Natural-language chat over the whole content store.
@@ -232,6 +311,11 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Tag API / admin / public pages | `src/lib/api/tags.js`, `src/pages/admin/TagManager.js`, `src/pages/TagsHub.js`, `src/pages/TagDetail.js` |
 | Tag colors + micro-blog art | `src/lib/generativeArt.js` |
 | Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
+| Route manifest (meta + card guard) | `src/data/routeManifest.js` |
+| OG card layouts / models / figures | `src/lib/og/` |
+| OG card generator | `scripts/og-preview.mjs` (`npm run og:fallbacks`) |
+| The committed share cards | `public/og/*.png` |
+| Card fonts (build-time only) | `scripts/og-fonts/` |
 | Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Second brain endpoint | `functions/api/ask.js` |
@@ -261,7 +345,7 @@ monthly digest of blogs / treks / marathons / micro-posts — uses
 
 - Add the entry to the **top** of the file following the versioning rules below.
 - Choose the version bump:
-  - **Major** (e.g. `v5.0.0` → `v6.0.0`): new page addition, major code refactor, or full redesign.
+  - **Major** (e.g. `v5.0.0` → `v6.0.0`): new page addition, major code refactor, or full redesign. A new route counts as a new page — and it also needs its own share card (see **Per-Route Meta and OG Cards**).
   - **Minor** (e.g. `v5.1.0` → `v5.2.0`): new features, new components, data updates, content additions.
   - **Patch** (e.g. `v5.1.0` → `v5.1.1`): bug fixes, copy/style tweaks, metadata changes, documentation updates.
 

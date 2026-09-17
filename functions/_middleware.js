@@ -6,7 +6,7 @@ import {
   SITE_URL,
   PAGE_META,
   DEFAULT_META,
-  DEFAULT_IMAGE,
+  OG_IMAGE,
   composeTitle,
   buildMicroblogMeta,
   buildTrekMeta,
@@ -16,7 +16,14 @@ import {
   buildProjectMeta,
   buildPresentationMeta,
   buildShareMeta,
+  buildTagMeta,
 } from "../src/data/pageMeta";
+// Share-card URLs. A fixed route's og:image is its committed card (carried on
+// the meta entry); a detail route's is the ROW'S OWN photo when it has one,
+// which is what these helpers resolve out of a PostgREST row.
+import {
+  isCardImage, cardUrlForOrigin, storageUrl, firstSlideImage,
+} from "../src/lib/og/paths";
 
 function escAttr(str) {
   return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -92,6 +99,10 @@ export async function onRequest(context) {
   const blogMatch = pathname.match(/^\/100-days-to-offload\/(\d+)$/);
   const presentationMatch = pathname.match(/^\/presentations\/(\d+)$/);
   const shareMatch = pathname.match(/^\/ask\/s\/([A-Za-z0-9]{8,64})$/);
+  // `/tags/:name` carries a URI-encoded, deliberately UN-slugified name so
+  // Devanagari survives (see tagPath in src/lib/api/tags.js). Until now this
+  // route had no per-item meta at all and every tag page unfurled as /tags.
+  const tagMatch = pathname.match(/^\/tags\/([^/]+)$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
   const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -112,17 +123,11 @@ export async function onRequest(context) {
         const posts = await postRes.json();
         const post = posts?.[0];
         if (post) {
-          let imageUrl = DEFAULT_IMAGE;
-          if (post.image_url) {
-            imageUrl = post.image_url.startsWith("http")
-              ? post.image_url
-              : `${supabaseUrl}/storage/v1/object/public/media${post.image_url}`;
-          }
           dynamicMeta = buildMicroblogMeta({
             title: post.title,
             text: post.text,
             date: post.date,
-            image: imageUrl,
+            image: storageUrl(post.image_url, supabaseUrl),
           });
         }
       } catch (_) {
@@ -137,21 +142,12 @@ export async function onRequest(context) {
         const treks = await trekRes.json();
         const trek = treks?.[0];
         if (trek) {
-          let imageUrl = DEFAULT_IMAGE;
-          if (trek.slide_images && trek.slide_images.length > 0) {
-            const firstImg = trek.slide_images[0].url || trek.slide_images[0];
-            if (typeof firstImg === "string") {
-              imageUrl = firstImg.startsWith("http")
-                ? firstImg
-                : `${supabaseUrl}/storage/v1/object/public/media${firstImg}`;
-            }
-          }
           dynamicMeta = buildTrekMeta({
             fortName: trek.fort_name,
             enduranceLevel: trek.endurance_level,
             trekTime: trek.trek_time,
             date: trek.date,
-            image: imageUrl,
+            image: firstSlideImage(trek.slide_images, supabaseUrl),
           });
         }
       } catch (_) {
@@ -166,15 +162,6 @@ export async function onRequest(context) {
         const sports = await sportRes.json();
         const race = sports?.[0];
         if (race) {
-          let imageUrl = DEFAULT_IMAGE;
-          if (race.slide_images && race.slide_images.length > 0) {
-            const firstImg = race.slide_images[0].url || race.slide_images[0];
-            if (typeof firstImg === "string") {
-              imageUrl = firstImg.startsWith("http")
-                ? firstImg
-                : `${supabaseUrl}/storage/v1/object/public/media${firstImg}`;
-            }
-          }
           dynamicMeta = buildSportMeta({
             title: race.title,
             distance: race.distance,
@@ -182,7 +169,7 @@ export async function onRequest(context) {
             date: race.date,
             time: race.time,
             description: race.description,
-            image: imageUrl,
+            image: firstSlideImage(race.slide_images, supabaseUrl),
           });
         }
       } catch (_) {
@@ -197,6 +184,8 @@ export async function onRequest(context) {
         const books = await bookRes.json();
         const book = books?.[0];
         if (book) {
+          // Books have no photo of any kind, so this always unfurls as the
+          // shelf card — the builder's own fallback.
           dynamicMeta = buildBookMeta({
             title: book.title,
             author: book.author,
@@ -217,22 +206,14 @@ export async function onRequest(context) {
         // draft never leaks its title into a crawler's card.
         const project = projects?.[0];
         if (project) {
-          // `image` is optional since 0005; the first screenshot stands in for it,
-          // matching coverFor() on the client so both cards show the same picture.
-          const cover = project.image
-            || (project.slide_images ?? []).find((s) => s?.url)?.url
-            || "";
-          let imageUrl = DEFAULT_IMAGE;
-          if (cover) {
-            imageUrl = cover.startsWith("http")
-              ? cover
-              : `${supabaseUrl}/storage/v1/object/public/media${cover}`;
-          }
           dynamicMeta = buildProjectMeta({
             title: project.title,
             subtitle: project.subtitle,
             description: project.description,
-            image: imageUrl,
+            // Cover, else first screenshot — the same order as coverFor() in
+            // src/components/Projects/projectMedia.js.
+            image: storageUrl(project.image, supabaseUrl)
+              || firstSlideImage(project.slide_images, supabaseUrl),
           });
         }
       } catch (_) {
@@ -286,6 +267,28 @@ export async function onRequest(context) {
       } catch (_) {
         // Ignored
       }
+    } else if (tagMatch) {
+      try {
+        // Names are stored lowercased (CLAUDE.md), and url.pathname arrives
+        // percent-encoded, so decode before matching.
+        const name = decodeURIComponent(tagMatch[1]).toLowerCase();
+        const tagRes = await fetch(
+          `${supabaseUrl}/rest/v1/tags?name=eq.${encodeURIComponent(name)}&select=name,display_name,description,category&limit=1`,
+          { headers },
+        );
+        const tags = await tagRes.json();
+        const tag = tags?.[0];
+        if (tag) {
+          dynamicMeta = buildTagMeta({
+            name: tag.name,
+            displayName: tag.display_name,
+            description: tag.description,
+            category: tag.category,
+          });
+        }
+      } catch (_) {
+        // Ignored
+      }
     }
   }
 
@@ -311,18 +314,41 @@ export async function onRequest(context) {
   const fullTitle = composeTitle(meta.title);
   const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
+  // The share image, already resolved: a fixed route's PAGE_META entry carries
+  // its committed card, and each builder above fell back to its section's card
+  // when the row had no photo. There is nothing to render and nothing to fetch.
+  //
+  // It is re-hosted onto the origin serving this request, so a Pages preview
+  // advertises its OWN cards rather than production's — see cardUrlForOrigin.
+  const imageUrl = cardUrlForOrigin(meta.image, url.origin, SITE_URL);
+  const imageAlt = meta.imageAlt || meta.description;
+  const ogType = meta.type || "website";
+
+  // Dimensions are declared only for our own 1200x630 cards. A row's photo is
+  // whatever shape it was shot in, and asserting 1200x630 over a 900px-tall
+  // portrait makes every platform crop it wrong; undeclared, they measure it.
+  const sized = isCardImage(imageUrl);
+
+  // Must stay tag-for-tag identical to src/components/Template/PageMeta.js.
+  // og:type was hardcoded "website" for every route on the site, including
+  // articles. og:site_name is deliberately absent: index.html carries it
+  // globally, and emitting it here too puts two of them in every page's head.
   const tags = `
     <link rel="canonical" href="${escAttr(canonicalUrl)}">
     <meta name="description" content="${escAttr(meta.description)}">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="${escAttr(ogType)}">
     <meta property="og:url" content="${escAttr(canonicalUrl)}">
     <meta property="og:title" content="${escAttr(fullTitle)}">
     <meta property="og:description" content="${escAttr(meta.description)}">
-    <meta property="og:image" content="${escAttr(meta.image)}">
+    <meta property="og:image" content="${escAttr(imageUrl)}">${sized ? `
+    <meta property="og:image:width" content="${OG_IMAGE.width}">
+    <meta property="og:image:height" content="${OG_IMAGE.height}">` : ""}
+    <meta property="og:image:alt" content="${escAttr(imageAlt)}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escAttr(fullTitle)}">
     <meta name="twitter:description" content="${escAttr(meta.description)}">
-    <meta name="twitter:image" content="${escAttr(meta.image)}">`;
+    <meta name="twitter:image" content="${escAttr(imageUrl)}">
+    <meta name="twitter:image:alt" content="${escAttr(imageAlt)}">`;
 
   return new HTMLRewriter()
     .on("title", new TitleRewriter(fullTitle))

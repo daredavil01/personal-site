@@ -25,7 +25,7 @@ import { getRegion } from "./registry";
 const MAP_PATH = ATLAS_LIVE ? "/" : "/world";
 
 const RegionShell = ({
-  region, title, description, image, children,
+  region, title, description, image, imageAlt, ogType, children,
 }) => {
   const meta = getRegion(region);
   const { world, visitRegion } = useWorld();
@@ -56,7 +56,13 @@ const RegionShell = ({
       onAnimationEnd={handleEntranceEnd}
     >
       <a href="#main" className="atlas-region-skip">Skip to main content</a>
-      <PageMeta title={title} description={description} image={image} />
+      <PageMeta
+        title={title}
+        description={description}
+        image={image}
+        imageAlt={imageAlt}
+        ogType={ogType}
+      />
 
       <header className="atlas-region-header">
         <div className="atlas-region-art" aria-hidden="true">
@@ -96,6 +102,8 @@ RegionShell.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
   image: PropTypes.string,
+  imageAlt: PropTypes.string,
+  ogType: PropTypes.string,
   children: PropTypes.node,
 };
 
@@ -104,6 +112,8 @@ RegionShell.defaultProps = {
   title: null,
   description: null,
   image: null,
+  imageAlt: null,
+  ogType: null,
   children: null,
 };
 

@@ -69,7 +69,10 @@ const BlogPost = () => {
   const visibleTags = (blog.blog_tags || []).filter((t) => t.toLowerCase() !== CHALLENGE_TAG);
 
   // Shared with the Cloudflare middleware so crawler + client OG tags match.
-  const meta = buildBlogMeta({ title: blog.blog_title, description: blog.blog_description });
+  const meta = buildBlogMeta({
+    title: blog.blog_title,
+    description: blog.blog_description,
+  });
 
   return (
     <PageShell region="writer" title={meta.title} description={meta.description} image={meta.image}>

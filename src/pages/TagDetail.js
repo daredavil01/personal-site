@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import { useTags } from "../context/ContentContext";
 import { getTagEntities } from "../lib/api/tags";
+import { SITE_URL } from "../data/pageMeta";
+import { ogStaticUrl, CARD_FALLBACKS } from "../lib/og/paths";
 import { colorForTag } from "../lib/generativeArt";
 import { ErrorBlock, LoadingBlock } from "../components/common/AsyncStates";
 
@@ -69,6 +71,10 @@ const TagDetail = () => {
       region="person"
       title={`#${label}`}
       description={tag?.description || `Everything on the site tagged #${label} — ${items.length} item${items.length === 1 ? "" : "s"}.`}
+      imageAlt={`Tag card for ${label}`}
+      // A tag has no image of its own, so every tag page unfurls as the tags
+      // card. Stated here because this route has no PAGE_META entry to carry it.
+      image={ogStaticUrl(CARD_FALLBACKS.tag, SITE_URL)}
     >
       <article className="flex flex-col gap-10 w-full max-w-3xl">
         <BackLink />

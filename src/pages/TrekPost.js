@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { buildTrekMeta } from "../data/pageMeta";
+import { firstSlideImage } from "../lib/og/paths";
 import { useTreks } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
@@ -73,7 +74,9 @@ const TrekPost = () => {
     enduranceLevel: trek.endurance_level,
     trekTime: trek.trek_time,
     date: trek.date,
-    image: trek.slideImages?.[0]?.url,
+    // The trek's own photo, or the treks card when it has none (buildTrekMeta
+    // falls back). Client rows are already absolutised by toStorageImages.
+    image: firstSlideImage(trek.slideImages),
   });
 
   return (
