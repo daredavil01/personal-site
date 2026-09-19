@@ -296,12 +296,23 @@ Natural-language chat over the whole content store.
     key, the row state and `ask_eval_budget()` — reserve-then-check like
     `ask_quota()` — before a single token is spent. `mode: "estimate"` spends
     nothing and fills the confirm dialog.
-  - **The two routes are not the same API.** Vercel's AI Gateway (where the free
-    monthly credit is) serves evaluation through the AI SDK only, with `boolean`
-    questions and index-keyed score probabilities; `api.typesafe.ai` takes a plain
-    POST with `noul`. Hence `toGatewayQuestions` / `toNativeQuestions`. The AI SDK
-    takes the Functions bundle from 30 KB to 278 KB gzipped — the first dependency
-    any Function here has had.
+  - **The judge has its own ladder** (`ask_settings.auto_eval_tiers`,
+    `src/lib/askJudgeTiers.js`): `jev` → `gemini` → `workers-ai`, tried in order,
+    same row shape as `tiers`. Gemini's free tier and the Workers AI allowance cost
+    nothing and already exist on this deployment, so **grading is free with no new
+    key at all**. They answer the same rubric as JSON, and because a language
+    model's confidence is not calibrated the way Jev's is, those grades are tagged
+    `judge-fallback` and `eval_auto.calibrated` is false.
+  - **`auto_eval_allow_metered` is off by default**, and a rung billed per token is
+    filtered out of the ladder before anything runs — key present or not, enabled
+    or not. When no usable rung can cost anything the token budget is skipped too,
+    because a cap on free work only stops free work.
+  - **The two Jev routes are not the same API.** Vercel's AI Gateway (where the
+    free monthly credit is) serves evaluation through the AI SDK only, with
+    `boolean` questions and index-keyed score probabilities; `api.typesafe.ai`
+    takes a plain POST with `noul`. Hence `toGatewayQuestions` /
+    `toNativeQuestions`. The AI SDK takes the Functions bundle from 30 KB to
+    281 KB gzipped — the first dependency any Function here has had.
   - Jev cannot explain itself, so a separate button escalates only the
     low-confidence rows to the existing free Gemini rung, appending one sentence
     under the numbers.
@@ -315,8 +326,10 @@ Natural-language chat over the whole content store.
   bundle by Vite). Public; committed in `wrangler.toml` `[vars]`.
 - `SUPABASE_SERVICE_ROLE_KEY` — **secret**, server/scripts only. Never commit;
   set via `wrangler pages secret put` or the Cloudflare dashboard.
-- `AI_GATEWAY_API_KEY` / `TYPESAFE_API_KEY` — **secret**, one or the other, for the
-  automatic judge only. Absent means it cannot grade; the flag must be on as well.
+- `AI_GATEWAY_API_KEY` / `TYPESAFE_API_KEY` — **secret**, optional, and only for
+  the Jev rungs of the judge ladder. Neither is needed to grade: the free Gemini
+  and Workers AI rungs use `GEMINI_API_KEY` and the `AI` binding, which are already
+  set. `TYPESAFE_API_KEY` is metered and also needs `auto_eval_allow_metered`.
 
 ## Images (Supabase Storage)
 
@@ -359,7 +372,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Ask sources (plug-in registry) | `scripts/ask-sources/`, `scripts/lib/registry.mjs` |
 | /stats numbers + hourly snapshot | `src/lib/siteStats.js`, `functions/api/stats.js` |
 | Answer link/image rules | `src/lib/askFormat.js` |
-| Automatic eval rubric + endpoint | `src/lib/askJudge.js`, `functions/api/ask-eval.js` |
+| Automatic eval rubric + ladder + endpoint | `src/lib/askJudge.js`, `src/lib/askJudgeTiers.js`, `functions/api/ask-eval.js` |
 | Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |

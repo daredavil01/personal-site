@@ -13,9 +13,14 @@
 //
 //   1. the caller proved they are the site owner (is_owner(), with their JWT),
 //   2. ask_settings.auto_eval_enabled is true,
-//   3. a judge credential exists on this deployment,
+//   3. a rung of the judge ladder can actually run here — and a rung billed per
+//      token is not one of them unless auto_eval_allow_metered says so,
 //   4. every target row is an assistant answer with evaluated_at still null,
 //   5. ask_eval_budget() reserved the estimate inside the monthly cap.
+//
+// Gate 5 is skipped when no usable rung can cost anything, because a token budget
+// on a free rung would only stop free work. It applies the moment a rung that
+// draws on credit or bills per token becomes usable.
 //
 // Gate 4 is re-checked here against the database rather than trusted from the
 // request, which is what makes "a hand-written evaluation is never overwritten"
@@ -29,14 +34,12 @@
 
 import { DEFAULT_ASK_SETTINGS } from "../../src/data/askConfig";
 import {
-  buildJudgeState, deterministicFindings, estimateTokens, mapJudgeAnswers,
-  STATE_LIMITS, toGatewayQuestions, toNativeQuestions,
+  buildJudgeState, deterministicFindings, estimateTokens, mapJudgeAnswers, STATE_LIMITS,
 } from "../../src/lib/askJudge";
+import { runJudgeTiers, usableRungs } from "../../src/lib/askJudgeTiers";
 import { json, restHeaders, rpc } from "../../src/lib/askServer";
 import { runTiers } from "../../src/lib/askTiers";
 
-const TYPESAFE_URL = "https://api.typesafe.ai";
-const JUDGE_TIMEOUT_MS = 10000;
 // Extracts are not stored on the log row, so they are re-read from the index at
 // grading time. Two chunks per cited item is what the answering worker itself
 // allows (selectChunks' perEntity), so this matches what it could have seen.
@@ -62,34 +65,13 @@ async function loadSettings(env) {
 }
 
 /**
- * Which way to reach the judge, and with what.
- *
- * The gateway first by default, because that is the route that runs for nothing:
- * a Vercel team gets AI Gateway credit every thirty days, so the feature never
- * reaches a card. A direct TypeSafe key is the fallback and IS metered — pennies
- * at this volume, but not zero, which is why the route is recorded on every row.
+ * The rungs that could grade something on this deployment right now, cheapest
+ * first — the ladder minus anything unconfigured, minus anything billed per token
+ * unless that has been explicitly allowed.
  */
-function judgeRoute(env, settings) {
-  const gateway = env.AI_GATEWAY_API_KEY
-    ? { route: "gateway", key: env.AI_GATEWAY_API_KEY, baseURL: env.AI_GATEWAY_URL || null }
-    : null;
-  const direct = env.TYPESAFE_API_KEY
-    ? { route: "typesafe", key: env.TYPESAFE_API_KEY, url: `${TYPESAFE_URL}/v1/systemone` }
-    : null;
-  if ((settings.auto_eval_route || "gateway") === "typesafe") return direct || gateway;
-  return gateway || direct;
-}
-
-/**
- * The same model is named differently on the two routes, so a route change alone
- * would otherwise 404. Forgiving rather than strict: a mismatched id is a typo in
- * a settings field, not a reason to refuse to grade anything.
- */
-function modelForRoute(route, model) {
-  const id = String(model || "").trim();
-  if (route === "gateway") return id.includes("/") ? id : "typesafe-ai/jev";
-  return id.includes("/") ? "jev-latest" : id || "jev-latest";
-}
+const rungsFor = (env, settings) => usableRungs(settings.auto_eval_tiers, env, {
+  allowMetered: !!settings.auto_eval_allow_metered,
+});
 
 /** The caller's bearer token, which is a Supabase session token or nothing. */
 function bearer(request) {
@@ -242,80 +224,22 @@ function extractsFor(row, byEntity) {
   return out;
 }
 
-function withTimeout(promise, ms, onTimeout) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      if (onTimeout) onTimeout();
-      reject(new Error(`judge timed out after ${ms}ms`));
-    }, ms);
-    promise.then(
-      (value) => { clearTimeout(timer); resolve(value); },
-      (err) => { clearTimeout(timer); reject(err); },
-    );
-  });
-}
-
-/**
- * TypeSafe's own endpoint. A plain POST, `noul` for the yes/no questions, usage
- * as input_tokens / output_tokens.
- */
-async function askJudgeDirect({ url, key, model, state }) {
-  const controller = new AbortController();
-  const res = await withTimeout(fetch(url, {
-    method: "POST",
-    signal: controller.signal,
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, state, questions: toNativeQuestions() }),
-  }), JUDGE_TIMEOUT_MS, () => controller.abort());
-  if (!res.ok) throw new Error(`judge ${res.status} ${await res.text().catch(() => "")}`);
-  const body = await res.json();
-  return {
-    answers: body?.answers,
-    model: body?.model || model,
-    inputTokens: Number(body?.usage?.input_tokens || 0),
-  };
-}
-
-/**
- * The AI Gateway, which is NOT the same API: Vercel's docs are explicit that the
- * evaluation modality "is available through the AI SDK only. It is not supported
- * through the OpenAI-compatible, Anthropic-compatible, or Cohere-compatible
- * endpoints", and it wants AI SDK 7 or later. So this route cannot be a forwarded
- * POST — it goes through experimental_evaluate, with `boolean` questions instead
- * of `noul` and camelCase usage. Imported dynamically so that the direct route,
- * and every refusal above, never pay for loading the SDK.
- */
-async function askJudgeGateway({ key, baseURL, model, state }) {
-  const [{ experimental_evaluate: evaluate }, { createGateway }] = await Promise.all([
-    import("ai"),
-    import("@ai-sdk/gateway"),
-  ]);
-  const gateway = createGateway({ apiKey: key, ...(baseURL ? { baseURL } : {}) });
-  const result = await withTimeout(evaluate({
-    model: gateway.evaluationModel(model),
-    state,
-    questions: toGatewayQuestions(),
-  }), JUDGE_TIMEOUT_MS);
-  return {
-    answers: result?.answers,
-    model,
-    inputTokens: Number(result?.usage?.inputTokens || 0),
-  };
-}
-
-const askJudge = (credentials, model, state) => (
-  credentials.route === "gateway"
-    ? askJudgeGateway({ ...credentials, model, state })
-    : askJudgeDirect({ ...credentials, model, state })
-);
-
-const evalRow = (mapped, model, route) => ({
+const evalRow = (mapped, judged) => ({
   eval_verdict: mapped.verdict,
   eval_score: mapped.score,
   eval_tags: mapped.tags,
   eval_notes: mapped.notes,
   eval_source: "auto",
-  eval_auto: { ...mapped.auto, model, route },
+  eval_auto: {
+    ...mapped.auto,
+    // Which rung graded it, and whether its probabilities are the calibrated
+    // kind. Without this a Gemini guess and a Jev measurement look identical.
+    tier: judged.tier,
+    provider: judged.provider,
+    model: judged.model,
+    cost: judged.cost,
+    calibrated: !!judged.calibrated,
+  },
   evaluated_at: new Date().toISOString(),
   // eval_ideal_answer is deliberately untouched: it is the owner's reference
   // text, and a model with no prose to offer has nothing to put in it.
@@ -354,7 +278,7 @@ export async function onRequestGet(context) {
   if (!owner.ok) return notOwner(owner);
 
   const settings = await loadSettings(env);
-  const credentials = judgeRoute(env, settings);
+  const rungs = rungsFor(env, settings);
   let used = 0;
   try {
     const rows = await select(
@@ -368,9 +292,16 @@ export async function onRequestGet(context) {
   const cap = settings.auto_eval_monthly_token_cap;
   return json({
     enabled: !!settings.auto_eval_enabled,
-    configured: !!credentials,
-    route: credentials?.route || null,
-    model: credentials ? modelForRoute(credentials.route, settings.auto_eval_model) : null,
+    configured: rungs.length > 0,
+    // Every rung the admin page can show, so a misconfigured ladder is visible
+    // there instead of only in a failed run.
+    rungs: rungs.map(({ tier, status }) => ({
+      name: tier.name || tier.provider,
+      provider: tier.provider,
+      model: tier.model,
+      cost: status.cost,
+    })),
+    allowMetered: !!settings.auto_eval_allow_metered,
     batchCap: settings.auto_eval_batch_cap,
     requestBatch: settings.auto_eval_request_batch,
     minConfidence: settings.auto_eval_min_confidence,
@@ -383,7 +314,7 @@ export async function onRequestGet(context) {
 // POST — estimate, run, explain.
 // ---------------------------------------------------------------------------
 
-async function runBatch(context, settings, credentials, ids) {
+async function runBatch(context, settings, ids) {
   const { env } = context;
   const rows = await loadCandidates(env, ids);
   const skipped = ids.length - rows.length;
@@ -414,23 +345,39 @@ async function runBatch(context, settings, credentials, ids) {
     };
   });
 
-  const reserved = jobs.reduce((sum, j) => sum + estimateTokens(j.state), 0);
-  const allowance = await budget(env, reserved);
+  // Only reserve against the cap if something here could actually be charged for.
+  // With a free-only ladder there is nothing to ration, and a cap would just stop
+  // grading that costs nothing.
+  const spends = rungsFor(env, settings).some(({ status }) => status.cost !== "free");
+  const reserved = spends ? jobs.reduce((sum, j) => sum + estimateTokens(j.state), 0) : 0;
+  const allowance = spends
+    ? await budget(env, reserved)
+    : { allowed: true, free: true };
   if (!allowance?.allowed) {
     return { error: "budget", reason: allowance?.reason || "token_cap", budget: allowance };
   }
 
-  const model = modelForRoute(credentials.route, settings.auto_eval_model);
   const settled = await Promise.all(jobs.map(async (job) => {
     try {
-      const out = await askJudge(credentials, model, job.state);
-      if (!out?.answers) throw new Error("the judge returned no answers");
+      const out = await runJudgeTiers({
+        tiers: settings.auto_eval_tiers,
+        state: job.state,
+        env,
+        allowMetered: !!settings.auto_eval_allow_metered,
+      });
+      if (!out?.answers) {
+        throw new Error(out?.errors?.join("; ") || "no judge rung answered");
+      }
       const mapped = mapJudgeAnswers(out.answers, {
         minConfidence: settings.auto_eval_min_confidence,
-        model: out.model || model,
+        model: out.model,
         findings: job.findings,
+        // A language model's confidence is not calibrated the way the decision
+        // model's is, and the review threshold was chosen on the latter. Say so on
+        // the row rather than letting the two look alike.
+        extraTags: out.calibrated ? [] : ["judge-fallback"],
       });
-      const row = evalRow(mapped, out.model || model, credentials.route);
+      const row = evalRow(mapped, out);
       const saved = await patchMessage(env, job.row.id, row);
       // No row came back: someone graded it by hand in the last second, and the
       // PATCH's own filter refused. Their verdict stands.
@@ -448,17 +395,17 @@ async function runBatch(context, settings, credentials, ids) {
   // Swap the reservation for what the judge actually billed. Best-effort: the
   // grading already happened, and a failure here only leaves the month's
   // counter reading high, which errs towards spending less.
-  context.waitUntil(
-    rpc(env, "ask_eval_record", {
-      p_reserved: reserved, p_actual: actual, p_graded: done.length,
-    }, { serviceRole: true }).catch(() => {}),
-  );
+  if (spends || done.length) {
+    context.waitUntil(
+      rpc(env, "ask_eval_record", {
+        p_reserved: reserved, p_actual: spends ? actual : 0, p_graded: done.length,
+      }, { serviceRole: true }).catch(() => {}),
+    );
+  }
 
   return {
     results: done.map((s) => savedShape(s.saved)).filter((r) => r.id),
     graded: done.length,
-    route: credentials.route,
-    model,
     // Rows nobody could grade: already graded when the batch was assembled, plus
     // any that were graded by hand while it ran.
     skipped: skipped + settled.filter((s) => s.skipped).length,
@@ -480,12 +427,7 @@ async function estimateBatch(env, settings, ids) {
       * CHUNKS_PER_ENTITY;
     return sum + Math.ceil(chars / 4) + extracts * ESTIMATE_TOKENS_PER_EXTRACT;
   }, 0);
-  return {
-    count: rows.length,
-    skipped: ids.length - rows.length,
-    tokens,
-    model: settings.auto_eval_model,
-  };
+  return { count: rows.length, skipped: ids.length - rows.length, tokens };
 }
 
 /**
@@ -607,11 +549,16 @@ export async function onRequestPost(context) {
 
   // Said plainly rather than failing as a generic error: with no judge key this
   // endpoint cannot grade anything, and retrying will not help.
-  const credentials = judgeRoute(env, settings);
-  if (!credentials) {
+  // Not "is there a key" any more: is there a rung that can run at all, once the
+  // unconfigured and the metered ones are taken out.
+  const rungs = rungsFor(env, settings);
+  if (!rungs.length) {
     return json({
       error: "not configured",
-      note: "No judge key on this deployment (AI_GATEWAY_API_KEY or TYPESAFE_API_KEY).",
+      note: settings.auto_eval_allow_metered
+        ? "No judge rung is usable: check the ladder in /admin/ask/settings and its keys."
+        : "No free judge rung is usable. Gemini needs GEMINI_API_KEY, Workers AI needs the "
+          + "AI binding, and the metered rung is off because spending is not allowed.",
     }, 503);
   }
 
@@ -621,7 +568,7 @@ export async function onRequestPost(context) {
     }
     try {
       // Reads rows and counts characters. Spends nothing.
-      return json(await estimateBatch(env, settings, ids));
+      return json({ ...await estimateBatch(env, settings, ids), rungs: rungs.length });
     } catch (err) {
       return json({ error: "unavailable", note: String(err.message || err) }, 503);
     }
@@ -635,7 +582,7 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const out = await runBatch(context, settings, credentials, ids);
+    const out = await runBatch(context, settings, ids);
     if (out.error === "budget") {
       const unreachable = out.reason === "unavailable";
       return json({

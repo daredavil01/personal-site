@@ -11,7 +11,7 @@ bump it when the rubric changes, and it lands on every row in `eval_auto.rubric`
 
 ## What the judge is
 
-**Jev**, TypeSafe AI's "System One" model. It takes unstructured `state` plus
+**Jev**, from **TypeSafe AI** — a "System One" model. It takes unstructured `state` plus
 *typed questions* and answers them in one parallel pass:
 
 - a **choice** — one option from a named set, with a probability for each,
@@ -125,7 +125,54 @@ returns the number the confirm dialog shows. It spends nothing. A test asserts
 that no judge host is fetched on any refusal path, because a refusal that still
 calls the model is the one bug in here that costs real credit.
 
-## The two routes, which are not the same API
+## The ladder: how this stays at $0
+
+Jev is metered per token, and the AI Gateway's free credit may or may not cover
+it. So the judge has a ladder of its own, in `ask_settings.auto_eval_tiers`, tried
+in order until one rung answers — the same shape and the same reasoning as the
+answer ladder in `askTiers.js`, for a different purpose. That one exists so a
+visitor always gets an answer; this one exists so grading can be free.
+
+| rung | cost | needs |
+|---|---|---|
+| `jev` via `gateway` | the free AI Gateway credit ($5/30 days) | `AI_GATEWAY_API_KEY` |
+| `gemini` | **free** — ~15 RPM, ~1,000–1,500/day | `GEMINI_API_KEY`, already set for `/ask` |
+| `workers-ai` | **free** — 10,000 neurons/day | the `AI` binding, no key at all |
+| `jev` via `typesafe` | **metered**, ~$0.0002/answer | `TYPESAFE_API_KEY` |
+
+**`auto_eval_allow_metered` is off by default, and that is what makes $0 a
+property of the code rather than a promise.** With it off, a rung billed per token
+is filtered out of the ladder before anything runs — even if its key is present
+and its row says `enabled: true`. A test asserts exactly that.
+
+And when nothing in the usable ladder can cost anything, the monthly token budget
+is skipped: a cap on free work would only stop free work. It applies again the
+moment a credit or metered rung becomes usable.
+
+So the zero-cost configuration is: **no `TYPESAFE_API_KEY` needed, no gateway key
+needed.** Gemini and Workers AI alone will grade everything, and both are already
+configured on this deployment because `/ask` answers on them.
+
+### The honest cost of the free rungs
+
+Only Jev returns *calibrated* probabilities. Gemini and Workers AI are language
+models answering the same rubric as JSON (`JUDGE_JSON_SYSTEM` and
+`parseJudgeJson` in `src/lib/askJudge.js`), and a language model's self-reported
+confidence is **not** calibrated — while `auto_eval_min_confidence` was chosen on
+the assumption that it is. So every grade from a fallback rung is tagged
+**`judge-fallback`**, and `eval_auto` records the rung, the provider and
+`calibrated: false`. Filter on that tag before drawing conclusions from a batch.
+
+Two practical limits of the free rungs:
+
+- **Gemini's rate limit is per minute.** A run fires a slice of requests in
+  parallel, so a long run can trip ~15 RPM; that rung 429s and the next one takes
+  the row. Lower `auto_eval_request_batch` if it happens a lot.
+- **Workers AI's 10,000 neurons/day is the same pool `/ask` embeds queries
+  from.** A big grading run can eat into what visitors' searches need. It is last
+  in the ladder for that reason.
+
+## The two Jev routes, which are not the same API
 
 | | `gateway` | `typesafe` |
 |---|---|---|
@@ -180,9 +227,13 @@ it and the honest choice is the metered direct route — pennies, but not zero.
 ## Using it
 
 1. Apply `supabase/migrations/0022_ask_auto_evals.sql`.
-2. `wrangler pages secret put AI_GATEWAY_API_KEY` (or `TYPESAFE_API_KEY`).
-3. At `/admin/ask/settings` → **Automatic evaluation**, pick the route and switch
-   it on. Start with a small **Answers per press**.
+2. Nothing, for the free path — `GEMINI_API_KEY` and the `AI` binding are already
+   on this deployment. Only for Jev:
+   `wrangler pages secret put AI_GATEWAY_API_KEY` (or `TYPESAFE_API_KEY`, which is
+   metered and also needs **Allow rungs that cost money** switched on).
+3. At `/admin/ask/settings` → **Automatic evaluation**, switch it on and check the
+   **Judge ladder**. Leave **Allow rungs that cost money** off unless you mean it.
+   Start with a small **Answers per press**.
 4. At `/admin/ask/conversations`, filter to what you want graded and press
    **Grade N**. The dialog states the count, the tokens and the remaining budget
    before anything is spent.
@@ -213,9 +264,10 @@ That touches no hand-written grade, because those are `eval_source = 'human'`.
 
 - **Shipped:** the rubric, both routes, the endpoint and its gates, the admin
   buttons, the filters, the agreement tile, 39 unit tests.
-- **Unverified:** the gateway route has never been run against a real key — the
-  wire shapes come from Vercel's and TypeSafe's published docs, not from a call.
+- **Unverified:** neither Jev rung has been run against a real key — the wire
+  shapes come from Vercel's and TypeSafe's published docs, not from a call.
   `src/lib/askJudge.js` is where an adjustment would go, and its fixtures are one
-  file.
+  file. The free Gemini and Workers AI rungs are ordinary calls to providers this
+  site already uses, so they are the safer place to start.
 - **Not built:** replaying a question to compare prompt versions, and any
   scheduled grading. Grading is on demand, by design.

@@ -36,7 +36,9 @@ binding = "AI"
 #   wrangler pages secret put ASK_IP_SALT
 #   wrangler pages secret put TURNSTILE_SECRET_KEY   (optional)
 #
-# The automatic judge for /ask answers (docs/ask-evals.md) needs ONE of these,
-# and grades nothing until ask_settings.auto_eval_enabled is also on:
+# The automatic judge for /ask answers (docs/ask-evals.md) needs NEITHER of these:
+# its ladder falls back to Gemini and Workers AI, which are already configured
+# above and cost nothing. Set one only to put Jev on the top rung:
 #   wrangler pages secret put AI_GATEWAY_API_KEY   (Vercel AI Gateway — free monthly credit)
-#   wrangler pages secret put TYPESAFE_API_KEY     (api.typesafe.ai direct — metered)
+#   wrangler pages secret put TYPESAFE_API_KEY     (api.typesafe.ai direct — METERED, and
+#                                                   also needs auto_eval_allow_metered on)

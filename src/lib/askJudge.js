@@ -176,6 +176,114 @@ export function buildJudgeState({ question, answer, extracts, scoped } = {}) {
   return state;
 }
 
+// ---------------------------------------------------------------------------
+// The same rubric for a model that only writes text
+// ---------------------------------------------------------------------------
+//
+// Jev is metered, and the free-credit route may not cover it. Gemini's free tier
+// and the Workers AI allowance cost nothing at all, so they stand behind it as
+// fallback judges — which means the rubric has to be answerable in prose-shaped
+// JSON as well as by typed questions.
+//
+// The honest caveat, and the reason a fallback grade is tagged: a language model's
+// self-reported confidence is not calibrated. Jev's is, and the needs-review
+// threshold was chosen on that basis. A number from a fallback rung is a hint,
+// not a probability.
+
+export const JUDGE_JSON_SYSTEM = [
+  "You are grading one answer produced by a personal archive's question-answering feature.",
+  "You are given the question, the answer, and the archive extracts the answer was written from.",
+  "Reply with JSON only. No prose, no markdown, no code fence.",
+  "",
+  "Reply with exactly this shape:",
+  "{",
+  '  "grounding": {"score": 0|1|2, "confidence": 0.0-1.0},',
+  '  "contradiction": {"probability": 0.0-1.0},',
+  '  "retrieval": {"score": 0|1|2, "confidence": 0.0-1.0},',
+  '  "disposition": {"choice": "<one option below>", "confidence": 0.0-1.0},',
+  '  "citations": {"probability": 0.0-1.0}',
+  "}",
+  "",
+  `grounding — 0: ${GROUNDING_LEVELS[0]}. 1: ${GROUNDING_LEVELS[1]}. 2: ${GROUNDING_LEVELS[2]}.`,
+  "contradiction — the probability that the answer states something an extract directly contradicts.",
+  `retrieval — 0: ${RETRIEVAL_LEVELS[0]}. 1: ${RETRIEVAL_LEVELS[1]}. 2: ${RETRIEVAL_LEVELS[2]}.`,
+  `disposition — one of: ${Object.entries(DISPOSITIONS).map(([k, v]) => `${k} (${v})`).join("; ")}.`,
+  "citations — the probability that statements taken from the extracts are followed by a bare item number.",
+  "",
+  "Judge only what is in front of you. Do not use anything you know about the subject.",
+  "confidence is how sure you are of that one judgement, not how good the answer is.",
+].join("\n");
+
+/** The state as text, for a model that cannot take a typed state. */
+export function buildJudgePrompt(state) {
+  const s = state || {};
+  return [
+    `QUESTION: ${s.question || "(missing)"}`,
+    `ANSWER: ${s.answer || "(empty)"}`,
+    "EXTRACTS:",
+    (s.extracts || []).length
+      ? s.extracts.map((e) => `<<<${e.n} | ${e.type} | ${e.title}>>>\n${e.text}`).join("\n\n")
+      : "(nothing was retrieved)",
+    s.note ? `NOTE: ${s.note}` : null,
+  ].filter(Boolean).join("\n\n");
+}
+
+const clamp01 = (v) => Math.max(0, Math.min(1, Number(v)));
+const clampScore = (v, max) => Math.max(0, Math.min(max, Number(v)));
+
+/**
+ * A text model's reply, in the same shape normaliseAnswers reads.
+ *
+ * Tolerant on the way in — a fenced block or a sentence of preamble is common and
+ * is not worth failing a whole batch over — and strict on the way out: anything
+ * missing or out of range becomes null rather than a number that looks measured.
+ */
+export function parseJudgeJson(text) {
+  const raw = String(text || "").trim()
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/, "")
+    .trim();
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) throw new Error("the judge did not return JSON");
+  const parsed = JSON.parse(raw.slice(start, end + 1));
+
+  const score = (q, levels) => {
+    const value = Number(q?.score);
+    if (!Number.isFinite(value)) return {};
+    return {
+      score: clampScore(value, levels - 1),
+      confidence: Number.isFinite(Number(q?.confidence)) ? clamp01(q.confidence) : null,
+      // Length alone tells normaliseAnswers how many rungs this question had.
+      probabilities: new Array(levels).fill(null),
+    };
+  };
+  const bool = (q) => {
+    const value = Number(q?.probability ?? q?.noul);
+    return Number.isFinite(value) ? { probability: clamp01(value) } : {};
+  };
+
+  const choice = DISPOSITIONS[parsed?.disposition?.choice]
+    ? parsed.disposition.choice
+    : null;
+  const confidence = Number.isFinite(Number(parsed?.disposition?.confidence))
+    ? clamp01(parsed.disposition.confidence)
+    : null;
+
+  return {
+    grounding: score(parsed?.grounding, GROUNDING_LEVELS.length),
+    retrieval: score(parsed?.retrieval, RETRIEVAL_LEVELS.length),
+    contradiction: bool(parsed?.contradiction),
+    citations: bool(parsed?.citations),
+    disposition: {
+      choice,
+      confidence,
+      // So the notes line reads the same whichever rung answered.
+      probabilities: choice && confidence !== null ? { [choice]: confidence } : {},
+    },
+  };
+}
+
 const QUESTIONS_CHARS = JSON.stringify(JUDGE_QUESTIONS).length;
 
 /** Rough input-token count for one request, for the pre-flight estimate. */
@@ -242,9 +350,15 @@ export function normaliseAnswers(answers) {
   const a = answers || {};
   const score = (q) => {
     const list = probabilityList(q?.probabilities);
+    // A fallback rung sends an array of nulls purely to say how many rungs the
+    // question had, so the rung count comes from the array and the confidence
+    // from the model, never from an empty distribution.
+    const rungs = Array.isArray(q?.probabilities)
+      ? q.probabilities.length
+      : Object.keys(q?.probabilities || {}).length;
     return {
       score: num(q?.score),
-      levels: list.length || null,
+      levels: rungs || null,
       confidence: num(q?.confidence, list.length ? Math.max(...list) : null),
     };
   };
@@ -285,7 +399,9 @@ const fixed = (value, places = 2) => (Number.isFinite(value) ? value.toFixed(pla
  *
  * @returns {{verdict, score, tags, notes, confidence, auto}}
  */
-export function mapJudgeAnswers(answers, { minConfidence = 0.7, model = null, findings = [] } = {}) {
+export function mapJudgeAnswers(answers, {
+  minConfidence = 0.7, model = null, findings = [], extraTags = [],
+} = {}) {
   const n = normaliseAnswers(answers);
   const grounding = n.grounding.score;
   const retrieval = n.retrieval.score;
@@ -344,6 +460,7 @@ export function mapJudgeAnswers(answers, { minConfidence = 0.7, model = null, fi
   if (disposition === "answered_unsupported") tags.add("hallucination");
   if (Number.isFinite(citations) && citations < 0.4) tags.add("formatting");
   findings.forEach((f) => tags.add(f));
+  extraTags.forEach((t) => tags.add(t));
   // Flagged, never withheld: eval_verdict allows only pass and fail, so an
   // unsure row still gets one, and this tag is how a human finds it again.
   if (!Number.isFinite(confidence) || confidence < minConfidence) tags.add("needs-review");

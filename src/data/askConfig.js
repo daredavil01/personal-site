@@ -160,10 +160,46 @@ A micro-post is a passing thought from years ago, sometimes a reblog of someone 
   // off in this fallback too: if ask_settings is unreachable the judge must not
   // run, because a default that spends money is not a safe default.
   auto_eval_enabled: false,
-  // 'gateway' (Vercel AI Gateway, where the free monthly credit is) or
-  // 'typesafe' (api.typesafe.ai directly, which is metered).
-  auto_eval_route: "gateway",
-  auto_eval_model: "typesafe-ai/jev",
+  // The judge's own ladder, tried in order (src/lib/askJudgeTiers.js). Jev first
+  // because it is the only rung that returns calibrated probabilities; the free
+  // language models behind it answer the same rubric as JSON, which is worse and
+  // is tagged as such. The metered rung is present but disabled: with
+  // auto_eval_allow_metered false it cannot run even if it is switched on.
+  auto_eval_tiers: [
+    {
+      name: "jev-gateway",
+      provider: "jev",
+      route: "gateway",
+      model: "typesafe-ai/jev",
+      enabled: true,
+      timeout_ms: 10000,
+    },
+    {
+      name: "gemini-judge",
+      provider: "gemini",
+      model: "gemini-flash-lite-latest",
+      enabled: true,
+      timeout_ms: 12000,
+    },
+    {
+      name: "cf-gpt-oss-20b",
+      provider: "workers-ai",
+      model: "@cf/openai/gpt-oss-20b",
+      enabled: true,
+      timeout_ms: 15000,
+    },
+    {
+      name: "jev-direct",
+      provider: "jev",
+      route: "typesafe",
+      model: "jev-latest",
+      enabled: false,
+      timeout_ms: 10000,
+    },
+  ],
+  // The one switch that decides whether this feature can ever cost anything. Off
+  // means a rung billed per token is skipped, however it is configured.
+  auto_eval_allow_metered: false,
   auto_eval_batch_cap: 50,
   auto_eval_request_batch: 8,
   auto_eval_min_confidence: 0.7,
@@ -224,6 +260,10 @@ export const DEFAULT_QUESTION_POOL = [
 ];
 
 export const ASK_PROVIDERS = ["gemini", "workers-ai"];
+
+// Providers that can grade an answer. `jev` is the decision model; the other two
+// answer the same rubric as JSON and are free.
+export const ASK_JUDGE_PROVIDERS = ["jev", "gemini", "workers-ai"];
 
 // The terminal rung of the tier ladder: no model answered, but retrieval did.
 export const SEARCH_ONLY_TIER = "search-only";

@@ -36,6 +36,13 @@ let calls = [];
  * @param owner   what is_owner() answers: true, false, or "throw"
  * @param settings  overrides merged onto the ask_settings row
  */
+const LADDER = [
+  { name: "jev-gateway", provider: "jev", route: "gateway", model: "typesafe-ai/jev", enabled: true },
+  { name: "gemini-judge", provider: "gemini", model: "gemini-flash-lite-latest", enabled: true },
+  { name: "cf", provider: "workers-ai", model: "@cf/openai/gpt-oss-20b", enabled: true },
+  { name: "jev-direct", provider: "jev", route: "typesafe", model: "jev-latest", enabled: true },
+];
+
 const stubFetch = ({ owner = true, settings = {}, rows = [] } = {}) => {
   calls = [];
   global.fetch = jest.fn(async (url, init) => {
@@ -49,7 +56,10 @@ const stubFetch = ({ owner = true, settings = {}, rows = [] } = {}) => {
       return new Response(JSON.stringify(owner), { status: 200 });
     }
     if (href.includes("ask_settings")) {
-      return new Response(JSON.stringify([{ auto_eval_enabled: true, ...settings }]), { status: 200 });
+      return new Response(
+        JSON.stringify([{ auto_eval_enabled: true, auto_eval_tiers: LADDER, ...settings }]),
+        { status: 200 },
+      );
     }
     if (href.includes("ask_eval_usage")) {
       return new Response(JSON.stringify([{ input_tokens: 10, graded: 2 }]), { status: 200 });
@@ -111,20 +121,39 @@ describe("POST /api/ask-eval gates", () => {
     expect(judgeWasCalled()).toBe(false);
   });
 
-  it("refuses when the deployment has no judge key, and says so plainly", async () => {
+  it("refuses when no rung of the ladder can run here, and says why", async () => {
     stubFetch();
     const res = await post({ messageIds: [1] });
     expect(res.status).toBe(503);
     const body = await res.json();
     expect(body.error).toBe("not configured");
-    expect(body.note).toMatch(/AI_GATEWAY_API_KEY|TYPESAFE_API_KEY/);
+    expect(body.note).toMatch(/GEMINI_API_KEY/);
+    expect(judgeWasCalled()).toBe(false);
+  });
+
+  // The switch that makes "$0" a property of the code: a key for the metered rung
+  // is present and the ladder enables it, and it still must not be usable.
+  it("refuses rather than reach for a metered rung while spending is off", async () => {
+    stubFetch();
+    const res = await onRequestPost({
+      // The metered key IS present and the ladder enables that rung.
+      env: { ...ENV, TYPESAFE_API_KEY: "k" },
+      waitUntil: () => {},
+      request: new Request("https://site.example/api/ask-eval", {
+        method: "POST",
+        headers: { Authorization: "Bearer t", "Content-Type": "application/json" },
+        body: JSON.stringify({ messageIds: [1] }),
+      }),
+    });
+    expect(res.status).toBe(503);
+    expect((await res.json()).error).toBe("not configured");
     expect(judgeWasCalled()).toBe(false);
   });
 
   it("refuses a batch larger than the per-request cap rather than truncating it", async () => {
     stubFetch({ settings: { auto_eval_request_batch: 2 } });
     const res = await onRequestPost({
-      env: { ...ENV, TYPESAFE_API_KEY: "k" },
+      env: { ...ENV, GEMINI_API_KEY: "k" },
       waitUntil: () => {},
       request: new Request("https://site.example/api/ask-eval", {
         method: "POST",
@@ -153,7 +182,7 @@ describe("POST /api/ask-eval gates", () => {
   it("estimates without calling the judge at all", async () => {
     stubFetch({ rows: [{ id: 1, content: "an answer", source_count: 2, sources: [], types: [] }] });
     const res = await onRequestPost({
-      env: { ...ENV, TYPESAFE_API_KEY: "k" },
+      env: { ...ENV, GEMINI_API_KEY: "k" },
       waitUntil: () => {},
       request: new Request("https://site.example/api/ask-eval", {
         method: "POST",
@@ -171,7 +200,7 @@ describe("POST /api/ask-eval gates", () => {
   it("only ever asks the database for ungraded assistant rows", async () => {
     stubFetch({ rows: [] });
     await onRequestPost({
-      env: { ...ENV, TYPESAFE_API_KEY: "k" },
+      env: { ...ENV, GEMINI_API_KEY: "k" },
       waitUntil: () => {},
       request: new Request("https://site.example/api/ask-eval", {
         method: "POST",
@@ -198,29 +227,38 @@ describe("GET /api/ask-eval", () => {
     expect((await get(ENV)).status).toBe(403);
   });
 
-  it("reports the flag, the route and the budget without leaking a key", async () => {
+  it("reports the usable rungs and the budget without leaking a key", async () => {
     stubFetch();
-    const res = await get({ ...ENV, TYPESAFE_API_KEY: "secret-key" });
+    const res = await get({ ...ENV, GEMINI_API_KEY: "secret-key" });
     const body = await res.json();
     expect(body.enabled).toBe(true);
     expect(body.configured).toBe(true);
-    expect(body.route).toBe("typesafe");
-    expect(body.model).toBe("jev-latest");
+    expect(body.rungs).toEqual([
+      { name: "gemini-judge", provider: "gemini", model: "gemini-flash-lite-latest", cost: "free" },
+    ]);
     expect(body.budget.remaining).toBe(body.budget.cap - 10);
     expect(JSON.stringify(body)).not.toContain("secret-key");
   });
 
-  it("names the gateway model when routed through the gateway", async () => {
+  it("lists the gateway rung as credit and puts it first", async () => {
     stubFetch();
-    const body = await (await get({ ...ENV, AI_GATEWAY_API_KEY: "k" })).json();
-    expect(body.route).toBe("gateway");
-    expect(body.model).toBe("typesafe-ai/jev");
+    const body = await (await get({ ...ENV, AI_GATEWAY_API_KEY: "k", AI: {} })).json();
+    expect(body.rungs.map((r) => r.name)).toEqual(["jev-gateway", "cf"]);
+    expect(body.rungs[0].cost).toBe("credit");
   });
 
-  it("says it is not configured when no key exists", async () => {
+  it("hides the metered rung from the readiness report while spending is off", async () => {
     stubFetch();
-    const body = await (await get(ENV)).json();
+    const body = await (await get({ ...ENV, TYPESAFE_API_KEY: "k" })).json();
     expect(body.configured).toBe(false);
-    expect(body.route).toBeNull();
+    expect(body.rungs).toEqual([]);
+    expect(body.allowMetered).toBe(false);
+  });
+
+  it("shows the metered rung once spending is allowed", async () => {
+    stubFetch({ settings: { auto_eval_allow_metered: true } });
+    const body = await (await get({ ...ENV, TYPESAFE_API_KEY: "k" })).json();
+    expect(body.rungs.map((r) => r.cost)).toEqual(["metered"]);
+    expect(body.allowMetered).toBe(true);
   });
 });

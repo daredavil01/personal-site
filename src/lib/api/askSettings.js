@@ -30,8 +30,8 @@ function fromRow(r) {
     contextDoc: r.context_doc ?? "",
     contextDocUpdatedAt: r.context_doc_updated_at ?? null,
     autoEvalEnabled: !!r.auto_eval_enabled,
-    autoEvalRoute: r.auto_eval_route ?? "gateway",
-    autoEvalModel: r.auto_eval_model ?? "typesafe-ai/jev",
+    autoEvalTiers: Array.isArray(r.auto_eval_tiers) ? r.auto_eval_tiers : [],
+    autoEvalAllowMetered: !!r.auto_eval_allow_metered,
     autoEvalBatchCap: r.auto_eval_batch_cap ?? 50,
     autoEvalRequestBatch: r.auto_eval_request_batch ?? 8,
     autoEvalMinConfidence: r.auto_eval_min_confidence ?? 0.7,
@@ -68,8 +68,8 @@ function toRow(v) {
       .filter((row) => row?.q?.trim())
       .map((row) => ({ q: row.q.trim(), c: row.c || "" })),
     auto_eval_enabled: !!v.autoEvalEnabled,
-    auto_eval_route: v.autoEvalRoute === "typesafe" ? "typesafe" : "gateway",
-    auto_eval_model: (v.autoEvalModel || "").trim() || "typesafe-ai/jev",
+    auto_eval_tiers: Array.isArray(v.autoEvalTiers) ? v.autoEvalTiers : [],
+    auto_eval_allow_metered: !!v.autoEvalAllowMetered,
     auto_eval_batch_cap: Number(v.autoEvalBatchCap) || 50,
     auto_eval_request_batch: Number(v.autoEvalRequestBatch) || 8,
     // 0 is a legitimate value (flag nothing for review), so not `|| default`.

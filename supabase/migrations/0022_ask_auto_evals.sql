@@ -51,12 +51,14 @@ create index if not exists ask_messages_unevaluated_idx
 -- as "off": auto_eval_enabled is false, and no judge call can happen.
 alter table public.ask_settings
   add column if not exists auto_eval_enabled boolean not null default false,
-  -- 'gateway' routes through Vercel's AI Gateway, which is where the monthly
-  -- free credit lives; 'typesafe' calls api.typesafe.ai directly and IS metered.
-  add column if not exists auto_eval_route text not null default 'gateway',
-  -- Named differently on the two routes: typesafe-ai/jev through the gateway,
-  -- jev-latest direct. The endpoint normalises an id that does not match.
-  add column if not exists auto_eval_model text not null default 'typesafe-ai/jev',
+  -- The judge's ladder, same row shape as `tiers`:
+  --   [{name, provider, route?, model, enabled, timeout_ms}]
+  -- provider is 'jev' (typed decisions, metered unless the gateway credit covers
+  -- it), 'gemini' (free tier) or 'workers-ai' (free allowance). Tried in order.
+  add column if not exists auto_eval_tiers jsonb not null default '[]'::jsonb,
+  -- The switch that decides whether this can ever cost money. False means a rung
+  -- billed per token is skipped however it is configured.
+  add column if not exists auto_eval_allow_metered boolean not null default false,
   -- Rows per press of the button.
   add column if not exists auto_eval_batch_cap int not null default 50,
   -- Rows per HTTP request. Workers Free allows ~10ms CPU per request, so the
@@ -70,14 +72,21 @@ alter table public.ask_settings
   -- The Gemini escalation that writes a reason for a low-confidence verdict.
   add column if not exists auto_eval_explain_enabled boolean not null default false;
 
-do $$
-begin
-  if not exists (select 1 from pg_constraint where conname = 'ask_settings_auto_eval_route') then
-    alter table public.ask_settings
-      add constraint ask_settings_auto_eval_route
-      check (auto_eval_route in ('gateway', 'typesafe'));
-  end if;
-end$$;
+-- Seed the ladder, but only if it has never been set: an empty array here would
+-- silently mean "no rung can grade", and re-running this migration must not undo
+-- an edit made in /admin.
+update public.ask_settings
+   set auto_eval_tiers = '[
+     {"name": "jev-gateway", "provider": "jev", "route": "gateway",
+      "model": "typesafe-ai/jev", "enabled": true, "timeout_ms": 10000},
+     {"name": "gemini-judge", "provider": "gemini",
+      "model": "gemini-flash-lite-latest", "enabled": true, "timeout_ms": 12000},
+     {"name": "cf-gpt-oss-20b", "provider": "workers-ai",
+      "model": "@cf/openai/gpt-oss-20b", "enabled": true, "timeout_ms": 15000},
+     {"name": "jev-direct", "provider": "jev", "route": "typesafe",
+      "model": "jev-latest", "enabled": false, "timeout_ms": 10000}
+   ]'::jsonb
+ where id = 1 and jsonb_array_length(auto_eval_tiers) = 0;
 
 -- The judge endpoint asks this with the caller's own access token, which is how
 -- it knows the request came from the owner before it spends anything. Reached
@@ -164,14 +173,20 @@ as $fn$
 declare
   used bigint;
 begin
-  update public.ask_eval_usage
-     set input_tokens = greatest(
-           input_tokens - greatest(coalesce(p_reserved, 0), 0)
-                        + greatest(coalesce(p_actual, 0), 0), 0),
-         graded = graded + greatest(coalesce(p_graded, 0), 0),
-         updated_at = now()
-   where month = date_trunc('month', now())::date
-   returning input_tokens into used;
+  -- Upsert, not update: a run on a free-only ladder reserves nothing, so the
+  -- month's row may not exist yet, and its graded count would otherwise be lost.
+  insert into public.ask_eval_usage (month, input_tokens, graded)
+    values (date_trunc('month', now())::date,
+            greatest(coalesce(p_actual, 0), 0),
+            greatest(coalesce(p_graded, 0), 0))
+    on conflict (month) do update
+      set input_tokens = greatest(
+            public.ask_eval_usage.input_tokens
+              - greatest(coalesce(p_reserved, 0), 0)
+              + greatest(coalesce(p_actual, 0), 0), 0),
+          graded = public.ask_eval_usage.graded + greatest(coalesce(p_graded, 0), 0),
+          updated_at = now()
+    returning input_tokens into used;
   return jsonb_build_object('used', coalesce(used, 0));
 end;
 $fn$;

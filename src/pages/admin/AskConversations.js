@@ -413,16 +413,19 @@ const AskConversations = () => {
     try {
       const est = await runJudge({ messageIds: toGrade, mode: "estimate" });
       if (!est.count) { toast.error("Nothing here is ungraded."); return; }
+      const rungs = judge?.rungs || [];
+      const paid = rungs.filter((r) => r.cost !== "free");
       const usd = (est.tokens * JUDGE_USD_PER_MTOK) / 1e6;
-      const remaining = judge?.budget?.remaining ?? 0;
       setConfirm({
-        title: `Grade ${est.count} answer${est.count === 1 ? "" : "s"} with ${est.model}?`,
+        title: `Grade ${est.count} answer${est.count === 1 ? "" : "s"}?`,
         message: [
-          `At most about ${est.tokens.toLocaleString()} input tokens (~$${usd.toFixed(4)}).`,
-          `This month has ${remaining.toLocaleString()} of ${(judge?.budget?.cap ?? 0).toLocaleString()} left.`,
-          judge?.route === "typesafe"
-            ? "Route: typesafe — billed per token."
-            : "Route: gateway — spends the free monthly credit.",
+          `Ladder: ${rungs.map((r) => `${r.name} (${r.cost})`).join(" → ") || "none"}.`,
+          // Only quote a price when something in the ladder could produce one.
+          paid.length
+            ? `At most about ${est.tokens.toLocaleString()} input tokens (~$${usd.toFixed(4)}),`
+              + ` and this month has ${(judge?.budget?.remaining ?? 0).toLocaleString()}`
+              + ` of ${(judge?.budget?.cap ?? 0).toLocaleString()} tokens left.`
+            : "Every rung here is free, so this costs nothing.",
           "Answers you graded by hand are never touched.",
         ].join(" "),
         confirmLabel: "Grade them",
