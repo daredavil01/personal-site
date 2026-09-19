@@ -245,6 +245,20 @@ it and the honest choice is the metered direct route — pennies, but not zero.
    **Explain N**. It uses the free rung `/ask` already answers on, appends one
    sentence under the numbers, and never replaces them.
 
+## When "Grade N" says nothing could be graded
+
+The button counts ungraded answers in the browser; the endpoint decides again
+against the database, and it will tell you which of three things happened:
+
+| the toast says | what it means |
+|---|---|
+| cannot read the conversation log | `SUPABASE_SERVICE_ROLE_KEY` is not set on this deployment, or migration 0022 has not been applied. The endpoint now refuses before this point, so you should see that message instead. |
+| already been graded | Genuinely nothing left in this filter. Widen the date range, or clear the **Graded by** filter. |
+| questions, not answers | Should not happen from the UI; it means the ids sent were `role = 'user'` rows. |
+
+The first one used to be silent, which was the worst of the three: an unreadable
+log and a fully graded one both come back from PostgREST as `200 []`.
+
 ## Turning it off
 
 Clear **Grade answers automatically** at `/admin/ask/settings` — live within a

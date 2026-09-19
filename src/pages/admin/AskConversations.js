@@ -386,6 +386,7 @@ const AskConversations = () => {
         // every batch at once would race it.
         // eslint-disable-next-line no-await-in-loop
         const out = await runJudge({ messageIds: batches[i], mode });
+        if (out.note && !out.results?.length) throw new Error(out.note);
         (out.results || []).forEach((r) => onEvalSaved(r.id, r));
         changed += out.graded ?? out.explained ?? 0;
         skipped += out.skipped || 0;
@@ -412,7 +413,13 @@ const AskConversations = () => {
   const askToGrade = async () => {
     try {
       const est = await runJudge({ messageIds: toGrade, mode: "estimate" });
-      if (!est.count) { toast.error("Nothing here is ungraded."); return; }
+      if (!est.count) {
+        // The endpoint says which of the identical-looking causes it was: rows
+        // that are all graded, and rows it cannot read at all, both come back
+        // as an empty list.
+        toast.error(est.note || "No answer in this selection could be graded.");
+        return;
+      }
       const rungs = judge?.rungs || [];
       const paid = rungs.filter((r) => r.cost !== "free");
       const usd = (est.tokens * JUDGE_USD_PER_MTOK) / 1e6;
