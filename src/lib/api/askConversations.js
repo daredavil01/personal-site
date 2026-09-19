@@ -49,6 +49,12 @@ function messageFromRow(r) {
     evalTags: r.eval_tags || [],
     evalNotes: r.eval_notes || null,
     evalIdealAnswer: r.eval_ideal_answer || null,
+    // Who graded it: "human" or "auto" (migration 0022). Null on rows graded
+    // before that migration existed, which it backfills.
+    evalSource: r.eval_source || null,
+    // The judge's own record, kept even after a hand grade replaces the verdict
+    // above — the only thing that makes judge-vs-human agreement measurable.
+    evalAuto: r.eval_auto || {},
     evaluatedAt: r.evaluated_at || null,
     createdAt: r.created_at,
     sessionId: conv.session_id || null,
@@ -77,11 +83,24 @@ export async function listAskMessages({ from, to, max = 20000 } = {}) {
   return rows.map(messageFromRow);
 }
 
-// Quick-pick reasons in eval mode; any other tag can be typed in.
+// Quick-pick reasons in eval mode; any other tag can be typed in. The last
+// three are the automatic judge's own additions (src/lib/askJudge.js), listed
+// here so a hand grade can use the same words the machine does.
 export const EVAL_TAGS = [
   "hallucination", "wrong-source", "missed-source", "incomplete",
   "off-topic", "bad-link", "formatting", "too-slow", "great",
+  "needs-review", "over-refusal", "contradiction",
 ];
+
+// Mirrors auto_eval_min_confidence's default. The page overrides it from the
+// endpoint's readiness payload; this is what the filters fall back to.
+export const LOW_CONFIDENCE = 0.7;
+
+/** The confidence the judge recorded for a row, if a judge graded it. */
+export const autoConfidence = (answer) => {
+  const value = Number(answer?.evalAuto?.confidence);
+  return Number.isFinite(value) ? value : null;
+};
 
 /**
  * The admin's evaluation of one answer (separate from reader feedback). An
@@ -100,6 +119,12 @@ export async function saveEvaluation(messageId, { verdict, score, tags, notes, i
   const empty = !row.eval_verdict && !row.eval_score && !row.eval_tags.length
     && !row.eval_notes && !row.eval_ideal_answer;
   row.evaluated_at = empty ? null : new Date().toISOString();
+  // Saving by hand claims the row, but deliberately does NOT clear eval_auto:
+  // comparing your verdict with the machine's is the whole reason to run one, and
+  // there is nowhere else that record survives. Clearing an evaluation does reset
+  // it, because a cleared row is genuinely ungraded and eligible again.
+  row.eval_source = empty ? null : "human";
+  if (empty) row.eval_auto = {};
 
   const { data, error } = await supabase
     .from("ask_messages")
@@ -115,9 +140,75 @@ export async function saveEvaluation(messageId, { verdict, score, tags, notes, i
     evalTags: saved.evalTags,
     evalNotes: saved.evalNotes,
     evalIdealAnswer: saved.evalIdealAnswer,
+    evalSource: saved.evalSource,
+    evalAuto: saved.evalAuto,
     evaluatedAt: saved.evaluatedAt,
   };
 }
+
+// ---------------------------------------------------------------------------
+// The automatic judge (functions/api/ask-eval.js)
+// ---------------------------------------------------------------------------
+//
+// The judge's key is a Cloudflare secret, so grading cannot happen in the
+// browser. This is the only place that reads the session token and hands it to
+// the endpoint, which verifies it with is_owner() before spending anything.
+
+async function askEval(path, init = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  if (!token) throw new Error("Signed out — sign in again to grade answers.");
+  const res = await fetch(`/api/ask-eval${path}`, {
+    ...init,
+    headers: {
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(body.note || body.error || `ask-eval ${res.status}`);
+    err.status = res.status;
+    err.reason = body.error;
+    err.budget = body.budget;
+    throw err;
+  }
+  return body;
+}
+
+/** Whether grading is switched on and configured, and what it has spent. */
+export const getJudgeStatus = () => askEval("");
+
+/**
+ * Grade, estimate or explain. `mode: "estimate"` reads the rows and counts
+ * characters without calling the judge, which is what fills the confirm dialog.
+ */
+export const runJudge = ({ messageIds, mode = "run" }) => askEval("", {
+  method: "POST",
+  body: JSON.stringify({ messageIds, mode }),
+});
+
+/** What is worth sending: answers in this set that nobody has graded yet. */
+export const ungradedIds = (exchanges, cap) => exchanges
+  .filter((e) => !e.answer.evaluatedAt)
+  .sort((a, b) => b.askedAt.localeCompare(a.askedAt))
+  .slice(0, cap)
+  .map((e) => e.answer.id);
+
+/** Rows the judge was unsure about, which a human or Gemini can settle. */
+export const lowConfidenceIds = (exchanges, threshold = LOW_CONFIDENCE) => exchanges
+  .filter((e) => {
+    const c = autoConfidence(e.answer);
+    return e.answer.evalSource === "auto" && c !== null && c < threshold;
+  })
+  .map((e) => e.answer.id);
+
+/** Split a list into slices the endpoint will accept in one request. */
+export const sliceBatches = (ids, size) => {
+  const out = [];
+  for (let i = 0; i < ids.length; i += Math.max(1, size)) out.push(ids.slice(i, i + Math.max(1, size)));
+  return out;
+};
 
 /** What the index holds, per content type (from site_facts). */
 export async function getIndexCoverage() {
@@ -219,8 +310,10 @@ export const EMPTY_FILTERS = {
   sourceType: "",
   feedback: "", // liked | disliked | commented | rated | unrated
   feedbackTag: "",
-  evaluation: "", // evaluated | unevaluated | pass | fail
+  evaluation: "", // evaluated | unevaluated | pass | fail | disagreed
   evalTag: "",
+  evalSource: "", // human | auto
+  confidence: "", // low | high — the judge's own, for rows it graded
   degraded: "", // yes | no
   keywordOnly: "",
   errors: "",
@@ -239,7 +332,20 @@ export function applyFilters(exchanges, f) {
     if (f.evaluation === "evaluated" && !a.evaluatedAt) return false;
     if (f.evaluation === "unevaluated" && a.evaluatedAt) return false;
     if ((f.evaluation === "pass" || f.evaluation === "fail") && a.evalVerdict !== f.evaluation) return false;
+    // Rows where you and the judge reached different verdicts on the same answer:
+    // the short list worth reading before trusting any of its other grades.
+    if (f.evaluation === "disagreed"
+      && !(a.evalSource === "human" && a.evalAuto?.verdict && a.evalAuto.verdict !== a.evalVerdict)) {
+      return false;
+    }
     if (f.evalTag && !a.evalTags.includes(f.evalTag)) return false;
+    if (f.evalSource && a.evalSource !== f.evalSource) return false;
+    if (f.confidence) {
+      const c = autoConfidence(a);
+      if (c === null) return false;
+      if (f.confidence === "low" && c >= LOW_CONFIDENCE) return false;
+      if (f.confidence === "high" && c < LOW_CONFIDENCE) return false;
+    }
     if (f.tier && a.tier !== f.tier) return false;
     if (f.provider && a.provider !== f.provider) return false;
     if (f.model && a.model !== f.model) return false;
@@ -285,6 +391,24 @@ export function summariseExchanges(exchanges) {
     commented: count((a) => !!a.feedbackComment),
     satisfaction: liked + disliked ? Math.round((liked / (liked + disliked)) * 100) : null,
     evaluated: count((a) => !!a.evaluatedAt),
+    evaluatedByHand: count((a) => a.evalSource === "human" || (a.evaluatedAt && !a.evalSource)),
+    evaluatedAuto: count((a) => a.evalSource === "auto"),
+    lowConfidence: count((a) => {
+      const c = autoConfidence(a);
+      return c !== null && c < LOW_CONFIDENCE;
+    }),
+    // How often your own verdict matched the judge's on the same answer. The
+    // number that decides whether the judge is worth running; null until you
+    // have re-graded something it graded.
+    agreement: (() => {
+      const both = answers.filter(
+        (a) => a.evalSource === "human" && !!a.evalAuto?.verdict,
+      );
+      const agreed = both.filter((a) => a.evalAuto.verdict === a.evalVerdict).length;
+      return both.length
+        ? { n: both.length, agreed, rate: Math.round((agreed / both.length) * 100) }
+        : null;
+    })(),
     passed,
     failed,
     passRate: passed + failed ? Math.round((passed / (passed + failed)) * 100) : null,
@@ -338,6 +462,11 @@ const CSV_COLUMNS = [
   ["evalTags", (e) => e.answer.evalTags.join("|")],
   ["evalNotes", (e) => e.answer.evalNotes],
   ["evalIdealAnswer", (e) => e.answer.evalIdealAnswer],
+  ["evalSource", (e) => e.answer.evalSource],
+  ["evalAutoVerdict", (e) => e.answer.evalAuto?.verdict ?? null],
+  ["evalAutoScore", (e) => e.answer.evalAuto?.score ?? null],
+  ["evalConfidence", (e) => autoConfidence(e.answer)],
+  ["evalRubric", (e) => e.answer.evalAuto?.rubric ?? null],
   ["evaluatedAt", (e) => e.answer.evaluatedAt],
 ];
 
@@ -362,6 +491,10 @@ export function toEvalsJsonl(exchanges) {
   return exchanges
     .filter((e) => e.answer.feedback !== null || e.answer.feedbackComment || e.answer.evaluatedAt)
     .map((e) => JSON.stringify({
+      // Without an id an exported line cannot be joined back to the row it came
+      // from, which is exactly what comparing a judge against a hand grade needs.
+      message_id: e.answer.id,
+      message_uuid: e.answer.messageUuid,
       question: e.question,
       answer: e.answer.content,
       sources: e.answer.sources,
@@ -377,6 +510,8 @@ export function toEvalsJsonl(exchanges) {
       eval_score: e.answer.evalScore,
       eval_tags: e.answer.evalTags,
       eval_notes: e.answer.evalNotes,
+      eval_source: e.answer.evalSource,
+      eval_auto: e.answer.evalAuto,
       ideal_answer: e.answer.evalIdealAnswer,
       asked_at: e.askedAt,
     }))

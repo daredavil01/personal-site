@@ -12,13 +12,19 @@ export function json(body, status = 200) {
   });
 }
 
-export function restHeaders(env, { serviceRole = false } = {}) {
+/**
+ * `token` sends a caller's own access token instead of a project key, which is
+ * how an endpoint asks Postgres who is calling: is_owner() reads auth.jwt(), so
+ * PostgREST answers for whichever token it is handed. apikey stays the project
+ * key either way — Supabase needs both.
+ */
+export function restHeaders(env, { serviceRole = false, token = null } = {}) {
   const key = (serviceRole && env.SUPABASE_SERVICE_ROLE_KEY)
     || env.VITE_SUPABASE_ANON_KEY
     || env.VITE_SUPABASE_PUBLISHABLE_KEY;
   return {
     apikey: key,
-    Authorization: `Bearer ${key}`,
+    Authorization: `Bearer ${token || key}`,
     "Content-Type": "application/json",
     Accept: "application/json",
   };

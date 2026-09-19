@@ -1,5 +1,6 @@
 import {
-  applyFilters, EMPTY_FILTERS, summariseExchanges, toChats, toEvalsJsonl, toExchanges,
+  applyFilters, EMPTY_FILTERS, lowConfidenceIds, sliceBatches, summariseExchanges,
+  toChats, toEvalsJsonl, toExchanges, ungradedIds,
 } from "./askConversations";
 
 const msg = (id, conversationId, turnIndex, role, createdAt, extra = {}) => ({
@@ -75,5 +76,87 @@ describe("conversation log helpers", () => {
     const lines = toEvalsJsonl(exchanges).split("\n").map((l) => JSON.parse(l));
     expect(lines.map((l) => l.rating)).toEqual([1, -1]);
     expect(lines[1].comment).toBe("no ultra");
+  });
+});
+
+// --- the automatic judge (migration 0022) -----------------------------------
+
+const graded = (id, extra) => msg(id, 9, 1, "assistant", "2026-09-19T10:00:00Z", {
+  evalTags: [], evalAuto: {}, evalSource: null, ...extra,
+});
+
+describe("judge-graded rows", () => {
+  const auto = graded(101, {
+    evalSource: "auto",
+    evalVerdict: "fail",
+    evalScore: 2,
+    evaluatedAt: "2026-09-19T11:00:00Z",
+    evalAuto: { verdict: "fail", score: 2, confidence: 0.42, rubric: "r1" },
+  });
+  const byHand = graded(102, {
+    evalSource: "human",
+    evalVerdict: "pass",
+    evalScore: 4,
+    evaluatedAt: "2026-09-19T11:05:00Z",
+    // A row the judge graded first and the owner then re-graded differently.
+    evalAuto: { verdict: "fail", score: 2, confidence: 0.91, rubric: "r1" },
+  });
+  const ungraded = graded(103);
+  const exchanges = toExchanges([msg(100, 9, 0, "user", "2026-09-19T09:59:00Z"), auto, byHand, ungraded]);
+
+  it("filters by who graded it", () => {
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, evalSource: "auto" })
+      .map((e) => e.answer.id)).toEqual([101]);
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, evalSource: "human" })
+      .map((e) => e.answer.id)).toEqual([102]);
+  });
+
+  it("filters to the rows the judge was unsure about", () => {
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, confidence: "low" })
+      .map((e) => e.answer.id)).toEqual([101]);
+    // An ungraded row has no confidence, so it is in neither band.
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, confidence: "high" })
+      .map((e) => e.answer.id)).toEqual([102]);
+  });
+
+  it("filters to the rows where the judge and the owner disagreed", () => {
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, evaluation: "disagreed" })
+      .map((e) => e.answer.id)).toEqual([102]);
+  });
+
+  it("counts hand and machine grades separately and measures agreement", () => {
+    const s = summariseExchanges(exchanges);
+    expect(s.evaluatedAuto).toBe(1);
+    expect(s.evaluatedByHand).toBe(1);
+    expect(s.lowConfidence).toBe(1);
+    // One row re-graded by hand, and the verdicts differed.
+    expect(s.agreement).toEqual({ n: 1, agreed: 0, rate: 0 });
+  });
+
+  it("reports no agreement number until something has been re-graded", () => {
+    const only = toExchanges([msg(100, 9, 0, "user", "2026-09-19T09:59:00Z"), auto]);
+    expect(summariseExchanges(only).agreement).toBeNull();
+  });
+
+  it("picks the newest ungraded answers, capped, for a run", () => {
+    expect(ungradedIds(exchanges, 10)).toEqual([103]);
+    expect(ungradedIds(exchanges, 0)).toEqual([]);
+  });
+
+  it("picks only the judge's own low-confidence rows to explain", () => {
+    expect(lowConfidenceIds(exchanges)).toEqual([101]);
+  });
+
+  it("slices a run into requests the endpoint will accept", () => {
+    expect(sliceBatches([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+    // A nonsense size must not loop forever.
+    expect(sliceBatches([1, 2], 0)).toEqual([[1], [2]]);
+  });
+
+  it("carries a joinable id and the machine record into the evals export", () => {
+    const line = JSON.parse(toEvalsJsonl(exchanges).split("\n")[0]);
+    expect(line.message_id).toBe(101);
+    expect(line.eval_source).toBe("auto");
+    expect(line.eval_auto.rubric).toBe("r1");
   });
 });

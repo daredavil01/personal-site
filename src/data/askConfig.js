@@ -156,6 +156,19 @@ A micro-post is a passing thought from years ago, sometimes a reblog of someone 
   question_pool: [],
   context_doc: "",
   turnstile_required: false,
+  // Automatic evaluation of logged answers (migration 0022). Off by default and
+  // off in this fallback too: if ask_settings is unreachable the judge must not
+  // run, because a default that spends money is not a safe default.
+  auto_eval_enabled: false,
+  // 'gateway' (Vercel AI Gateway, where the free monthly credit is) or
+  // 'typesafe' (api.typesafe.ai directly, which is metered).
+  auto_eval_route: "gateway",
+  auto_eval_model: "typesafe-ai/jev",
+  auto_eval_batch_cap: 50,
+  auto_eval_request_batch: 8,
+  auto_eval_min_confidence: 0.7,
+  auto_eval_monthly_token_cap: 2000000,
+  auto_eval_explain_enabled: false,
 };
 
 // The subject axis for starter questions. Four chips are drawn per page load,

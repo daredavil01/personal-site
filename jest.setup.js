@@ -15,19 +15,24 @@ class ObserverStub {
 
   disconnect() {}
 }
-window.IntersectionObserver = ObserverStub;
-window.ResizeObserver = ObserverStub;
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+// Guarded because a Pages Function is a Worker module, not a document: its tests
+// declare `@jest-environment node`, where there is no window to stub.
+if (typeof window !== 'undefined') {
+  window.IntersectionObserver = ObserverStub;
+  window.ResizeObserver = ObserverStub;
+
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+}

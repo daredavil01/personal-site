@@ -1,18 +1,25 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   applyFilters,
+  autoConfidence,
   download,
   EMPTY_FILTERS,
   EVAL_TAGS,
+  getJudgeStatus,
+  LOW_CONFIDENCE,
+  lowConfidenceIds,
+  runJudge,
   saveEvaluation,
   filterOptions,
   getIndexCoverage,
   listAskMessages,
+  sliceBatches,
   summariseExchanges,
   toChats,
   toCsv,
   toEvalsJsonl,
   toExchanges,
+  ungradedIds,
 } from "../../lib/api/askConversations";
 import PageHeader from "./ui/PageHeader";
 import Card from "./ui/Card";
@@ -21,11 +28,17 @@ import Badge from "./ui/Badge";
 import { Checkbox, Input, Select, Textarea } from "./ui/Input";
 import { Download } from "./ui/icons";
 import { Spinner, ErrorState } from "./ui/Feedback";
+import ProgressBar from "./ui/ProgressBar";
+import ConfirmDialog from "./ui/ConfirmDialog";
 import { useToast } from "./ui/ToastContext";
 import { faintText, hairline, labelClass, mutedText } from "./ui/tokens";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 40;
+// Jev's published rate: $0.042 per million input tokens, output free. Only ever
+// used to put an order of magnitude in the confirm dialog — the cap that actually
+// protects the budget is counted in tokens, server-side.
+const JUDGE_USD_PER_MTOK = 0.042;
 
 const ms = (v) => (v === null || v === undefined ? "—" : `${v.toLocaleString()} ms`);
 const time = (v) => (v ? new Date(v).toLocaleString() : "—");
@@ -95,7 +108,17 @@ const EvalSummary = ({ answer: a }) => (
       {a.evalVerdict === "pass" && <Badge tone="success">Pass</Badge>}
       {a.evalVerdict === "fail" && <Badge tone="danger">Fail</Badge>}
       {a.evalScore && <Badge tone="accent">{`${a.evalScore}/5`}</Badge>}
-      {a.evalTags.map((t) => <Badge key={t}>{t}</Badge>)}
+      {/* Whose verdict this is. An auto grade must never read as the owner's. */}
+      {a.evalSource === "auto" && (
+        <Badge tone="accent">
+          {`${a.evalAuto?.model || "auto"}${
+            autoConfidence(a) === null ? "" : ` · conf ${autoConfidence(a).toFixed(2)}`
+          }`}
+        </Badge>
+      )}
+      {a.evalTags.map((t) => (
+        <Badge key={t} tone={t === "needs-review" ? "warning" : undefined}>{t}</Badge>
+      ))}
     </div>
     {a.evalNotes && <p className="text-[13px] mb-0 whitespace-pre-wrap border-l-2 border-admin-500 pl-2">{a.evalNotes}</p>}
     {a.evalIdealAnswer && (
@@ -150,6 +173,11 @@ const EvalForm = ({ answer: a, onSaved }) => {
         {a.evaluatedAt
           ? <Badge tone="success">{`evaluated ${time(a.evaluatedAt)}`}</Badge>
           : <Badge tone="warning">not evaluated</Badge>}
+        {a.evalSource === "auto" && (
+          <span className={`text-[11px] ${mutedText}`}>
+            Graded by the judge. Saving makes it yours; its verdict is kept for comparison.
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <div className="flex flex-col gap-1">
@@ -291,6 +319,11 @@ const AskConversations = () => {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [shown, setShown] = useState(PAGE_SIZE);
   const [evalMode, setEvalMode] = useState(readEvalMode);
+  // Null until the endpoint answers, and null again if it cannot: no readiness,
+  // no buttons. The flag, the key and the budget all live on that side.
+  const [judge, setJudge] = useState(null);
+  const [grading, setGrading] = useState(null);
+  const [confirm, setConfirm] = useState(null);
   const toast = useToast();
 
   const toggleEvalMode = (on) => {
@@ -315,11 +348,98 @@ const AskConversations = () => {
     getIndexCoverage().then(setCoverage).catch(() => setCoverage(null));
   }, []);
 
+  const refreshJudge = () => getJudgeStatus().then(setJudge).catch(() => setJudge(null));
+  useEffect(() => { refreshJudge(); }, []);
+
   const exchanges = useMemo(() => toExchanges(messages || []), [messages]);
   const options = useMemo(() => filterOptions(exchanges), [exchanges]);
   const filtered = useMemo(() => applyFilters(exchanges, filters), [exchanges, filters]);
   const summary = useMemo(() => summariseExchanges(filtered), [filtered]);
   const chats = useMemo(() => toChats(filtered), [filtered]);
+
+  const lowBand = judge?.minConfidence ?? LOW_CONFIDENCE;
+  const canGrade = !!judge?.enabled && !!judge?.configured && !grading;
+  // Newest first and capped: one press is a known amount of work and a known
+  // amount of spend, and pressing again does the next lot.
+  const toGrade = useMemo(
+    () => ungradedIds(filtered, judge?.batchCap ?? 50),
+    [filtered, judge?.batchCap],
+  );
+  const toExplain = useMemo(() => lowConfidenceIds(filtered, lowBand), [filtered, lowBand]);
+
+  /**
+   * The browser drives the batch. Each request carries a few answers because
+   * Workers Free allows about 10ms of CPU per request, and walking the list here
+   * also means a real progress bar and results that land as they arrive rather
+   * than all at the end.
+   */
+  const runInBatches = async (ids, mode, label) => {
+    const batches = sliceBatches(ids, judge?.requestBatch ?? 8);
+    let done = 0;
+    let changed = 0;
+    let skipped = 0;
+    const failed = [];
+    setGrading({ done: 0, total: ids.length, label });
+    try {
+      for (let i = 0; i < batches.length; i += 1) {
+        // Sequential on purpose: the spend cap is checked per request, and firing
+        // every batch at once would race it.
+        // eslint-disable-next-line no-await-in-loop
+        const out = await runJudge({ messageIds: batches[i], mode });
+        (out.results || []).forEach((r) => onEvalSaved(r.id, r));
+        changed += out.graded ?? out.explained ?? 0;
+        skipped += out.skipped || 0;
+        failed.push(...(out.failed || []));
+        done += batches[i].length;
+        setGrading({ done, total: ids.length, label });
+      }
+      const parts = [`${label} ${changed} of ${ids.length}.`];
+      if (skipped) parts.push(`${skipped} already graded by hand.`);
+      if (failed.length) parts.push(`${failed.length} failed: ${failed[0].error}`);
+      if (failed.length) toast.error(parts.join(" "));
+      else toast.success(parts.join(" "));
+    } catch (err) {
+      // Whatever already succeeded stays: nothing is rolled back.
+      toast.error(err.message || "Grading stopped.");
+    } finally {
+      setGrading(null);
+      refreshJudge();
+    }
+  };
+
+  // Estimate first, always. This reads the rows and counts characters; it never
+  // calls the judge, so the dialog can state the cost before anything is spent.
+  const askToGrade = async () => {
+    try {
+      const est = await runJudge({ messageIds: toGrade, mode: "estimate" });
+      if (!est.count) { toast.error("Nothing here is ungraded."); return; }
+      const usd = (est.tokens * JUDGE_USD_PER_MTOK) / 1e6;
+      const remaining = judge?.budget?.remaining ?? 0;
+      setConfirm({
+        title: `Grade ${est.count} answer${est.count === 1 ? "" : "s"} with ${est.model}?`,
+        message: [
+          `At most about ${est.tokens.toLocaleString()} input tokens (~$${usd.toFixed(4)}).`,
+          `This month has ${remaining.toLocaleString()} of ${(judge?.budget?.cap ?? 0).toLocaleString()} left.`,
+          judge?.route === "typesafe"
+            ? "Route: typesafe — billed per token."
+            : "Route: gateway — spends the free monthly credit.",
+          "Answers you graded by hand are never touched.",
+        ].join(" "),
+        confirmLabel: "Grade them",
+        run: () => runInBatches(toGrade, "run", "Graded"),
+      });
+    } catch (err) {
+      toast.error(err.message || "Could not estimate the run.");
+    }
+  };
+
+  const askToExplain = () => setConfirm({
+    title: `Explain ${toExplain.length} low-confidence grade${toExplain.length === 1 ? "" : "s"}?`,
+    message: "The judge returns probabilities, never prose. This asks the free Gemini "
+      + "rung for one sentence on each and writes it under the numbers.",
+    confirmLabel: "Explain them",
+    run: () => runInBatches(toExplain, "explain", "Explained"),
+  });
 
   const setFilter = (key) => (value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -358,6 +478,16 @@ const AskConversations = () => {
               <Checkbox id="ask-eval-mode" checked={evalMode} onChange={(e) => toggleEvalMode(e.target.checked)} />
               Eval mode
             </label>
+            {judge?.enabled && judge?.configured && (
+              <Button size="sm" variant="primary" disabled={!canGrade || !toGrade.length} onClick={askToGrade}>
+                {grading ? `${grading.label}…` : `Grade ${toGrade.length}`}
+              </Button>
+            )}
+            {judge?.enabled && judge?.explainEnabled && !!toExplain.length && (
+              <Button size="sm" disabled={!canGrade} onClick={askToExplain}>
+                {`Explain ${toExplain.length}`}
+              </Button>
+            )}
             <Button size="sm" icon={Download} disabled={!filtered.length} onClick={() => exportAs("csv")}>CSV</Button>
             <Button size="sm" icon={Download} disabled={!filtered.length} onClick={() => exportAs("json")}>JSON</Button>
             <Button size="sm" icon={Download} disabled={!filtered.length} onClick={() => exportAs("evals")}>Evals JSONL</Button>
@@ -400,11 +530,25 @@ const AskConversations = () => {
             <Choice
               value={filters.evaluation}
               onChange={setFilter("evaluation")}
-              options={[["evaluated", "Evaluated"], ["unevaluated", "Not evaluated"], ["pass", "Pass"], ["fail", "Fail"]]}
+              options={[["evaluated", "Evaluated"], ["unevaluated", "Not evaluated"], ["pass", "Pass"], ["fail", "Fail"], ["disagreed", "Judge disagreed"]]}
             />
           </Filter>
           <Filter label="Eval tag">
             <Choice value={filters.evalTag} onChange={setFilter("evalTag")} options={options.evalTags} />
+          </Filter>
+          <Filter label="Graded by">
+            <Choice
+              value={filters.evalSource}
+              onChange={setFilter("evalSource")}
+              options={[["human", "By hand"], ["auto", "The judge"]]}
+            />
+          </Filter>
+          <Filter label="Judge confidence">
+            <Choice
+              value={filters.confidence}
+              onChange={setFilter("confidence")}
+              options={[["low", `Low (under ${lowBand})`], ["high", "High"]]}
+            />
           </Filter>
           <Filter label="Tier">
             <Choice value={filters.tier} onChange={setFilter("tier")} options={options.tiers} />
@@ -436,6 +580,26 @@ const AskConversations = () => {
         </div>
       </Card>
 
+      {grading && (
+        <ProgressBar
+          value={grading.total ? grading.done / grading.total : null}
+          label={`${grading.label} ${grading.done} of ${grading.total}`}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title}
+        message={confirm?.message}
+        confirmLabel={confirm?.confirmLabel}
+        onConfirm={async () => {
+          const { run } = confirm;
+          setConfirm(null);
+          await run();
+        }}
+        onClose={() => setConfirm(null)}
+      />
+
       {!messages ? <Spinner /> : (
         <>
           <Card title="Summary" description="For the exchanges matching the filters above.">
@@ -452,7 +616,19 @@ const AskConversations = () => {
                 <Stat
                   label="Evaluated"
                   value={`${summary.evaluated} / ${summary.questions}`}
-                  hint={summary.questions ? `${Math.round((summary.evaluated / summary.questions) * 100)}% reviewed` : undefined}
+                  hint={`${summary.evaluatedByHand} by hand · ${summary.evaluatedAuto} by the judge`}
+                />
+                <Stat
+                  label="Low confidence"
+                  value={summary.lowConfidence}
+                  hint={`judge under ${lowBand}`}
+                />
+                <Stat
+                  label="Judge agreement"
+                  value={summary.agreement ? `${summary.agreement.rate}%` : "—"}
+                  hint={summary.agreement
+                    ? `${summary.agreement.agreed} of ${summary.agreement.n} re-graded`
+                    : "re-grade some by hand to find out"}
                 />
                 <Stat
                   label="Eval pass rate"

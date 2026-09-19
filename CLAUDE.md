@@ -272,6 +272,39 @@ Natural-language chat over the whole content store.
   per-answer form (verdict, 1–5 score, tags, notes, ideal answer) saved to the
   `eval_*` columns on `ask_messages` — separate from reader `feedback_*`, written
   directly under owner RLS. Filter by evaluated / not evaluated.
+- **Automatic evals** (`0022`, `docs/ask-evals.md` — read it before touching the
+  rubric): a "Grade N" button on the Conversations page sends the filtered,
+  ungraded answers to **Jev** (TypeSafe AI's System One model — typed decisions,
+  no prose, `$0.042/MTok` in with output free) and fills the same `eval_*` columns,
+  marked `eval_source = 'auto'`. **Off by default** behind
+  `ask_settings.auto_eval_enabled`, and off in `DEFAULT_ASK_SETTINGS` too, so an
+  unreachable Supabase switches it off rather than on.
+  - **The rubric lives in `src/lib/askJudge.js`** — four dimensions, of which link
+    and format compliance never reaches a model because `sanitiseAnswer` already
+    decides it exactly, for free. `JUDGE_RUBRIC_VERSION` is stamped on every row:
+    rewording a criterion redefines every grade after it.
+  - **A hand grade is never overwritten.** The write is a PostgREST
+    `PATCH … &evaluated_at=is.null`, so Postgres refuses rather than a client-side
+    `if`. And `eval_auto` keeps the machine's verdict after you replace it, which
+    is what makes the Judge agreement number possible.
+  - **Groundedness is judged against chunk text re-fetched from `content_chunks`**
+    — `ask_log` stores source cards only, so the text the answering model saw was
+    never logged, and re-indexing may have moved it since.
+  - **The endpoint is `functions/api/ask-eval.js`** (not `functions/api/ask/eval.js`,
+    which would collide with `/api/ask`). It verifies the caller with the existing
+    `is_owner()` RPC called with their own access token, then checks the flag, the
+    key, the row state and `ask_eval_budget()` — reserve-then-check like
+    `ask_quota()` — before a single token is spent. `mode: "estimate"` spends
+    nothing and fills the confirm dialog.
+  - **The two routes are not the same API.** Vercel's AI Gateway (where the free
+    monthly credit is) serves evaluation through the AI SDK only, with `boolean`
+    questions and index-keyed score probabilities; `api.typesafe.ai` takes a plain
+    POST with `noul`. Hence `toGatewayQuestions` / `toNativeQuestions`. The AI SDK
+    takes the Functions bundle from 30 KB to 278 KB gzipped — the first dependency
+    any Function here has had.
+  - Jev cannot explain itself, so a separate button escalates only the
+    low-confidence rows to the existing free Gemini rung, appending one sentence
+    under the numbers.
 - **Nightly:** `.github/workflows/ask-refresh.yml` (02:00 IST) runs
   `blogs:wordcount` + `ask:index` and commits the ledger JSON only when posts
   changed. Repo secrets: `SUPABASE_SERVICE_ROLE_KEY`, `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
@@ -282,6 +315,8 @@ Natural-language chat over the whole content store.
   bundle by Vite). Public; committed in `wrangler.toml` `[vars]`.
 - `SUPABASE_SERVICE_ROLE_KEY` — **secret**, server/scripts only. Never commit;
   set via `wrangler pages secret put` or the Cloudflare dashboard.
+- `AI_GATEWAY_API_KEY` / `TYPESAFE_API_KEY` — **secret**, one or the other, for the
+  automatic judge only. Absent means it cannot grade; the flag must be on as well.
 
 ## Images (Supabase Storage)
 
@@ -324,6 +359,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Ask sources (plug-in registry) | `scripts/ask-sources/`, `scripts/lib/registry.mjs` |
 | /stats numbers + hourly snapshot | `src/lib/siteStats.js`, `functions/api/stats.js` |
 | Answer link/image rules | `src/lib/askFormat.js` |
+| Automatic eval rubric + endpoint | `src/lib/askJudge.js`, `functions/api/ask-eval.js` |
 | Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |

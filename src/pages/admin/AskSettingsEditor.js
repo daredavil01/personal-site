@@ -4,6 +4,7 @@ import {
   getAskSettings,
   updateAskSettings,
   getAskUsage,
+  getAskEvalUsage,
 } from "../../lib/api/askSettings";
 import { ASK_PROVIDERS, QUESTION_CATEGORIES } from "../../data/askConfig";
 import PageHeader from "./ui/PageHeader";
@@ -17,6 +18,60 @@ import useUnsavedGuard from "./ui/useUnsavedGuard";
 import ConfirmDialog from "./ui/ConfirmDialog";
 import { hairline, mutedText, surface } from "./ui/tokens";
 import { RepeatableRows } from "./now/SectionEditors";
+
+// Automatic evaluation of logged answers by a decision model (migration 0022).
+// Separate from the ladder above: this grades answers, it does not write them.
+const AUTO_EVAL = [
+  {
+    name: "autoEvalEnabled",
+    label: "Grade answers automatically",
+    type: "boolean",
+    hint: "Off by default. Needs AI_GATEWAY_API_KEY or TYPESAFE_API_KEY on the deployment.",
+  },
+  {
+    name: "autoEvalExplainEnabled",
+    label: "Let Gemini explain low-confidence grades",
+    type: "boolean",
+    hint: "The judge returns probabilities, never prose. This writes the reason underneath.",
+  },
+  {
+    name: "autoEvalRoute",
+    label: "Route",
+    type: "select",
+    options: ["gateway", "typesafe"],
+    hint: "gateway spends the Vercel AI Gateway's free monthly credit; typesafe is billed per token.",
+  },
+  {
+    name: "autoEvalModel",
+    label: "Judge model",
+    type: "text",
+    hint: "typesafe-ai/jev through the gateway, jev-latest direct. Pin a version once thresholds are tuned.",
+  },
+  {
+    name: "autoEvalBatchCap",
+    label: "Answers per press",
+    type: "number",
+    hint: "The most one press of Grade these may grade.",
+  },
+  {
+    name: "autoEvalRequestBatch",
+    label: "Answers per request",
+    type: "number",
+    hint: "Small on purpose — Workers Free allows about 10ms of CPU per request.",
+  },
+  {
+    name: "autoEvalMinConfidence",
+    label: "Low-confidence threshold",
+    type: "number",
+    hint: "0-1. Below this a grade is tagged needs-review instead of trusted.",
+  },
+  {
+    name: "autoEvalMonthlyTokenCap",
+    label: "Input tokens per month",
+    type: "number",
+    hint: "Fails closed. 2,000,000 is about $0.08 at the judge's rate; 0 grades nothing.",
+  },
+];
 
 const SWITCHES = [
   { name: "enabled", label: "Second brain enabled", type: "boolean" },
@@ -152,6 +207,7 @@ const AskSettingsEditor = () => {
   const [form, setForm] = useState(null);
   const [meta, setMeta] = useState(null);
   const [usage, setUsage] = useState([]);
+  const [evalUsage, setEvalUsage] = useState([]);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
@@ -176,6 +232,9 @@ const AskSettingsEditor = () => {
       .catch(setError);
     // Usage is a nice-to-have; a failure here must not blank the editor.
     getAskUsage(14).then(setUsage).catch(() => setUsage([]));
+    // Missing before migration 0022 is applied; an empty panel is the right
+    // degradation, not an error page over a settings form.
+    getAskEvalUsage(3).then(setEvalUsage).catch(() => setEvalUsage([]));
   }, []);
 
   const onField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
@@ -286,6 +345,30 @@ const AskSettingsEditor = () => {
             />
           </Field>
         </div>
+      </Card>
+
+      <Card
+        title="Automatic evaluation"
+        description="Grades logged answers on demand from Ask · Conversations. A grade you typed yourself is never overwritten."
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          {AUTO_EVAL.map((field) => (
+            <Field key={field.name} label={field.label} hint={field.hint}>
+              <FormField field={field} value={form[field.name]} onChange={onField} />
+            </Field>
+          ))}
+        </div>
+        {evalUsage[0] && (
+          <p className={`text-xs ${mutedText} mt-4`}>
+            {`This month: ${evalUsage[0].graded} answer${
+              evalUsage[0].graded === 1 ? "" : "s"
+            } graded over ${evalUsage[0].runs} run${
+              evalUsage[0].runs === 1 ? "" : "s"
+            }, ${evalUsage[0].inputTokens.toLocaleString()} input tokens of ${
+              Number(form.autoEvalMonthlyTokenCap || 0).toLocaleString()
+            }.`}
+          </p>
+        )}
       </Card>
 
       <Card
