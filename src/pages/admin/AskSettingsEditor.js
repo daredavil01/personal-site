@@ -4,8 +4,9 @@ import {
   getAskSettings,
   updateAskSettings,
   getAskUsage,
+  getAskEvalUsage,
 } from "../../lib/api/askSettings";
-import { ASK_PROVIDERS, QUESTION_CATEGORIES } from "../../data/askConfig";
+import { ASK_JUDGE_PROVIDERS, ASK_PROVIDERS, QUESTION_CATEGORIES } from "../../data/askConfig";
 import PageHeader from "./ui/PageHeader";
 import Card from "./ui/Card";
 import Field from "./ui/Field";
@@ -15,8 +16,78 @@ import { Spinner, ErrorState } from "./ui/Feedback";
 import { useToast } from "./ui/ToastContext";
 import useUnsavedGuard from "./ui/useUnsavedGuard";
 import ConfirmDialog from "./ui/ConfirmDialog";
-import { hairline, mutedText, surface } from "./ui/tokens";
+import { hairline, labelClass, mutedText, surface } from "./ui/tokens";
 import { RepeatableRows } from "./now/SectionEditors";
+
+const JUDGE_TIER_FIELDS = [
+  { name: "name", label: "Label", type: "text" },
+  { name: "provider", label: "Provider", type: "select", options: ASK_JUDGE_PROVIDERS },
+  {
+    name: "route",
+    label: "Route (jev only)",
+    type: "selectOrOther",
+    options: ["gateway", "typesafe"],
+    hint: "gateway spends the free AI Gateway credit; typesafe bills per token.",
+  },
+  { name: "model", label: "Model", type: "text" },
+  { name: "timeout_ms", label: "Timeout (ms)", type: "number" },
+  { name: "enabled", label: "Enabled", type: "boolean" },
+];
+
+const BLANK_JUDGE_TIER = {
+  name: "",
+  provider: "gemini",
+  model: "gemini-flash-lite-latest",
+  timeout_ms: 12000,
+  enabled: true,
+};
+
+// Automatic evaluation of logged answers by a decision model (migration 0022).
+// Separate from the ladder above: this grades answers, it does not write them.
+const AUTO_EVAL = [
+  {
+    name: "autoEvalEnabled",
+    label: "Grade answers automatically",
+    type: "boolean",
+    hint: "Off by default. Needs AI_GATEWAY_API_KEY or TYPESAFE_API_KEY on the deployment.",
+  },
+  {
+    name: "autoEvalExplainEnabled",
+    label: "Let Gemini explain low-confidence grades",
+    type: "boolean",
+    hint: "The judge returns probabilities, never prose. This writes the reason underneath.",
+  },
+  {
+    name: "autoEvalAllowMetered",
+    label: "Allow rungs that cost money",
+    type: "boolean",
+    hint: "Off means a rung billed per token is skipped however it is configured. This is the switch that keeps grading free.",
+  },
+  {
+    name: "autoEvalBatchCap",
+    label: "Answers per press",
+    type: "number",
+    hint: "The most one press of Grade these may grade.",
+  },
+  {
+    name: "autoEvalRequestBatch",
+    label: "Answers per request",
+    type: "number",
+    hint: "Small on purpose — Workers Free allows about 10ms of CPU per request.",
+  },
+  {
+    name: "autoEvalMinConfidence",
+    label: "Low-confidence threshold",
+    type: "number",
+    hint: "0-1. Below this a grade is tagged needs-review instead of trusted.",
+  },
+  {
+    name: "autoEvalMonthlyTokenCap",
+    label: "Input tokens per month",
+    type: "number",
+    hint: "Fails closed. 2,000,000 is about $0.08 at the judge's rate; 0 grades nothing.",
+  },
+];
 
 const SWITCHES = [
   { name: "enabled", label: "Second brain enabled", type: "boolean" },
@@ -88,7 +159,7 @@ const BLANK_TIER = {
 
 // The ladder is ordered, so this needs move up/down — which the shared
 // RepeatableRows does not do. Everything else about it is the same.
-const TierRows = ({ rows, onChange }) => {
+const TierRows = ({ rows, onChange, fields = TIER_FIELDS, blank = BLANK_TIER, noun = "tier" }) => {
   const set = (i, name, value) => onChange(rows.map((r, idx) => (idx === i ? { ...r, [name]: value } : r)));
   const move = (i, delta) => {
     const next = [...rows];
@@ -105,7 +176,7 @@ const TierRows = ({ rows, onChange }) => {
         // eslint-disable-next-line react/no-array-index-key
         <div key={i} className={`border ${hairline} rounded-xl p-4 flex flex-col gap-3`}>
           <div className="flex items-center gap-2">
-            <span className={`text-xs ${mutedText}`}>{`Tier ${i + 1}`}</span>
+            <span className={`text-xs ${mutedText}`}>{`${noun} ${i + 1}`}</span>
             <div className="ml-auto flex items-center gap-1">
               <Button size="xs" icon={ChevronUp} onClick={() => move(i, -1)} disabled={i === 0}>
                 Up
@@ -129,7 +200,7 @@ const TierRows = ({ rows, onChange }) => {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-            {TIER_FIELDS.map((field) => (
+            {fields.map((field) => (
               <Field key={field.name} label={field.label} hint={field.hint}>
                 <FormField
                   field={field}
@@ -141,8 +212,8 @@ const TierRows = ({ rows, onChange }) => {
           </div>
         </div>
       ))}
-      <Button size="sm" icon={Plus} className="self-start" onClick={() => onChange([...rows, BLANK_TIER])}>
-        Add tier
+      <Button size="sm" icon={Plus} className="self-start" onClick={() => onChange([...rows, blank])}>
+        {`Add ${noun}`}
       </Button>
     </div>
   );
@@ -152,6 +223,7 @@ const AskSettingsEditor = () => {
   const [form, setForm] = useState(null);
   const [meta, setMeta] = useState(null);
   const [usage, setUsage] = useState([]);
+  const [evalUsage, setEvalUsage] = useState([]);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
@@ -176,6 +248,9 @@ const AskSettingsEditor = () => {
       .catch(setError);
     // Usage is a nice-to-have; a failure here must not blank the editor.
     getAskUsage(14).then(setUsage).catch(() => setUsage([]));
+    // Missing before migration 0022 is applied; an empty panel is the right
+    // degradation, not an error page over a settings form.
+    getAskEvalUsage(3).then(setEvalUsage).catch(() => setEvalUsage([]));
   }, []);
 
   const onField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
@@ -286,6 +361,46 @@ const AskSettingsEditor = () => {
             />
           </Field>
         </div>
+      </Card>
+
+      <Card
+        title="Automatic evaluation"
+        description="Grades logged answers on demand from Ask · Conversations. A grade you typed yourself is never overwritten."
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          {AUTO_EVAL.map((field) => (
+            <Field key={field.name} label={field.label} hint={field.hint}>
+              <FormField field={field} value={form[field.name]} onChange={onField} />
+            </Field>
+          ))}
+        </div>
+        <div className="mt-6">
+          <p className={`${labelClass} mb-1`}>Judge ladder</p>
+          <p className={`text-xs ${mutedText} mb-3`}>
+            Tried in order until one answers. Only `jev` returns calibrated probabilities —
+            a grade from a language model rung is tagged `judge-fallback`, because the
+            review threshold was chosen on Jev&apos;s calibration, not on a self-reported number.
+            `gemini` and `workers-ai` cost nothing.
+          </p>
+          <TierRows
+            rows={form.autoEvalTiers || []}
+            onChange={(rows) => onField("autoEvalTiers", rows)}
+            fields={JUDGE_TIER_FIELDS}
+            blank={BLANK_JUDGE_TIER}
+            noun="rung"
+          />
+        </div>
+        {evalUsage[0] && (
+          <p className={`text-xs ${mutedText} mt-4`}>
+            {`This month: ${evalUsage[0].graded} answer${
+              evalUsage[0].graded === 1 ? "" : "s"
+            } graded over ${evalUsage[0].runs} run${
+              evalUsage[0].runs === 1 ? "" : "s"
+            }, ${evalUsage[0].inputTokens.toLocaleString()} input tokens of ${
+              Number(form.autoEvalMonthlyTokenCap || 0).toLocaleString()
+            }.`}
+          </p>
+        )}
       </Card>
 
       <Card

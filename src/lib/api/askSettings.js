@@ -29,6 +29,14 @@ function fromRow(r) {
     questionPool: Array.isArray(r.question_pool) ? r.question_pool : [],
     contextDoc: r.context_doc ?? "",
     contextDocUpdatedAt: r.context_doc_updated_at ?? null,
+    autoEvalEnabled: !!r.auto_eval_enabled,
+    autoEvalTiers: Array.isArray(r.auto_eval_tiers) ? r.auto_eval_tiers : [],
+    autoEvalAllowMetered: !!r.auto_eval_allow_metered,
+    autoEvalBatchCap: r.auto_eval_batch_cap ?? 50,
+    autoEvalRequestBatch: r.auto_eval_request_batch ?? 8,
+    autoEvalMinConfidence: r.auto_eval_min_confidence ?? 0.7,
+    autoEvalMonthlyTokenCap: r.auto_eval_monthly_token_cap ?? 2000000,
+    autoEvalExplainEnabled: !!r.auto_eval_explain_enabled,
   };
 }
 
@@ -59,6 +67,18 @@ function toRow(v) {
     question_pool: (Array.isArray(v.questionPool) ? v.questionPool : [])
       .filter((row) => row?.q?.trim())
       .map((row) => ({ q: row.q.trim(), c: row.c || "" })),
+    auto_eval_enabled: !!v.autoEvalEnabled,
+    auto_eval_tiers: Array.isArray(v.autoEvalTiers) ? v.autoEvalTiers : [],
+    auto_eval_allow_metered: !!v.autoEvalAllowMetered,
+    auto_eval_batch_cap: Number(v.autoEvalBatchCap) || 50,
+    auto_eval_request_batch: Number(v.autoEvalRequestBatch) || 8,
+    // 0 is a legitimate value (flag nothing for review), so not `|| default`.
+    auto_eval_min_confidence: Number.isFinite(Number(v.autoEvalMinConfidence))
+      ? Number(v.autoEvalMinConfidence) : 0.7,
+    // 0 is legitimate too, and it means "grade nothing" — a second off switch.
+    auto_eval_monthly_token_cap: Number.isFinite(Number(v.autoEvalMonthlyTokenCap))
+      ? Math.max(0, Math.round(Number(v.autoEvalMonthlyTokenCap))) : 2000000,
+    auto_eval_explain_enabled: !!v.autoEvalExplainEnabled,
   };
 }
 
@@ -81,6 +101,26 @@ export async function updateAskSettings(values) {
     .single();
   if (error) throw error;
   return fromRow(data);
+}
+
+/**
+ * What the judge has spent this month. Owner-only (RLS); the counters themselves
+ * are moved by the endpoint's service-role RPCs, never from here.
+ */
+export async function getAskEvalUsage(months = 3) {
+  const since = new Date(Date.now() - months * 31 * 86400000).toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from("ask_eval_usage")
+    .select("month, input_tokens, graded, runs")
+    .gte("month", since)
+    .order("month", { ascending: false });
+  if (error) throw error;
+  return (data || []).map((r) => ({
+    month: r.month,
+    inputTokens: Number(r.input_tokens || 0),
+    graded: r.graded ?? 0,
+    runs: r.runs ?? 0,
+  }));
 }
 
 // Owner-only (RLS). The '' ip_hash row is the global counter for that day.
