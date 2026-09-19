@@ -257,6 +257,40 @@ const savedShape = (r) => ({
   evaluatedAt: r.evaluated_at || null,
 });
 
+/**
+ * Why a batch came back empty.
+ *
+ * Worth a second query, because the two causes look identical from the outside
+ * and lead opposite ways: rows nobody can read return `200 []` under RLS exactly
+ * as rows that are simply all graded do, and "nothing here is ungraded" is a
+ * badly wrong thing to say when the truth is that the log is unreadable.
+ */
+async function diagnoseEmpty(env, ids) {
+  const list = ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0);
+  if (!list.length) return { reason: "no-ids" };
+  try {
+    const seen = await select(
+      env,
+      `ask_messages?id=in.(${list.join(",")})&select=id,role,evaluated_at`,
+    );
+    if (!seen.length) return { reason: "unreadable" };
+    if (seen.every((r) => r.evaluated_at)) return { reason: "already-evaluated" };
+    if (!seen.some((r) => r.role === "assistant")) return { reason: "not-answers" };
+    return { reason: "unknown" };
+  } catch (err) {
+    return { reason: "unreadable", detail: String(err.message || err) };
+  }
+}
+
+const EMPTY_NOTES = {
+  unreadable: "The judge cannot read the conversation log. This deployment is missing "
+    + "SUPABASE_SERVICE_ROLE_KEY, or migration 0022 has not been applied.",
+  "already-evaluated": "Every answer here has already been graded.",
+  "not-answers": "Those rows are questions, not answers.",
+  "no-ids": "No answers were named.",
+  unknown: "No answer in this selection could be graded.",
+};
+
 async function budget(env, estimate) {
   // Fails closed exactly as /api/ask does when ask_quota is unreachable: an
   // uncapped spender is worse than a button that does not work.
@@ -276,6 +310,16 @@ export async function onRequestGet(context) {
   if (!env.VITE_SUPABASE_URL) return json({ error: "not configured" }, 503);
   const owner = await isOwner(env, request);
   if (!owner.ok) return notOwner(owner);
+
+  // Said plainly rather than failing as a wrong answer: without the service role
+  // key every read below falls back to the anon key, RLS returns an empty list,
+  // and an unreadable log is indistinguishable from a fully graded one.
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    return json({
+      error: "not configured",
+      note: "The judge needs SUPABASE_SERVICE_ROLE_KEY on this deployment to read the log.",
+    }, 503);
+  }
 
   const settings = await loadSettings(env);
   const rungs = rungsFor(env, settings);
@@ -318,7 +362,12 @@ async function runBatch(context, settings, ids) {
   const { env } = context;
   const rows = await loadCandidates(env, ids);
   const skipped = ids.length - rows.length;
-  if (!rows.length) return { results: [], skipped, failed: [], graded: 0 };
+  if (!rows.length) {
+    const { reason, detail } = await diagnoseEmpty(env, ids);
+    return {
+      results: [], skipped, failed: [], graded: 0, reason, note: EMPTY_NOTES[reason], detail,
+    };
+  }
 
   const [questions, byEntity, roster] = await Promise.all([
     loadQuestions(env, rows),
@@ -427,6 +476,10 @@ async function estimateBatch(env, settings, ids) {
       * CHUNKS_PER_ENTITY;
     return sum + Math.ceil(chars / 4) + extracts * ESTIMATE_TOKENS_PER_EXTRACT;
   }, 0);
+  if (!rows.length) {
+    const { reason, detail } = await diagnoseEmpty(env, ids);
+    return { count: 0, skipped: ids.length, tokens: 0, reason, note: EMPTY_NOTES[reason], detail };
+  }
   return { count: rows.length, skipped: ids.length - rows.length, tokens };
 }
 
@@ -517,6 +570,16 @@ export async function onRequestPost(context) {
   // spend a token.
   const owner = await isOwner(env, request);
   if (!owner.ok) return notOwner(owner);
+
+  // Said plainly rather than failing as a wrong answer: without the service role
+  // key every read below falls back to the anon key, RLS returns an empty list,
+  // and an unreadable log is indistinguishable from a fully graded one.
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    return json({
+      error: "not configured",
+      note: "The judge needs SUPABASE_SERVICE_ROLE_KEY on this deployment to read the log.",
+    }, 503);
+  }
 
   const settings = await loadSettings(env);
   if (!settings.auto_eval_enabled) {

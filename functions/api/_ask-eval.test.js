@@ -30,6 +30,8 @@ const ENV = {
   SUPABASE_SERVICE_ROLE_KEY: "service",
 };
 
+const { SUPABASE_SERVICE_ROLE_KEY, ...NO_SERVICE_KEY } = ENV;
+
 let calls = [];
 
 /**
@@ -260,5 +262,85 @@ describe("GET /api/ask-eval", () => {
     const body = await (await get({ ...ENV, TYPESAFE_API_KEY: "k" })).json();
     expect(body.rungs.map((r) => r.cost)).toEqual(["metered"]);
     expect(body.allowMetered).toBe(true);
+  });
+});
+
+// A log the endpoint cannot read looks exactly like a log with nothing left to
+// grade: RLS answers both with 200 and an empty list. Saying "nothing is
+// ungraded" to someone whose key is missing sends them looking in the wrong place.
+describe("an empty batch says why", () => {
+  const estimate = (env, rows) => {
+    stubFetch({ rows });
+    return onRequestPost({
+      env,
+      waitUntil: () => {},
+      request: new Request("https://site.example/api/ask-eval", {
+        method: "POST",
+        headers: { Authorization: "Bearer t", "Content-Type": "application/json" },
+        body: JSON.stringify({ messageIds: [1, 2], mode: "estimate" }),
+      }),
+    });
+  };
+
+  it("refuses outright when the service role key is missing", async () => {
+    stubFetch();
+    const res = await onRequestPost({
+      env: { ...NO_SERVICE_KEY, GEMINI_API_KEY: "k" },
+      waitUntil: () => {},
+      request: new Request("https://site.example/api/ask-eval", {
+        method: "POST",
+        headers: { Authorization: "Bearer t", "Content-Type": "application/json" },
+        body: JSON.stringify({ messageIds: [1] }),
+      }),
+    });
+    expect(res.status).toBe(503);
+    expect((await res.json()).note).toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+    expect(judgeWasCalled()).toBe(false);
+  });
+
+  it("says the log is unreadable when the rows cannot be seen at all", async () => {
+    const body = await (await estimate({ ...ENV, GEMINI_API_KEY: "k" }, [])).json();
+    expect(body.count).toBe(0);
+    expect(body.reason).toBe("unreadable");
+    expect(body.note).toMatch(/SUPABASE_SERVICE_ROLE_KEY|0022/);
+  });
+
+  it("says they are already graded when that is the truth", async () => {
+    // loadCandidates filters on evaluated_at=is.null and matches nothing; the
+    // probe then sees the rows and finds every one of them graded.
+    let call = 0;
+    global.fetch = jest.fn(async (url) => {
+      const href = String(url);
+      calls.push({ href, method: "GET" });
+      if (href.includes("/rpc/is_owner")) return new Response("true", { status: 200 });
+      if (href.includes("ask_settings")) {
+        return new Response(
+          JSON.stringify([{ auto_eval_enabled: true, auto_eval_tiers: LADDER }]),
+          { status: 200 },
+        );
+      }
+      if (href.includes("ask_messages")) {
+        call += 1;
+        return new Response(
+          call === 1 ? "[]" : JSON.stringify([
+            { id: 1, role: "assistant", evaluated_at: "2026-09-19T00:00:00Z" },
+          ]),
+          { status: 200 },
+        );
+      }
+      return new Response("[]", { status: 200 });
+    });
+    calls = [];
+    const body = await (await onRequestPost({
+      env: { ...ENV, GEMINI_API_KEY: "k" },
+      waitUntil: () => {},
+      request: new Request("https://site.example/api/ask-eval", {
+        method: "POST",
+        headers: { Authorization: "Bearer t", "Content-Type": "application/json" },
+        body: JSON.stringify({ messageIds: [1], mode: "estimate" }),
+      }),
+    })).json();
+    expect(body.reason).toBe("already-evaluated");
+    expect(body.note).toMatch(/already been graded/);
   });
 });
