@@ -17,7 +17,7 @@ about.
 |---|---|---|---|
 | Workers AI (`AI` binding) | `wrangler.toml` `[ai]` | `@cf/baai/bge-m3` query embeddings; rungs 2–3 of the answer ladder; rung 3 of the judge ladder | free, 10,000 neurons/day |
 | Gemini (`GEMINI_API_KEY`) | Pages secret | rung 1 of the answer ladder; rung 2 of the judge ladder | free tier, ~15 RPM |
-| Jev (`AI_GATEWAY_API_KEY`) | Pages secret, optional | rung 1 of the judge ladder only | free monthly gateway credit |
+| Jev — TypeSafe AI's System One (`AI_GATEWAY_API_KEY`) | Pages secret, optional | rung 1 of the judge ladder only | free monthly gateway credit |
 | pgvector index | `content_chunks` (`0009`) | `/ask` retrieval, `related_content_ranked()` | already built, incremental |
 
 And the corpus is big enough to be worth mining:
@@ -39,8 +39,12 @@ And the corpus is big enough to be worth mining:
 This matters more than the feature list, because picking the wrong one is how
 these things get expensive or bad.
 
-**Jev — decisions, not prose.** Typed questions, calibrated probabilities, no
-generated text, so it cannot hallucinate a verdict or return a type error.
+**Jev, from TypeSafe AI — decisions, not prose.** Their "System One" model:
+typed questions, calibrated probabilities, no generated text, so it cannot
+hallucinate a verdict or return a type error. It is reached two ways, and they
+are not the same API — Vercel's AI Gateway (where the free monthly credit is,
+via the AI SDK) and `api.typesafe.ai` direct (a plain POST, and metered). See
+`docs/ask-evals.md` for both dialects.
 Use it anywhere the answer is *a choice from a known set* or *a yes/no with a
 confidence you intend to act on*: classification, routing, gating, triage. Never
 use it to write anything. The confidence-band pattern in `src/lib/askJudge.js`

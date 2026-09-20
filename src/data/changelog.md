@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v18.1.2] — 2026-09-20
+
+### Fixed
+
+- **Jev's provenance in the AI proposal** (`docs/ai-features-proposal.md`): the document named Jev twenty times and never once said whose model it is. `CLAUDE.md`, `docs/ask-evals.md` and this changelog all attribute it to **TypeSafe AI**, so the one doc a reader might open first was the one that did not. It now names TypeSafe AI and its "System One" model in both the capability table and the what-each-model-is-for section, and points at `docs/ask-evals.md` for the two routes — Vercel's AI Gateway, where the free credit is, and `api.typesafe.ai` direct, which is metered.
+
+---
+
 ## [v18.1.1] — 2026-09-20
 
 ### Added
