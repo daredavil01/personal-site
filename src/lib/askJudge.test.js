@@ -86,18 +86,24 @@ describe("buildJudgeState", () => {
 });
 
 describe("citationScore", () => {
-  it("counts a bare item number that points at an extract it was given", () => {
-    const extracts = [{ n: 1 }, { n: 2 }];
-    expect(citationScore({ answer: "He climbed Ghangad [1].", extracts })).toBe(1);
-    expect(citationScore({ answer: "He climbed Ghangad.", extracts })).toBe(0);
+  it("counts a bare item number that points at a source it was given", () => {
+    expect(citationScore({ answer: "He climbed Ghangad [1].", count: 2 })).toBe(1);
+    expect(citationScore({ answer: "He climbed Ghangad.", count: 2 })).toBe(0);
   });
 
-  it("ignores a number pointing past the extracts", () => {
-    expect(citationScore({ answer: "See [7].", extracts: [{ n: 1 }] })).toBe(0);
+  it("ignores a number pointing past the sources", () => {
+    expect(citationScore({ answer: "See [7].", count: 1 })).toBe(0);
+  });
+
+  // The answer numbers its source CARDS, while the state holds up to two chunks
+  // per source capped at eight. Counting against the extracts would read an
+  // answer citing its eighth source as having cited nothing.
+  it("counts against the cards the reader saw, not the extracts", () => {
+    expect(citationScore({ answer: "The eighth one [8].", count: 8 })).toBe(1);
   });
 
   it("does not arise when nothing was retrieved", () => {
-    expect(citationScore({ answer: "Nothing found.", extracts: [] })).toBeNull();
+    expect(citationScore({ answer: "Nothing found.", count: 0 })).toBeNull();
   });
 });
 

@@ -36,7 +36,7 @@ what the Gemini escalation below is for.
 | dimension | how it is decided |
 |---|---|
 | Link & format compliance | **In JS, free.** `sanitiseAnswer` from `src/lib/askFormat.js` already decides it: if it changes the answer, the answer carried a link or image the archive never supplied. Exact where a probability would not be. Compared against text that has already had `sanitiseAnswer`'s own whitespace tidy applied, or every answer containing a double space reads as having invented a URL. |
-| Citation habit | **In JS, free, since r2.** A regex for a bare `[n]` pointing at an extract the judge was shown. Asked of the model under r1; across 98 graded answers it agreed with the regex 84% of the time and every one of the sixteen disagreements was the model missing a citation that was plainly there. |
+| Citation habit | **In JS, free, since r2.** A regex for a bare `[n]` pointing at one of the source cards the reader saw. Counted against the cards and not the extracts, because that is the numbering the answer itself uses — the state holds up to two chunks per source capped at eight, so an answer citing its eighth source would fall outside a three-extract state. Asked of the model under r1; across 98 graded answers it agreed with the regex 84% of the time and every one of the sixteen disagreements was the model missing a citation that was plainly there. |
 | Groundedness | `grounding` (score, 3 rungs) + `contradiction` (yes/no) |
 | Retrieval quality | `retrieval` (score, 3 rungs) |
 | Refusal appropriateness | `disposition` (choice, 4 options) + `answerable` (yes/no, against the archive summary) |

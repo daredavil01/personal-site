@@ -1,6 +1,6 @@
 import {
   applyFilters, EMPTY_FILTERS, isStaleGrade, lowConfidenceIds, regradeIds, sliceBatches,
-  staleIds, summariseExchanges,
+  summariseExchanges,
   toChats, toEvalsJsonl, toExchanges, ungradedIds,
 } from "./askConversations";
 
@@ -164,9 +164,6 @@ describe("judge-graded rows", () => {
     // The hand-graded row is the most valuable one in the set: re-grading it
     // writes eval_auto alone, and that is where the agreement number comes from.
     expect(regradeIds(exchanges).sort()).toEqual([101, 102, 103]);
-    // Stale is the subset worth the tokens, and an ungraded row is in it.
-    expect(staleIds(exchanges, R2).sort()).toEqual([101, 102, 103]);
-    expect(staleIds(exchanges, { rubric: "r1" }).sort()).toEqual([103]);
   });
 
   it("reports no agreement number until something has been re-graded", () => {

@@ -385,11 +385,16 @@ const CITATION_RE = /\[(\d{1,2})\]/g;
  * one of the sixteen disagreements was the model missing a citation that was
  * plainly there.
  *
+ * Counted against the SOURCE CARDS, which is what the answer's numbering refers
+ * to — not against the extracts. The two are not the same list: the state holds
+ * up to two chunks per source, capped at eight, so an answer citing [8] of eight
+ * sources would fall outside a three-extract state and read as uncited.
+ *
  * @returns 1, 0, or null when the question does not arise — nothing was
  *   retrieved, so there is nothing to cite and nothing to fault.
  */
-export function citationScore({ answer, extracts } = {}) {
-  const total = (extracts || []).length;
+export function citationScore({ answer, count } = {}) {
+  const total = Number(count) || 0;
   const text = String(answer || "");
   if (!total || !text) return null;
   const cited = [...text.matchAll(CITATION_RE)]

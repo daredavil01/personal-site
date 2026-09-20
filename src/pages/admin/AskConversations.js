@@ -15,7 +15,6 @@ import {
   getIndexCoverage,
   listAskMessages,
   sliceBatches,
-  staleIds,
   summariseExchanges,
   toChats,
   toCsv,
@@ -382,7 +381,10 @@ const AskConversations = () => {
   // changing the rubric or adding a key, and doing it fifty at a time would make
   // the corpus a mixture of two rubrics for as long as it took to finish.
   const toRegrade = useMemo(() => regradeIds(filtered), [filtered]);
-  const stale = useMemo(() => staleIds(filtered, version).length, [filtered, version]);
+  // Deliberately the same number the Out-of-date grades tile shows: grades a
+  // re-grade would move, not rows it would visit. Two different counts wearing
+  // the word "stale" on one screen is worse than either of them alone.
+  const { stale } = summary;
 
   /**
    * The browser drives the batch. Each request carries a few answers because

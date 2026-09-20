@@ -224,12 +224,6 @@ export const regradeIds = (exchanges) => exchanges
   .sort((a, b) => b.askedAt.localeCompare(a.askedAt))
   .map((e) => e.answer.id);
 
-/** The subset a re-grade would actually change something about. */
-export const staleIds = (exchanges, version = {}) => exchanges
-  .filter((e) => !e.answer.evalAuto?.verdict || isStaleGrade(e.answer, version))
-  .sort((a, b) => b.askedAt.localeCompare(a.askedAt))
-  .map((e) => e.answer.id);
-
 /** Rows the judge was unsure about, which a human or Gemini can settle. */
 export const lowConfidenceIds = (exchanges, threshold = LOW_CONFIDENCE) => exchanges
   .filter((e) => {

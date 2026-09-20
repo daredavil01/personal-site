@@ -442,9 +442,9 @@ async function runBatch(context, settings, ids, { regrade = false } = {}) {
         linkable: facts.urls,
         checkLinks: facts.ok,
       }),
-      // Computed, never asked. Counted against the extracts the judge was shown,
-      // so a number pointing past them is not a citation.
-      citations: citationScore({ answer: row.content, extracts: state.extracts }),
+      // Computed, never asked, and counted against the source cards the reader
+      // saw — the numbering the answer itself uses.
+      citations: citationScore({ answer: row.content, count: (row.sources || []).length }),
     };
   });
 
