@@ -8,12 +8,14 @@ import {
   getJudgeStatus,
   LOW_CONFIDENCE,
   lowConfidenceIds,
+  regradeIds,
   runJudge,
   saveEvaluation,
   filterOptions,
   getIndexCoverage,
   listAskMessages,
   sliceBatches,
+  staleIds,
   summariseExchanges,
   toChats,
   toCsv,
@@ -353,8 +355,18 @@ const AskConversations = () => {
 
   const exchanges = useMemo(() => toExchanges(messages || []), [messages]);
   const options = useMemo(() => filterOptions(exchanges), [exchanges]);
-  const filtered = useMemo(() => applyFilters(exchanges, filters), [exchanges, filters]);
-  const summary = useMemo(() => summariseExchanges(filtered), [filtered]);
+  // What "current" means, straight from the endpoint. The page holds no opinion
+  // of its own about the rubric, so the two can never disagree about which
+  // stored grades are out of date.
+  const version = useMemo(
+    () => ({ rubric: judge?.rubric || null, model: judge?.judgeModel || null }),
+    [judge?.rubric, judge?.judgeModel],
+  );
+  const filtered = useMemo(
+    () => applyFilters(exchanges, filters, version),
+    [exchanges, filters, version],
+  );
+  const summary = useMemo(() => summariseExchanges(filtered, version), [filtered, version]);
   const chats = useMemo(() => toChats(filtered), [filtered]);
 
   const lowBand = judge?.minConfidence ?? LOW_CONFIDENCE;
@@ -366,6 +378,11 @@ const AskConversations = () => {
     [filtered, judge?.batchCap],
   );
   const toExplain = useMemo(() => lowConfidenceIds(filtered, lowBand), [filtered, lowBand]);
+  // Uncapped, unlike a first grading: re-grading is the operation you run after
+  // changing the rubric or adding a key, and doing it fifty at a time would make
+  // the corpus a mixture of two rubrics for as long as it took to finish.
+  const toRegrade = useMemo(() => regradeIds(filtered), [filtered]);
+  const stale = useMemo(() => staleIds(filtered, version).length, [filtered, version]);
 
   /**
    * The browser drives the batch. Each request carries a few answers because
@@ -377,6 +394,7 @@ const AskConversations = () => {
     const batches = sliceBatches(ids, judge?.requestBatch ?? 8);
     let done = 0;
     let changed = 0;
+    let measured = 0;
     let skipped = 0;
     const failed = [];
     setGrading({ done: 0, total: ids.length, label });
@@ -389,12 +407,16 @@ const AskConversations = () => {
         if (out.note && !out.results?.length) throw new Error(out.note);
         (out.results || []).forEach((r) => onEvalSaved(r.id, r));
         changed += out.graded ?? out.explained ?? 0;
+        measured += out.measuredOnly || 0;
         skipped += out.skipped || 0;
         failed.push(...(out.failed || []));
         done += batches[i].length;
         setGrading({ done, total: ids.length, label });
       }
       const parts = [`${label} ${changed} of ${ids.length}.`];
+      // Said explicitly, because it is the one thing a re-grade does that looks
+      // alarming and is not: the owner's verdicts are still theirs.
+      if (measured) parts.push(`${measured} hand-graded — only the judge's record was updated.`);
       if (skipped) parts.push(`${skipped} already graded by hand.`);
       if (failed.length) parts.push(`${failed.length} failed: ${failed[0].error}`);
       if (failed.length) toast.error(parts.join(" "));
@@ -408,11 +430,44 @@ const AskConversations = () => {
     }
   };
 
+  /**
+   * The pre-flight, in slices the endpoint takes in one call. A re-grade can name
+   * more rows than one estimate accepts, and summing them here is better than
+   * inventing a second cap to keep the dialog honest.
+   */
+  const estimateAll = async (ids, { regrade = false } = {}) => {
+    const slices = sliceBatches(ids, judge?.batchCap ?? 50);
+    const total = {
+      count: 0, tokens: 0, handGraded: 0, note: null,
+    };
+    for (let i = 0; i < slices.length; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const est = await runJudge({ messageIds: slices[i], mode: "estimate", regrade });
+      total.count += est.count || 0;
+      total.tokens += est.tokens || 0;
+      total.handGraded += est.handGraded || 0;
+      if (!total.note) total.note = est.note || null;
+    }
+    return total;
+  };
+
+  const usdFor = (tokens) => (tokens * JUDGE_USD_PER_MTOK) / 1e6;
+
+  /** What the ladder costs, said once and the same way in both dialogs. */
+  const costLine = (tokens) => {
+    const paid = (judge?.rungs || []).filter((r) => r.cost !== "free");
+    if (!paid.length) return "Every rung here is free, so this costs nothing.";
+    return `At most about ${tokens.toLocaleString()} input tokens `
+      + `(~$${usdFor(tokens).toFixed(4)}), and this month has `
+      + `${(judge?.budget?.remaining ?? 0).toLocaleString()} of `
+      + `${(judge?.budget?.cap ?? 0).toLocaleString()} tokens left.`;
+  };
+
   // Estimate first, always. This reads the rows and counts characters; it never
   // calls the judge, so the dialog can state the cost before anything is spent.
   const askToGrade = async () => {
     try {
-      const est = await runJudge({ messageIds: toGrade, mode: "estimate" });
+      const est = await estimateAll(toGrade);
       if (!est.count) {
         // The endpoint says which of the identical-looking causes it was: rows
         // that are all graded, and rows it cannot read at all, both come back
@@ -421,22 +476,54 @@ const AskConversations = () => {
         return;
       }
       const rungs = judge?.rungs || [];
-      const paid = rungs.filter((r) => r.cost !== "free");
-      const usd = (est.tokens * JUDGE_USD_PER_MTOK) / 1e6;
       setConfirm({
         title: `Grade ${est.count} answer${est.count === 1 ? "" : "s"}?`,
         message: [
           `Ladder: ${rungs.map((r) => `${r.name} (${r.cost})`).join(" → ") || "none"}.`,
           // Only quote a price when something in the ladder could produce one.
-          paid.length
-            ? `At most about ${est.tokens.toLocaleString()} input tokens (~$${usd.toFixed(4)}),`
-              + ` and this month has ${(judge?.budget?.remaining ?? 0).toLocaleString()}`
-              + ` of ${(judge?.budget?.cap ?? 0).toLocaleString()} tokens left.`
-            : "Every rung here is free, so this costs nothing.",
+          costLine(est.tokens),
           "Answers you graded by hand are never touched.",
         ].join(" "),
         confirmLabel: "Grade them",
         run: () => runInBatches(toGrade, "run", "Graded"),
+      });
+    } catch (err) {
+      toast.error(err.message || "Could not estimate the run.");
+    }
+  };
+
+  /**
+   * Re-grading, which differs from grading in both directions: it looks at every
+   * answer rather than only the ungraded ones, and on a row you graded yourself
+   * it writes the judge's record alone. That second half is not a concession —
+   * it is the only way a verdict of yours and a verdict of the judge's ever sit
+   * on the same row, which is what the agreement number is computed from.
+   */
+  const askToRegrade = async () => {
+    try {
+      const est = await estimateAll(toRegrade, { regrade: true });
+      if (!est.count) {
+        toast.error(est.note || "No answer in this selection could be re-graded.");
+        return;
+      }
+      setConfirm({
+        title: `Re-grade ${est.count} answer${est.count === 1 ? "" : "s"}?`,
+        message: [
+          `Rubric ${judge?.rubric || "?"}, judged by ${judge?.judgeModel || "the ladder"}.`,
+          stale
+            ? `${stale} of these carry a grade from an older rubric or a different model;`
+              + " the rest will be graded again and their previous verdict kept in the row's"
+              + " history."
+            : "None of these are out of date, so this re-runs grades that already agree"
+              + " with the current rubric.",
+          est.handGraded
+            ? `${est.handGraded} you graded by hand: your verdict, score, tags and notes are`
+              + " left exactly as they are and only the judge's own record is rewritten."
+            : "Nothing in this selection was graded by hand.",
+          costLine(est.tokens),
+        ].join(" "),
+        confirmLabel: "Re-grade them",
+        run: () => runInBatches(toRegrade, "regrade", "Re-graded"),
       });
     } catch (err) {
       toast.error(err.message || "Could not estimate the run.");
@@ -491,6 +578,11 @@ const AskConversations = () => {
             {judge?.enabled && judge?.configured && (
               <Button size="sm" variant="primary" disabled={!canGrade || !toGrade.length} onClick={askToGrade}>
                 {grading ? `${grading.label}…` : `Grade ${toGrade.length}`}
+              </Button>
+            )}
+            {judge?.enabled && judge?.configured && !!toRegrade.length && (
+              <Button size="sm" disabled={!canGrade} onClick={askToRegrade}>
+                {stale ? `Re-grade ${toRegrade.length} · ${stale} stale` : `Re-grade ${toRegrade.length}`}
               </Button>
             )}
             {judge?.enabled && judge?.explainEnabled && !!toExplain.length && (
@@ -551,6 +643,13 @@ const AskConversations = () => {
               value={filters.evalSource}
               onChange={setFilter("evalSource")}
               options={[["human", "By hand"], ["auto", "The judge"]]}
+            />
+          </Filter>
+          <Filter label="Grade version">
+            <Choice
+              value={filters.stale}
+              onChange={setFilter("stale")}
+              options={[["yes", "Out of date"], ["no", `Current (${judge?.rubric || "—"})`]]}
             />
           </Filter>
           <Filter label="Judge confidence">
@@ -632,6 +731,11 @@ const AskConversations = () => {
                   label="Low confidence"
                   value={summary.lowConfidence}
                   hint={`judge under ${lowBand}`}
+                />
+                <Stat
+                  label="Out-of-date grades"
+                  value={summary.stale}
+                  hint={judge?.rubric ? `current is ${judge.rubric}` : "judge unreachable"}
                 />
                 <Stat
                   label="Judge agreement"

@@ -35,10 +35,11 @@ what the Gemini escalation below is for.
 
 | dimension | how it is decided |
 |---|---|
-| Link & format compliance | **In JS, free.** `sanitiseAnswer` from `src/lib/askFormat.js` already decides it: if it changes the answer, the answer carried a link or image the archive never supplied. Exact where a probability would not be. |
+| Link & format compliance | **In JS, free.** `sanitiseAnswer` from `src/lib/askFormat.js` already decides it: if it changes the answer, the answer carried a link or image the archive never supplied. Exact where a probability would not be. Compared against text that has already had `sanitiseAnswer`'s own whitespace tidy applied, or every answer containing a double space reads as having invented a URL. |
+| Citation habit | **In JS, free, since r2.** A regex for a bare `[n]` pointing at an extract the judge was shown. Asked of the model under r1; across 98 graded answers it agreed with the regex 84% of the time and every one of the sixteen disagreements was the model missing a citation that was plainly there. |
 | Groundedness | `grounding` (score, 3 rungs) + `contradiction` (yes/no) |
 | Retrieval quality | `retrieval` (score, 3 rungs) |
-| Refusal appropriateness | `disposition` (choice, 4 options) |
+| Refusal appropriateness | `disposition` (choice, 4 options) + `answerable` (yes/no, against the archive summary) |
 
 `disposition` is the load-bearing question. A single choice over four mutually
 exclusive outcomes is what this class of model is best at, and it separates the
@@ -50,8 +51,42 @@ The questions are written around the model's stated weaknesses. It reads
 literally, so no instruction contains a negation. It cannot count and cannot order
 dates, so nothing asks "how many" or "which is earlier" — a test in
 `src/lib/askJudge.test.js` fails if such a phrase is reintroduced. Its accuracy
-degrades when the state is padded, so the state carries the question, the answer
-and the extracts, and nothing else.
+degrades when the state is padded, so the state carries the question, the answer,
+the extracts and one line about the archive, and nothing else.
+
+### The archive summary, and why r2 added it
+
+The extracts say what retrieval found and **nothing about what retrieval missed**.
+A judge shown only the extracts cannot tell a question this archive cannot answer
+from a question its search failed on — and the second is a bug in `/ask` while the
+first is correct behaviour.
+
+Under r1 it could not, and it showed. Of 98 grades, eleven answers refusing
+outright were all passed as `refused_correctly`, four of them unambiguously wrong:
+"which forts has he trekked" refused against a roster naming all twenty, "latest
+micro-post" refused with `latest` sitting in the facts card. Each was correct *by
+the r1 rubric* and wrong in fact.
+
+So `buildArchiveNote` puts one line from `site_facts()` into the state — the
+counts, and which types have a roster the archive can enumerate completely — and
+`answerable` asks whether the archive holds the kind of thing the question wants.
+A refusal with `answerable` high is `over-refusal` and a fail, whatever the
+disposition said.
+
+Deliberately a sentence and not the roster itself: every title would be thousands
+of tokens of padding, and padding is what this class of model is worst with. When
+`site_facts()` cannot be read the block is **left out** and `answerable` stops
+counting as evidence — a judge told nothing about the archive must not conclude
+the archive holds nothing.
+
+### A refusal that cites its extracts is a misclassification
+
+The same run applied `refused_wrongly` to nine answers of which only three were
+refusals; one was a correct, detailed answer about 51 books. An answer citing the
+extracts is not one refusing them, so when the disposition says refusal and
+`citationScore` says the answer cited, the *classification* is doubted rather than
+the answer: it stops deciding the verdict, confidence is capped at 0.5, and the row
+goes to a human. `eval_auto.incoherent` records it.
 
 ### What the judge is deliberately not shown
 
@@ -63,9 +98,25 @@ agreement number below circular and worthless.
 ### Verdict, score, tags
 
 `eval_verdict` is `fail` when grounding is low, a contradiction is likely, the
-disposition is `answered_unsupported` or `refused_wrongly`, or the free link check
-failed. The column allows only `pass` and `fail`, so an unsure row still gets one
-— plus a `needs-review` tag, which is how it is found again.
+disposition is `answered_unsupported` or `refused_wrongly`, the answer refused
+something `answerable` says the archive holds, or the free link check failed. The
+column allows only `pass` and `fail`, so an unsure row still gets one — plus a
+`needs-review` tag, which is how it is found again.
+
+### Confidence, and why a fallback rung's is not taken at face value
+
+Jev's probabilities are calibrated; a language model's self-report is not. On the
+98 grades the Gemini rung produced, 63 came back at **exactly 1.00**, the median
+was 1.00, and `needs-review` fired **once**. A number that is 1.00 two thirds of
+the time is a verbal tic, and reading it as certainty left the low-confidence
+filter and the Gemini escalation with nothing to work on.
+
+So on an uncalibrated rung — and only there — a claimed confidence at or above
+`SELF_REPORT_CEILING` (0.95) is discarded as unstated, and a **margin** stands in
+its place: how far each dimension that decided the verdict sits from the exact
+threshold it was compared against, weakest wins. A grounding of 1.02 with the line
+at 1 is a coin toss however sure the model says it is, and that is the row worth a
+minute of yours.
 
 `eval_score` is 1–5, weighted towards grounding, clamped so a fractional score can
 never round to 0 and violate the column's CHECK. `eval_notes` gets one line of
@@ -81,11 +132,17 @@ body the answering model actually read was never logged. Grading re-reads it fro
 text may have moved since. Good enough to catch hallucination and over-refusal;
 not evidence in a dispute about an old answer.
 
-**"Missed source" is not fully measurable.** Knowing what was *not* retrieved needs
-the un-retrieved archive in the state, which is both a token-limit violation and
-exactly the padding that costs accuracy. What is measured is whether the extracts
-are on-subject and whether they contain what was asked. The one sound inference —
-the extracts answered it and the answer refused anyway — is tagged `over-refusal`.
+**"Missed source" is measured against a summary, not the archive.** Knowing
+exactly what was *not* retrieved would need the un-retrieved archive in the state,
+which is both a token-limit violation and exactly the padding that costs accuracy.
+Since r2 the judge gets the next best thing — one line naming what the archive
+holds and which types it can enumerate — so `over-refusal` covers a refusal the
+rosters contradict as well as one the extracts do. A question the archive holds
+but whose specific *value* is not in any roster (a book's page count, say) is still
+beyond it: `answerable` will read low and the refusal will pass, correctly.
+
+Under r1 this section claimed the extracts-only inference was "the one sound
+inference". That was wrong, and the eleven false passes above are the evidence.
 
 ## A hand grade is immutable
 
@@ -99,6 +156,52 @@ And when the owner later re-grades a row the judge did, the judge's verdict is
 That is what makes the **Judge agreement** tile possible, and agreement is the
 only thing that says whether the judge is worth running. Clearing an evaluation
 does reset both, because a cleared row is genuinely ungraded and eligible again.
+
+## Versions, and re-grading
+
+Every machine grade carries the `rubric` and the `model` that made it. Both are
+load-bearing:
+
+- **`JUDGE_RUBRIC_VERSION`** (`src/lib/askJudge.js`) is stamped on each row.
+  Rewording a criterion redefines every grade after it while a pass-rate chart
+  pools them silently, so the version is what keeps the two tellable apart.
+- **`model`** matters for a reason that is not hypothetical. The first 98 grades
+  on this log came from the Gemini fallback because no Jev key was configured.
+  Adding one later has to be able to say "these are out of date" without the
+  rubric having moved at all.
+
+A grade is **stale** when either has changed. `GET /api/ask-eval` returns
+`rubric` and `judgeModel` — the rung that would answer now — and the admin page
+counts stale rows from those two alone, so the page and the endpoint can never
+disagree about what current means. There is an **Out-of-date grades** tile and a
+**Grade version** filter.
+
+**Re-grade N** runs the whole filtered set, not just the stale part and not
+capped at `auto_eval_batch_cap`: re-grading is what you do after changing the
+rubric or adding a key, and doing it fifty at a time would leave the corpus a
+mixture of two rubrics for as long as it took to finish. The browser still slices
+it into `auto_eval_request_batch`-sized requests for the CPU budget, and sums the
+pre-flight estimate across slices so the dialog stays honest without a second cap.
+
+It writes two different things, and the difference is enforced by PostgREST
+filters rather than by a branch in the endpoint:
+
+| row | guard | what moves |
+|---|---|---|
+| auto-graded, or never graded | `&or=(eval_source.eq.auto,evaluated_at.is.null)` | verdict, score, tags, notes, `eval_auto`, `evaluated_at` |
+| **graded by hand** | `&evaluated_at=not.is.null&or=(eval_source.is.null,eval_source.neq.auto)` | **`eval_auto` only** |
+
+That second row is the point, not a concession. A hand-graded answer the judge has
+never seen is the most valuable row in the log: re-grading it puts a machine
+verdict beside the owner's without touching the owner's, and that is the only way
+the **Judge agreement** number is ever obtainable. The toast counts those rows
+separately so a re-grade cannot read as having overwritten anything of yours.
+
+The grade a re-grade replaces is kept in `eval_auto.history`, newest first,
+capped at `HISTORY_LIMIT` (5) — the summary (`rubric`, `model`, `verdict`,
+`score`, `confidence`, `reason`, `at`), not the whole record, because the point is
+to see a verdict move rather than to re-derive it. It rides along in the evals
+JSONL, and the CSV gains `evalAutoModel` and `evalRegrades`.
 
 ## Every gate before a token is spent
 
@@ -244,6 +347,9 @@ it and the honest choice is the metered direct route — pennies, but not zero.
 6. Optional: switch on **Let Gemini explain low-confidence grades** and press
    **Explain N**. It uses the free rung `/ask` already answers on, appends one
    sentence under the numbers, and never replaces them.
+7. After a rubric change or a new key, press **Re-grade N**. The button's label
+   says how many of the set are out of date; the dialog says what will move on a
+   row you graded yourself, which is `eval_auto` and nothing else.
 
 ## When "Grade N" says nothing could be graded
 

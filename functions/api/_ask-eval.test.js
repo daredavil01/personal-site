@@ -344,3 +344,48 @@ describe("an empty batch says why", () => {
     expect(body.note).toMatch(/already been graded/);
   });
 });
+
+describe("re-grading", () => {
+  const withKey = (body) => onRequestPost({
+    env: { ...ENV, GEMINI_API_KEY: "k" },
+    waitUntil: () => {},
+    request: new Request("https://site.example/api/ask-eval", {
+      method: "POST",
+      headers: { Authorization: "Bearer t", "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  });
+
+  const candidateQuery = () => calls
+    .map((c) => c.href)
+    .find((href) => href.includes("ask_messages") && href.includes("role=eq.assistant"));
+
+  it("keeps a plain run to rows nobody has graded", async () => {
+    stubFetch({ rows: [] });
+    await withKey({ messageIds: [1], mode: "estimate" });
+    expect(candidateQuery()).toContain("evaluated_at=is.null");
+  });
+
+  // The whole point of the mode: a graded row is what it is for.
+  it("widens a re-grade to every answer", async () => {
+    stubFetch({ rows: [] });
+    await withKey({ messageIds: [1], mode: "estimate", regrade: true });
+    expect(candidateQuery()).not.toContain("evaluated_at=is.null");
+    expect(judgeWasCalled()).toBe(false);
+  });
+
+  it("does not call an already-graded row a dead end when re-grading", async () => {
+    stubFetch({ rows: [] });
+    const body = await (await withKey({
+      messageIds: [1], mode: "estimate", regrade: true,
+    })).json();
+    expect(body.reason).not.toBe("already-evaluated");
+  });
+
+  it("refuses a mode it does not know before spending anything", async () => {
+    stubFetch({ rows: [] });
+    const res = await withKey({ messageIds: [1], mode: "wipe" });
+    expect(res.status).toBe(400);
+    expect(judgeWasCalled()).toBe(false);
+  });
+});

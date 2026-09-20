@@ -183,9 +183,9 @@ export const getJudgeStatus = () => askEval("");
  * Grade, estimate or explain. `mode: "estimate"` reads the rows and counts
  * characters without calling the judge, which is what fills the confirm dialog.
  */
-export const runJudge = ({ messageIds, mode = "run" }) => askEval("", {
+export const runJudge = ({ messageIds, mode = "run", regrade = false }) => askEval("", {
   method: "POST",
-  body: JSON.stringify({ messageIds, mode }),
+  body: JSON.stringify({ messageIds, mode, regrade }),
 });
 
 /** What is worth sending: answers in this set that nobody has graded yet. */
@@ -193,6 +193,41 @@ export const ungradedIds = (exchanges, cap) => exchanges
   .filter((e) => !e.answer.evaluatedAt)
   .sort((a, b) => b.askedAt.localeCompare(a.askedAt))
   .slice(0, cap)
+  .map((e) => e.answer.id);
+
+/**
+ * Whether a stored grade was made by something other than what would grade the
+ * row now — an older rubric, or a rung that is no longer the one that answers.
+ *
+ * Kept here rather than imported so the admin page does not pull the rubric
+ * module into the client bundle for one comparison; the server sends both halves
+ * on the readiness call, and disagreeing about them is not possible when neither
+ * side holds an opinion of its own.
+ */
+export const isStaleGrade = (answer, { rubric, model } = {}) => {
+  const auto = answer?.evalAuto;
+  if (!auto?.verdict) return false;
+  if (rubric && (auto.rubric || null) !== rubric) return true;
+  return !!model && (auto.model || null) !== model;
+};
+
+/**
+ * Everything a re-grade would look at, newest first.
+ *
+ * Deliberately not only the stale rows. A hand-graded answer the judge has never
+ * seen is the most valuable row in the set — re-grading it writes eval_auto and
+ * nothing else, which is the only way the judge is ever measured against the
+ * owner — and it carries no stored grade to be stale.
+ */
+export const regradeIds = (exchanges) => exchanges
+  .filter((e) => e.answer.id)
+  .sort((a, b) => b.askedAt.localeCompare(a.askedAt))
+  .map((e) => e.answer.id);
+
+/** The subset a re-grade would actually change something about. */
+export const staleIds = (exchanges, version = {}) => exchanges
+  .filter((e) => !e.answer.evalAuto?.verdict || isStaleGrade(e.answer, version))
+  .sort((a, b) => b.askedAt.localeCompare(a.askedAt))
   .map((e) => e.answer.id);
 
 /** Rows the judge was unsure about, which a human or Gemini can settle. */
@@ -313,6 +348,7 @@ export const EMPTY_FILTERS = {
   evaluation: "", // evaluated | unevaluated | pass | fail | disagreed
   evalTag: "",
   evalSource: "", // human | auto
+  stale: "", // yes | no — graded by an older rubric, or by a rung that no longer answers
   confidence: "", // low | high — the judge's own, for rows it graded
   degraded: "", // yes | no
   keywordOnly: "",
@@ -323,7 +359,13 @@ export const EMPTY_FILTERS = {
 
 const yesNo = (want, value) => !want || (want === "yes" ? value : !value);
 
-export function applyFilters(exchanges, f) {
+/**
+ * @param {object} version {rubric, model} from the readiness call, so "stale"
+ *   means the same thing here as it does at the endpoint. Absent, the stale
+ *   filter matches nothing rather than guessing — a page that has not heard from
+ *   the judge does not know what current is.
+ */
+export function applyFilters(exchanges, f, version = {}) {
   const needle = (f.search || "").trim().toLowerCase();
   return exchanges.filter((e) => {
     const a = e.answer;
@@ -340,6 +382,7 @@ export function applyFilters(exchanges, f) {
     }
     if (f.evalTag && !a.evalTags.includes(f.evalTag)) return false;
     if (f.evalSource && a.evalSource !== f.evalSource) return false;
+    if (f.stale && !yesNo(f.stale, isStaleGrade(a, version))) return false;
     if (f.confidence) {
       const c = autoConfidence(a);
       if (c === null) return false;
@@ -366,7 +409,7 @@ export function applyFilters(exchanges, f) {
 }
 
 /** Headline numbers for whatever is currently filtered. */
-export function summariseExchanges(exchanges) {
+export function summariseExchanges(exchanges, version = {}) {
   const answers = exchanges.map((e) => e.answer);
   const count = (fn) => answers.filter(fn).length;
   const latencies = answers.map((a) => a.totalMs).filter(Number.isFinite).sort((x, y) => x - y);
@@ -397,6 +440,10 @@ export function summariseExchanges(exchanges) {
       const c = autoConfidence(a);
       return c !== null && c < LOW_CONFIDENCE;
     }),
+    // Grades that a re-grade would move, because the rubric or the rung that
+    // made them is no longer the one in force. Distinct from "not evaluated":
+    // these rows have a verdict, it is just one that meant something else.
+    stale: count((a) => isStaleGrade(a, version)),
     // How often your own verdict matched the judge's on the same answer. The
     // number that decides whether the judge is worth running; null until you
     // have re-graded something it graded.
@@ -467,6 +514,8 @@ const CSV_COLUMNS = [
   ["evalAutoScore", (e) => e.answer.evalAuto?.score ?? null],
   ["evalConfidence", (e) => autoConfidence(e.answer)],
   ["evalRubric", (e) => e.answer.evalAuto?.rubric ?? null],
+  ["evalAutoModel", (e) => e.answer.evalAuto?.model ?? null],
+  ["evalRegrades", (e) => (e.answer.evalAuto?.history || []).length],
   ["evaluatedAt", (e) => e.answer.evaluatedAt],
 ];
 

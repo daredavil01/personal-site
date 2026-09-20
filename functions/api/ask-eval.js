@@ -15,7 +15,7 @@
 //   2. ask_settings.auto_eval_enabled is true,
 //   3. a rung of the judge ladder can actually run here — and a rung billed per
 //      token is not one of them unless auto_eval_allow_metered says so,
-//   4. every target row is an assistant answer with evaluated_at still null,
+//   4. every target row is an assistant answer the caller's mode may write to,
 //   5. ask_eval_budget() reserved the estimate inside the monthly cap.
 //
 // Gate 5 is skipped when no usable rung can cost anything, because a token budget
@@ -24,7 +24,10 @@
 //
 // Gate 4 is re-checked here against the database rather than trusted from the
 // request, which is what makes "a hand-written evaluation is never overwritten"
-// an invariant instead of a habit of the admin page.
+// an invariant instead of a habit of the admin page. mode "regrade" widens the
+// rows it will look at to every answer, and narrows what it will write instead:
+// on a row the owner graded, only eval_auto moves. Both halves are PostgREST
+// filters on the PATCH, so Postgres refuses rather than this file remembering to.
 //
 // The browser sends the batch in slices (auto_eval_request_batch). Workers Free
 // allows about 10ms of CPU per request — the limit that took edge OG rendering
@@ -34,7 +37,8 @@
 
 import { DEFAULT_ASK_SETTINGS } from "../../src/data/askConfig";
 import {
-  buildJudgeState, deterministicFindings, estimateTokens, mapJudgeAnswers, STATE_LIMITS,
+  buildJudgeState, citationScore, deterministicFindings, estimateTokens,
+  JUDGE_RUBRIC_VERSION, mapJudgeAnswers, STATE_LIMITS, withHistory,
 } from "../../src/lib/askJudge";
 import { runJudgeTiers, usableRungs } from "../../src/lib/askJudgeTiers";
 import { json, restHeaders, rpc } from "../../src/lib/askServer";
@@ -137,19 +141,43 @@ const orPairs = (pairs) => `(${pairs.map(
   ([type, id]) => `and(entity_type.eq.${type},entity_id.eq.${id})`,
 ).join(",")})`;
 
+const CANDIDATE_COLUMNS = "&select=id,conversation_id,turn_index,content,sources,types,"
+  + "source_count,eval_source,evaluated_at,eval_auto";
+
 /**
- * Answers the judge is allowed to grade: assistant rows that nobody has graded.
- * The id list is a suggestion; this is the decision.
+ * Answers the judge is allowed to grade. The id list is a suggestion; this is
+ * the decision.
+ *
+ * Two rules, not one. A grading run takes only rows nobody has graded, which is
+ * what has always made "a hand grade is never overwritten" an invariant rather
+ * than a habit of the admin page. A re-grading run takes every answer — but what
+ * it may WRITE still differs by row, and that is decided at the PATCH below,
+ * where Postgres enforces it, rather than here.
  */
-async function loadCandidates(env, ids) {
+async function loadCandidates(env, ids, { regrade = false } = {}) {
   const list = ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0);
   if (!list.length) return [];
+  const ungraded = regrade ? "" : "&evaluated_at=is.null";
   return select(
     env,
-    `ask_messages?id=in.(${list.join(",")})&role=eq.assistant&evaluated_at=is.null`
-    + "&select=id,conversation_id,turn_index,content,sources,types,source_count",
+    `ask_messages?id=in.(${list.join(",")})&role=eq.assistant${ungraded}${CANDIDATE_COLUMNS}`,
   );
 }
+
+/** A row the owner graded themselves, whose verdict is not the judge's to move. */
+const isHandGraded = (row) => !!row.evaluated_at && row.eval_source !== "auto";
+
+// The two writes a re-grade may make, as PostgREST filters so that the database
+// decides and not this file.
+//
+// A hand-graded row gets its eval_auto refreshed and NOTHING else: no verdict, no
+// score, no tags, no notes, no evaluated_at. That is what lets the judge be
+// measured against the owner on rows the owner has already ruled on — the
+// agreement number is unobtainable any other way — without the measurement
+// changing what it measures.
+const AUTO_GUARD = `&or=${encodeURIComponent("(eval_source.eq.auto,evaluated_at.is.null)")}`;
+const HUMAN_GUARD = "&evaluated_at=not.is.null"
+  + `&or=${encodeURIComponent("(eval_source.is.null,eval_source.neq.auto)")}`;
 
 /** The question each answer was answering: the row before it in the same chat. */
 async function loadQuestions(env, rows) {
@@ -199,18 +227,23 @@ async function loadExtracts(env, rows) {
 }
 
 /**
- * Every url the facts rosters name. sanitiseAnswer takes these as its extra
- * allow-list in the worker, so the link check has to see them too or it flags
- * every legitimate roster link as invented. Best-effort, and the caller skips the
- * check rather than guessing when this fails.
+ * site_facts(), which this endpoint needs twice over.
+ *
+ * Its roster urls are sanitiseAnswer's extra allow-list in the worker, so the
+ * link check has to see them too or it flags every legitimate roster link as
+ * invented. And since r2 its counts and rosters go into the judge's state, which
+ * is what lets a refusal be weighed against what the archive actually holds.
+ *
+ * Best-effort, and the caller degrades rather than guesses when it fails: the
+ * link check is skipped, and `answerable` stops counting as evidence.
  */
-async function loadRosterUrls(env) {
+async function loadFacts(env) {
   try {
     const facts = await rpc(env, "site_facts", {}, { serviceRole: true });
     const urls = Object.values(facts?.roster || {}).flat().map((r) => r?.u).filter(Boolean);
-    return { ok: true, urls };
+    return { ok: true, urls, facts };
   } catch (_) {
-    return { ok: false, urls: [] };
+    return { ok: false, urls: [], facts: null };
   }
 }
 
@@ -224,22 +257,31 @@ function extractsFor(row, byEntity) {
   return out;
 }
 
-const evalRow = (mapped, judged) => ({
+/**
+ * The machine's record, carrying whatever it supersedes.
+ *
+ * `rubric` and `model` on it are not decoration: isStaleGrade reads exactly
+ * those two to decide a stored grade was made by something other than what would
+ * grade it now, which is what the re-grade button is pointed at.
+ */
+const autoRecord = (mapped, judged, previous) => withHistory({
+  ...mapped.auto,
+  // Which rung graded it, and whether its probabilities are the calibrated
+  // kind. Without this a Gemini guess and a Jev measurement look identical.
+  tier: judged.tier,
+  provider: judged.provider,
+  model: judged.model,
+  cost: judged.cost,
+  calibrated: !!judged.calibrated,
+}, previous);
+
+const evalRow = (mapped, judged, previous) => ({
   eval_verdict: mapped.verdict,
   eval_score: mapped.score,
   eval_tags: mapped.tags,
   eval_notes: mapped.notes,
   eval_source: "auto",
-  eval_auto: {
-    ...mapped.auto,
-    // Which rung graded it, and whether its probabilities are the calibrated
-    // kind. Without this a Gemini guess and a Jev measurement look identical.
-    tier: judged.tier,
-    provider: judged.provider,
-    model: judged.model,
-    cost: judged.cost,
-    calibrated: !!judged.calibrated,
-  },
+  eval_auto: autoRecord(mapped, judged, previous),
   evaluated_at: new Date().toISOString(),
   // eval_ideal_answer is deliberately untouched: it is the owner's reference
   // text, and a model with no prose to offer has nothing to put in it.
@@ -265,7 +307,7 @@ const savedShape = (r) => ({
  * as rows that are simply all graded do, and "nothing here is ungraded" is a
  * badly wrong thing to say when the truth is that the log is unreadable.
  */
-async function diagnoseEmpty(env, ids) {
+async function diagnoseEmpty(env, ids, { regrade = false } = {}) {
   const list = ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0);
   if (!list.length) return { reason: "no-ids" };
   try {
@@ -274,7 +316,7 @@ async function diagnoseEmpty(env, ids) {
       `ask_messages?id=in.(${list.join(",")})&select=id,role,evaluated_at`,
     );
     if (!seen.length) return { reason: "unreadable" };
-    if (seen.every((r) => r.evaluated_at)) return { reason: "already-evaluated" };
+    if (!regrade && seen.every((r) => r.evaluated_at)) return { reason: "already-evaluated" };
     if (!seen.some((r) => r.role === "assistant")) return { reason: "not-answers" };
     return { reason: "unknown" };
   } catch (err) {
@@ -346,6 +388,13 @@ export async function onRequestGet(context) {
       cost: status.cost,
     })),
     allowMetered: !!settings.auto_eval_allow_metered,
+    // The two halves of "was this graded by what would grade it now". The admin
+    // page needs both to count stale rows without asking the server about each
+    // one: a stored grade naming an older rubric OR a different rung is out of
+    // date, and after a run with no Jev key configured every row is the second
+    // kind without the rubric having moved at all.
+    rubric: JUDGE_RUBRIC_VERSION,
+    judgeModel: rungs[0]?.tier?.model || null,
     batchCap: settings.auto_eval_batch_cap,
     requestBatch: settings.auto_eval_request_batch,
     minConfidence: settings.auto_eval_min_confidence,
@@ -358,29 +407,31 @@ export async function onRequestGet(context) {
 // POST — estimate, run, explain.
 // ---------------------------------------------------------------------------
 
-async function runBatch(context, settings, ids) {
+async function runBatch(context, settings, ids, { regrade = false } = {}) {
   const { env } = context;
-  const rows = await loadCandidates(env, ids);
+  const rows = await loadCandidates(env, ids, { regrade });
   const skipped = ids.length - rows.length;
   if (!rows.length) {
-    const { reason, detail } = await diagnoseEmpty(env, ids);
+    const { reason, detail } = await diagnoseEmpty(env, ids, { regrade });
     return {
       results: [], skipped, failed: [], graded: 0, reason, note: EMPTY_NOTES[reason], detail,
     };
   }
 
-  const [questions, byEntity, roster] = await Promise.all([
+  const [questions, byEntity, facts] = await Promise.all([
     loadQuestions(env, rows),
     loadExtracts(env, rows),
-    loadRosterUrls(env),
+    loadFacts(env),
   ]);
 
   const jobs = rows.map((row) => {
+    const extracts = extractsFor(row, byEntity);
     const state = buildJudgeState({
       question: questions.get(`${row.conversation_id}:${row.turn_index - 1}`) || "",
       answer: row.content,
-      extracts: extractsFor(row, byEntity),
+      extracts,
       scoped: (row.types || []).join(", ") || null,
+      facts: facts.facts,
     });
     return {
       row,
@@ -388,9 +439,12 @@ async function runBatch(context, settings, ids) {
       findings: deterministicFindings({
         answer: row.content,
         sources: row.sources || [],
-        linkable: roster.urls,
-        checkLinks: roster.ok,
+        linkable: facts.urls,
+        checkLinks: facts.ok,
       }),
+      // Computed, never asked. Counted against the extracts the judge was shown,
+      // so a number pointing past them is not a citation.
+      citations: citationScore({ answer: row.content, extracts: state.extracts }),
     };
   });
 
@@ -421,19 +475,44 @@ async function runBatch(context, settings, ids) {
         minConfidence: settings.auto_eval_min_confidence,
         model: out.model,
         findings: job.findings,
-        // A language model's confidence is not calibrated the way the decision
-        // model's is, and the review threshold was chosen on the latter. Say so on
-        // the row rather than letting the two look alike.
+        citations: job.citations,
+        // Turns on the ceiling over a self-reported confidence and the margin
+        // that stands in for it. A language model's confidence is not calibrated
+        // the way the decision model's is, and the review threshold was chosen on
+        // the latter.
+        calibrated: !!out.calibrated,
+        // Without site_facts() there is no archive summary in the state, so
+        // `answerable` is an answer to a question the judge was never shown.
+        hasArchive: facts.ok,
+        // Said on the row too, rather than letting the two look alike.
         extraTags: out.calibrated ? [] : ["judge-fallback"],
       });
-      const row = evalRow(mapped, out);
-      const saved = await patchMessage(env, job.row.id, row);
+      const previous = job.row.eval_auto || null;
+      // The owner's verdict is never the judge's to move, so on a row they graded
+      // only eval_auto is written — and the filter, not this branch, is what
+      // enforces it.
+      const handGraded = isHandGraded(job.row);
+      const saved = handGraded
+        ? await patchMessage(
+          env,
+          job.row.id,
+          { eval_auto: autoRecord(mapped, out, previous) },
+          HUMAN_GUARD,
+        )
+        : await patchMessage(
+          env,
+          job.row.id,
+          evalRow(mapped, out, previous),
+          regrade ? AUTO_GUARD : "&evaluated_at=is.null",
+        );
       // No row came back: someone graded it by hand in the last second, and the
       // PATCH's own filter refused. Their verdict stands.
       if (!saved) {
         return { ok: false, id: job.row.id, skipped: "already-evaluated", tokens: out.inputTokens };
       }
-      return { ok: true, id: job.row.id, saved, tokens: out.inputTokens };
+      return {
+        ok: true, id: job.row.id, saved, tokens: out.inputTokens, autoOnly: handGraded,
+      };
     } catch (err) {
       return { ok: false, id: job.row.id, error: String(err.message || err) };
     }
@@ -455,6 +534,10 @@ async function runBatch(context, settings, ids) {
   return {
     results: done.map((s) => savedShape(s.saved)).filter((r) => r.id),
     graded: done.length,
+    // Hand-graded rows the judge measured itself against without touching their
+    // verdict. Counted apart so a re-grade run cannot read as having overwritten
+    // anything of the owner's.
+    measuredOnly: done.filter((s) => s.autoOnly).length,
     // Rows nobody could grade: already graded when the batch was assembled, plus
     // any that were graded by hand while it ran.
     skipped: skipped + settled.filter((s) => s.skipped).length,
@@ -464,8 +547,8 @@ async function runBatch(context, settings, ids) {
   };
 }
 
-async function estimateBatch(env, settings, ids) {
-  const rows = await loadCandidates(env, ids);
+async function estimateBatch(env, settings, ids, { regrade = false } = {}) {
+  const rows = await loadCandidates(env, ids, { regrade });
   const questionChars = settings.max_message_chars || 500;
   const tokens = rows.reduce((sum, row) => {
     // The answer's real length, plus the question at its worst case — the
@@ -477,10 +560,15 @@ async function estimateBatch(env, settings, ids) {
     return sum + Math.ceil(chars / 4) + extracts * ESTIMATE_TOKENS_PER_EXTRACT;
   }, 0);
   if (!rows.length) {
-    const { reason, detail } = await diagnoseEmpty(env, ids);
+    const { reason, detail } = await diagnoseEmpty(env, ids, { regrade });
     return { count: 0, skipped: ids.length, tokens: 0, reason, note: EMPTY_NOTES[reason], detail };
   }
-  return { count: rows.length, skipped: ids.length - rows.length, tokens };
+  return {
+    count: rows.length,
+    skipped: ids.length - rows.length,
+    tokens,
+    handGraded: rows.filter(isHandGraded).length,
+  };
 }
 
 /**
@@ -592,6 +680,9 @@ export async function onRequestPost(context) {
   const ids = Array.isArray(payload?.messageIds) ? payload.messageIds : [];
   if (!ids.length) return json({ error: "bad request", note: "No answers named." }, 400);
   const mode = payload?.mode || "run";
+  // A re-grade reads rows a plain run would refuse, so it is a mode of its own
+  // rather than a flag on one — nothing can reach the wider row set by accident.
+  const regrade = mode === "regrade";
 
   if (mode === "explain") {
     if (!settings.auto_eval_explain_enabled) {
@@ -630,11 +721,20 @@ export async function onRequestPost(context) {
       return json({ error: "too many", note: `At most ${settings.auto_eval_batch_cap} per run.` }, 400);
     }
     try {
-      // Reads rows and counts characters. Spends nothing.
-      return json({ ...await estimateBatch(env, settings, ids), rungs: rungs.length });
+      // Reads rows and counts characters. Spends nothing. The browser sums
+      // several of these for a re-grade, which is why the cap here is per call
+      // and not per press.
+      return json({
+        ...await estimateBatch(env, settings, ids, { regrade: !!payload?.regrade }),
+        rungs: rungs.length,
+      });
     } catch (err) {
       return json({ error: "unavailable", note: String(err.message || err) }, 503);
     }
+  }
+
+  if (mode !== "run" && !regrade) {
+    return json({ error: "bad request", note: `Unknown mode: ${mode}.` }, 400);
   }
 
   if (ids.length > settings.auto_eval_request_batch) {
@@ -645,7 +745,7 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const out = await runBatch(context, settings, ids);
+    const out = await runBatch(context, settings, ids, { regrade });
     if (out.error === "budget") {
       const unreachable = out.reason === "unavailable";
       return json({

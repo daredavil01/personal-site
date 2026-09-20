@@ -280,9 +280,29 @@ Natural-language chat over the whole content store.
   `ask_settings.auto_eval_enabled`, and off in `DEFAULT_ASK_SETTINGS` too, so an
   unreachable Supabase switches it off rather than on.
   - **The rubric lives in `src/lib/askJudge.js`** — four dimensions, of which link
-    and format compliance never reaches a model because `sanitiseAnswer` already
-    decides it exactly, for free. `JUDGE_RUBRIC_VERSION` is stamped on every row:
-    rewording a criterion redefines every grade after it.
+    compliance and the citation habit never reach a model because `sanitiseAnswer`
+    and a regex already decide them exactly, for free. `JUDGE_RUBRIC_VERSION` is
+    stamped on every row: rewording a criterion redefines every grade after it.
+  - **The judge sees one line about the archive, not just the extracts** (`r2`).
+    The extracts say what retrieval found and nothing about what it missed, so
+    without `buildArchiveNote`'s summary from `site_facts()` an answer refusing a
+    question the rosters plainly answer scores `refused_correctly` — correct by the
+    rubric and wrong in fact. `answerable` is the cross-check, and `over-refusal`
+    is what it produces. When `site_facts()` cannot be read the block is left out
+    and `answerable` stops counting.
+  - **A fallback rung's confidence is not taken at face value.** On an uncalibrated
+    rung a self-reported confidence at or above `SELF_REPORT_CEILING` is discarded
+    and a margin — distance from the thresholds that actually decided the verdict —
+    stands in its place. Without it 63 of 98 grades read 1.00 and `needs-review`
+    fired once.
+  - **Grades are versioned and re-runnable.** Each carries the `rubric` and `model`
+    that made it; a grade by either an older rubric or a rung that no longer
+    answers is *stale*, counted on the page from the `rubric`/`judgeModel` the GET
+    returns. **Re-grade N** (`mode: "regrade"`) runs the whole filtered set
+    uncapped and keeps what it replaced in `eval_auto.history` (5 deep). On a
+    hand-graded row it writes **`eval_auto` alone** — that is how a machine verdict
+    and yours end up on the same row, which is where Judge agreement comes from —
+    and both write rules are PostgREST filters, not branches.
   - **A hand grade is never overwritten.** The write is a PostgREST
     `PATCH … &evaluated_at=is.null`, so Postgres refuses rather than a client-side
     `if`. And `eval_auto` keeps the machine's verdict after you replace it, which

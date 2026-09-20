@@ -1,5 +1,6 @@
 import {
-  applyFilters, EMPTY_FILTERS, lowConfidenceIds, sliceBatches, summariseExchanges,
+  applyFilters, EMPTY_FILTERS, isStaleGrade, lowConfidenceIds, regradeIds, sliceBatches,
+  staleIds, summariseExchanges,
   toChats, toEvalsJsonl, toExchanges, ungradedIds,
 } from "./askConversations";
 
@@ -131,6 +132,41 @@ describe("judge-graded rows", () => {
     expect(s.lowConfidence).toBe(1);
     // One row re-graded by hand, and the verdicts differed.
     expect(s.agreement).toEqual({ n: 1, agreed: 0, rate: 0 });
+  });
+
+  // Versions. The log this was written against was graded entirely by the
+  // fallback rung at rubric r1, so both halves of "stale" matter here.
+  const R2 = { rubric: "r2", model: "jev-1.13.0" };
+
+  it("calls a grade stale when the rubric or the rung that made it has moved", () => {
+    expect(isStaleGrade(auto, R2)).toBe(true);
+    expect(isStaleGrade(auto, { rubric: "r1", model: "jev-1.13.0" })).toBe(true);
+    expect(isStaleGrade(auto, { rubric: "r1" })).toBe(false);
+    // Never graded at all is not stale — it is ungraded, and a different button.
+    expect(isStaleGrade(ungraded.answer ? ungraded : { evalAuto: {} }, R2)).toBe(false);
+  });
+
+  it("filters to grades an older rubric produced", () => {
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, stale: "yes" }, R2)
+      .map((e) => e.answer.id)).toEqual([101, 102]);
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, stale: "no" }, R2)
+      .map((e) => e.answer.id)).toEqual([103]);
+    // With no version in hand the page has no opinion about what current means.
+    expect(applyFilters(exchanges, { ...EMPTY_FILTERS, stale: "yes" }, {})).toHaveLength(0);
+  });
+
+  it("counts out-of-date grades apart from ungraded ones", () => {
+    expect(summariseExchanges(exchanges, R2).stale).toBe(2);
+    expect(summariseExchanges(exchanges, R2).evaluated).toBe(2);
+  });
+
+  it("re-grades every answer, including the one the owner graded", () => {
+    // The hand-graded row is the most valuable one in the set: re-grading it
+    // writes eval_auto alone, and that is where the agreement number comes from.
+    expect(regradeIds(exchanges).sort()).toEqual([101, 102, 103]);
+    // Stale is the subset worth the tokens, and an ungraded row is in it.
+    expect(staleIds(exchanges, R2).sort()).toEqual([101, 102, 103]);
+    expect(staleIds(exchanges, { rubric: "r1" }).sort()).toEqual([103]);
   });
 
   it("reports no agreement number until something has been re-graded", () => {
