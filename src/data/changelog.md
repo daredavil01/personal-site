@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v18.1.1] — 2026-09-20
+
+### Added
+
+- **`docs/ai-features-proposal.md`**: all three model providers on this deployment — Workers AI, Gemini and Jev — are used in exactly one place, `/ask`, and nothing AI-shaped touches authoring, the detail pages or media. This is the shortlist of what could change that: eighteen candidate features grouped by direction, each with the model that fits it, where the call would run, what it would cost and what it would break. It records the constraints any of them has to obey — nothing heavy at the edge, free by default with metered behind an explicit switch, a new route means a new share card — and ranks six of them by value per unit of risk. A proposal, not a plan of record: nothing in it is built.
+
+---
+
 ## [v18.1.0] — 2026-09-20
 
 ### Added
