@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-17T22:59:48.177Z",
+  "generatedAt": "2026-09-20T22:38:21.039Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
@@ -32,14 +32,14 @@
     "activeMonths": 34
   },
   "currentPeriod": {
-    "asOf": "2026-09-18",
+    "asOf": "2026-09-21",
     "monthToDate": {
       "month": "2026-09",
       "label": "September 2026",
       "posts": 5,
       "words": 6555,
-      "daysElapsed": 18,
-      "wordsPerDay": 364,
+      "daysElapsed": 21,
+      "wordsPerDay": 312,
       "previousMonth": {
         "month": "2026-08",
         "posts": 6,
@@ -51,13 +51,13 @@
       "year": "2026",
       "posts": 61,
       "words": 67258,
-      "daysElapsed": 261,
-      "wordsPerDay": 258,
+      "daysElapsed": 264,
+      "wordsPerDay": 255,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7827,
-        "throughDate": "2025-09-18"
+        "throughDate": "2025-09-21"
       },
       "changeVsPriorYear": 759.3
     }
@@ -3836,6 +3836,13 @@
       "blogId": 62,
       "title": "Patience in the game of uncertainty!",
       "url": "https://sankettambare.substack.com/p/patience-in-the-game-of-uncertainty",
+      "note": "Row in `blogs` matches no post on either platform."
+    },
+    {
+      "kind": "unmatched_blogs_row",
+      "blogId": 63,
+      "title": "The simplicity of the complex world!",
+      "url": "https://sankettambare.substack.com/p/the-simplicity-of-the-complex-world",
       "note": "Row in `blogs` matches no post on either platform."
     }
   ]
