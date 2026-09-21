@@ -81,6 +81,15 @@ export const PAGE_META = {
     ogSlug: "changelog",
     type: "website",
   },
+  "/changelog/graph": {
+    title: "The Commit Graph",
+    description:
+      "Every release in the changelog has a commit behind it. The commit graph, the code written and deleted week by week, and what each version cost.",
+    image: `${SITE_URL}/og/changelog-graph.png`,
+    imageAlt: "The commit history behind the site",
+    ogSlug: "changelog-graph",
+    type: "website",
+  },
   "/contact": {
     title: "Contact",
     description:

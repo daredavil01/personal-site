@@ -37,6 +37,8 @@ export const ENTITY_TYPES = {
   instagram: { label: "Instagram", list: "/instagram", path: () => "/instagram" },
   now: { label: "Now", list: "/now", path: () => "/now" },
   page: { label: "Page", list: "/", path: () => null },
+  // Chunks carry their own /changelog#vX.Y.Z anchor, so path() adds nothing.
+  changelog: { label: "Changelog", list: "/changelog", path: () => null },
   // Types added by the source registry (scripts/ask-sources/). Their chunks
   // carry their own url; `list` is where "browse everything" points.
   resume: { label: "Résumé", list: "/resume", path: () => "/resume" },
@@ -69,6 +71,7 @@ export const ENTITY_PLURALS = {
   instagram: "photo sets",
   now: "now updates",
   page: "pages",
+  changelog: "changelog versions",
   resume: "résumé entries",
   writing: "essays",
   stats: "stats",

@@ -333,6 +333,85 @@ const LinkList = ({ value, onChange }) => {
   );
 };
 
+// One changelog bullet per row: kind, name, the file path parenthetical and the
+// body. The same {kind, name, path, body} shape changelogParse.js produces from
+// markdown, so a row edited here and a row published from the buffer are
+// indistinguishable.
+const CHANGE_KINDS = ["Added", "Changed", "Fixed", "Removed"];
+
+const ChangeList = ({ value, onChange }) => {
+  const rows = Array.isArray(value) ? value : [];
+  const update = (i, patch) => onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  const move = (i, delta) => {
+    const target = i + delta;
+    if (target < 0 || target >= rows.length) return;
+    const next = [...rows];
+    [next[i], next[target]] = [next[target], next[i]];
+    onChange(next);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      {rows.map((row, i) => (
+        <div key={i} className={`flex flex-col gap-2 p-2 rounded-md border ${hairline}`}>
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+            <Select
+              className="sm:w-32"
+              aria-label={`Kind for change ${i + 1}`}
+              value={row.kind || "Changed"}
+              onChange={(e) => update(i, { kind: e.target.value })}
+            >
+              {CHANGE_KINDS.map((k) => <option key={k} value={k}>{k}</option>)}
+            </Select>
+            <Input
+              className="flex-1 min-w-0"
+              placeholder="Component or feature name"
+              aria-label={`Name for change ${i + 1}`}
+              value={row.name || ""}
+              onChange={(e) => update(i, { name: e.target.value })}
+            />
+            <Input
+              className="sm:w-56"
+              placeholder="src/path.js"
+              aria-label={`File path for change ${i + 1}`}
+              value={row.path || ""}
+              onChange={(e) => update(i, { path: e.target.value })}
+            />
+            <div className="flex items-center gap-0.5 shrink-0">
+              <IconButton icon={ChevronUp} label={`Move change ${i + 1} up`} size="sm" disabled={i === 0} onClick={() => move(i, -1)} />
+              <IconButton icon={ChevronDown} label={`Move change ${i + 1} down`} size="sm" disabled={i === rows.length - 1} onClick={() => move(i, 1)} />
+              <IconButton
+                icon={Trash2}
+                label={`Remove change ${i + 1}`}
+                size="sm"
+                variant="dangerGhost"
+                onClick={() => onChange(rows.filter((_, idx) => idx !== i))}
+              />
+            </div>
+          </div>
+          <Textarea
+            rows={2}
+            placeholder="What changed and why."
+            aria-label={`Description for change ${i + 1}`}
+            value={row.body || ""}
+            onChange={(e) => update(i, { body: e.target.value })}
+          />
+        </div>
+      ))}
+      <Button
+        size="sm"
+        className="self-start"
+        onClick={() => onChange([...rows, {
+          kind: rows[rows.length - 1]?.kind || "Added", name: "", path: "", body: "",
+        }])}
+      >
+        Add change
+      </Button>
+    </div>
+  );
+};
+
 const JsonField = ({ value, onChange }) => {
   const [text, setText] = useState(() => JSON.stringify(value ?? {}, null, 2));
   const [error, setError] = useState(null);
@@ -702,7 +781,7 @@ const TagSuggest = ({ field, value, context, onChange }) => {
 
 // Composite widgets can't carry a native `required`, so the form validates them
 // on submit instead. See ResourceManager.
-export const COMPOSITE_TYPES = new Set(["tags", "stringList", "slideImages", "linkList", "json"]);
+export const COMPOSITE_TYPES = new Set(["tags", "stringList", "slideImages", "linkList", "changeList", "json"]);
 
 const FormField = ({ field, value, folder, onChange, suggestOptions = null, draftContext = null }) => {
   const set = (v) => onChange(field.name, v);
@@ -825,6 +904,8 @@ const FormField = ({ field, value, folder, onChange, suggestOptions = null, draf
       );
     case "linkList":
       return <LinkList value={value} onChange={set} />;
+    case "changeList":
+      return <ChangeList value={value} onChange={set} />;
     case "json":
       return <JsonField value={value} onChange={set} />;
     default:

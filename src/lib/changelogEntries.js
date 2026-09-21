@@ -1,119 +1,12 @@
-// Parses src/data/changelog.md into structured entries so the admin's Now-month
-// editor can offer that month's shipped work as "Website Updates" highlights,
-// instead of having them retyped from the changelog by hand.
+// Turns `changelog` rows into the "Website Updates" highlights the admin's
+// Now-month editor offers, so a month's shipped work isn't retyped by hand.
 //
-// The format is the one CLAUDE.md mandates:
-//   ## [v12.0.0] — 2026-07-20
-//   ### Added
-//   - **Feature Name** (`src/path.js`): What it is and why.
-// The backticked path group is optional, and a handful of older bullets are
-// plain prose with no bold name — both are tolerated.
+// The markdown parser this file used to carry lives in ./changelogParse.js —
+// the version history is in Postgres now, and the Now editor reads the one
+// month it needs (getChangelogMonth) instead of fetching a 204 KB file. The
+// re-export keeps the parser's one import path for callers and tests.
 
-import changelogUrl from "../data/changelog.md?url";
-
-const VERSION_RE = /^##\s+\[?(v[\d.]+)\]?\s*[—–-]\s*(\d{4}-\d{2}-\d{2})/;
-const KIND_RE = /^###\s+(\w+)/;
-
-/**
- * Fetch the raw changelog markdown. The static URL import keeps the markdown
- * asset reference in the main bundle for Cloudflare Pages' asset server.
- */
-export async function loadChangelog() {
-  const res = await fetch(changelogUrl);
-  if (!res.ok) throw new Error(`Changelog fetch failed (${res.status})`);
-  const text = await res.text();
-  return text.replace(/^---[\s\S]*?---\s*\n/, "");
-}
-
-// "- **Name** (`path`): body"  →  { name, body }
-function parseBullet(raw) {
-  let rest = raw.replace(/^-\s+/, "").trim();
-  let name = "";
-
-  const bold = rest.match(/^\*\*(.+?)\*\*/);
-  if (bold) {
-    name = bold[1].trim();
-    rest = rest.slice(bold[0].length).trim();
-    // Drop the optional file-path parenthetical. Paths never contain ")".
-    rest = rest.replace(/^\([^)]*\)/, "").trim();
-    rest = rest.replace(/^:/, "").trim();
-  }
-
-  // Strip inline markdown emphasis/code so the highlight reads as plain text.
-  const body = rest.replace(/[`*]/g, "").trim();
-  return { name: name.replace(/[`*]/g, ""), body };
-}
-
-// The reader-facing paragraph npm run changelog:notes writes under a version
-// heading, as a blockquote. One per version, before the first `###` section.
-const SUMMARY_RE = /^>\s*(.+)/;
-
-/**
- * Parse changelog markdown into version entries.
- * @returns {{version, date, monthKey, summary, changes: {kind, name, body}[]}[]}
- */
-export function parseChangelog(md) {
-  const entries = [];
-  let entry = null;
-  let kind = null;
-  let bullet = null;
-
-  const flush = () => {
-    if (!bullet || !entry) { bullet = null; return; }
-    const parsed = parseBullet(bullet);
-    if (parsed.name || parsed.body) entry.changes.push({ kind: kind || "Changed", ...parsed });
-    bullet = null;
-  };
-
-  (md || "").split("\n").forEach((line) => {
-    const version = line.match(VERSION_RE);
-    if (version) {
-      flush();
-      entry = {
-        version: version[1],
-        date: version[2],
-        monthKey: version[2].slice(0, 7),
-        summary: "",
-        changes: [],
-      };
-      entries.push(entry);
-      kind = null;
-      return;
-    }
-
-    // Before the first section heading, and only the first one: a blockquote
-    // deeper in a version block is somebody quoting something, not the summary.
-    const summary = line.match(SUMMARY_RE);
-    if (summary && entry && !kind && !entry.summary) {
-      flush();
-      entry.summary = summary[1].trim();
-      return;
-    }
-
-    const kindMatch = line.match(KIND_RE);
-    if (kindMatch) {
-      flush();
-      [, kind] = kindMatch; // Added | Changed | Fixed | Removed
-      return;
-    }
-
-    if (/^-\s+/.test(line)) {
-      flush();
-      bullet = line;
-      return;
-    }
-
-    // A bullet can wrap across lines; anything else ends it.
-    if (bullet && line.trim() && !line.startsWith("#") && !line.startsWith("---")) {
-      bullet += ` ${line.trim()}`;
-      return;
-    }
-    flush();
-  });
-
-  flush();
-  return entries;
-}
+export { parseChangelog, default as parseChangelogDefault } from "./changelogParse";
 
 // Words whose trailing dot is not a sentence end. A lone letter is included so
 // initials ("J. Doe") don't split the line either.
@@ -202,4 +95,4 @@ export function changelogHighlights(entries, monthKey) {
     ]);
 }
 
-export default parseChangelog;
+export default changelogHighlights;

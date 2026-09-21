@@ -244,8 +244,12 @@ describe("release-note blockquotes", () => {
     const [entry] = parseChangelog(md);
     expect(entry.version).toBe("v3.0.0");
     expect(entry.summary).toBe("The site got faster and the search stopped guessing.");
+    // `path` is kept now: the changelog table stores it and /changelog renders
+    // it beside the name.
     expect(entry.changes).toEqual([
-      { kind: "Added", name: "A thing", body: "It does something." },
+      {
+        kind: "Added", name: "A thing", path: "a.js", body: "It does something.",
+      },
     ]);
   });
 
@@ -257,6 +261,22 @@ describe("release-note blockquotes", () => {
       id: "v3.0.0-summary",
     });
     expect(items).toHaveLength(2);
+  });
+
+  it("reads a month-only heading with a trailing label", () => {
+    // The eight oldest versions predate the current convention:
+    // "## [v2.0.0] — 2025-03 (Sports Page Launch)". They were silently skipped,
+    // which attached their bullets to the version above them — invisible until
+    // the history was counted on its way into Postgres.
+    const legacy = `## [v2.0.0] — 2025-03 (Sports Page Launch)
+
+### Added
+
+- **Sports page**: Races, with photos.
+`;
+    const [entry] = parseChangelog(legacy);
+    expect(entry).toMatchObject({ version: "v2.0.0", date: "2025-03-01", monthKey: "2025-03" });
+    expect(entry.changes).toHaveLength(1);
   });
 
   it("leaves summary empty when the version has none", () => {

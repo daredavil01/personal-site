@@ -106,6 +106,11 @@ export function pageModel(slug, payload, {
       title: "Every change, dated",
       lede: "A transparent record of what shipped, when, and why.",
     },
+    "changelog-graph": {
+      eyebrow: "Commit graph",
+      title: "What each release cost",
+      lede: "Every version, the commits behind it, and the lines it moved.",
+    },
     contact: {
       eyebrow: "Contact",
       title: "Let's talk",
@@ -261,7 +266,7 @@ export function pageModel(slug, payload, {
 // "page"` names one of these AND that the PNG exists, so a new page route
 // cannot ship without a card.
 export const PAGE_SLUGS = [
-  "home", "about", "ask", "books", "challenges", "changelog", "contact", "instagram",
+  "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
   "ask-share",

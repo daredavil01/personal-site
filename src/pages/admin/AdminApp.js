@@ -10,6 +10,7 @@ import ResourceRoute from "./ResourceRoute";
 import ResumePage from "./ResumePage";
 import MicroblogManager from "./MicroblogManager";
 import TagManager from "./TagManager";
+import ChangelogSync from "./ChangelogSync";
 import NowMetaEditor from "./NowMetaEditor";
 import AskSettingsEditor from "./AskSettingsEditor";
 import AskConversations from "./AskConversations";
@@ -48,6 +49,8 @@ const AdminRoutes = ({ session }) => {
         <Route index element={<Overview />} />
         <Route path="microblog" element={<MicroblogManager />} />
         <Route path="tags" element={<TagManager />} />
+        {/* Two segments, so the :resourceKey route below never sees it. */}
+        <Route path="changelog/sync" element={<ChangelogSync />} />
         <Route path="now/months" element={<NowMonthEditor />} />
         <Route path="now/meta" element={<NowMetaEditor />} />
         <Route path="ask/settings" element={<AskSettingsEditor />} />

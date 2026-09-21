@@ -9,13 +9,37 @@ patch for fixes and tweaks.
 
 ---
 
+## [v19.0.0] — 2026-09-22
+
+### Added
+
+- **The changelog moved into Postgres** (`supabase/migrations/0028_changelog.sql`): the version history was a 204 KB markdown file, and it was fetched whole twice at runtime — once by `/changelog`, once more by the Now-month editor's "Pull highlights from changelog". Neither needs more than one version. 91 versions and 571 entries are now rows, ordered by generated `major`/`minor`/`patch` integers because text sorts `v5.0.0` above `v18.2.1` and `released_on` is not a fallback either: `v18.2.1` is dated the day before `v18.2.0`. The markdown file stays as a staging buffer, so an entry still lands in the same commit and the same diff as the code it describes.
+- **Publishing an entry is a reviewed step** (`src/pages/admin/ChangelogSync.js`): `/admin/changelog/sync` parses the buffer, marks each version new, edited or already published, and writes the ones you tick. It runs as the owner under RLS, so it needs no service-role key. `npm run changelog:push` does the same headlessly and empties the buffer afterwards, which a browser cannot do. Both refuse to run when a heading fails to parse — an unparsed heading silently attaches its bullets to the version above it, which is exactly what the eight oldest `## [v2.0.0] — 2025-03 (Sports Page Launch)` headings had been doing unnoticed.
+- **One major version at a time** (`src/pages/Changelog.js`): `/changelog` opens on the newest major with a tab per chapter, `?v=` in the URL so a chapter is shareable, and a deep link to `#v18.2.0` opens the major that holds it. Each release shows its reader-facing summary; the engineering entries are collapsed underneath in a native `<details>`.
+- **Chapter summaries for a whole major** (`supabase/migrations/0030_changelog_majors.sql`, `scripts/summarise-majors.mjs`): `npm run changelog:majors` writes a headline, a paragraph, and the additions and fixes worth naming for each major, from the per-version summaries rather than the raw entries — so the layering is entries, then version summary, then chapter. Skips a major whose input has not changed, and answers to the existing `release_notes` switch.
+- **The commit graph** (`src/pages/ChangelogGraph.js`, `supabase/migrations/0029_repo_history.sql`): `/changelog/graph` draws the release rail, a real commit DAG with branches and merges, a contribution heatmap and a code-frequency chart, over 787 commits going back to 2014. `npm run repo:sync` reads the local clone with `git log --numstat`; there is no GitHub API call anywhere, because an unauthenticated api.github.com allows 60 requests an hour and per-commit stats there cost one request each.
+- **What each version cost** (`scripts/sync-repo-history.mjs`): this repository has no git tags, but the commit that added a version's `## [vX.Y.Z]` heading is the commit it shipped in, which maps every one of the 91 versions to a commit. Where several versions share one — the nine oldest were back-written into `3c57c76` — the diff is attributed to the newest of the group and the rest are left null rather than zero.
+
+### Changed
+
+- **The Now-month editor reads one month** (`src/lib/changelogEntries.js`, `src/pages/admin/now/NowMonthEditor.js`): "Pull highlights from changelog" used to download and parse the whole archive in the browser to find one month in it. The markdown parser moved to `src/lib/changelogParse.js`, free of the Vite-only `?url` import that stopped Node reusing it.
+- **`/ask` indexes a version at a time** (`scripts/ask-sources/changelog.mjs`): the changelog reached the index as prose chunks of one enormous file, which cut versions in half and put two releases in one chunk. A version is the unit a question is actually about.
+
+### Fixed
+
+- **Entry bodies rendered through a markdown pass** (`src/pages/Changelog.js`): entries are full of angle-bracket placeholders — `/tags/<name>`, `<slug>.png` — and `markdown-to-jsx` was parsing them as unknown HTML elements and swallowing the text. The parser already strips backticks and emphasis, so the body is plain text and is now rendered as such.
+
 ## [v18.2.1] — 2026-09-21
+
+> The public changelog highlights now load reliably on the site by importing the data statically so Cloudflare Pages serves the asset correctly.
 
 ### Fixed
 
 - **Now-month changelog highlights** (`src/lib/changelogEntries.js`): imported the changelog URL statically so Cloudflare Pages serves the asset without a failing runtime module request.
 
 ## [v18.2.0] — 2026-09-22
+
+> The search and question-answering features on the site are now significantly more accurate, thanks to better handling of keyword stemming, clearer document summaries, and improved matching for Marathi and English queries. Visitors can also use voice input to ask questions, listen to audio guides, and explore related content more easily through improved navigation and automated suggestions. Behind the scenes, administrators gain powerful new tools for managing AI features, tracking retrieval performance, and automating content descriptions and micro-post classifications safely.
 
 ### Fixed
 
@@ -68,6 +92,8 @@ patch for fixes and tweaks.
 
 ## [v18.1.2] — 2026-09-20
 
+> Documentation now correctly identifies TypeSafe AI and its System One model within the AI proposal, noting the distinction between the free gateway route and the direct metered connection.
+
 ### Fixed
 
 - **Jev's provenance in the AI proposal** (`docs/ai-features-proposal.md`): the document named Jev twenty times and never once said whose model it is. `CLAUDE.md`, `docs/ask-evals.md` and this changelog all attribute it to **TypeSafe AI**, so the one doc a reader might open first was the one that did not. It now names TypeSafe AI and its "System One" model in both the capability table and the what-each-model-is-for section, and points at `docs/ask-evals.md` for the two routes — Vercel's AI Gateway, where the free credit is, and `api.typesafe.ai` direct, which is metered.
@@ -75,6 +101,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v18.1.1] — 2026-09-20
+
+> Voice input and output proposals for the site have been updated with verified model catalogs and language constraints, highlighting that browser speech synthesis will serve as a fallback for Marathi. Additionally, a new proposal document outlines eighteen potential AI features grouped by direction, cost, and risk, while confirming that AI usage remains strictly limited to the search and question tool.
 
 ### Added
 
@@ -84,6 +112,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v18.1.0] — 2026-09-20
+
+> This release updates the site with pre-rendered social share cards for every route and tag page, ensuring they display correctly across platforms. It also introduces features to share entire second brain conversations via unlisted links, adds rotating starter questions and improved topic re-ranking to the /ask page, and cleans up tag categories and database records.
 
 ### Added
 
@@ -170,6 +200,8 @@ patch for fixes and tweaks.
 
 ## [v18.0.1] — 2026-09-14
 
+> The automated nightly search index update now gracefully handles connection restrictions from the Substack archive by reusing the previously saved writing ledger and text cache. This keeps the rest of the site data, including WordPress posts and the second brain search index, refreshing smoothly without failing the entire workflow.
+
 ### Fixed
 
 - **Nightly ask refresh** (`scripts/blog-word-counts.mjs`): Substack's archive API returns 403 to GitHub Actions runners, which failed `npm run blogs:wordcount` and the whole job. A Substack failure now reuses the Substack posts from the last committed `writing-ledger.json` (bodies from the text cache) and emits a workflow warning; WordPress, the ledger and `ask:index` still refresh.
@@ -177,6 +209,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v18.0.0] — 2026-09-14
+
+> A new presentations page now displays HTML slide decks in a card grid with lazy-loading live previews, alongside dedicated viewer pages with full-width embeds and related content. You can add new decks from the admin panel simply by pasting their web addresses without needing a site redeploy. Additionally, the second-brain search tool now indexes the slide text and metadata so you can ask questions directly about the presentations.
 
 ### Added
 
@@ -194,6 +228,8 @@ patch for fixes and tweaks.
 
 ## [v17.2.1] — 2026-09-14
 
+> The evaluation form in the admin section now passes code quality checks without errors by properly handling the labels for custom input wrappers.
+
 ### Fixed
 
 - **Lint** (`src/pages/admin/AskConversations.js`, `src/lib/api/askConversations.js`): cleared the `jsx-a11y/label-has-associated-control` and `newline-per-chained-call` errors from the v17.2.0 eval form, so `npm run lint` passes again. Labels already point at their controls with `htmlFor`; the rule just can't see through the admin `Select`/`Input`/`Textarea`/`Checkbox` wrappers, so they use the same inline disable as the other admin forms.
@@ -201,6 +237,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v17.2.0] — 2026-09-14
+
+> An evaluation mode toggle has been added to the ask conversations admin view, allowing pass and fail verdicts, scores, tags, notes, and ideal answers to be recorded separately from reader feedback. The admin interface now includes dedicated filtering, statistics, and tag breakdowns for these evaluations, alongside updated CSV and JSONL data exports.
 
 ### Added
 
@@ -210,6 +248,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v17.1.0] — 2026-09-13
+
+> The second brain search tool now indexes more personal writing, summaries of every tag, the résumé, and statistics figures, while skipping unchanged content during updates to save processing. Answers can now display link chips, archive photos, and thumbnails, and you can submit feedback on any answer. Additionally, the stats page and writing ledger load faster and more reliably, and an admin view lets you review past chat conversations and export them.
 
 ### Added
 
@@ -237,6 +277,8 @@ patch for fixes and tweaks.
 
 ## [v17.0.2] — 2026-09-13
 
+> Clicking suggestion chips, follow-up chips, or direct question links in the chat will now successfully wait for security verification tokens rather than failing immediately. If a verification check still fails, the chat provides a button to reset the check and retry the question directly in place.
+
 ### Fixed
 
 - **Ask verification failures** (`src/components/Ask/useTurnstile.js`, `src/components/Ask/AskChat.js`): suggestion chips, follow-up chips and `?q=` links sent the question before Turnstile had produced a token, so with verification switched on the chat bubble answered "verification failed". A question now waits up to 10 seconds for a fresh token. If verification still fails, whether the token is missing or rejected with a 403, the answer offers a **Verify and retry** button that resets the widget and re-asks in place of the failed exchange.
@@ -246,6 +288,8 @@ patch for fixes and tweaks.
 
 ## [v17.0.1] — 2026-09-13
 
+> Streaming answers from the second brain search now work reliably in production without unexpected failures. The underlying runtime settings were updated to properly support the stream generation feature.
+
 ### Fixed
 
 - **Ask streaming crash** (`wrangler.toml`): streaming answers from `/api/ask` failed in production with Cloudflare error 1101. The Pages project had no `compatibility_date`, so Functions ran on the oldest runtime defaults, where `new ReadableStream()` is disabled. Setting `compatibility_date = "2026-01-01"` enables the constructor. The non-streaming JSON path was never affected.
@@ -253,6 +297,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v17.0.0] — 2026-09-12
+
+> Visitors can now use a second brain feature at `/ask` or via a floating launcher to search and chat about the site content in plain English or Marathi. The system combines keyword and semantic search over all books, races, treks, projects, and posts, returning answers backed by verifiable source cards with related content strips appearing across individual pages. Conversations stream token by token with support for thread persistence, content-type filtering, daily usage quotas, and a tiered model fallback that keeps the feature running reliably on free tiers.
 
 ### Added
 
@@ -278,6 +324,8 @@ patch for fixes and tweaks.
 - **`wrangler.toml`**: adds the Workers AI binding. `GEMINI_API_KEY`, `ASK_IP_SALT` and the optional Turnstile secret are deployment secrets, never `[vars]`.
 
 ## [v16.0.0] — 2026-09-12
+
+> The books page has been completely rebuilt with a cover-forward grid, a reading timeline, detailed statistics, and a sortable table view, all backed by expanded bibliographic data and automated metadata retrieval. Navigation across the entire site is now grouped into five main sections with a matching footer site map, and both the writing ledger and the site share a unified dark and light theme. Additionally, filtering across books and micro-posts now combines categories with an inclusive approach so that selecting multiple options broadens the results rather than emptying the page.
 
 ### Added
 
@@ -318,6 +366,8 @@ patch for fixes and tweaks.
 
 ## [v15.0.0] — 2026-09-11
 
+> The projects page has been rebuilt with four tabbed views including a showcase, a timeline, statistics, and a table, all backed by a unified filter bar and shareable URLs. Every project now features updated metadata such as status, category, role, tech stack, screenshots, and problem-solution-outcome details, with full-color preview cards and a quick-look modal. The admin area includes improved form fields, date pickers, field defaults, and autocomplete, while backend updates ensure hidden drafts are properly secured and project dates and sorting are normalized.
+
 ### Added
 
 - **Projects page, rebuilt** (`src/pages/Projects.js`, `src/components/Projects/`): `/projects` is now four tabbed views sharing one filter bar — **Showcase** (featured spotlight + masonry grid with hover screenshot previews), **Timeline** (grouped by year), **Statistics** (per-year, per-tech, per-category and per-status breakdowns), and **Table** (dense, sortable). Filters and the active view both live in the URL, so any filtered view is a shareable link. Replaces `ProjectGallery.js`, whose fixed `index % 6` layout meant a card changed shape whenever the list reordered.
@@ -354,6 +404,8 @@ patch for fixes and tweaks.
 
 ## [v14.1.0] — 2026-09-11
 
+> The Stats page now features a consolidated content tags analysis that replaces the previous separate lists with headline numbers, a breakdown of the most-used themes by content type, and bridge themes spanning multiple categories. Every tag links directly to its dedicated page, and the overall view uses consistent colors across light and dark modes while excluding the offload challenge marker.
+
 ### Added
 
 - **Tag analysis** (`src/components/Stats/TagAnalysis.js`): The Stats page's Content Tags section is now an analysis of the central tag tables rather than three separate per-table tag lists. It shows headline numbers (themes in use, tag links, cross-content themes, share used only once), the 12 most-used themes as bars split by content type, "bridge" themes that span several content types, and a per-type table of theme counts and top themes. Every tag links to its `/tags/:name` page. Content-type colors come from the validated dataviz palette in separate light and dark steps. The challenge's `100_days_to_offload` marker tag is left out.
@@ -365,6 +417,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v14.0.0] — 2026-09-11
+
+> All site tags have been brought together into a central system with categories, colors, descriptions, and dedicated pages for browsing tags and the content connected to them. Micro-blog posts now feature generative art and month views tinted by their tag colors. The admin area also gains an updated tag manager with autocomplete, alongside new tag support for races, treks, and projects.
 
 ### Added
 
@@ -397,6 +451,8 @@ patch for fixes and tweaks.
 
 ## [v13.2.5] — 2026-09-10
 
+> The writing ledger page has been updated with fresh word count and blog post totals across Substack and WordPress. Additionally, new documentation is now available detailing the steps to manually refresh the word-count data and troubleshoot common failures.
+
 ### Added
 
 - **Writing Ledger refresh guide** (`docs/writing-ledger.md`): Documents how to manually refresh the blog word-count data — the `npm run blogs:wordcount` → `npm run blogs:infographic` order, what each script reads and writes, which output is committed vs gitignored, how to read the anomaly report, and troubleshooting for the common failures. Linked from the README docs index.
@@ -409,6 +465,8 @@ patch for fixes and tweaks.
 
 ## [v13.2.4] — 2026-09-10
 
+> Internal code formatting rules were updated across site files to maintain clean formatting standards without altering any features or visible behavior on the website.
+
 ### Fixed
 
 - **Lint compliance** (`functions/_middleware.js`, `src/data/pageMeta.js`): Reformatted the site-URL centralization changes to satisfy airbnb ESLint rules (`operator-linebreak`, `implicit-arrow-linebreak`, `function-paren-newline`, `no-confusing-arrow`) — 8 errors, no behaviour change.
@@ -416,6 +474,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v13.2.3] — 2026-08-23
+
+> The website's URL configuration has been updated across metadata, crawler middleware, and share cards to use a standardized site address. This internal cleanup ensures consistent link generation and sharing behavior across all pages.
 
 ### Changed
 
@@ -425,6 +485,8 @@ patch for fixes and tweaks.
 
 ## [v13.2.2] — 2026-08-23
 
+> The website now uses the official domain across all pages, metadata files, sitemaps, and search documents.
+
 ### Changed
 
 - **Canonical site domain** (`src/data/pageMeta.js`, `public/`): Replaced all previous Pages-domain URL references with `sankettambare.in` across site metadata, crawler files, sitemap, AI-readable documentation, and the writing-ledger template.
@@ -432,6 +494,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v13.2.1] — 2026-08-21
+
+> The Atlas event module has been renamed to prevent ad and tracker blockers from mistakenly blocking a core site script during local development. This fix restores the navigation toggle inside the classic shell for anyone running the site locally.
 
 ### Fixed
 
@@ -441,10 +505,14 @@ patch for fixes and tweaks.
 
 ## [v13.2.0] — 2026-08-21
 
+> Visitors without a saved preference now land on the classic editorial homepage by default instead of the interactive world map. The atlas remains fully available through the top-level toggle or by specifying a view preference.
+
 ### Changed
 
 - **Classic is the default view again** (`src/config/featureFlags.js`, `src/atlas/useViewMode.js`): A visitor with no stored preference, no `?view=` param and no reduced-motion request now lands on the classic editorial homepage instead of the Wanderer's Atlas. The atlas itself is untouched and fully live — it still owns `/` as the world map, and is one click away through the "Enter the Atlas" toggle, `?view=atlas`, or a stored preference, which continues to win over the default. The landing choice moved out of the `ATLAS_LIVE` flag (which still governs atlas routing and labels) into its own `DEFAULT_VIEW` flag, so the two can be flipped independently; set it back to `"atlas"` to make the map the front door again.
 ## [v13.1.0] — 2026-08-09
+
+> Images uploaded through the admin area now automatically resize and compress to fit size limits, preserving orientation and transparency while showing a live progress bar. Once an upload finishes, the field displays a summary of the reduction in file size and dimensions. Documentation has also been updated to reflect that manual image preparation is no longer required for content added directly on the site.
 
 ### Added
 
@@ -460,6 +528,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v13.0.0] — 2026-07-31
+
+> The admin dashboard has been redesigned into a purpose-built workspace featuring proper navigation, structured tables with search and sorting, and dedicated forms with integrated media previews and date pickers. It also adds a command palette, an overview landing page with activity feeds, in-app notifications, and validation guards to prevent accidental data loss. These changes affect only the internal management tools, leaving the public site and its data structures completely unchanged.
 
 ### Changed
 
@@ -490,6 +560,8 @@ patch for fixes and tweaks.
 
 ## [v12.2.1] — 2026-07-31
 
+> Visual effects like the confetti burst and starfield animations on the site no longer crash when browser graphics contexts are unavailable or when elements are removed while running. These animations now safely stop when their display canvas is disconnected or cannot be initialized, preventing background errors during page transitions and tests.
+
 ### Fixed
 
 - **Confetti burst crashed without a 2D canvas context** (`src/atlas/lib/confetti.js`): `canvas.getContext("2d")` returns `null` where 2D canvas isn't available — jsdom under test, or a browser that has run out of contexts — and the queued animation frame then threw `Cannot read properties of null (reading 'clearRect')`. Because the burst has no `cancelAnimationFrame` path, it threw on every frame for the full 2.4s. In CI this surfaced as an unrelated failure in whichever test was running when the frame fired (`AppAtlas.test.js › redirects /world to /`); it passed locally only because teardown won the race. The burst now bails and removes its canvas when there is no context.
@@ -504,6 +576,8 @@ patch for fixes and tweaks.
 
 ## [v12.2.0] — 2026-07-31
 
+> The site now includes a Writing Ledger page at a dedicated web address that displays lifetime word counts, month-to-date and year-to-date metrics, and visual charts tracking writing habits across platforms, years, and months. This standalone page features a searchable and filterable table of all posts, a light and dark theme toggle that respects your system preference or manual choice, and an export option for generating PNG posters. Behind the scenes, new tooling calculates accurate word counts from both Substack and WordPress sources, tracks untracked posts and date anomalies, and organizes the data by publish timestamps.
+
 ### Added
 
 - **Blog word-count extractor** (`scripts/blog-word-counts.mjs`): A read-only script — `npm run blogs:wordcount` — that answers "how much have I actually written?". It pages the Substack archive API, whose post objects carry a native `wordcount`, and the WordPress.com API, which has no such field and so gets its counts derived by stripping tags from the rendered body. Each post records which of the two methods produced its number, because Substack's counter and a whitespace split are not the same measurement and shouldn't be blended silently. Output is `knowledge_base/blog-word-counts.json`: per-post rows plus totals rolled up by month, year, platform and lifetime. Posts are bucketed by their own publish timestamp converted to IST, not by `blogs.blog_date`, so a late-evening post lands on the day the site says it did.
@@ -517,6 +591,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v12.1.0] — 2026-07-26
+
+> The administrative area for the monthly update page has been rebuilt with dedicated forms for every section, replacing raw text editing with structured fields and a dropdown for month selection. A new auto-fill feature can now pull matching blogs, races, books, treks, micro-posts, and site changelog entries directly into the month being edited. In addition, the public update page now supports displaying micro-blog scraps and custom statistical groups.
 
 ### Added
 
@@ -536,6 +612,8 @@ patch for fixes and tweaks.
 
 ## [v12.0.0] — 2026-07-20
 
+> The 100 Days challenge now appears as an illustrated mountain trail with clickable waypoints, while the micro-blog archive adopts a corkboard pinboard view alongside a monthly activity strip that doubles as a filter. The stats page has been reorganised into chaptered almanac layouts with animated numbers and new charts, and modals now open correctly when arriving from the map or on mobile screens.
+
 ### Added
 
 - **Expedition Trail** (`src/components/OneHundredDays/ExpeditionTrail.js`): The 100 Days challenge drawn as a journey — an illustrated SVG route from Base Camp (post 0) to the Summit (post 100) across the writer region's ridge. One waypoint per post (published waypoints are inked, clickable, and open the post modal), tents mark the quarter camps, a pennant flag shows today's position with the pace delta as a margin note, and the walked segment draws itself in on first view (reduced-motion renders instantly). A steeper switchback route keeps it legible on phones. The classic ring + tiles band survives behind the new Trail/Classic toggle (`?layout=classic`).
@@ -553,6 +631,8 @@ patch for fixes and tweaks.
 
 ## [v11.2.1] — 2026-07-18
 
+> A new site dossier has been added to provide a complete feature and architecture reference for the entire website. This document covers the two shell system, the Wanderer's Atlas, public pages, the share image editor, the design language, data architecture, admin content management, and the delivery layer.
+
 ### Added
 
 - **Site dossier** (`docs/SITE_DOSSIER.md`): A complete feature and architecture reference for the whole site — the two-shell system, the Wanderer's Atlas (intro, map hub, HUD, gamification, audio, guide), the classic homepage and every public page, the share-image editor, design language, Supabase data architecture, admin CMS, and the Cloudflare delivery layer — written as the source document for a design presentation. Counts and version facts dated as of 2026-07-18.
@@ -560,6 +640,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v11.2.0] — 2026-07-13
+
+> The share-image generator is now a full editor with seventeen themes, multiple aspect ratios, custom text styling, layout controls for hero images, and eight new display typefaces for Marathi and English. Region pages in atlas mode now include the standard site footer, while the admin dashboard removes the atlas navigation overlay. Additionally, micro-blog photo posts now correctly display their hero images in the share menu, and date metadata can be toggled on or off across all content types.
 
 ### Added
 
@@ -581,6 +663,8 @@ patch for fixes and tweaks.
 
 ## [v11.1.0] — 2026-07-11
 
+> New on-screen zoom controls have been added to the map hub for touch and pointer users, alongside a button in the classic shell that finally lets you switch back to the Wanderer's Atlas. A new statistics placard now hangs above the map hub to take you straight to the stats page, and the map hub has been updated to fit all six regions on mobile screens instead of zooming in on phones. Finally, the atlas arrival stage loads instantly without waiting for network requests, using hand-maintained counts for its teaser display.
+
 ### Added
 
 - **Map zoom controls** (`src/atlas/map/MapControls.js`, `src/atlas/map/worldMap.css`): An on-screen zoom-in / zoom-out / reset cluster at the bottom-left of the map hub, so touch users and wheel-less pointer users get the affordances the wheel/pinch gestures assume. Reset flies the camera back to the resting view (the same target as the Escape key) — the escape hatch when a pinch strands the view. Fades out during a fly-in.
@@ -595,6 +679,8 @@ patch for fixes and tweaks.
 ---
 
 ## [v11.0.0] — 2026-07-10
+
+> The homepage is now an interactive world map complete with a skippable animated intro, six illustrated biomes with day and night states, and local exploration quests that award passport stamps. A persistent HUD offers a regional compass, a day/night sun-moon toggle, and an optional procedural ambient audio player, while the classic site layout remains accessible via settings or motion preferences. Under the hood, legacy stylesheets and tour dependencies were removed to reduce bundle size, and avatar radius styling was corrected.
 
 **The Wanderer's Atlas.** The site is now an explorable illustrated world. You
 arrive in orbit above a globe, dive through the clouds, and land on a hand-drawn
@@ -647,6 +733,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.4.0] — 2026-07-06
 
+> The homepage now features an interactive 3D globe that organizes books, treks, running routes, and writing into six clickable thematic worlds complete with detail cards, exploration modes, and deep links. Visitors can also take a guided site tour tailored to whichever page they are currently browsing, launched via a new floating button.
+
 ### Added
 - **"My World" interactive 3D globe on homepage** (`src/components/Index/GlobeShowcase.js`, `src/components/Index/GlobeRenderer.js`, `src/components/Index/globe/`, `src/data/homeFeatures.js`): A new homepage section renders an abstract WebGL globe (react-globe.gl/three.js) with six themed "worlds" — Marathons, Treks, Writer, Reader, Creator, Person — each anchoring a spiral of clickable content pins (races, treks, blog posts, books, projects, site features), procedural hexagon terrain, a radar ring, and a cross-fading background artwork. Clicking a pin opens a rich detail card (extended MindMapDetailPanel with a new `feature` type). The globe and its three.js dependency are code-split via React.lazy and only mount once the section scrolls into view.
 - **Globe exploration features** (`src/components/Index/GlobeRenderer.js`, `src/components/Index/globe/`): Always-visible domain legend chips with item counts (click to fly), an active-domain glass info card with a "View all" link, constellation arcs linking the active domain's pins, an auto-play mode that drifts world-to-world, a "Replay my journey" mode that rotates the globe through all six worlds in turn — round-robin, a few stops per world — with a comet arc and section-labelled captions, a dark-mode twinkling starfield, a gamified "worlds explored" tracker with a one-time confetti celebration, a first-visit "drag to explore" coach mark, and shareable deep links (`/?world=treks`).
@@ -659,6 +747,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 - **Globe image assets compressed** (`public/images/globe/`): Background artwork and globe textures converted from 0.6–1.2MB PNGs to ≤235KB JPEGs; six unused per-domain texture PNGs (~6.7MB), the unused earth day/night textures, and the obsolete `src/data/geo/placeCoordinates.js` lookup were removed.
 
 ## [v10.3.0] — 2026-07-02
+
+> The homepage now features a live feed of recent Substack posts along with a monthly digest dashboard that groups blogs, micro-posts, treks, marathons, and books by content month. The digest includes a month picker, summary tiles, and direct links to detail pages, while the writing feed loads posts as you scroll.
 
 ### Added
 
@@ -679,6 +769,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.2.4] — 2026-06-30
 
+> The checkbox used to toggle the current month setting in the admin editor is now visible and clickable again. Native rendering was restored with inline styling to fix an issue where the form stylesheet was hiding the input element.
+
 ### Fixed
 
 - **"Is current month" toggle in the Now · Months admin editor** (`src/pages/admin/FormField.js`): The boolean checkbox was invisible and felt un-editable. The vendored HTML5UP form stylesheet (`src/static/css/components/_form.scss`) applies a global `input[type="checkbox"] { appearance: none; opacity: 0; float: left; }` rule (the skel pattern that hides the real box and draws a fake one via a paired `<label>`), and that attribute selector outranks the Tailwind utility classes on the admin checkbox. Restored native rendering with inline styles (which win over the no-`!important` legacy rule) so the toggle is visible and clickable again.
@@ -687,6 +779,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.2.3] — 2026-06-17
 
+> Photos shared as images are no longer cropped to a fixed width and instead maintain their natural aspect ratios while remaining centered. This ensures that both portrait and landscape images appear in full without cutting off any parts of the picture.
+
 ### Fixed
 
 - **Share-as-image hero crop** (`src/components/share/ShareCard.js`): The included photo was forced into a full-width, fixed-height box with `object-cover`, cropping portrait/landscape images. The image now keeps the fixed height but takes a dynamic width from its natural aspect ratio and is centered, so the whole photo is shown un-cropped.
@@ -694,6 +788,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v10.2.2] — 2026-06-16
+
+> Links and social media previews for micro-blog posts, treks, sports updates, books, blog posts, and projects now show consistent titles, descriptions, and images whether viewed by a web crawler or directly in a browser. Individual micro-posts use their actual content and custom images in share previews instead of generic site defaults.
 
 ### Fixed
 
@@ -708,6 +804,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.2.1] — 2026-06-15
 
+> The sidebar and main content no longer overlap at medium desktop widths. Layout styling is now handled entirely by Tailwind instead of legacy rules, so the sidebar stays in its proper right-hand position across all desktop screens.
+
 ### Fixed
 
 - **Sidebar/content overlap at desktop widths on every page** (`src/static/css/layout/_wrapper.scss`, `src/layouts/Main.js`): The vendored HTML5UP `#wrapper` rule styled the layout container by **ID** (`display: flex; flex-direction: row-reverse`) and forced `display: block` at the skel `large` breakpoint (`≤1280px`), which outranks the Tailwind layout utilities on the same element. Between `lg` (1024px) and 1280px the sidebar (profile / about / résumé) and the main content collapsed into an overlapping block stack. Removed the legacy layout declarations and set `lg:flex-row-reverse` on the wrapper in `Main.js` so Tailwind owns the layout — the sidebar keeps its original right-hand column position across all desktop widths, without the overlap.
@@ -715,6 +813,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v10.2.0] — 2026-06-17
+
+> The home page has been reorganized to feature a new introductory overview and an expanded set of life statistics right below the main hero section. Content across books, runs, treks, blog posts, and micro-posts can now be easily exported as branded PNG images using a new customization popup with multiple backgrounds and format options. Additionally, admin forms now feature a streamlined chip editor for managing tags, and the About page shares its introductory text directly with the home page.
 
 ### Changed
 
@@ -736,6 +836,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.1.2] — 2026-06-14
 
+> Search engines can now discover all public pages more easily using a new sitemap at the site root. AI crawlers have also been given clearer access rules and dedicated discovery files that outline Sanket Tambare's background, site sections, and content.
+
 ### Added
 - **`sitemap.xml`** (`public/sitemap.xml`): Static XML sitemap covering all 17 public routes with priorities and change frequencies, served at the site root for search engine discovery.
 - **`agents.md`** (`public/agents.md`): AI-agent discovery file (llms.txt-style) with rich context about Sanket Tambare — professional background, site sections, social links, tech stack, and content inventory.
@@ -748,6 +850,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.1.1] — 2026-06-13
 
+> The admin dashboard now syncs the active tab with the browser address bar, allowing you to use back and forward navigation or share direct links to specific tabs. Detail modals for books, treks, runs, and micro-posts now include buttons to share, copy, or open a dedicated permalink page, with a temporary confirmation message when an action succeeds.
+
 ### Changed
 
 - **Admin Dashboard** (`src/pages/admin/Dashboard.js`): Active tab is now synced to the URL via `?tab=<key>` query param using `useSearchParams`. Deep-linking to a specific tab (e.g. `/admin?tab=__microblog`) now works correctly, and the browser back/forward buttons navigate between tabs.
@@ -759,6 +863,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v10.1.0] — 2026-06-13
+
+> The micro-blog section now includes a new stats tab with breakdowns of post types, sources, and tags, along with new sorting options like newest, oldest, and shuffle. Every item across the site, including micro-posts, treks, sports, books, projects, and blog posts, now has a dedicated page with a direct link and a share button. Additionally, the main stats page features a new card displaying all content tags with their respective post counts, and individual posts now generate proper social-share previews.
 
 ### Added
 
@@ -776,6 +882,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v10.0.0] — 2026-06-13
 
+> A new micro-blog archive is now available, featuring over sixteen hundred searchable and paginated short posts imported from Tumblr. You can filter the posts by tags, sources, and types, with your filter selections automatically saved in the URL so you can bookmark or share specific views. An administrative dashboard has also been added to allow managing these posts directly.
+
 ### Added
 
 - **Micro Blog page** (`src/pages/MicroBlog.js`, `src/components/MicroBlog/`): New `/micro-blog` page — a searchable, paginated archive of short posts imported from Tumblr (1,600+ posts). Server-side full-text search (Postgres `tsvector`), tag/source/type filters, load-more pagination, and a detail modal. Added to the main nav (`src/data/routes.js`) and per-route meta (`src/data/pageMeta.js`).
@@ -789,6 +897,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v9.1.6] — 2026-06-13
 
+> The profile photo on the sidebar now loads correctly on the deployed site by using a direct root-relative path.
+
 ### Fixed
 
 - **SideBar** (`src/components/Template/SideBar.js`): Profile photo was broken on the deployed site because `const { PUBLIC_URL } = process.env` is not replaced by Vite's `define` (only the literal `process.env.PUBLIC_URL` token is). Replaced with a plain `/images/me.jpg` root-relative path.
@@ -796,6 +906,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v9.1.5] — 2026-06-13
+
+> The admin dashboard now includes a dark and light mode toggle, bringing the admin pages into consistency with the rest of the site.
 
 ### Added
 
@@ -805,6 +917,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v9.1.4] — 2026-06-13
 
+> The sports entry form in the admin section now features a standard date picker and a dropdown menu for common distances with an option for custom values. These updates make it easier to add and manage running and trekking records on the site.
+
 ### Changed
 
 - **Sports admin form** (`src/pages/admin/resources.js`, `src/pages/admin/FormField.js`): Date field now uses a native date picker (`input[type="date"]`) with automatic conversion between the stored `"Month DD, YYYY"` format and the browser's `YYYY-MM-DD` input format. Distance field replaced with a select dropdown (10 Kms, 21 Kms, 35 Kms, 42 Kms, 50 Kms) plus an "Other" option that reveals a free-text input for custom values.
@@ -812,6 +926,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v9.1.3] — 2026-06-13
+
+> The site's deployment configuration has been updated to include necessary environment variables for the database connection. The sensitive service role key is now excluded from the configuration file and must be set securely as a server secret.
 
 ### Added
 
@@ -821,6 +937,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v9.1.2] — 2026-06-13
 
+> The internal documentation has been cleaned up by removing outdated guides and rewriting the architecture, deployment, and setup instructions to match the current Supabase-backed stack.
+
 ### Changed
 
 - **Docs** (`docs/`): Removed 6 obsolete documents (`cms-data-flow.md`, `cms-github-oauth-setup.md`, `customization.md`, `improvement-plan.md`, `supabase-migration-plan.md`, `features.md`). Rewrote `architecture.md`, `deployment.md`, and `setup_guide.md` to reflect the current Supabase-backed stack. Kept `contributing.md` unchanged.
@@ -829,6 +947,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v9.1.1] — 2026-06-13
 
+> Unused local image directories for sports, treks, social posts, projects, and stories have been removed from the site. These images are now loaded directly from cloud storage, while essential branding and icon files remain unchanged locally.
+
 ### Changed
 
 - **Static image assets** (`public/images/`): Deleted `sports/`, `treks/`, `insta_posts/`, `projects/`, and `nirman_story/` subdirectories (205 files). All images are now served from Supabase Storage via `toStorageUrl`; the local copies were redundant. Kept `favicon/`, `me.jpg`, `logo.png`, and `logo.svg` which are still referenced in static code.
@@ -836,6 +956,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v9.1.0] — 2026-06-13
+
+> Images across sports, treks, and projects now load directly from cloud storage, and the site relies entirely on the database for its content instead of local files. The interactive sports and treks view now syncs with the browser address bar so specific tabs can be shared directly via link.
 
 ### Added
 
@@ -852,6 +974,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v9.0.0] — 2026-06-13
+
+> The site now loads dynamic content like books, running, treks, projects, and blog posts directly from a new database backend instead of static files. A secure admin dashboard has been added at a new address to manage and update all content types with image uploads. Public pages display loading and error states while fetching this live data, and a one-time import script was used to move existing markdown content into the database.
 
 ### Added
 
@@ -872,6 +996,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v8.0.1] — 2026-06-13
 
+> A new design document outlines plans to move dynamic content such as books, sports, treks, and blog posts from the static markdown pipeline to a database backend with a custom in-app editor. This migration will use live runtime fetching with security policies and email authentication, implemented in phases. No application code or dependencies have changed yet.
+
 ### Added
 
 - **Supabase migration plan** (`docs/supabase-migration-plan.md`): Design document for moving dynamic content (books, sports, treks, projects, 100-days blogs, instagram, resume, now-page) from the static markdown pipeline to a Supabase/Postgres backend with a custom in-app `/admin` editor. Recommends a single repository, live runtime fetch via `@supabase/supabase-js` with Row-Level Security, email+password auth, and a phased migration with verification steps. Planning only — no app code or dependencies changed.
@@ -879,6 +1005,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v8.0.0] — 2026-06-13
+
+> The underlying build system for the site has been modernized, significantly speeding up production builds and reducing security vulnerabilities. The now page and changelog have been updated to use modern module loading techniques to support this new setup without changing how content is displayed.
 
 ### Changed
 
@@ -890,6 +1018,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v7.1.0] — 2026-06-13
+
+> The About page features a structured three-section layout with dynamic stats and expanded biographical details, while the Now page introduces an interactive month-timeline switcher and bento grid layout. The 100 Days To Offload page has been redesigned with an animated progress ring, a clickable calendar heatmap, a posts-per-month bar chart, and filtering controls. Across the site, page titles and descriptions are now managed centrally, images load faster with native lazy-loading, and race statistics are handled more reliably.
 
 ### Added
 
@@ -909,6 +1039,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v7.0.0] — 2026-06-12
+
+> The editing interface has been streamlined to use a single content management tool, with all site content now automatically generated from markdown files during builds to prevent data drift. Images across the site have been compressed and converted to widely supported formats to fix broken galleries and speed up loading times. In addition, the underlying test suite, linting scripts, and automated deployment checks have been fixed and updated to ensure site features and dark mode render correctly.
 
 ### Added
 
@@ -934,6 +1066,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.6.0] — 2026-06-11
 
+> An interactive mind map is now available at a new route from the navigation menu and homepage, featuring a central hub that zooms into your books, running, trekking, projects, and blog categories with smooth animations and a detail panel. The sports page now remembers your active view in the browser address bar so you can easily share specific tabs. Six new posts have also been added to the writing collection covering recent thoughts and travel logs.
+
 ### Added
 
 - **Mind Map Page** (`src/pages/MindMap.js`, `src/components/MindMap/`): New `/mindmap` route with an interactive radial SVG mindmap. A central "Me" bubble has five category branches (Books, Marathons, Treks, Projects, Blogs); clicking a category animates a zoom into it and fans out all of its items in collision-free concentric rings with staggered entrance animations; clicking any item opens a detail panel reusing the existing modal pattern. The canvas supports drag-to-pan, scroll-wheel and pinch zoom (`usePanZoom.js`), hover effects, native tooltips, a category legend, and zoom/reset controls. Built with pure React + SVG (no external graph library). Added to navbar dropdown (`src/data/routes.js`).
@@ -945,6 +1079,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.5.0] — 2026-05-31
 
+> A new interactive page has been added to explore sports and trekking memories through an image-first vertical timeline with shuffling photos and auto-scrolling. This page is accessible from the navigation bar and the homepage feature grid, complete with dedicated sub-tabs to filter between sports and treks.
+
 ### Added
 
 - **Interactive Me Page** (`src/pages/InteractiveMe.js`, `src/components/InteractiveMe/`): New `/interactive-me` page with image-first vertical timeline. Images from Sports and Treks data are shuffled on mount, displayed as alternating left/right cards connected by SVG bezier curves, and the page auto-scrolls (pauses on hover). Includes SPORTS and TREKS sub-tabs. Added to navbar "More" dropdown (`src/data/routes.js`) and homepage feature grid (`src/pages/Index.js`).
@@ -952,6 +1088,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v6.4.6] — 2026-05-31
+
+> Card images in the sports and treks sections now display in full colour by removing the previous grayscale filter.
 
 ### Fixed
 
@@ -961,6 +1099,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.4.5] — 2026-05-31
 
+> The now page has been updated with recent reading and writing activity from May, including three new books and six new blog entries. Visitors can check the current status section to see what Sanket has been reading and writing over the past month.
+
 ### Changed
 
 - **Now Page Data** (`src/data/now-data.js`): Filled in May 2026 blogs (6 entries) and books (3 entries) for the current month section.
@@ -968,6 +1108,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v6.4.4] — 2026-04-26
+
+> The site infrastructure has been updated to fully transition from GitHub Pages to Cloudflare Pages, removing unused deployment scripts, workflows, and outdated packages. Internal cleanup removed several unused components, orphaned markdown files, and dead code. Additionally, documentation across the architecture, features, and deployment guides has been rewritten to reflect the current codebase and project structure.
 
 ### Changed
 
@@ -996,6 +1138,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.4.3] — 2026-04-26
 
+> The now page has been updated to prevent crashes when the underlying data is missing or uses Windows-style line endings. This ensures the daily rituals section displays correctly regardless of the operating system used to edit the content.
+
 ### Fixed
 
 - **parseNowCms** (`src/utils/parseNowCms.js`): Updated `parseFrontMatter` regex from `/^---\n/` to `/^---\r?\n/` so it matches Windows-style CRLF line endings; previously returned `{}` on Windows, causing `nowMeta.dailyRituals` to be undefined.
@@ -1004,6 +1148,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v6.4.2] — 2026-04-26
+
+> The site now correctly loads the updates for the monthly status page by fixing formatting errors in the data files that previously prevented them from displaying.
 
 ### Fixed
 
@@ -1014,6 +1160,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.4.1] — 2026-04-26
 
+> Internal code rules were updated to allow the site build to succeed without making any visible changes to the pages or features. These adjustments fixed syntax formatting and loop styles behind the scenes so the project compiles correctly for production.
+
 ### Fixed
 
 - **Changelog** (`src/pages/Changelog.js`): Collapsed multi-line arrow function in `.then()` chain to satisfy `implicit-arrow-linebreak` and `function-paren-newline` ESLint rules that blocked the production build.
@@ -1022,6 +1170,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v6.4.0] — 2026-04-26
+
+> The Now page now loads its content directly from the underlying markdown and metadata files at runtime rather than relying on a separate data file. This change makes the content files the single source of truth for the page without requiring a synchronization step.
 
 ### Added
 
@@ -1040,6 +1190,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.3.4] — 2026-04-26
 
+> The site updates now allow the changelog to be edited directly through the content management system editor. Local development tools have also been updated so that all existing site content correctly appears in the editor instead of starting empty.
+
 ### Added
 
 - **Decap CMS — Changelog** (`public/cms/config.yml`): Added `changelog` files collection pointing to `src/data/changelog.md` with a `markdown` body widget, making the changelog editable through the CMS editor.
@@ -1055,6 +1207,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 
 ## [v6.3.3] — 2026-04-26
 
+> The changelog page now renders its content correctly by replacing an incompatible component with the standard text layout used across the rest of the site. Previously, the page loaded the changelog markdown properly but displayed nothing.
+
 ### Fixed
 
 - **Changelog page** (`src/pages/Changelog.js`): Replaced incorrect `NowDocument` usage (which expects a `months` array) with a direct `markdown-to-jsx` render inside a `prose` article wrapper — the same pattern used by `AboutDocument`. Markdown was loading correctly but rendering nothing due to the component mismatch.
@@ -1062,6 +1216,8 @@ hidden `/world` preview route; this entry is the whole story, landing at once.
 ---
 
 ## [v6.3.2] — 2026-04-25
+
+> All existing personal data, including books, treks, projects, and running records, has been converted into markdown files for the content management system. This update populates the editors across all twelve collections so existing records are immediately visible and editable.
 
 ### Added
 

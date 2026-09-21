@@ -73,8 +73,7 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 - **Legacy migration (one-time):** apply 0003 → `npm run tags:migrate -- --dry-run`
   → `npm run tags:migrate` (verify must pass) → re-run just before deploying
   → deploy → apply `0004_drop_legacy_tag_columns.sql`.
-- **Hand-maintained files NOT in Supabase:** `src/data/changelog.md`,
-  `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
+- **Hand-maintained files NOT in Supabase:** `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
   `src/data/pageMeta.js`, `src/data/stats/personal.js`.
 
 ## Docs (read before touching a table)
@@ -366,7 +365,13 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 
 | Purpose | Path |
 |---|---|
-| Changelog | `src/data/changelog.md` |
+| Changelog staging buffer | `src/data/changelog.md` |
+| Changelog table + API | `supabase/migrations/0028_changelog.sql`, `src/lib/api/changelog.js` |
+| Changelog markdown parser | `src/lib/changelogParse.js` |
+| Changelog publish (admin / CLI) | `src/pages/admin/ChangelogSync.js`, `scripts/push-changelog.mjs` |
+| Major-version summaries | `supabase/migrations/0030_changelog_majors.sql`, `scripts/summarise-majors.mjs` |
+| Commit history + graph page | `supabase/migrations/0029_repo_history.sql`, `scripts/sync-repo-history.mjs`, `src/pages/ChangelogGraph.js` |
+| Graph maths (lanes, weeks, streaks) | `src/lib/repoGraph.js` |
 | Page layout + Helmet | `src/layouts/Main.js` |
 | App routes | `src/App.js` |
 | Nav menu | `src/data/routes.js` |
@@ -411,6 +416,50 @@ monthly digest of blogs / treks / marathons / micro-posts — uses
 ## Changelog Rule
 
 **Always update `src/data/changelog.md` when making any code change.**
+
+`src/data/changelog.md` is a **staging buffer, not the archive.** The published
+version history lives in the `changelog` table (`0028_changelog.sql`), which is
+what `/changelog` and `/ask` read. The file is where an entry waits to be
+reviewed: it lands in the same commit and the same diff as the code it
+describes, which is the only reason it is still a file.
+
+Publishing an entry is a separate, explicit step:
+
+- **`/admin/changelog/sync`** — parses the buffer, shows each version as *new*,
+  *edited* or *already published*, and writes the ones you tick. Runs as the
+  owner under RLS, so it needs no service-role key. It cannot empty the file (a
+  browser cannot write to the repo) — clear the buffer in your next commit.
+- **`npm run changelog:push`** — the same job headlessly, and it *does* empty
+  the buffer afterwards. `--dry-run` prints the plan, `--keep` leaves the file.
+
+Both refuse to run if a `## [vX.Y.Z]` heading fails to parse, because an
+unparsed heading silently attaches its bullets to the version above it.
+
+Edit a published version at **`/admin/changelog`**; `npm run changelog:notes`
+writes each version's reader-facing paragraph into its `summary` column, and
+`npm run changelog:majors` writes the chapter summary for a whole major into
+`changelog_majors` — headline, paragraph, and the additions and fixes worth
+naming. Both answer to the existing `release_notes` AI feature switch, and both
+skip work whose input has not changed. `/changelog` renders the chapter summary
+**first** and collapses the engineering entries under each release.
+
+### The commit graph (`/changelog/graph`)
+
+`npm run repo:sync` reads the **local clone** with `git log --numstat` and
+writes `repo_commits` plus each version's cost onto its `changelog` row. There
+is no GitHub API call anywhere in this: an unauthenticated api.github.com allows
+60 requests an hour, and per-commit stats there are one request per commit.
+
+- **A version's release commit is the one that added its `## [vX.Y.Z]` heading**
+  to the buffer — there are no git tags in this repository. Several versions can
+  share one commit (the nine oldest were back-written into `3c57c76`); the diff
+  is attributed to the **newest** version in that group and the others are left
+  **null**, never zero.
+- **Run it from a full clone.** A `fetch-depth: 1` checkout sees one commit; the
+  script refuses rather than publishing a history of one.
+- `package-lock.json` and sourcemaps are excluded from a version's line count —
+  one lockfile bump would dwarf every real change. Per-commit numbers are git's
+  own, unfiltered.
 
 - Add the entry to the **top** of the file following the versioning rules below.
 - Choose the version bump:

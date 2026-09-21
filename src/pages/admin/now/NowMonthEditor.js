@@ -8,7 +8,8 @@ import {
 import { monthLabel } from "../../../lib/monthDigest";
 import { getMicroblogByMonth } from "../../../lib/api/microblog";
 import { collectMonthRecords } from "../../../lib/nowAutofill";
-import { changelogHighlights, loadChangelog, parseChangelog } from "../../../lib/changelogEntries";
+import { changelogHighlights } from "../../../lib/changelogEntries";
+import { getChangelogMonth } from "../../../lib/api/changelog";
 import {
   SECTION_SPECS, LIST_SECTIONS, serializeSections,
 } from "./sectionSpecs";
@@ -220,11 +221,14 @@ const NowMonthEditor = () => {
   // --- Auto-fill: changelog highlights ------------------------------------
   const openChangelog = async () => {
     setChangelogError(null);
-    let entries = changelog;
+    // One month's versions, not the archive: this used to fetch the whole
+    // 204 KB changelog.md and parse it in the browser. Cached per month, since
+    // the dialog is usually opened more than once per edit.
+    let entries = changelog?.monthKey === monthKey ? changelog.entries : null;
     if (!entries) {
       try {
-        entries = parseChangelog(await loadChangelog());
-        setChangelog(entries);
+        entries = await getChangelogMonth(monthKey);
+        setChangelog({ monthKey, entries });
       } catch (err) {
         setChangelogError(err.message);
         return;

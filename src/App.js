@@ -39,6 +39,7 @@ const Presentations = lazy(() => import("./pages/Presentations"));
 const PresentationPost = lazy(() => import("./pages/PresentationPost"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Changelog = lazy(() => import("./pages/Changelog"));
+const ChangelogGraph = lazy(() => import("./pages/ChangelogGraph"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
@@ -102,6 +103,7 @@ const App = () => (
               <Route path="/presentations/:id" element={<PresentationPost />} />
               <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
               <Route path="/changelog" element={<Changelog />} />
+              <Route path="/changelog/graph" element={<ChangelogGraph />} />
               <Route path="/treks" element={<TreksPage />} />
               <Route path="/interactive-me" element={<InteractiveMePage />} />
               <Route path="/mindmap" element={<MindMap />} />

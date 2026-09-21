@@ -5,9 +5,12 @@
 import fs from "fs";
 import path from "path";
 
+// id 2 was src/data/changelog.md. The version history is a table now, indexed
+// a version at a time by ask-sources/changelog.mjs — the file it used to read
+// is only a staging buffer. The id is not reused: content_chunks is unique on
+// (entity_type, entity_id, chunk_index).
 const PAGE_FILES = [
   { id: 1, file: "src/data/about.md", title: "About", url: "/about" },
-  { id: 2, file: "src/data/changelog.md", title: "Changelog", url: "/changelog" },
 ];
 
 export default {

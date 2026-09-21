@@ -311,4 +311,35 @@ export const versionStack = ({ width = 420, height = 260, accent = COLORS.textFa
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${rows}</svg>`;
 };
 
+// --- /changelog/graph -------------------------------------------------------
+
+// A commit graph: one trunk, a branch that leaves and merges back, dots for
+// commits and ringed dots for the two releases. Deliberately carries no
+// numbers — the page's counts are not in computeSiteStats, and a card that
+// invents one is worse than a card that shows structure.
+export const commitGraph = ({ width = 380, height = 260, accent = COLORS.amber } = {}) => {
+  const rows = 8;
+  const gap = height / (rows + 1);
+  const trunk = 40;
+  const branch = 104;
+  const y = (i) => gap * (i + 1);
+
+  const line = (x1, y1, x2, y2, colour, w = 3, op = 1) => `<path d="M${x1},${y1} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2}" fill="none" stroke="${colour}" stroke-width="${w}" stroke-opacity="${op}"/>`;
+
+  const dot = (x, i, release) => `<circle cx="${x}" cy="${y(i)}" r="${release ? 9 : 5}" fill="${release ? accent : COLORS.textFaint}"${release ? ` stroke="${COLORS.panel}" stroke-width="3"` : ""}/>`;
+
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    // The trunk, top to bottom.
+    line(trunk, y(0), trunk, y(rows - 1), COLORS.textFaint, 3, 0.55),
+    // A branch that leaves at row 1 and merges back at row 5.
+    line(trunk, y(1), branch, y(2), accent, 3, 0.85),
+    line(branch, y(2), branch, y(4), accent, 3, 0.85),
+    line(branch, y(4), trunk, y(5), accent, 3, 0.85),
+    [0, 1, 3, 5, 6, 7].map((i) => dot(trunk, i, i === 0 || i === 5)).join(""),
+    [2, 3, 4].map((i) => dot(branch, i, false)).join(""),
+    "</svg>",
+  ].join("");
+};
+
 export { esc };

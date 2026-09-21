@@ -29,6 +29,7 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/presentations/:id` | PresentationPost | the row's photo, else `/og/presentations.png` |
 | `/100-days-to-offload/:id` | BlogPost | the row's photo, else `/og/100-days-to-offload.png` |
 | `/changelog` | Changelog | `/og/changelog.png` |
+| `/changelog/graph` | ChangelogGraph | `/og/changelog-graph.png` |
 | `/treks` | TreksPage | `/og/treks.png` |
 | `/interactive-me` | InteractiveMePage | `/og/interactive-me.png` |
 | `/mindmap` | MindMap | `/og/mindmap.png` |

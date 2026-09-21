@@ -1,15 +1,13 @@
 #!/usr/bin/env node
 /**
- * Writes one reader-facing paragraph under each version heading in
- * src/data/changelog.md.
+ * Writes one reader-facing paragraph into each `changelog` row's `summary`.
  *
  * The engineering entries stay exactly as they are. They explain *why*, which
  * is the reason this changelog is worth reading at all — but a visitor landing
  * on /changelog meets `fts_en`, RRF and `ts_rank_cd` in the first sentence.
- * The paragraph goes in as a blockquote directly under the `## [vX.Y.Z]` line,
- * so markdown-to-jsx renders it on /changelog with no component work, and the
- * parser in src/lib/changelogEntries.js ignores it (it reads `-` bullets under
- * `###` headings, and a blockquote is neither).
+ * /changelog renders the summary above the entries, and the Now-month editor
+ * offers it first, pre-checked, because it is already written in the words a
+ * Now page wants.
  *
  * Usage:
  *   npm run changelog:notes -- --dry-run      print, write nothing
@@ -18,22 +16,18 @@
  *   npm run changelog:notes -- --version v18.2.0
  *   npm run changelog:notes -- --force        rewrite existing paragraphs
  *
- * Needs GEMINI_API_KEY in .env and the release_notes switch on under AI
- * features in /admin/ask/settings. SUPABASE_SERVICE_ROLE_KEY is needed only to
- * read that switch and the model ladder.
+ * Needs SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY in .env, and the
+ * release_notes switch on under AI features in /admin/ask/settings.
  *
- * The human gate is git: this edits a tracked file and nothing is published
- * until the diff is read and committed.
+ * This used to splice blockquotes into src/data/changelog.md, where the human
+ * gate was git: it edited a tracked file and nothing shipped until the diff was
+ * read. The version history is a table now and that file is only a staging
+ * buffer, so the gate moved — review a paragraph at /admin/changelog, or run
+ * --dry-run first, which prints exactly what would be written.
  */
 
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { makeClient } from "./build-docs.mjs";
 import { askGemini, tiersForFeature } from "./lib/gemini.mjs";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const FILE = path.join(ROOT, "src", "data", "changelog.md");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const FORCE = process.argv.includes("--force");
@@ -46,8 +40,6 @@ function argValue(flag) {
 const LIMIT = Number(argValue("--limit")) || 0;
 const ONLY = argValue("--version");
 
-const VERSION_RE = /^##\s+\[?(v[\d.]+)\]?\s*[—–-]\s*(\d{4}-\d{2}-\d{2})/;
-
 const SYSTEM = [
   "You write the short public summary of a software release for a personal website.",
   "The site belongs to Sanket Tambare: books, running, trekking, software projects, blog posts, micro-posts, and an /ask second brain over all of it.",
@@ -57,46 +49,11 @@ const SYSTEM = [
   "Plain, factual, unexcited. Return the paragraph alone.",
 ].join(" ");
 
-/**
- * Splits the file into blocks, one per `## [vX]` heading, plus the preamble.
- *
- * Text-level rather than reusing parseChangelog(): that returns structured
- * changes and deliberately drops everything it does not recognise, and this
- * script has to write the file back byte for byte apart from the lines it adds.
- */
-function splitVersions(md) {
-  const lines = md.split("\n");
-  const blocks = [];
-  let current = { version: null, date: null, start: 0 };
-
-  lines.forEach((line, i) => {
-    const m = line.match(VERSION_RE);
-    if (!m) return;
-    current.end = i;
-    blocks.push(current);
-    current = { version: m[1], date: m[2], start: i };
-  });
-  current.end = lines.length;
-  blocks.push(current);
-
-  return { lines, blocks: blocks.filter((b) => b.version) };
-}
-
-/** Whether a block already carries a summary blockquote under its heading. */
-function hasSummary(lines, block) {
-  for (let i = block.start + 1; i < block.end; i += 1) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    return line.startsWith(">");
-  }
-  return false;
-}
-
-/** The bullets of one version, as the model should see them. */
-function bulletsOf(lines, block) {
-  return lines
-    .slice(block.start + 1, block.end)
-    .filter((l) => /^[-*]\s+/.test(l))
+/** The version's changes, as the model should see them. */
+function bulletsOf(row) {
+  return (Array.isArray(row.changes) ? row.changes : [])
+    .map((c) => `- ${[c.name, c.body].filter(Boolean).join(": ")}`)
+    .filter((l) => l !== "- ")
     .join("\n");
 }
 
@@ -116,28 +73,33 @@ async function main() {
   const supabase = makeClient();
   const tiers = await tiersForFeature(supabase, "release_notes");
 
-  const md = fs.readFileSync(FILE, "utf8");
-  const { lines, blocks } = splitVersions(md);
+  let query = supabase
+    .from("changelog")
+    .select("id, version, released_on, summary, changes")
+    .order("major", { ascending: false })
+    .order("minor", { ascending: false })
+    .order("patch", { ascending: false });
+  if (!FORCE) query = query.is("summary", null);
+  if (ONLY) query = query.eq("version", ONLY);
 
-  let targets = blocks.filter((b) => FORCE || !hasSummary(lines, b));
-  if (ONLY) targets = targets.filter((b) => b.version === ONLY);
+  const { data, error } = await query;
+  if (error) throw new Error(`read: ${error.message}`);
+
+  let targets = data || [];
   if (LIMIT) targets = targets.slice(0, LIMIT);
 
   console.log(
-    `${blocks.length} versions, ${targets.length} to summarise`
+    `${targets.length} version${targets.length === 1 ? "" : "s"} to summarise`
     + `${FORCE ? " (--force: rewriting existing)" : ""}${DRY_RUN ? " [dry run]" : ""}`,
   );
 
-  // Collected and applied in one pass at the end: line numbers shift the
-  // moment anything is inserted, and editing while iterating is how an
-  // off-by-one silently moves a paragraph under the wrong version.
-  const inserts = [];
+  const writes = [];
   let failed = 0;
 
-  for (const block of targets) {
-    const bullets = bulletsOf(lines, block);
+  for (const row of targets) {
+    const bullets = bulletsOf(row);
     if (!bullets.trim()) {
-      console.log(`  ${block.version}: no entries, skipped`);
+      console.log(`  ${row.version}: no entries, skipped`);
       continue;
     }
 
@@ -147,46 +109,40 @@ async function main() {
       paragraph = tidy(await askGemini({
         tiers,
         system: SYSTEM,
-        prompt: `Version ${block.version}, released ${block.date}.\n\n${bullets}`,
+        prompt: `Version ${row.version}, released ${row.released_on}.\n\n${bullets}`,
       }));
     } catch (err) {
-      console.error(`  ${block.version}: ${err.message}`);
+      console.error(`  ${row.version}: ${err.message}`);
       failed += 1;
       continue;
     }
     if (!paragraph) {
-      console.error(`  ${block.version}: empty answer`);
+      console.error(`  ${row.version}: empty answer`);
       failed += 1;
       continue;
     }
 
-    console.log(`\n  ${block.version} → ${paragraph}`);
-    inserts.push({ block, paragraph });
+    console.log(`\n  ${row.version} → ${paragraph}`);
+    writes.push({ id: row.id, version: row.version, summary: paragraph });
   }
 
-  if (DRY_RUN || !inserts.length) {
-    console.log(`\n${inserts.length} ready, ${failed} failed. Nothing written.`);
+  if (DRY_RUN || !writes.length) {
+    console.log(`\n${writes.length} ready, ${failed} failed. Nothing written.`);
     return;
   }
 
-  const out = [...lines];
-  // Bottom-up, so an insertion never moves a line number still to be used.
-  inserts
-    .sort((a, b) => b.block.start - a.block.start)
-    .forEach(({ block, paragraph }) => {
-      if (FORCE && hasSummary(lines, block)) {
-        const at = out.findIndex((l, i) => i > block.start && l.trim().startsWith(">"));
-        if (at !== -1) out.splice(at, 1);
-      }
-      out.splice(block.start + 1, 0, "", `> ${paragraph}`);
-    });
+  for (const { id, version, summary } of writes) {
+    // eslint-disable-next-line no-await-in-loop
+    const { error: writeErr } = await supabase
+      .from("changelog").update({ summary }).eq("id", id);
+    if (writeErr) throw new Error(`${version}: ${writeErr.message}`);
+  }
 
-  fs.writeFileSync(FILE, out.join("\n"), "utf8");
-  console.log(`\nWrote ${inserts.length} summaries into ${path.relative(ROOT, FILE)}, ${failed} failed.`);
-  console.log("Read the diff before committing — nothing here has been seen by a human yet.");
+  console.log(`\nWrote ${writes.length} summaries, ${failed} failed.`);
+  console.log("Review them at /admin/changelog, then run `npm run ask:index`.");
 }
 
 main().catch((err) => {
-  console.error(err);
+  console.error(err.message || err);
   process.exit(1);
 });

@@ -109,6 +109,12 @@ export const ROUTE_MANIFEST = [
     indexable: true,
   },
   { path: "/changelog", component: "Changelog", og: { strategy: "page", slug: "changelog" }, indexable: true },
+  {
+    path: "/changelog/graph",
+    component: "ChangelogGraph",
+    og: { strategy: "page", slug: "changelog-graph" },
+    indexable: true,
+  },
   { path: "/treks", component: "TreksPage", og: { strategy: "page", slug: "treks" }, indexable: true },
   {
     path: "/interactive-me",

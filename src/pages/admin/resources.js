@@ -4,6 +4,7 @@ import sports from "../../lib/api/sports";
 import treks from "../../lib/api/treks";
 import projects from "../../lib/api/projects";
 import presentations from "../../lib/api/presentations";
+import changelog from "../../lib/api/changelog";
 import blogs from "../../lib/api/blogs";
 import instagram from "../../lib/api/instagram";
 import {
@@ -334,6 +335,54 @@ const resources = [
       },
       {
         name: "description", label: "Description", type: "textarea", span: "full", aiDraft: true,
+      },
+    ],
+  },
+  {
+    key: "changelog",
+    label: "Changelog",
+    singular: "version",
+    api: changelog,
+    title: (r) => r.version,
+    searchKeys: ["version", "summary"],
+    viewPath: (r) => `/changelog#${r.version}`,
+    columns: [
+      { key: "version", label: "Version", sortable: true, primary: true },
+      { key: "date", label: "Released", sortable: true, width: "9rem" },
+      {
+        key: "changes",
+        label: "Changes",
+        width: "6rem",
+        render: (r) => (Array.isArray(r.changes) ? String(r.changes.length) : "—"),
+      },
+      {
+        key: "summary",
+        label: "Summary",
+        render: (r) => (r.summary ? <Badge tone="success">yes</Badge> : "—"),
+      },
+    ],
+    fields: [
+      {
+        name: "version",
+        label: "Version",
+        type: "text",
+        required: true,
+        hint: "vX.Y.Z — major for a new page or redesign, minor for features (one a week), patch for fixes",
+      },
+      { name: "date", label: "Released", type: "isoDate", required: true, hint: "Stored as a real date" },
+      {
+        name: "summary",
+        label: "Reader summary",
+        type: "textarea",
+        span: "full",
+        hint: "One plain paragraph for someone who uses the site. npm run changelog:notes writes these.",
+      },
+      {
+        name: "changes",
+        label: "Changes",
+        type: "changeList",
+        span: "full",
+        hint: "Usually published from src/data/changelog.md via Sync — edit here to correct one after the fact",
       },
     ],
   },
