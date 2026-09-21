@@ -27,6 +27,7 @@ function fromRow(r) {
     quotaNote: r.quota_note ?? "",
     suggestedQuestions: r.suggested_questions ?? [],
     questionPool: Array.isArray(r.question_pool) ? r.question_pool : [],
+    keywordFloor: r.keyword_floor ?? 0.02,
     contextDoc: r.context_doc ?? "",
     contextDocUpdatedAt: r.context_doc_updated_at ?? null,
     autoEvalEnabled: !!r.auto_eval_enabled,
@@ -67,6 +68,8 @@ function toRow(v) {
     question_pool: (Array.isArray(v.questionPool) ? v.questionPool : [])
       .filter((row) => row?.q?.trim())
       .map((row) => ({ q: row.q.trim(), c: row.c || "" })),
+    // 0 is a legitimate value (no floor), so not `|| default`.
+    keyword_floor: Number.isFinite(Number(v.keywordFloor)) ? Number(v.keywordFloor) : 0.02,
     auto_eval_enabled: !!v.autoEvalEnabled,
     auto_eval_tiers: Array.isArray(v.autoEvalTiers) ? v.autoEvalTiers : [],
     auto_eval_allow_metered: !!v.autoEvalAllowMetered,

@@ -98,6 +98,12 @@ export const DEFAULT_ASK_SETTINGS = {
   // semantic half of hybrid_search returns its nearest rows however far away
   // they are, which is how a narrowed search came back confident and wrong.
   semantic_floor: 0.35,
+  // The same idea for the other half. Until 0023 the keyword branch had no
+  // floor of any kind: any chunk containing any prefix of any non-stopword term
+  // was eligible, so a question with no answer in the archive still filled every
+  // slot with whatever matched loosest. This is a normalised ts_rank_cd, so it
+  // means the same thing across queries; 0 restores the old behaviour.
+  keyword_floor: 0.02,
   tiers: [
     {
       name: "gemini-flash-lite",

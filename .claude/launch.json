@@ -4,15 +4,39 @@
     {
       "name": "React Dev Server",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeArgs": [
+        "start"
+      ],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "Atlas Preview",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "4317", "--strictPort"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "4317",
+        "--strictPort"
+      ],
       "port": 4317
+    },
+    {
+      "name": "Ask Functions",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "pages",
+        "dev",
+        "build",
+        "--port",
+        "8788",
+        "--env-file",
+        ".dev.vars"
+      ],
+      "port": 8788
     }
   ]
 }

@@ -116,6 +116,12 @@ const RETRIEVAL = [
     type: "number",
     hint: "0–1 similarity. Raise it if answers cite loosely related items; lower it if good questions come back empty",
   },
+  {
+    name: "keywordFloor",
+    label: "Keyword floor",
+    type: "number",
+    hint: "0–1 normalised rank. The same idea for the keyword half: raise it if weak word matches crowd out good ones, 0 to disable",
+  },
 ];
 
 // One starter chip. `c` is the subject the draw stratifies by, so a question

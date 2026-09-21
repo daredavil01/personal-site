@@ -1,4 +1,4 @@
-import { retrievalQuery, selectChunks } from "./askRetrieval";
+import { retrievalQuery, selectChunks, typesNamed } from "./askRetrieval";
 
 // content_chunks rows keep their database spelling all the way to the worker.
 const chunk = (type, id, index = 0) => ({
@@ -62,6 +62,56 @@ describe("selectChunks", () => {
   it("survives an empty result", () => {
     expect(selectChunks({ chunks: [], types: ["book"], question: "x" }))
       .toEqual({ picked: [], widened: true });
+  });
+
+  // The graded run's worst shape: eight micro-posts answering a trek question,
+  // legal under perEntity because each was a different post.
+  it("caps one type from taking every slot", () => {
+    const pool = Array.from({ length: 8 }, (_, i) => chunk("microblog", i));
+    const { picked } = selectChunks({
+      chunks: pool, question: "Which forts has he trekked?", limit: 8,
+    });
+    expect(picked).toHaveLength(3);
+  });
+
+  it("lifts the cap for a type the question asked for", () => {
+    const pool = Array.from({ length: 8 }, (_, i) => chunk("microblog", i));
+    const { picked } = selectChunks({
+      chunks: pool, question: "What are the most recent micro posts?", limit: 8,
+    });
+    expect(picked).toHaveLength(8);
+  });
+
+  it("lifts the cap for a type the chips asked for", () => {
+    const pool = Array.from({ length: 8 }, (_, i) => chunk("book", i));
+    const { picked } = selectChunks({
+      chunks: pool, types: ["book"], question: "anything at all", limit: 8,
+    });
+    expect(picked).toHaveLength(8);
+  });
+
+  it("returns fewer than the limit rather than padding", () => {
+    const { picked } = selectChunks({
+      chunks: [chunk("trek", 1), chunk("trek", 2)], question: "forts", limit: 8,
+    });
+    expect(picked).toHaveLength(2);
+  });
+});
+
+describe("typesNamed", () => {
+  it("reads inflected English", () => {
+    expect(typesNamed("Which forts has he trekked?")).toContain("trek");
+    expect(typesNamed("How many marathons has he run?")).toContain("sport");
+  });
+
+  it("reads Marathi", () => {
+    expect(typesNamed("त्याने कोणते किल्ले सर केले?")).toContain("trek");
+    expect(typesNamed("मला पुस्तका विषयी माहिती सांग")).toContain("book");
+  });
+
+  it("names nothing for a question about no type in particular", () => {
+    expect(typesNamed("What does he think about privacy?")).toEqual([]);
+    expect(typesNamed("")).toEqual([]);
   });
 });
 

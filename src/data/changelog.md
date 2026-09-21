@@ -9,6 +9,29 @@ patch for fixes and tweaks.
 
 ---
 
+## [v18.2.0] — 2026-09-21
+
+### Fixed
+
+- **`/ask` retrieval returned confident, unrelated items** (`supabase/migrations/0023_ask_retrieval_relevance.sql`): a Jev-graded run of 106 logged answers failed 79 of them, and the cause was not the model. Three faults, each measured against the live database. **`match_score` carried no relevance** — every query returned the same ladder, `0.0196, 0.0192, 0.0189…`, because RRF fuses rank positions and threw `ts_rank_cd` away, so nothing downstream could tell a perfect match from a junk one. **The keyword half had no floor**, so a question the archive cannot answer still filled all eight slots. And **`to_tsvector('simple')` does not stem**, so `trekked` never matched `trek` and `marathons` never matched `marathon`: live, "Which forts has he trekked?" retrieved zero trek chunks and "How many marathons has he run?" retrieved zero race chunks. The migration adds a second generated column, `fts_en`, stemmed with the `english` config and matched *beside* the existing `simple` one rather than replacing it — `simple` is the reason Marathi works at all — floors the keyword half on a normalised `ts_rank_cd` (flag 32, so the number means the same thing across queries), and returns `kw_score` and `sem_score` so the two halves can be told apart. No re-embedding: only the tsvector side changed.
+- **Trek, race and book chunks were metadata and nothing else** (`scripts/ask-sources/trek.mjs`, `sport.mjs`, `book.mjs`): `Trek: Rajgad | Duration: 3 hrs | Endurance: Medium` is six terms, none of them the words a reader uses — the word "fort" appeared in no trek body on the site. A six-term document cannot out-rank `changelog.md`. Each row now also carries one plain sentence saying what it is, built only from columns the row actually has: the race sentence takes its distance from the row rather than calling a 10 Kms run a marathon. 96 rows re-embedded.
+- **The prompt contradicted itself about citations** (`scripts/build-docs.mjs`): the generated archive card carried its own "Answering rules" section, shipped in the same message as the `## Rules` block in `functions/api/ask.js`. One said "cite by naming the item; the interface renders the links itself", the other "cite with the item's number in square brackets". 21 of the 106 graded answers were tagged `formatting` for citing nothing at all. The card also told the model to say what the archive does cover when the items fall short — the gap-narration the rules ban outright. The card now describes the corpus; the rules live in one place.
+
+### Added
+
+- **Complete lists are written out, not buried** (`functions/api/ask.js`): `site_facts().roster` has always held every book, trek, race, project and deck, and the prompt has always said to use it — inside an 11 KB single-line JSON blob. 30 of 35 enumeration and recency questions failed anyway, refusing questions whose full answer was sitting in that blob. When a question plainly asks for a list or for the newest of something, that roster is now lifted out and rendered as lines, and refusing is stated to be wrong when one is present. Deterministic, by regex over the question: a model call to classify it would put a metered dependency on a public, anonymous endpoint.
+- **A per-type slot cap** (`src/lib/askRetrieval.js`): `perEntity` capped chunks per *entity*, so eight different micro-posts broke no rule and still took every slot — and micro-blog is 1,664 of 2,969 chunks, which wins on base rate alone. At most three items may now share a type unless the question or the chips asked for it. `typesNamed()` reads the subject out of a question in English and Marathi, and is used again for the rosters and for the admin filter below.
+- **Keyword floor as a setting** (`/admin/ask/settings`): `semantic_floor` has been editable since 0019; its twin now is too, because the right value depends on the corpus and finding it should be a slider rather than a deploy.
+- **Retrieval is visible in the log** (`src/pages/admin/AskConversations.js`): each source card now carries `kw`/`sem`, and a **Retrieval missed the subject** filter lists answers whose question named a content type that none of its sources were. That is the exact shape of this bug, and it was invisible here for a month because nothing compared the question's subject against what came back.
+
+### Changed
+
+- **A keyword-only answer says so** (`src/components/Ask/AskChat.js`): when the embedding call fails, only the half of retrieval that matches words runs. The worker has always sent `keywordOnly`, and the admin log has always badged it; the reader was the only one not told.
+- **Starter chips name what is newest even with an empty pool** (`functions/api/ask.js`): the two roster-derived chips were appended only when `question_pool` was non-empty — dropping them exactly when the fallback list is most stale.
+- **A refusal offers somewhere to go** (`functions/api/ask.js`): with no sources there was nothing to build the browse row from, so the least useful answer was also the one with no next step. It now falls back to the types the question named.
+
+---
+
 ## [v18.1.2] — 2026-09-20
 
 ### Fixed

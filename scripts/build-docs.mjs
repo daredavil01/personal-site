@@ -212,6 +212,18 @@ function statsSection(p) {
 `;
 }
 
+// The archive card: what the archive HOLDS, not how to answer.
+//
+// It used to carry its own "Answering rules" section, which shipped in the same
+// prompt as the ## Rules block in functions/api/ask.js and contradicted it. The
+// card said "cite by naming the item; the interface renders the links itself"
+// while the rules said "cite with the item's number in square brackets". A
+// graded run of 106 answers tagged 21 of them `formatting` for citing nothing
+// at all — the model had been told, in one message, to cite two incompatible
+// ways. The card also told it to say what the archive does cover when the items
+// fall short, which is the gap-narration the rules ban outright.
+//
+// One set of rules, in one place. This file describes the corpus.
 function buildChatbotContext(facts, statsPayload) {
   const c = facts?.counts || {};
   const topTags = (facts?.top_tags || [])
@@ -223,8 +235,8 @@ function buildChatbotContext(facts, statsPayload) {
 
   return `# What this archive contains
 
-Sanket Tambare's personal site. Every answer must come from the retrieved items
-below the facts block, or from these facts. Never invent a title, date or link.
+Sanket Tambare's personal site. This card says what the archive holds; the
+answering rules live with the prompt, and are not repeated here.
 
 ## Content types and where they live
 
@@ -252,14 +264,11 @@ ${c.tags ?? "?"} tags, shared across every content type, always lowercase.
 Most used: ${topTags}.
 Tag pages live at /tags/:name.
 
-## Answering rules
+## What a micro post is
 
-- Cite by naming the item; the interface renders the links itself.
-- Counting questions: use the facts block, never count the retrieved items.
-- A retrieved micro post is a passing thought from years ago, not a considered
-  position. Say so when it matters.
-- If the retrieved items do not cover the question, say what the archive does
-  cover instead of guessing.`;
+A retrieved micro post is a passing thought from years ago, sometimes a reblog
+of someone else — not a considered position. Say so when quoting one as an
+opinion.`;
 }
 
 // --- entry point ------------------------------------------------------------

@@ -1,7 +1,7 @@
 # What this archive contains
 
-Sanket Tambare's personal site. Every answer must come from the retrieved items
-below the facts block, or from these facts. Never invent a title, date or link.
+Sanket Tambare's personal site. This card says what the archive holds; the
+answering rules live with the prompt, and are not repeated here.
 
 ## Content types and where they live
 
@@ -40,11 +40,8 @@ below the facts block, or from these facts. Never invent a title, date or link.
 Most used: life (28), technology (26), 100_days_to_offload (23), self-reflection (22), ai (20), digital wellbeing (19), social (15), youtube (13), travel (12), fiction (11), marathon (11), philosophy (9), खंडेराव (8), politics (7), भटकंती (7), claude code (6), non-fiction (6), psychology (6), running (6), self-help (6).
 Tag pages live at /tags/:name.
 
-## Answering rules
+## What a micro post is
 
-- Cite by naming the item; the interface renders the links itself.
-- Counting questions: use the facts block, never count the retrieved items.
-- A retrieved micro post is a passing thought from years ago, not a considered
-  position. Say so when it matters.
-- If the retrieved items do not cover the question, say what the archive does
-  cover instead of guessing.
+A retrieved micro post is a passing thought from years ago, sometimes a reblog
+of someone else — not a considered position. Say so when quoting one as an
+opinion.

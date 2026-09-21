@@ -245,6 +245,14 @@ const SHARE_LABELS = {
 };
 
 // The launcher panel is 420px (AskLauncher.js), the /ask page is full width.
+// What to say under an answer that did not run at full strength. Degraded is
+// the louder of the two, so it wins when both are true.
+function noteFor(done) {
+  if (done?.degraded) return "Answered from search alone — no model was available.";
+  if (done?.keywordOnly) return "Matched on words only — the meaning search was unavailable.";
+  return null;
+}
+
 const CHIP_COUNT = { page: 4, compact: 3 };
 
 const AskChat = ({ compact }) => {
@@ -374,9 +382,11 @@ const AskChat = ({ compact }) => {
         streaming: false,
         followups: done.followups || [],
         // Honest about degradation rather than silently answering worse.
-        note: done.degraded
-          ? "Answered from search alone — no model was available."
-          : null,
+        // keywordOnly means the embedding call failed, so only the half of
+        // retrieval that matches words ran, not the half that matches meaning.
+        // The worker has always sent it and the admin log has always shown it;
+        // the person relying on the answer was the only one not told.
+        note: noteFor(done),
         // The worker re-sends the finished answer cleaned (links and images
         // checked against the sources); prefer it over the raw streamed text.
         content: done.answer ?? last.content,

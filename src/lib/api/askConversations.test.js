@@ -1,5 +1,6 @@
 import {
-  applyFilters, EMPTY_FILTERS, isStaleGrade, lowConfidenceIds, regradeIds, sliceBatches,
+  applyFilters, EMPTY_FILTERS, isStaleGrade, lowConfidenceIds, missedNamedType,
+  regradeIds, sliceBatches,
   summariseExchanges,
   toChats, toEvalsJsonl, toExchanges, ungradedIds,
 } from "./askConversations";
@@ -191,5 +192,26 @@ describe("judge-graded rows", () => {
     expect(line.message_id).toBe(101);
     expect(line.eval_source).toBe("auto");
     expect(line.eval_auto.rubric).toBe("r1");
+  });
+});
+
+// The shape the retrieval bug had: a question that names a type, answered from
+// eight chunks of something else.
+describe("missedNamedType", () => {
+  const ex = (question, types) => ({
+    question,
+    answer: { sources: types.map((t) => ({ entity_type: t })) },
+  });
+
+  it("catches a trek question answered from books", () => {
+    expect(missedNamedType(ex("Which forts has he trekked?", ["book", "book"]))).toBe(true);
+  });
+
+  it("passes when the named type came back", () => {
+    expect(missedNamedType(ex("Which forts has he trekked?", ["trek", "book"]))).toBe(false);
+  });
+
+  it("says nothing about a question that names no type", () => {
+    expect(missedNamedType(ex("What does he think about privacy?", ["microblog"]))).toBe(false);
   });
 });

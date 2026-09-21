@@ -269,7 +269,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2969**
+Rows: **2971**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -290,6 +290,7 @@ Rows: **2969**
 | `content_hash` | text | yes | — |
 | `embed_hash` | text | yes | — |
 | `image_url` | text | yes | — |
+| `fts_en` | tsvector | yes | `to_tsvector('english'::regconfig, ((COAL` |
 
 Constraints:
 - `CHECK ((entity_type ~ '^[a-z][a-z0-9_]*

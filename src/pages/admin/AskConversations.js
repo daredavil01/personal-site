@@ -102,6 +102,17 @@ const readEvalMode = () => {
 };
 
 // The admin's saved evaluation, read-only.
+// How hybrid_search scored a source, when the answer is new enough to have it
+// (added with migration 0023). Reading "trek question, eight book chunks at
+// kw 0.04" off the log is the difference between blaming the model and finding
+// the retrieval bug that was actually there.
+function sourceScore(s) {
+  const kw = Number.isFinite(Number(s?.kw)) ? `kw ${Number(s.kw).toFixed(2)}` : null;
+  const sem = Number.isFinite(Number(s?.sem)) ? `sem ${Number(s.sem).toFixed(2)}` : null;
+  const parts = [kw, sem].filter(Boolean);
+  return parts.length ? ` ${parts.join("/")}` : "";
+}
+
 const EvalSummary = ({ answer: a }) => (
   <div className="flex flex-col gap-1">
     <div className="flex flex-wrap items-center gap-1.5">
@@ -283,7 +294,7 @@ const Exchange = ({ exchange, onSession, evalMode, onEvalSaved }) => {
 
       {!!a.sources.length && (
         <p className={`text-[11px] ${faintText} mb-0`}>
-          {a.sources.map((s, i) => `[${i + 1}] ${s.title || "Untitled"} (${s.entity_type})`).join(" · ")}
+          {a.sources.map((s, i) => `[${i + 1}] ${s.title || "Untitled"} (${s.entity_type})${sourceScore(s)}`).join(" · ")}
         </p>
       )}
 
@@ -684,6 +695,9 @@ const AskConversations = () => {
           </Filter>
           <Filter label="No sources found">
             <Choice value={filters.noSources} onChange={setFilter("noSources")} options={YES_NO} />
+          </Filter>
+          <Filter label="Retrieval missed the subject">
+            <Choice value={filters.offTopic} onChange={setFilter("offTopic")} options={YES_NO} />
           </Filter>
           <Filter label="Session id">
             <Input value={filters.session} placeholder="any browser" onChange={(e) => setFilter("session")(e.target.value.trim())} />

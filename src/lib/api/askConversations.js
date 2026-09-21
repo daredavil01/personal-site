@@ -1,4 +1,5 @@
 import { supabase } from "../supabaseClient";
+import { typesNamed } from "../askRetrieval";
 
 // The /ask conversation log, for the admin Conversations page. Owner-only
 // (RLS) — visitors write it through the ask_log() RPC and rate answers through
@@ -348,8 +349,24 @@ export const EMPTY_FILTERS = {
   keywordOnly: "",
   errors: "",
   noSources: "",
+  offTopic: "", // yes | no — the question named a type none of its sources were
   session: "",
 };
+
+/**
+ * The question named a content type and retrieval returned none of it.
+ *
+ * This is the shape the whole retrieval bug had: "Which forts has he trekked?"
+ * answered from eight book chunks, "How many marathons has he run?" from eight
+ * more. It was invisible in this log for a month because nothing here compared
+ * the question's subject against what came back.
+ */
+export function missedNamedType(exchange) {
+  const asked = typesNamed(exchange?.question);
+  if (!asked.length) return false;
+  const got = new Set((exchange?.answer?.sources || []).map((s) => s.entity_type));
+  return !asked.some((t) => got.has(t));
+}
 
 const yesNo = (want, value) => !want || (want === "yes" ? value : !value);
 
@@ -398,6 +415,7 @@ export function applyFilters(exchanges, f, version = {}) {
     if (!yesNo(f.keywordOnly, a.keywordOnly)) return false;
     if (!yesNo(f.errors, a.tierErrors.length > 0)) return false;
     if (!yesNo(f.noSources, !a.sourceCount)) return false;
+    if (f.offTopic && !yesNo(f.offTopic, missedNamedType(e))) return false;
     return true;
   });
 }

@@ -64,3 +64,5 @@ supabase/.temp/
 
 # Local Pages Functions env (wrangler reads this; may hold secrets)
 .dev.vars
+
+launch.json
