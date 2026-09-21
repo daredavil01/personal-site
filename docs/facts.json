@@ -26,13 +26,30 @@
   },
   "counts": {
     "tags": 98,
-    "blogs": 60,
+    "blogs": 63,
     "books": 51,
     "treks": 20,
     "sports": 25,
     "projects": 16,
     "instagram": 11,
-    "microblog": 1661
+    "microblog": 1664
+  },
+  "latest": {
+    "blog": {
+      "d": "2026-09-21",
+      "t": "The simplicity of the complex world!",
+      "u": "/100-days-to-offload/63"
+    },
+    "writing": {
+      "d": "2026-09-03",
+      "t": "The Battle Within",
+      "u": "https://sankettambare.substack.com/p/the-battle-within"
+    },
+    "microblog": {
+      "d": "2026-09-19",
+      "t": "#१४५९ खंडेराव...!💭",
+      "u": "/micro-blog/1664"
+    }
   },
   "resume": {
     "skills": 30,
@@ -48,12 +65,674 @@
     "positions": 6,
     "certifications": 12
   },
+  "roster": {
+    "book": [
+      {
+        "d": "2026-11-15",
+        "t": "पट्यारा",
+        "u": "/books/50"
+      },
+      {
+        "d": "2026-10-15",
+        "t": "त्सुबाकी स्टेशनर्स",
+        "u": "/books/51"
+      },
+      {
+        "d": "2026-07-23",
+        "t": "Across the Himalaya",
+        "u": "/books/49"
+      },
+      {
+        "d": "2026-07-15",
+        "t": "टाटायन",
+        "u": "/books/42"
+      },
+      {
+        "d": "2026-07-04",
+        "t": "भटकंती",
+        "u": "/books/48"
+      },
+      {
+        "d": "2026-05-30",
+        "t": "Usain Bolt: Faster Than Lightning",
+        "u": "/books/46"
+      },
+      {
+        "d": "2026-05-15",
+        "t": "वाट तुडवताना",
+        "u": "/books/44"
+      },
+      {
+        "d": "2026-04-15",
+        "t": "कर के देखो",
+        "u": "/books/45"
+      },
+      {
+        "d": "2026-02-21",
+        "t": "Make Time: How to Focus on What Matters Every Day",
+        "u": "/books/35"
+      },
+      {
+        "d": "2026-02-15",
+        "t": "मुक्तांगणाची गोष्ट",
+        "u": "/books/47"
+      },
+      {
+        "d": "2025-12-15",
+        "t": "एक होता कार्व्हर ",
+        "u": "/books/25"
+      },
+      {
+        "d": "2025-12-09",
+        "t": "Careless People: A Story of where I used to work:\nPower. Greed. Madness.",
+        "u": "/books/30"
+      },
+      {
+        "d": "2025-11-24",
+        "t": "The Anxious Generation",
+        "u": "/books/39"
+      },
+      {
+        "d": "2025-11-15",
+        "t": "प्रकाशवाटा ",
+        "u": "/books/26"
+      },
+      {
+        "d": "2025-10-17",
+        "t": "AI 2041: Ten Visions for our future",
+        "u": "/books/34"
+      },
+      {
+        "d": "2025-10-15",
+        "t": "माझा साक्षात्कारी हृदयरोग ",
+        "u": "/books/27"
+      },
+      {
+        "d": "2025-09-15",
+        "t": "When The Chips Are Down",
+        "u": "/books/28"
+      },
+      {
+        "d": "2025-09-11",
+        "t": "The age of AI",
+        "u": "/books/31"
+      },
+      {
+        "d": "2025-08-15",
+        "t": "Can't Hurt Me",
+        "u": "/books/41"
+      },
+      {
+        "d": "2025-06-15",
+        "t": "एका तेलियाने",
+        "u": "/books/43"
+      },
+      {
+        "d": "2025-06-15",
+        "t": "The Art of Loving",
+        "u": "/books/19"
+      },
+      {
+        "d": "2025-05-15",
+        "t": "नदीष्ट ",
+        "u": "/books/32"
+      },
+      {
+        "d": "2025-04-15",
+        "t": "वॉल्टन",
+        "u": "/books/33"
+      },
+      {
+        "d": "2025-04-15",
+        "t": "Brave New World",
+        "u": "/books/21"
+      },
+      {
+        "d": "2025-03-24",
+        "t": "AI Snake Oil",
+        "u": "/books/29"
+      },
+      {
+        "d": "2025-03-15",
+        "t": "हिंदू ",
+        "u": "/books/22"
+      },
+      {
+        "d": "2025-02-15",
+        "t": "We, The Citizens : Strengthening the Indian Republic",
+        "u": "/books/23"
+      },
+      {
+        "d": "2025-01-15",
+        "t": "मेळघाटातील मोहर: डॉ. रवींद्र आणि डॉ. स्मिता कोल्हे ",
+        "u": "/books/36"
+      },
+      {
+        "d": "2025-01-15",
+        "t": "गडकिल्ले आणि मी ",
+        "u": "/books/24"
+      },
+      {
+        "d": "2024-12-15",
+        "t": "The Nitopadesha",
+        "u": "/books/13"
+      },
+      {
+        "d": "2024-11-15",
+        "t": "Missing In Action: Why You Should Care About Public Policy",
+        "u": "/books/14"
+      },
+      {
+        "d": "2024-10-15",
+        "t": "न्या . लोयांचा खुनी कोण ?",
+        "u": "/books/15"
+      },
+      {
+        "d": "2024-10-15",
+        "t": "The SIlent Coup: The History of India's Deep State",
+        "u": "/books/3"
+      },
+      {
+        "d": "2024-09-15",
+        "t": "राधिकासांत्वनाम:  ",
+        "u": "/books/16"
+      },
+      {
+        "d": "2024-07-09",
+        "t": "Possible Minds",
+        "u": "/books/40"
+      },
+      {
+        "d": "2024-05-15",
+        "t": "1984",
+        "u": "/books/20"
+      },
+      {
+        "d": "2023-12-15",
+        "t": "Mindf*ck Inside Cambriadge Analytica Story",
+        "u": "/books/1"
+      },
+      {
+        "d": "2023-02-15",
+        "t": "21 Lessons for the 21st Century",
+        "u": "/books/11"
+      },
+      {
+        "d": "2023-01-15",
+        "t": "Pegasus: The Story of the World's Most Dangerous Spyware",
+        "u": "/books/12"
+      },
+      {
+        "d": "2022-11-15",
+        "t": "शिवाजी कोण होता ?",
+        "u": "/books/2"
+      },
+      {
+        "d": "2022-07-15",
+        "t": "Man's Search For Meaning",
+        "u": "/books/18"
+      },
+      {
+        "d": "2022-07-15",
+        "t": "Flow: The Clasic Work on how to achieve Happiness",
+        "u": "/books/6"
+      },
+      {
+        "d": "2022-06-15",
+        "t": "The Subtle Art of NOT Giving A F*ck",
+        "u": "/books/7"
+      },
+      {
+        "d": "2022-03-15",
+        "t": "Homo Deus: A Brief History of Tomorrow",
+        "u": "/books/10"
+      },
+      {
+        "d": "2021-08-15",
+        "t": "Animal Farm",
+        "u": "/books/17"
+      },
+      {
+        "d": "2021-05-15",
+        "t": "7 Habits of Highly Effective People",
+        "u": "/books/8"
+      },
+      {
+        "d": "2021-04-15",
+        "t": "Sapiens: A Brief History of Humankind",
+        "u": "/books/9"
+      },
+      {
+        "d": "2021-02-28",
+        "t": "Ways of Seeing",
+        "u": "/books/38"
+      },
+      {
+        "d": "2020-08-18",
+        "t": "Permanent Record",
+        "u": "/books/37"
+      },
+      {
+        "d": "2019-09-15",
+        "t": "मी अल्बर्ट एलिस ",
+        "u": "/books/4"
+      },
+      {
+        "d": "2019-08-15",
+        "t": "असाही विचार करायला काय हरकत आहे ... ",
+        "u": "/books/5"
+      }
+    ],
+    "trek": [
+      {
+        "d": "2026-08-09",
+        "t": "Ghangad Fort",
+        "u": "/treks/20"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "Lingya Waterfall",
+        "u": "/treks/19"
+      },
+      {
+        "d": "2026-06-19",
+        "t": "Harishchandragad",
+        "u": "/treks/18"
+      },
+      {
+        "d": "2026-06-14",
+        "t": "Karnala",
+        "u": "/treks/17"
+      },
+      {
+        "d": "2026-05-16",
+        "t": "Talgad",
+        "u": "/treks/16"
+      },
+      {
+        "d": "2025-08-02",
+        "t": "Panhala to Pawankhind",
+        "u": "/treks/14"
+      },
+      {
+        "d": "2025-07-20",
+        "t": "Bhimashankar to Padarwadi",
+        "u": "/treks/13"
+      },
+      {
+        "d": "2025-01-05",
+        "t": "Padmadurga",
+        "u": "/treks/12"
+      },
+      {
+        "d": "2024-10-06",
+        "t": "Jivdhan",
+        "u": "/treks/11"
+      },
+      {
+        "d": "2024-09-07",
+        "t": "Sinhagad",
+        "u": "/treks/10"
+      },
+      {
+        "d": "2024-01-14",
+        "t": "Raigad",
+        "u": "/treks/9"
+      },
+      {
+        "d": "2023-12-30",
+        "t": "Katraj To Sinhgad",
+        "u": "/treks/15"
+      },
+      {
+        "d": "2023-09-03",
+        "t": "Kailasgad",
+        "u": "/treks/8"
+      },
+      {
+        "d": "2023-08-13",
+        "t": "Bhimashankar To Bhorgiri",
+        "u": "/treks/7"
+      },
+      {
+        "d": "2023-07-23",
+        "t": "Hadsar",
+        "u": "/treks/6"
+      },
+      {
+        "d": "2023-07-02",
+        "t": "Kalavantin Durga",
+        "u": "/treks/5"
+      },
+      {
+        "d": "2023-01-01",
+        "t": "Dhak_Bahiri",
+        "u": "/treks/4"
+      },
+      {
+        "d": "2019-12-13",
+        "t": "Vasota",
+        "u": "/treks/3"
+      },
+      {
+        "d": "2019-06-25",
+        "t": "Panhala",
+        "u": "/treks/2"
+      },
+      {
+        "d": "2019-02-17",
+        "t": "Tikona",
+        "u": "/treks/1"
+      }
+    ],
+    "sport": [
+      {
+        "d": "2026-09-05",
+        "t": "Satara Hill Half Marathon 2026",
+        "u": "/sports/25"
+      },
+      {
+        "d": "2026-08-29",
+        "t": "NMDC Hyderabad Marathon 2026",
+        "u": "/sports/24"
+      },
+      {
+        "d": "2026-08-07",
+        "t": "Self Paced Sinhagad Half Marathon ",
+        "u": "/sports/23"
+      },
+      {
+        "d": "2026-07-29",
+        "t": "July Self Paced Half Marathon",
+        "u": "/sports/22"
+      },
+      {
+        "d": "2026-06-06",
+        "t": "Vrukshathon 2026",
+        "u": "/sports/21"
+      },
+      {
+        "d": "2026-03-21",
+        "t": "Nanded City LSOM 2026",
+        "u": "/sports/20"
+      },
+      {
+        "d": "2026-02-21",
+        "t": "Tata Ultra Marathon 2026",
+        "u": "/sports/19"
+      },
+      {
+        "d": "2026-02-14",
+        "t": "IPA Neerathon 2026",
+        "u": "/sports/18"
+      },
+      {
+        "d": "2026-01-17",
+        "t": "Tata Mumbai Marathon 2026",
+        "u": "/sports/17"
+      },
+      {
+        "d": "2025-12-06",
+        "t": "Pune International Marathon 2025",
+        "u": "/sports/16"
+      },
+      {
+        "d": "2025-09-13",
+        "t": "Satara Half Hill Marathon 2025",
+        "u": "/sports/14"
+      },
+      {
+        "d": "2025-08-23",
+        "t": "NMDC Hyderabad Marathon 2025",
+        "u": "/sports/15"
+      },
+      {
+        "d": "2025-05-31",
+        "t": "Vrukshathon 2025",
+        "u": "/sports/13"
+      },
+      {
+        "d": "2025-02-22",
+        "t": "Tata Ultra Marathon, Lonavala 2025",
+        "u": "/sports/12"
+      },
+      {
+        "d": "2025-02-01",
+        "t": "Milit Lake View HM 2025",
+        "u": "/sports/11"
+      },
+      {
+        "d": "2025-01-18",
+        "t": "Tata Mumbai Marathon 2025",
+        "u": "/sports/10"
+      },
+      {
+        "d": "2024-11-16",
+        "t": "CME Marathon 2024",
+        "u": "/sports/9"
+      },
+      {
+        "d": "2024-10-19",
+        "t": "Apala Pune Marathon 2024",
+        "u": "/sports/8"
+      },
+      {
+        "d": "2024-08-31",
+        "t": "Satara Half Hill Marathon 2024",
+        "u": "/sports/7"
+      },
+      {
+        "d": "2024-08-25",
+        "t": "NMDC Hyderabad Marathon 2024",
+        "u": "/sports/6"
+      },
+      {
+        "d": "2024-06-08",
+        "t": "Vrukshathon 2024",
+        "u": "/sports/5"
+      },
+      {
+        "d": "2024-04-06",
+        "t": "ANP Run 2024",
+        "u": "/sports/4"
+      },
+      {
+        "d": "2024-03-16",
+        "t": "AMIBOLT 2024",
+        "u": "/sports/3"
+      },
+      {
+        "d": "2024-03-02",
+        "t": "Pune City Marathon 2024",
+        "u": "/sports/2"
+      },
+      {
+        "d": "2023-10-14",
+        "t": "NDA Marathon 2023",
+        "u": "/sports/1"
+      }
+    ],
+    "project": [
+      {
+        "d": "2026-08-01",
+        "t": "Personal Websites & Projects Directory",
+        "u": "/projects/13"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "CMS Site Planner",
+        "u": "/projects/12"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "Antyodaya Foundation Website",
+        "u": "/projects/11"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "E20 ka Chakravyuha",
+        "u": "/projects/10"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "Visiting Card",
+        "u": "/projects/8"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "RunFolio",
+        "u": "/projects/7"
+      },
+      {
+        "d": "2026-08-01",
+        "t": "YUNG Foundation Website",
+        "u": "/projects/6"
+      },
+      {
+        "d": "2026-07-06",
+        "t": "The Self — Three.js Orb Prototype",
+        "u": "/projects/16"
+      },
+      {
+        "d": "2026-07-01",
+        "t": "Young Foundation Nisarg School Management Portal",
+        "u": "/projects/9"
+      },
+      {
+        "d": "2026-05-31",
+        "t": "Adivasi Survey Dashboard — Nandurbar",
+        "u": "/projects/14"
+      },
+      {
+        "d": "2026-04-26",
+        "t": "The Wanderer's Digital Escape",
+        "u": "/projects/15"
+      },
+      {
+        "d": "2026-03-01",
+        "t": "RunSmart",
+        "u": "/projects/4"
+      },
+      {
+        "d": "2020-11-20",
+        "t": "Social-Ape",
+        "u": "/projects/5"
+      },
+      {
+        "d": "2020-10-20",
+        "t": "Personal Website",
+        "u": "/projects/2"
+      },
+      {
+        "d": "2020-10-20",
+        "t": "Expense Management Web-App using firebase",
+        "u": "/projects/1"
+      }
+    ],
+    "instagram": [
+      {
+        "d": null,
+        "t": "Mountains!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Wardha Diaries!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Kailasgad!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Friends",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Some glimpse from Marathons!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Another NIRMAN visit...!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "#Royal",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Raigad Clicks!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Where things took turn for public policy!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "My NIRMAN Story...!",
+        "u": "/instagram"
+      },
+      {
+        "d": null,
+        "t": "Few Great Pictures...!",
+        "u": "/instagram"
+      }
+    ],
+    "presentation": [
+      {
+        "d": "2026-09-14",
+        "t": "Ask the Archive",
+        "u": "/presentations/8"
+      },
+      {
+        "d": null,
+        "t": "E20 ka Chakravyuha",
+        "u": "/presentations/7"
+      },
+      {
+        "d": null,
+        "t": "Yung Foundation website",
+        "u": "/presentations/6"
+      },
+      {
+        "d": null,
+        "t": "The Wanderer's Atlas — Feature Dossier",
+        "u": "/presentations/5"
+      },
+      {
+        "d": null,
+        "t": "A Developer, Measured",
+        "u": "/presentations/4"
+      },
+      {
+        "d": null,
+        "t": "RunFolio — Every Finish, Framed",
+        "u": "/presentations/3"
+      },
+      {
+        "d": null,
+        "t": "What the Archive Knows",
+        "u": "/presentations/2"
+      },
+      {
+        "d": null,
+        "t": "The Wanderer's Digital Escape",
+        "u": "/presentations/1"
+      }
+    ]
+  },
   "sports": {
     "by_distance": {
-      "10K": 2,
-      "21K": 7,
-      "10 Kms": 1,
-      "21 Kms": 11,
+      "10 Kms": 3,
+      "21 Kms": 18,
       "35 Kms": 1,
       "42 Kms": 2,
       "50 Kms": 1
@@ -76,7 +755,7 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 26
+      "total": 28
     },
     {
       "name": "technology",
@@ -84,6 +763,10 @@
     },
     {
       "name": "100_days_to_offload",
+      "total": 23
+    },
+    {
+      "name": "self-reflection",
       "total": 22
     },
     {
@@ -95,16 +778,16 @@
       "total": 19
     },
     {
-      "name": "self-reflection",
-      "total": 18
-    },
-    {
       "name": "social",
       "total": 15
     },
     {
       "name": "youtube",
       "total": 13
+    },
+    {
+      "name": "travel",
+      "total": 12
     },
     {
       "name": "fiction",
@@ -115,12 +798,12 @@
       "total": 11
     },
     {
-      "name": "travel",
-      "total": 11
-    },
-    {
       "name": "philosophy",
       "total": 9
+    },
+    {
+      "name": "खंडेराव",
+      "total": 8
     },
     {
       "name": "politics",
@@ -147,7 +830,7 @@
       "total": 6
     },
     {
-      "name": "खंडेराव",
+      "name": "self-help",
       "total": 6
     },
     {
@@ -155,11 +838,11 @@
       "total": 5
     },
     {
-      "name": "history",
+      "name": "digitalnomad",
       "total": 5
     },
     {
-      "name": "self-help",
+      "name": "history",
       "total": 5
     },
     {
@@ -169,15 +852,11 @@
     {
       "name": "book review",
       "total": 4
-    },
-    {
-      "name": "daredavil01",
-      "total": 4
     }
   ],
   "microblog": {
     "by_type": {
-      "text": 471,
+      "text": 474,
       "photo": 953,
       "quote": 237
     },
@@ -190,10 +869,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 92
+      "2026": 95
     },
     "date_range": {
-      "max": "2026-09-10",
+      "max": "2026-09-19",
       "min": "2018-03-19"
     }
   },
@@ -201,11 +880,11 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-13T20:15:34.225238+00:00",
+  "generated_at": "2026-09-21T11:49:27.318997+00:00",
   "index_by_type": {
     "now": 13,
     "tag": 98,
-    "blog": 60,
+    "blog": 63,
     "book": 51,
     "page": 2,
     "site": 21,
@@ -216,7 +895,7 @@
     "project": 15,
     "writing": 44,
     "instagram": 11,
-    "microblog": 1661,
+    "microblog": 1664,
     "presentation": 8
   },
   "tags_by_category": {

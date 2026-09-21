@@ -6,32 +6,32 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 26 | Mind & Life |
+| `life` | 28 | Mind & Life |
 | `technology` | 26 | Technology & Data |
-| `100_days_to_offload` | 22 | Writing & Blogging |
+| `100_days_to_offload` | 23 | Writing & Blogging |
+| `self-reflection` | 22 | Mind & Life |
 | `ai` | 20 | Technology & Data |
 | `digital wellbeing` | 19 | Digital Life |
-| `self-reflection` | 18 | Mind & Life |
 | `social` | 15 | Society & Ideas |
 | `youtube` | 13 | Digital Life |
+| `travel` | 12 | Travel & Outdoors |
 | `fiction` | 11 | Books & Reading |
 | `marathon` | 11 | Running & Fitness |
-| `travel` | 11 | Travel & Outdoors |
 | `philosophy` | 9 | Society & Ideas |
+| `खंडेराव` | 8 | Writing & Blogging |
 | `politics` | 7 | Society & Ideas |
 | `भटकंती` | 7 | Travel & Outdoors |
 | `claude code` | 6 | Technology & Data |
 | `non-fiction` | 6 | Books & Reading |
 | `psychology` | 6 | Society & Ideas |
 | `running` | 6 | Running & Fitness |
-| `खंडेराव` | 6 | Writing & Blogging |
+| `self-help` | 6 | Books & Reading |
 | `biography` | 5 | Books & Reading |
+| `digitalnomad` | 5 | Digital Life |
 | `history` | 5 | Society & Ideas |
-| `self-help` | 5 | Books & Reading |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
 | `book review` | 4 | Books & Reading |
 | `daredavil01` | 4 | Personal |
-| `digitalnomad` | 4 | Digital Life |
 | `love` | 4 | People & Feelings |
 | `marathi` | 4 | Books & Reading |
 | `ngo` | 4 | Society & Ideas |

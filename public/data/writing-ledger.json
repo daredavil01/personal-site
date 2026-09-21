@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-20T22:38:21.039Z",
+  "generatedAt": "2026-09-21T11:48:06.707Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 104,
-    "words": 100199,
-    "averageWords": 963,
-    "trackedPosts": 60,
+    "posts": 107,
+    "words": 103880,
+    "averageWords": 971,
+    "trackedPosts": 63,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-09-12",
+    "latestPost": "2026-09-21",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,8 +26,8 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 61,
-      "words": 67258
+      "posts": 64,
+      "words": 70939
     },
     "activeMonths": 34
   },
@@ -36,37 +36,37 @@
     "monthToDate": {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 5,
-      "words": 6555,
+      "posts": 8,
+      "words": 10233,
       "daysElapsed": 21,
-      "wordsPerDay": 312,
+      "wordsPerDay": 487,
       "previousMonth": {
         "month": "2026-08",
         "posts": 6,
         "words": 6193
       },
-      "changeVsPreviousMonth": 5.8
+      "changeVsPreviousMonth": 65.2
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 61,
-      "words": 67258,
+      "posts": 64,
+      "words": 70939,
       "daysElapsed": 264,
-      "wordsPerDay": 255,
+      "wordsPerDay": 269,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7827,
         "throughDate": "2025-09-21"
       },
-      "changeVsPriorYear": 759.3
+      "changeVsPriorYear": 806.3
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 76,
-      "words": 75514,
+      "posts": 79,
+      "words": 79195,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 61,
-      "words": 67258
+      "posts": 64,
+      "words": 70939
     }
   ],
   "byMonth": [
@@ -304,7 +304,7 @@
       "month": "2026-07",
       "label": "July 2026",
       "posts": 8,
-      "words": 8167
+      "words": 8170
     },
     {
       "month": "2026-08",
@@ -315,8 +315,8 @@
     {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 5,
-      "words": 6555
+      "posts": 8,
+      "words": 10233
     }
   ],
   "cumulative": [
@@ -509,20 +509,20 @@
     {
       "month": "2026-07",
       "label": "July 2026",
-      "words": 87451,
+      "words": 87454,
       "posts": 93
     },
     {
       "month": "2026-08",
       "label": "August 2026",
-      "words": 93644,
+      "words": 93647,
       "posts": 99
     },
     {
       "month": "2026-09",
       "label": "September 2026",
-      "words": 100199,
-      "posts": 104
+      "words": 103880,
+      "posts": 107
     }
   ],
   "byDayOfWeek": [
@@ -533,8 +533,8 @@
     },
     {
       "day": "Monday",
-      "posts": 16,
-      "words": 18136
+      "posts": 17,
+      "words": 19175
     },
     {
       "day": "Tuesday",
@@ -544,12 +544,12 @@
     {
       "day": "Wednesday",
       "posts": 15,
-      "words": 14157
+      "words": 14160
     },
     {
       "day": "Thursday",
-      "posts": 14,
-      "words": 15734
+      "posts": 16,
+      "words": 18373
     },
     {
       "day": "Friday",
@@ -565,8 +565,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 50,
-      "words": 56340
+      "posts": 53,
+      "words": 60021
     },
     {
       "section": "Uncategorised",
@@ -582,8 +582,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 47,
-      "words": 50990
+      "posts": 50,
+      "words": 54668
     },
     {
       "tag": "digital-wellbeing",
@@ -591,19 +591,19 @@
       "words": 26404
     },
     {
+      "tag": "self-reflection",
+      "posts": 16,
+      "words": 16759
+    },
+    {
       "tag": "Travel Blogs",
       "posts": 15,
       "words": 14414
     },
     {
-      "tag": "self-reflection",
-      "posts": 13,
-      "words": 13081
-    },
-    {
       "tag": "ai",
-      "posts": 12,
-      "words": 12980
+      "posts": 13,
+      "words": 14344
     },
     {
       "tag": "life",
@@ -613,7 +613,7 @@
     {
       "tag": "technology",
       "posts": 10,
-      "words": 10733
+      "words": 10736
     },
     {
       "tag": "marathon",
@@ -642,8 +642,8 @@
     },
     {
       "tag": "artificial-intelligence",
-      "posts": 5,
-      "words": 5550
+      "posts": 6,
+      "words": 6911
     },
     {
       "tag": "flourishing",
@@ -654,6 +654,11 @@
       "tag": "privacy",
       "posts": 4,
       "words": 4135
+    },
+    {
+      "tag": "digital-brain",
+      "posts": 3,
+      "words": 3652
     },
     {
       "tag": "nmdc-hyderabad-marathon",
@@ -686,9 +691,9 @@
       "words": 2949
     },
     {
-      "tag": "digital-brain",
+      "tag": "claudecode",
       "posts": 2,
-      "words": 2291
+      "words": 2364
     },
     {
       "tag": "bharatekkhoj",
@@ -803,7 +808,7 @@
     {
       "tag": "engineering",
       "posts": 1,
-      "words": 1088
+      "words": 1091
     },
     {
       "tag": "instagram",
@@ -819,11 +824,6 @@
       "tag": "twitter",
       "posts": 1,
       "words": 1026
-    },
-    {
-      "tag": "claudecode",
-      "posts": 1,
-      "words": 1003
     },
     {
       "tag": "obsidian",
@@ -1071,7 +1071,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 35
+      "posts": 38
     },
     {
       "label": "1,500–1,999",
@@ -1190,6 +1190,73 @@
     }
   ],
   "posts": [
+    {
+      "title": "The simplicity of the complex world!",
+      "date": "2026-09-21",
+      "publishedAt": "2026-09-20T21:18:11.154Z",
+      "url": "https://sankettambare.substack.com/p/the-simplicity-of-the-complex-world",
+      "platform": "Substack",
+      "words": 1039,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "self-reflection",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!XDPK!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fa42bc30e-494c-4ebd-ab23-ed92d0faa8ea_2752x1536.png",
+      "trackedInBlogsTable": true,
+      "blogId": 63,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
+    {
+      "title": "Patience in the game of uncertainty!",
+      "date": "2026-09-17",
+      "publishedAt": "2026-09-17T18:05:11.868Z",
+      "url": "https://sankettambare.substack.com/p/patience-in-the-game-of-uncertainty",
+      "platform": "Substack",
+      "words": 1278,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "self-reflection",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!V3Av!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F975757a5-e017-4bef-a82b-317b64206817_2752x1536.png",
+      "trackedInBlogsTable": true,
+      "blogId": 62,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
+    {
+      "title": "The Second Brain: Decoding the complex anatomy of this digital self!",
+      "date": "2026-09-17",
+      "publishedAt": "2026-09-16T18:55:27.639Z",
+      "url": "https://sankettambare.substack.com/p/decoding-the-second-brain",
+      "platform": "Substack",
+      "words": 1361,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "digital-brain",
+        "ai",
+        "self-reflection",
+        "claudecode",
+        "100_days_to_offload",
+        "artificial-intelligence"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!mxx9!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F2a07b95c-d760-4b52-b7cc-4cbaa6a1d0a4_2752x1536.png",
+      "trackedInBlogsTable": true,
+      "blogId": 61,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "The notes of the digital wank!",
       "date": "2026-09-12",
@@ -1517,7 +1584,7 @@
       "publishedAt": "2026-07-15T18:07:40.075Z",
       "url": "https://sankettambare.substack.com/p/personal-website-redesign-fable-5",
       "platform": "Substack",
-      "words": 1088,
+      "words": 1091,
       "wordsSource": "substack_api",
       "section": "100 Days To Offload!",
       "tags": [
@@ -3823,27 +3890,6 @@
       "url": "https://daredavil453624413.wordpress.com/2020/08/17/those-2-incredible-days-in-tarkarli/",
       "platform": "Wordpress",
       "note": "Published, but has no row in the Supabase `blogs` table."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 61,
-      "title": "The Second Brain: Decoding the complex anatomy of this digital self!",
-      "url": "https://sankettambare.substack.com/p/decoding-the-second-brain",
-      "note": "Row in `blogs` matches no post on either platform."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 62,
-      "title": "Patience in the game of uncertainty!",
-      "url": "https://sankettambare.substack.com/p/patience-in-the-game-of-uncertainty",
-      "note": "Row in `blogs` matches no post on either platform."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 63,
-      "title": "The simplicity of the complex world!",
-      "url": "https://sankettambare.substack.com/p/the-simplicity-of-the-complex-world",
-      "note": "Row in `blogs` matches no post on either platform."
     }
   ]
 }
