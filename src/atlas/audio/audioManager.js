@@ -14,7 +14,8 @@
 // suspends the context.
 
 import SFX_MAP from "./sfxMap";
-import { registerSfx } from "./sfxBus";
+import GUIDE_VOICE_MAP from "./guideVoiceMap";
+import { registerSfx, registerVoice } from "./sfxBus";
 
 const GUARD = 0.2;
 const XFADE = 1.0;
@@ -27,6 +28,8 @@ let biomeKey = null; // requested biome — remembered even while disabled
 let current = null; // { key, source, gain }
 const bufferCache = new Map(); // url -> Promise<AudioBuffer>
 let sfxBuffer = null;
+let voiceBuffer = null;
+let voiceSource = null; // the beat currently speaking, if any
 
 const equalPowerCurve = (from) => {
   const steps = 32;
@@ -119,6 +122,49 @@ export const sfx = (name) => {
   source.start(0, spec[0], spec[1]);
 };
 
+/**
+ * One of the guide's spoken beats, out of its own sprite.
+ *
+ * The sprite is fetched on first use rather than pre-decoded with the SFX one:
+ * it is 161 KB against the SFX sprite's 30 KB, and a visitor who never meets
+ * the guide should never pay for it. The first beat therefore speaks a moment
+ * late, which is fine — the bubble is already on screen either way.
+ */
+export const stopVoice = () => {
+  if (voiceSource) {
+    try {
+      voiceSource.stop();
+    } catch (_) { /* already finished */ }
+    voiceSource = null;
+  }
+  // The other voice on this site is the browser's own (ReadAloud). One voice
+  // at a time means one across both, not one per implementation.
+  if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
+};
+
+export const speak = (id) => {
+  if (!enabled || !ctx) return;
+  const spec = GUIDE_VOICE_MAP[id];
+  if (!spec) return;
+  stopVoice();
+  loadBuffer("/audio/guide-voice.m4a")
+    .then((buffer) => {
+      voiceBuffer = buffer;
+      // Sound may have been switched off while the sprite was downloading.
+      if (!enabled || !ctx) return;
+      stopVoice();
+      const source = ctx.createBufferSource();
+      source.buffer = voiceBuffer;
+      const gain = ctx.createGain();
+      gain.gain.value = 1;
+      source.connect(gain).connect(master);
+      source.onended = () => { if (voiceSource === source) voiceSource = null; };
+      voiceSource = source;
+      source.start(0, spec[0], spec[1]);
+    })
+    .catch(() => { /* missing sprite: the bubble still carries the words */ });
+};
+
 // Autoplay-policy escape hatch: when sound was already ON at page load,
 // enable() runs without a user gesture and the context stays "suspended" —
 // the next pointer/key gesture resumes it (sources started meanwhile are
@@ -143,6 +189,7 @@ export const enable = () => {
     master.connect(ctx.destination);
     document.addEventListener("visibilitychange", onVisibility);
     registerSfx(sfx);
+    registerVoice(speak, stopVoice);
   }
   enabled = true;
   ctx.resume().catch(() => { /* resumes on the unlock gesture instead */ });
@@ -156,6 +203,7 @@ export const enable = () => {
 
 export const disable = () => {
   enabled = false;
+  stopVoice();
   if (!ctx) return;
   fadeOutCurrent();
   // Give the fade-out a beat, then park the context (no CPU while off).

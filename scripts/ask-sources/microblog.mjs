@@ -12,6 +12,12 @@ export default {
       ["Micro post", r.title],
       ["Date", r.date],
       ["Type", r.post_type],
+      // 0025's post_kind, in the text rather than a column: hybrid_search
+      // returns the body and nothing else about the row, so this is the only
+      // place a "he did not write this one" signal can reach retrieval — and
+      // the answering model reads it too, which is what CLAUDE.md's prose
+      // warning about reblogs has been asking a model to remember.
+      ["Kind", r.post_kind],
       ["Tags", (r.tag_names || []).join(", ")],
     ];
     // Split with room for the header, so the combined body stays in the window.

@@ -9,6 +9,7 @@ import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import PostCard from "../components/MicroBlog/PostCard";
 import PinboardCard from "../components/MicroBlog/PinboardCard";
 import MonthRiver from "../components/MicroBlog/MonthRiver";
+import OnThisDay from "../components/MicroBlog/OnThisDay";
 import PostModal from "../components/MicroBlog/PostModal";
 
 const PAGE_SIZE = 24;
@@ -24,6 +25,16 @@ const TYPES = [
   { value: "text", label: "Text" },
   { value: "quote", label: "Quote" },
   { value: "photo", label: "Photo" },
+];
+
+// post_kind (0025) — what a post IS, where TYPES is the Tumblr export's format
+// label. "All kinds" includes the posts no classifier has reached yet.
+const KINDS = [
+  { value: "", label: "All kinds" },
+  { value: "own", label: "His own" },
+  { value: "quote", label: "Quotes" },
+  { value: "reblog", label: "Reblogs" },
+  { value: "link", label: "Links" },
 ];
 
 const SORTS = [
@@ -72,6 +83,7 @@ const MicroBlog = () => {
   const [activeTags, setActiveTags] = useState(() => parseTags(searchParams.get("tags")));
   const [source, setSource] = useState(() => searchParams.get("source") || "");
   const [type, setType] = useState(() => searchParams.get("type") || "");
+  const [kind, setKind] = useState(() => searchParams.get("kind") || "");
   const [month, setMonth] = useState(() => searchParams.get("month") || "");
   const [sort, setSort] = useState(() => searchParams.get("sort") || "date_desc");
 
@@ -119,10 +131,11 @@ const MicroBlog = () => {
     if (activeTags.length) next.tags = activeTags.join(",");
     if (source) next.source = source;
     if (type) next.type = type;
+    if (kind) next.kind = kind;
     if (month) next.month = month;
     if (sort !== "date_desc") next.sort = sort;
     setSearchParams(next, { replace: true });
-  }, [tab, view, searchTerm, activeTagsKey, source, type, month, sort, setSearchParams]);
+  }, [tab, view, searchTerm, activeTagsKey, source, type, kind, month, sort, setSearchParams]);
 
   // Tag facets load once (used by both tabs).
   useEffect(() => {
@@ -148,7 +161,7 @@ const MicroBlog = () => {
     setError(null);
     const apiSort = sort === "random" ? "date_desc" : sort;
     searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, month, page: 0, pageSize: PAGE_SIZE, sort: apiSort,
+      query: searchTerm, tags: activeTags, source, type, kind, month, page: 0, pageSize: PAGE_SIZE, sort: apiSort,
     })
       .then(({ rows: r, count: c }) => {
         if (!active) return;
@@ -159,14 +172,14 @@ const MicroBlog = () => {
       .catch((e) => { if (active) setError(e); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [searchTerm, activeTagsKey, source, type, month, sort]);
+  }, [searchTerm, activeTagsKey, source, type, kind, month, sort]);
 
   const loadMore = () => {
     const next = page + 1;
     setLoadingMore(true);
     const apiSort = sort === "random" ? "date_desc" : sort;
     searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, month, page: next, pageSize: PAGE_SIZE, sort: apiSort,
+      query: searchTerm, tags: activeTags, source, type, kind, month, page: next, pageSize: PAGE_SIZE, sort: apiSort,
     })
       .then(({ rows: r }) => {
         setRows((prev) => [...prev, ...(sort === "random" ? shuffleArray(r) : r)]);
@@ -189,17 +202,18 @@ const MicroBlog = () => {
     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
   ));
 
-  const hasFilters = searchTerm || activeTags.length > 0 || source || type || month;
+  const hasFilters = searchTerm || activeTags.length > 0 || source || type || kind || month;
 
   // How many *axes* are in play. The search box is excluded: it still narrows
   // while tags / source / type / month widen.
-  const axisCount = [activeTags.length ? "tags" : "", source, type, month].filter(Boolean).length;
+  const axisCount = [activeTags.length ? "tags" : "", source, type, kind, month].filter(Boolean).length;
   const clearFilters = () => {
     setSearchInput("");
     setSearchTerm("");
     setActiveTags([]);
     setSource("");
     setType("");
+    setKind("");
     setMonth("");
   };
 
@@ -410,6 +424,15 @@ const MicroBlog = () => {
         {/* List panel */}
         {tab === "list" && (
           <>
+            {/* Today's date in an earlier year, and what it rhymes with.
+                Hidden while a filter is on — it answers a question nobody
+                narrowing the archive is asking. */}
+            {!hasFilters && (
+              <div className="mb-4">
+                <OnThisDay />
+              </div>
+            )}
+
             {/* Search + filters */}
             <section>
               <input
@@ -439,6 +462,9 @@ const MicroBlog = () => {
                 </select>
                 <select className={selectClass} value={type} onChange={(e) => setType(e.target.value)}>
                   {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+                <select className={selectClass} value={kind} onChange={(e) => setKind(e.target.value)}>
+                  {KINDS.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
                 </select>
 
                 <div className="flex items-center gap-3 ml-auto">

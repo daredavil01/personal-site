@@ -10,6 +10,7 @@
 import { supabase } from "../supabaseClient";
 
 const ENDPOINT = "/api/ask";
+const TRANSCRIBE_ENDPOINT = "/api/transcribe";
 const SESSION_KEY = "ask.sessionId";
 
 // Stable per-browser id so the admin log can group a back-and-forth into one
@@ -146,6 +147,7 @@ export async function askQuestionStream({
   message,
   history = [],
   types = [],
+  spokenLanguage = null,
   turnstileToken,
   signal,
   onSources = () => {},
@@ -162,6 +164,10 @@ export async function askQuestionStream({
       message,
       history,
       types,
+      // Whisper's detected language when the question was spoken. Better
+      // evidence than the script it is typed in, which reads romanised Marathi
+      // as English and answers it in English.
+      spokenLanguage,
       turnstileToken,
       stream: true,
       sessionId: sessionId(),
@@ -211,4 +217,25 @@ export async function askQuestionStream({
   }
   if (buffer.trim()) handle(buffer);
   return result;
+}
+
+/**
+ * Speech to text for the composer.
+ *
+ * The audio goes to /api/transcribe and nowhere else, is never stored, and the
+ * transcript comes straight back to the question box — editable, and never
+ * sent as a question by itself.
+ */
+export async function transcribeAudio(blob, turnstileToken) {
+  const res = await fetch(TRANSCRIBE_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": blob.type || "application/octet-stream",
+      ...(turnstileToken ? { "X-Turnstile-Token": turnstileToken } : {}),
+    },
+    body: blob,
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.note || body.error || `transcribe ${res.status}`);
+  return { text: String(body.text || ""), language: body.language || null };
 }

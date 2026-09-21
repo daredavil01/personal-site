@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import RelatedContent from "../components/Ask/RelatedContent";
+
 import PageShell from "../atlas/PageShell";
 import { buildBookMeta } from "../data/pageMeta";
 import { useBooks } from "../context/ContentContext";
@@ -8,9 +9,14 @@ import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 import TagLinks from "../components/common/TagLinks";
+
 import BookCover from "../components/Books/BookCover";
 import Stars from "../components/Books/Stars";
 import { formatReadDate } from "../lib/bookDate";
+
+// Module-level so the array identity is stable: RelatedContent re-fetches when
+// `types` changes, and a literal would be a new array on every render.
+const SHELF = ["book"];
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
@@ -188,7 +194,14 @@ const BookPost = () => {
               )}
             </div>
           )}
-          <RelatedContent type="book" id={id} />
+          <RelatedContent
+            type="book"
+            id={id}
+            types={SHELF}
+            limit={3}
+            title="If you liked this"
+          />
+          <RelatedContent type="book" id={id} excludeTypes={SHELF} />
         </article>
       </div>
     </PageShell>

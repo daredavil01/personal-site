@@ -96,9 +96,11 @@ const resources = [
         name: "cover_url", label: "Cover", type: "image", span: "full", hint: "Full-size files are fine — they are compressed in the browser",
       },
       {
-        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full",
       },
-      { name: "description", label: "Description", type: "textarea", required: true, span: "full" },
+      {
+        name: "description", label: "Description", type: "textarea", required: true, span: "full", aiDraft: true,
+      },
       {
         name: "quote", label: "Pull-quote", type: "textarea", span: "full", hint: "A line worth surfacing on the card",
       },
@@ -144,9 +146,11 @@ const resources = [
       { name: "bibNumber", label: "Bib number" },
       { name: "timeCertificateLink", label: "Certificate link", type: "url", span: "full" },
       {
-        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full",
       },
-      { name: "description", label: "Description", type: "textarea", required: true, span: "full" },
+      {
+        name: "description", label: "Description", type: "textarea", required: true, span: "full", aiDraft: true,
+      },
       { name: "slideImages", label: "Images", type: "slideImages", span: "full" },
     ],
   },
@@ -184,7 +188,7 @@ const resources = [
       },
       { name: "blog_link", label: "Blog link", type: "url", span: "full" },
       {
-        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full",
       },
       { name: "slideImages", label: "Images", type: "slideImages", span: "full" },
     ],
@@ -264,7 +268,7 @@ const resources = [
         hint: "React, Supabase, Tailwind… — suggestions come from tech you have already used",
       },
       {
-        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full", hint: "Topical tags, shared with /tags",
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full", hint: "Topical tags, shared with /tags",
       },
       {
         name: "links",
@@ -273,7 +277,9 @@ const resources = [
         span: "full",
         hint: "GitHub repo, live demo, write-up…",
       },
-      { name: "desc", label: "Description", type: "textarea", required: true, span: "full" },
+      {
+        name: "desc", label: "Description", type: "textarea", required: true, span: "full", aiDraft: true,
+      },
       {
         name: "highlights",
         label: "Highlights",
@@ -281,9 +287,15 @@ const resources = [
         span: "full",
         hint: "One outcome per line — shown as bullets on the card and detail page",
       },
-      { name: "problem", label: "Problem", type: "textarea", span: "full" },
-      { name: "solution", label: "Solution", type: "textarea", span: "full" },
-      { name: "outcome", label: "Outcome", type: "textarea", span: "full" },
+      {
+        name: "problem", label: "Problem", type: "textarea", span: "full", aiDraft: true,
+      },
+      {
+        name: "solution", label: "Solution", type: "textarea", span: "full", aiDraft: true,
+      },
+      {
+        name: "outcome", label: "Outcome", type: "textarea", span: "full", aiDraft: true,
+      },
       { name: "slideImages", label: "Screenshots", type: "slideImages", span: "full" },
     ],
   },
@@ -318,9 +330,11 @@ const resources = [
         hint: "https link to the HTML deck. The host must allow embedding in an iframe (GitHub Pages does)",
       },
       {
-        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full", hint: "Topical tags, shared with /tags",
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full", hint: "Topical tags, shared with /tags",
       },
-      { name: "description", label: "Description", type: "textarea", span: "full" },
+      {
+        name: "description", label: "Description", type: "textarea", span: "full", aiDraft: true,
+      },
     ],
   },
   {
@@ -355,9 +369,11 @@ const resources = [
       { name: "challenge_id", label: "Challenge id", hint: "e.g. 100_days_to_offload" },
       { name: "blog_link", label: "Link", type: "url", required: true },
       {
-        name: "blog_tags", label: "Tags", type: "tags", suggest: true, span: "full",
+        name: "blog_tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full",
       },
-      { name: "blog_description", label: "Description", type: "textarea", required: true, span: "full" },
+      {
+        name: "blog_description", label: "Description", type: "textarea", required: true, span: "full", aiDraft: true,
+      },
     ],
   },
   {
@@ -376,7 +392,7 @@ const resources = [
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
       {
-        name: "tags", label: "Tags", type: "tags", suggest: true,
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true,
       },
       { name: "caption", label: "Caption", type: "textarea", required: true, span: "full" },
       { name: "slideImages", label: "Images", type: "slideImages", span: "full" },

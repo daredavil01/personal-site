@@ -30,11 +30,20 @@ const FIELDS = [
   {
     name: "postType", label: "Type", type: "select", options: ["text", "quote", "photo"], required: true,
   },
+  {
+    // post_kind (0025). Blank is "not classified", which is not one of the four
+    // — npm run microblog:classify fills it, and this is where a wrong machine
+    // verdict is corrected.
+    name: "postKind",
+    label: "Kind",
+    type: "select",
+    options: ["", "own", "quote", "reblog", "link"],
+  },
   { name: "title", label: "Title", type: "text" },
   { name: "url", label: "Original URL", type: "url" },
   { name: "text", label: "Text", type: "textarea", required: true, span: "full" },
   {
-    name: "tags", label: "Tags", type: "tags", suggest: true, span: "full",
+    name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full",
   },
   { name: "imageUrl", label: "Image", type: "image", span: "full" },
 ];
@@ -230,7 +239,15 @@ const MicroblogManager = () => {
 
           {FIELDS.map((field) => (
             <Field key={field.name} label={field.label} required={field.required} span={field.span}>
-              <FormField field={field} value={form[field.name]} folder="microblog" onChange={onField} />
+              <FormField
+                field={field}
+                value={form[field.name]}
+                folder="microblog"
+                onChange={onField}
+                // This manager has its own FIELDS rather than a resources.js
+                // entry, so the context the tag suggester needs is built here.
+                draftContext={{ resource: "micro-post", values: form }}
+              />
             </Field>
           ))}
         </div>

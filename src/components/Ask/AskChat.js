@@ -6,11 +6,12 @@ import { entityLabel } from "../../data/askConfig";
 import { colorForTag } from "../../lib/generativeArt";
 import { useTagColors } from "../../context/ContentContext";
 import useTurnstile from "./useTurnstile";
+import useVoiceCapture from "./useVoiceCapture";
 import AnswerBody, { MediaStrip } from "./AnswerBody";
 import { hasInlineImage, isExternal } from "../../lib/askFormat";
 import AnswerActions from "./AnswerActions";
 import { clearThread, loadThread, saveThread } from "./askStorage";
-import { pickQuestions } from "../../lib/askQuestions";
+import { matchQuestions, pickQuestions } from "../../lib/askQuestions";
 import useShareThread from "./useShareThread";
 
 // The one chat component. /ask renders it full-page; AskLauncher renders the
@@ -258,6 +259,9 @@ const CHIP_COUNT = { page: 4, compact: 3 };
 const AskChat = ({ compact }) => {
   const [turns, setTurns] = useState(() => loadThread());
   const [draft, setDraft] = useState("");
+  // Whisper's detected language for the current draft, when it was spoken.
+  // Cleared the moment the draft is typed over: it describes this text only.
+  const [spokenLanguage, setSpokenLanguage] = useState(null);
   const [pending, setPending] = useState(false);
   const [info, setInfo] = useState(null);
   const [blocked, setBlocked] = useState(null);
@@ -273,8 +277,22 @@ const AskChat = ({ compact }) => {
     info?.turnstileSiteKey,
     info?.turnstileRequired,
   );
+  const voice = useVoiceCapture({
+    onTranscript: (text, language) => {
+      // Into the box, never into a question. The visitor edits and presses
+      // Ask — a misheard sentence must cost a keystroke, not an answer.
+      setDraft((prev) => (prev ? `${prev} ${text}` : text));
+      setSpokenLanguage(language);
+    },
+    getTurnstileToken: () => (info?.turnstileRequired ? turnstile.take() : undefined),
+  });
   const [searchParams, setSearchParams] = useSearchParams();
   const shareThread = useShareThread();
+
+  // Autocomplete over the same pool the chips are drawn from. Derived in
+  // render rather than held in state: it is a function of the draft, and a
+  // second copy of it would be a second thing to keep in step.
+  const matches = pending ? [] : matchQuestions(info?.questionPool, draft);
 
   // One draw per page load, from a pool of ~30 across six subjects. A returning
   // visitor gets a different four, and never four about the same thing.
@@ -329,6 +347,7 @@ const AskChat = ({ compact }) => {
     const message = (text ?? draft).trim();
     if (!message || pending || blocked) return;
     setDraft("");
+    setSpokenLanguage(null);
     // A retry replaces the failed question/answer pair rather than stacking a copy.
     const base = replaceFailed ? turns.slice(0, -2) : turns;
     const history = base.map((t) => ({ role: t.role, content: t.content }));
@@ -367,6 +386,7 @@ const AskChat = ({ compact }) => {
         message,
         history,
         types: askTypes,
+        spokenLanguage,
         turnstileToken,
         signal: controller.signal,
         onSources: (event) => patchLast(() => ({
@@ -597,13 +617,31 @@ const AskChat = ({ compact }) => {
               means most visitors never see a challenge. */}
           <div ref={turnstile.containerRef} />
 
+          {matches.length > 0 && (
+            <ul className="list-none pl-0 mb-2 flex flex-wrap gap-1.5">
+              {matches.map((q) => (
+                <li key={q}>
+                  <button
+                    type="button"
+                    // Fills the box, never sends. Same rule the microphone
+                    // follows: the visitor presses Ask.
+                    onClick={() => setDraft(q)}
+                    className="rounded-full border border-stone-200 dark:border-stone-800 px-3 py-1 text-[12px] text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-600"
+                  >
+                    {q}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div className="flex items-end gap-2">
             <textarea
               rows={2}
               value={draft}
               maxLength={max}
               placeholder="Ask something…"
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(e) => { setDraft(e.target.value); setSpokenLanguage(null); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -612,6 +650,22 @@ const AskChat = ({ compact }) => {
               }}
               className="flex-1 resize-none rounded-xl border border-stone-200 dark:border-stone-800 bg-transparent px-3 py-2 text-[14px] focus:outline-none focus:border-stone-400 dark:focus:border-stone-600"
             />
+            {voice.supported && info?.voiceInput && !pending && (
+              <button
+                type="button"
+                onClick={voice.toggle}
+                disabled={voice.busy}
+                title={voice.recording ? "Stop recording" : "Ask by voice — the audio is not stored"}
+                aria-label={voice.recording ? "Stop recording" : "Ask by voice"}
+                className={`rounded-xl border px-3 py-2 text-[13px] font-medium ${
+                  voice.recording
+                    ? "border-red-400 text-red-500"
+                    : "border-stone-300 dark:border-stone-700"
+                } disabled:opacity-40`}
+              >
+                {voice.busy ? "…" : "🎙"}
+              </button>
+            )}
             {pending ? (
               <button
                 type="button"
@@ -630,6 +684,12 @@ const AskChat = ({ compact }) => {
               </button>
             )}
           </div>
+
+          {voice.supported && info?.voiceInput && (
+            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-2 mb-0">
+              {voice.error || "Voice: the recording is transcribed and discarded — nothing is stored, and nothing sends until you press Ask."}
+            </p>
+          )}
         </form>
       )}
     </div>

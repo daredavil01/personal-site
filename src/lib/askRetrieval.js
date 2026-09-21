@@ -23,6 +23,16 @@ const META_QUESTION = /\b(site|website|web ?page|built|build|building|second bra
 // than sharpening it, so the answer comes from everything instead.
 const MIN_IN_SCOPE = 3;
 
+// A micro-post he did not write. `microblog.post_kind` (migration 0025) is
+// carried in the chunk head by scripts/ask-sources/microblog.mjs, because
+// hybrid_search returns the body and nothing else about the row.
+//
+// These sink rather than drop. A reblog is still archive — it answers "has he
+// ever mentioned X" — but it is somebody else's sentence, and an answer that
+// quotes it back as his position is wrong in the way that matters most here.
+// Null (never classified) is not one of the four and stays where it is.
+const BORROWED_KIND = /(^|\|)\s*Kind:\s*(quote|reblog|link)\b/i;
+
 // At most this many of the picked items may share an entity type, unless the
 // question or the chips actually asked for that type.
 //
@@ -138,6 +148,8 @@ export function selectChunks({
     pool = sink(pool, (c) => META_TYPES.has(c.entity_type));
   }
 
+  pool = sink(pool, (c) => c.entity_type === "microblog" && BORROWED_KIND.test(String(c.body || "")));
+
   // Cards are deduped by URL after this, so without a cap one long project
   // chunked five ways leaves the answer with two things to talk about.
   const perEntityCount = new Map();
@@ -158,4 +170,33 @@ export function selectChunks({
   });
 
   return { picked, widened };
+}
+
+/**
+ * Re-orders the candidate chunks by a cross-encoder's scores.
+ *
+ * `ranking` is Workers AI's reranker answer — `[{ id, score }]`, where `id` is
+ * the index of the passage as it was sent. Anything unexpected returns the
+ * list untouched: the RRF ordering this replaces is a perfectly good answer,
+ * and a reranker that misbehaves must cost nothing.
+ *
+ * Chunks the model did not score keep their original order at the back rather
+ * than being dropped — a truncated answer should narrow the top of the list,
+ * never the archive.
+ */
+export function applyRerank(chunks, ranking) {
+  const all = Array.isArray(chunks) ? chunks : [];
+  if (!Array.isArray(ranking) || !ranking.length) return all;
+
+  const seen = new Set();
+  const front = [];
+  ranking.forEach((row) => {
+    const i = Number(row?.id);
+    if (!Number.isInteger(i) || i < 0 || i >= all.length || seen.has(i)) return;
+    seen.add(i);
+    front.push(all[i]);
+  });
+  if (!front.length) return all;
+
+  return [...front, ...all.filter((_, i) => !seen.has(i))];
 }

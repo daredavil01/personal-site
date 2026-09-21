@@ -1,4 +1,5 @@
 import { supabase } from "../supabaseClient";
+import { AI_FEATURES, AI_MASTER_KEY } from "../../data/askConfig";
 
 // The /ask runtime config: one row, id = 1, same singleton shape as now_meta.
 // Not a createResource — there is no list, no tags, and exactly one row.
@@ -12,6 +13,8 @@ function fromRow(r) {
   return {
     enabled: !!r.enabled,
     turnstileRequired: !!r.turnstile_required,
+    dailyVoiceGlobalCap: r.daily_voice_global_cap ?? 0,
+    dailyVoiceIpCap: r.daily_voice_ip_cap ?? 0,
     dailyGlobalCap: r.daily_global_cap ?? 300,
     dailyIpCap: r.daily_ip_cap ?? 15,
     maxMessageChars: r.max_message_chars ?? 500,
@@ -38,6 +41,9 @@ function fromRow(r) {
     autoEvalMinConfidence: r.auto_eval_min_confidence ?? 0.7,
     autoEvalMonthlyTokenCap: r.auto_eval_monthly_token_cap ?? 2000000,
     autoEvalExplainEnabled: !!r.auto_eval_explain_enabled,
+    // The switchboard for the AI features outside /ask (0024). Plain object of
+    // booleans; a missing key means off.
+    aiFeatures: (r.ai_features && typeof r.ai_features === "object") ? r.ai_features : {},
   };
 }
 
@@ -46,6 +52,8 @@ function toRow(v) {
     id: 1,
     enabled: !!v.enabled,
     turnstile_required: !!v.turnstileRequired,
+    daily_voice_global_cap: Number(v.dailyVoiceGlobalCap) || 0,
+    daily_voice_ip_cap: Number(v.dailyVoiceIpCap) || 0,
     daily_global_cap: Number(v.dailyGlobalCap) || 0,
     daily_ip_cap: Number(v.dailyIpCap) || 0,
     max_message_chars: Number(v.maxMessageChars) || 500,
@@ -82,6 +90,12 @@ function toRow(v) {
     auto_eval_monthly_token_cap: Number.isFinite(Number(v.autoEvalMonthlyTokenCap))
       ? Math.max(0, Math.round(Number(v.autoEvalMonthlyTokenCap))) : 2000000,
     auto_eval_explain_enabled: !!v.autoEvalExplainEnabled,
+    // Only booleans, and only keys the code knows about: an unrecognised key
+    // here would be a flag nothing reads, which is worse than no flag.
+    ai_features: Object.fromEntries(
+      [AI_MASTER_KEY, ...AI_FEATURES.map((f) => f.key)]
+        .map((key) => [key, !!(v.aiFeatures || {})[key]]),
+    ),
   };
 }
 

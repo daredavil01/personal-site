@@ -1,4 +1,4 @@
-import { pickQuestions, validPool } from "./askQuestions";
+import { matchQuestions, pickQuestions, validPool } from "./askQuestions";
 
 const pool = [
   { q: "books 1", c: "reading" }, { q: "books 2", c: "reading" },
@@ -59,5 +59,37 @@ describe("validPool", () => {
     expect(validPool([
       { q: "keep", c: "site" }, { q: "   ", c: "site" }, { c: "site" }, null, "nope",
     ])).toEqual([{ q: "keep", c: "site" }]);
+  });
+});
+
+describe("matchQuestions", () => {
+  const live = [
+    { q: "How many marathons has he run?", c: "running" },
+    { q: "What was his slowest marathon?", c: "running" },
+    { q: "Which Marathi books has he read?", c: "reading" },
+  ];
+
+  it("matches a word anywhere in the question, not only the start", () => {
+    expect(matchQuestions(live, "marathon")).toEqual([
+      "How many marathons has he run?", "What was his slowest marathon?",
+    ]);
+  });
+
+  it("requires every typed word", () => {
+    expect(matchQuestions(live, "slowest marathon")).toEqual(["What was his slowest marathon?"]);
+  });
+
+  it("stays quiet until there is something to go on", () => {
+    expect(matchQuestions(live, "ma")).toEqual([]);
+    expect(matchQuestions(live, "   ")).toEqual([]);
+  });
+
+  it("drops the question already typed out in full", () => {
+    expect(matchQuestions(live, "how many marathons has he run?")).toEqual([]);
+  });
+
+  it("returns nothing for an empty or malformed pool", () => {
+    expect(matchQuestions(null, "marathon")).toEqual([]);
+    expect(matchQuestions([{ c: "running" }], "marathon")).toEqual([]);
   });
 });

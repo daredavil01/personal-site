@@ -227,3 +227,46 @@ describe("serializeSections", () => {
     }]);
   });
 });
+
+describe("release-note blockquotes", () => {
+  // npm run changelog:notes writes one of these under a version heading. The
+  // parser must walk past it: the Now editor offers changes, not summaries.
+  const md = `## [v3.0.0] — 2026-06-01
+
+> The site got faster and the search stopped guessing.
+
+### Added
+
+- **A thing** (\`a.js\`): It does something.
+`;
+
+  it("ignores the summary and still reads the bullets", () => {
+    const [entry] = parseChangelog(md);
+    expect(entry.version).toBe("v3.0.0");
+    expect(entry.summary).toBe("The site got faster and the search stopped guessing.");
+    expect(entry.changes).toEqual([
+      { kind: "Added", name: "A thing", body: "It does something." },
+    ]);
+  });
+
+  it("offers the summary first, as its own highlight", () => {
+    const items = changelogHighlights(parseChangelog(md), "2026-06");
+    expect(items[0]).toMatchObject({
+      kind: "Summary",
+      line: "The site got faster and the search stopped guessing.",
+      id: "v3.0.0-summary",
+    });
+    expect(items).toHaveLength(2);
+  });
+
+  it("leaves summary empty when the version has none", () => {
+    const plain = `## [v3.0.1] — 2026-06-02
+
+### Fixed
+
+- **X**: y.
+`;
+    expect(parseChangelog(plain)[0].summary).toBe("");
+    expect(changelogHighlights(parseChangelog(plain), "2026-06")).toHaveLength(1);
+  });
+});

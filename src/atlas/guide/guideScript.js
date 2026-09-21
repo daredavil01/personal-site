@@ -7,37 +7,10 @@
 // pickBeat is pure (world + pathname in, beat out) and unit-tested.
 
 import { regionForPath } from "../map/mapRegions";
+import { BEATS } from "./guideBeats";
 
-// where: "map" (the hub), "region" (any region interior), "any".
-export const BEATS = [
-  {
-    id: "welcome",
-    where: "map",
-    // Only once the visitor has actually reached the hub (intro played or
-    // skipped) — never over the orbit stage, where "this map" isn't shown yet.
-    text: "Welcome, fellow explorer! This map is my whole world — six regions, one me. Click any region and the camera flies you in.",
-    when: (world) => world.introSeen,
-  },
-  {
-    id: "first-stamp",
-    where: "region",
-    text: "That's your first region — stamped! Everything you explore lands in your traveler's passport, the little book up top.",
-    when: (world) => Object.keys(world.visitedRegions || {}).length >= 1,
-  },
-  {
-    id: "sound-hint",
-    where: "any",
-    text: "Want the world to hum? The sound toggle plays each region's own ambience — waves, wind, gears. Off until you say so.",
-    when: (world) => Object.keys(world.visitedRegions || {}).length >= 2 && !world.sound,
-  },
-  {
-    id: "egg-hint",
-    where: "map",
-    text: "Between you and me — this map keeps a few secrets. Shiny ones. Keep your eyes open as you wander.",
-    when: (world) => Object.keys(world.visitedRegions || {}).length >= 3
-      && Object.keys(world.eggs || {}).length === 0,
-  },
-];
+// Re-exported so guideScript stays the one import site for the guide.
+export { BEATS };
 
 /**
  * The first unseen beat whose place and condition match, or null.

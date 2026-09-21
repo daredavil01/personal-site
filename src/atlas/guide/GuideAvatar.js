@@ -10,6 +10,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useWorld } from "../world/WorldContext";
 import { pickBeat } from "./guideScript";
+import { playVoice } from "../audio/sfxBus";
 import "./guide.css";
 
 // Flat-vector mini Sanket. Decorative — the bubble carries the content.
@@ -64,7 +65,13 @@ const GuideAvatar = () => {
       setShown(null);
       return undefined;
     }
-    const t = setTimeout(() => setShown(beatId), 1100);
+    const t = setTimeout(() => {
+      setShown(beatId);
+      // Speaks only when the visitor has turned sound on — playVoice is a
+      // no-op until the audio manager registers, which the toggle is what
+      // triggers. The bubble carries the same words either way.
+      playVoice(beatId);
+    }, 1100);
     return () => clearTimeout(t);
   }, [beatId]);
 

@@ -5,13 +5,16 @@ import { monthRange } from "../monthDigest";
 
 // Explicit column list so the generated `search_tsv` tsvector is never shipped
 // to the browser. `tag_names` is the computed field from 0003_centralized_tags.
-const COLUMNS = "id, source, source_id, post_type, date, title, text, tag_names, url, image_url, created_at, updated_at";
+const COLUMNS = "id, source, source_id, post_type, post_kind, post_kind_confidence, date, title, text, tag_names, url, image_url, created_at, updated_at";
 
 const fromRow = (r) => ({
   id: r.id,
   source: r.source,
   sourceId: r.source_id ?? undefined,
   postType: r.post_type,
+  // null means "not classified yet", which is not one of the four verdicts.
+  postKind: r.post_kind ?? null,
+  postKindConfidence: r.post_kind_confidence ?? null,
   date: r.date,
   title: r.title ?? "",
   text: r.text ?? "",
@@ -24,6 +27,7 @@ const toRow = (v) => ({
   source: v.source || "manual",
   source_id: v.sourceId || null,
   post_type: v.postType || "text",
+  post_kind: v.postKind || null,
   date: v.date,
   title: v.title || "",
   text: v.text || "",
@@ -50,7 +54,7 @@ const microblog = createResource({
  * @returns {Promise<{ rows: object[], count: number }>}
  */
 export async function searchMicroblog({
-  query = "", tags = [], source = "", type = "", month = "", page = 0, pageSize = 24, sort = "date_desc",
+  query = "", tags = [], source = "", type = "", kind = "", month = "", page = 0, pageSize = 24, sort = "date_desc",
 } = {}) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
@@ -80,6 +84,12 @@ export async function searchMicroblog({
     clauses.push(`and(date.gte.${start},date.lt.${endExclusive})`);
   }
   if (clauses.length) q = q.or(clauses.join(","));
+
+  // kind NARROWS, where the axes above widen. "Only his own thoughts" is a lens
+  // over whatever else is selected; OR-ing it would put the reblogs straight
+  // back. Unclassified rows are excluded by an explicit kind on purpose — the
+  // reader asked for posts known to be of that kind.
+  if (kind) q = q.eq("post_kind", kind);
 
   q = q
     .order("date", { ascending })
@@ -223,6 +233,57 @@ export async function getMicroblogByMonth(key, limit = 6) {
     .limit(limit);
   if (error) throw error;
   return { rows: (data ?? []).map(fromRow), count: count ?? 0 };
+}
+
+/**
+ * "On this day" — but semantic, not calendrical.
+ *
+ * The seed is the most recent post written on today's date in an earlier year
+ * (microblog_on_this_day, 0025 — PostgREST cannot filter on `extract(day from
+ * date)`). The echoes are that post's nearest neighbours in the /ask index,
+ * which is what makes this "what you were thinking about the last time you
+ * wrote about this" rather than "a year ago today".
+ *
+ * No model call: related_content_ranked (0013/0014) reads vectors that
+ * `npm run ask:index` already wrote. Returns null when today's date is blank
+ * in the archive, so the caller can render nothing.
+ */
+export async function getMicroblogOnThisDay(echoCount = 8) {
+  const now = new Date();
+  const { data: seeds, error } = await supabase.rpc("microblog_on_this_day", {
+    p_month: now.getMonth() + 1,
+    p_day: now.getDate(),
+    p_limit: 1,
+  });
+  if (error) throw error;
+
+  const seed = (seeds || [])[0];
+  if (!seed) return null;
+
+  const { data: echoes } = await supabase.rpc("related_content_ranked", {
+    p_type: "microblog",
+    p_id: seed.id,
+    p_limit: echoCount,
+    p_types: ["microblog"],
+  });
+
+  return {
+    seed: {
+      id: seed.id,
+      date: seed.date,
+      title: seed.title ?? "",
+      text: seed.text ?? "",
+      postType: seed.post_type,
+      url: seed.url ?? undefined,
+      imageUrl: toStorageUrl(seed.image_url) ?? undefined,
+    },
+    echoes: (echoes || []).map((e) => ({
+      id: e.entity_id,
+      title: e.title ?? "",
+      date: e.chunk_date,
+      similarity: e.similarity,
+    })),
+  };
 }
 
 export default microblog;

@@ -9,16 +9,17 @@
 // The backticked path group is optional, and a handful of older bullets are
 // plain prose with no bold name — both are tolerated.
 
+import changelogUrl from "../data/changelog.md?url";
+
 const VERSION_RE = /^##\s+\[?(v[\d.]+)\]?\s*[—–-]\s*(\d{4}-\d{2}-\d{2})/;
 const KIND_RE = /^###\s+(\w+)/;
 
 /**
- * Fetch the raw changelog markdown. Mirrors src/pages/Changelog.js — the ?url
- * suffix makes Vite resolve the markdown to its served asset URL.
+ * Fetch the raw changelog markdown. The static URL import keeps the markdown
+ * asset reference in the main bundle for Cloudflare Pages' asset server.
  */
 export async function loadChangelog() {
-  const mod = await import("../data/changelog.md?url");
-  const res = await fetch(mod.default);
+  const res = await fetch(changelogUrl);
   if (!res.ok) throw new Error(`Changelog fetch failed (${res.status})`);
   const text = await res.text();
   return text.replace(/^---[\s\S]*?---\s*\n/, "");
@@ -43,9 +44,13 @@ function parseBullet(raw) {
   return { name: name.replace(/[`*]/g, ""), body };
 }
 
+// The reader-facing paragraph npm run changelog:notes writes under a version
+// heading, as a blockquote. One per version, before the first `###` section.
+const SUMMARY_RE = /^>\s*(.+)/;
+
 /**
  * Parse changelog markdown into version entries.
- * @returns {{version, date, monthKey, changes: {kind, name, body}[]}[]}
+ * @returns {{version, date, monthKey, summary, changes: {kind, name, body}[]}[]}
  */
 export function parseChangelog(md) {
   const entries = [];
@@ -68,10 +73,20 @@ export function parseChangelog(md) {
         version: version[1],
         date: version[2],
         monthKey: version[2].slice(0, 7),
+        summary: "",
         changes: [],
       };
       entries.push(entry);
       kind = null;
+      return;
+    }
+
+    // Before the first section heading, and only the first one: a blockquote
+    // deeper in a version block is somebody quoting something, not the summary.
+    const summary = line.match(SUMMARY_RE);
+    if (summary && entry && !kind && !entry.summary) {
+      flush();
+      entry.summary = summary[1].trim();
       return;
     }
 
@@ -164,14 +179,27 @@ export function changelogHighlights(entries, monthKey) {
   if (!monthKey) return [];
   return (entries || [])
     .filter((e) => e.monthKey === monthKey)
-    .flatMap((e) => e.changes.map((change, i) => ({
-      id: `${e.version}-${i}`,
-      version: e.version,
-      date: e.date,
-      kind: change.kind,
-      name: change.name,
-      line: highlightLine(change),
-    })));
+    .flatMap((e) => [
+      // The version's own summary first, where there is one: it is already
+      // written for a reader, which is what a Now page wants and what every
+      // engineering bullet below it has to be trimmed into.
+      ...(e.summary ? [{
+        id: `${e.version}-summary`,
+        version: e.version,
+        date: e.date,
+        kind: "Summary",
+        name: "",
+        line: e.summary,
+      }] : []),
+      ...e.changes.map((change, i) => ({
+        id: `${e.version}-${i}`,
+        version: e.version,
+        date: e.date,
+        kind: change.kind,
+        name: change.name,
+        line: highlightLine(change),
+      })),
+    ]);
 }
 
 export default parseChangelog;

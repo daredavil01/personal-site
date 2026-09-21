@@ -14,7 +14,9 @@ import { useTagColors } from "../../context/ContentContext";
 // added, or before `npm run ask:index` has run, an empty strip is better than a
 // heading over a blank row.
 
-const RelatedContent = ({ type, id, limit, title }) => {
+const RelatedContent = ({
+  type, id, limit, title, types, excludeTypes,
+}) => {
   const [items, setItems] = useState([]);
   const colors = useTagColors();
 
@@ -22,16 +24,21 @@ const RelatedContent = ({ type, id, limit, title }) => {
     if (!isSupabaseConfigured || !type || !id) return;
     let cancelled = false;
     supabase
-      .rpc("related_content_ranked", { p_type: type, p_id: Number(id), p_limit: limit })
+      .rpc("related_content_ranked", {
+        p_type: type, p_id: Number(id), p_limit: limit, p_types: types || null,
+      })
       .then(({ data, error }) => {
         if (cancelled || error) return;
-        setItems(data || []);
+        // Filtered here rather than in the RPC: the caller knows what another
+        // strip on the same page is already showing, and naming every type it
+        // does NOT want would be a list to keep in step with the schema.
+        setItems((data || []).filter((r) => !excludeTypes?.includes(r.entity_type)));
       });
     // eslint-disable-next-line consistent-return
     return () => {
       cancelled = true;
     };
-  }, [type, id, limit]);
+  }, [type, id, limit, types, excludeTypes]);
 
   if (!items.length) return null;
 
@@ -79,8 +86,15 @@ RelatedContent.propTypes = {
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   limit: PropTypes.number,
   title: PropTypes.string,
+  // Narrows the neighbours to these entity types, which the RPC has always
+  // supported and nothing passed. Null means the whole archive.
+  types: PropTypes.arrayOf(PropTypes.string),
+  // Drops these types from the answer, for a page that shows them separately.
+  excludeTypes: PropTypes.arrayOf(PropTypes.string),
 };
 
-RelatedContent.defaultProps = { limit: 6, title: "Related from the archive" };
+RelatedContent.defaultProps = {
+  limit: 6, title: "Related from the archive", types: null, excludeTypes: null,
+};
 
 export default RelatedContent;

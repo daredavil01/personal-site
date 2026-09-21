@@ -6,7 +6,9 @@ import {
   getAskUsage,
   getAskEvalUsage,
 } from "../../lib/api/askSettings";
-import { ASK_JUDGE_PROVIDERS, ASK_PROVIDERS, QUESTION_CATEGORIES } from "../../data/askConfig";
+import {
+  AI_FEATURES, AI_MASTER_KEY, ASK_JUDGE_PROVIDERS, ASK_PROVIDERS, QUESTION_CATEGORIES,
+} from "../../data/askConfig";
 import PageHeader from "./ui/PageHeader";
 import Card from "./ui/Card";
 import Field from "./ui/Field";
@@ -15,6 +17,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from "./ui/icons";
 import { Spinner, ErrorState } from "./ui/Feedback";
 import { useToast } from "./ui/ToastContext";
 import useUnsavedGuard from "./ui/useUnsavedGuard";
+import { refreshAiFeatures } from "./useAiFeatures";
 import ConfirmDialog from "./ui/ConfirmDialog";
 import { hairline, labelClass, mutedText, surface } from "./ui/tokens";
 import { RepeatableRows } from "./now/SectionEditors";
@@ -104,6 +107,13 @@ const LIMITS = [
   { name: "dailyIpCap", label: "Questions per day (per visitor)", type: "number" },
   { name: "maxMessageChars", label: "Max question length", type: "number" },
   { name: "maxHistoryTurns", label: "Turns of history sent", type: "number" },
+  {
+    name: "dailyVoiceGlobalCap",
+    label: "Transcriptions per day (everyone)",
+    type: "number",
+    hint: "Counted separately from questions, so a hot microphone cannot spend the day's answers",
+  },
+  { name: "dailyVoiceIpCap", label: "Transcriptions per day (per visitor)", type: "number" },
 ];
 
 const RETRIEVAL = [
@@ -260,12 +270,21 @@ const AskSettingsEditor = () => {
   }, []);
 
   const onField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
+  // The AI switchboard is one jsonb column, so its toggles write into that
+  // object rather than onto a field of their own.
+  const setFeature = (key, value) => setForm((prev) => ({
+    ...prev,
+    aiFeatures: { ...(prev.aiFeatures || {}), [key]: !!value },
+  }));
 
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
       await updateAskSettings(form);
+      // The AI switches are cached per page load, so the Draft button would keep
+      // its old visibility until a reload without this.
+      refreshAiFeatures();
       setMeta((prev) => ({ ...prev, baseline: form }));
       toast.success("Ask settings saved. Live within a minute.");
     } catch (err) {
@@ -287,7 +306,7 @@ const AskSettingsEditor = () => {
         description="Everything /ask reads at request time. Changes go live within a minute — no redeploy."
       />
 
-      <Card title="Switch">
+      <Card collapsible title="Switch">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           {SWITCHES.map((field) => (
             <Field key={field.name} label={field.label} hint={field.hint}>
@@ -298,6 +317,7 @@ const AskSettingsEditor = () => {
       </Card>
 
       <Card
+        collapsible
         title="Limits"
         description="The endpoint fails closed: past these caps it answers with the note below instead of calling a model."
       >
@@ -318,6 +338,7 @@ const AskSettingsEditor = () => {
       </Card>
 
       <Card
+        collapsible
         title="Model ladder"
         description="Tried top to bottom until one answers. If they all fail, /ask still returns the matching pages with a short note."
       >
@@ -325,6 +346,7 @@ const AskSettingsEditor = () => {
       </Card>
 
       <Card
+        collapsible
         title="Retrieval"
         description="How many chunks to pull, and how keyword and meaning are weighted when the two rankings are fused."
       >
@@ -337,7 +359,7 @@ const AskSettingsEditor = () => {
         </div>
       </Card>
 
-      <Card title="Copy" description="The prompt and the three canned replies.">
+      <Card collapsible title="Copy" description="The prompt and the three canned replies.">
         <div className="grid grid-cols-1 gap-x-6 gap-y-5">
           {COPY.map((field) => (
             <Field key={field.name} label={field.label} hint={field.hint} span={field.span}>
@@ -370,6 +392,41 @@ const AskSettingsEditor = () => {
       </Card>
 
       <Card
+        collapsible
+        title="AI features"
+        description="Everything outside /ask that calls a model: the admin Draft button and the batch scripts. Each is off until switched on here, and the master switch overrides all of them."
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <Field
+            label="AI features enabled"
+            hint="Master switch. Off means none of the features below run, whatever their own switch says."
+            span="full"
+          >
+            <FormField
+              field={{ name: AI_MASTER_KEY, type: "boolean" }}
+              value={!!(form.aiFeatures || {})[AI_MASTER_KEY]}
+              onChange={setFeature}
+            />
+          </Field>
+          {AI_FEATURES.map((feature) => (
+            <Field key={feature.key} label={feature.label} hint={feature.hint}>
+              <FormField
+                field={{ name: feature.key, type: "boolean" }}
+                value={!!(form.aiFeatures || {})[feature.key]}
+                onChange={setFeature}
+              />
+            </Field>
+          ))}
+        </div>
+        <p className={`text-xs ${mutedText} mt-4 mb-0`}>
+          A batch script reads these too, so turning one off stops the next run as well as the
+          button. Every one of them is owner-only or offline — none adds a model call a visitor
+          can reach.
+        </p>
+      </Card>
+
+      <Card
+        collapsible
         title="Automatic evaluation"
         description="Grades logged answers on demand from Ask · Conversations. A grade you typed yourself is never overwritten."
       >
@@ -410,6 +467,7 @@ const AskSettingsEditor = () => {
       </Card>
 
       <Card
+        collapsible
         title="Archive card"
         description="Generated by `npm run ask:index` from docs/chatbot-context.md and appended to the system prompt. Read-only here."
       >
@@ -424,7 +482,7 @@ const AskSettingsEditor = () => {
       </Card>
 
       {usage.length > 1 && (
-        <Card title="Last 14 days" description="Which tier actually answered.">
+        <Card collapsible title="Last 14 days" description="Which tier actually answered.">
           <div className="overflow-x-auto">
             <table className="text-[13px] w-full">
               <thead>

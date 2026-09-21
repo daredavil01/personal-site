@@ -8,6 +8,8 @@ import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 import TagLinks from "../components/common/TagLinks";
+import BLOG_WORDS from "../data/blogWords";
+import { readingLabel } from "../lib/readingTime";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
@@ -29,6 +31,9 @@ const BlogPost = () => {
   const [shareState, setShareState] = useState("idle");
 
   const blog = blogsData.find((b) => String(b.id) === id);
+  // Word counts come from the ledger the nightly job already builds, so a post
+  // the crawler has not seen yet simply has no label rather than a wrong one.
+  const readLabel = readingLabel(BLOG_WORDS[id]);
 
   // Opening a post counts toward the Wordsmith collector quest (§4.5).
   useEffect(() => {
@@ -102,6 +107,11 @@ const BlogPost = () => {
             {blog.blog_platform && (
               <span className={`font-label text-[9px] uppercase tracking-widest px-2 py-0.5 rounded ${platformColors[blog.blog_platform] || "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400"}`}>
                 {blog.blog_platform}
+              </span>
+            )}
+            {readLabel && (
+              <span className="font-mono text-xs text-stone-400 dark:text-stone-500">
+                {readLabel}
               </span>
             )}
             {blog.language && (

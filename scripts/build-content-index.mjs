@@ -30,6 +30,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { buildDocs, makeClient } from "./build-docs.mjs";
 import { EMBEDDING_MODEL, entityUrl } from "../src/data/askConfig.js";
+import { embedTexts } from "./lib/workersAi.mjs";
 import * as chunking from "./lib/chunking.mjs";
 import {
   chunkKey, collectChunks, loadSources, planChunks, planOrphans,
@@ -120,28 +121,7 @@ async function loadVectors(hashes) {
 
 // --- embeddings -------------------------------------------------------------
 
-async function embed(texts) {
-  const { CF_ACCOUNT_ID, CF_API_TOKEN } = process.env;
-  if (!CF_ACCOUNT_ID || !CF_API_TOKEN) {
-    throw new Error("Missing CF_ACCOUNT_ID / CF_API_TOKEN in .env (Workers AI embeddings).");
-  }
-  const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/run/${EMBEDDING_MODEL}`,
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${CF_API_TOKEN}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ text: texts }),
-    },
-  );
-  if (!res.ok) {
-    throw new Error(`Workers AI ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  }
-  const vectors = (await res.json())?.result?.data;
-  if (!Array.isArray(vectors) || vectors.length !== texts.length) {
-    throw new Error(`Workers AI returned ${vectors?.length ?? "no"} vectors for ${texts.length} texts`);
-  }
-  return vectors;
-}
+const embed = (texts) => embedTexts(EMBEDDING_MODEL, texts);
 
 // Batches are packed against the padded cost above, and the per-text estimate
 // is deliberately pessimistic (2 chars/token) because Devanagari tokenises far

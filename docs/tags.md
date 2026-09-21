@@ -6,75 +6,79 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 28 | Mind & Life |
-| `technology` | 26 | Technology & Data |
-| `100_days_to_offload` | 23 | Writing & Blogging |
-| `self-reflection` | 22 | Mind & Life |
-| `ai` | 20 | Technology & Data |
-| `digital wellbeing` | 19 | Digital Life |
-| `social` | 15 | Society & Ideas |
+| `life` | 124 | Mind & Life |
+| `self-reflection` | 115 | Mind & Life |
+| `sanky` | 58 | Personal |
+| `philosophy` | 41 | Society & Ideas |
+| `travel` | 39 | Travel & Outdoors |
+| `forts` | 33 | Travel & Outdoors |
+| `maharashtra` | 31 | Travel & Outdoors |
+| `digital wellbeing` | 28 | Digital Life |
+| `technology` | 28 | Technology & Data |
+| `100_days_to_offload` | 25 | Writing & Blogging |
+| `love` | 24 | People & Feelings |
+| `marathi` | 23 | Books & Reading |
+| `ai` | 22 | Technology & Data |
+| `personaldevelopment` | 21 | Mind & Life |
+| `daredavil01` | 20 | Personal |
+| `social` | 19 | Society & Ideas |
+| `desperate me` | 18 | People & Feelings |
+| `self-help` | 16 | Books & Reading |
+| `social media` | 15 | Digital Life |
+| `calmness` | 14 | Mind & Life |
+| `konkan` | 13 | Travel & Outdoors |
 | `youtube` | 13 | Digital Life |
-| `travel` | 12 | Travel & Outdoors |
+| `भटकंती` | 13 | Travel & Outdoors |
+| `marathon` | 12 | Running & Fitness |
 | `fiction` | 11 | Books & Reading |
-| `marathon` | 11 | Running & Fitness |
-| `philosophy` | 9 | Society & Ideas |
+| `digital detox` | 10 | Digital Life |
+| `politics` | 10 | Society & Ideas |
+| `psychology` | 10 | Society & Ideas |
 | `खंडेराव` | 8 | Writing & Blogging |
-| `politics` | 7 | Society & Ideas |
-| `भटकंती` | 7 | Travel & Outdoors |
+| `मन` | 8 | Mind & Life |
+| `book review` | 7 | Books & Reading |
+| `choices` | 7 | Mind & Life |
+| `latepost` | 7 | Writing & Blogging |
+| `running` | 7 | Running & Fitness |
+| `biography` | 6 | Books & Reading |
 | `claude code` | 6 | Technology & Data |
+| `history` | 6 | Society & Ideas |
 | `non-fiction` | 6 | Books & Reading |
-| `psychology` | 6 | Society & Ideas |
-| `running` | 6 | Running & Fitness |
-| `self-help` | 6 | Books & Reading |
-| `biography` | 5 | Books & Reading |
+| `trekking` | 6 | Travel & Outdoors |
 | `digitalnomad` | 5 | Digital Life |
-| `history` | 5 | Society & Ideas |
+| `public policy` | 5 | Society & Ideas |
+| `स्थितप्रज्ञ` | 5 | Mind & Life |
+| `adventure` | 4 | Travel & Outdoors |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
-| `book review` | 4 | Books & Reading |
-| `daredavil01` | 4 | Personal |
-| `love` | 4 | People & Feelings |
-| `marathi` | 4 | Books & Reading |
+| `data` | 4 | Technology & Data |
 | `ngo` | 4 | Society & Ideas |
-| `public policy` | 4 | Society & Ideas |
-| `social media` | 4 | Digital Life |
-| `trekking` | 4 | Travel & Outdoors |
-| `data` | 3 | Technology & Data |
-| `digital detox` | 3 | Digital Life |
-| `forts` | 3 | Travel & Outdoors |
-| `latepost` | 3 | Writing & Blogging |
-| `sports` | 3 | Running & Fitness |
-| `adventure` | 2 | Travel & Outdoors |
-| `calmness` | 2 | Mind & Life |
-| `choices` | 2 | Mind & Life |
-| `data privacy` | 2 | Digital Life |
-| `desperate me` | 2 | People & Feelings |
-| `newsletter` | 2 | Writing & Blogging |
+| `sports` | 4 | Running & Fitness |
+| `youth` | 4 | Society & Ideas |
+| `data privacy` | 3 | Digital Life |
+| `mydesigns` | 3 | Arts & Culture |
+| `newsletter` | 3 | Writing & Blogging |
+| `privacy` | 3 | Digital Life |
+| `scientific temperament` | 3 | Society & Ideas |
+| `auto-biography` | 2 | Books & Reading |
+| `bankot fort` | 2 | Travel & Outdoors |
+| `digital manipulation` | 2 | Digital Life |
+| `digital technology` | 2 | Digital Life |
+| `knowledgeeconomy` | 2 | Society & Ideas |
+| `nda marathon` | 2 | Running & Fitness |
 | `nirman` | 2 | Society & Ideas |
-| `personaldevelopment` | 2 | Mind & Life |
-| `privacy` | 2 | Digital Life |
-| `sanky` | 2 | Personal |
-| `youth` | 2 | Society & Ideas |
-| `मन` | 2 | Mind & Life |
-| `स्थितप्रज्ञ` | 2 | Mind & Life |
-| `auto-biography` | 1 | Books & Reading |
-| `bankot fort` | 1 | Travel & Outdoors |
+| `search` | 2 | Society & Ideas |
+| `the social dilemma` | 2 | Digital Life |
+| `vibe-coding` | 2 | Technology & Data |
 | `bioscope` | 1 | Mind & Life |
 | `data journalism` | 1 | Technology & Data |
 | `data visualization` | 1 | Technology & Data |
-| `digital manipulation` | 1 | Digital Life |
-| `digital technology` | 1 | Digital Life |
 | `floating_in_sea🌊` | 1 | Travel & Outdoors |
 | `google sites` | 1 | Writing & Blogging |
 | `harihareshwar` | 1 | Travel & Outdoors |
 | `hyderabad` | 1 | Travel & Outdoors |
 | `information age` | 1 | Digital Life |
 | `kailasgad` | 1 | Travel & Outdoors |
-| `knowledgeeconomy` | 1 | Society & Ideas |
-| `konkan` | 1 | Travel & Outdoors |
 | `krantismritivan` | 1 | Travel & Outdoors |
-| `maharashtra` | 1 | Travel & Outdoors |
-| `mydesigns` | 1 | Arts & Culture |
-| `nda marathon` | 1 | Running & Fitness |
 | `nightsky` | 1 | Travel & Outdoors |
 | `note-taking` | 1 | Writing & Blogging |
 | `obsidian` | 1 | Writing & Blogging |
@@ -86,22 +90,18 @@ Names are lowercase and URI-encoded rather than slugified.
 | `rock_garden` | 1 | Travel & Outdoors |
 | `satara` | 1 | Travel & Outdoors |
 | `satpuda` | 1 | Travel & Outdoors |
-| `scientific temperament` | 1 | Society & Ideas |
 | `sea_at_night🌃🌊` | 1 | Travel & Outdoors |
-| `search` | 1 | Society & Ideas |
 | `semiconductor` | 1 | Technology & Data |
 | `sexual-drama` | 1 | Books & Reading |
 | `tarkarli` | 1 | Travel & Outdoors |
 | `tata` | 1 | Society & Ideas |
 | `technology policy` | 1 | Society & Ideas |
 | `the matrix` | 1 | Digital Life |
-| `the social dilemma` | 1 | Digital Life |
 | `the_trip` | 1 | Travel & Outdoors |
 | `three.js` | 1 | Technology & Data |
 | `traditionallook😍` | 1 | Arts & Culture |
 | `tsunami_island🏝️` | 1 | Travel & Outdoors |
 | `turtle festival` | 1 | Travel & Outdoors |
-| `vibe-coding` | 1 | Technology & Data |
 | `wardha` | 1 | Travel & Outdoors |
 | `पट्यारा` | 1 | Books & Reading |
 <!-- generated:tags end -->

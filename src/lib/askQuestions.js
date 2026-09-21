@@ -62,3 +62,35 @@ export function pickQuestions(pool, count = 4, random = Math.random) {
 
   return picked;
 }
+
+// Autocomplete needs at least this much to go on. Below it every question in
+// the pool matches, which is the chip row again and not a suggestion.
+const MIN_PREFIX = 3;
+
+/**
+ * The pool questions that match what is being typed.
+ *
+ * Substring per word rather than a prefix on the whole string: someone typing
+ * "marathon" means the question about marathons wherever the word sits in it,
+ * and nobody types a question from its first character. Stop at `limit` —
+ * a list under the cursor is a hint, not a menu.
+ *
+ * Pool-only by design. The obvious better source is the conversation log, but
+ * `ask_messages` is owner-only RLS on purpose, and it stays that way: every
+ * visitor's questions are in there.
+ */
+export function matchQuestions(pool, draft, limit = 3) {
+  const text = String(draft || "").trim().toLowerCase();
+  if (text.length < MIN_PREFIX) return [];
+
+  const words = text.split(/\s+/).filter((w) => w.length > 1);
+  if (!words.length) return [];
+
+  return validPool(pool)
+    .map((item) => item.q.trim())
+    .filter((q) => {
+      const lower = q.toLowerCase();
+      return lower !== text && words.every((w) => lower.includes(w));
+    })
+    .slice(0, limit);
+}

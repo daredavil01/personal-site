@@ -33,6 +33,14 @@ const PostCard = ({ post, onOpen }) => {
           >
             {post.postType}
           </span>
+          {/* What the post IS, where the badge above is the export's format
+              label. Absent until the classifier has reached this row, and
+              "own" is left unlabelled — the archive is his by default. */}
+          {post.postKind && post.postKind !== "own" && (
+            <span className="font-label text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500">
+              {post.postKind}
+            </span>
+          )}
           <Link
             to={`/micro-blog/${post.id}`}
             onClick={(e) => e.stopPropagation()}

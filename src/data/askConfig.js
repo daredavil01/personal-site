@@ -161,6 +161,8 @@ A micro-post is a passing thought from years ago, sometimes a reblog of someone 
   ],
   question_pool: [],
   context_doc: "",
+  daily_voice_global_cap: 200,
+  daily_voice_ip_cap: 20,
   turnstile_required: false,
   // Automatic evaluation of logged answers (migration 0022). Off by default and
   // off in this fallback too: if ask_settings is unreachable the judge must not
@@ -211,7 +213,101 @@ A micro-post is a passing thought from years ago, sometimes a reblog of someone 
   auto_eval_min_confidence: 0.7,
   auto_eval_monthly_token_cap: 2000000,
   auto_eval_explain_enabled: false,
+  // Every AI feature outside /ask is off until switched on at
+  // /admin/ask/settings. Off in the fallback too, so an unreachable database
+  // switches the machine off rather than on — the same bargain as
+  // auto_eval_enabled above.
+  ai_features: {},
 };
+
+// ---------------------------------------------------------------------------
+// AI features outside /ask (migration 0024)
+// ---------------------------------------------------------------------------
+//
+// One key per feature, stored as booleans in ask_settings.ai_features. This
+// list is what the admin switchboard renders, so adding a feature is a row
+// here plus a call to aiFeatureOn() at the point that spends — not a new
+// column, a new table or a deploy-time constant.
+//
+// `AI_MASTER_KEY` is the switch above all of them: off means none of them run,
+// whatever their own flag says.
+export const AI_MASTER_KEY = "enabled";
+
+export const AI_FEATURES = [
+  {
+    key: "tag_descriptions",
+    label: "Tag descriptions",
+    hint: "npm run tags:describe — fills tags.description from each tag's own items.",
+  },
+  {
+    key: "draft_fields",
+    label: "Draft long-text fields",
+    hint: "The Draft button on admin textareas. Owner-only, fills the box, saves nothing.",
+  },
+  {
+    key: "book_metadata",
+    label: "Book metadata gap-fill",
+    hint: "npm run books:propose — proposes into the template books:apply already reads.",
+  },
+  {
+    key: "tag_suggest",
+    label: "Tag suggestions on save",
+    hint: "Suggests tags on an admin form. Writes still go through set_entity_tags.",
+  },
+  {
+    key: "microblog_autotag",
+    label: "Micro-blog bulk auto-tagging",
+    hint: "npm run microblog:tag — a batch pass over untagged micro-posts.",
+  },
+  {
+    key: "microblog_kind",
+    label: "Micro-blog own/reblog classifier",
+    hint: "npm run microblog:classify — fills post_kind so a reblog can be told from a thought.",
+  },
+  {
+    key: "answer_cache",
+    label: "Answer cache on /ask",
+    hint: "Serves a stored answer for the same question over the same sources. Saves the model call, not the quota.",
+  },
+  {
+    key: "rerank",
+    label: "Rerank /ask results",
+    hint: "A cross-encoder re-orders what search found. One extra call on the visitor path; fails open.",
+  },
+  {
+    key: "voice_input",
+    label: "Voice input on /ask",
+    hint: "Whisper transcribes into the question box. Audio is never stored, and it has its own daily cap.",
+  },
+  {
+    key: "release_notes",
+    label: "Changelog release notes",
+    hint: "npm run changelog:notes — one reader-facing paragraph per version, written under its heading.",
+  },
+  {
+    key: "archive_gaps",
+    label: "Archive gap report",
+    hint: "npm run ask:gaps — clusters what readers asked and what /ask could not answer. Report only.",
+  },
+  {
+    key: "image_alt",
+    label: "Image alt text",
+    hint: "Describes an image as it is uploaded in /admin.",
+  },
+];
+
+/**
+ * Whether one feature may run right now.
+ *
+ * Reads a settings object of either shape — the row (`ai_features`) or the
+ * mapped client value (`aiFeatures`) — because the worker holds the first and
+ * the admin the second, and a second spelling of this check is a second thing
+ * to get wrong. Anything missing is off.
+ */
+export function aiFeatureOn(settings, key) {
+  const flags = settings?.ai_features || settings?.aiFeatures || {};
+  return flags[AI_MASTER_KEY] === true && flags[key] === true;
+}
 
 // The subject axis for starter questions. Four chips are drawn per page load,
 // one from each of four random categories — a flat shuffle of the pool below

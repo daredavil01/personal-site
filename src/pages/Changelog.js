@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react";
 import Markdown from "markdown-to-jsx";
 import PageShell from "../atlas/PageShell";
+import changelogUrl from "../data/changelog.md?url";
 
 const Changelog = () => {
   const [markdown, setMarkdown] = useState("");
 
   useEffect(() => {
-    // The ?url suffix makes Vite resolve the markdown to its served URL.
-    import("../data/changelog.md?url")
-      .then((res) => {
-        fetch(res.default)
-          .then((r) => r.text())
-          .then((text) => {
-            setMarkdown(text.replace(/^---[\s\S]*?---\s*\n/, ""));
-          });
+    fetch(changelogUrl)
+      .then((r) => r.text())
+      .then((text) => {
+        setMarkdown(text.replace(/^---[\s\S]*?---\s*\n/, ""));
       })
       .catch(console.error);
   }, []);

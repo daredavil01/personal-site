@@ -1,15 +1,17 @@
 import React, { useId, useRef, useState } from "react";
 import { useOptionalTags } from "../../context/ContentContext";
+import draftField, { describeImage, suggestTags } from "../../lib/api/assist";
 import uploadImage from "../../lib/api/storage";
 import { colorForTag } from "../../lib/generativeArt";
 import { ImageCompressError, compressImage, formatBytes } from "../../lib/imageCompress";
 import Button, { IconButton } from "./ui/Button";
 import { Checkbox, Input, Select, Textarea } from "./ui/Input";
 import {
-  ChevronDown, ChevronUp, ImageIcon, LinkIcon, Trash2, Upload, X,
+  ChevronDown, ChevronUp, ImageIcon, LinkIcon, Sparkles, Trash2, Upload, X,
 } from "./ui/icons";
 import ProgressBar from "./ui/ProgressBar";
 import { useToast } from "./ui/ToastContext";
+import useAiFeature from "./useAiFeatures";
 import { faintText, hairline, inputClass } from "./ui/tokens";
 
 // Re-exported for the Now editors (now/SectionEditors.js, now/AutofillPreview.js,
@@ -45,7 +47,9 @@ const useUploader = (folder) => {
 
       setProgress({ stage: "uploading", value: null });
       const url = await uploadImage(result.file, folder);
-      onUploaded(url);
+      // The compressed file goes back with the URL: alt text is written from
+      // the bytes we already hold, not by fetching the image again.
+      onUploaded(url, result.file);
 
       setReport(result);
       toast.success(result.skipped
@@ -86,7 +90,9 @@ const savingsLine = (report, compact) => {
  * text-input-plus-Upload-button pair, which showed the URL as raw text and gave
  * no way to tell a good upload from a 404.
  */
-const ImagePicker = ({ value, folder, onChange, compact = false }) => {
+const ImagePicker = ({
+  value, folder, onChange, compact = false, onUploaded = null,
+}) => {
   const { busy, progress, report, clearReport, upload } = useUploader(folder);
   const [dragging, setDragging] = useState(false);
   const [broken, setBroken] = useState(false);
@@ -100,10 +106,15 @@ const ImagePicker = ({ value, folder, onChange, compact = false }) => {
     onChange(next);
   };
 
+  const handleUploaded = (url, file) => {
+    onChange(url);
+    if (onUploaded) onUploaded(url, file);
+  };
+
   const onDrop = (e) => {
     e.preventDefault();
     setDragging(false);
-    upload(e.dataTransfer.files?.[0], onChange);
+    upload(e.dataTransfer.files?.[0], handleUploaded);
   };
 
   const thumb = value && !broken
@@ -170,7 +181,7 @@ const ImagePicker = ({ value, folder, onChange, compact = false }) => {
           accept="image/*"
           className="hidden"
           onChange={(e) => {
-            upload(e.target.files?.[0], onChange);
+            upload(e.target.files?.[0], handleUploaded);
             e.target.value = "";
           }}
         />
@@ -179,9 +190,28 @@ const ImagePicker = ({ value, folder, onChange, compact = false }) => {
   );
 };
 
-const SlideImages = ({ value, folder, onChange }) => {
+const SlideImages = ({ value, folder, onChange, context = null }) => {
   const rows = Array.isArray(value) ? value : [];
+  const altOn = useAiFeature("image_alt");
+  const [describing, setDescribing] = useState(null); // row index, or null
   const update = (i, patch) => onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  // Alt text is written from the bytes that were just uploaded, and only for a
+  // row that has none — a sentence already written is never overwritten.
+  const describe = async (i, file) => {
+    if (!altOn || !file || rows[i]?.alt) return;
+    setDescribing(i);
+    try {
+      const alt = await describeImage(file, context);
+      if (alt) update(i, { alt });
+    } catch (_) {
+      // Alt text is a convenience on top of an upload that already worked.
+      // Failing it loudly would make a successful upload look broken; the field
+      // is right there and can be typed.
+    } finally {
+      setDescribing(null);
+    }
+  };
 
   const move = (i, delta) => {
     const target = i + delta;
@@ -200,16 +230,26 @@ const SlideImages = ({ value, folder, onChange }) => {
               value={row.url}
               folder={folder}
               onChange={(url) => update(i, { url })}
+              onUploaded={(_url, file) => describe(i, file)}
               compact
             />
           </div>
-          <Input
-            className="sm:w-40"
-            placeholder="Caption"
-            aria-label={`Caption for slide ${i + 1}`}
-            value={row.caption || ""}
-            onChange={(e) => update(i, { caption: e.target.value })}
-          />
+          <div className="sm:w-56 flex flex-col gap-1.5">
+            <Input
+              placeholder="Caption"
+              aria-label={`Caption for slide ${i + 1}`}
+              value={row.caption || ""}
+              onChange={(e) => update(i, { caption: e.target.value })}
+            />
+            {altOn && (
+              <Input
+                placeholder={describing === i ? "Describing…" : "Alt text"}
+                aria-label={`Alt text for slide ${i + 1}`}
+                value={row.alt || ""}
+                onChange={(e) => update(i, { alt: e.target.value })}
+              />
+            )}
+          </div>
           <div className="flex items-center gap-0.5 shrink-0">
             <IconButton icon={ChevronUp} label={`Move slide ${i + 1} up`} size="sm" disabled={i === 0} onClick={() => move(i, -1)} />
             <IconButton icon={ChevronDown} label={`Move slide ${i + 1} down`} size="sm" disabled={i === rows.length - 1} onClick={() => move(i, 1)} />
@@ -547,17 +587,142 @@ const TagInput = ({ value, onChange, suggest = false, options = null }) => {
   );
 };
 
+/**
+ * A textarea with a "Draft" button, for fields marked `aiDraft: true`.
+ *
+ * The draft only ever lands in the input — nothing is saved until the author
+ * presses Save, which is why a bad draft costs a keystroke and needs no
+ * confirmation. The model call itself is owner-only and lives at /api/assist;
+ * GEMINI_API_KEY is a Cloudflare secret and cannot be read from here.
+ */
+const DraftableTextarea = ({ field, value, required, context, onChange }) => {
+  const toast = useToast();
+  const enabled = useAiFeature("draft_fields");
+  const [busy, setBusy] = useState(false);
+
+  const draft = async () => {
+    setBusy(true);
+    try {
+      const text = await draftField({
+        resource: context.resource,
+        field: field.name,
+        label: field.label || field.name,
+        values: context.values,
+        examples: context.examples,
+      });
+      onChange(text);
+      toast.success("Draft written — edit it before saving.");
+    } catch (err) {
+      toast.error(err.message || "Could not draft this field.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Switched off at /admin/ask/settings — the field is still a field.
+  if (!enabled) {
+    return <Textarea required={required} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Textarea required={required} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      <div className="flex items-center gap-2">
+        <Button size="xs" icon={Sparkles} loading={busy} disabled={busy} onClick={draft}>
+          {value ? "Redraft" : "Draft"}
+        </Button>
+        <span className={`text-xs ${faintText}`}>Fills the box. Nothing is saved until you press Save.</span>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * The Suggest button under a `tags` field marked `aiSuggest: true`.
+ *
+ * Suggestions only ever land in the input: the write still goes through
+ * set_entity_tags on Save, exactly as a typed tag does. The endpoint intersects
+ * the model's answer with the central tag list, so a suggestion is always a tag
+ * that already exists — a new one stays something you type on purpose.
+ */
+const TagSuggest = ({ field, value, context, onChange }) => {
+  const toast = useToast();
+  const enabled = useAiFeature("tag_suggest");
+  const [busy, setBusy] = useState(false);
+  const [maybe, setMaybe] = useState([]);
+
+  if (!enabled) return null;
+
+  const tags = Array.isArray(value) ? value : [];
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      const { suggested, maybe: perhaps } = await suggestTags({
+        resource: context.resource,
+        field: field.name,
+        values: context.values,
+      });
+      if (suggested.length) {
+        onChange([...tags, ...suggested.filter(
+          (name) => !tags.some((t) => t.toLowerCase() === name.toLowerCase()),
+        )]);
+      }
+      setMaybe(perhaps);
+      if (!suggested.length && !perhaps.length) toast.success("No tag fits this one.");
+    } catch (err) {
+      toast.error(err.message || "Could not suggest tags.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const accept = (name) => {
+    setMaybe((prev) => prev.filter((n) => n !== name));
+    if (!tags.some((t) => t.toLowerCase() === name.toLowerCase())) onChange([...tags, name]);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button size="xs" icon={Sparkles} loading={busy} disabled={busy} onClick={run}>Suggest</Button>
+      {maybe.length > 0 && (
+        <>
+          <span className={`text-xs ${faintText}`}>Maybe:</span>
+          {maybe.map((name) => (
+            <Button key={name} size="xs" variant="ghost" onClick={() => accept(name)}>{name}</Button>
+          ))}
+        </>
+      )}
+      {!maybe.length && !busy && (
+        <span className={`text-xs ${faintText}`}>Picks from tags that already exist. Nothing is saved until you press Save.</span>
+      )}
+    </div>
+  );
+};
+
 // Composite widgets can't carry a native `required`, so the form validates them
 // on submit instead. See ResourceManager.
 export const COMPOSITE_TYPES = new Set(["tags", "stringList", "slideImages", "linkList", "json"]);
 
-const FormField = ({ field, value, folder, onChange, suggestOptions = null }) => {
+const FormField = ({ field, value, folder, onChange, suggestOptions = null, draftContext = null }) => {
   const set = (v) => onChange(field.name, v);
   const required = !!field.required;
 
   switch (field.type) {
     case "textarea":
-      return <Textarea required={required} value={value ?? ""} onChange={(e) => set(e.target.value)} />;
+      // `aiDraft` adds a draft button; without a context to build the prompt
+      // from (the Now editors don't pass one) it stays a plain textarea.
+      return field.aiDraft && draftContext
+        ? (
+          <DraftableTextarea
+            field={field}
+            value={value}
+            required={required}
+            context={draftContext}
+            onChange={set}
+          />
+        )
+        : <Textarea required={required} value={value ?? ""} onChange={(e) => set(e.target.value)} />;
     case "number":
       return (
         <Input
@@ -584,12 +749,17 @@ const FormField = ({ field, value, folder, onChange, suggestOptions = null }) =>
       // `suggest` pulls from the central tag list; `suggestFrom` pulls from
       // values already used on this resource (ResourceManager builds the pool).
       return (
-        <TagInput
-          value={Array.isArray(value) ? value : []}
-          onChange={set}
-          suggest={!!field.suggest || !!field.suggestFrom}
-          options={field.suggestFrom ? suggestOptions ?? [] : null}
-        />
+        <div className="flex flex-col gap-1.5">
+          <TagInput
+            value={Array.isArray(value) ? value : []}
+            onChange={set}
+            suggest={!!field.suggest || !!field.suggestFrom}
+            options={field.suggestFrom ? suggestOptions ?? [] : null}
+          />
+          {field.aiSuggest && draftContext && (
+            <TagSuggest field={field} value={value} context={draftContext} onChange={set} />
+          )}
+        </div>
       );
     case "stringList":
       return (
@@ -645,7 +815,14 @@ const FormField = ({ field, value, folder, onChange, suggestOptions = null }) =>
         />
       );
     case "slideImages":
-      return <SlideImages value={value} folder={folder} onChange={set} />;
+      return (
+        <SlideImages
+          value={value}
+          folder={folder}
+          onChange={set}
+          context={draftContext?.subject || null}
+        />
+      );
     case "linkList":
       return <LinkList value={value} onChange={set} />;
     case "json":

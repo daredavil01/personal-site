@@ -1,4 +1,6 @@
-import { retrievalQuery, selectChunks, typesNamed } from "./askRetrieval";
+import {
+  applyRerank, retrievalQuery, selectChunks, typesNamed,
+} from "./askRetrieval";
 
 // content_chunks rows keep their database spelling all the way to the worker.
 const chunk = (type, id, index = 0) => ({
@@ -132,5 +134,69 @@ describe("retrievalQuery", () => {
 
   it("is a no-op without history", () => {
     expect(retrievalQuery("what books?", [])).toBe("what books?");
+  });
+});
+
+describe("applyRerank", () => {
+  const chunks = [{ id: "a" }, { id: "b" }, { id: "c" }];
+
+  it("reorders by the cross-encoder's ranking", () => {
+    const out = applyRerank(chunks, [{ id: 2, score: 0.9 }, { id: 0, score: 0.4 }, { id: 1, score: 0.01 }]);
+    expect(out.map((c) => c.id)).toEqual(["c", "a", "b"]);
+  });
+
+  it("keeps unscored chunks, in their old order, behind the scored ones", () => {
+    const out = applyRerank(chunks, [{ id: 2, score: 0.9 }]);
+    expect(out.map((c) => c.id)).toEqual(["c", "a", "b"]);
+  });
+
+  it("falls open to the original order when the answer is unusable", () => {
+    expect(applyRerank(chunks, null).map((c) => c.id)).toEqual(["a", "b", "c"]);
+    expect(applyRerank(chunks, []).map((c) => c.id)).toEqual(["a", "b", "c"]);
+    expect(applyRerank(chunks, [{ id: 9 }, { id: -1 }]).map((c) => c.id)).toEqual(["a", "b", "c"]);
+  });
+
+  it("ignores a repeated index rather than duplicating a chunk", () => {
+    const out = applyRerank(chunks, [{ id: 1 }, { id: 1 }]);
+    expect(out.map((c) => c.id)).toEqual(["b", "a", "c"]);
+  });
+});
+
+describe("borrowed micro-posts", () => {
+  const micro = (id, kind) => ({
+    ...chunk("microblog", id),
+    body: `Micro post: p${id} | Date: 2019-01-01${kind ? ` | Kind: ${kind}` : ""} | words`,
+  });
+
+  it("sinks quotes, reblogs and links below his own posts", () => {
+    const { picked } = selectChunks({
+      chunks: [micro(1, "reblog"), micro(2, "quote"), micro(3, "own"), micro(4, "link")],
+      types: [],
+      // Names micro-posts, so MAX_PER_TYPE does not truncate the order.
+      question: "what do his micro posts say about focus?",
+      perEntity: 1,
+    });
+    expect(picked.map((c) => c.entity_id)).toEqual([3, 1, 2, 4]);
+  });
+
+  it("leaves unclassified posts where they were", () => {
+    const { picked } = selectChunks({
+      chunks: [micro(1, null), micro(2, "reblog"), micro(3, null)],
+      types: [],
+      question: "what does he think about focus?",
+      perEntity: 1,
+    });
+    expect(picked.map((c) => c.entity_id)).toEqual([1, 3, 2]);
+  });
+
+  it("does not sink another type whose body happens to say reblog", () => {
+    const blog = { ...chunk("blog", 5), body: "Blog: on the reblog habit | Kind: reblog" };
+    const { picked } = selectChunks({
+      chunks: [blog, micro(1, "own")],
+      types: [],
+      question: "what has he written?",
+      perEntity: 1,
+    });
+    expect(picked.map((c) => c.entity_type)).toEqual(["blog", "microblog"]);
   });
 });

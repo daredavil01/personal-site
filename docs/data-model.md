@@ -91,6 +91,11 @@ Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `im
 | `search_tsv` | tsvector | yes | `to_tsvector('simple'::regconfig, ((COALE` |
 | `created_at` | timestamp with time zone | no | `now()` |
 | `updated_at` | timestamp with time zone | no | `now()` |
+| `post_kind` | text | yes | — |
+| `post_kind_confidence` | numeric | yes | — |
+
+Constraints:
+- `CHECK (((post_kind IS NULL) OR (post_kind = ANY (ARRAY['own'::text, 'quote'::text, 'reblog'::text, 'link'::text]))))`
 
 ### `projects`
 
@@ -252,7 +257,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **401**
+Rows: **989**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -269,7 +274,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2971**
+Rows: **2991**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -335,6 +340,10 @@ Rows: **1**
 | `auto_eval_min_confidence` | real | no | `0.7` |
 | `auto_eval_monthly_token_cap` | integer | no | `2000000` |
 | `auto_eval_explain_enabled` | boolean | no | `false` |
+| `keyword_floor` | real | no | `0.02` |
+| `ai_features` | jsonb | no | `'{}'::jsonb` |
+| `daily_voice_global_cap` | integer | no | `200` |
+| `daily_voice_ip_cap` | integer | no | `20` |
 
 Constraints:
 - `CHECK ((id = 1))`

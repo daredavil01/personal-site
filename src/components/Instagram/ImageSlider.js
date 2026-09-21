@@ -57,7 +57,9 @@ const ImageSlider = ({ data }) => {
           <div key={image.caption} style={styles.slide}>
             <img
               src={image.url}
-              alt={image.caption || "Slide"}
+              // alt text describes the picture; a caption is written for someone who
+              // can already see it. Prefer the first, fall back to the second.
+              alt={image.alt || image.caption || "Slide"}
               loading="lazy"
               decoding="async"
               style={styles.image}

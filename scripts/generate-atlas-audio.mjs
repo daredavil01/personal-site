@@ -37,7 +37,7 @@ const TMP_DIR = path.join(tmpdir(), "atlas-audio-wav");
 // ---------------------------------------------------------------------------
 // ffmpeg discovery: PATH first, then ffmpeg-static.
 // ---------------------------------------------------------------------------
-async function findFfmpeg() {
+export async function findFfmpeg() {
   try {
     execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
     return "ffmpeg";
@@ -359,7 +359,11 @@ const main = async () => {
   console.log(`Done -> ${OUT_DIR}`);
 };
 
-main().catch((err) => {
-  console.error(err.message || err);
-  process.exit(1);
-});
+// Guarded so generate-guide-audio.mjs can import findFfmpeg without rendering
+// every ambient bed as a side effect.
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith("generate-atlas-audio.mjs")) {
+  main().catch((err) => {
+    console.error(err.message || err);
+    process.exit(1);
+  });
+}

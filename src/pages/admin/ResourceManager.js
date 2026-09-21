@@ -48,6 +48,15 @@ const pooledValues = (rows, field) => {
   return [...counts.values()].sort((a, b) => b.total - a.total);
 };
 
+// Up to three of `field`'s existing values on other rows, longest first — the
+// style examples the draft button sends to /api/assist. Longest because a
+// one-word value teaches the model nothing about how this field reads.
+const sampleValues = (rows, field, current) => (rows ?? [])
+  .filter((row) => row?.id !== current && typeof row?.[field] === "string" && row[field].trim().length > 40)
+  .map((row) => row[field].trim())
+  .sort((a, b) => b.length - a.length)
+  .slice(0, 3);
+
 const isBlank = (value) => value === null
   || value === undefined
   || value === ""
@@ -200,6 +209,14 @@ const ResourceManager = ({ resource }) => {
                 folder={resource.key}
                 onChange={onField}
                 suggestOptions={field.suggestFrom ? pooledValues(rows, field.suggestFrom) : null}
+                draftContext={(field.aiDraft || field.aiSuggest || field.type === "slideImages") ? {
+                  resource: resource.singular ?? resource.label,
+                  // What the row is called, for alt text: "a photo from the
+                  // Mumbai Marathon" describes better than "a photo".
+                  subject: resource.title?.(form) || null,
+                  values: form,
+                  examples: sampleValues(rows, field.name, form.id),
+                } : null}
               />
             </Field>
           ))}

@@ -16,11 +16,13 @@
 // visitor never sees a stack trace and the account never sees a bill.
 
 import {
-  DEFAULT_ASK_SETTINGS, EMBEDDING_MODEL, ENTITY_PLURALS, entityLabel,
+  aiFeatureOn, DEFAULT_ASK_SETTINGS, EMBEDDING_MODEL, ENTITY_PLURALS, entityLabel,
   entityListUrl,
 } from "../../src/data/askConfig";
 import { runTiers, streamTiers } from "../../src/lib/askTiers";
-import { retrievalQuery, selectChunks, typesNamed } from "../../src/lib/askRetrieval";
+import {
+  applyRerank, retrievalQuery, selectChunks, typesNamed,
+} from "../../src/lib/askRetrieval";
 import FALLBACK_FACTS from "../../docs/facts.json";
 import {
   collectMedia, isExternal, linkDomain, sanitiseAnswer,
@@ -33,6 +35,49 @@ import {
 
 const SETTINGS_TTL_SECONDS = 60;
 const FACTS_TTL_SECONDS = 60 * 60;
+// Answers are cached for ten minutes, which is long enough for a starter chip
+// clicked by twenty people in an hour and short enough that a re-index or a
+// settings change is never more than one cycle away from being reflected.
+// ponytail: a constant rather than a settings column — the switchboard flag is
+// already the off switch, and a second knob is a second thing to explain.
+const ANSWER_TTL_SECONDS = 600;
+
+// Cross-encoder reranking (B1). This is the one model call on the visitor's
+// latency path, so it is capped hard and fails open: past this many
+// milliseconds the RRF ordering answers, which is what shipped for a year.
+const RERANK_MODEL = "@cf/baai/bge-reranker-base";
+// Measured against the live model, 24 passages of 700 chars: 333-898 ms, and
+// latency barely moves with payload size — it is the call, not the work. A cap
+// inside that spread spends the whole budget and returns nothing, so it sits
+// above the tail rather than in the middle of it.
+const RERANK_TIMEOUT_MS = 1200;
+// The reranker reads passages, and a whole chunk is mostly boilerplate after
+// the first few lines.
+const RERANK_CHARS = 700;
+
+/**
+ * The candidates, re-ordered by how well each passage answers this question.
+ *
+ * askRetrieval's heuristics approximate exactly this; a cross-encoder scores
+ * the pair directly. Every failure — no binding, a timeout, a malformed answer
+ * — returns the input list, so nothing here can cost an answer.
+ */
+async function rerank(env, question, chunks) {
+  if (!env.AI || !Array.isArray(chunks) || chunks.length < 2) return chunks;
+
+  const contexts = chunks.map((c) => ({ text: String(c.body || c.title || "").slice(0, RERANK_CHARS) }));
+  const timeout = new Promise((resolve) => { setTimeout(() => resolve(null), RERANK_TIMEOUT_MS); });
+
+  try {
+    const out = await Promise.race([
+      env.AI.run(RERANK_MODEL, { query: question, contexts }),
+      timeout,
+    ]);
+    return applyRerank(chunks, out?.response);
+  } catch (_) {
+    return chunks;
+  }
+}
 
 // Reads a value through the edge cache. `cacheKey` must be a URL string.
 async function cached(context, cacheKey, ttl, load) {
@@ -50,6 +95,31 @@ async function cached(context, cacheKey, ttl, load) {
   });
   context.waitUntil(cache.put(req, response.clone()));
   return value;
+}
+
+/**
+ * The cache key for one answer.
+ *
+ * The question and the chunks that were actually picked, because the same
+ * words against a re-indexed archive are a different answer. The persona and
+ * the ladder go in too: editing either at /admin should not be masked by a
+ * stored reply written by the old one.
+ */
+async function answerCacheKey(origin, {
+  message, chunks, settings, scopeLabels, spokenLanguage,
+}) {
+  const material = JSON.stringify([
+    message.toLowerCase().replace(/\s+/g, " ").trim(),
+    (chunks || []).map((c) => c.id).sort(),
+    scopeLabels || "",
+    // The same words spoken in Marathi are answered in Marathi, so the hint is
+    // part of what makes an answer reusable.
+    spokenLanguage || "",
+    settings.updated_at || settings.system_persona || "",
+  ]);
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(material));
+  const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${origin}/__ask/answer/${hex}`;
 }
 
 async function loadSettings(context) {
@@ -203,7 +273,7 @@ function rosterSections(facts, asked, question) {
   ].join("\n");
 }
 
-function buildSystemPrompt(settings, facts, chunks, scope, rosters) {
+function buildSystemPrompt(settings, facts, chunks, scope, rosters, spokenLanguage) {
   return [
     settings.system_persona || DEFAULT_ASK_SETTINGS.system_persona,
     "",
@@ -257,6 +327,11 @@ function buildSystemPrompt(settings, facts, chunks, scope, rosters) {
     "  the facts, name whatever items you do have, and stop. The interface shows",
     "  a link to the full listing, so never apologise for not listing everything.",
     "- Answer in the language the question was asked in, refusals included.",
+    // Whisper reports the language it heard, which beats guessing from the
+    // script: romanised Marathi is typed in Latin letters and reads as English.
+    spokenLanguage
+      ? `- This question was spoken, and heard as "${spokenLanguage}". Answer in that language unless the words say otherwise.`
+      : null,
     "- You may use markdown: **bold**, lists. No headings, no code blocks.",
     `- Refuse only when the facts AND the items both lack it: "${
       settings.refusal_note || DEFAULT_ASK_SETTINGS.refusal_note
@@ -438,12 +513,23 @@ export async function onRequestPost(context) {
   ]);
   timings.retrieval_ms = Date.now() - retrievalStart;
 
+  // Reranking sits between the over-fetch and the heuristics, so the chips,
+  // the per-type cap and the meta sink all still apply — to a better ordering.
+  // Off unless switched on at /admin: it changes what the judge grades, so the
+  // date it goes on is the date the grade history splits.
+  let ranked = found || [];
+  if (aiFeatureOn(settings, "rerank")) {
+    const rerankStart = Date.now();
+    ranked = await rerank(env, message, ranked);
+    timings.rerank_ms = Date.now() - rerankStart;
+  }
+
   // One reading of the question, used twice: which types may exceed the
   // per-type cap, and which rosters get spelled out.
   const asked = typesNamed(message);
 
   const { picked: chunks, widened } = selectChunks({
-    chunks: found || [],
+    chunks: ranked,
     types,
     question: message,
     limit: settings.match_count,
@@ -511,12 +597,14 @@ export async function onRequestPost(context) {
     .filter((b) => b.url)
     .slice(0, 3);
 
+  const spokenLanguage = String(payload?.spokenLanguage || "").slice(0, 16) || null;
   const system = buildSystemPrompt(
     settings,
     facts,
     chunks || [],
     types.length && !widened ? scopeLabels : null,
     rosterSections(facts, asked, message),
+    spokenLanguage,
   );
   const user = [
     ...history.map((turn) => ({
@@ -551,6 +639,42 @@ export async function onRequestPost(context) {
         p_types: types,
       }).catch(() => {}),
     );
+  };
+
+  // Answer cache (B6). The model call is the expensive part of this request and
+  // starter chips are clicked far more often than they are varied, so a hit is
+  // a Gemini request not spent. Quota is still counted above — the cache saves
+  // the call, not the rate limit.
+  //
+  // Only for a first question: a follow-up's answer depends on a thread this
+  // key says nothing about. Only a real tier's answer is stored, because
+  // caching a fallback would keep serving it after the model came back.
+  const cacheAnswers = aiFeatureOn(settings, "answer_cache") && !history.length;
+  const answerKey = cacheAnswers
+    ? await answerCacheKey(new URL(request.url).origin, {
+      message, chunks, settings, scopeLabels, spokenLanguage,
+    })
+    : null;
+
+  let cachedAnswer = null;
+  if (answerKey) {
+    try {
+      const hit = await caches.default.match(new Request(answerKey));
+      if (hit) cachedAnswer = await hit.json();
+    } catch (_) {
+      cachedAnswer = null;
+    }
+  }
+
+  const storeAnswer = (answer, tier) => {
+    if (!answerKey || !tier || tier === "search-only") return;
+    const body = new Response(JSON.stringify({ answer, tier }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": `public, max-age=${ANSWER_TTL_SECONDS}`,
+      },
+    });
+    context.waitUntil(caches.default.put(new Request(answerKey), body));
   };
 
   const fallbackAnswer = () => (sources.length
@@ -590,19 +714,26 @@ export async function onRequestPost(context) {
 
         let result;
         const generationStart = Date.now();
-        try {
-          result = await streamTiers({
-            tiers: settings.tiers,
-            system,
-            user,
-            env,
-            onDelta: (text) => {
-              buffered += text;
-              flushSafe();
-            },
-          });
-        } catch (err) {
-          result = { tier: null, text: "", errors: [String(err?.message || err)] };
+        if (cachedAnswer) {
+          // A hit replays through the same writer the live path uses, so the
+          // client needs no idea this happened.
+          result = { tier: cachedAnswer.tier, text: cachedAnswer.answer, errors: [] };
+          timings.cached = true;
+        } else {
+          try {
+            result = await streamTiers({
+              tiers: settings.tiers,
+              system,
+              user,
+              env,
+              onDelta: (text) => {
+                buffered += text;
+                flushSafe();
+              },
+            });
+          } catch (err) {
+            result = { tier: null, text: "", errors: [String(err?.message || err)] };
+          }
         }
 
         timings.generation_ms = Date.now() - generationStart;
@@ -612,6 +743,7 @@ export async function onRequestPost(context) {
         // Deltas went out raw; the final answer is cleaned and re-sent in `done`
         // so a link the archive does not contain never stays on the page.
         const streamedText = sanitiseAnswer(splitText, sources, rosterUrls);
+        if (!cachedAnswer) storeAnswer(streamedText, streamedTier);
         const followups = buildFollowups(sources, browse);
         // Whatever the newline-safe flush could not send yet.
         if (streamedText.length > emitted) {
@@ -655,12 +787,15 @@ export async function onRequestPost(context) {
   }
 
   const generationStart = Date.now();
-  const { tier, answer, errors } = await runTiers({
-    tiers: settings.tiers,
-    system,
-    user,
-    env,
-  });
+  const { tier, answer, errors } = cachedAnswer
+    ? { tier: cachedAnswer.tier, answer: cachedAnswer.answer, errors: [] }
+    : await runTiers({
+      tiers: settings.tiers,
+      system,
+      user,
+      env,
+    });
+  if (cachedAnswer) timings.cached = true;
   timings.generation_ms = Date.now() - generationStart;
 
   const usedTier = tier || "search-only";
@@ -670,6 +805,7 @@ export async function onRequestPost(context) {
     rosterUrls,
   );
   const followups = buildFollowups(sources, browse);
+  if (!cachedAnswer) storeAnswer(cleanAnswer, usedTier);
   context.waitUntil(
     rpc(env, "ask_record_tier", { p_tier: usedTier }).catch(() => {}),
   );
@@ -735,6 +871,10 @@ export async function onRequestGet(context) {
     // rotation, not the chips themselves.
     suggestedQuestions: settings.suggested_questions || [],
     turnstileRequired: settings.turnstile_required,
+    // Whether the composer may offer a microphone. The endpoint checks the
+    // same flag before it spends anything — this only hides a control that
+    // would be refused.
+    voiceInput: aiFeatureOn(settings, "voice_input"),
     turnstileSiteKey: context.env.TURNSTILE_SITE_KEY || null,
     note: settings.enabled ? null : settings.disabled_note,
   });

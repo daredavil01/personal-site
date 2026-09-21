@@ -238,8 +238,9 @@ const NowMonthEditor = () => {
         text: h.line,
         meta: `${h.version} · ${h.kind}`,
         // Fixes and tweaks are offered but not assumed — Added is what usually
-        // belongs on a Now page.
-        checked: h.kind === "Added",
+        // belongs on a Now page, and a version summary (npm run
+        // changelog:notes) is already written in reader-facing words.
+        checked: h.kind === "Added" || h.kind === "Summary",
         editable: true,
       }));
     setPreview({ kind: "changelog", groups: items.length ? [{ key: "website", label: "Website Updates", items }] : [] });

@@ -52,6 +52,15 @@ const AtlasFrame = () => {
     return () => { cancelled = true; };
   }, [world.sound]);
 
+  // Classic view is the quiet shell, and /admin is a workspace — AtlasFrameGate
+  // unmounts this component for both. Without a teardown the AudioContext kept
+  // playing the bed (and could finish speaking a guide beat) over a view that
+  // has no sound control to stop it with. world.sound stays as it was, so
+  // returning to the atlas picks the sound back up.
+  useEffect(() => () => {
+    if (audioRef.current) audioRef.current.disable();
+  }, []);
+
   // Crossfade the bed when navigation crosses a region border.
   useEffect(() => {
     if (audioRef.current) audioRef.current.setBiome(biomeKey);

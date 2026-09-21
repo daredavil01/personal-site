@@ -6,6 +6,7 @@ import { getMicroblogPost } from "../lib/api/microblog";
 import { buildMicroblogMeta } from "../data/pageMeta";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import ExportImageButton from "../components/MicroBlog/ExportImageButton";
+import ReadAloud from "../components/ReadAloud";
 import TagLinks from "../components/common/TagLinks";
 import { sourceLabels, typeColors } from "../components/MicroBlog/constants";
 
@@ -99,6 +100,16 @@ const MicroBlogPost = () => {
               >
                 {post.postType}
               </span>
+              {/* post_kind (0025) — what it IS, not its export format. */}
+              {post.postKind && post.postKind !== "own" && (
+                <span className="font-label text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500">
+                  {post.postKind}
+                </span>
+              )}
+              {/* The browser's own voice. Renders nothing on a device with no
+                  voice for this post's language — which is the honest answer
+                  for Marathi, where Workers AI has none to generate with. */}
+              <ReadAloud text={body} className="ml-auto" />
             </div>
 
             {post.imageUrl && (

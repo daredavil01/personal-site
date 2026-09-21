@@ -39,4 +39,5 @@ and refreshing the docs are the same command.
 
 - `og-cards.md` — the per-route share cards: how they render, the Workers CPU bet, the Devanagari limitation, and development status.
 - `ask-evals.md` — the automatic judge for /ask answers: the rubric, the two routes, every spend gate, and how to turn it off.
-- `ai-features-proposal.md` — a shortlist of what Workers AI, Gemini and Jev could do outside `/ask`, with the cost, runtime and risk of each. A proposal, not a plan of record: nothing in it is built.
+- `ai-features-proposal.md` — a shortlist of what Workers AI, Gemini and Jev could do outside `/ask`, with the cost, runtime and risk of each. A proposal, not a plan of record.
+- `ai-features-status.md` — which items from that proposal are actually built, the standing decisions behind them (Gemini primary, free tier only, generated text is always a draft), and a dated log. Hand-written; `docs:build` never touches it.
