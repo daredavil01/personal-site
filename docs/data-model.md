@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **60** · indexed as `blog`
+Rows: **63** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1661** · indexed as `microblog`
+Rows: **1664** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -252,7 +252,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **389**
+Rows: **401**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -269,7 +269,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2913**
+Rows: **2969**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -323,6 +323,17 @@ Rows: **1**
 | `turnstile_required` | boolean | no | `false` |
 | `created_at` | timestamp with time zone | no | `now()` |
 | `updated_at` | timestamp with time zone | no | `now()` |
+| `semantic_floor` | real | no | `0.35` |
+| `question_pool` | jsonb | no | `'[]'::jsonb` |
+| `daily_share_cap` | integer | no | `10` |
+| `auto_eval_enabled` | boolean | no | `false` |
+| `auto_eval_tiers` | jsonb | no | `'[]'::jsonb` |
+| `auto_eval_allow_metered` | boolean | no | `false` |
+| `auto_eval_batch_cap` | integer | no | `50` |
+| `auto_eval_request_batch` | integer | no | `8` |
+| `auto_eval_min_confidence` | real | no | `0.7` |
+| `auto_eval_monthly_token_cap` | integer | no | `2000000` |
+| `auto_eval_explain_enabled` | boolean | no | `false` |
 
 Constraints:
 - `CHECK ((id = 1))`
