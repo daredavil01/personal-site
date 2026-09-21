@@ -76,6 +76,7 @@ const routes = [
     subRoutes: [
       { label: "Contact", path: "/contact" },
       { label: "Changelog", path: "/changelog" },
+      { label: "Changelog Graph", path: "/changelog/graph" },
     ],
   },
 ];
