@@ -9,6 +9,23 @@ patch for fixes and tweaks.
 
 ---
 
+## [v18.1.2] — 2026-09-20
+
+### Fixed
+
+- **Jev's provenance in the AI proposal** (`docs/ai-features-proposal.md`): the document named Jev twenty times and never once said whose model it is. `CLAUDE.md`, `docs/ask-evals.md` and this changelog all attribute it to **TypeSafe AI**, so the one doc a reader might open first was the one that did not. It now names TypeSafe AI and its "System One" model in both the capability table and the what-each-model-is-for section, and points at `docs/ask-evals.md` for the two routes — Vercel's AI Gateway, where the free credit is, and `api.typesafe.ai` direct, which is metered.
+
+---
+
+## [v18.1.1] — 2026-09-20
+
+### Added
+
+- **Voice input and output, and verified model ids** (`docs/ai-features-proposal.md`): eleven more candidates — five for speech in, six for speech out, six smaller ones — and the Workers AI catalogue checked rather than recalled. Two findings changed the ranking. **There is no Marathi voice on Workers AI**: Whisper is genuinely multilingual so speech *in* works in both languages, but Aura is English and Spanish and MeloTTS means EN/ES/FR/ZH/JA/KO, which on a site with 21 Marathi books and a persona instructed to answer in the language it was asked in is a design constraint, not a footnote — so the browser's own `SpeechSynthesis` is proposed as the disclosed fallback, shipped alongside pre-rendered audio rather than after it. And **the hard part of voice output is already built**: `src/atlas/audio/` has a WebAudio manager with crossfades, a buffer cache, visibility suspension and an SFX sprite map, gated by a toggle that is off by default and doubles as the autoplay-unlock gesture, with `sfxBus` a no-op until it registers so no audio byte loads for a visitor who never opts in. Giving the Atlas guide — which already speaks, in a bubble — an actual voice is therefore a build-time script and a few offsets in `sfxMap.js`, which moved it to second on the list.
+- **`docs/ai-features-proposal.md`**: all three model providers on this deployment — Workers AI, Gemini and Jev — are used in exactly one place, `/ask`, and nothing AI-shaped touches authoring, the detail pages or media. This is the shortlist of what could change that: eighteen candidate features grouped by direction, each with the model that fits it, where the call would run, what it would cost and what it would break. It records the constraints any of them has to obey — nothing heavy at the edge, free by default with metered behind an explicit switch, a new route means a new share card — and ranks six of them by value per unit of risk. A proposal, not a plan of record: nothing in it is built.
+
+---
+
 ## [v18.1.0] — 2026-09-20
 
 ### Added
