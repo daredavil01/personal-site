@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **63** · indexed as `blog`
+Rows: **65** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **16** · indexed as `project`
+Rows: **19** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **8** · indexed as `presentation`
+Rows: **12** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -257,7 +257,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **989**
+Rows: **2256**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -274,7 +274,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2991**
+Rows: **2930**
 
 | column | type | null | default |
 |---|---|---|---|

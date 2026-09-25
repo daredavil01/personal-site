@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-21T11:48:06.707Z",
+  "generatedAt": "2026-09-25T15:07:26.914Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 107,
-    "words": 103880,
-    "averageWords": 971,
-    "trackedPosts": 63,
+    "posts": 108,
+    "words": 105084,
+    "averageWords": 973,
+    "trackedPosts": 65,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-09-21",
+    "latestPost": "2026-09-23",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -19,54 +19,54 @@
       "url": "https://sankettambare.substack.com/p/the-un-orthodox-ways-of-seeing"
     },
     "busiestMonth": {
-      "month": "2026-06",
-      "label": "June 2026",
-      "posts": 12,
-      "words": 11248
+      "month": "2026-09",
+      "label": "September 2026",
+      "posts": 9,
+      "words": 11437
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 64,
-      "words": 70939
+      "posts": 65,
+      "words": 72143
     },
     "activeMonths": 34
   },
   "currentPeriod": {
-    "asOf": "2026-09-21",
+    "asOf": "2026-09-25",
     "monthToDate": {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 8,
-      "words": 10233,
-      "daysElapsed": 21,
-      "wordsPerDay": 487,
+      "posts": 9,
+      "words": 11437,
+      "daysElapsed": 25,
+      "wordsPerDay": 457,
       "previousMonth": {
         "month": "2026-08",
         "posts": 6,
         "words": 6193
       },
-      "changeVsPreviousMonth": 65.2
+      "changeVsPreviousMonth": 84.7
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 64,
-      "words": 70939,
-      "daysElapsed": 264,
+      "posts": 65,
+      "words": 72143,
+      "daysElapsed": 268,
       "wordsPerDay": 269,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7827,
-        "throughDate": "2025-09-21"
+        "throughDate": "2025-09-25"
       },
-      "changeVsPriorYear": 806.3
+      "changeVsPriorYear": 821.7
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 79,
-      "words": 79195,
+      "posts": 80,
+      "words": 80399,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 64,
-      "words": 70939
+      "posts": 65,
+      "words": 72143
     }
   ],
   "byMonth": [
@@ -315,8 +315,8 @@
     {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 8,
-      "words": 10233
+      "posts": 9,
+      "words": 11437
     }
   ],
   "cumulative": [
@@ -521,8 +521,8 @@
     {
       "month": "2026-09",
       "label": "September 2026",
-      "words": 103880,
-      "posts": 107
+      "words": 105084,
+      "posts": 108
     }
   ],
   "byDayOfWeek": [
@@ -543,8 +543,8 @@
     },
     {
       "day": "Wednesday",
-      "posts": 15,
-      "words": 14160
+      "posts": 16,
+      "words": 15364
     },
     {
       "day": "Thursday",
@@ -565,8 +565,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 53,
-      "words": 60021
+      "posts": 54,
+      "words": 61225
     },
     {
       "section": "Uncategorised",
@@ -582,8 +582,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 50,
-      "words": 54668
+      "posts": 51,
+      "words": 55872
     },
     {
       "tag": "digital-wellbeing",
@@ -646,6 +646,11 @@
       "words": 6911
     },
     {
+      "tag": "digital-brain",
+      "posts": 4,
+      "words": 4856
+    },
+    {
       "tag": "flourishing",
       "posts": 4,
       "words": 4829
@@ -654,11 +659,6 @@
       "tag": "privacy",
       "posts": 4,
       "words": 4135
-    },
-    {
-      "tag": "digital-brain",
-      "posts": 3,
-      "words": 3652
     },
     {
       "tag": "nmdc-hyderabad-marathon",
@@ -1071,7 +1071,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 38
+      "posts": 39
     },
     {
       "label": "1,500–1,999",
@@ -1190,6 +1190,27 @@
     }
   ],
   "posts": [
+    {
+      "title": "The story of Numbers: Why crunching the statistics matters?",
+      "date": "2026-09-23",
+      "publishedAt": "2026-09-23T16:21:14.378Z",
+      "url": "https://sankettambare.substack.com/p/the-story-of-numbers",
+      "platform": "Substack",
+      "words": 1204,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "digital-brain",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!pp2F!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F23843886-3d3a-44a2-8ad6-528ab3d90967_2752x1536.png",
+      "trackedInBlogsTable": true,
+      "blogId": 65,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "The simplicity of the complex world!",
       "date": "2026-09-21",
@@ -1339,10 +1360,10 @@
       "audience": "everyone",
       "type": "newsletter",
       "image": "https://substackcdn.com/image/fetch/$s_!klkr!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcd2142d7-1fb2-419e-bf54-48977dee0d9d_2752x1536.png",
-      "trackedInBlogsTable": false,
-      "blogId": null,
-      "challengeId": null,
-      "language": null
+      "trackedInBlogsTable": true,
+      "blogId": 64,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
     },
     {
       "title": "Breaking the barriers within: Hyderabad Marathon 2026!",
@@ -3495,15 +3516,6 @@
     }
   ],
   "anomalies": [
-    {
-      "kind": "untracked_post",
-      "title": "The Battle Within",
-      "date": "2026-09-03",
-      "words": 1412,
-      "url": "https://sankettambare.substack.com/p/the-battle-within",
-      "platform": "Substack",
-      "note": "Published, but has no row in the Supabase `blogs` table."
-    },
     {
       "kind": "untracked_post",
       "title": "2025: A Year of Confluence & Consistency",

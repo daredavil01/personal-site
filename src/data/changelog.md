@@ -9,6 +9,14 @@ patch for fixes and tweaks.
 
 ---
 
+## [v19.0.1] — 2026-09-25
+
+### Fixed
+
+- **`npm run blogs:wordcount` would not start** (`scripts/blog-word-counts.mjs`): the `.join("\n")` that writes the word-count file had a literal line break inside its string, a `SyntaxError` at load time, so the script (and the nightly refresh that runs it) failed before doing anything. Restored the escape.
+
+---
+
 ## [v19.0.0] — 2026-09-22
 
 ### Added

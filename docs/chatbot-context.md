@@ -11,10 +11,10 @@ answering rules live with the prompt, and are not repeated here.
 - **Micro posts** (1664) — /micro-blog/:id. A Tumblr archive,
   2018-03-19 → 2026-09-19,
   English and Marathi, short and unedited. Many are photo posts with no text.
-- **Blog posts** (63) — /100-days-to-offload/:id. Ledger rows that link out
+- **Blog posts** (65) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
-- **Projects** (16) — /projects/:id. Status: Live: 12, Concept: 1, Archived: 3.
+- **Projects** (19) — /projects/:id. Status: Live: 15, Concept: 1, Archived: 3.
 - **Races** (25) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 18, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
@@ -28,16 +28,16 @@ answering rules live with the prompt, and are not repeated here.
 - Reading: 51 books, ~16.8k pages, 30 English / 21 Marathi; top genres Technology, Fiction, Society.
 - Running: 25 races, 577 km. PBs: marathon 05:05:53 (Tata Mumbai Marathon 2026), half 1:59:57 (NMDC Hyderabad Marathon 2025), 10K 00:55:28 (IPA Neerathon 2026).
 - Treks: 20 (3 hard) over 5 years; latest Ghangad Fort.
-- 100 Days To Offload: 63 of 100 posts.
+- 100 Days To Offload: 65 of 100 posts.
 - Micro posts: 1664; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 6 organisations, 15 projects, 12 certifications (latest: AWS Fundamentals Specialization).
+- Work: 6 organisations, 18 projects, 12 certifications (latest: AWS Fundamentals Specialization).
 - Based in Barshi, MH.
 
 ## Tags
 
 98 tags, shared across every content type, always lowercase.
-Most used: life (124), self-reflection (115), sanky (58), philosophy (41), travel (39), forts (33), maharashtra (31), digital wellbeing (28), technology (28), 100_days_to_offload (25), love (24), marathi (23), ai (22), personaldevelopment (21), daredavil01 (20), social (19), desperate me (18), self-help (16), social media (15), calmness (14).
+Most used: life (363), self-reflection (296), sanky (114), latepost (109), marathi (109), philosophy (90), travel (78), love (63), digital wellbeing (53), personaldevelopment (53), calmness (46), social (43), maharashtra (41), social media (40), technology (37), forts (35), politics (34), digital detox (32), psychology (31), 100_days_to_offload (28).
 Tag pages live at /tags/:name.
 
 ## What a micro post is

@@ -26,19 +26,19 @@
   },
   "counts": {
     "tags": 98,
-    "blogs": 63,
+    "blogs": 65,
     "books": 51,
     "treks": 20,
     "sports": 25,
-    "projects": 16,
+    "projects": 19,
     "instagram": 11,
     "microblog": 1664
   },
   "latest": {
     "blog": {
-      "d": "2026-09-21",
-      "t": "The simplicity of the complex world!",
-      "u": "/100-days-to-offload/63"
+      "d": "2026-09-23",
+      "t": "The story of Number: Why crunching the statistics matters?",
+      "u": "/100-days-to-offload/65"
     },
     "writing": {
       "d": "2026-09-03",
@@ -554,6 +554,21 @@
     ],
     "project": [
       {
+        "d": "2026-09-25",
+        "t": "Learning Hub",
+        "u": "/projects/19"
+      },
+      {
+        "d": "2026-09-18",
+        "t": "The Long Way Round",
+        "u": "/projects/17"
+      },
+      {
+        "d": "2026-09-14",
+        "t": "The Dividend Question",
+        "u": "/projects/18"
+      },
+      {
         "d": "2026-08-01",
         "t": "Personal Websites & Projects Directory",
         "u": "/projects/13"
@@ -688,9 +703,29 @@
     ],
     "presentation": [
       {
+        "d": "2026-09-25",
+        "t": "The Digital Hub",
+        "u": "/presentations/11"
+      },
+      {
+        "d": "2026-09-23",
+        "t": "Day Island — the Redesign Deck",
+        "u": "/presentations/12"
+      },
+      {
+        "d": "2026-09-18",
+        "t": "The Long Way Round",
+        "u": "/presentations/10"
+      },
+      {
         "d": "2026-09-14",
         "t": "Ask the Archive",
         "u": "/presentations/8"
+      },
+      {
+        "d": "2026-09-11",
+        "t": "Projects, Reborn",
+        "u": "/presentations/9"
       },
       {
         "d": null,
@@ -740,118 +775,118 @@
   },
   "projects": {
     "by_status": {
-      "Live": 12,
+      "Live": 15,
       "Concept": 1,
       "Archived": 3
     },
     "by_category": {
       "Tool": 2,
       "Design": 2,
-      "Web App": 6,
+      "Web App": 7,
       "Website": 4,
-      "Data Story": 2
+      "Data Story": 4
     }
   },
   "top_tags": [
     {
       "name": "life",
-      "total": 124
+      "total": 363
     },
     {
       "name": "self-reflection",
-      "total": 115
+      "total": 296
     },
     {
       "name": "sanky",
-      "total": 58
+      "total": 114
     },
     {
-      "name": "philosophy",
-      "total": 41
-    },
-    {
-      "name": "travel",
-      "total": 39
-    },
-    {
-      "name": "forts",
-      "total": 33
-    },
-    {
-      "name": "maharashtra",
-      "total": 31
-    },
-    {
-      "name": "digital wellbeing",
-      "total": 28
-    },
-    {
-      "name": "technology",
-      "total": 28
-    },
-    {
-      "name": "100_days_to_offload",
-      "total": 25
-    },
-    {
-      "name": "love",
-      "total": 24
+      "name": "latepost",
+      "total": 109
     },
     {
       "name": "marathi",
-      "total": 23
+      "total": 109
     },
     {
-      "name": "ai",
-      "total": 22
+      "name": "philosophy",
+      "total": 90
+    },
+    {
+      "name": "travel",
+      "total": 78
+    },
+    {
+      "name": "love",
+      "total": 63
+    },
+    {
+      "name": "digital wellbeing",
+      "total": 53
     },
     {
       "name": "personaldevelopment",
-      "total": 21
-    },
-    {
-      "name": "daredavil01",
-      "total": 20
-    },
-    {
-      "name": "social",
-      "total": 19
-    },
-    {
-      "name": "desperate me",
-      "total": 18
-    },
-    {
-      "name": "self-help",
-      "total": 16
-    },
-    {
-      "name": "social media",
-      "total": 15
+      "total": 53
     },
     {
       "name": "calmness",
-      "total": 14
+      "total": 46
+    },
+    {
+      "name": "social",
+      "total": 43
+    },
+    {
+      "name": "maharashtra",
+      "total": 41
+    },
+    {
+      "name": "social media",
+      "total": 40
+    },
+    {
+      "name": "technology",
+      "total": 37
+    },
+    {
+      "name": "forts",
+      "total": 35
+    },
+    {
+      "name": "politics",
+      "total": 34
+    },
+    {
+      "name": "digital detox",
+      "total": 32
+    },
+    {
+      "name": "psychology",
+      "total": 31
+    },
+    {
+      "name": "100_days_to_offload",
+      "total": 28
+    },
+    {
+      "name": "ai",
+      "total": 28
+    },
+    {
+      "name": "desperate me",
+      "total": 28
+    },
+    {
+      "name": "daredavil01",
+      "total": 27
     },
     {
       "name": "konkan",
-      "total": 13
+      "total": 27
     },
     {
-      "name": "youtube",
-      "total": 13
-    },
-    {
-      "name": "भटकंती",
-      "total": 13
-    },
-    {
-      "name": "marathon",
-      "total": 12
-    },
-    {
-      "name": "fiction",
-      "total": 11
+      "name": "मन",
+      "total": 26
     }
   ],
   "microblog": {
@@ -880,23 +915,24 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-21T19:18:36.460168+00:00",
+  "generated_at": "2026-09-25T15:05:13.091618+00:00",
   "index_by_type": {
     "now": 13,
     "tag": 98,
-    "blog": 63,
+    "blog": 65,
     "book": 51,
-    "page": 2,
-    "site": 21,
+    "page": 1,
+    "site": 22,
     "trek": 20,
     "sport": 25,
     "stats": 10,
     "resume": 21,
-    "project": 15,
+    "project": 18,
     "writing": 44,
+    "changelog": 92,
     "instagram": 11,
     "microblog": 1664,
-    "presentation": 8
+    "presentation": 12
   },
   "tags_by_category": {
     "Personal": 2,

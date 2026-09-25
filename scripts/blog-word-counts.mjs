@@ -86,15 +86,28 @@ const SUPABASE_KEY =
 
 async function getJson(url) {
   const res = await fetch(url, {
-    headers: { Accept: "application/json", "User-Agent": "personal-site-wordcount" },
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "personal-site-wordcount",
+    },
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${url}`);
   return res.json();
 }
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 /** UTC ISO timestamp → { iso, monthKey, label, year } in IST. */
@@ -114,16 +127,34 @@ function istParts(timestamp) {
 }
 
 const NAMED_ENTITIES = {
-  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
-  hellip: "…", mdash: "—", ndash: "–", rsquo: "’", lsquo: "‘",
-  rdquo: "”", ldquo: "“", middot: "·", bull: "•", deg: "°",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  hellip: "…",
+  mdash: "—",
+  ndash: "–",
+  rsquo: "’",
+  lsquo: "‘",
+  rdquo: "”",
+  ldquo: "“",
+  middot: "·",
+  bull: "•",
+  deg: "°",
 };
 
 function decodeEntities(text) {
   return text
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
-    .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m);
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) =>
+      String.fromCodePoint(parseInt(n, 16)),
+    )
+    .replace(
+      /&([a-z]+);/gi,
+      (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m,
+    );
 }
 
 /** Count words in an HTML body: drop script/style, strip tags, split on whitespace. */
@@ -148,7 +179,10 @@ function htmlToText(html) {
   return decodeEntities(
     html
       .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-      .replace(/<\/(p|h[1-6]|li|blockquote|figcaption|pre)>|<br\s*\/?>/gi, "\n\n")
+      .replace(
+        /<\/(p|h[1-6]|li|blockquote|figcaption|pre)>|<br\s*\/?>/gi,
+        "\n\n",
+      )
       .replace(/<[^>]+>/g, " "),
   )
     .split(/\n{2,}/)
@@ -325,9 +359,19 @@ function buildReport(posts, tracked) {
     }));
 
   // --- derived statistics (everything the infographic plots) --------------
-  const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const DAY_NAMES = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
   const byDayOfWeek = DAY_NAMES.map((day, i) => {
-    const hits = sorted.filter((p) => p.date && new Date(`${p.date}T00:00:00Z`).getUTCDay() === i);
+    const hits = sorted.filter(
+      (p) => p.date && new Date(`${p.date}T00:00:00Z`).getUTCDay() === i,
+    );
     return {
       day,
       posts: hits.length,
@@ -362,7 +406,9 @@ function buildReport(posts, tracked) {
   ];
   const byLength = LENGTH_BUCKETS.map((b) => ({
     label: b.label,
-    posts: sorted.filter((p) => (p.words || 0) >= b.min && (p.words || 0) < b.max).length,
+    posts: sorted.filter(
+      (p) => (p.words || 0) >= b.min && (p.words || 0) < b.max,
+    ).length,
   }));
 
   // Running lifetime total at the end of each month that has posts.
@@ -371,7 +417,12 @@ function buildReport(posts, tracked) {
   const cumulative = byMonth.map((m) => {
     running += m.words;
     runningPosts += m.posts;
-    return { month: m.month, label: m.label, words: running, posts: runningPosts };
+    return {
+      month: m.month,
+      label: m.label,
+      words: running,
+      posts: runningPosts,
+    };
   });
 
   const topPosts = sorted
@@ -386,7 +437,8 @@ function buildReport(posts, tracked) {
       url: p.url,
     }));
 
-  const busiestMonth = [...byMonth].sort((a, b) => b.words - a.words)[0] || null;
+  const busiestMonth =
+    [...byMonth].sort((a, b) => b.words - a.words)[0] || null;
   const busiestYear = [...byYear].sort((a, b) => b.words - a.words)[0] || null;
 
   // --- month-to-date / year-to-date ---------------------------------------
@@ -459,7 +511,12 @@ function buildReport(posts, tracked) {
       firstPost: sorted.length ? sorted[sorted.length - 1].date : null,
       latestPost: sorted.length ? sorted[0].date : null,
       longestPost: longest
-        ? { title: longest.title, date: longest.date, words: longest.words, url: longest.url }
+        ? {
+            title: longest.title,
+            date: longest.date,
+            words: longest.words,
+            url: longest.url,
+          }
         : null,
       busiestMonth,
       busiestYear,
@@ -486,7 +543,9 @@ async function collectTexts(posts) {
   const cache = new Map();
   if (fs.existsSync(TEXT_FILE)) {
     try {
-      for (const p of JSON.parse(fs.readFileSync(TEXT_FILE, "utf8")).posts || []) cache.set(p.url, p);
+      for (const p of JSON.parse(fs.readFileSync(TEXT_FILE, "utf8")).posts ||
+        [])
+        cache.set(p.url, p);
     } catch (err) {
       console.log(`  • text cache unreadable (${err.message}) — rebuilding it`);
     }
@@ -507,7 +566,9 @@ async function collectTexts(posts) {
         const full = await getJson(`${SUBSTACK_HOST}/api/v1/posts/${p.slug}`);
         text = htmlToText(full.body_html);
         downloaded += 1;
-        await new Promise((resolve) => setTimeout(resolve, SUBSTACK_BODY_DELAY_MS));
+        await new Promise((resolve) =>
+          setTimeout(resolve, SUBSTACK_BODY_DELAY_MS),
+        );
       } catch (err) {
         failed.push(`${p.title}: ${err.message}`);
         text = hit?.text || null; // a stale body beats a missing one
@@ -531,8 +592,8 @@ async function collectTexts(posts) {
   }
 
   console.log(
-    `  ✓ post text: ${out.length} posts (${downloaded} downloaded, ${fromCache} from cache`
-      + `${failed.length ? `, ${failed.length} failed` : ""})`,
+    `  ✓ post text: ${out.length} posts (${downloaded} downloaded, ${fromCache} from cache` +
+      `${failed.length ? `, ${failed.length} failed` : ""})`,
   );
   failed.forEach((f) => console.log(`    • ${f}`));
   return out;
@@ -557,7 +618,9 @@ async function main() {
     console.log(`  ✓ blogs table: ${tracked.length} rows`);
   } catch (err) {
     trackedAvailable = false;
-    console.log(`  • blogs table: unavailable (${err.message}) — continuing without it`);
+    console.log(
+      `  • blogs table: unavailable (${err.message}) — continuing without it`,
+    );
   }
 
   const trackedByUrl = new Map(
@@ -591,7 +654,9 @@ async function main() {
   );
   // Keys written bare rather than through JSON.stringify: they are numeric ids,
   // and quoting them is an eslint quote-props error in this repo.
-  const pairs = Object.entries(wordsById).map(([id, words]) => `  ${id}: ${words},`);
+  const pairs = Object.entries(wordsById).map(
+    ([id, words]) => `  ${id}: ${words},`,
+  );
   fs.writeFileSync(
     WORDS_FILE,
     `${[
@@ -601,8 +666,7 @@ async function main() {
       ...pairs,
       "};",
       "",
-    ].join("
-")}`,
+    ].join("\n")}`,
     "utf8",
   );
 
@@ -617,29 +681,41 @@ async function main() {
   const n = (v) => v.toLocaleString("en-IN");
   console.log("\nBy year");
   for (const y of report.byYear) {
-    console.log(`  ${y.year}  ${String(y.posts).padStart(3)} posts  ${n(y.words).padStart(8)} words`);
+    console.log(
+      `  ${y.year}  ${String(y.posts).padStart(3)} posts  ${n(y.words).padStart(8)} words`,
+    );
   }
 
   console.log("\nBy platform");
   for (const p of report.byPlatform) {
-    console.log(`  ${p.platform.padEnd(10)} ${String(p.posts).padStart(3)} posts  ${n(p.words).padStart(8)} words  (${p.method})`);
+    console.log(
+      `  ${p.platform.padEnd(10)} ${String(p.posts).padStart(3)} posts  ${n(p.words).padStart(8)} words  (${p.method})`,
+    );
   }
 
   const { monthToDate: m, yearToDate: y } = report.currentPeriod;
   const pct = (v) => (v == null ? "n/a" : `${v > 0 ? "+" : ""}${v}%`);
   console.log("\nTo date");
-  console.log(`  MTD (${m.label}): ${n(m.words)} words · ${m.posts} posts · ${pct(m.changeVsPreviousMonth)} vs last month`);
-  console.log(`  YTD (${y.year}):      ${n(y.words)} words · ${y.posts} posts · ${pct(y.changeVsPriorYear)} vs ${y.priorYearSamePeriod.year} same period`);
+  console.log(
+    `  MTD (${m.label}): ${n(m.words)} words · ${m.posts} posts · ${pct(m.changeVsPreviousMonth)} vs last month`,
+  );
+  console.log(
+    `  YTD (${y.year}):      ${n(y.words)} words · ${y.posts} posts · ${pct(y.changeVsPriorYear)} vs ${y.priorYearSamePeriod.year} same period`,
+  );
 
   const { totals } = report;
   console.log("\nOverall");
   console.log(`  posts:        ${n(totals.posts)}`);
   console.log(`  words:        ${n(totals.words)}`);
   console.log(`  average:      ${n(totals.averageWords)} words/post`);
-  console.log(`  tracked:      ${n(totals.trackedPosts)} of ${n(totals.posts)} in the blogs table`);
+  console.log(
+    `  tracked:      ${n(totals.trackedPosts)} of ${n(totals.posts)} in the blogs table`,
+  );
   console.log(`  range:        ${totals.firstPost} → ${totals.latestPost}`);
   if (totals.longestPost) {
-    console.log(`  longest:      ${n(totals.longestPost.words)} words — ${totals.longestPost.title}`);
+    console.log(
+      `  longest:      ${n(totals.longestPost.words)} words — ${totals.longestPost.title}`,
+    );
   }
 
   const byKind = report.anomalies.reduce((acc, a) => {
@@ -650,11 +726,17 @@ async function main() {
   for (const [kind, count] of Object.entries(byKind)) {
     console.log(`  • ${kind}: ${count}`);
   }
-  for (const a of report.anomalies.filter((x) => x.kind === "malformed_blog_date")) {
-    console.log(`    blogs id ${a.blogId} — ${JSON.stringify(a.value)} (${a.title})`);
+  for (const a of report.anomalies.filter(
+    (x) => x.kind === "malformed_blog_date",
+  )) {
+    console.log(
+      `    blogs id ${a.blogId} — ${JSON.stringify(a.value)} (${a.title})`,
+    );
   }
 
-  console.log(`\nWrote ${path.relative(ROOT, LEDGER_FILE)} and ${path.relative(ROOT, TEXT_FILE)}\n`);
+  console.log(
+    `\nWrote ${path.relative(ROOT, LEDGER_FILE)} and ${path.relative(ROOT, TEXT_FILE)}\n`,
+  );
 }
 
 main().catch((err) => {
