@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-25T15:07:26.914Z",
+  "generatedAt": "2026-09-26T07:17:07.794Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 108,
-    "words": 105084,
-    "averageWords": 973,
-    "trackedPosts": 65,
+    "posts": 109,
+    "words": 106361,
+    "averageWords": 976,
+    "trackedPosts": 66,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-09-23",
+    "latestPost": "2026-09-26",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -21,52 +21,52 @@
     "busiestMonth": {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 9,
-      "words": 11437
+      "posts": 10,
+      "words": 12714
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 65,
-      "words": 72143
+      "posts": 66,
+      "words": 73420
     },
     "activeMonths": 34
   },
   "currentPeriod": {
-    "asOf": "2026-09-25",
+    "asOf": "2026-09-26",
     "monthToDate": {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 9,
-      "words": 11437,
-      "daysElapsed": 25,
-      "wordsPerDay": 457,
+      "posts": 10,
+      "words": 12714,
+      "daysElapsed": 26,
+      "wordsPerDay": 489,
       "previousMonth": {
         "month": "2026-08",
         "posts": 6,
         "words": 6193
       },
-      "changeVsPreviousMonth": 84.7
+      "changeVsPreviousMonth": 105.3
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 65,
-      "words": 72143,
-      "daysElapsed": 268,
-      "wordsPerDay": 269,
+      "posts": 66,
+      "words": 73420,
+      "daysElapsed": 269,
+      "wordsPerDay": 273,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7827,
-        "throughDate": "2025-09-25"
+        "throughDate": "2025-09-26"
       },
-      "changeVsPriorYear": 821.7
+      "changeVsPriorYear": 838
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 80,
-      "words": 80399,
+      "posts": 81,
+      "words": 81676,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 65,
-      "words": 72143
+      "posts": 66,
+      "words": 73420
     }
   ],
   "byMonth": [
@@ -315,8 +315,8 @@
     {
       "month": "2026-09",
       "label": "September 2026",
-      "posts": 9,
-      "words": 11437
+      "posts": 10,
+      "words": 12714
     }
   ],
   "cumulative": [
@@ -521,8 +521,8 @@
     {
       "month": "2026-09",
       "label": "September 2026",
-      "words": 105084,
-      "posts": 108
+      "words": 106361,
+      "posts": 109
     }
   ],
   "byDayOfWeek": [
@@ -558,15 +558,15 @@
     },
     {
       "day": "Saturday",
-      "posts": 11,
-      "words": 11339
+      "posts": 12,
+      "words": 12616
     }
   ],
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 54,
-      "words": 61225
+      "posts": 55,
+      "words": 62502
     },
     {
       "section": "Uncategorised",
@@ -582,8 +582,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 51,
-      "words": 55872
+      "posts": 52,
+      "words": 57149
     },
     {
       "tag": "digital-wellbeing",
@@ -592,8 +592,8 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 16,
-      "words": 16759
+      "posts": 17,
+      "words": 18036
     },
     {
       "tag": "Travel Blogs",
@@ -1071,7 +1071,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 39
+      "posts": 40
     },
     {
       "label": "1,500–1,999",
@@ -1190,6 +1190,27 @@
     }
   ],
   "posts": [
+    {
+      "title": "Being at the right place, at right time!",
+      "date": "2026-09-26",
+      "publishedAt": "2026-09-26T07:06:40.472Z",
+      "url": "https://sankettambare.substack.com/p/being-at-the-right-place-at-right",
+      "platform": "Substack",
+      "words": 1277,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "self-reflection",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!AkvD!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F0b4b2797-8406-40cf-a021-869193b9d827_2752x1536.png",
+      "trackedInBlogsTable": true,
+      "blogId": 66,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "The story of Numbers: Why crunching the statistics matters?",
       "date": "2026-09-23",
