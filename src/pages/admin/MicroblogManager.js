@@ -31,9 +31,7 @@ const FIELDS = [
     name: "postType", label: "Type", type: "select", options: ["text", "quote", "photo"], required: true,
   },
   {
-    // post_kind (0025). Blank is "not classified", which is not one of the four
-    // — npm run microblog:classify fills it, and this is where a wrong machine
-    // verdict is corrected.
+    // post_kind (0025). Blank is "not classified", which is not one of the four.
     name: "postKind",
     label: "Kind",
     type: "select",

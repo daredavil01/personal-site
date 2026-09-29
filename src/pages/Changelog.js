@@ -48,7 +48,7 @@ const majorOf = (version) => {
 };
 
 // The chapter card: what a whole major was about, written by
-// `npm run changelog:majors` from the releases inside it. Rendered first and
+// `npm run changelog` from the releases inside it. Rendered first and
 // the engineering entries are collapsed under each release, because this is
 // what someone opening /changelog came to read.
 //
@@ -121,7 +121,7 @@ const Version = ({ entry }) => (
       </span>
     </div>
 
-    {/* The reader-facing paragraph npm run changelog:notes writes, where the
+    {/* The reader-facing paragraph npm run changelog writes, where the
         version has one. It says what changed for someone who uses the site;
         the entries below it say why. */}
     {entry.summary && (

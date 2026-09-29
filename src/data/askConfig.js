@@ -240,29 +240,14 @@ export const AI_MASTER_KEY = "enabled";
 
 export const AI_FEATURES = [
   {
-    key: "tag_descriptions",
-    label: "Tag descriptions",
-    hint: "npm run tags:describe — fills tags.description from each tag's own items.",
-  },
-  {
     key: "draft_fields",
     label: "Draft long-text fields",
     hint: "The Draft button on admin textareas. Owner-only, fills the box, saves nothing.",
   },
   {
-    key: "book_metadata",
-    label: "Book metadata gap-fill",
-    hint: "npm run books:propose — proposes into the template books:apply already reads.",
-  },
-  {
     key: "tag_suggest",
     label: "Tag suggestions on save",
     hint: "Suggests tags on an admin form. Writes still go through set_entity_tags.",
-  },
-  {
-    key: "microblog_kind",
-    label: "Micro-blog own/reblog classifier",
-    hint: "npm run microblog:classify — fills post_kind so a reblog can be told from a thought.",
   },
   {
     key: "answer_cache",
@@ -282,7 +267,7 @@ export const AI_FEATURES = [
   {
     key: "release_notes",
     label: "Changelog release notes",
-    hint: "npm run changelog:notes — one reader-facing paragraph per version, written under its heading.",
+    hint: "The notes step of npm run changelog — one reader-facing paragraph per version.",
   },
   {
     key: "archive_gaps",

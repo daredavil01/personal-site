@@ -10,11 +10,11 @@
  * Now page wants.
  *
  * Usage:
- *   npm run changelog:notes -- --dry-run      print, write nothing
- *   npm run changelog:notes                   fill versions that have none
- *   npm run changelog:notes -- --limit 3      newest N versions only
- *   npm run changelog:notes -- --version v18.2.0
- *   npm run changelog:notes -- --force        rewrite existing paragraphs
+ *   node scripts/summarise-changelog.mjs --dry-run         print, write nothing
+ *   node scripts/summarise-changelog.mjs                   fill versions that have none
+ *   node scripts/summarise-changelog.mjs --limit 3         newest N versions only
+ *   node scripts/summarise-changelog.mjs --version v18.2.0
+ *   node scripts/summarise-changelog.mjs --force           rewrite existing paragraphs
  *
  * Needs SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY in .env, and the
  * release_notes switch on under AI features in /admin/ask/settings.

@@ -9,16 +9,16 @@
  * should say what that chapter was about — so this is rendered first and the
  * entries are collapsed under it.
  *
- * The input is the per-version summaries `npm run changelog:notes` already
+ * The input is the per-version summaries summarise-changelog.mjs already
  * wrote, falling back to a version's entry names where it has none. Summarising
  * summaries keeps the prompt small (v6 alone is seventeen releases) and keeps
  * one voice across both levels.
  *
  * Usage:
- *   npm run changelog:majors -- --dry-run    print, write nothing
- *   npm run changelog:majors                 fill majors whose input changed
- *   npm run changelog:majors -- --major 18   one major
- *   npm run changelog:majors -- --force      rewrite even if nothing changed
+ *   node scripts/summarise-majors.mjs --dry-run       print, write nothing
+ *   node scripts/summarise-majors.mjs                 fill majors whose input changed
+ *   node scripts/summarise-majors.mjs --major 18      one major
+ *   node scripts/summarise-majors.mjs --force         rewrite even if nothing changed
  *
  * Needs SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY in .env, and the
  * release_notes switch on under AI features in /admin/ask/settings — the same

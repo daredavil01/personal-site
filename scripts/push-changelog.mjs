@@ -13,9 +13,9 @@
  * version that is in the table and not in the buffer is simply left alone.
  *
  * Usage:
- *   npm run changelog:push -- --dry-run   parse and print, write nothing
- *   npm run changelog:push                upsert, then clear the buffer
- *   npm run changelog:push -- --keep      upsert but leave the file as it is
+ *   node scripts/push-changelog.mjs --dry-run      parse and print, write nothing
+ *   node scripts/push-changelog.mjs                upsert, then clear the buffer
+ *   node scripts/push-changelog.mjs --keep         upsert but leave the file as it is
  *
  * Needs SUPABASE_SERVICE_ROLE_KEY in .env.
  */
@@ -40,8 +40,8 @@ const EMPTY_BUFFER = `---
 
 Staging buffer only — the published version history lives in the \`changelog\`
 table and is read by /changelog and /ask. Append a new version's entry below,
-in the format CLAUDE.md mandates, then run \`npm run changelog:push\` to upsert
-it and empty this file again.
+in the format CLAUDE.md mandates, then run \`npm run changelog\` to upsert it
+and empty this file again.
 
 Versioning follows the semver-style rules in CLAUDE.md: major for new
 pages/refactors/redesigns, minor for features and content additions (at most one
@@ -92,10 +92,11 @@ async function main() {
   if (readErr) throw new Error(`read: ${readErr.message}`);
   const known = new Map((existing || []).map((r) => [r.version, r]));
 
-  // `npm run changelog:notes` writes the reader-facing paragraph into the row,
-  // not back into the buffer — so a buffer entry almost never carries one. An
-  // upsert that sent summary: null would erase it. A summary is only ever
-  // written from here when the buffer actually has one.
+  // The notes step (summarise-changelog.mjs) writes the reader-facing
+  // paragraph into the row, not back into the buffer — so a buffer entry
+  // almost never carries one. An upsert that sent summary: null would erase
+  // it. A summary is only ever written from here when the buffer actually
+  // has one.
   rows.forEach((r) => {
     if (!r.summary) delete r.summary;
   });

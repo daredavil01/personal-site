@@ -71,6 +71,17 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 - **Hand-maintained files NOT in Supabase:** `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
   `src/data/pageMeta.js`, `src/data/stats/personal.js`.
 
+## Periodic upkeep
+
+`npm run refresh` runs, in order: `changelog` (push, notes, majors), `repo`
+(commit graph), `blogs` (word counts), `ask` (index + docs). Name steps to run
+some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
+step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
+steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
+(run after content moves, then commit the PNGs), `newsletter:draft` (monthly).
+One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
+have no npm entry — run them with `node`.
+
 ## Docs (read before touching a table)
 
 `docs/` is the deep reference; this file is the summary.
@@ -463,16 +474,18 @@ Publishing an entry is a separate, explicit step:
   *edited* or *already published*, and writes the ones you tick. Runs as the
   owner under RLS, so it needs no service-role key. It cannot empty the file (a
   browser cannot write to the repo) — clear the buffer in your next commit.
-- **`npm run changelog:push`** — the same job headlessly, and it *does* empty
-  the buffer afterwards. `--dry-run` prints the plan, `--keep` leaves the file.
+- **`npm run changelog`** — the same job headlessly, then the per-version
+  notes and the major summaries, in that order. It *does* empty the buffer.
+  `-- --dry-run` prints each plan; for `--keep`, `--force` etc. run the script
+  directly (`node scripts/push-changelog.mjs --keep`).
 
 Both refuse to run if a `## [vX.Y.Z]` heading fails to parse, because an
 unparsed heading silently attaches its bullets to the version above it.
 
-Edit a published version at **`/admin/changelog`**; `npm run changelog:notes`
-writes each version's reader-facing paragraph into its `summary` column, and
-`npm run changelog:majors` writes the chapter summary for a whole major into
-`changelog_majors` — headline, paragraph, and the additions and fixes worth
+Edit a published version at **`/admin/changelog`**; the notes step
+(`summarise-changelog.mjs`) writes each version's reader-facing paragraph into
+its `summary` column, and the majors step (`summarise-majors.mjs`) writes the
+chapter summary for a whole major into `changelog_majors` — headline, paragraph, and the additions and fixes worth
 naming. Both answer to the existing `release_notes` AI feature switch, and both
 skip work whose input has not changed. `/changelog` renders the chapter summary
 **first** and collapses the engineering entries under each release.

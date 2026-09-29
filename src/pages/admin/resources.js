@@ -375,7 +375,7 @@ const resources = [
         label: "Reader summary",
         type: "textarea",
         span: "full",
-        hint: "One plain paragraph for someone who uses the site. npm run changelog:notes writes these.",
+        hint: "One plain paragraph for someone who uses the site. npm run changelog writes these.",
       },
       {
         name: "changes",

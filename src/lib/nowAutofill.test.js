@@ -312,7 +312,7 @@ describe("serializeSections", () => {
 });
 
 describe("release-note blockquotes", () => {
-  // npm run changelog:notes writes one of these under a version heading. The
+  // npm run changelog writes one of these under a version heading. The
   // parser must walk past it: the Now editor offers changes, not summaries.
   const md = `## [v3.0.0] — 2026-06-01
 

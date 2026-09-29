@@ -6,9 +6,9 @@
 -- sentence. So each major gets a headline, a paragraph, and the additions and
 -- fixes worth naming; the engineering entries are collapsed underneath it.
 --
--- Written by `npm run changelog:majors` (scripts/summarise-majors.mjs) through
+-- Written by `npm run changelog` (scripts/summarise-majors.mjs) through
 -- the existing `release_notes` AI feature — the same switch and the same Gemini
--- ladder `npm run changelog:notes` uses for a single version's summary. A major
+-- ladder `npm run changelog` uses for a single version's summary. A major
 -- summary is written from those per-version summaries, so the layering is
 -- entries → version summary → major summary.
 

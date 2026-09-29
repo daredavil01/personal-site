@@ -19,7 +19,7 @@ import { hairline, mutedText } from "./ui/tokens";
 // there, in the same commit and the same diff as the code it describes, so the
 // entry is reviewed as code review. This page is where that entry becomes a
 // published row. It runs as the owner under RLS, so it needs no service-role
-// key — unlike `npm run changelog:push`, which does the same job headlessly and
+// key — unlike `npm run changelog`, which does the same job headlessly and
 // can also empty the file afterwards. A browser cannot write to the repo, so
 // clearing the buffer is always a commit or that script, never this page.
 
@@ -28,7 +28,7 @@ import { hairline, mutedText } from "./ui/tokens";
 // same     — published, identical
 const STATE_TONE = { new: "success", changed: "warning", same: "neutral" };
 
-// `npm run changelog:notes` writes the reader-facing paragraph into the row,
+// `npm run changelog` writes the reader-facing paragraph into the row,
 // not back into the buffer, so a buffer entry almost never carries one. It is
 // therefore never a difference, and publishing never blanks a summary that is
 // already there — only a buffer entry that has its own replaces it.
@@ -187,7 +187,7 @@ const ChangelogSync = () => {
           <p className={`text-sm ${mutedText} mt-2 mb-0`}>
             Everything in the buffer is published. Empty the file in your next
             commit — a browser cannot write to the repo, so clearing it stays a
-            commit (or npm run changelog:push, which clears it for you).
+            commit (or npm run changelog, which clears it for you).
           </p>
         )}
       </Card>

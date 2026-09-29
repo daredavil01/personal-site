@@ -77,16 +77,16 @@ edit; a form button fills an input that is only persisted on Save.
 
 | id | feature | flag | model | runtime | status |
 |---|---|---|---|---|---|
-| D1 | Tag descriptions | `tag_descriptions` | Gemini | batch script | **built and run** — 97 of 98 tags described |
+| D1 | Tag descriptions | — | Gemini | one-off | **done** — 97 of 98 tags described; script removed |
 | A2 | Draft long-text fields | `draft_fields` | Gemini | request (owner-only) | **built** |
-| A5 | Book metadata gap-fill | `book_metadata` | Gemini | batch script | **built, not yet run** |
+| A5 | Book metadata gap-fill | — | Gemini | one-off | **removed** — script deleted unrun |
 | A1 | Tag suggestions on save | `tag_suggest` | Gemini (JSON) | request (owner-only) | **built** |
 | C1 | Micro-blog bulk auto-tagging | — | Claude (Claude Code session) | one-off | **done** 2026-09-29 — 816 posts gained tags; script removed |
 | A3 | Image alt text | `image_alt` | Gemini vision | request (owner-only) | **built** for `slideImages` |
-| C3 | Micro-blog near-duplicates | — | none (embeddings) | batch script | **built, report only** |
+| C3 | Micro-blog near-duplicates | — | none (embeddings) | one-off | **removed** |
 | E1 | `/ask`-powered 404 | — | none (embeddings) | request | **built** |
 | E2 | Semantic "on this day" | — | none (embeddings) | request | **built** on `/microblog` |
-| C2 | Own thought vs reblog | `microblog_kind` | Claude (Claude Code session); Gemini script for new posts | batch script | **run** 2026-09-29 — 1,635 classified |
+| C2 | Own thought vs reblog | — | Claude (Claude Code session) | one-off | **done** 2026-09-29 — 1,635 classified; script removed |
 | W1 | The Atlas guide speaks | — | Workers AI (aura-2-en) | build-time | **built and run** |
 | W5 | Read aloud | — | none (browser) | client | **built** on micro-post pages |
 | B6 | Answer cache | `answer_cache` | none | request | **built** |
@@ -97,7 +97,7 @@ edit; a form button fills an input that is only persisted on Save.
 | E3 | Query autocomplete on `/ask` | — | none (pool text) | client | **built** |
 | E5 | Reading time | — | none (arithmetic) | build-time | **built** on blog pages; no difficulty band |
 | — | Reblogs sink in `/ask` retrieval | — | none (`post_kind`) | request | **built**, live after the next `ask:index` |
-| E4 | Changelog → release notes | `release_notes` | Gemini | batch script | **built, not yet run** |
+| E4 | Changelog → release notes | `release_notes` | Gemini | batch script | **built and run** |
 | B2 | Archive gap report | `archive_gaps` | Gemini | batch script | **built**, dry-run only |
 
 Everything else in the proposal is **not started**: A4, B3–B5, C1's sibling
@@ -110,20 +110,17 @@ is no model call to switch off.
 
 ### What each one is
 
-- **D1 — `npm run tags:describe`.** Fills `tags.description` from each tag's own
+- **D1 — tag descriptions.** Filled `tags.description` once from each tag's own
   items, read through the existing `tag_entities()` RPC, so the sentence says
-  what the tag covers *on this site*. `--dry-run`, `--force`, `--limit N`,
-  `--tag <name>`. Skips a tag that already has text and a tag with no items.
+  what the tag covers *on this site*. The script and its `tag_descriptions`
+  switch were removed on 2026-09-29; new descriptions are typed in `/admin/tags`.
 - **A2 — the Draft button.** On any admin `textarea` flagged `aiDraft: true`
   (`resources.js`). The prompt is the row as the form currently holds it plus
   the three longest existing values of the same field as style examples. Fills
   the box; saves nothing.
-- **A5 — `npm run books:propose`.** Step 2.5 of the existing
-  `books:template` → `books:apply` pipeline, writing into the same template JSON
-  so the human gate is unchanged. Never proposes `cover_url` — a hallucinated
-  ISBN is visible in review, a hallucinated image URL is a 404 that
-  `books:apply` would try to download — and an ISBN that is not 10 or 13 digits
-  is dropped.
+- **A5 — book metadata gap-fill.** Removed on 2026-09-29 with the rest of the
+  books backfill pipeline and its `book_metadata` switch, never run. Missing
+  metadata is typed in `/admin`.
 - **A1 — the Suggest button.** On every central-tag field on the site: books,
   races, treks, projects, decks, photos, blog posts and micro-posts. Confident
   names are added to the input, plausible ones offered as chips. Writes still go
@@ -150,12 +147,8 @@ is no model call to switch off.
 
 ### Wave 2 — what each one is
 
-- **C3 — `npm run microblog:dupes`.** Every micro-post through
-  `related_content_ranked()`, reporting pairs above a cosine threshold
-  (`--threshold`, default 0.92). Report only: it writes
-  `knowledge_base/microblog-duplicates-<timestamp>.json` and changes nothing.
-  Posts shorter than 60 characters are skipped — the wordless photo-post chunks
-  are all near-identical to each other and would be the entire report.
+- **C3 — micro-blog near-duplicates.** A report-only pass through
+  `related_content_ranked()`. Removed on 2026-09-29 as a finished one-off.
 - **E1 — the 404.** `pathToQuery` decodes the path, splits it, drops ids, years
   and one-character fragments, and hands the words to `hybrid_search` with a
   null embedding. Suggestions are restricted to site paths; a failed lookup
@@ -163,15 +156,15 @@ is no model call to switch off.
 - **E2 — "on this day".** `microblog_on_this_day(month, day)` for the seed,
   `related_content_ranked()` for the echoes. Hidden while a filter is on, and it
   renders nothing on a silent date.
-- **C2 — `npm run microblog:classify`.** `post_kind` is one of `own`, `quote`,
-  `reblog`, `link`, or null for not-yet-classified. Journal/`--undo`/resumable.
-  The public filter narrows rather than widens. The first full pass was done on
-  2026-09-29 by a Claude Code session, not the script: all 1,635 posts with text
-  → 1,516 own, 33 quote, 38 reblog, 48 link, with a confidence per post. Its
-  journal (`knowledge_base/microblog-kind-journal-2026-09-29T13-09-04-471Z.json`)
-  has the script's shape, so `--undo` reverts it. The script stays for posts
-  imported later.
-- **W1 — `npm run atlas:voice`.** Four beats, one sprite, generated offsets.
+- **C2 — own thought vs reblog.** `post_kind` is one of `own`, `quote`,
+  `reblog`, `link`, or null for not-yet-classified. The public filter narrows
+  rather than widens. The full pass was done on 2026-09-29 by a Claude Code
+  session: all 1,635 posts with text → 1,516 own, 33 quote, 38 reblog, 48 link,
+  with a confidence per post. Its journal
+  (`knowledge_base/microblog-kind-journal-2026-09-29T13-09-04-471Z.json`) holds
+  each row's value before and after. The script and its `microblog_kind` switch
+  were removed; a new post's kind is set in the `/admin` micro-blog form.
+- **W1 — `node scripts/generate-guide-audio.mjs`.** Four beats, one sprite, generated offsets.
   Lazy-loaded on the first beat; gated by the existing sound toggle; stops any
   other voice before it starts.
 - **W5 — `ReadAloud`.** The browser's own synthesiser, Marathi → Hindi →
@@ -248,7 +241,7 @@ one is a real migration. Only `slideImages` is covered so far.
   counted words shows no label rather than "1 min read". The proposal's
   difficulty band is **not built**: a depth grade nobody can check reads as a
   fact, and Jev grading 107 posts to produce one is spend for a decoration.
-- **E4 — `npm run changelog:notes`.** One paragraph per version, written under
+- **E4 — the notes step of `npm run changelog`.** One paragraph per version, written under
   its heading as a blockquote. The blockquote is load-bearing: `/changelog`
   renders markdown wholesale so nothing needed building, and
   `src/lib/changelogEntries.js` reads `-` bullets under `###` headings, so it
@@ -302,8 +295,8 @@ would describe an image it never saw, just as confidently.
 - `npm run ask:gaps -- --dry-run --days 365` over the live log: 127 answers, 10
   distinct questions the archive did not answer, all of them graded
   over-refusals rather than empty retrievals.
-- **Not yet run:** `npm run changelog:notes`, and `npm run ask:gaps` with the
-  model. Neither switch is on in the live row.
+- **Not yet run:** `npm run ask:gaps` with the model. Its switch is not on in
+  the live row.
 - **Pending:** `npm run ask:index`, without which reblogs do not sink — the
   chunk text carrying `post_kind` is not in the index yet.
 

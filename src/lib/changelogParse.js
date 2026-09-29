@@ -2,7 +2,7 @@
 //
 // This is the format CLAUDE.md mandates, which is still how an entry is
 // written — src/data/changelog.md is the staging buffer a code change appends
-// to, and `npm run changelog:push` runs this over it and upserts the result:
+// to, and `npm run changelog` runs this over it and upserts the result:
 //
 //   ## [v12.0.0] — 2026-07-20
 //   > One reader-facing paragraph.
@@ -29,7 +29,7 @@ const VERSION_RE = /^##\s+\[?(v[\d.]+)\]?\s*[—–-]\s*(\d{4}-\d{2}(?:-\d{2})?)
 export const VERSION_HEADING_RE = /^##\s+\[?v[\d.]+/;
 const KIND_RE = /^###\s+(\w+)/;
 
-// The reader-facing paragraph `npm run changelog:notes` writes, as a
+// The reader-facing paragraph `npm run changelog` writes, as a
 // blockquote. One per version, before the first `###` section.
 const SUMMARY_RE = /^>\s*(.+)/;
 

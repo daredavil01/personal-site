@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 
 // The version history (0028_changelog.sql). Postgres is the source of truth;
 // src/data/changelog.md is only the staging buffer a code change appends to,
-// which `npm run changelog:push` drains into this table.
+// which `npm run changelog` drains into this table.
 //
 // Ordering is major/minor/patch, the generated integer columns — text sorts
 // v5.0.0 above v18.2.1, and released_on is not a fallback either (v18.2.1 is
@@ -95,7 +95,7 @@ export async function getChangelogMonth(monthKey) {
 /**
  * The written summary of one major version (0030_changelog_majors.sql):
  * headline, paragraph, and the additions and fixes worth naming. Null when
- * `npm run changelog:majors` has not reached that major yet — /changelog then
+ * `npm run changelog` has not reached that major yet — /changelog then
  * shows the releases without a chapter heading rather than an empty card.
  */
 export async function getMajorSummary(major) {

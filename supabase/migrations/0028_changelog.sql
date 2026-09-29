@@ -7,7 +7,7 @@
 --
 -- The file does not disappear; it becomes a staging buffer. A code change still
 -- appends its entry there, in the same commit and the same diff, and
--- `npm run changelog:push` parses the buffer, upserts each version into this
+-- `npm run changelog` parses the buffer, upserts each version into this
 -- table, and empties the file back to its header. Postgres is the source of
 -- truth; the file is where an entry waits for a human to read it.
 --
