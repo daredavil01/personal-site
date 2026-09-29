@@ -16,6 +16,8 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/instagram` | Instagram | `/og/instagram.png` |
 | `/sports` | SportsPage | `/og/sports.png` |
 | `/now` | Now | `/og/now.png` |
+| `/newsletter` | Newsletter | `/og/newsletter.png` |
+| `/newsletter/:slug` | NewsletterIssue | the row's photo, else `/og/newsletter.png` |
 | `/books` | Books | `/og/books.png` |
 | `/challenges` | Challenges | `/og/challenges.png` |
 | `/100-days-to-offload` | OneHundredDays | `/og/100-days-to-offload.png` |

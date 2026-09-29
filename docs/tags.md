@@ -6,51 +6,51 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 363 | Mind & Life |
-| `self-reflection` | 296 | Mind & Life |
+| `life` | 366 | Mind & Life |
+| `self-reflection` | 299 | Mind & Life |
 | `sanky` | 114 | Personal |
+| `marathi` | 110 | Books & Reading |
 | `latepost` | 109 | Writing & Blogging |
-| `marathi` | 109 | Books & Reading |
-| `philosophy` | 90 | Society & Ideas |
+| `philosophy` | 92 | Society & Ideas |
 | `travel` | 78 | Travel & Outdoors |
 | `love` | 63 | People & Feelings |
+| `personaldevelopment` | 55 | Mind & Life |
 | `digital wellbeing` | 53 | Digital Life |
-| `personaldevelopment` | 53 | Mind & Life |
-| `calmness` | 46 | Mind & Life |
+| `calmness` | 47 | Mind & Life |
 | `social` | 43 | Society & Ideas |
 | `maharashtra` | 41 | Travel & Outdoors |
 | `social media` | 40 | Digital Life |
-| `technology` | 37 | Technology & Data |
+| `technology` | 39 | Technology & Data |
 | `forts` | 35 | Travel & Outdoors |
 | `politics` | 34 | Society & Ideas |
 | `digital detox` | 32 | Digital Life |
 | `psychology` | 31 | Society & Ideas |
+| `ai` | 30 | Technology & Data |
 | `100_days_to_offload` | 28 | Writing & Blogging |
-| `ai` | 28 | Technology & Data |
 | `desperate me` | 28 | People & Feelings |
 | `daredavil01` | 27 | Personal |
 | `konkan` | 27 | Travel & Outdoors |
-| `मन` | 26 | Mind & Life |
+| `मन` | 27 | Mind & Life |
 | `self-help` | 25 | Books & Reading |
 | `भटकंती` | 25 | Travel & Outdoors |
+| `choices` | 17 | Mind & Life |
 | `book review` | 16 | Books & Reading |
-| `choices` | 16 | Mind & Life |
+| `claude code` | 14 | Technology & Data |
 | `nightsky` | 14 | Travel & Outdoors |
 | `youtube` | 14 | Digital Life |
 | `fiction` | 13 | Books & Reading |
+| `marathon` | 13 | Running & Fitness |
 | `nirman` | 13 | Society & Ideas |
 | `youth` | 13 | Society & Ideas |
 | `auto-biography` | 12 | Books & Reading |
-| `claude code` | 12 | Technology & Data |
 | `history` | 12 | Society & Ideas |
-| `marathon` | 12 | Running & Fitness |
 | `mydesigns` | 11 | Arts & Culture |
+| `running` | 11 | Running & Fitness |
 | `biography` | 10 | Books & Reading |
 | `data privacy` | 10 | Digital Life |
 | `digital technology` | 9 | Digital Life |
 | `privacy` | 9 | Digital Life |
 | `public policy` | 9 | Society & Ideas |
-| `running` | 9 | Running & Fitness |
 | `adventure` | 8 | Travel & Outdoors |
 | `खंडेराव` | 8 | Writing & Blogging |
 | `bioscope` | 7 | Mind & Life |
@@ -63,9 +63,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `tarkarli` | 6 | Travel & Outdoors |
 | `digital manipulation` | 5 | Digital Life |
 | `digitalnomad` | 5 | Digital Life |
+| `newsletter` | 5 | Writing & Blogging |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
 | `information age` | 4 | Digital Life |
-| `newsletter` | 4 | Writing & Blogging |
 | `sports` | 4 | Running & Fitness |
 | `the_trip` | 4 | Travel & Outdoors |
 | `three.js` | 4 | Technology & Data |
@@ -90,6 +90,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `hyderabad` | 1 | Travel & Outdoors |
 | `kailasgad` | 1 | Travel & Outdoors |
 | `krantismritivan` | 1 | Travel & Outdoors |
+| `learning` | 1 | — |
 | `note-taking` | 1 | Writing & Blogging |
 | `obsidian` | 1 | Writing & Blogging |
 | `panhala🏞️` | 1 | Travel & Outdoors |

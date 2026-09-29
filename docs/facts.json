@@ -25,30 +25,35 @@
     }
   },
   "counts": {
-    "tags": 98,
-    "blogs": 65,
+    "tags": 99,
+    "blogs": 66,
     "books": 51,
     "treks": 20,
     "sports": 25,
     "projects": 19,
     "instagram": 11,
-    "microblog": 1664
+    "microblog": 1666
   },
   "latest": {
+    "now": {
+      "d": "2026-09-01",
+      "t": "Newsletter — September 2026",
+      "u": "/newsletter/2026-09"
+    },
     "blog": {
-      "d": "2026-09-23",
-      "t": "The story of Number: Why crunching the statistics matters?",
-      "u": "/100-days-to-offload/65"
+      "d": "2026-09-26",
+      "t": "Being at the right place, at right time!",
+      "u": "/100-days-to-offload/66"
     },
     "writing": {
-      "d": "2026-09-03",
-      "t": "The Battle Within",
-      "u": "https://sankettambare.substack.com/p/the-battle-within"
+      "d": "2025-12-31",
+      "t": "2025: A Year of Confluence & Consistency",
+      "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-09-19",
-      "t": "#१४५९ खंडेराव...!💭",
-      "u": "/micro-blog/1664"
+      "d": "2026-09-29",
+      "t": "#1461 Dear Self...!",
+      "u": "/micro-blog/1666"
     }
   },
   "resume": {
@@ -703,6 +708,16 @@
     ],
     "presentation": [
       {
+        "d": "2026-09-29",
+        "t": "A Month, in One Letter",
+        "u": "/presentations/14"
+      },
+      {
+        "d": "2026-09-25",
+        "t": "Learning Hub: Sixty days, tracked in public",
+        "u": "/presentations/13"
+      },
+      {
         "d": "2026-09-25",
         "t": "The Digital Hub",
         "u": "/presentations/11"
@@ -790,27 +805,27 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 363
+      "total": 366
     },
     {
       "name": "self-reflection",
-      "total": 296
+      "total": 299
     },
     {
       "name": "sanky",
       "total": 114
     },
     {
+      "name": "marathi",
+      "total": 110
+    },
+    {
       "name": "latepost",
       "total": 109
     },
     {
-      "name": "marathi",
-      "total": 109
-    },
-    {
       "name": "philosophy",
-      "total": 90
+      "total": 92
     },
     {
       "name": "travel",
@@ -821,16 +836,16 @@
       "total": 63
     },
     {
+      "name": "personaldevelopment",
+      "total": 55
+    },
+    {
       "name": "digital wellbeing",
       "total": 53
     },
     {
-      "name": "personaldevelopment",
-      "total": 53
-    },
-    {
       "name": "calmness",
-      "total": 46
+      "total": 47
     },
     {
       "name": "social",
@@ -846,7 +861,7 @@
     },
     {
       "name": "technology",
-      "total": 37
+      "total": 39
     },
     {
       "name": "forts",
@@ -865,11 +880,11 @@
       "total": 31
     },
     {
-      "name": "100_days_to_offload",
-      "total": 28
+      "name": "ai",
+      "total": 30
     },
     {
-      "name": "ai",
+      "name": "100_days_to_offload",
       "total": 28
     },
     {
@@ -886,12 +901,12 @@
     },
     {
       "name": "मन",
-      "total": 26
+      "total": 27
     }
   ],
   "microblog": {
     "by_type": {
-      "text": 474,
+      "text": 476,
       "photo": 953,
       "quote": 237
     },
@@ -904,10 +919,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 95
+      "2026": 97
     },
     "date_range": {
-      "max": "2026-09-19",
+      "max": "2026-09-29",
       "min": "2018-03-19"
     }
   },
@@ -915,29 +930,30 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-25T15:05:13.091618+00:00",
+  "generated_at": "2026-09-29T05:10:15.412828+00:00",
   "index_by_type": {
     "now": 13,
     "tag": 98,
-    "blog": 65,
+    "blog": 66,
     "book": 51,
     "page": 1,
-    "site": 22,
+    "site": 23,
     "trek": 20,
     "sport": 25,
     "stats": 10,
     "resume": 21,
     "project": 18,
-    "writing": 44,
-    "changelog": 92,
+    "writing": 43,
+    "changelog": 94,
     "instagram": 11,
-    "microblog": 1664,
-    "presentation": 12
+    "microblog": 1666,
+    "presentation": 14
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
+    "uncategorised": 1,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,

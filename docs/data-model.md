@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **65** · indexed as `blog`
+Rows: **66** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1664** · indexed as `microblog`
+Rows: **1666** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **12** · indexed as `presentation`
+Rows: **14** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -228,12 +228,18 @@ Client-side renames: `is_current` → `isCurrent`
 | `sections` | jsonb | no | `'{}'::jsonb` |
 | `created_at` | timestamp with time zone | no | `now()` |
 | `updated_at` | timestamp with time zone | no | `now()` |
+| `slug` | text | yes | — |
+| `headline` | text | yes | — |
+| `note` | text | yes | — |
+| `poll` | jsonb | yes | — |
+| `published_at` | timestamp with time zone | yes | — |
+| `card_url` | text | yes | — |
 
 ### `tags`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **98**
+Rows: **99**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -257,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **2256**
+Rows: **2281**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -274,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **2930**
+Rows: **3048**
 
 | column | type | null | default |
 |---|---|---|---|
