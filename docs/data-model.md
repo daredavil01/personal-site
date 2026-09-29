@@ -157,7 +157,7 @@ Constraints:
 
 Races run. `date` is free text ('February 22, 2026'), `time` is chip time HH:MM:SS.
 
-Rows: **25** · indexed as `sport`
+Rows: **26** · indexed as `sport`
 
 Client-side renames: `time_certificate_link` → `timeCertificateLink`, `bib_number` → `bibNumber`, `slide_images` → `slideImages`
 
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **2281**
+Rows: **3709**
 
 | column | type | null | default |
 |---|---|---|---|

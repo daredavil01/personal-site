@@ -9,6 +9,13 @@ patch for fixes and tweaks.
 
 ---
 
+## [v20.1.0] — 2026-09-29
+
+### Changed
+
+- **Micro-blog tagged by Claude**: every micro-post with text (1,635 of 1,666) was read in a Claude Code session and given up to four tags from the existing vocabulary, merged onto its current tags (at most five per post) through `set_entity_tags`. 816 posts gained tags; no new tag was created. The run's journal in `knowledge_base/` holds each row's tags before and after.
+- **Removed `npm run microblog:tag`** (`scripts/tag-microblog.mjs`, `package.json`): the Gemini batch pass it ran is done, so the script, its npm entry and the `microblog_autotag` switch in `AI_FEATURES` (`src/data/askConfig.js`) are gone. `docs/ai-features-status.md` records the run.
+
 ## [v20.0.0] — 2026-09-29
 
 ### Added

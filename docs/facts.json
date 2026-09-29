@@ -29,7 +29,7 @@
     "blogs": 66,
     "books": 51,
     "treks": 20,
-    "sports": 25,
+    "sports": 26,
     "projects": 19,
     "instagram": 11,
     "microblog": 1666
@@ -782,7 +782,7 @@
   "sports": {
     "by_distance": {
       "10 Kms": 3,
-      "21 Kms": 18,
+      "21 Kms": 19,
       "35 Kms": 1,
       "42 Kms": 2,
       "50 Kms": 1
@@ -805,103 +805,103 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 366
+      "total": 478
     },
     {
       "name": "self-reflection",
-      "total": 299
-    },
-    {
-      "name": "sanky",
-      "total": 114
+      "total": 454
     },
     {
       "name": "marathi",
-      "total": 110
+      "total": 267
+    },
+    {
+      "name": "social media",
+      "total": 144
+    },
+    {
+      "name": "love",
+      "total": 137
+    },
+    {
+      "name": "sanky",
+      "total": 134
+    },
+    {
+      "name": "personaldevelopment",
+      "total": 130
+    },
+    {
+      "name": "calmness",
+      "total": 125
+    },
+    {
+      "name": "philosophy",
+      "total": 120
+    },
+    {
+      "name": "travel",
+      "total": 118
+    },
+    {
+      "name": "digital wellbeing",
+      "total": 113
     },
     {
       "name": "latepost",
       "total": 109
     },
     {
-      "name": "philosophy",
-      "total": 92
-    },
-    {
-      "name": "travel",
-      "total": 78
-    },
-    {
-      "name": "love",
-      "total": 63
-    },
-    {
-      "name": "personaldevelopment",
-      "total": 55
-    },
-    {
-      "name": "digital wellbeing",
-      "total": 53
-    },
-    {
-      "name": "calmness",
-      "total": 47
-    },
-    {
-      "name": "social",
-      "total": 43
-    },
-    {
-      "name": "maharashtra",
-      "total": 41
-    },
-    {
-      "name": "social media",
-      "total": 40
-    },
-    {
-      "name": "technology",
-      "total": 39
-    },
-    {
-      "name": "forts",
-      "total": 35
+      "name": "digital detox",
+      "total": 73
     },
     {
       "name": "politics",
-      "total": 34
-    },
-    {
-      "name": "digital detox",
-      "total": 32
+      "total": 72
     },
     {
       "name": "psychology",
-      "total": 31
+      "total": 70
+    },
+    {
+      "name": "social",
+      "total": 65
+    },
+    {
+      "name": "technology",
+      "total": 63
+    },
+    {
+      "name": "choices",
+      "total": 53
+    },
+    {
+      "name": "maharashtra",
+      "total": 49
     },
     {
       "name": "ai",
-      "total": 30
-    },
-    {
-      "name": "100_days_to_offload",
-      "total": 28
-    },
-    {
-      "name": "desperate me",
-      "total": 28
-    },
-    {
-      "name": "daredavil01",
-      "total": 27
-    },
-    {
-      "name": "konkan",
-      "total": 27
+      "total": 48
     },
     {
       "name": "मन",
-      "total": 27
+      "total": 46
+    },
+    {
+      "name": "nightsky",
+      "total": 45
+    },
+    {
+      "name": "खंडेराव",
+      "total": 41
+    },
+    {
+      "name": "desperate me",
+      "total": 40
+    },
+    {
+      "name": "forts",
+      "total": 38
     }
   ],
   "microblog": {
@@ -930,7 +930,7 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-29T05:10:15.412828+00:00",
+  "generated_at": "2026-09-29T12:17:52.631833+00:00",
   "index_by_type": {
     "now": 13,
     "tag": 98,

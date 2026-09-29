@@ -18,10 +18,10 @@
  * Needs SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY in .env, and the
  * microblog_kind switch on under AI features in /admin/ask/settings.
  *
- * Same bargain as microblog:tag, for the same reasons: every real run writes a
- * journal to knowledge_base/microblog-kind-journal-<timestamp>.json holding
- * each row's value before and after, --undo replays it backwards, and the pass
- * is resumable because a row that already has a post_kind is skipped.
+ * Reversible and resumable: every real run writes a journal to
+ * knowledge_base/microblog-kind-journal-<timestamp>.json holding each row's
+ * value before and after, --undo replays it backwards, and the pass is
+ * resumable because a row that already has a post_kind is skipped.
  */
 
 import fs from "fs";

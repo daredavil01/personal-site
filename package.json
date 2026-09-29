@@ -21,7 +21,6 @@
     "tags:migrate": "node scripts/migrate-tags-to-central.mjs",
     "tags:describe": "node scripts/describe-tags.mjs",
     "microblog:import": "node scripts/import-tumblr-microblog.mjs",
-    "microblog:tag": "node scripts/tag-microblog.mjs",
     "microblog:dupes": "node scripts/find-duplicate-microposts.mjs",
     "changelog:notes": "node scripts/summarise-changelog.mjs",
     "changelog:push": "node scripts/push-changelog.mjs",

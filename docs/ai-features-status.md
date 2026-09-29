@@ -81,7 +81,7 @@ edit; a form button fills an input that is only persisted on Save.
 | A2 | Draft long-text fields | `draft_fields` | Gemini | request (owner-only) | **built** |
 | A5 | Book metadata gap-fill | `book_metadata` | Gemini | batch script | **built, not yet run** |
 | A1 | Tag suggestions on save | `tag_suggest` | Gemini (JSON) | request (owner-only) | **built** |
-| C1 | Micro-blog bulk auto-tagging | `microblog_autotag` | Gemini (JSON) | batch script | **built, not yet run** |
+| C1 | Micro-blog bulk auto-tagging | — | Claude (Claude Code session) | one-off | **done** 2026-09-29 — 816 posts gained tags; script removed |
 | A3 | Image alt text | `image_alt` | Gemini vision | request (owner-only) | **built** for `slideImages` |
 | C3 | Micro-blog near-duplicates | — | none (embeddings) | batch script | **built, report only** |
 | E1 | `/ask`-powered 404 | — | none (embeddings) | request | **built** |
@@ -131,11 +131,15 @@ is no model call to switch off.
   needed its own wiring — `MicroblogManager` keeps its own field list rather
   than a `resources.js` entry. **Not** on `techStack` (the build axis, a plain
   `text[]`) or on resume skill `category`, neither of which is a central tag.
-- **C1 — `npm run microblog:tag`.** A batch pass over the untagged micro-posts.
-  `--dry-run`, `--limit N`, and every real run writes a journal to
-  `knowledge_base/microblog-tag-journal-<timestamp>.json` holding each row's tags
-  before and after; `--undo <file>` replays it backwards. Resumable — a row that
-  already has tags is skipped — which matters at ~15 requests a minute.
+- **C1 — micro-blog bulk tagging.** Done once, on 2026-09-29, by a Claude Code
+  session instead of the Gemini batch script: every post with text (1,635) was
+  read and given up to four tags from the existing vocabulary, merged onto its
+  current tags (capped at five) through `set_entity_tags`. 816 posts gained tags,
+  no new tag was created. `npm run microblog:tag`, `scripts/tag-microblog.mjs`
+  and the `microblog_autotag` switch were removed. The run's journal
+  (`knowledge_base/microblog-tag-journal-2026-09-29T12-16-56-093Z.json`) holds
+  each row's tags before and after, so replaying `before` through
+  `set_entity_tags` reverts it.
 - **A3 — alt text on upload.** `slide_images` is jsonb, so `alt` lives beside
   `url` and `caption` with **no migration**. The sentence is written from the
   compressed bytes the browser already holds, never by fetching the URL back;

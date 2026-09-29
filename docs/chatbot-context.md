@@ -15,7 +15,7 @@ answering rules live with the prompt, and are not repeated here.
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
 - **Projects** (19) — /projects/:id. Status: Live: 15, Concept: 1, Archived: 3.
-- **Races** (25) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 18, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
+- **Races** (26) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 19, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
 - **Now** — /now. Current entry: September 2026.
@@ -26,7 +26,7 @@ answering rules live with the prompt, and are not repeated here.
 ## Headline stats (the numbers on /stats, refreshed hourly)
 
 - Reading: 51 books, ~16.8k pages, 30 English / 21 Marathi; top genres Technology, Fiction, Society.
-- Running: 25 races, 577 km. PBs: marathon 05:05:53 (Tata Mumbai Marathon 2026), half 1:59:57 (NMDC Hyderabad Marathon 2025), 10K 00:55:28 (IPA Neerathon 2026).
+- Running: 26 races, 598 km. PBs: marathon 05:05:53 (Tata Mumbai Marathon 2026), half 1:59:57 (NMDC Hyderabad Marathon 2025), 10K 00:55:28 (IPA Neerathon 2026).
 - Treks: 20 (3 hard) over 5 years; latest Ghangad Fort.
 - 100 Days To Offload: 66 of 100 posts.
 - Micro posts: 1666; longest daily streak 16 days.
@@ -37,7 +37,7 @@ answering rules live with the prompt, and are not repeated here.
 ## Tags
 
 99 tags, shared across every content type, always lowercase.
-Most used: life (366), self-reflection (299), sanky (114), marathi (110), latepost (109), philosophy (92), travel (78), love (63), personaldevelopment (55), digital wellbeing (53), calmness (47), social (43), maharashtra (41), social media (40), technology (39), forts (35), politics (34), digital detox (32), psychology (31), ai (30).
+Most used: life (478), self-reflection (454), marathi (267), social media (144), love (137), sanky (134), personaldevelopment (130), calmness (125), philosophy (120), travel (118), digital wellbeing (113), latepost (109), digital detox (73), politics (72), psychology (70), social (65), technology (63), choices (53), maharashtra (49), ai (48).
 Tag pages live at /tags/:name.
 
 ## What a micro post is

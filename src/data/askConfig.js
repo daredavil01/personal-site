@@ -260,11 +260,6 @@ export const AI_FEATURES = [
     hint: "Suggests tags on an admin form. Writes still go through set_entity_tags.",
   },
   {
-    key: "microblog_autotag",
-    label: "Micro-blog bulk auto-tagging",
-    hint: "npm run microblog:tag — a batch pass over untagged micro-posts.",
-  },
-  {
     key: "microblog_kind",
     label: "Micro-blog own/reblog classifier",
     hint: "npm run microblog:classify — fills post_kind so a reblog can be told from a thought.",

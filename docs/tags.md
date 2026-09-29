@@ -6,92 +6,92 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 366 | Mind & Life |
-| `self-reflection` | 299 | Mind & Life |
-| `sanky` | 114 | Personal |
-| `marathi` | 110 | Books & Reading |
+| `life` | 478 | Mind & Life |
+| `self-reflection` | 454 | Mind & Life |
+| `marathi` | 267 | Books & Reading |
+| `social media` | 144 | Digital Life |
+| `love` | 137 | People & Feelings |
+| `sanky` | 134 | Personal |
+| `personaldevelopment` | 130 | Mind & Life |
+| `calmness` | 125 | Mind & Life |
+| `philosophy` | 120 | Society & Ideas |
+| `travel` | 118 | Travel & Outdoors |
+| `digital wellbeing` | 113 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
-| `philosophy` | 92 | Society & Ideas |
-| `travel` | 78 | Travel & Outdoors |
-| `love` | 63 | People & Feelings |
-| `personaldevelopment` | 55 | Mind & Life |
-| `digital wellbeing` | 53 | Digital Life |
-| `calmness` | 47 | Mind & Life |
-| `social` | 43 | Society & Ideas |
-| `maharashtra` | 41 | Travel & Outdoors |
-| `social media` | 40 | Digital Life |
-| `technology` | 39 | Technology & Data |
-| `forts` | 35 | Travel & Outdoors |
-| `politics` | 34 | Society & Ideas |
-| `digital detox` | 32 | Digital Life |
-| `psychology` | 31 | Society & Ideas |
-| `ai` | 30 | Technology & Data |
+| `digital detox` | 73 | Digital Life |
+| `politics` | 72 | Society & Ideas |
+| `psychology` | 70 | Society & Ideas |
+| `social` | 65 | Society & Ideas |
+| `technology` | 63 | Technology & Data |
+| `choices` | 53 | Mind & Life |
+| `maharashtra` | 49 | Travel & Outdoors |
+| `ai` | 48 | Technology & Data |
+| `मन` | 46 | Mind & Life |
+| `nightsky` | 45 | Travel & Outdoors |
+| `खंडेराव` | 41 | Writing & Blogging |
+| `desperate me` | 40 | People & Feelings |
+| `forts` | 38 | Travel & Outdoors |
+| `running` | 35 | Running & Fitness |
+| `nirman` | 34 | Society & Ideas |
+| `daredavil01` | 30 | Personal |
+| `konkan` | 29 | Travel & Outdoors |
+| `भटकंती` | 29 | Travel & Outdoors |
 | `100_days_to_offload` | 28 | Writing & Blogging |
-| `desperate me` | 28 | People & Feelings |
-| `daredavil01` | 27 | Personal |
-| `konkan` | 27 | Travel & Outdoors |
-| `मन` | 27 | Mind & Life |
-| `self-help` | 25 | Books & Reading |
-| `भटकंती` | 25 | Travel & Outdoors |
-| `choices` | 17 | Mind & Life |
-| `book review` | 16 | Books & Reading |
+| `self-help` | 27 | Books & Reading |
+| `digital manipulation` | 26 | Digital Life |
+| `स्थितप्रज्ञ` | 26 | Mind & Life |
+| `book review` | 23 | Books & Reading |
+| `mydesigns` | 22 | Arts & Culture |
+| `youth` | 22 | Society & Ideas |
+| `marathon` | 19 | Running & Fitness |
+| `scientific temperament` | 19 | Society & Ideas |
+| `history` | 18 | Society & Ideas |
+| `privacy` | 18 | Digital Life |
+| `data privacy` | 16 | Digital Life |
+| `fiction` | 15 | Books & Reading |
+| `information age` | 15 | Digital Life |
 | `claude code` | 14 | Technology & Data |
-| `nightsky` | 14 | Travel & Outdoors |
 | `youtube` | 14 | Digital Life |
-| `fiction` | 13 | Books & Reading |
-| `marathon` | 13 | Running & Fitness |
-| `nirman` | 13 | Society & Ideas |
-| `youth` | 13 | Society & Ideas |
+| `biography` | 13 | Books & Reading |
 | `auto-biography` | 12 | Books & Reading |
-| `history` | 12 | Society & Ideas |
-| `mydesigns` | 11 | Arts & Culture |
-| `running` | 11 | Running & Fitness |
-| `biography` | 10 | Books & Reading |
-| `data privacy` | 10 | Digital Life |
+| `public policy` | 11 | Society & Ideas |
+| `adventure` | 9 | Travel & Outdoors |
 | `digital technology` | 9 | Digital Life |
-| `privacy` | 9 | Digital Life |
-| `public policy` | 9 | Society & Ideas |
-| `adventure` | 8 | Travel & Outdoors |
-| `खंडेराव` | 8 | Writing & Blogging |
+| `trekking` | 9 | Travel & Outdoors |
+| `ngo` | 8 | Society & Ideas |
 | `bioscope` | 7 | Mind & Life |
 | `data` | 7 | Technology & Data |
 | `non-fiction` | 7 | Books & Reading |
-| `trekking` | 7 | Travel & Outdoors |
-| `स्थितप्रज्ञ` | 7 | Mind & Life |
-| `ngo` | 6 | Society & Ideas |
-| `scientific temperament` | 6 | Society & Ideas |
-| `tarkarli` | 6 | Travel & Outdoors |
-| `digital manipulation` | 5 | Digital Life |
+| `tarkarli` | 7 | Travel & Outdoors |
+| `technology policy` | 7 | Society & Ideas |
+| `the social dilemma` | 6 | Digital Life |
 | `digitalnomad` | 5 | Digital Life |
 | `newsletter` | 5 | Writing & Blogging |
+| `sports` | 5 | Running & Fitness |
+| `the_trip` | 5 | Travel & Outdoors |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
-| `information age` | 4 | Digital Life |
-| `sports` | 4 | Running & Fitness |
-| `the_trip` | 4 | Travel & Outdoors |
 | `three.js` | 4 | Technology & Data |
 | `vibe-coding` | 4 | Technology & Data |
 | `data visualization` | 3 | Technology & Data |
 | `floating_in_sea🌊` | 3 | Travel & Outdoors |
+| `nda marathon` | 3 | Running & Fitness |
 | `roadtrip🏍️` | 3 | Travel & Outdoors |
 | `the matrix` | 3 | Digital Life |
 | `traditionallook😍` | 3 | Arts & Culture |
 | `bankot fort` | 2 | Travel & Outdoors |
 | `data journalism` | 2 | Technology & Data |
+| `hyderabad` | 2 | Travel & Outdoors |
 | `knowledgeeconomy` | 2 | Society & Ideas |
-| `nda marathon` | 2 | Running & Fitness |
+| `note-taking` | 2 | Writing & Blogging |
 | `satara` | 2 | Travel & Outdoors |
 | `search` | 2 | Society & Ideas |
 | `sexual-drama` | 2 | Books & Reading |
-| `technology policy` | 2 | Society & Ideas |
-| `the social dilemma` | 2 | Digital Life |
 | `wardha` | 2 | Travel & Outdoors |
 | `google sites` | 1 | Writing & Blogging |
 | `harihareshwar` | 1 | Travel & Outdoors |
-| `hyderabad` | 1 | Travel & Outdoors |
 | `kailasgad` | 1 | Travel & Outdoors |
 | `krantismritivan` | 1 | Travel & Outdoors |
 | `learning` | 1 | — |
-| `note-taking` | 1 | Writing & Blogging |
 | `obsidian` | 1 | Writing & Blogging |
 | `panhala🏞️` | 1 | Travel & Outdoors |
 | `pegasus` | 1 | Digital Life |
