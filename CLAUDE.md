@@ -33,10 +33,8 @@ is canonical.
 - **Editing content:** the admin dashboard at `/admin` (`src/pages/admin/`). Forms
   are schema-driven from `src/pages/admin/resources.js` — each resource's `fields`
   match the shape its api's `toRow` expects. Postgres auto-assigns row `id`s.
-- **Bulk seeding scripts** (`scripts/`, require `SUPABASE_SERVICE_ROLE_KEY` in
-  `.env`): `npm run microblog:import` (Tumblr archive, idempotent upsert),
-  `npm run tags:migrate` (one-time legacy tag migration — see Tags below),
-  `npm run images:upload` (`upload-images-to-supabase.mjs`).
+- **Bulk seeding script** (`scripts/`, requires `SUPABASE_SERVICE_ROLE_KEY` in
+  `.env`): `npm run microblog:import` (Tumblr archive, idempotent upsert).
 
 ## Tags (Centralized)
 
@@ -70,9 +68,6 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
   Tag colors resolve through `colorForTag` in `src/lib/generativeArt.js`
   (stored color, else a hue hashed from the name).
 - **Compare tags case-insensitively** — names are stored lowercase.
-- **Legacy migration (one-time):** apply 0003 → `npm run tags:migrate -- --dry-run`
-  → `npm run tags:migrate` (verify must pass) → re-run just before deploying
-  → deploy → apply `0004_drop_legacy_tag_columns.sql`.
 - **Hand-maintained files NOT in Supabase:** `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
   `src/data/pageMeta.js`, `src/data/stats/personal.js`.
 
@@ -394,7 +389,7 @@ image / `slideImages` fields upload through `src/lib/api/storage.js`
 At read time, `toStorageUrl` / `toStorageImages` (in `src/lib/supabaseClient.js`)
 prefix stored relative paths with the bucket URL. Admin uploads are **resized and
 compressed automatically** in the browser by `src/lib/imageCompress.js` (see
-Image Compression below); bulk script uploads still need compressing by hand.
+Image Compression below).
 Uploads are grouped by type folder (`sports`, `treks`, etc.).
 
 ## Key File Locations
@@ -568,17 +563,6 @@ Convert iPhone photos first:
 
 ```bash
 convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" output.jpeg
-```
-
-**Bulk uploads still need manual compression.** `npm run images:upload`
-(`scripts/upload-images-to-supabase.mjs`) pushes raw bytes from `public/images/`
-with no processing, so compress before running it:
-
-```bash
-# sharp-cli
-npx sharp-cli --input path/to/image.jpg --output ./ --format jpeg --quality 80
-# or ImageMagick
-convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" output.jpg
 ```
 
 ---

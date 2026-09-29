@@ -35,7 +35,7 @@ Open `.env` and fill in:
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase Dashboard → Project Settings → API → Project API keys → Publishable |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → Project API keys → service_role (**server-only, never commit**) |
 
-`SUPABASE_SERVICE_ROLE_KEY` is only needed when running the import scripts (`npm run microblog:import`, `npm run tags:migrate`, `npm run images:upload`). It is never used by the browser.
+`SUPABASE_SERVICE_ROLE_KEY` is only needed when running the import scripts (`npm run microblog:import`, `npm run ask:index`, `npm run docs:build`, …). It is never used by the browser.
 
 ### 4. Start Development Server
 
@@ -48,11 +48,10 @@ Open [http://localhost:3000](http://localhost:3000). The page reloads on changes
 ## One-Time Data Import (first setup only)
 
 If setting up a fresh Supabase project, apply `supabase/migrations/` in order,
-then run the seed scripts once:
+then run the seed script once:
 
 ```bash
 npm run microblog:import  # imports the Tumblr archive into the microblog table
-npm run images:upload     # uploads public/images/** to the media Storage bucket
 ```
 
 Other content is added through the `/admin` dashboard. (The old markdown

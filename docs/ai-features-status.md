@@ -86,7 +86,7 @@ edit; a form button fills an input that is only persisted on Save.
 | C3 | Micro-blog near-duplicates | — | none (embeddings) | batch script | **built, report only** |
 | E1 | `/ask`-powered 404 | — | none (embeddings) | request | **built** |
 | E2 | Semantic "on this day" | — | none (embeddings) | request | **built** on `/microblog` |
-| C2 | Own thought vs reblog | `microblog_kind` | Gemini (JSON) | batch script | **built, not yet run** |
+| C2 | Own thought vs reblog | `microblog_kind` | Claude (Claude Code session); Gemini script for new posts | batch script | **run** 2026-09-29 — 1,635 classified |
 | W1 | The Atlas guide speaks | — | Workers AI (aura-2-en) | build-time | **built and run** |
 | W5 | Read aloud | — | none (browser) | client | **built** on micro-post pages |
 | B6 | Answer cache | `answer_cache` | none | request | **built** |
@@ -164,8 +164,13 @@ is no model call to switch off.
   `related_content_ranked()` for the echoes. Hidden while a filter is on, and it
   renders nothing on a silent date.
 - **C2 — `npm run microblog:classify`.** `post_kind` is one of `own`, `quote`,
-  `reblog`, `link`, or null for not-yet-classified. Same journal/`--undo`/
-  resumable shape as C1. The public filter narrows rather than widens.
+  `reblog`, `link`, or null for not-yet-classified. Journal/`--undo`/resumable.
+  The public filter narrows rather than widens. The first full pass was done on
+  2026-09-29 by a Claude Code session, not the script: all 1,635 posts with text
+  → 1,516 own, 33 quote, 38 reblog, 48 link, with a confidence per post. Its
+  journal (`knowledge_base/microblog-kind-journal-2026-09-29T13-09-04-471Z.json`)
+  has the script's shape, so `--undo` reverts it. The script stays for posts
+  imported later.
 - **W1 — `npm run atlas:voice`.** Four beats, one sprite, generated offsets.
   Lazy-loaded on the first beat; gated by the existing sound toggle; stops any
   other voice before it starts.
@@ -313,7 +318,7 @@ would describe an image it never saw, just as confidently.
 - `BEATS` moved to `src/atlas/guide/guideBeats.js` so the audio script can read
   the lines in node — `guideScript.js` imports `mapRegions`, which node cannot
   resolve and the script has no use for.
-- **Not yet run:** `npm run microblog:classify` against production.
+- **Run 2026-09-29** (by Claude, see C2): every micro-post has a `post_kind`.
 
 ### 2026-09-21 — phases 1–6
 
