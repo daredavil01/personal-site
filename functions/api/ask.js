@@ -21,7 +21,7 @@ import {
 } from "../../src/data/askConfig";
 import { runTiers, streamTiers } from "../../src/lib/askTiers";
 import {
-  applyRerank, retrievalQuery, selectChunks, typesNamed,
+  applyRerank, focusTargets, pickFocusChunks, retrievalQuery, selectChunks, typesNamed, withFocus,
 } from "../../src/lib/askRetrieval";
 import FALLBACK_FACTS from "../../docs/facts.json";
 import {
@@ -80,6 +80,28 @@ async function rerank(env, question, chunks) {
 }
 
 // Reads a value through the edge cache. `cacheKey` must be a URL string.
+// The chunks of the page the reader is asking from ("ask about this issue"),
+// read by key rather than searched for. content_chunks is public-read, and the
+// targets are validated before they reach the filter. Fails soft: no focus is
+// just an ordinary question.
+const FOCUS_COLUMNS = "entity_type,entity_id,chunk_index,title,url,body,chunk_date,tags,image_url";
+
+async function loadFocus(env, focus) {
+  const targets = focusTargets(focus);
+  if (!targets.length) return [];
+  const or = targets.map((t) => `and(entity_type.eq.${t.type},entity_id.eq.${t.id})`).join(",");
+  try {
+    const res = await fetch(
+      `${env.VITE_SUPABASE_URL}/rest/v1/content_chunks?select=${FOCUS_COLUMNS}&or=(${or})&order=chunk_index&limit=40`,
+      { headers: restHeaders(env) },
+    );
+    if (!res.ok) return [];
+    return pickFocusChunks(await res.json(), targets);
+  } catch (_) {
+    return [];
+  }
+}
+
 async function cached(context, cacheKey, ttl, load) {
   const cache = caches.default;
   const req = new Request(cacheKey);
@@ -496,7 +518,7 @@ export async function onRequestPost(context) {
   // narrowed search always returned match_count items of that type however
   // unrelated — which is what made the chips feel broken.
   const retrievalStart = Date.now();
-  const [found, facts] = await Promise.all([
+  const [found, facts, focused] = await Promise.all([
     rpc(env, "hybrid_search", {
       query_text: retrievalQuery(message, history),
       query_embedding: embedding,
@@ -510,6 +532,7 @@ export async function onRequestPost(context) {
       min_keyword_rank: settings.keyword_floor ?? DEFAULT_ASK_SETTINGS.keyword_floor,
     }).catch(() => []),
     loadFacts(context),
+    loadFocus(env, payload?.focus),
   ]);
   timings.retrieval_ms = Date.now() - retrievalStart;
 
@@ -528,13 +551,14 @@ export async function onRequestPost(context) {
   // per-type cap, and which rosters get spelled out.
   const asked = typesNamed(message);
 
-  const { picked: chunks, widened } = selectChunks({
+  const { picked, widened } = selectChunks({
     chunks: ranked,
     types,
     question: message,
     limit: settings.match_count,
     asked,
   });
+  const chunks = withFocus(focused, picked, settings.match_count);
   // Named for the reader, not for the database: "books", not "book".
   const scopeLabels = types.map((t) => ENTITY_PLURALS[t] || entityLabel(t)).join(", ");
   // Every page the rosters name, so an answer may link something the search did

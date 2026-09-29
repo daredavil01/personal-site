@@ -256,8 +256,11 @@ function noteFor(done) {
 
 const CHIP_COUNT = { page: 4, compact: 3 };
 
-const AskChat = ({ compact }) => {
-  const [turns, setTurns] = useState(() => loadThread());
+// `focus` pins one page into every question (a newsletter issue asking about
+// itself); such a thread is about that page only, so it is neither restored
+// from nor saved over the site-wide thread. `starters` replaces the drawn chips.
+const AskChat = ({ compact, focus, starters: givenStarters }) => {
+  const [turns, setTurns] = useState(() => (focus ? [] : loadThread()));
   const [draft, setDraft] = useState("");
   // Whisper's detected language for the current draft, when it was spoken.
   // Cleared the moment the draft is typed over: it describes this text only.
@@ -298,6 +301,10 @@ const AskChat = ({ compact }) => {
   // visitor gets a different four, and never four about the same thing.
   const drawStarters = (i) => {
     const count = compact ? CHIP_COUNT.compact : CHIP_COUNT.page;
+    if (givenStarters?.length) {
+      setStarters(givenStarters.slice(0, count));
+      return;
+    }
     const drawn = pickQuestions(i?.questionPool, count);
     // An empty or unseeded pool falls back to the fixed list rather than to
     // nothing — a blank empty state reads as a broken page.
@@ -311,7 +318,11 @@ const AskChat = ({ compact }) => {
         drawStarters(i);
         if (!i.enabled) setBlocked(i.note || "The second brain is off right now.");
       })
-      .catch(() => setInfo({ maxMessageChars: 500, suggestedQuestions: [] }));
+      .catch(() => {
+        setInfo({ maxMessageChars: 500, suggestedQuestions: [] });
+        // A page's own starters (focus) do not depend on the endpoint's pool.
+        drawStarters({});
+      });
     // Intentionally mount-only: re-running this would redraw the chips while
     // someone is reading them.
   }, []);
@@ -323,8 +334,8 @@ const AskChat = ({ compact }) => {
   // The thread outlives a reload for a day. Saved on every change so a crash
   // mid-answer still leaves the question behind.
   useEffect(() => {
-    if (turns.length) saveThread(turns);
-  }, [turns]);
+    if (turns.length && !focus) saveThread(turns);
+  }, [turns, focus]);
 
   // Updates the assistant turn being streamed — always the last one.
   const patchLast = (patch) => setTurns((prev) => {
@@ -387,6 +398,7 @@ const AskChat = ({ compact }) => {
         history,
         types: askTypes,
         spokenLanguage,
+        focus,
         turnstileToken,
         signal: controller.signal,
         onSources: (event) => patchLast(() => ({
@@ -462,7 +474,8 @@ const AskChat = ({ compact }) => {
   // replaying a cached answer, so it always reflects the archive as it is now.
   useEffect(() => {
     const q = searchParams.get("q");
-    if (!q || turns.length || !info) return;
+    // A focused chat leaves ?q= to the site-wide one, which owns shared links.
+    if (!q || focus || turns.length || !info) return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -478,7 +491,7 @@ const AskChat = ({ compact }) => {
 
   const reset = () => {
     stop();
-    clearThread();
+    if (!focus) clearThread();
     setTurns([]);
     setBlocked(null);
     // The chips used to survive a clear, so the next question was silently
@@ -696,7 +709,15 @@ const AskChat = ({ compact }) => {
   );
 };
 
-AskChat.propTypes = { compact: PropTypes.bool };
-AskChat.defaultProps = { compact: false };
+AskChat.propTypes = {
+  compact: PropTypes.bool,
+  focus: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    refs: PropTypes.arrayOf(PropTypes.shape({ type: PropTypes.string, id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]) })),
+  }),
+  starters: PropTypes.arrayOf(PropTypes.string),
+};
+AskChat.defaultProps = { compact: false, focus: null, starters: null };
 
 export default AskChat;

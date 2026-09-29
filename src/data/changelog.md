@@ -9,6 +9,37 @@ patch for fixes and tweaks.
 
 ---
 
+## [v20.0.0] — 2026-09-29
+
+### Added
+
+- **The Newsletter** (`src/pages/Newsletter.js`, `src/pages/NewsletterIssue.js`): a monthly letter at `/newsletter`, one issue per month at `/newsletter/<YYYY-MM>`. Each issue gathers the month's races, treks, books, blog posts and short posts from the archive, adds a hand-written letter, three headline numbers and a day-by-day calendar of the month. The hub explains what the letter is and why it exists and lists every issue by year.
+- **Two layouts from one model** (`src/components/Newsletter/`, `src/lib/newsletterIssue.js`): in the atlas theme an issue arrives as a stamped envelope from Hometown Square that opens into a handwritten letter with each section as a postcard; in the classic theme it is a magazine — photo cover, drop cap, numbered spreads and a pull-quote. Both read `issueModel()`, as do the share cards, the OG card, the middleware and the `/ask` source.
+- **Issues are `now_months` rows** (`supabase/migrations/0032_newsletter.sql`): adds `slug`, `headline`, `note`, `poll`, `published_at` and `card_url`; the twelve months already on `/now` become the first twelve issues. RLS now hides unpublished months from the public except the current one.
+- **`npm run newsletter:draft`** (`scripts/newsletter-draft.mjs`): merges every dated item of a month into its row (idempotent, and backfills an archive `ref` onto hand-typed rows), renders the issue's 1200×630 card to Storage and writes a facts-only brief. `--note` writes a letter back from a markdown file, `--all` re-runs every month. It never publishes.
+- **The `/newsletter` Claude skill** (`.claude/skills/newsletter/SKILL.md`): runs the script, writes the headline, letter and poll from the brief alone, and hands the issue over for review. `.gitignore` now shares `.claude/skills/` while keeping local Claude settings private.
+- **Reader feedback** (`functions/api/newsletter-feedback.js`, `src/components/Newsletter/IssueFeedback.js`): emoji reactions per section, a monthly poll, a 1–5 rating with a favourite section, and a private reply. Stored owner-only; the public reads counts through `newsletter_feedback_summary()`, which never returns a reply; writes are capped per visitor with the IP hashed at the edge.
+- **Ask about this issue** (`src/lib/askRetrieval.js`, `functions/api/ask.js`): a chat on each issue sends a `focus` of the issue and the items it links to; the worker reads those chunks by key and puts them ahead of search. Starter questions are built from the issue itself.
+- **Share images for an issue** (`src/components/share/shareCardConfig.js`): a portrait "my month" image, one per section, and one per item using that item's own card.
+- **Admin issue panel** (`src/pages/admin/now/IssuePanel.js`): headline, letter (with the Draft button), poll, Publish, **Copy for Substack**, and the month's reactions, ratings and replies. `?edit=<id>` opens a month directly.
+- **Docs** (`docs/newsletter.md`): the workflow, entity map, the script-versus-prompt decision, privacy design and what to adopt to build one.
+
+### Changed
+
+- **Short posts fold after six** (`src/components/Newsletter/IssueItems.js`): a month can hold twenty micro-posts; an issue shows six with a "Show all" toggle, in both layouts.
+- **`/now` shows the current month only** (`src/pages/Now.js`): the month timeline moved to the newsletter; `NowDocument` is deleted.
+- **Books bucket by their finish date** (`src/lib/monthDigest.js`): a book with a day-precise `date_finished` lands in the month it was finished instead of the month it was added — in the newsletter, the Now autofill and the homepage digest.
+- **`/ask` indexes each issue by section** (`scripts/ask-sources/now.mjs`): a letter chunk plus one chunk per section at `/newsletter/<slug>`; drafts are skipped. The `now` type is labelled "Newsletter".
+- **The card renderer is shared** (`scripts/lib/og-render.mjs`): `og:fallbacks` and `newsletter:draft` use one satori + resvg setup. New figures: the month calendar and the envelope (`public/og/newsletter.png`).
+
+### Fixed
+
+- **A race typed on /now and its archive row counted twice** (`src/lib/nowAutofill.js`): the hand-typed row and the archive row carry different names and links ("Tata Ultra Marathon" and "Tata Ultra Marathon 2026"), and /now often dated a race the 1st, so the month merge kept both and January read 84 km for one marathon. Races now match by name core and distance, any two rows match on url or title, dated rows on different days never match, and a merged typed row takes the archive's ref and real date. `dedupeSections` repairs months merged before the fix on the next `newsletter:draft` run.
+- **47 bulk-imported books landed in June** (`src/lib/nowAutofill.js`): a book without a day-precise finish date falls back to its `created_at`, and the books imported together on 2026-06-13 made June "37 books". Books added five or more on the same day are left out unless they have a real finish date.
+- **Issue cards over the 300 KB cap** (`scripts/newsletter-draft.mjs`): a duotoned photo made the PNG 500 KB–1 MB, which WhatsApp drops. Over the cap the card re-renders with the calendar alone.
+
+---
+
 ## [v19.0.1] — 2026-09-25
 
 ### Fixed

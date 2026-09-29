@@ -59,7 +59,7 @@ export const NAV_GROUPS = [
     id: "now",
     label: "Now",
     items: [
-      { to: "/admin/now/months", label: "Months", icon: Calendar },
+      { to: "/admin/now/months", label: "Newsletter issues", icon: Calendar },
       { to: "/admin/now/meta", label: "Meta", icon: Sparkles },
     ],
   },

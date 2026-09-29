@@ -26,6 +26,7 @@ export const CARD_FALLBACKS = {
   microblog: "micro-blog",
   tag: "tags",
   "ask-share": "ask-share",
+  newsletter: "newsletter",
 };
 
 // True for our own cards, which are all exactly 1200x630. Both meta layers use

@@ -7,6 +7,8 @@
 //   - sport : date      "Month DD, YYYY" (parseable by new Date())
 //   - micro : date      "YYYY-MM-DD" (Postgres date)
 //   - presentation: date "YYYY-MM-DD" (nullable — undated decks bucket by created_at)
+//   - book  : date_finished "YYYY-MM-DD", trusted only when date_precision is
+//             "day" — a "year" row's month and day are filler (0008)
 // created_at is used only as a defensive fallback (all date columns are NOT NULL).
 
 const MONTH_NAMES = [
@@ -17,6 +19,7 @@ const MONTH_NAMES = [
 // Returns the raw content-date string for an item of the given type.
 const rawDate = (item, type) => {
   if (type === "blog") return item.blog_date;
+  if (type === "book") return item.date_precision === "day" ? item.date_finished : null;
   return item.date; // trek | sport | micro
 };
 

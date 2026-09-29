@@ -151,6 +151,11 @@ export function pageModel(slug, payload, {
       title: "What I'm doing right now",
       lede: "Current projects, daily rituals, books in progress. Updated monthly.",
     },
+    newsletter: {
+      eyebrow: "Newsletter",
+      title: "A letter, every month",
+      lede: "Every race, trek, book and post of the month, with a note on what it all meant.",
+    },
     "100-days-to-offload": {
       eyebrow: "100 Days To Offload",
       title: "One hundred posts, one year",
@@ -269,7 +274,24 @@ export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
-  "ask-share",
+  "ask-share", "newsletter",
 ];
+
+// One issue's card, from issueModel() (src/lib/newsletterIssue.js). Rendered by
+// `npm run newsletter:draft` and uploaded to Storage — never at request time.
+// `photo` must already be an inlined JPEG/PNG data URI (resvg draws no WebP).
+export function issueCardModel(issue, { photo = null } = {}) {
+  return {
+    kind: "page",
+    slug: "newsletter",
+    accent: accentFor("newsletter"),
+    path: `/newsletter/${issue.slug}`,
+    eyebrow: `Newsletter · ${issue.label}`,
+    title: issue.headline,
+    stats: issue.stats.slice(0, 3),
+    photo,
+    figure: { days: issue.days, grid: issue.grid },
+  };
+}
 
 export default pageModel;

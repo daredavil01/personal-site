@@ -136,7 +136,37 @@ const ask = (item) => ({
   footerUrl: `${SITE_DOMAIN}/ask`,
 });
 
+// A whole newsletter issue: `item` is issueModel() plus the resolved `hero`
+// photo. The month's numbers ride in the meta row, the headline is the title.
+const newsletter = (item) => ({
+  kind: "newsletter",
+  eyebrow: `Newsletter · ${clean(item.label)}`,
+  title: clean(item.headline),
+  metaRows: (item.stats || []).map((s) => ({ label: `${s.value} ${s.label}` })),
+  body: clean(item.note).replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/[*_#>]/g, ""),
+  // Section names are not tags; the card would print them as "#On the shelf".
+  tags: [],
+  imageUrl: item.hero || null,
+  footerUrl: `${SITE_DOMAIN}/newsletter/${item.slug}`,
+});
+
+// One section of an issue ("Books I read in September"): `item` is
+// { issue, section, titles } with `section` from issueSections() and `titles`
+// its rows as one-liners (itemTitle).
+const newsletterSection = ({ issue, section, titles = [] }) => ({
+  kind: "newsletter-section",
+  eyebrow: `${clean(section.label)} · ${clean(issue.label)}`,
+  title: `${section.items.length} ${section.items.length === 1 ? "entry" : "entries"} this month`,
+  metaRows: [],
+  body: titles.map((t) => `• ${t}`).join("\n"),
+  tags: [],
+  imageUrl: null,
+  footerUrl: `${SITE_DOMAIN}/newsletter/${issue.slug}`,
+});
+
 export const ADAPTERS = {
+  newsletter,
+  "newsletter-section": newsletterSection,
   microblog,
   book,
   blog,
@@ -155,6 +185,8 @@ export const KIND_LABELS = {
   sport: "Race",
   trek: "Trek",
   ask: "Answer",
+  newsletter: "Newsletter",
+  "newsletter-section": "Newsletter section",
 };
 
 export const toShareModel = (kind, item) => (ADAPTERS[kind] && item ? ADAPTERS[kind](item) : null);

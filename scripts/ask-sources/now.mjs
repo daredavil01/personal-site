@@ -1,5 +1,11 @@
-// The /now page: each month's `sections` blob flattened into readable prose,
-// plus the page's own intro, rituals and inspiration from the now_meta row.
+// Newsletter issues (0032): each now_months row is one month. Chunk 0 is the
+// letter itself — headline, the month's numbers and the note — and each section
+// of the month follows as its own chunk, so "which books in August?" lands on
+// the books of August rather than on a wall of everything. Drafts are skipped
+// (this runs with the service role, which RLS does not filter) except the
+// current month, which /now shows. Plus the /now page's own intro and rituals.
+
+import { issueModel, itemTitle } from "../../src/lib/newsletterIssue.js";
 
 const flatten = (value, clean) => {
   if (Array.isArray(value)) {
@@ -23,27 +29,59 @@ export default {
     if (error) throw new Error(`now_meta: ${error.message}`);
     return { months, meta };
   },
-  toChunks: ({ months, meta }, { compose, clean, entityUrl, syntheticId }) => {
-    const out = months.map((r) => {
-      const flat = Object.entries(r.sections || {})
-        .map(([key, value]) => `${key}: ${clean(flatten(value, clean))}`)
-        .filter((s) => s.split(": ")[1]);
-      return {
-        entity_type: "now",
-        entity_id: r.id,
-        chunk_index: 0,
-        title: `Now — ${r.month} ${r.year}`,
-        url: entityUrl("now", r.id),
-        chunk_date: null,
-        tags: [],
-        image_url: null,
-        body: compose([
-          ["Now update", `${r.month} ${r.year}`],
-          ["Current", r.is_current ? "yes" : "no"],
-          [null, flat.join(" | ")],
-        ]),
-      };
-    });
+  toChunks: ({ months, meta }, {
+    compose, clean, splitProse, syntheticId,
+  }) => {
+    const out = months
+      .filter((r) => r.published_at || r.is_current)
+      .flatMap((r) => {
+        const issue = issueModel({
+          id: r.id, slug: r.slug, headline: r.headline, note: r.note, sections: r.sections,
+        });
+        const published = !!r.published_at;
+        const base = {
+          entity_type: "now",
+          entity_id: r.id,
+          title: published ? `Newsletter — ${issue.label}` : `Now — ${issue.label}`,
+          url: published ? `/newsletter/${r.slug}` : "/now",
+          chunk_date: r.slug ? `${r.slug}-01` : null,
+          tags: [],
+          image_url: null,
+        };
+        const stats = issue.stats.map((st) => `${st.value} ${st.label}`).join(", ");
+        const letter = splitProse(issue.note || "");
+        const chunks = [{
+          ...base,
+          chunk_index: 0,
+          body: compose([
+            [published ? "Newsletter issue" : "Now update (this month, in progress)", issue.label],
+            ["Headline", r.headline],
+            ["The month in numbers", stats],
+            [null, letter[0]],
+          ]),
+        }];
+        letter.slice(1).forEach((part) => chunks.push({
+          ...base,
+          chunk_index: chunks.length,
+          body: compose([["Newsletter letter", issue.label], [null, part]]),
+        }));
+        issue.sections.forEach((section) => chunks.push({
+          ...base,
+          chunk_index: chunks.length,
+          body: compose([
+            [section.label, issue.label],
+            [null, section.items.map((item) => clean(itemTitle(section.key, item))).join(" · ")],
+          ]),
+        }));
+        if (issue.extraStats) {
+          chunks.push({
+            ...base,
+            chunk_index: chunks.length,
+            body: compose([["Stats", issue.label], [null, flatten(issue.extraStats, clean)]]),
+          });
+        }
+        return chunks;
+      });
 
     if (meta) {
       const inspired = meta.inspired_by && typeof meta.inspired_by === "object"

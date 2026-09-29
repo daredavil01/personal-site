@@ -44,6 +44,14 @@ export const ROUTE_MANIFEST = [
   { path: "/instagram", component: "Instagram", og: { strategy: "page", slug: "instagram" }, indexable: true },
   { path: "/sports", component: "SportsPage", og: { strategy: "page", slug: "sports" }, indexable: true },
   { path: "/now", component: "Now", og: { strategy: "page", slug: "now" }, indexable: true },
+  { path: "/newsletter", component: "Newsletter", og: { strategy: "page", slug: "newsletter" }, indexable: true },
+  {
+    path: "/newsletter/:slug",
+    component: "NewsletterIssue",
+    meta: "buildNewsletterMeta",
+    og: { strategy: "entity", kind: "newsletter" },
+    indexable: true,
+  },
   { path: "/books", component: "Books", og: { strategy: "page", slug: "books" }, indexable: true },
   { path: "/challenges", component: "Challenges", og: { strategy: "page", slug: "challenges" }, indexable: true },
   {

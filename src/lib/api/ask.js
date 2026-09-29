@@ -148,6 +148,8 @@ export async function askQuestionStream({
   history = [],
   types = [],
   spokenLanguage = null,
+  // { type, id, refs } — pins a page's own chunks into the answer (withFocus).
+  focus = null,
   turnstileToken,
   signal,
   onSources = () => {},
@@ -168,6 +170,7 @@ export async function askQuestionStream({
       // evidence than the script it is typed in, which reads romanised Marathi
       // as English and answers it in English.
       spokenLanguage,
+      focus,
       turnstileToken,
       stream: true,
       sessionId: sessionId(),

@@ -26,6 +26,8 @@ const Stats = lazy(() => import("./pages/Stats"));
 const Instagram = lazy(() => import("./pages/Instagram"));
 const SportsPage = lazy(() => import("./pages/Sports"));
 const Now = lazy(() => import("./pages/Now"));
+const Newsletter = lazy(() => import("./pages/Newsletter"));
+const NewsletterIssue = lazy(() => import("./pages/NewsletterIssue"));
 const Books = lazy(() => import("./pages/Books"));
 const Challenges = lazy(() => import("./pages/Challenges"));
 const OneHundredDays = lazy(() => import("./pages/OneHundredDays"));
@@ -90,6 +92,8 @@ const App = () => (
               <Route path="/instagram" element={<Instagram />} />
               <Route path="/sports" element={<SportsPage />} />
               <Route path="/now" element={<Now />} />
+              <Route path="/newsletter" element={<Newsletter />} />
+              <Route path="/newsletter/:slug" element={<NewsletterIssue />} />
               <Route path="/books" element={<Books />} />
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/100-days-to-offload" element={<OneHundredDays />} />

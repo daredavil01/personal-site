@@ -144,6 +144,15 @@ export const PAGE_META = {
     ogSlug: "now",
     type: "website",
   },
+  "/newsletter": {
+    title: "Newsletter",
+    description:
+      "A letter every month: every race, trek, book, blog and short post of the month in one place, with a note on what it all meant.",
+    image: `${SITE_URL}/og/newsletter.png`,
+    imageAlt: "A sealed envelope — Sanket Tambare's monthly newsletter",
+    ogSlug: "newsletter",
+    type: "website",
+  },
   "/100-days-to-offload": {
     title: "100 Days To Offload",
     description:
@@ -340,6 +349,21 @@ export function buildPresentationMeta({ title, description, image } = {}) {
     description: description || `A presentation: ${title}.`,
     image: image || sectionImage("presentations"),
     imageAlt: `Slide deck card for ${title}`,
+    type: "article",
+  };
+}
+
+// One monthly issue. `image` is the issue's own pre-rendered card (card_url,
+// written by `npm run newsletter:draft`), else the /newsletter card.
+export function buildNewsletterMeta({ label, headline, stats, image } = {}) {
+  const title = headline ? `${headline} — ${label}` : `${label} newsletter`;
+  return {
+    title,
+    description: stats
+      ? `${label}: ${stats}. Every race, trek, book and post of the month, with a letter on what it meant.`
+      : `Everything Sanket Tambare did in ${label}, in one letter.`,
+    image: image || sectionImage("newsletter"),
+    imageAlt: `Newsletter card for ${label}`,
     type: "article",
   };
 }

@@ -13,7 +13,7 @@ import {
 import {
   spineStack, ridgeline, lostTrail, dotMatrix, progressBar, swatchCloud, radialSpokes,
   connectedCurve, slideFan, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
-  commitGraph,
+  commitGraph, monthCalendar, envelope,
 } from "./figures.js";
 
 const col = (gap, ...children) => h("div", { style: { display: "flex", flexDirection: "column", gap } }, children);
@@ -104,6 +104,36 @@ const FIGURES = {
 
   notfound: () => band(lostTrail(CARD.width, 280), CARD.width, 280, { bottom: 84, opacity: 0.9 }),
 
+  // The hub gets the envelope; an issue gets its own month, lit where something
+  // happened, over its hero photo when it has one.
+  newsletter: (m) => {
+    const grid = m.figure && m.figure.grid;
+    if (!grid || !grid.daysInMonth) {
+      return inset(envelope({ accent: m.accent }), 460, 300, { right: 64, bottom: 150 });
+    }
+    const step = 58;
+    const rows = Math.ceil((grid.firstWeekday + grid.daysInMonth) / 7);
+    const calendar = inset(
+      monthCalendar(m.figure.days, grid, { accent: m.accent }),
+      7 * step - 8,
+      rows * step - 8,
+      { right: 72, bottom: 110 },
+    );
+    if (!m.photo) return calendar;
+    return h(
+      "div",
+      { style: { position: "absolute", left: 0, top: 0, display: "flex", width: CARD.width, height: CARD.height } },
+      h(
+        "div",
+        { style: { position: "absolute", left: 0, top: 0, display: "flex", opacity: 0.4 } },
+        PhotoPanel(m.photo, {
+          width: CARD.width, height: CARD.height, accent: m.accent, opacity: 0.5, scrim: "to right",
+        }),
+      ),
+      calendar,
+    );
+  },
+
   "writing-ledger": (m) => {
     const months = (m.figure && m.figure.months) || [];
     if (months.length < 2) return null;
@@ -175,7 +205,7 @@ export const pageCard = (model) => {
   const bleed = typeof figure === "function" ? figure(model) : null;
   // Leave room for whichever side the figure occupies so text never collides
   // with it. The full-bleed portraits are the exception: text sits over them.
-  const textWidth = ["home", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger"]
+  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger"]
     .includes(model.slug) ? 620 : CARD.width - 128;
 
   return Frame({

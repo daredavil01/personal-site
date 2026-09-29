@@ -15,6 +15,7 @@ import {
 } from "./sectionSpecs";
 import { RepeatableRows, StringLines, StatsEditor } from "./SectionEditors";
 import AutofillPreview from "./AutofillPreview";
+import { IssueFeedbackPanel, IssueFields, IssuePublish } from "./IssuePanel";
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
 import Field from "../ui/Field";
@@ -33,7 +34,9 @@ import { hairline, mutedText, surface } from "../ui/tokens";
 // Dedicated manager for `now_months` (not the generic ResourceManager): the
 // month's `sections` blob holds nine differently-shaped sub-sections that used
 // to be typed as raw JSON. Each gets a real form here, plus two auto-fills —
-// one from the content tables, one from the changelog.
+// one from the content tables, one from the changelog. Since 0032 each row is
+// also a newsletter issue: the letter, poll and publish switch live in
+// IssuePanel.js, and `npm run newsletter:draft` fills the same row headlessly.
 
 // Enough to cover a busy micro-blogging month without shipping the archive.
 const MICRO_LIMIT = 50;
@@ -43,6 +46,10 @@ const emptyForm = () => ({
   year: String(new Date().getFullYear()),
   isCurrent: false,
   sections: {},
+  headline: "",
+  note: "",
+  poll: null,
+  publishedAt: null,
 });
 
 // "May" + 2026 → "2026-05", the key both auto-fills and monthDigest speak.
@@ -124,6 +131,19 @@ const NowMonthEditor = () => {
     next.delete("start");
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, openForm]);
+
+  // ?edit=<id> — the link `npm run newsletter:draft` prints.
+  useEffect(() => {
+    const edit = searchParams.get("edit");
+    if (!edit || !rows) return;
+    const row = rows.find((r) => String(r.id) === edit);
+    if (row) openForm({ ...row, year: String(row.year), sections: row.sections || {} });
+    const next = new URLSearchParams(searchParams);
+    next.delete("edit");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, rows, openForm]);
+
+  const patchForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
 
   const setSection = (key, value) => {
     setForm((prev) => ({ ...prev, sections: { ...prev.sections, [key]: value } }));
@@ -279,7 +299,7 @@ const NowMonthEditor = () => {
     return (
       <form onSubmit={save} className="flex flex-col gap-5 pb-20">
         <PageHeader
-          title={`${form.id ? "Edit" : "New"} Now month`}
+          title={`${form.id ? "Edit" : "New"} issue`}
           description={monthKey ? monthLabel(monthKey) : "Pick a month and year"}
         />
 
@@ -335,6 +355,8 @@ const NowMonthEditor = () => {
           )}
         </Card>
 
+        <IssuePublish form={form} onChange={patchForm} />
+
         {preview && (
           <AutofillPreview
             title={preview.kind === "changelog"
@@ -381,6 +403,9 @@ const NowMonthEditor = () => {
         <Card title="Stats">
           <StatsEditor value={sections.stats} onChange={(v) => setSection("stats", v)} />
         </Card>
+
+        <IssueFields form={form} rows={rows} onChange={patchForm} />
+        <IssueFeedbackPanel issueId={form.publishedAt ? form.id : null} />
 
         <details className={`border ${hairline} rounded-xl px-4 py-3`}>
           <summary className="text-[13px] font-medium cursor-pointer">Advanced: raw JSON</summary>
@@ -452,6 +477,14 @@ const NowMonthEditor = () => {
     },
     { key: "year", label: "Year", sortable: true, width: "6rem" },
     {
+      key: "publishedAt",
+      label: "Issue",
+      width: "7rem",
+      sortable: true,
+      sortValue: (r) => (r.publishedAt ? 1 : 0),
+      render: (r) => (r.publishedAt ? <Badge tone="success">Published</Badge> : <Badge tone="warning">Draft</Badge>),
+    },
+    {
       key: "sections",
       label: "Sections",
       width: "8rem",
@@ -464,8 +497,8 @@ const NowMonthEditor = () => {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
-        title="Now · Months"
-        description={rows ? `${rows.length} months on record` : "Loading…"}
+        title="Newsletter issues"
+        description={rows ? `${rows.length} months on record · ${rows.filter((r) => r.publishedAt).length} published` : "Loading…"}
         actions={(
           <Button variant="primary" icon={Plus} onClick={() => openForm(emptyForm())}>New month</Button>
         )}
@@ -483,7 +516,7 @@ const NowMonthEditor = () => {
           <>
             <IconButton icon={Pencil} label="Edit" size="sm" onClick={() => openEdit(row)} />
             <a
-              href="/now"
+              href={row.publishedAt ? `/newsletter/${row.slug}` : "/now"}
               target="_blank"
               rel="noreferrer"
               title="View on site"

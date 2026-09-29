@@ -75,6 +75,7 @@ const PRESENTATION = {
     pages: [
       { path: "/about", label: "About", icon: "home" },
       { path: "/now", label: "Now", icon: "schedule" },
+      { path: "/newsletter", label: "Newsletter", icon: "mail" },
       { path: "/instagram", label: "Instagram", icon: "photo_camera" },
       { path: "/stats", label: "Stats", icon: "monitoring" },
       { path: "/mindmap", label: "Observatory", icon: "hub" },

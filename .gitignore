@@ -51,8 +51,9 @@ nohup.out
 # stitch design related
 stitch/
 
-#claude
-.claude/
+#claude — local settings stay private; project skills are shared
+.claude/*
+!.claude/skills/
 
 # Raw Data
 knowledge_base/

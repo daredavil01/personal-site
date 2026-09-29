@@ -69,7 +69,7 @@ describe("admin routes", () => {
     ["/admin/blogs", "100 Days"],
     ["/admin/instagram", "Instagram"],
     ["/admin/microblog", "Micro Blog"],
-    ["/admin/now/months", "Now · Months"],
+    ["/admin/now/months", "Newsletter issues"],
     ["/admin/now/meta", "Now · Meta"],
   ])("renders %s", async (path, heading) => {
     renderAt(path);
@@ -102,7 +102,7 @@ describe("legacy ?tab= bookmarks", () => {
   it.each([
     ["books", "Books"],
     ["__microblog", "Micro Blog"],
-    ["__nowmonths", "Now · Months"],
+    ["__nowmonths", "Newsletter issues"],
     ["__nowmeta", "Now · Meta"],
     ["resume_skills", "Skills"],
   ])("?tab=%s lands on %s", async (tab, heading) => {

@@ -99,7 +99,7 @@ const MonthlyDigest = () => {
     blogsData.forEach((b) => { const k = itemMonthKey(b, "blog"); if (k) set.add(k); });
     treksData.forEach((t) => { const k = itemMonthKey(t, "trek"); if (k) set.add(k); });
     sportsData.forEach((s) => { const k = itemMonthKey(s, "sport"); if (k) set.add(k); });
-    // Books have no month-precise date, so they bucket by created_at (fallback).
+    // Books bucket by a day-precise finish date, else by created_at (fallback).
     booksData.forEach((b) => { const k = itemMonthKey(b, "book"); if (k) set.add(k); });
     decksData.forEach((d) => { const k = itemMonthKey(d, "presentation"); if (k) set.add(k); });
     return [...set].sort().reverse();

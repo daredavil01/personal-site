@@ -342,4 +342,38 @@ export const commitGraph = ({ width = 380, height = 260, accent = COLORS.amber }
   ].join("");
 };
 
+// --- /newsletter --------------------------------------------------------------
+
+// The month as a wall calendar: one square per day, lit where something
+// happened. `days` is { dayOfMonth: [sectionKeys] } from issueDays(); a month
+// with nothing dated still draws its grid, which is the section's shape.
+export const monthCalendar = (days, { daysInMonth = 30, firstWeekday = 0 } = {}, {
+  cell = 50, gap = 8, accent = COLORS.amber,
+} = {}) => {
+  const step = cell + gap;
+  const rows = Math.ceil((firstWeekday + daysInMonth) / 7);
+  const width = 7 * step - gap;
+  const height = rows * step - gap;
+  const squares = Array.from({ length: daysInMonth }, (_, i) => {
+    const slot = firstWeekday + i;
+    const x = (slot % 7) * step;
+    const y = Math.floor(slot / 7) * step;
+    const on = (days && days[i + 1] && days[i + 1].length) || 0;
+    return `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="8" fill="${on ? accent : COLORS.panelEdge}" opacity="${on ? Math.min(1, 0.6 + on * 0.2) : 0.5}"/>`;
+  }).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${squares}</svg>`;
+};
+
+// A sealed envelope with a postage stamp, for the /newsletter hub card.
+export const envelope = ({ width = 460, height = 300, accent = COLORS.amber } = {}) => [
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+  `<rect x="4" y="4" width="${width - 8}" height="${height - 8}" rx="18" fill="${COLORS.panel}" stroke="${accent}" stroke-width="4"/>`,
+  `<path d="M8,12 L${width / 2},${height * 0.58} L${width - 8},12" fill="none" stroke="${accent}" stroke-width="4" stroke-linejoin="round"/>`,
+  `<rect x="${width - 104}" y="${height - 116}" width="72" height="84" rx="4" fill="${accent}" opacity="0.9"/>`,
+  `<rect x="${width - 96}" y="${height - 108}" width="56" height="68" rx="2" fill="none" stroke="${COLORS.panel}" stroke-width="3" stroke-dasharray="6 5"/>`,
+  `<rect x="36" y="${height - 86}" width="${width * 0.45}" height="12" rx="6" fill="${COLORS.textFaint}" opacity="0.55"/>`,
+  `<rect x="36" y="${height - 60}" width="${width * 0.3}" height="12" rx="6" fill="${COLORS.textFaint}" opacity="0.35"/>`,
+  "</svg>",
+].join("");
+
 export { esc };

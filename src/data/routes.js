@@ -45,6 +45,7 @@ const routes = [
     path: "/now",
     subRoutes: [
       { label: "Now", path: "/now" },
+      { label: "Newsletter", path: "/newsletter" },
       { label: "Books", path: "/books" },
       { label: "Sports", path: "/sports" },
       { label: "Treks", path: "/treks" },

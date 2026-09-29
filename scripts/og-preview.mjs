@@ -22,39 +22,21 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import satori from "satori";
-import { initWasm, Resvg } from "@resvg/resvg-wasm";
 
-import { FONT_FACES, FONT_DIR } from "../src/lib/og/fonts.js";
 import { firstSlideImage, storageUrl } from "../src/lib/og/paths.js";
 import { pageModel, PAGE_SLUGS } from "../src/lib/og/model.js";
 import { pageCard } from "../src/lib/og/layouts/page.js";
 import { STATS_FIXTURE } from "../src/lib/og/fixtures.js";
-import { renderCard } from "../src/lib/og/render.js";
-import { CARD } from "../src/lib/og/tokens.js";
 import { getStatsPayload, STATS_URL } from "./lib/statsSource.mjs";
+import { createRenderer, inlineImage } from "./lib/og-render.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "knowledge_base", "og-preview");
-const FONTS = path.join(ROOT, FONT_DIR);
-// resvg's wasm is read straight out of node_modules: this is a Node-only build
-// step, so there is nothing to vendor. (It was committed under functions/ only
-// because a Worker cannot fetch and compile wasm at runtime.)
-const WASM = path.join(ROOT, "node_modules", "@resvg", "resvg-wasm", "index_bg.wasm");
 
 const only = (process.argv.find((a) => a.startsWith("--only=")) || "").split("=")[1] || null;
 // --fallbacks writes the committed public/og/ set; without it, a contact sheet.
 const writeFallbacks = process.argv.includes("--fallbacks");
 const offline = process.argv.includes("--offline");
-
-async function loadFonts() {
-  return Promise.all(FONT_FACES.map(async (face) => ({
-    name: face.name,
-    weight: face.weight,
-    style: face.style,
-    data: await fs.promises.readFile(path.join(FONTS, face.file)),
-  })));
-}
 
 // Inlined rather than linked: satori has to read the pixels to composite the
 // portrait, and a data URI keeps the render free of network I/O.
@@ -103,20 +85,7 @@ function publicSupabase() {
 // embeds it happily and resvg then draws nothing, which is why two tiles came
 // out as flat accent squares. So: over-fetch, keep what is decodable, inline it
 // as a data URI — which also takes the network out of the render.
-const DECODABLE = /^image\/(jpeg|png|gif)$/;
-
-async function inlineImage(url) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const type = (res.headers.get("content-type") || "").split(";")[0].trim();
-    if (!DECODABLE.test(type)) return null;
-    const bytes = Buffer.from(await res.arrayBuffer());
-    return `data:${type};base64,${bytes.toString("base64")}`;
-  } catch (_) {
-    return null;
-  }
-}
+// (inlineImage in scripts/lib/og-render.mjs does the culling.)
 
 async function loadCardPhotos() {
   const { url, key } = publicSupabase();
@@ -200,8 +169,7 @@ ${rows}
 }
 
 async function main() {
-  await initWasm(await fs.promises.readFile(WASM));
-  const fonts = await loadFonts();
+  const render = await createRenderer();
   const { payload, from } = await loadStats();
   const photos = offline ? {} : await loadCardPhotos();
   // Committed by `npm run blogs:wordcount`, and what public/writing-ledger.html
@@ -224,7 +192,6 @@ async function main() {
     process.exit(1);
   }
 
-  const rasterise = (svg) => new Resvg(svg, { fitTo: { mode: "width", value: CARD.width } }).render().asPng();
   const rendered = [];
   let failed = 0;
 
@@ -234,7 +201,7 @@ async function main() {
       const model = pageModel(slug, payload, { portrait, photos, ledger });
       const started = Date.now();
       // eslint-disable-next-line no-await-in-loop -- sequential keeps peak memory flat and timings honest
-      const png = await renderCard(pageCard(model), { satori, fonts, rasterise });
+      const png = await render(pageCard(model));
       const ms = Date.now() - started;
       // eslint-disable-next-line no-await-in-loop
       await fs.promises.writeFile(path.join(outDir, `${slug}.png`), png);

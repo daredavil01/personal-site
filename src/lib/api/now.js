@@ -6,7 +6,16 @@ export const MONTH_ORDER = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+/** "September" + 2026 → "2026-09", the issue's URL slug. */
+export function monthSlug(month, year) {
+  const index = MONTH_ORDER.indexOf(month);
+  if (index < 0 || !year) return null;
+  return `${year}-${String(index + 1).padStart(2, "0")}`;
+}
+
 // --- Months (one row per month) ------------------------------------------
+// Each row is also a newsletter issue (0032): published ones are read at
+// /newsletter/<slug>, the current one is what /now shows.
 export const nowMonths = createResource({
   table: "now_months",
   order: [{ column: "year", ascending: false }],
@@ -16,12 +25,24 @@ export const nowMonths = createResource({
     year: r.year,
     isCurrent: !!r.is_current,
     sections: r.sections ?? {},
+    slug: r.slug || monthSlug(r.month, r.year),
+    headline: r.headline ?? "",
+    note: r.note ?? "",
+    poll: r.poll ?? null,
+    publishedAt: r.published_at ?? null,
+    cardUrl: r.card_url ?? null,
   }),
   toRow: (v) => ({
     month: v.month,
     year: Number(v.year),
     is_current: !!v.isCurrent,
     sections: v.sections ?? {},
+    slug: monthSlug(v.month, Number(v.year)),
+    headline: v.headline || null,
+    note: v.note || null,
+    poll: v.poll?.q ? v.poll : null,
+    published_at: v.publishedAt || null,
+    card_url: v.cardUrl || null,
   }),
 });
 

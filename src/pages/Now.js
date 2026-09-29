@@ -1,6 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
-import NowDocument from "../components/Now/NowDocument";
+import MonthSection from "../components/Now/MonthSection";
 import { useNowMeta, useNowMonths } from "../context/ContentContext";
 
 const Now = () => {
@@ -23,8 +24,8 @@ const Now = () => {
               Now.
             </h1>
             <p className="font-body text-lg text-stone-500 dark:text-stone-400 leading-relaxed">
-              A month-by-month snapshot of what I'm running, reading, writing,
-              and building. Pick a month from the timeline to travel through it.
+              What I'm running, reading, writing and building this month. When the
+              month ends it becomes an issue of the newsletter.
             </p>
             {lastUpdated && (
               <div className="mt-6 inline-flex items-center gap-3 bg-secondary/[0.05] dark:bg-secondary/[0.08] border border-secondary/20 rounded-full px-4 py-2">
@@ -71,7 +72,16 @@ const Now = () => {
           </section>
         )}
 
-        <NowDocument months={nowData} />
+        {current && <MonthSection month={current} />}
+
+        {/* Past months are newsletter issues now (0032). */}
+        <Link
+          to="/newsletter"
+          className="self-start inline-flex items-center gap-2 rounded-full border border-stone-200 dark:border-stone-700 px-5 py-2.5 font-label text-xs uppercase tracking-widest font-bold text-stone-700 dark:text-stone-200 no-underline hover:border-secondary hover:text-secondary transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">mail</span>
+          Past months live in the newsletter
+        </Link>
       </div>
     </PageShell>
   );

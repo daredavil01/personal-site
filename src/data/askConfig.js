@@ -35,7 +35,9 @@ export const ENTITY_TYPES = {
   sport: { label: "Race", list: "/sports", path: (id) => `/sports/${id}` },
   trek: { label: "Trek", list: "/treks", path: (id) => `/treks/${id}` },
   instagram: { label: "Instagram", list: "/instagram", path: () => "/instagram" },
-  now: { label: "Now", list: "/now", path: () => "/now" },
+  // Each now_months row is a newsletter issue (0032). Its chunks carry their
+  // own /newsletter/<slug> url (the current, unpublished month points at /now).
+  now: { label: "Newsletter", list: "/newsletter", path: () => null },
   page: { label: "Page", list: "/", path: () => null },
   // Chunks carry their own /changelog#vX.Y.Z anchor, so path() adds nothing.
   changelog: { label: "Changelog", list: "/changelog", path: () => null },
@@ -69,7 +71,7 @@ export const ENTITY_PLURALS = {
   sport: "races",
   trek: "treks",
   instagram: "photo sets",
-  now: "now updates",
+  now: "newsletter issues",
   page: "pages",
   changelog: "changelog versions",
   resume: "résumé entries",

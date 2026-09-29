@@ -53,6 +53,7 @@ export const ACCENTS = {
   microblog: COLORS.teal,
   mindmap: COLORS.blue,
   now: COLORS.cyan,
+  newsletter: COLORS.amber,
   "100-days-to-offload": COLORS.orange,
   blog: COLORS.orange,
   presentations: COLORS.blue,

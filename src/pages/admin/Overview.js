@@ -51,7 +51,7 @@ const NowStatus = ({ months }) => {
         description="The Now page shows whichever month carries the isCurrent flag."
         action={(
           <Link to="/admin/now/months" className="no-underline">
-            <Button size="sm" variant="primary" icon={Plus}>Open Now · Months</Button>
+            <Button size="sm" variant="primary" icon={Plus}>Open newsletter issues</Button>
           </Link>
         )}
       />

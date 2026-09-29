@@ -40,7 +40,8 @@
     "docs:build": "node scripts/build-docs.mjs",
     "atlas:voice": "node scripts/generate-guide-audio.mjs",
     "og:preview": "node scripts/og-preview.mjs",
-    "og:fallbacks": "node scripts/og-preview.mjs --fallbacks"
+    "og:fallbacks": "node scripts/og-preview.mjs --fallbacks",
+    "newsletter:draft": "node scripts/newsletter-draft.mjs"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.87",

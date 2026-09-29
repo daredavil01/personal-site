@@ -1,5 +1,5 @@
 import {
-  applyRerank, retrievalQuery, selectChunks, typesNamed,
+  applyRerank, focusTargets, pickFocusChunks, retrievalQuery, selectChunks, typesNamed, withFocus,
 } from "./askRetrieval";
 
 // content_chunks rows keep their database spelling all the way to the worker.
@@ -198,5 +198,36 @@ describe("borrowed micro-posts", () => {
       perEntity: 1,
     });
     expect(picked.map((c) => c.entity_type)).toEqual(["blog", "microblog"]);
+  });
+});
+
+describe("ask about this page", () => {
+  const focus = {
+    type: "now",
+    id: 12,
+    refs: [{ type: "sport", id: 5 }, { type: "trek", id: 9 }, { type: "bad type", id: 1 }, { type: "book", id: "1;drop" }],
+  };
+
+  it("keeps only well-formed targets, page first, deduped", () => {
+    expect(focusTargets(focus)).toEqual([
+      { type: "now", id: "12" }, { type: "sport", id: "5" }, { type: "trek", id: "9" },
+    ]);
+    expect(focusTargets({ ...focus, refs: [{ type: "now", id: 12 }] })).toHaveLength(1);
+    expect(focusTargets(null)).toEqual([]);
+  });
+
+  it("takes the page's chunks and one chunk per ref, in the page's order", () => {
+    const rows = [chunk("trek", 9, 1), chunk("trek", 9, 0), chunk("now", 12, 1), chunk("now", 12, 0), chunk("sport", 5, 0)];
+    const picked = pickFocusChunks(rows, focusTargets(focus));
+    expect(picked.map((c) => `${c.entity_type}:${c.entity_id}:${c.chunk_index}`)).toEqual([
+      "now:12:0", "now:12:1", "sport:5:0", "trek:9:0",
+    ]);
+  });
+
+  it("puts focus chunks ahead of search results without duplicating them", () => {
+    const pinned = [chunk("now", 12), chunk("sport", 5)];
+    const merged = withFocus(pinned, [chunk("sport", 5), chunk("book", 7), chunk("book", 8)], 3);
+    expect(merged.map((c) => `${c.entity_type}:${c.entity_id}`)).toEqual(["now:12", "sport:5", "book:7"]);
+    expect(withFocus([], forts, 8)).toBe(forts);
   });
 });

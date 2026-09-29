@@ -15,7 +15,7 @@ export const ADMIN_TABLES = [
   { table: "blogs", label: "100 Days", path: "/admin/blogs", titleColumns: ["blog_title"] },
   { table: "instagram", label: "Instagram", path: "/admin/instagram", titleColumns: ["title"] },
   { table: "microblog", label: "Micro posts", path: "/admin/microblog", titleColumns: ["title", "text"] },
-  { table: "now_months", label: "Now months", path: "/admin/now/months", titleColumns: ["month"] },
+  { table: "now_months", label: "Newsletter issues", path: "/admin/now/months", titleColumns: ["month"] },
   { table: "resume_positions", label: "Positions", path: "/admin/resume/experience", titleColumns: ["position", "company"] },
   { table: "resume_degrees", label: "Degrees", path: "/admin/resume/education", titleColumns: ["school"] },
   { table: "resume_certifications", label: "Certifications", path: "/admin/resume/certifications", titleColumns: ["name"] },

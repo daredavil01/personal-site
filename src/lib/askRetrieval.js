@@ -200,3 +200,60 @@ export function applyRerank(chunks, ranking) {
 
   return [...front, ...all.filter((_, i) => !seen.has(i))];
 }
+
+// --- "Ask about this page" -------------------------------------------------
+//
+// A page can pin itself into a question: a newsletter issue sends
+// `focus = { type: "now", id, refs: [{ type, id }, ...] }`, and the worker
+// reads those chunks straight out of content_chunks and puts them ahead of
+// whatever search found. Without it "how did the race go?" searches the whole
+// archive for "race" and answers about the wrong one.
+
+const FOCUS_TYPE = /^[a-z][a-z0-9_]*$/;
+const FOCUS_ID = /^\d{1,12}$/;
+
+/**
+ * The validated entities a focus names — the page itself first, then its refs,
+ * capped. Everything else is dropped: these end up in a PostgREST filter.
+ */
+export function focusTargets(focus, max = 9) {
+  if (!focus || typeof focus !== "object") return [];
+  const all = [{ type: focus.type, id: focus.id }, ...(Array.isArray(focus.refs) ? focus.refs : [])];
+  const seen = new Set();
+  return all
+    .filter((r) => r && FOCUS_TYPE.test(String(r.type)) && FOCUS_ID.test(String(r.id)))
+    .map((r) => ({ type: String(r.type), id: String(r.id) }))
+    .filter((r) => {
+      const k = `${r.type}:${r.id}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    })
+    .slice(0, max);
+}
+
+/**
+ * From every chunk of the focus targets: the page's own first `own` chunks,
+ * then ONE chunk per ref in the order the page listed them — the page is the
+ * subject, its refs are the detail.
+ */
+export function pickFocusChunks(rows, targets, { own = 4 } = {}) {
+  if (!Array.isArray(rows) || !targets?.length) return [];
+  const byIndex = [...rows].sort((a, b) => (a.chunk_index || 0) - (b.chunk_index || 0));
+  const of = (t) => byIndex.filter((r) => r.entity_type === t.type && String(r.entity_id) === t.id);
+  const [page, ...refs] = targets;
+  return [
+    ...of(page).slice(0, own),
+    ...refs.map((t) => of(t)[0]).filter(Boolean),
+  ];
+}
+
+/** Focus chunks first, then search results that are not already in, to `limit`. */
+export function withFocus(focusChunks, picked, limit = 8) {
+  const pinned = Array.isArray(focusChunks) ? focusChunks : [];
+  if (!pinned.length) return picked || [];
+  const key = (c) => `${c.entity_type}:${c.entity_id}:${c.chunk_index}`;
+  const seen = new Set(pinned.map(key));
+  const rest = (picked || []).filter((c) => !seen.has(key(c)));
+  return [...pinned, ...rest].slice(0, Math.max(limit, pinned.length));
+}

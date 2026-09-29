@@ -7,11 +7,31 @@
 // Micro-posts are the exception: they are not in ContentContext (1,600+ rows),
 // so the caller fetches the month server-side and passes them in pre-filtered.
 
-import { itemMonthKey, parseContentDate, toIsoDate } from "./monthDigest";
+// Explicit extension: scripts/newsletter-draft.mjs imports this under Node.
+// eslint-disable-next-line import/extensions
+import { itemMonthKey, parseContentDate, toIsoDate } from "./monthDigest.js";
 
 const clean = (v) => (typeof v === "string" ? v.trim() : v) || "";
 
 const isoOf = (item, type) => toIsoDate(parseContentDate(item, type));
+
+// The archive row a section row came from. The newsletter uses it to share the
+// item as an image and to pin it into an "ask about this issue" question.
+const refOf = (type, id) => (id == null ? undefined : { type, id });
+
+// A book with no day-precise finish date falls back to its created_at — right
+// for one added the month it was read, wrong for the 47 imported on one day in
+// June 2026, which made that month "37 books". Rows created together carry the
+// import's date, not their own, so they are left out of every month.
+// ponytail: "5+ books added the same day = an import"; giving a book a real
+// finish date (date_precision "day") puts it back in its month for good.
+const BULK_IMPORT_MIN = 5;
+const addedDay = (row) => String(row.created_at || "").slice(0, 10);
+export const notBulkImported = (rows) => {
+  const perDay = {};
+  rows.forEach((r) => { perDay[addedDay(r)] = (perDay[addedDay(r)] || 0) + 1; });
+  return (r) => r.date_precision === "day" || (perDay[addedDay(r)] || 0) < BULK_IMPORT_MIN;
+};
 
 /**
  * "21 Kms" → "21". NowRunningSection renders `{distance} km`, so the stored
@@ -33,9 +53,11 @@ const SOURCES = [
     label: "Blogs",
     map: (b) => ({
       title: clean(b.blog_title),
+      date: isoOf(b, "blog"),
       url: clean(b.blog_link),
       description: clean(b.blog_description),
       platform: clean(b.blog_platform),
+      ref: refOf("blog", b.id),
     }),
   },
   {
@@ -50,6 +72,7 @@ const SOURCES = [
       time: clean(s.time),
       note: clean(s.place),
       link: clean(s.timeCertificateLink),
+      ref: refOf("sport", s.id),
     }),
   },
   {
@@ -57,12 +80,14 @@ const SOURCES = [
     type: "book",
     section: "books",
     label: "Books",
-    // Books only store a year, so parseContentDate falls back to created_at.
-    note: "bucketed by date added",
+    // The finish date when it is day-precise, else the date the row was added.
+    note: "by finish date, else date added",
+    usable: notBulkImported,
     map: (b) => ({
       title: clean(b.title),
       author: clean(b.author),
       link: clean(b.blog_link),
+      ref: refOf("book", b.id),
     }),
   },
   {
@@ -77,6 +102,7 @@ const SOURCES = [
       date: isoOf(t, "trek"),
       description: [clean(t.trek_time), clean(t.endurance_level)].filter(Boolean).join(" · "),
       link: clean(t.blog_link),
+      ref: refOf("trek", t.id),
     }),
   },
   {
@@ -95,6 +121,7 @@ const SOURCES = [
       text: clean(p.text),
       tags: p.tags ?? [],
       imageUrl: clean(p.imageUrl),
+      ref: refOf("microblog", p.id),
     }),
   },
 ];
@@ -106,9 +133,33 @@ const TITLE_KEY = {
 };
 
 /**
- * True when `row` already appears in `existing` — by archive id when both have
- * one, else by url, else by title.
+ * True when `row` already appears in `existing`: the same archive id or ref,
+ * else the same url OR the same title, else — for races — the same day.
+ *
+ * A url mismatch does not make two rows different: a race typed by hand on
+ * /now links its certificate, the archive row links something else, and both
+ * are the same race. Before this, "Tata Ultra Marathon" and "Tata Ultra
+ * Marathon 2026" both stayed in February and the issue counted 100 km.
  */
+// The core of a race's name: "Nanded City LSOM 21 Kms Run" and "Nanded City
+// LSOM 2026" are one race typed twice — once on /now with a distance, once in
+// the archive with a year.
+const raceName = (title) => clean(title).toLowerCase()
+  .replace(/\((.*?)\)/g, " $1 ")
+  .replace(/\b(19|20)\d{2}\b/g, " ")
+  .replace(/\b\d+(\.\d+)?\s*(kms?|km|k)\b/g, " ")
+  .replace(/\b(run|race)\b/g, " ")
+  .replace(/[^\p{L}\p{N}]+/gu, " ")
+  .trim();
+
+const sameRace = (a, b) => {
+  const x = raceName(a.event);
+  const y = raceName(b.event);
+  if (x.length < 6 || y.length < 6) return false;
+  const named = x === y || x.startsWith(`${y} `) || y.startsWith(`${x} `);
+  return named && bareDistance(a.distance) === bareDistance(b.distance);
+};
+
 export function isDuplicate(existing, row, section) {
   const titleKey = TITLE_KEY[section];
   const urlKey = section === "blogs" ? "url" : "link";
@@ -116,10 +167,46 @@ export function isDuplicate(existing, row, section) {
   const rowTitle = clean(row[titleKey]).toLowerCase();
   return (existing || []).some((e) => {
     if (row.id && e.id) return String(row.id) === String(e.id);
+    if (row.ref && e.ref) return row.ref.type === e.ref.type && String(row.ref.id) === String(e.ref.id);
+    // Hand-typed races were often dated the 1st, so a race matches by name and
+    // distance before the dates get a say.
+    if (section === "running" && sameRace(e, row)) return true;
+    // Two dated rows on different days are two things, whatever they are called.
+    if (clean(row.date) && clean(e.date) && clean(row.date) !== clean(e.date)) return false;
     const eUrl = clean(e[urlKey]).toLowerCase();
-    if (rowUrl && eUrl) return rowUrl === eUrl;
-    return !!rowTitle && clean(e[titleKey]).toLowerCase() === rowTitle;
+    if (rowUrl && eUrl && rowUrl === eUrl) return true;
+    if (rowTitle && clean(e[titleKey]).toLowerCase() === rowTitle) return true;
+    // One race a day: the names and links differ, the date does not.
+    return section === "running" && !!clean(row.date) && clean(e.date) === clean(row.date);
   });
+}
+
+// A typed row that turns out to be an archive row takes the archive's ref and
+// its date — the archive is where the real date lives; /now often had the 1st.
+const adopt = (typed, archived) => (typed.ref || !archived.ref
+  ? typed
+  : { ...typed, ref: archived.ref, ...(clean(archived.date) ? { date: archived.date } : {}) });
+
+// `rows` with `row` added, or folded into the row it duplicates.
+const absorb = (rows, row, section) => {
+  const i = rows.findIndex((e) => isDuplicate([e], row, section));
+  if (i < 0) return [...rows, row];
+  return rows.map((e, j) => (j === i ? adopt(e, row) : e));
+};
+
+/**
+ * Collapses rows that describe the same thing within each section, keeping
+ * the first (the hand-typed one, since the merge appends) and moving the
+ * archive ref of a dropped duplicate onto it. Repairs months merged before
+ * isDuplicate knew that a race keeps its date when it changes its name.
+ */
+export function dedupeSections(sections = {}) {
+  const next = { ...sections };
+  Object.keys(TITLE_KEY).forEach((section) => {
+    if (!Array.isArray(sections[section])) return;
+    next[section] = sections[section].reduce((kept, row) => absorb(kept, row, section), []);
+  });
+  return next;
 }
 
 const ellipsis = (text, max = 90) => (text.length > max ? `${text.slice(0, max).trim()}…` : text);
@@ -141,7 +228,9 @@ export function collectMonthRecords(data, monthKey, sections = {}) {
   if (!monthKey) return [];
   return SOURCES.map((source) => {
     const keep = source.keep || ((row) => clean(row[TITLE_KEY[source.section]]));
-    const rows = (data[source.key] || [])
+    const all = data[source.key] || [];
+    const rows = all
+      .filter(source.usable ? source.usable(all) : Boolean)
       .filter((item) => source.preFiltered || itemMonthKey(item, source.type) === monthKey)
       .map(source.map)
       .filter(keep)
@@ -159,6 +248,21 @@ export function collectMonthRecords(data, monthKey, sections = {}) {
       })),
     };
   }).filter((group) => group.rows.length > 0);
+}
+
+/**
+ * The month's sections with every content row of `monthKey` merged in — what
+ * `npm run newsletter:draft` writes. Idempotent: a row already present is not
+ * added again, but gains the archive `ref` it was missing (rows typed by hand,
+ * or pulled before refs existed), so re-running it over an old month upgrades
+ * that month rather than duplicating it.
+ */
+export function mergeMonthRecords(data, monthKey, sections = {}) {
+  const next = dedupeSections(sections);
+  collectMonthRecords(data, monthKey, {}).forEach(({ section, rows }) => {
+    next[section] = rows.reduce((merged, { row }) => absorb(merged, row, section), next[section] || []);
+  });
+  return next;
 }
 
 export default collectMonthRecords;

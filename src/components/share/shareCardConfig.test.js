@@ -67,4 +67,28 @@ describe("hasImage", () => {
     expect(hasImage("instagram", { id: 1, slideImages: [{ url: "/a.jpg" }] })).toBe(true);
     expect(hasImage("book", { id: 1, title: "T" })).toBe(false);
   });
+
+  it("maps a newsletter issue and one of its sections", () => {
+    const issue = {
+      slug: "2026-09",
+      label: "September 2026",
+      headline: "Rain, ridges and a PB",
+      note: "It **rained**. [More](https://x.test)",
+      stats: [{ value: "21", label: "km raced" }],
+      sections: [{ key: "books", label: "On the shelf", items: [{ title: "Kosla" }] }],
+      hero: "https://img/hero.jpg",
+    };
+    const model = toShareModel("newsletter", issue);
+    expect(model.eyebrow).toBe("Newsletter · September 2026");
+    expect(model.metaRows.map((r) => r.label)).toEqual(["21 km raced"]);
+    expect(model.body).toBe("It rained. More");
+    expect(model.imageUrl).toBe("https://img/hero.jpg");
+    expect(model.footerUrl).toBe(`${SITE_DOMAIN}/newsletter/2026-09`);
+
+    const section = toShareModel("newsletter-section", {
+      issue, section: issue.sections[0], titles: ["Kosla — Nemade"],
+    });
+    expect(section.title).toBe("1 entry this month");
+    expect(section.body).toBe("• Kosla — Nemade");
+  });
 });

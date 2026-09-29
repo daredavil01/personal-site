@@ -85,6 +85,8 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 - `docs/entities.md` — what each content type *means* (hand-written, and the part
   that is not derivable from the schema).
 - `docs/routes.md`, `docs/tags.md` — route map and the tag vocabulary.
+- `docs/newsletter.md` — the monthly newsletter: workflow, entity map, why it
+  is built this way (hand-written; the source for presenting the feature).
 - `docs/chatbot-context.md` — the ~1,200-token card `/ask` injects; derived, never
   hand-edited.
 
@@ -239,6 +241,40 @@ Natural-language chat over the whole content store.
   strip on every detail page from the same embeddings — no model call at read
   time.
 
+## Newsletter (/newsletter)
+
+A monthly issue per month, built from the archive plus a hand-written letter.
+Full reference: `docs/newsletter.md`.
+
+- **An issue IS a `now_months` row** (`0032_newsletter.sql` adds `slug`,
+  `headline`, `note`, `poll`, `published_at`, `card_url`). There is no issues
+  table. `/now` shows only the current month; every published month is
+  `/newsletter/<YYYY-MM>`. RLS: the public reads a month only when it is
+  published or current; the page shows an unpublished one only when signed in.
+- **Everything reads an issue through `src/lib/newsletterIssue.js`**
+  (`issueModel`, `issueStats`, `issueDays`, `issueRefs`, `issueQuestions`,
+  `issueToHtml`) — both layouts, share cards, the OG card, the middleware and
+  the `/ask` source. Never recompute an issue's numbers elsewhere.
+- **Monthly workflow:** `/newsletter <YYYY-MM>` (the Claude skill in
+  `.claude/skills/newsletter/`) or `npm run newsletter:draft -- <YYYY-MM>`.
+  The script merges the month's rows (`mergeMonthRecords`, idempotent, adds
+  `ref: {type, id}` to each), renders the card to Storage at
+  `media/og/newsletter-<slug>.png` (flat name so `isCardImage` matches), and
+  writes a brief to `knowledge_base/newsletter/`. The model writes prose from
+  that brief only; `--note file.md` writes it back. **Nothing publishes but a
+  person** pressing Publish at `/admin/now/months`, which also has "Copy for
+  Substack". `--all` re-runs every month.
+- **Two layouts, one model:** `IssueLetter` (atlas) and `IssueMagazine`
+  (classic), picked by `useViewMode()` in `src/pages/NewsletterIssue.js`.
+- **Feedback** (`newsletter_feedback`) is owner-only RLS. Writes go through
+  `functions/api/newsletter-feedback.js` (Turnstile per `ask_settings`, IP
+  hashed at the edge) into the service-role-only `newsletter_feedback_add()`;
+  the public reads counts through `newsletter_feedback_summary()`, which never
+  returns a reply.
+- **Ask focus:** the issue's chat sends `focus: {type: "now", id, refs}`;
+  `functions/api/ask.js` reads those chunks by key and puts them ahead of search
+  (`withFocus` in `src/lib/askRetrieval.js`). Any page can pin itself this way.
+
 ## Ask Sources, Stats Snapshot and Feedback
 
 - **Sources are files.** Every `scripts/ask-sources/*.mjs` is a source (`type`,
@@ -372,6 +408,9 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Major-version summaries | `supabase/migrations/0030_changelog_majors.sql`, `scripts/summarise-majors.mjs` |
 | Commit history + graph page | `supabase/migrations/0029_repo_history.sql`, `scripts/sync-repo-history.mjs`, `src/pages/ChangelogGraph.js` |
 | Graph maths (lanes, weeks, streaks) | `src/lib/repoGraph.js` |
+| Newsletter model / script / skill | `src/lib/newsletterIssue.js`, `scripts/newsletter-draft.mjs`, `.claude/skills/newsletter/SKILL.md` |
+| Newsletter pages + layouts | `src/pages/Newsletter.js`, `src/pages/NewsletterIssue.js`, `src/components/Newsletter/` |
+| Newsletter schema + feedback | `supabase/migrations/0032_newsletter.sql`, `functions/api/newsletter-feedback.js` |
 | Page layout + Helmet | `src/layouts/Main.js` |
 | App routes | `src/App.js` |
 | Nav menu | `src/data/routes.js` |
@@ -544,11 +583,13 @@ convert input.jpg -auto-orient -strip -quality 80 -resize "1200x>" output.jpg
 
 ---
 
-### Now Page
+### Now Page and Newsletter Issues
 
 **Tables:** `now_months` + `now_meta` (Supabase), read via `useNowMonths` /
-`useNowMeta`. Edit in the admin dashboard → **Now · Months** (and the Now-meta
-editor, `src/pages/admin/NowMetaEditor.js`).
+`useNowMeta`. Edit in the admin dashboard → **Newsletter issues** (and the
+Now-meta editor, `src/pages/admin/NowMetaEditor.js`). `/now` shows the current
+month; each other month is a newsletter issue (see **Newsletter** above) —
+prefer `npm run newsletter:draft` over filling a month by hand.
 
 Each `now_months` row has `month`, `year`, `isCurrent` (boolean), and a `sections`
 JSON blob keyed by any of `blogs`, `running`, `books`, `events`, `projects`,
@@ -557,8 +598,9 @@ JSON blob keyed by any of `blogs`, `running`, `books`, `events`, `projects`,
 When pushing a new month's update:
 
 1. Add a `now_months` row with `isCurrent: true` and the month's `sections`.
-2. Set `isCurrent: false` on the previous month's row.
-3. Older rows stay unchanged — the page sorts/archives them automatically.
+2. Set `isCurrent: false` on the previous month's row (saving a current month
+   in `/admin` does this for you).
+3. Write and publish the previous month's issue (`/newsletter <YYYY-MM>`).
 
 **Questions to ask:** "What month and year? (e.g., May, 2026)" and "What are the
 bullet-point activities for this month?"

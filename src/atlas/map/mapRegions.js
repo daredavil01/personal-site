@@ -114,6 +114,7 @@ const PATH_PREFIXES = [
   ["/micro-blog", "writer"],
   ["/about", "person"],
   ["/now", "person"],
+  ["/newsletter", "person"],
   ["/contact", "person"],
   ["/instagram", "person"],
   ["/stats", "person"],

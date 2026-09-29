@@ -17,7 +17,10 @@ import {
   buildPresentationMeta,
   buildShareMeta,
   buildTagMeta,
+  buildNewsletterMeta,
 } from "../src/data/pageMeta";
+// Pure and import-free: the same stats line the issue page and its card show.
+import { issueStats, slugLabel } from "../src/lib/newsletterIssue";
 // Share-card URLs. A fixed route's og:image is its committed card (carried on
 // the meta entry); a detail route's is the ROW'S OWN photo when it has one,
 // which is what these helpers resolve out of a PostgREST row.
@@ -103,6 +106,7 @@ export async function onRequest(context) {
   // Devanagari survives (see tagPath in src/lib/api/tags.js). Until now this
   // route had no per-item meta at all and every tag page unfurled as /tags.
   const tagMatch = pathname.match(/^\/tags\/([^/]+)$/);
+  const newsletterMatch = pathname.match(/^\/newsletter\/(\d{4}-\d{2})$/);
 
   const supabaseUrl = env.VITE_SUPABASE_URL;
   const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -267,6 +271,26 @@ export async function onRequest(context) {
       } catch (_) {
         // Ignored
       }
+    } else if (newsletterMatch) {
+      try {
+        // RLS already hides drafts from the anon key; the filter says so too.
+        const issueRes = await fetch(
+          `${supabaseUrl}/rest/v1/now_months?slug=eq.${newsletterMatch[1]}&published_at=not.is.null&select=slug,headline,sections,card_url&limit=1`,
+          { headers },
+        );
+        const issues = await issueRes.json();
+        const issue = issues?.[0];
+        if (issue) {
+          dynamicMeta = buildNewsletterMeta({
+            label: slugLabel(issue.slug),
+            headline: issue.headline,
+            stats: issueStats(issue.sections || {}).map((st) => `${st.value} ${st.label}`).join(", "),
+            image: issue.card_url,
+          });
+        }
+      } catch (_) {
+        // Ignored
+      }
     } else if (tagMatch) {
       try {
         // Names are stored lowercased (CLAUDE.md), and url.pathname arrives
@@ -303,6 +327,7 @@ export async function onRequest(context) {
       [/^\/presentations\/\d+$/, "/presentations"],
       [/^\/100-days-to-offload\/\d+$/, "/100-days-to-offload"],
       [/^\/tags\/[^/]+$/, "/tags"],
+      [/^\/newsletter\/\d{4}-\d{2}$/, "/newsletter"],
     ];
     const parentPath = staticChildParents.find(([rx]) => rx.test(pathname))?.[1];
     if (parentPath) {

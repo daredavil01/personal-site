@@ -191,6 +191,30 @@ describe("a detail route with no photo", () => {
   });
 });
 
+describe("a newsletter issue", () => {
+  it("unfurls as its own pre-rendered card, sized, with the month's numbers", async () => {
+    const card = "https://db.co/storage/v1/object/public/media/og/newsletter-2026-09.png";
+    const { injected, title } = await run("/newsletter/2026-09", {
+      "now_months?slug=eq.2026-09": [{
+        slug: "2026-09",
+        headline: "Rain, ridges and a PB",
+        sections: { running: [{ event: "Pune Half", distance: "21" }] },
+        card_url: card,
+      }],
+    });
+    expect(tag(injected, "og:image")).toBe(card);
+    // Our own card, so its 1200x630 is known and declared.
+    expect(tag(injected, "og:image:width")).toBe("1200");
+    expect(tag(injected, "og:description")).toContain("21 km raced");
+    expect(title).toBe("Rain, ridges and a PB — September 2026 | Sanket Tambare");
+  });
+
+  it("falls back to the /newsletter card for an unknown or draft month", async () => {
+    const { injected } = await run("/newsletter/2031-01");
+    expect(tag(injected, "og:image")).toBe("https://sankettambare.in/og/newsletter.png");
+  });
+});
+
 describe("when the row cannot be read", () => {
   it("degrades to the section's card and the section's copy", async () => {
     const { injected } = await run("/books/999");

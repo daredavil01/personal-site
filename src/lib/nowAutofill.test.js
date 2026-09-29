@@ -1,4 +1,6 @@
-import { bareDistance, collectMonthRecords, isDuplicate } from "./nowAutofill";
+import {
+  bareDistance, collectMonthRecords, dedupeSections, isDuplicate, mergeMonthRecords,
+} from "./nowAutofill";
 import { parseChangelog, changelogHighlights, highlightLine } from "./changelogEntries";
 import { serializeSections } from "../pages/admin/now/sectionSpecs";
 import { todayIso, toIsoDate } from "./monthDigest";
@@ -112,7 +114,88 @@ describe("collectMonthRecords", () => {
   });
 });
 
+describe("mergeMonthRecords", () => {
+  const data = {
+    books: [{ id: 3, title: "Kosla", author: "Nemade", created_at: "2026-05-02T10:00:00Z" }],
+    treks: [{ id: 4, fort_name: "Rajgad", date: "09-05-2026" }],
+  };
+
+  it("adds new rows with their archive ref and backfills refs on typed rows", () => {
+    const sections = { books: [{ title: "kosla" }], misc: ["kept"] };
+    const next = mergeMonthRecords(data, "2026-05", sections);
+    expect(next.books).toEqual([{ title: "kosla", ref: { type: "book", id: 3 } }]);
+    expect(next.events[0]).toMatchObject({ name: "Rajgad", ref: { type: "trek", id: 4 } });
+    expect(next.misc).toEqual(["kept"]);
+    // The input is not mutated.
+    expect(sections.books[0].ref).toBeUndefined();
+  });
+
+  it("is idempotent", () => {
+    const once = mergeMonthRecords(data, "2026-05", {});
+    expect(mergeMonthRecords(data, "2026-05", once)).toEqual(once);
+  });
+});
+
+describe("bulk-imported books", () => {
+  it("leaves out books that only carry the date of a bulk import", () => {
+    const imported = Array.from({ length: 5 }, (_, i) => ({
+      id: 100 + i, title: `Imported ${i}`, created_at: "2026-06-13T10:00:00Z",
+    }));
+    const books = [
+      ...imported,
+      { id: 1, title: "Read in June", created_at: "2026-06-20T10:00:00Z" },
+      // A real finish date wins even when the row came in with the import.
+      {
+        id: 2, title: "Dated", created_at: "2026-06-13T10:00:00Z", date_finished: "2026-06-02", date_precision: "day",
+      },
+    ];
+    const group = collectMonthRecords({ books }, "2026-06", {}).find((g) => g.key === "books");
+    expect(group.rows.map((r) => r.row.title).sort()).toEqual(["Dated", "Read in June"]);
+  });
+});
+
 describe("isDuplicate", () => {
+  it("treats a race typed by hand and its archive row as one race", () => {
+    const typed = { event: "Tata Ultra Marathon", date: "2026-02-08", link: "https://cert/1" };
+    const archive = {
+      event: "Tata Ultra Marathon 2026", date: "2026-02-08", link: "https://strava/9", ref: { type: "sport", id: 4 },
+    };
+    expect(isDuplicate([typed], archive, "running")).toBe(true);
+    expect(isDuplicate([typed], { event: "IPA Neerathon", date: "2026-02-22", link: "https://x" }, "running")).toBe(false);
+    // Same title, different links: still the same post.
+    expect(isDuplicate([{ title: "The Digital Paradox", url: "https://a" }], { title: "The Digital Paradox", url: "https://b" }, "blogs")).toBe(true);
+  });
+
+  it("matches a race by its name and distance when /now dated it the 1st", () => {
+    const typed = { event: "Nanded City LSOM 21 Kms Run", date: "2026-03-01", distance: "21" };
+    const archive = {
+      event: "Nanded City LSOM 2026", date: "2026-03-22", distance: "21", ref: { type: "sport", id: 20 },
+    };
+    expect(isDuplicate([typed], archive, "running")).toBe(true);
+    expect(isDuplicate([typed], { ...archive, distance: "10" }, "running")).toBe(false);
+    expect(isDuplicate([{ event: "Tata Mumbai Marathon", distance: "42" }], { event: "Tata Ultra Marathon", distance: "42" }, "running")).toBe(false);
+    // The typed row keeps its words and takes the archive's ref and real date.
+    expect(dedupeSections({ running: [typed, archive] }).running).toEqual([
+      { event: "Nanded City LSOM 21 Kms Run", date: "2026-03-22", distance: "21", ref: { type: "sport", id: 20 } },
+    ]);
+  });
+
+  it("repairs a month that was merged with duplicates, keeping the typed row", () => {
+    const repaired = dedupeSections({
+      running: [
+        { event: "Tata Ultra Marathon", date: "2026-02-08", distance: "50" },
+        { event: "IPA Neerathon", date: "2026-02-22", distance: "10" },
+        { event: "Tata Ultra Marathon 2026", date: "2026-02-08", distance: "50", ref: { type: "sport", id: 4 } },
+      ],
+      misc: ["kept"],
+    });
+    expect(repaired.running).toEqual([
+      { event: "Tata Ultra Marathon", date: "2026-02-08", distance: "50", ref: { type: "sport", id: 4 } },
+      { event: "IPA Neerathon", date: "2026-02-22", distance: "10" },
+    ]);
+    expect(repaired.misc).toEqual(["kept"]);
+  });
+
   it("matches on id first, then url, then title", () => {
     expect(isDuplicate([{ id: 1, text: "A" }], { id: 1, text: "B" }, "micro")).toBe(true);
     expect(isDuplicate([{ id: 1, text: "A" }], { id: 2, text: "A" }, "micro")).toBe(false);
