@@ -6,26 +6,26 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 478 | Mind & Life |
-| `self-reflection` | 454 | Mind & Life |
+| `life` | 479 | Mind & Life |
+| `self-reflection` | 455 | Mind & Life |
 | `marathi` | 267 | Books & Reading |
-| `social media` | 144 | Digital Life |
+| `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 134 | Personal |
 | `personaldevelopment` | 130 | Mind & Life |
 | `calmness` | 125 | Mind & Life |
-| `philosophy` | 120 | Society & Ideas |
+| `philosophy` | 121 | Society & Ideas |
 | `travel` | 118 | Travel & Outdoors |
-| `digital wellbeing` | 113 | Digital Life |
+| `digital wellbeing` | 114 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 73 | Digital Life |
+| `digital detox` | 74 | Digital Life |
 | `politics` | 72 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 65 | Society & Ideas |
-| `technology` | 63 | Technology & Data |
-| `choices` | 53 | Mind & Life |
+| `technology` | 64 | Technology & Data |
+| `choices` | 54 | Mind & Life |
+| `ai` | 49 | Technology & Data |
 | `maharashtra` | 49 | Travel & Outdoors |
-| `ai` | 48 | Technology & Data |
 | `मन` | 46 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
 | `खंडेराव` | 41 | Writing & Blogging |
@@ -57,8 +57,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `public policy` | 11 | Society & Ideas |
 | `adventure` | 9 | Travel & Outdoors |
 | `digital technology` | 9 | Digital Life |
+| `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
-| `ngo` | 8 | Society & Ideas |
 | `bioscope` | 7 | Mind & Life |
 | `data` | 7 | Technology & Data |
 | `non-fiction` | 7 | Books & Reading |

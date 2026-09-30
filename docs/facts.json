@@ -32,7 +32,7 @@
     "sports": 26,
     "projects": 19,
     "instagram": 11,
-    "microblog": 1666
+    "microblog": 1667
   },
   "latest": {
     "now": {
@@ -51,9 +51,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-09-29",
-      "t": "#1461 Dear Self...!",
-      "u": "/micro-blog/1666"
+      "d": "2026-09-30",
+      "t": "#1462 Looking beyond the obvious...!🌱💭❣️",
+      "u": "/micro-blog/1667"
     }
   },
   "resume": {
@@ -713,6 +713,11 @@
     ],
     "presentation": [
       {
+        "d": "2026-09-30",
+        "t": "Drafts, Not Decisions: AI in the Yung Foundation admin",
+        "u": "/presentations/15"
+      },
+      {
         "d": "2026-09-29",
         "t": "A Month, in One Letter",
         "u": "/presentations/14"
@@ -810,11 +815,11 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 478
+      "total": 479
     },
     {
       "name": "self-reflection",
-      "total": 454
+      "total": 455
     },
     {
       "name": "marathi",
@@ -822,7 +827,7 @@
     },
     {
       "name": "social media",
-      "total": 144
+      "total": 145
     },
     {
       "name": "love",
@@ -842,7 +847,7 @@
     },
     {
       "name": "philosophy",
-      "total": 120
+      "total": 121
     },
     {
       "name": "travel",
@@ -850,7 +855,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 113
+      "total": 114
     },
     {
       "name": "latepost",
@@ -858,7 +863,7 @@
     },
     {
       "name": "digital detox",
-      "total": 73
+      "total": 74
     },
     {
       "name": "politics",
@@ -874,19 +879,19 @@
     },
     {
       "name": "technology",
-      "total": 63
+      "total": 64
     },
     {
       "name": "choices",
-      "total": 53
+      "total": 54
+    },
+    {
+      "name": "ai",
+      "total": 49
     },
     {
       "name": "maharashtra",
       "total": 49
-    },
-    {
-      "name": "ai",
-      "total": 48
     },
     {
       "name": "मन",
@@ -911,7 +916,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 476,
+      "text": 477,
       "photo": 953,
       "quote": 237
     },
@@ -924,10 +929,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 97
+      "2026": 98
     },
     "date_range": {
-      "max": "2026-09-29",
+      "max": "2026-09-30",
       "min": "2018-03-19"
     }
   },
@@ -935,7 +940,7 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-29T13:30:53.584575+00:00",
+  "generated_at": "2026-09-30T07:51:38.98241+00:00",
   "index_by_type": {
     "now": 13,
     "tag": 98,
@@ -949,10 +954,10 @@
     "resume": 21,
     "project": 18,
     "writing": 43,
-    "changelog": 95,
+    "changelog": 96,
     "instagram": 11,
-    "microblog": 1666,
-    "presentation": 14
+    "microblog": 1667,
+    "presentation": 15
   },
   "tags_by_category": {
     "Personal": 2,

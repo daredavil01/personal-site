@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1666** · indexed as `microblog`
+Rows: **1667** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **14** · indexed as `presentation`
+Rows: **15** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3709**
+Rows: **3719**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3050**
+Rows: **3069**
 
 | column | type | null | default |
 |---|---|---|---|
