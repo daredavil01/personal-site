@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 99,
-    "blogs": 66,
+    "blogs": 67,
     "books": 51,
     "treks": 20,
     "sports": 26,
@@ -41,9 +41,9 @@
       "u": "/newsletter/2026-09"
     },
     "blog": {
-      "d": "2026-09-26",
-      "t": "Being at the right place, at right time!",
-      "u": "/100-days-to-offload/66"
+      "d": "2026-09-30",
+      "t": "The Flow in the Modern Times",
+      "u": "/100-days-to-offload/67"
     },
     "writing": {
       "d": "2025-12-31",
@@ -819,7 +819,7 @@
     },
     {
       "name": "self-reflection",
-      "total": 455
+      "total": 456
     },
     {
       "name": "marathi",
@@ -839,7 +839,7 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 130
+      "total": 131
     },
     {
       "name": "calmness",
@@ -855,7 +855,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 114
+      "total": 115
     },
     {
       "name": "latepost",
@@ -879,7 +879,7 @@
     },
     {
       "name": "technology",
-      "total": 64
+      "total": 65
     },
     {
       "name": "choices",
@@ -887,7 +887,7 @@
     },
     {
       "name": "ai",
-      "total": 49
+      "total": 50
     },
     {
       "name": "maharashtra",
@@ -940,11 +940,11 @@
     "year": 2026,
     "month": "September"
   },
-  "generated_at": "2026-09-30T07:51:38.98241+00:00",
+  "generated_at": "2026-09-30T19:12:14.933511+00:00",
   "index_by_type": {
     "now": 13,
     "tag": 98,
-    "blog": 66,
+    "blog": 67,
     "book": 51,
     "page": 1,
     "site": 23,
