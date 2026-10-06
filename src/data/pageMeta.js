@@ -32,7 +32,8 @@ export const PAGE_META = {
     description:
       "Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator.",
     image: `${SITE_URL}/og/home.png`,
-    imageAlt: "Sanket Tambare — engineer, marathoner, fort-trekker and writer, with his reading, racing and trekking counts",
+    imageAlt:
+      "Sanket Tambare — engineer, marathoner, fort-trekker and writer, with his reading, racing and trekking counts",
     ogSlug: "home",
     type: "profile",
   },
@@ -185,7 +186,8 @@ export const PAGE_META = {
     description:
       "Professional background of Sanket Tambare — full-stack engineer with experience in cloud infrastructure, AI integration, and enterprise software. Includes work history, education, and certifications.",
     image: `${SITE_URL}/og/resume.png`,
-    imageAlt: "Sanket Tambare's resume, with organisation, certificate and degree counts",
+    imageAlt:
+      "Sanket Tambare's resume, with organisation, certificate and degree counts",
     ogSlug: "resume",
     type: "profile",
   },
@@ -255,7 +257,8 @@ export function composeTitle(title) {
 //     tags and shares have no photo at all, so they always take the card
 //   - `type` is the og:type. Detail pages are "article", which is what they are;
 //     the old code hardcoded "website" for every route on the site.
-const truncate = (str, max) => (str.length > max ? `${str.slice(0, max - 3)}…` : str);
+const truncate = (str, max) =>
+  str.length > max ? `${str.slice(0, max - 3)}…` : str;
 
 const sectionImage = (slug) => `${SITE_URL}/og/${slug}.png`;
 
@@ -272,7 +275,13 @@ export function buildMicroblogMeta({ title, text, date, image } = {}) {
   };
 }
 
-export function buildTrekMeta({ fortName, enduranceLevel, trekTime, date, image } = {}) {
+export function buildTrekMeta({
+  fortName,
+  enduranceLevel,
+  trekTime,
+  date,
+  image,
+} = {}) {
   return {
     title: `${fortName} Trek`,
     description: `A ${(enduranceLevel || "medium").toLowerCase()} endurance trek to ${fortName} fort on ${date}. Trek duration: ${trekTime}.`,
@@ -282,12 +291,20 @@ export function buildTrekMeta({ fortName, enduranceLevel, trekTime, date, image 
   };
 }
 
-export function buildSportMeta({ title, distance, place, date, time, description, image } = {}) {
+export function buildSportMeta({
+  title,
+  distance,
+  place,
+  date,
+  time,
+  description,
+  image,
+} = {}) {
   return {
     title,
     description:
-      description
-      || `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
+      description ||
+      `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
     image: image || sectionImage("sports"),
     imageAlt: `Race card for ${title}`,
     type: "article",
@@ -298,8 +315,8 @@ export function buildBookMeta({ title, author, description, image } = {}) {
   return {
     title: `${title} by ${author}`,
     description:
-      description
-      || `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
+      description ||
+      `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
     image: image || sectionImage("books"),
     imageAlt: `Book card for ${title}`,
     type: "article",
@@ -310,8 +327,8 @@ export function buildBlogMeta({ title, description, image } = {}) {
   return {
     title,
     description:
-      description
-      || `A blog post from the 100 Days to Offload challenge: ${title}.`,
+      description ||
+      `A blog post from the 100 Days to Offload challenge: ${title}.`,
     image: image || sectionImage("100-days-to-offload"),
     imageAlt: `Blog post card for ${title}`,
     type: "article",
@@ -371,13 +388,19 @@ export function buildNewsletterMeta({ label, headline, stats, image } = {}) {
 // One tag. `displayName` keeps the author's casing and script — tag names are
 // stored lowercased for lookups, and `/tags/:name` is deliberately NOT
 // slugified so Marathi names survive in the URL.
-export function buildTagMeta({ name, displayName, description, category, image } = {}) {
+export function buildTagMeta({
+  name,
+  displayName,
+  description,
+  category,
+  image,
+} = {}) {
   const label = displayName || name || "";
   return {
     title: `#${label}`,
     description:
-      description
-      || `Everything in Sanket Tambare's archive tagged ${label}${category ? ` — a ${category} tag` : ""}.`,
+      description ||
+      `Everything in Sanket Tambare's archive tagged ${label}${category ? ` — a ${category} tag` : ""}.`,
     image: image || sectionImage("tags"),
     imageAlt: `Tag card for ${label}`,
     type: "website",

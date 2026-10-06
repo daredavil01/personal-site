@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **67** · indexed as `blog`
+Rows: **68** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1667** · indexed as `microblog`
+Rows: **1668** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -215,7 +215,7 @@ Rows: **11** · indexed as `instagram`
 
 One row per month of the /now page. `sections` is a free-form jsonb blob.
 
-Rows: **12** · indexed as `now`
+Rows: **13** · indexed as `now`
 
 Client-side renames: `is_current` → `isCurrent`
 
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3724**
+Rows: **3732**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3094**
+Rows: **3107**
 
 | column | type | null | default |
 |---|---|---|---|

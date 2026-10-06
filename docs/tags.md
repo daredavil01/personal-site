@@ -7,15 +7,15 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 479 | Mind & Life |
-| `self-reflection` | 456 | Mind & Life |
-| `marathi` | 267 | Books & Reading |
+| `self-reflection` | 457 | Mind & Life |
+| `marathi` | 268 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 134 | Personal |
 | `personaldevelopment` | 131 | Mind & Life |
 | `calmness` | 125 | Mind & Life |
 | `philosophy` | 121 | Society & Ideas |
-| `travel` | 118 | Travel & Outdoors |
+| `travel` | 119 | Travel & Outdoors |
 | `digital wellbeing` | 115 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
 | `digital detox` | 74 | Digital Life |
@@ -31,11 +31,11 @@ Names are lowercase and URI-encoded rather than slugified.
 | `खंडेराव` | 41 | Writing & Blogging |
 | `desperate me` | 40 | People & Feelings |
 | `forts` | 38 | Travel & Outdoors |
+| `nirman` | 35 | Society & Ideas |
 | `running` | 35 | Running & Fitness |
-| `nirman` | 34 | Society & Ideas |
 | `daredavil01` | 30 | Personal |
+| `भटकंती` | 30 | Travel & Outdoors |
 | `konkan` | 29 | Travel & Outdoors |
-| `भटकंती` | 29 | Travel & Outdoors |
 | `100_days_to_offload` | 28 | Writing & Blogging |
 | `self-help` | 27 | Books & Reading |
 | `digital manipulation` | 26 | Digital Life |
@@ -55,7 +55,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `biography` | 13 | Books & Reading |
 | `auto-biography` | 12 | Books & Reading |
 | `public policy` | 11 | Society & Ideas |
-| `adventure` | 9 | Travel & Outdoors |
+| `adventure` | 10 | Travel & Outdoors |
 | `digital technology` | 9 | Digital Life |
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
@@ -64,9 +64,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `non-fiction` | 7 | Books & Reading |
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
+| `newsletter` | 6 | Writing & Blogging |
 | `the social dilemma` | 6 | Digital Life |
 | `digitalnomad` | 5 | Digital Life |
-| `newsletter` | 5 | Writing & Blogging |
 | `sports` | 5 | Running & Fitness |
 | `the_trip` | 5 | Travel & Outdoors |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
@@ -84,6 +84,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `knowledgeeconomy` | 2 | Society & Ideas |
 | `note-taking` | 2 | Writing & Blogging |
 | `satara` | 2 | Travel & Outdoors |
+| `satpuda` | 2 | Travel & Outdoors |
 | `search` | 2 | Society & Ideas |
 | `sexual-drama` | 2 | Books & Reading |
 | `wardha` | 2 | Travel & Outdoors |
@@ -98,7 +99,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `rafting_amidst_the_waves🏖️` | 1 | Travel & Outdoors |
 | `republic day` | 1 | Society & Ideas |
 | `rock_garden` | 1 | Travel & Outdoors |
-| `satpuda` | 1 | Travel & Outdoors |
 | `sea_at_night🌃🌊` | 1 | Travel & Outdoors |
 | `semiconductor` | 1 | Technology & Data |
 | `tata` | 1 | Society & Ideas |

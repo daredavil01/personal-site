@@ -26,24 +26,24 @@
   },
   "counts": {
     "tags": 99,
-    "blogs": 67,
+    "blogs": 68,
     "books": 51,
     "treks": 20,
     "sports": 26,
     "projects": 19,
     "instagram": 11,
-    "microblog": 1667
+    "microblog": 1668
   },
   "latest": {
     "now": {
-      "d": "2026-09-01",
-      "t": "Newsletter — September 2026",
-      "u": "/newsletter/2026-09"
+      "d": "2026-10-01",
+      "t": "Now — October 2026",
+      "u": "/now"
     },
     "blog": {
-      "d": "2026-09-30",
-      "t": "The Flow in the Modern Times",
-      "u": "/100-days-to-offload/67"
+      "d": "2026-10-06",
+      "t": "सातपुड्यात भटकताना, मला सापडलेलो मी…",
+      "u": "/100-days-to-offload/68"
     },
     "writing": {
       "d": "2025-12-31",
@@ -51,9 +51,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-09-30",
-      "t": "#1462 Looking beyond the obvious...!🌱💭❣️",
-      "u": "/micro-blog/1667"
+      "d": "2026-10-01",
+      "t": "#1463 September Update",
+      "u": "/micro-blog/1668"
     }
   },
   "resume": {
@@ -819,11 +819,11 @@
     },
     {
       "name": "self-reflection",
-      "total": 456
+      "total": 457
     },
     {
       "name": "marathi",
-      "total": 267
+      "total": 268
     },
     {
       "name": "social media",
@@ -851,7 +851,7 @@
     },
     {
       "name": "travel",
-      "total": 118
+      "total": 119
     },
     {
       "name": "digital wellbeing",
@@ -916,7 +916,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 477,
+      "text": 478,
       "photo": 953,
       "quote": 237
     },
@@ -929,22 +929,22 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 98
+      "2026": 99
     },
     "date_range": {
-      "max": "2026-09-30",
+      "max": "2026-10-01",
       "min": "2018-03-19"
     }
   },
   "now_current": {
     "year": 2026,
-    "month": "September"
+    "month": "October"
   },
-  "generated_at": "2026-09-30T19:12:14.933511+00:00",
+  "generated_at": "2026-10-06T17:46:59.537556+00:00",
   "index_by_type": {
-    "now": 13,
+    "now": 14,
     "tag": 98,
-    "blog": 67,
+    "blog": 68,
     "book": 51,
     "page": 1,
     "site": 23,
@@ -956,7 +956,7 @@
     "writing": 43,
     "changelog": 96,
     "instagram": 11,
-    "microblog": 1667,
+    "microblog": 1668,
     "presentation": 15
   },
   "tags_by_category": {

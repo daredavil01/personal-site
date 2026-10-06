@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-30T19:11:54.870Z",
+  "generatedAt": "2026-10-06T17:46:05.833Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 110,
-    "words": 107745,
-    "averageWords": 980,
-    "trackedPosts": 67,
+    "posts": 111,
+    "words": 108886,
+    "averageWords": 981,
+    "trackedPosts": 68,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-01",
+    "latestPost": "2026-10-06",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,40 +26,40 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 67,
-      "words": 74804
+      "posts": 68,
+      "words": 75948
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-01",
+    "asOf": "2026-10-06",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 1,
-      "words": 1384,
-      "daysElapsed": 1,
-      "wordsPerDay": 1384,
+      "posts": 2,
+      "words": 2530,
+      "daysElapsed": 6,
+      "wordsPerDay": 422,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -89.1
+      "changeVsPreviousMonth": -80.1
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 67,
-      "words": 74804,
-      "daysElapsed": 274,
-      "wordsPerDay": 273,
+      "posts": 68,
+      "words": 75948,
+      "daysElapsed": 279,
+      "wordsPerDay": 272,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
-        "words": 7827,
-        "throughDate": "2025-10-01"
+        "words": 7826,
+        "throughDate": "2025-10-06"
       },
-      "changeVsPriorYear": 855.7
+      "changeVsPriorYear": 870.5
     }
   },
   "byPlatform": [
@@ -71,8 +71,8 @@
     },
     {
       "platform": "Wordpress",
-      "posts": 28,
-      "words": 24685,
+      "posts": 29,
+      "words": 25826,
       "method": "derived_html"
     }
   ],
@@ -90,7 +90,7 @@
     {
       "year": "2022",
       "posts": 5,
-      "words": 2302
+      "words": 2300
     },
     {
       "year": "2023",
@@ -105,12 +105,12 @@
     {
       "year": "2025",
       "posts": 12,
-      "words": 15490
+      "words": 15489
     },
     {
       "year": "2026",
-      "posts": 67,
-      "words": 74804
+      "posts": 68,
+      "words": 75948
     }
   ],
   "byMonth": [
@@ -160,7 +160,7 @@
       "month": "2022-12",
       "label": "December 2022",
       "posts": 1,
-      "words": 587
+      "words": 585
     },
     {
       "month": "2023-02",
@@ -238,7 +238,7 @@
       "month": "2025-08",
       "label": "August 2025",
       "posts": 2,
-      "words": 3056
+      "words": 3055
     },
     {
       "month": "2025-09",
@@ -304,7 +304,7 @@
       "month": "2026-07",
       "label": "July 2026",
       "posts": 8,
-      "words": 8170
+      "words": 8168
     },
     {
       "month": "2026-08",
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 1,
-      "words": 1384
+      "posts": 2,
+      "words": 2530
     }
   ],
   "cumulative": [
@@ -371,170 +371,170 @@
     {
       "month": "2022-12",
       "label": "December 2022",
-      "words": 10496,
+      "words": 10494,
       "posts": 21
     },
     {
       "month": "2023-02",
       "label": "February 2023",
-      "words": 11840,
+      "words": 11838,
       "posts": 23
     },
     {
       "month": "2023-05",
       "label": "May 2023",
-      "words": 11843,
+      "words": 11841,
       "posts": 24
     },
     {
       "month": "2023-07",
       "label": "July 2023",
-      "words": 12869,
+      "words": 12867,
       "posts": 25
     },
     {
       "month": "2023-08",
       "label": "August 2023",
-      "words": 13506,
+      "words": 13504,
       "posts": 26
     },
     {
       "month": "2023-12",
       "label": "December 2023",
-      "words": 14364,
+      "words": 14362,
       "posts": 27
     },
     {
       "month": "2024-04",
       "label": "April 2024",
-      "words": 14892,
+      "words": 14890,
       "posts": 28
     },
     {
       "month": "2024-06",
       "label": "June 2024",
-      "words": 15802,
+      "words": 15800,
       "posts": 29
     },
     {
       "month": "2024-07",
       "label": "July 2024",
-      "words": 16645,
+      "words": 16643,
       "posts": 30
     },
     {
       "month": "2024-10",
       "label": "October 2024",
-      "words": 17451,
+      "words": 17449,
       "posts": 31
     },
     {
       "month": "2025-01",
       "label": "January 2025",
-      "words": 18037,
+      "words": 18035,
       "posts": 32
     },
     {
       "month": "2025-03",
       "label": "March 2025",
-      "words": 19003,
+      "words": 19001,
       "posts": 33
     },
     {
       "month": "2025-07",
       "label": "July 2025",
-      "words": 20639,
+      "words": 20637,
       "posts": 35
     },
     {
       "month": "2025-08",
       "label": "August 2025",
-      "words": 23695,
+      "words": 23692,
       "posts": 37
     },
     {
       "month": "2025-09",
       "label": "September 2025",
-      "words": 25278,
+      "words": 25275,
       "posts": 38
     },
     {
       "month": "2025-10",
       "label": "October 2025",
-      "words": 29357,
+      "words": 29354,
       "posts": 40
     },
     {
       "month": "2025-11",
       "label": "November 2025",
-      "words": 30527,
+      "words": 30524,
       "posts": 41
     },
     {
       "month": "2025-12",
       "label": "December 2025",
-      "words": 32941,
+      "words": 32938,
       "posts": 43
     },
     {
       "month": "2026-01",
       "label": "January 2026",
-      "words": 43834,
+      "words": 43831,
       "posts": 53
     },
     {
       "month": "2026-02",
       "label": "February 2026",
-      "words": 48466,
+      "words": 48463,
       "posts": 57
     },
     {
       "month": "2026-03",
       "label": "March 2026",
-      "words": 53939,
+      "words": 53936,
       "posts": 61
     },
     {
       "month": "2026-04",
       "label": "April 2026",
-      "words": 60492,
+      "words": 60489,
       "posts": 67
     },
     {
       "month": "2026-05",
       "label": "May 2026",
-      "words": 68036,
+      "words": 68033,
       "posts": 73
     },
     {
       "month": "2026-06",
       "label": "June 2026",
-      "words": 79284,
+      "words": 79281,
       "posts": 85
     },
     {
       "month": "2026-07",
       "label": "July 2026",
-      "words": 87454,
+      "words": 87449,
       "posts": 93
     },
     {
       "month": "2026-08",
       "label": "August 2026",
-      "words": 93647,
+      "words": 93642,
       "posts": 99
     },
     {
       "month": "2026-09",
       "label": "September 2026",
-      "words": 106361,
+      "words": 106356,
       "posts": 109
     },
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 107745,
-      "posts": 110
+      "words": 108886,
+      "posts": 111
     }
   ],
   "byDayOfWeek": [
@@ -546,17 +546,17 @@
     {
       "day": "Monday",
       "posts": 17,
-      "words": 19175
+      "words": 19174
     },
     {
       "day": "Tuesday",
-      "posts": 24,
-      "words": 25767
+      "posts": 25,
+      "words": 26913
     },
     {
       "day": "Wednesday",
       "posts": 16,
-      "words": 15364
+      "words": 15362
     },
     {
       "day": "Thursday",
@@ -571,7 +571,7 @@
     {
       "day": "Saturday",
       "posts": 12,
-      "words": 12616
+      "words": 12614
     }
   ],
   "bySection": [
@@ -582,8 +582,8 @@
     },
     {
       "section": "Uncategorised",
-      "posts": 52,
-      "words": 42580
+      "posts": 53,
+      "words": 43721
     },
     {
       "section": "Chronicles of Wandering Mind",
@@ -609,8 +609,8 @@
     },
     {
       "tag": "Travel Blogs",
-      "posts": 15,
-      "words": 14414
+      "posts": 16,
+      "words": 15557
     },
     {
       "tag": "ai",
@@ -668,6 +668,11 @@
       "words": 4829
     },
     {
+      "tag": "Satpuda",
+      "posts": 3,
+      "words": 4175
+    },
+    {
       "tag": "privacy",
       "posts": 4,
       "words": 4135
@@ -686,11 +691,6 @@
       "tag": "Data",
       "posts": 3,
       "words": 3130
-    },
-    {
-      "tag": "Satpuda",
-      "posts": 2,
-      "words": 3029
     },
     {
       "tag": "Data Privacy",
@@ -755,7 +755,7 @@
     {
       "tag": "Book Review",
       "posts": 3,
-      "words": 1512
+      "words": 1510
     },
     {
       "tag": "ethics-morals",
@@ -775,12 +775,12 @@
     {
       "tag": "Panhala",
       "posts": 1,
-      "words": 1297
+      "words": 1296
     },
     {
       "tag": "Pawankhind",
       "posts": 1,
-      "words": 1297
+      "words": 1296
     },
     {
       "tag": "tarkarli",
@@ -968,34 +968,34 @@
       "words": 607
     },
     {
+      "tag": "Padmadurga",
+      "posts": 1,
+      "words": 586
+    },
+    {
       "tag": "2022",
       "posts": 1,
-      "words": 587
+      "words": 585
     },
     {
       "tag": "2022_unwrapped",
       "posts": 1,
-      "words": 587
+      "words": 585
     },
     {
       "tag": "dare_writes",
       "posts": 1,
-      "words": 587
+      "words": 585
     },
     {
       "tag": "Whats_next?",
       "posts": 1,
-      "words": 587
+      "words": 585
     },
     {
       "tag": "What_happened",
       "posts": 1,
-      "words": 587
-    },
-    {
-      "tag": "Padmadurga",
-      "posts": 1,
-      "words": 586
+      "words": 585
     },
     {
       "tag": "1984",
@@ -1030,7 +1030,7 @@
     {
       "tag": "Bhatkanti",
       "posts": 1,
-      "words": 482
+      "words": 480
     },
     {
       "tag": "John Berger",
@@ -1088,7 +1088,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 41
+      "posts": 42
     },
     {
       "label": "1,500–1,999",
@@ -1207,6 +1207,27 @@
     }
   ],
   "posts": [
+    {
+      "title": "सातपुड्यात भटकताना, मला सापडलेलो मी…",
+      "date": "2026-10-06",
+      "publishedAt": "2026-10-06T22:23:43+05:30",
+      "url": "https://daredavil453624413.wordpress.com/2026/10/06/satpuda-nisarg-sanwad-shibir/",
+      "platform": "Wordpress",
+      "words": 1146,
+      "wordsSource": "derived_html",
+      "section": null,
+      "tags": [
+        "Satpuda",
+        "Travel Blogs"
+      ],
+      "audience": null,
+      "type": "post",
+      "image": "https://daredavil453624413.wordpress.com/wp-content/uploads/2026/10/image-2.jpeg",
+      "trackedInBlogsTable": true,
+      "blogId": 68,
+      "challengeId": "100_days_to_offload",
+      "language": "Marathi"
+    },
     {
       "title": "The Flow in the Modern Times",
       "date": "2026-10-01",
@@ -1708,7 +1729,7 @@
       "publishedAt": "2026-07-04T21:42:22+05:30",
       "url": "https://daredavil453624413.wordpress.com/2026/07/04/bhatakanti-book-review/",
       "platform": "Wordpress",
-      "words": 482,
+      "words": 480,
       "wordsSource": "derived_html",
       "section": null,
       "tags": [
@@ -2822,7 +2843,7 @@
       "publishedAt": "2025-08-04T22:57:58+05:30",
       "url": "https://daredavil453624413.wordpress.com/2025/08/04/panhala-to-pawankhind/",
       "platform": "Wordpress",
-      "words": 1297,
+      "words": 1296,
       "wordsSource": "derived_html",
       "section": null,
       "tags": [
@@ -3147,7 +3168,7 @@
       "publishedAt": "2022-12-28T23:50:26+05:30",
       "url": "https://daredavil453624413.wordpress.com/2022/12/28/2022-unwrapped-the-peak-into-glimpse-of-some-creative-sparks/",
       "platform": "Wordpress",
-      "words": 587,
+      "words": 585,
       "wordsSource": "derived_html",
       "section": null,
       "tags": [
@@ -3643,7 +3664,7 @@
       "kind": "untracked_post",
       "title": "पन्हाळा ते पावनखिंड: एक सुंदर, मोहक पण तितकाच थरारक ट्रेक!",
       "date": "2025-08-04",
-      "words": 1297,
+      "words": 1296,
       "url": "https://daredavil453624413.wordpress.com/2025/08/04/panhala-to-pawankhind/",
       "platform": "Wordpress",
       "note": "Published, but has no row in the Supabase `blogs` table."
@@ -3778,7 +3799,7 @@
       "kind": "untracked_post",
       "title": "2022 Unwrapped: The peak into glimpse of some creative sparks…!",
       "date": "2022-12-28",
-      "words": 587,
+      "words": 585,
       "url": "https://daredavil453624413.wordpress.com/2022/12/28/2022-unwrapped-the-peak-into-glimpse-of-some-creative-sparks/",
       "platform": "Wordpress",
       "note": "Published, but has no row in the Supabase `blogs` table."
