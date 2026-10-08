@@ -1,97 +1,82 @@
 WEBVTT
 
-00:00:00.500 --> 00:00:02.200
-The Blueprint: how sankettambare.in is built, drawn as six sheets.
+00:00:00.600 --> 00:00:05.140
+This is The Blueprint: how Sanket Tambare dot in is built, drawn as six sheets.
 
-00:00:02.200 --> 00:00:07.000
-Six floors, one site: from the page you see to the scripts that build it.
+00:00:07.150 --> 00:00:08.857
+Sheet one: the site plan.
 
-00:00:07.000 --> 00:00:09.200
-Episode 01, Site plan: Every feature of the site, drawn as a room.
+00:00:09.500 --> 00:00:12.716
+A floor plan draws itself: eleven rooms, one per feature.
 
-00:00:09.600 --> 00:00:14.200
-Every feature of the site, drawn as a room: 11 of them, measured live.
+00:00:14.300 --> 00:00:15.995
+Archives: eight collections.
 
-00:00:14.200 --> 00:00:17.000
-Archives: eight collections, 1,877 rows, one table each.
+00:00:17.100 --> 00:00:19.434
+Ask: answers, with their sources.
 
-00:00:17.000 --> 00:00:19.800
-Ask the Archive: plain-language questions, answered with the pages they came from.
+00:00:19.900 --> 00:00:21.839
+The Atlas: the site as a map.
 
-00:00:19.800 --> 00:00:22.400
-The Atlas: the same pages as an illustrated world, in 6 regions.
+00:00:22.500 --> 00:00:25.200
+The admin room is locked, for staff only.
 
-00:00:22.400 --> 00:00:25.200
-Admin is staff only. Row-level security in Postgres is the lock.
+00:00:25.350 --> 00:00:26.697
+Sheet two: the section.
 
-00:00:25.200 --> 00:00:27.400
-Episode 02, Section: One feature, traced down through the stack.
+00:00:27.700 --> 00:00:31.926
+A cross-section: six floors, from the page shells down to the build scripts.
 
-00:00:27.700 --> 00:00:30.000
-A section through the site: the shells under the roof, the scripts in the plant room.
+00:00:33.300 --> 00:00:35.773
+A red riser threads Ask through every floor.
 
-00:00:30.000 --> 00:00:36.000
-Ask the Archive touches all 6 floors, from the launcher on every page to the nightly index.
+00:00:36.900 --> 00:00:39.385
+The changelog's riser skips the edge entirely.
 
-00:00:36.000 --> 00:00:41.900
-The changelog skips the edge entirely: 4 floors, the browser reading Postgres directly.
+00:00:42.050 --> 00:00:43.780
+Sheet three: the Ask circuit.
 
-00:00:41.900 --> 00:00:44.100
-Episode 03, The Ask circuit: A question, wired end to end.
+00:00:44.400 --> 00:00:47.999
+A wiring diagram. The question: Which forts has he trekked?
 
-00:00:44.400 --> 00:00:48.100
-A question goes in: "Which forts has he trekked?"
+00:00:49.700 --> 00:00:55.331
+The first model's switch flips open; the current drops a rung, and the second model answers.
 
-00:00:48.100 --> 00:00:50.250
-Keyword and meaning search run side by side, then fuse by rank.
+00:00:57.250 --> 00:00:59.450
+Sheet four: the unfurl bench, for link previews.
 
-00:00:50.250 --> 00:00:52.600
-The first model is down. The current falls through to the next rung.
+00:00:59.600 --> 00:01:03.280
+A pasted link runs down the edge, and a preview card appears.
 
-00:00:52.600 --> 00:00:57.100
-Only links the archive supplied survive, and the sources stream first.
+00:01:05.100 --> 00:01:07.376
+The books link gets its own card too.
 
-00:00:57.100 --> 00:00:59.300
-Episode 04, Unfurl bench: What a shared link turns into.
+00:01:08.600 --> 00:01:11.479
+Then a browser opens treks, and writes the same tags.
 
-00:00:59.700 --> 00:01:04.000
-Paste a link anywhere: the edge writes the tags before any JavaScript runs.
+00:01:13.150 --> 00:01:14.764
+Sheet five: the shell switch.
 
-00:01:04.000 --> 00:01:08.300
-26 pages, each with its own committed 1200×630 card. Nothing renders on demand.
+00:01:15.500 --> 00:01:18.739
+Visitor one's link asks for the Atlas, and they land there.
 
-00:01:08.300 --> 00:01:13.000
-A browser runs the app instead, and writes the very same tags.
+00:01:19.700 --> 00:01:22.347
+Visitor two prefers reduced motion: Classic.
 
-00:01:13.000 --> 00:01:15.200
-Episode 05, Shell switch: Atlas or Classic, and who decides.
+00:01:23.900 --> 00:01:26.628
+Visitor three has no preference: the default, Classic.
 
-00:01:15.400 --> 00:01:17.000
-Two shells, one content. Five rules, first match wins, decide which a visitor gets.
+00:01:29.150 --> 00:01:31.350
+Sheet six: the tag loom, where tags are woven.
 
-00:01:17.000 --> 00:01:21.200
-Rule 1, ?view= in the URL, sends them to the Atlas.
+00:01:31.500 --> 00:01:36.050
+Coloured threads weave collections, on the left, into tags, on the right.
 
-00:01:21.200 --> 00:01:25.400
-Rule 3, Reduced motion, sends them to Classic.
+00:01:36.200 --> 00:01:39.404
+Life is the thickest thread, mostly micro posts.
 
-00:01:25.400 --> 00:01:29.000
-No rule has an opinion, so DEFAULT_VIEW sends them to Classic.
+00:01:39.900 --> 00:01:42.791
+Without the micro-blog, Technology leads.
 
-00:01:29.000 --> 00:01:31.200
-Episode 06, Tag loom: One vocabulary across every shelf.
-
-00:01:31.500 --> 00:01:36.200
-One vocabulary for every shelf: 99 tags, 3,732 links.
-
-00:01:36.200 --> 00:01:38.800
-Life: 472 micro posts, 7 blog posts.
-
-00:01:38.800 --> 00:01:42.600
-Lift the micro-blog off the loom…
-
-00:01:42.600 --> 00:01:45.400
-…and Technology leads: 18 books, 7 blog posts, 6 presentations.
-
-00:01:45.700 --> 00:01:50.400
-Every drawing is live: sankettambare.in/blueprint
+00:01:45.700 --> 00:01:50.240
+Every drawing is live, at Sanket Tambare dot in, slash blueprint.

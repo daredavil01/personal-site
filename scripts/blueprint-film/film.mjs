@@ -15,6 +15,12 @@ import { loom, loomLayout } from "./scenes/loom.mjs";
 const pad = (k) => String(k).padStart(2, "0");
 const shellName = (s) => (s === "atlas" ? "the Atlas" : "Classic");
 
+// For the narration: small counts read better as words than as digits.
+const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+  "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+const spell = (k) => WORDS[k] || String(k);
+const ORDINAL = ["", "one", "two", "three", "four", "five", "six"];
+
 // "Life: 472 micro posts, 7 blog posts" — a tag's threads, in words.
 const threadsOf = (layout, tagName, plural) => layout.threads
   .filter((th) => th.tag === tagName)
@@ -64,6 +70,7 @@ export function buildFilm(d) {
   const sheets = [
     {
       id: "site-plan",
+      spoken: "the site plan",
       sheet: "A-01",
       title: "Site plan",
       line: "Every feature of the site, drawn as a room.",
@@ -80,9 +87,17 @@ export function buildFilm(d) {
         { at: 13.2, text: "Admin is staff only. Row-level security in Postgres is the lock." },
       ],
       sfx: tour.map((s) => ({ at: s.at, name: "stamp" })),
+      narration: [
+        { at: 0.3, text: `A floor plan draws itself: ${spell(d.features.length)} rooms, one per feature.` },
+        { at: 5.1, text: `Archives: ${spell(d.collections.length)} collections.` },
+        { at: 7.9, text: "Ask: answers, with their sources." },
+        { at: 10.7, text: "The Atlas: the site as a map." },
+        { at: 13.3, text: "The admin room is locked, for staff only." },
+      ],
     },
     {
       id: "section",
+      spoken: "the section",
       sheet: "A-02",
       title: "Section",
       line: "One feature, traced down through the stack.",
@@ -98,9 +113,20 @@ export function buildFilm(d) {
         { at: 8.6, text: `The changelog skips the edge entirely: ${floors(changelog)} floors, the browser reading Postgres directly.` },
       ],
       sfx: [{ at: 2.6, name: "stamp" }, { at: 8.6, name: "stamp" }],
+      narration: [
+        { at: 0.3, text: `A cross-section: ${spell(d.layers.length)} floors, from the page shells down to the build scripts.` },
+        {
+          at: 5.9,
+          text: floors(ask) === d.layers.length
+            ? "A red riser threads Ask through every floor."
+            : `A red riser threads Ask through ${spell(floors(ask))} floors.`,
+        },
+        { at: 9.5, text: changelog.layers.edge ? "The changelog's riser follows." : "The changelog's riser skips the edge entirely." },
+      ],
     },
     {
       id: "ask-circuit",
+      spoken: "the Ask circuit",
       sheet: "A-03",
       title: "The Ask circuit",
       line: "A question, wired end to end.",
@@ -116,9 +142,14 @@ export function buildFilm(d) {
         { at: stepTime(sanitiseIndex), text: "Only links the archive supplied survive, and the sources stream first." },
       ],
       sfx: [{ at: stepTime(failIndex) - 0.55, name: "stamp" }, { at: stepTime(answerIndex), name: "chime" }],
+      narration: [
+        { at: 0.3, text: `A wiring diagram. The question: ${d.question.replace(/\?$/, "")}?` },
+        { at: stepTime(failIndex) - 1.1, text: "The first model's switch flips open; the current drops a rung, and the second model answers." },
+      ],
     },
     {
       id: "unfurl-bench",
+      spoken: "the unfurl bench, for link previews",
       sheet: "A-04",
       title: "Unfurl bench",
       line: "What a shared link turns into.",
@@ -131,9 +162,25 @@ export function buildFilm(d) {
         { at: UNFURL_START + 2 * UNFURL_CYCLE, text: "A browser runs the app instead, and writes the very same tags." },
       ],
       sfx: d.shares.map((_, i) => ({ at: UNFURL_START + i * UNFURL_CYCLE + 1.45, name: "stamp" })),
+      narration: d.shares.map((share, i) => {
+        const page = share.path.replace(/^\//, "") || "home";
+        // Said as each link is pasted; the later ones wait for their card.
+        let line = `The ${page} link gets its own card too.`;
+        let lead = 1.1;
+        if (i === 0) {
+          line = "A pasted link runs down the edge, and a preview card appears.";
+          lead = -0.1;
+        }
+        if (share.mode === "reader") {
+          line = `Then a browser opens ${page}, and writes the same tags.`;
+          lead = 0.3;
+        }
+        return { at: UNFURL_START + i * UNFURL_CYCLE + lead, text: line };
+      }),
     },
     {
       id: "shell-switch",
+      spoken: "the shell switch",
       sheet: "A-05",
       title: "Shell switch",
       line: "Atlas or Classic, and who decides.",
@@ -153,9 +200,22 @@ export function buildFilm(d) {
         }),
       ],
       sfx: visitors.map((_, i) => ({ at: SHELL_START + i * VISIT + 2.2, name: "stamp" })),
+      narration: visitors.map((v, i) => {
+        const { rule, shell: to } = v.decision;
+        const who = `Visitor ${spell(i + 1)}`;
+        const said = {
+          param: `${who}'s link asks for ${shellName(to)}, and they land there.`,
+          stored: `${who} chose ${shellName(to)} before, and gets it again.`,
+          motion: `${who} prefers reduced motion: ${shellName(to)}.`,
+          preview: `${who} has the preview flag: ${shellName(to)}.`,
+          default: `${who} has no preference: the default, ${shellName(to)}.`,
+        };
+        return { at: SHELL_START + i * VISIT - 0.3, text: said[rule.id] };
+      }),
     },
     {
       id: "tag-loom",
+      spoken: "the tag loom, where tags are woven",
       sheet: "A-06",
       title: "Tag loom",
       line: "One vocabulary across every shelf.",
@@ -175,6 +235,15 @@ export function buildFilm(d) {
         { at: 11.4, text: `…and ${topB.displayName || topB.name} leads: ${threadsOf(withoutMicro, topB.name, d.plural)}.` },
       ],
       sfx: [{ at: 5.0, name: "stamp" }, { at: 11.4, name: "stamp" }],
+      narration: [
+        { at: 0.3, text: "Coloured threads weave collections, on the left, into tags, on the right." },
+        {
+          at: 5.0,
+          text: `${topA.displayName || topA.name} is the thickest thread, mostly ${d.plural(withMicro.threads
+            .filter((th) => th.tag === topA.name).sort((a, b) => b.n - a.n)[0].type)}.`,
+        },
+        { at: 8.7, text: `Without the micro-blog, ${topB.displayName || topB.name} leads.` },
+      ],
     },
   ];
 
@@ -205,6 +274,7 @@ export function buildFilm(d) {
     poster: 6.4,
     sfx: [{ at: 5.2, name: "chime" }],
     cues: [{ at: 0.5, until: 2.2, text: "The Blueprint: how sankettambare.in is built, drawn as six sheets." }, ...cuesOf(coverBeats, 7)],
+    narration: [{ at: 0.6, text: "This is The Blueprint: how Sanket Tambare dot in is built, drawn as six sheets." }],
     render: (t, layout) => frame({
       body: coverRender(t), rev: d.rev, border: prog(t, 0, 1.2), caption: captionAt(coverBeats, t, 7),
     }, layout),
@@ -221,10 +291,19 @@ export function buildFilm(d) {
       sfx: [{ at: 0, name: "whoosh" }],
       cues: [{ at: 0, until: 2.2, text: `Episode ${pad(i + 1)}, ${s.title}: ${s.line}` }],
       chapter: { sheet: s.sheet, title: s.title },
+      // Said over the title card. A rare title ("unfurl bench") gets a few
+      // words of context, so it is caught by ear without the picture.
+      narration: [{ at: 0.15, text: `Sheet ${ORDINAL[i + 1] || i + 1}: ${s.spoken}.` }],
       render: (t, layout) => frame({ body: card(t), rev: d.rev }, layout),
     });
     segments.push({
-      id: s.id, duration: s.duration, poster: s.poster, sfx: s.sfx, cues: cuesOf(s.beats, s.duration), render: chrome(s, i + 1),
+      id: s.id,
+      duration: s.duration,
+      poster: s.poster,
+      sfx: s.sfx,
+      cues: cuesOf(s.beats, s.duration),
+      narration: s.narration,
+      render: chrome(s, i + 1),
     });
   });
 
@@ -235,6 +314,7 @@ export function buildFilm(d) {
     poster: 3,
     sfx: [{ at: 0, name: "whoosh" }, { at: 1.2, name: "chime" }],
     cues: [{ at: 0.3, until: 5, text: "Every drawing is live: sankettambare.in/blueprint" }],
+    narration: [{ at: 0.3, text: "Every drawing is live, at Sanket Tambare dot in, slash blueprint." }],
     render: (t, layout) => frame({ body: end(t), rev: d.rev }, layout),
   });
 

@@ -11,6 +11,8 @@
  *   npm run blueprint:film -- --reuse         # …and splice / re-mix from them
  *   npm run blueprint:film -- --layout=vertical  # one shape (default: both)
  *   npm run blueprint:film -- --publish       # also refresh public/video/ for /blueprint
+ *   npm run blueprint:film -- --describe      # also an audio-described cut of the film
+ *   npm run blueprint:film -- --describe-only # just that, from the film already rendered
  *
  * Output goes to knowledge_base/blueprint-film/ (gitignored), every cut in two
  * shapes: square 1080x1080, the one shape every feed shows whole, and vertical
@@ -21,6 +23,15 @@
  * --publish re-encodes the square film for the web into public/video/ — the
  * MP4, a JPEG poster, the WebVTT captions and the chapter list the page's
  * player reads. Those four files are committed; nothing else here is.
+ *
+ * --describe adds an audio description to the full film: a narrator, timed to
+ * the drawing, says what is on screen and what the burned-in captions say, so
+ * the film can be followed without seeing it (WCAG 1.2.5). The lines live with
+ * the captions in scripts/blueprint-film/film.mjs; the voice is picked by
+ * scripts/blueprint-film/voice.mjs (Workers AI if CF keys are set, else Piper;
+ * --voice=aura|piper to force one). The music ducks under the voice. It writes
+ * the-blueprint-described[-vertical].mp4 and the narration as .srt/.vtt, and
+ * with --publish the page plays the described cut.
  *
  * Every frame is an SVG built from scripts/blueprint-film/ and rasterised with
  * resvg, the renderer the share cards already use; there is no browser and no
@@ -50,6 +61,9 @@ import SFX_MAP from "../src/atlas/audio/sfxMap.js";
 import { getStatsPayload } from "./lib/statsSource.mjs";
 import { woffToSfnt } from "./blueprint-film/woff.mjs";
 import { buildFilm } from "./blueprint-film/film.mjs";
+import {
+  pickVoice, speak, voiceCredit, wavSeconds,
+} from "./blueprint-film/voice.mjs";
 import { FPS, LAYOUTS, W } from "./blueprint-film/draw.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -70,6 +84,12 @@ const publish = process.argv.includes("--publish");
 // Internal: a worker process renders the jobs it is handed and exits.
 const isWorker = process.argv.includes("--worker");
 const PUBLIC_VIDEO = path.join(ROOT, "public", "video");
+const describeOnly = process.argv.includes("--describe-only");
+const describe = describeOnly || process.argv.includes("--describe");
+const FILM = "the-blueprint";
+// Narration fits its gap by speeding up, never by more than this: past it a
+// line is rewritten, not squeezed.
+const MAX_TEMPO = 1.35;
 
 const AMBIENT = path.join(ROOT, "public", "audio", "loop-creator.m4a");
 const SPRITE = path.join(ROOT, "public", "audio", "sfx.m4a");
@@ -92,6 +112,17 @@ async function findFfmpeg() {
 }
 
 const run = (bin, args) => execFileSync(bin, args, { stdio: ["ignore", "ignore", "pipe"] });
+
+// CF_ACCOUNT_ID / CF_API_TOKEN for the Workers AI narrator, as the other
+// Workers AI scripts read them.
+function loadEnv() {
+  const file = path.join(ROOT, ".env");
+  if (!fs.existsSync(file)) return;
+  fs.readFileSync(file, "utf8").split(/\r?\n/).forEach((line) => {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim().replace(/^["']|["']$/g, "");
+  });
+}
 
 // The Supabase url and publishable key, from wrangler.toml when the shell has
 // no .env — both are public, baked into the browser bundle anyway.
@@ -281,13 +312,18 @@ function extractSfx(ffmpeg) {
   return files;
 }
 
-function mux(ffmpeg, { video, events, duration, sfxFiles, out }) {
+function mux(ffmpeg, {
+  video, events, duration, sfxFiles, out, narration = null,
+}) {
   if (silent) {
     run(ffmpeg, ["-y", "-i", video, "-c", "copy", "-movflags", "+faststart", out]);
     return;
   }
   const names = [...new Set(events.map((e) => e.name))].filter((nm) => sfxFiles[nm]);
-  const inputs = ["-i", video, "-stream_loop", "-1", "-i", AMBIENT, ...names.flatMap((nm) => ["-i", sfxFiles[nm]])];
+  const inputs = [
+    "-i", video, "-stream_loop", "-1", "-i", AMBIENT, ...names.flatMap((nm) => ["-i", sfxFiles[nm]]),
+    ...(narration ? ["-i", narration] : []),
+  ];
   const graph = [
     `[1:a]aresample=48000,atrim=0:${duration.toFixed(3)},asetpts=PTS-STARTPTS,volume=${AMBIENT_GAIN},`
       + `afade=t=in:st=0:d=1.5,afade=t=out:st=${Math.max(0, duration - 2).toFixed(3)}:d=2[amb]`,
@@ -306,8 +342,19 @@ function mux(ffmpeg, { video, events, duration, sfxFiles, out }) {
   // Stereo, and normalised to a gentle -19 LUFS: feeds play video loud, and the
   // loop alone sits far below that. loudnorm resamples to 192 kHz, hence the
   // aresample after it.
-  graph.push(`${mixed.join("")}amix=inputs=${mixed.length}:normalize=0:duration=first,`
-    + "aformat=channel_layouts=stereo,loudnorm=I=-19:TP=-1.5:LRA=11,aresample=48000[aout]");
+  const master = "loudnorm=I=-19:TP=-1.5:LRA=11,aresample=48000[aout]";
+  if (!narration) {
+    graph.push(`${mixed.join("")}amix=inputs=${mixed.length}:normalize=0:duration=first,aformat=channel_layouts=stereo,${master}`);
+  } else {
+    // The narrator keys a compressor on the music and effects, so the bed
+    // ducks while a line is spoken and swells back in the gaps.
+    graph.push(`${mixed.join("")}amix=inputs=${mixed.length}:normalize=0:duration=first,aformat=channel_layouts=stereo[bed]`);
+    // TTS takes arrive near full scale and already sit well above the bed, so
+    // the voice goes in at unity; loudnorm sets the overall level.
+    graph.push(`[${names.length + 2}:a]aresample=48000,aformat=channel_layouts=stereo,asplit=2[voice][key]`);
+    graph.push("[bed][key]sidechaincompress=threshold=0.015:ratio=9:attack=25:release=450[ducked]");
+    graph.push(`[ducked][voice]amix=inputs=2:normalize=0:duration=first,${master}`);
+  }
   run(ffmpeg, [
     "-y", ...inputs, "-filter_complex", graph.join(";"),
     "-map", "0:v", "-map", "[aout]", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
@@ -390,13 +437,74 @@ function runWorkers(jobs, byId, dataFile) {
   })));
 }
 
+// --- audio description -------------------------------------------------------------
+
+// Speaks every line of a cut's narration and lays them on one track. A line
+// gets the time until the next one starts; if it runs longer it is sped up to
+// fit (up to MAX_TEMPO), and a line that still does not fit is reported, so
+// the script is fixed rather than the voice garbled.
+async function narrationTrack(ffmpeg, voice, cut, byId, offsets) {
+  const lines = cut.segments
+    .flatMap((id) => (byId[id].narration || []).map((l) => ({ start: offsets[id] + l.at, text: l.text })))
+    .sort((a, b) => a.start - b.start);
+  const dir = path.join(WORK, "voice");
+  for (const line of lines) { // eslint-disable-line no-restricted-syntax
+    // eslint-disable-next-line no-await-in-loop -- one take at a time keeps the API polite
+    line.file = await speak(voice, line.text, { ffmpeg, dir });
+    line.spoken = wavSeconds(line.file);
+  }
+  let squeezed = 0;
+  lines.forEach((line, i) => {
+    const next = lines[i + 1] ? lines[i + 1].start : offsets.__end;
+    const room = next - line.start - 0.15;
+    line.tempo = Math.min(MAX_TEMPO, Math.max(1, line.spoken / room));
+    line.end = line.start + line.spoken / line.tempo;
+    if (line.tempo > 1) squeezed += 1;
+    if (line.spoken / line.tempo > room + 0.05) {
+      console.warn(`  ! narration overruns by ${(line.spoken / line.tempo - room).toFixed(1)}s at ${line.start.toFixed(1)}s: "${line.text}"`);
+    }
+  });
+  const graph = lines.map((l, i) => `[${i}:a]atempo=${l.tempo.toFixed(3)},adelay=${Math.round(l.start * 1000)}:all=1[n${i}]`);
+  graph.push(`${lines.map((_, i) => `[n${i}]`).join("")}amix=inputs=${lines.length}:normalize=0,apad,atrim=0:${offsets.__end.toFixed(3)}[out]`);
+  const file = path.join(WORK, `${cut.file}-narration.wav`);
+  run(ffmpeg, ["-y", ...lines.flatMap((l) => ["-i", l.file]), "-filter_complex", graph.join(";"), "-map", "[out]", "-ar", "48000", file]);
+  const words = lines.reduce((n, l) => n + l.text.split(/\s+/).length, 0);
+  console.info(`Narration: ${lines.length} lines, ${words} words, ${squeezed} sped up to fit — ${voiceCredit(voice)}.`);
+  return { file, cues: lines.map((l) => ({ start: l.start, end: l.end, text: l.text })) };
+}
+
+// The described cut, from the rendered film's picture plus the narration.
+async function describeFilm(ffmpeg, { cut, byId, sfxFiles }) {
+  const voice = pickVoice(arg("voice"));
+  const offsets = offsetsOf(cut, byId);
+  const narration = await narrationTrack(ffmpeg, voice, cut, byId, offsets);
+  const events = cut.segments.flatMap((id) => (byId[id].sfx || []).map((e) => ({ name: e.name, at: offsets[id] + e.at })));
+  layouts.forEach((layout) => {
+    const suffix = layout === "square" ? "" : `-${layout}`;
+    const video = path.join(OUT, `${cut.file}${suffix}.mp4`);
+    if (!fs.existsSync(video)) throw new Error(`${path.relative(ROOT, video)} is missing: render the film first`);
+    const out = path.join(OUT, `${cut.file}-described${suffix}.mp4`);
+    mux(ffmpeg, {
+      video, events, duration: offsets.__end, sfxFiles, out, narration: narration.file,
+    });
+    console.info(`${path.basename(out)}  ${offsets.__end.toFixed(1)}s  ${Math.round(fs.statSync(out).size / 1024).toLocaleString("en-IN")} KB`);
+  });
+  fs.writeFileSync(path.join(OUT, `${cut.file}-described.srt`), toSrt(narration.cues));
+  fs.writeFileSync(path.join(OUT, `${cut.file}-described.vtt`), toVtt(narration.cues));
+  return { cues: narration.cues, credit: voiceCredit(voice) };
+}
+
 // --- publishing for /blueprint ------------------------------------------------------
 
 // The page's copy: a lighter encode (it streams to phones), a JPEG poster, the
 // captions as WebVTT, and the chapter starts the player's buttons seek to.
-function publishFilm(ffmpeg, { cut, byId, offsets, cues, rev }) {
+function publishFilm(ffmpeg, {
+  cut, byId, offsets, cues, rev, described = null,
+}) {
   fs.mkdirSync(PUBLIC_VIDEO, { recursive: true });
-  const src = path.join(OUT, `${cut.file}.mp4`);
+  // The page plays the described cut when there is one: it is the version
+  // everyone can follow, and its captions are then what the narrator says.
+  const src = path.join(OUT, `${cut.file}${described ? "-described" : ""}.mp4`);
   run(ffmpeg, [
     "-y", "-i", src, "-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-crf", "26",
     "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart",
@@ -412,6 +520,7 @@ function publishFilm(ffmpeg, { cut, byId, offsets, cues, rev }) {
     duration: Number(offsets.__end.toFixed(2)),
     rev,
     rendered: new Date().toISOString().slice(0, 10),
+    ...(described ? { narration: described.credit } : {}),
     chapters,
   }, null, 2)}\n`);
   const kb = Math.round(fs.statSync(path.join(PUBLIC_VIDEO, `${cut.file}.mp4`)).size / 1024);
@@ -421,6 +530,7 @@ function publishFilm(ffmpeg, { cut, byId, offsets, cues, rev }) {
 // --- main -----------------------------------------------------------------------
 
 async function main() {
+  loadEnv();
   const dataFile = arg("data");
   const { data, snapshot } = await gatherData(dataFile ? JSON.parse(fs.readFileSync(dataFile, "utf8")) : null);
   const { segments, cuts: allCuts } = buildFilm(data);
@@ -436,7 +546,26 @@ async function main() {
   if (!cuts.length) throw new Error(`No cut matched --only=${only}`);
   if (publish && !cuts.some((c) => c.file === "the-blueprint")) throw new Error("--publish needs the full film; drop --only");
   if (publish && !layouts.includes("square")) throw new Error("--publish needs the square layout");
+  if (describe && !cuts.some((c) => c.file === FILM)) throw new Error("--describe narrates the full film; drop --only");
   await fs.promises.mkdir(WORK, { recursive: true });
+  const done = () => {
+    if (!process.argv.includes("--keep")) fs.rmSync(WORK, { recursive: true, force: true });
+    console.info(`\nDone: ${path.relative(ROOT, OUT)}/`);
+  };
+
+  // Narrate the film already rendered: no frames are drawn.
+  if (describeOnly) {
+    const ffmpeg = await findFfmpeg();
+    const film = cuts.find((c) => c.file === FILM);
+    const described = await describeFilm(ffmpeg, { cut: film, byId, sfxFiles: silent ? {} : extractSfx(ffmpeg) });
+    if (publish) {
+      publishFilm(ffmpeg, {
+        cut: film, byId, offsets: offsetsOf(film, byId), cues: described.cues, rev: data.rev, described,
+      });
+    }
+    done();
+    return;
+  }
 
   if (frameArgs.length) {
     frameArgs.forEach((spec) => {
@@ -491,16 +620,17 @@ async function main() {
     console.info(`${name}.mp4  ${offsets.__end.toFixed(1)}s  ${kb.toLocaleString("en-IN")} KB`);
   }));
 
+  const film = cuts.find((c) => c.file === FILM);
+  const described = describe ? await describeFilm(ffmpeg, { cut: film, byId, sfxFiles }) : null;
+
   if (publish) {
-    const cut = cuts.find((c) => c.file === "the-blueprint");
-    const offsets = offsetsOf(cut, byId);
+    const offsets = offsetsOf(film, byId);
     publishFilm(ffmpeg, {
-      cut, byId, offsets, cues: cutCues(cut, byId, offsets), rev: data.rev,
+      cut: film, byId, offsets, cues: described ? described.cues : cutCues(film, byId, offsets), rev: data.rev, described,
     });
   }
 
-  if (!process.argv.includes("--keep")) fs.rmSync(WORK, { recursive: true, force: true });
-  console.info(`\nDone: ${path.relative(ROOT, OUT)}/`);
+  done();
 }
 
 main().catch((err) => {

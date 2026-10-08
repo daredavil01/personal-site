@@ -483,9 +483,20 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   `-- --stills` writes posters and subtitles only, `-- --frame=<seg>@<s>[@layout]`
   one frame, `-- --only=<name>` one cut, `-- --layout=square|vertical` one shape.
   Like the cards, the numbers are baked in: re-run it after content moves.
+- **Audio description:** `-- --describe` adds a narrator to the full film
+  (`the-blueprint-described[-vertical].mp4`, plus the narration as `.srt`/`.vtt`):
+  the lines live beside the captions in `scripts/blueprint-film/film.mjs`, are
+  timed to the drawing, and are sped up (≤1.35×) only if a line overruns its
+  gap; the music ducks under the voice. `voice.mjs` speaks with Workers AI's
+  Aura 2 (the Atlas guide's voice) when `CF_ACCOUNT_ID`/`CF_API_TOKEN` are set,
+  else Piper (`PIPER_VOICE`=path to a voice `.onnx`, `PIPER_BIN`). The
+  published film was narrated with Piper `en_GB-cori-high` (public-domain
+  LibriVox data). `-- --describe-only` re-narrates the rendered film without
+  drawing a frame.
 - **The film on the page (A-07):** `-- --publish` also writes a lighter web
-  encode of the square film to `public/video/the-blueprint.{mp4,jpg,vtt,json}`
-  — video, poster, captions, chapter starts — which **are committed**.
+  encode of the square film — the described cut when `--describe` is on — to
+  `public/video/the-blueprint.{mp4,jpg,vtt,json}` — video, poster, captions,
+  chapter starts — which **are committed**.
   `FilmPlayer.js` reads the chapters from the JSON (`preload="none"`, so the
   page costs a poster until someone presses play), and `film.test.js` fails
   the build if any of the four is missing or the chapters disagree.

@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// Sheet A-07: the same six sheets, animated, as one film. The video and its
-// sidecars live in public/video/, written by
-// `npm run blueprint:film -- --publish`: the MP4, a JPEG poster, WebVTT
-// captions, and a JSON list of where each sheet's chapter starts. The chapter
+// Sheet A-07: the same six sheets, animated, as one film, with an audio
+// description: a narrator says what is on screen, so the film can be followed
+// without watching it. The video and its sidecars live in public/video/,
+// written by `npm run blueprint:film -- --describe --publish`: the MP4, a JPEG
+// poster, the narration as WebVTT, and a JSON list of where each sheet's
+// chapter starts (plus the narrator's credit). The chapter
 // buttons come from that JSON, so a re-render that moves them needs no code
 // change; if it cannot be read the player simply has no chapter list.
 //
@@ -55,10 +57,10 @@ const FilmPlayer = () => {
         height="1080"
         onTimeUpdate={onTime}
         className="w-full h-auto block border bp-rule"
-        aria-label="The Blueprint, the film: all six sheets animated"
+        aria-label="The Blueprint, the film, with audio description: all six sheets animated"
       >
         <source src={`${FILM}.mp4`} type="video/mp4" />
-        <track kind="captions" src={`${FILM}.vtt`} srcLang="en" label="English" />
+        <track kind="captions" src={`${FILM}.vtt`} srcLang="en" label="English (narration)" />
       </video>
 
       <div className="flex flex-col gap-4 min-w-0">
@@ -85,8 +87,10 @@ const FilmPlayer = () => {
         )}
         <p className="font-body text-sm bp-soft m-0">
           Each sheet is drawn and animated frame by frame from the same code and the same live
-          numbers as the page above, with the site&apos;s own Workshop soundtrack. Captions are
+          numbers as the page above, over the site&apos;s own Workshop soundtrack. A narrator
+          describes what is on screen, so it can be followed without watching; the captions are
           burned in, so it reads with the sound off.
+          {meta && meta.narration ? ` Narration: ${meta.narration}.` : ""}
           {meta && meta.rendered ? ` Rendered ${meta.rendered}${meta.rev ? ` at ${meta.rev}` : ""}.` : ""}
         </p>
         <a
