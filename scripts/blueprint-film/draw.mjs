@@ -158,40 +158,74 @@ export function captionAt(beats, t, end) {
   return { text: beats[i].text, opacity: fade(t, beats[i].at, 0.35, next) };
 }
 
+// The two shapes the film is cut in. Every scene is drawn once, in the square's
+// coordinates; the vertical cut (Reels, Shorts, Stories) stacks the header,
+// that same drawing and a larger caption down a 9:16 frame, keeping all of it
+// clear of the top ~220px and bottom ~320px the apps cover with their own UI.
+export const LAYOUTS = {
+  square: { w: W, h: H },
+  vertical: { w: W, h: 1920 },
+};
+
 /**
  * One full frame: the sheet (grid, border, registration marks), its header
  * and footer, the caption, and the body drawn by the scene.
  */
 export function frame({
   body = "", sheet = null, title = null, series = null, rev = null, caption = null, border = 1, headerIn = 1,
-}) {
-  const perimeter = 2 * ((W - 48) + (H - 48));
+}, layout = "square") {
+  const { w: FW, h: FH } = LAYOUTS[layout];
+  const tall = layout === "vertical";
+  const perimeter = 2 * ((FW - 48) + (FH - 48));
   const parts = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${FW}" height="${FH}" viewBox="0 0 ${FW} ${FH}">`,
     GRID,
-    `<rect width="${W}" height="${H}" fill="${C.paper}"/>`,
-    `<rect width="${W}" height="${H}" fill="url(#bp-grid-s)"${op(border)}/>`,
-    `<rect width="${W}" height="${H}" fill="url(#bp-grid-l)"${op(border)}/>`,
-    `<rect x="24" y="24" width="${W - 48}" height="${H - 48}" fill="none" stroke="${C.ink}" stroke-width="2"${drawOn(perimeter, border)}/>`,
-    `<rect x="32" y="32" width="${W - 64}" height="${H - 64}" fill="none" stroke="${C.ink}" stroke-opacity="0.2"${op(border)}/>`,
-    `<path d="M22,46 V22 H46 M${W - 22},${H - 46} V${H - 22} H${W - 46}" fill="none" stroke="${C.red}" stroke-width="5"/>`,
+    `<rect width="${FW}" height="${FH}" fill="${C.paper}"/>`,
+    `<rect width="${FW}" height="${FH}" fill="url(#bp-grid-s)"${op(border)}/>`,
+    `<rect width="${FW}" height="${FH}" fill="url(#bp-grid-l)"${op(border)}/>`,
+    `<rect x="24" y="24" width="${FW - 48}" height="${FH - 48}" fill="none" stroke="${C.ink}" stroke-width="2"${drawOn(perimeter, border)}/>`,
+    `<rect x="32" y="32" width="${FW - 64}" height="${FH - 64}" fill="none" stroke="${C.ink}" stroke-opacity="0.2"${op(border)}/>`,
+    `<path d="M22,46 V22 H46 M${FW - 22},${FH - 46} V${FH - 22} H${FW - 46}" fill="none" stroke="${C.red}" stroke-width="5"/>`,
   ];
-  if (sheet) {
-    parts.push(label(64, 96, `Sheet ${sheet}`, { size: 20, fill: C.red, opacity: headerIn }));
-    parts.push(text(64, 158, title, { size: 56, font: FONT.serif, weight: 700, opacity: headerIn }));
+
+  if (tall) {
+    if (series) parts.push(label(64, 250, `The Blueprint · ${series}`, { size: 22, fill: C.soft, opacity: headerIn }));
+    if (sheet) {
+      parts.push(label(64, 298, `Sheet ${sheet}`, { size: 26, fill: C.red, opacity: headerIn }));
+      parts.push(text(64, 394, title, { size: 84, font: FONT.serif, weight: 700, opacity: headerIn }));
+    }
+  } else {
+    if (sheet) {
+      parts.push(label(64, 96, `Sheet ${sheet}`, { size: 20, fill: C.red, opacity: headerIn }));
+      parts.push(text(64, 158, title, { size: 56, font: FONT.serif, weight: 700, opacity: headerIn }));
+    }
+    if (series) {
+      parts.push(label(FW - 64, 92, "The Blueprint", { size: 16, anchor: "end", fill: C.soft, opacity: headerIn }));
+      parts.push(label(FW - 64, 120, series, { size: 16, anchor: "end", fill: C.red, opacity: headerIn }));
+    }
   }
-  if (series) {
-    parts.push(label(W - 64, 92, "The Blueprint", { size: 16, anchor: "end", fill: C.soft, opacity: headerIn }));
-    parts.push(label(W - 64, 120, series, { size: 16, anchor: "end", fill: C.red, opacity: headerIn }));
-  }
+
   if (caption && caption.text && caption.opacity > 0) {
-    const lines = wrap(caption.text, 54, 2);
-    parts.push(`<rect x="64" y="${lines.length > 1 ? 916 : 934}" width="5" height="${lines.length > 1 ? 74 : 38}" fill="${C.red}"${op(caption.opacity)}/>`);
-    lines.forEach((line, i) => parts.push(text(86, (lines.length > 1 ? 944 : 962) + i * 42, line, { size: 32, opacity: caption.opacity })));
+    const [max, rows, size, lead, top] = tall ? [40, 3, 42, 56, 1350] : [54, 2, 32, 42, lineTop(caption.text)];
+    const lines = wrap(caption.text, max, rows);
+    parts.push(`<rect x="64" y="${top - size + 4}" width="5" height="${(lines.length - 1) * lead + size + 6}" fill="${C.red}"${op(caption.opacity)}/>`);
+    lines.forEach((line, i) => parts.push(text(86, top + i * lead, line, { size, opacity: caption.opacity })));
   }
-  parts.push(`<line x1="64" y1="1008" x2="${W - 64}" y2="1008" stroke="${C.ink}" stroke-opacity="0.18"/>`);
-  parts.push(label(64, 1036, "sankettambare.in/blueprint", { size: 15, fill: C.soft }));
-  if (rev) parts.push(label(W - 64, 1036, `Rev ${rev}`, { size: 15, anchor: "end", fill: C.soft }));
-  parts.push(body, "</svg>");
+
+  const footY = tall ? 1590 : 1008;
+  parts.push(`<line x1="64" y1="${footY}" x2="${FW - 64}" y2="${footY}" stroke="${C.ink}" stroke-opacity="0.18"/>`);
+  parts.push(label(64, footY + 28 + (tall ? 4 : 0), "sankettambare.in/blueprint", { size: tall ? 20 : 15, fill: C.soft }));
+  if (rev) parts.push(label(FW - 64, footY + 28 + (tall ? 4 : 0), `Rev ${rev}`, { size: tall ? 20 : 15, anchor: "end", fill: C.soft }));
+
+  // The drawing itself. Vertical frames drop it below their stacked header
+  // (sheets) or centre it (cover, title cards, end card).
+  if (tall) parts.push(`<g transform="translate(0,${sheet ? 330 : 400})">${body}</g>`);
+  else parts.push(body);
+  parts.push("</svg>");
   return parts.join("");
+}
+
+// The square caption sits lower when it needs only one line.
+function lineTop(captionText) {
+  return wrap(captionText, 54, 2).length > 1 ? 944 : 962;
 }

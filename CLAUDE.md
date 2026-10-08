@@ -473,13 +473,22 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   the redline is the site's `#b22200`.
 - **The film:** `npm run blueprint:film` renders the sheets as illustrated
   video into `knowledge_base/blueprint-film/` (gitignored): one ~2-minute film
-  plus one ~20-second episode per sheet for posting as a series, 1080×1080
-  MP4 with a poster PNG each. Frames are SVG from `scripts/blueprint-film/`,
-  rasterised by resvg (no browser); the data is the same modules and the live
-  `/api/stats`, loaded through Vite's SSR loader. Sound is the site's own
-  Workshop loop and SFX sprite. Needs ffmpeg. `-- --stills` writes the posters
-  only, `-- --frame=<segment>@<seconds>` one frame, `-- --only=<name>` one cut.
+  plus one ~20-second episode per sheet for posting as a series, each in two
+  shapes — square 1080×1080 and vertical 1080×1920 (`-vertical`, for Reels,
+  Shorts and Stories) — with a poster PNG per cut and shape and an `.srt` of
+  the captions per cut. Frames are SVG from `scripts/blueprint-film/`,
+  rasterised by resvg (no browser) in parallel worker processes; the data is
+  the same modules and the live `/api/stats`, loaded through Vite's SSR
+  loader. Sound is the site's own Workshop loop and SFX sprite. Needs ffmpeg.
+  `-- --stills` writes posters and subtitles only, `-- --frame=<seg>@<s>[@layout]`
+  one frame, `-- --only=<name>` one cut, `-- --layout=square|vertical` one shape.
   Like the cards, the numbers are baked in: re-run it after content moves.
+- **The film on the page (A-07):** `-- --publish` also writes a lighter web
+  encode of the square film to `public/video/the-blueprint.{mp4,jpg,vtt,json}`
+  — video, poster, captions, chapter starts — which **are committed**.
+  `FilmPlayer.js` reads the chapters from the JSON (`preload="none"`, so the
+  page costs a poster until someone presses play), and `film.test.js` fails
+  the build if any of the four is missing or the chapters disagree.
 
 ## Homepage Sections
 

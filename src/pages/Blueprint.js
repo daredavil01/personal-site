@@ -16,6 +16,7 @@ import UnfurlBench from "../components/Blueprint/UnfurlBench";
 import ShellResolver from "../components/Blueprint/ShellResolver";
 import TagLoom from "../components/Blueprint/TagLoom";
 import RevisionBlock from "../components/Blueprint/RevisionBlock";
+import FilmPlayer from "../components/Blueprint/FilmPlayer";
 import "../components/Blueprint/blueprint.css";
 
 // /blueprint — the site, drawn as a set of architectural sheets. A cover with
@@ -33,6 +34,7 @@ const SHEETS = [
   { id: "a-04", no: "A-04", title: "Unfurl bench", what: "What a shared link becomes" },
   { id: "a-05", no: "A-05", title: "Shell switch", what: "Atlas or Classic, and who decides" },
   { id: "a-06", no: "A-06", title: "Tag loom", what: "One vocabulary across every shelf" },
+  { id: "a-07", no: "A-07", title: "The film", what: "All six sheets, animated" },
 ];
 
 // The version history, for the title block and the revision block. A failure
@@ -109,6 +111,12 @@ const Blueprint = () => {
                 of its rooms, a section through its floors, and detail sheets for the parts worth
                 taking apart. Every drawing is live. Click it.
               </p>
+              <a
+                href="#a-07"
+                className="bp-chip bp-chip-red bp-mono text-[11px] uppercase tracking-wider px-3 py-2 self-start no-underline"
+              >
+                ▶ Watch the two-minute film
+              </a>
               <TitleBlock rows={titleRows} />
               <nav aria-label="Drawing index">
                 <p className="bp-mono text-[10px] uppercase tracking-[0.2em] bp-ink mb-1.5">Drawing index</p>
@@ -189,6 +197,15 @@ const Blueprint = () => {
           hint="Hover a collection or a tag · press a tag to open it"
         >
           <TagLoom tags={ctx.tags} loading={loading} />
+        </SheetFrame>
+
+        <SheetFrame
+          id="a-07"
+          no="A-07"
+          title="The film"
+          lede="The six sheets, animated: the walls draw themselves, the riser climbs down, the circuit runs and the loom weaves. Also cut as six short episodes, square and vertical."
+        >
+          <FilmPlayer />
         </SheetFrame>
 
         {majors && majors.length > 0 && (

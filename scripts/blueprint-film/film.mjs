@@ -179,8 +179,15 @@ export function buildFilm(d) {
   ];
 
   // --- segments -------------------------------------------------------------
+  //
+  // Each segment renders a frame at time t in either layout, and carries its
+  // captions as cues ([{ at, until, text }]) for the subtitle files.
 
-  const chrome = (s, k) => (t) => frame({
+  const cuesOf = (beats, duration) => beats.map((b, i) => ({
+    at: b.at, until: beats[i + 1] ? beats[i + 1].at : duration, text: b.text,
+  }));
+
+  const chrome = (s, k) => (t, layout) => frame({
     body: s.render(t),
     sheet: s.sheet,
     title: s.title,
@@ -188,7 +195,7 @@ export function buildFilm(d) {
     rev: d.rev,
     caption: captionAt(s.beats, t, s.duration),
     headerIn: prog(t, 0, 0.4),
-  });
+  }, layout);
 
   const coverRender = cover({ layers: d.layers, riserLayers: Object.keys(ask.layers) });
   const coverBeats = [{ at: 2.2, text: "Six floors, one site: from the page you see to the scripts that build it." }];
@@ -197,9 +204,10 @@ export function buildFilm(d) {
     duration: 7,
     poster: 6.4,
     sfx: [{ at: 5.2, name: "chime" }],
-    render: (t) => frame({
+    cues: [{ at: 0.5, until: 2.2, text: "The Blueprint: how sankettambare.in is built, drawn as six sheets." }, ...cuesOf(coverBeats, 7)],
+    render: (t, layout) => frame({
       body: coverRender(t), rev: d.rev, border: prog(t, 0, 1.2), caption: captionAt(coverBeats, t, 7),
-    }),
+    }, layout),
   }];
 
   sheets.forEach((s, i) => {
@@ -207,16 +215,27 @@ export function buildFilm(d) {
       no: i + 1, total, sheet: s.sheet, title: s.title, line: s.line,
     });
     segments.push({
-      id: `card-${s.id}`, duration: 2.2, poster: 0, sfx: [{ at: 0, name: "whoosh" }], render: (t) => frame({ body: card(t), rev: d.rev }),
+      id: `card-${s.id}`,
+      duration: 2.2,
+      poster: 0,
+      sfx: [{ at: 0, name: "whoosh" }],
+      cues: [{ at: 0, until: 2.2, text: `Episode ${pad(i + 1)}, ${s.title}: ${s.line}` }],
+      chapter: { sheet: s.sheet, title: s.title },
+      render: (t, layout) => frame({ body: card(t), rev: d.rev }, layout),
     });
     segments.push({
-      id: s.id, duration: s.duration, poster: s.poster, sfx: s.sfx, render: chrome(s, i + 1),
+      id: s.id, duration: s.duration, poster: s.poster, sfx: s.sfx, cues: cuesOf(s.beats, s.duration), render: chrome(s, i + 1),
     });
   });
 
   const end = endCard({ date: d.date, releases: d.releases, rev: d.rev });
   segments.push({
-    id: "end", duration: 5, poster: 3, sfx: [{ at: 0, name: "whoosh" }, { at: 1.2, name: "chime" }], render: (t) => frame({ body: end(t), rev: d.rev }),
+    id: "end",
+    duration: 5,
+    poster: 3,
+    sfx: [{ at: 0, name: "whoosh" }, { at: 1.2, name: "chime" }],
+    cues: [{ at: 0.3, until: 5, text: "Every drawing is live: sankettambare.in/blueprint" }],
+    render: (t, layout) => frame({ body: end(t), rev: d.rev }, layout),
   });
 
   // --- the cuts -------------------------------------------------------------

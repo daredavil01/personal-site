@@ -9,10 +9,18 @@
  *   npm run blueprint:film -- --no-audio      # silent
  *   npm run blueprint:film -- --keep          # keep the encoded segments…
  *   npm run blueprint:film -- --reuse         # …and splice / re-mix from them
+ *   npm run blueprint:film -- --layout=vertical  # one shape (default: both)
+ *   npm run blueprint:film -- --publish       # also refresh public/video/ for /blueprint
  *
- * Output goes to knowledge_base/blueprint-film/ (gitignored): MP4s at 1080x1080,
- * 30 fps, H.264 + AAC — square because it is the one shape every feed shows
- * whole — and a poster PNG per cut for the platforms that ask for a cover.
+ * Output goes to knowledge_base/blueprint-film/ (gitignored), every cut in two
+ * shapes: square 1080x1080, the one shape every feed shows whole, and vertical
+ * 1080x1920 (`-vertical`) for Reels, Shorts and Stories. H.264 + AAC at 30 fps,
+ * a poster PNG per cut and shape, and an .srt of the captions per cut (the film
+ * gets a .vtt too). Segments render in parallel worker processes.
+ *
+ * --publish re-encodes the square film for the web into public/video/ — the
+ * MP4, a JPEG poster, the WebVTT captions and the chapter list the page's
+ * player reads. Those four files are committed; nothing else here is.
  *
  * Every frame is an SVG built from scripts/blueprint-film/ and rasterised with
  * resvg, the renderer the share cards already use; there is no browser and no
@@ -30,6 +38,7 @@
  */
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -41,7 +50,7 @@ import SFX_MAP from "../src/atlas/audio/sfxMap.js";
 import { getStatsPayload } from "./lib/statsSource.mjs";
 import { woffToSfnt } from "./blueprint-film/woff.mjs";
 import { buildFilm } from "./blueprint-film/film.mjs";
-import { FPS, W } from "./blueprint-film/draw.mjs";
+import { FPS, LAYOUTS, W } from "./blueprint-film/draw.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "knowledge_base", "blueprint-film");
@@ -54,8 +63,13 @@ const silent = process.argv.includes("--no-audio");
 // --reuse keeps segments already encoded in a .work left by --keep, so a
 // change to the sound or the splicing does not re-render every frame.
 const reuse = process.argv.includes("--reuse");
-// --frame=<segment>@<seconds>[,…] writes single frames, for checking a moment.
+// --frame=<segment>@<seconds>[@layout][,…] writes single frames, for checking a moment.
 const frameArgs = (arg("frame") || "").split(",").filter(Boolean);
+const layouts = (arg("layout") || "square,vertical").split(",").filter((l) => LAYOUTS[l]);
+const publish = process.argv.includes("--publish");
+// Internal: a worker process renders the jobs it is handed and exits.
+const isWorker = process.argv.includes("--worker");
+const PUBLIC_VIDEO = path.join(ROOT, "public", "video");
 
 const AMBIENT = path.join(ROOT, "public", "audio", "loop-creator.m4a");
 const SPRITE = path.join(ROOT, "public", "audio", "sfx.m4a");
@@ -95,7 +109,7 @@ function publicSupabaseEnv() {
 
 // The page's modules are browser code (JSX in .js, extensionless imports), so
 // they are loaded through Vite's SSR loader rather than imported directly.
-async function loadSource() {
+async function loadSource({ fetchMajors = true } = {}) {
   publicSupabaseEnv();
   const vite = await createServer({
     root: ROOT,
@@ -119,10 +133,12 @@ async function loadSource() {
       load("/src/lib/api/changelog.js"),
     ]);
     let majors = null;
-    try {
-      majors = await changelog.getChangelogMajors();
-    } catch (err) {
-      console.warn(`  ! changelog unavailable (${err.message}); the revision line is left out`);
+    if (fetchMajors) {
+      try {
+        majors = await changelog.getChangelogMajors();
+      } catch (err) {
+        console.warn(`  ! changelog unavailable (${err.message}); the revision line is left out`);
+      }
     }
     return {
       features, ladder, circuitMod, askConfig, pageMeta, og, art, flags, tagsApi, majors,
@@ -137,15 +153,18 @@ function cardDataUri(slug) {
   return `data:image/png;base64,${fs.readFileSync(file).toString("base64")}`;
 }
 
-async function gatherData() {
-  const src = await loadSource();
-  const { payload, from } = await getStatsPayload();
-  console.info(`Stats from ${from}.`);
+// `snapshot` ({ payload, majors }) is what the main process fetched; workers are
+// handed it so every segment of one run draws the same numbers.
+async function gatherData(snapshot = null) {
+  const src = await loadSource({ fetchMajors: !snapshot });
+  const { payload, from } = snapshot ? { payload: snapshot.payload, from: null } : await getStatsPayload();
+  if (from) console.info(`Stats from ${from}.`);
+  const majors = snapshot ? snapshot.majors : src.majors;
 
   const ctx = {
     stats: payload.stats, micro: payload.micro, tags: payload.tags, releases: null,
   };
-  const releases = src.majors ? src.majors.reduce((s, m) => s + (m.count || 0), 0) : null;
+  const releases = majors ? majors.reduce((s, m) => s + (m.count || 0), 0) : null;
   ctx.releases = releases;
 
   const {
@@ -175,7 +194,7 @@ async function gatherData() {
     };
   });
 
-  return {
+  const data = {
     features: src.features.FEATURES,
     layers: src.features.LAYERS,
     collections: src.features.COLLECTIONS.map((c) => ({ ...c, count: src.features.fmt(c.count(ctx)) })),
@@ -197,10 +216,11 @@ async function gatherData() {
     types: src.tagsApi.ENTITY_TYPES,
     plural: (type) => ENTITY_PLURALS[type] || type,
     colorForTag: src.art.colorForTag,
-    rev: src.majors && src.majors[0] ? src.majors[0].latest : null,
+    rev: majors && majors[0] ? majors[0].latest : null,
     releases,
     date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
   };
+  return { data, snapshot: { payload, majors } };
 }
 
 // --- rendering ------------------------------------------------------------------
@@ -219,7 +239,7 @@ async function createRasteriser() {
 const frameCount = (seconds) => Math.round(seconds * FPS);
 
 // One segment straight into ffmpeg as a PNG stream: nothing touches disk.
-function encodeSegment(ffmpeg, segment, rasterise, file) {
+function encodeSegment(ffmpeg, segment, layout, rasterise, file) {
   return new Promise((resolve, reject) => {
     const proc = spawn(ffmpeg, [
       "-y", "-loglevel", "error",
@@ -236,7 +256,7 @@ function encodeSegment(ffmpeg, segment, rasterise, file) {
     let i = 0;
     const pump = () => {
       while (i < frames) {
-        const png = rasterise(segment.render(i / FPS));
+        const png = rasterise(segment.render(i / FPS, layout));
         i += 1;
         if (!proc.stdin.write(png)) {
           proc.stdin.once("drain", pump);
@@ -295,71 +315,189 @@ function mux(ffmpeg, { video, events, duration, sfxFiles, out }) {
   ]);
 }
 
+// --- subtitles --------------------------------------------------------------------
+
+const stamp = (sec, sep) => {
+  const ms = Math.max(0, Math.round(sec * 1000));
+  const hh = String(Math.floor(ms / 3600000)).padStart(2, "0");
+  const mm = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
+  const ss = String(Math.floor(ms / 1000) % 60).padStart(2, "0");
+  return `${hh}:${mm}:${ss}${sep}${String(ms % 1000).padStart(3, "0")}`;
+};
+
+// The cut's captions on its own timeline: each segment's cues, shifted by
+// where the segment starts.
+function cutCues(cut, byId, offsets) {
+  return cut.segments.flatMap((id) => (byId[id].cues || []).map((c) => ({
+    start: offsets[id] + c.at, end: offsets[id] + c.until, text: c.text,
+  }))).filter((c) => c.end > c.start + 0.2);
+}
+
+const toSrt = (cues) => `${cues.map((c, i) => `${i + 1}\n${stamp(c.start, ",")} --> ${stamp(c.end, ",")}\n${c.text}\n`).join("\n")}`;
+const toVtt = (cues) => `WEBVTT\n\n${cues.map((c) => `${stamp(c.start, ".")} --> ${stamp(c.end, ".")}\n${c.text}\n`).join("\n")}`;
+
+// Where each segment of a cut starts, in seconds, on whole frames.
+function offsetsOf(cut, byId) {
+  let t = 0;
+  return Object.fromEntries(cut.segments.map((id) => {
+    const at = t;
+    t += frameCount(byId[id].duration) / FPS;
+    return [id, at];
+  }).concat([["__end", t]]));
+}
+
+// --- workers ---------------------------------------------------------------------
+
+const segFile = (id, layout) => path.join(WORK, `${id}.${layout}.mp4`);
+
+async function renderJobs(jobs, byId, ffmpeg, rasterise) {
+  for (const job of jobs) { // eslint-disable-line no-restricted-syntax
+    const [id, layout] = job.split("@");
+    const started = Date.now();
+    // eslint-disable-next-line no-await-in-loop -- one ffmpeg per worker keeps memory flat
+    await encodeSegment(ffmpeg, byId[id], layout, rasterise, segFile(id, layout));
+    console.info(`  ${String(frameCount(byId[id].duration)).padStart(4)} frames  ${String(Date.now() - started).padStart(6)}ms  ${id} (${layout})`);
+  }
+}
+
+// Spreads the jobs over worker processes, heaviest first onto the least-loaded
+// worker. A vertical frame has 78% more pixels to rasterise and compress.
+function runWorkers(jobs, byId, dataFile) {
+  const count = Math.max(1, Math.min(Number(arg("workers")) || os.cpus().length - 1, 4, jobs.length));
+  const weight = (job) => {
+    const [id, layout] = job.split("@");
+    return frameCount(byId[id].duration) * (layout === "vertical" ? 1.6 : 1);
+  };
+  const bins = Array.from({ length: count }, () => ({ load: 0, jobs: [] }));
+  jobs.slice().sort((a, b) => weight(b) - weight(a)).forEach((job) => {
+    const bin = bins.reduce((least, b) => (b.load < least.load ? b : least), bins[0]);
+    bin.jobs.push(job);
+    bin.load += weight(job);
+  });
+  console.info(`Rendering ${jobs.length} segments on ${count} workers.`);
+  const script = fileURLToPath(import.meta.url);
+  return Promise.all(bins.filter((b) => b.jobs.length).map((b) => new Promise((resolve, reject) => {
+    const proc = spawn(process.execPath, [script, "--worker", `--jobs=${b.jobs.join(",")}`, `--data=${dataFile}`], {
+      stdio: ["ignore", "inherit", "pipe"],
+    });
+    let err = "";
+    proc.stderr.on("data", (c) => {
+      const line = String(c);
+      // Node's notice that src/ is ESM without "type": "module" — noise here.
+      if (!/MODULE_TYPELESS|Reparsing as ES module|"type": "module"|trace-warnings/.test(line)) err += line;
+    });
+    proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`worker exited ${code}: ${err}`))));
+  })));
+}
+
+// --- publishing for /blueprint ------------------------------------------------------
+
+// The page's copy: a lighter encode (it streams to phones), a JPEG poster, the
+// captions as WebVTT, and the chapter starts the player's buttons seek to.
+function publishFilm(ffmpeg, { cut, byId, offsets, cues, rev }) {
+  fs.mkdirSync(PUBLIC_VIDEO, { recursive: true });
+  const src = path.join(OUT, `${cut.file}.mp4`);
+  run(ffmpeg, [
+    "-y", "-i", src, "-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-crf", "26",
+    "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart",
+    path.join(PUBLIC_VIDEO, `${cut.file}.mp4`),
+  ]);
+  run(ffmpeg, ["-y", "-i", path.join(OUT, `${cut.file}.png`), "-q:v", "4", path.join(PUBLIC_VIDEO, `${cut.file}.jpg`)]);
+  fs.writeFileSync(path.join(PUBLIC_VIDEO, `${cut.file}.vtt`), toVtt(cues));
+  const chapters = cut.segments
+    .filter((id) => byId[id].chapter)
+    .map((id) => ({ ...byId[id].chapter, start: Number(offsets[id].toFixed(2)) }));
+  fs.writeFileSync(path.join(PUBLIC_VIDEO, `${cut.file}.json`), `${JSON.stringify({
+    title: cut.title,
+    duration: Number(offsets.__end.toFixed(2)),
+    rev,
+    rendered: new Date().toISOString().slice(0, 10),
+    chapters,
+  }, null, 2)}\n`);
+  const kb = Math.round(fs.statSync(path.join(PUBLIC_VIDEO, `${cut.file}.mp4`)).size / 1024);
+  console.info(`Published ${path.relative(ROOT, PUBLIC_VIDEO)}/${cut.file}.{mp4,jpg,vtt,json}  (${kb.toLocaleString("en-IN")} KB video)`);
+}
+
 // --- main -----------------------------------------------------------------------
 
 async function main() {
-  const data = await gatherData();
+  const dataFile = arg("data");
+  const { data, snapshot } = await gatherData(dataFile ? JSON.parse(fs.readFileSync(dataFile, "utf8")) : null);
   const { segments, cuts: allCuts } = buildFilm(data);
+  const byId = Object.fromEntries(segments.map((s) => [s.id, s]));
+  const rasterise = await createRasteriser();
+
+  if (isWorker) {
+    await renderJobs((arg("jobs") || "").split(",").filter(Boolean), byId, await findFfmpeg(), rasterise);
+    return;
+  }
+
   const cuts = only ? allCuts.filter((c) => c.file.includes(only)) : allCuts;
   if (!cuts.length) throw new Error(`No cut matched --only=${only}`);
-  const byId = Object.fromEntries(segments.map((s) => [s.id, s]));
-
+  if (publish && !cuts.some((c) => c.file === "the-blueprint")) throw new Error("--publish needs the full film; drop --only");
+  if (publish && !layouts.includes("square")) throw new Error("--publish needs the square layout");
   await fs.promises.mkdir(WORK, { recursive: true });
-  const rasterise = await createRasteriser();
 
   if (frameArgs.length) {
     frameArgs.forEach((spec) => {
-      const [id, at] = spec.split("@");
+      const [id, at, layout = layouts[0]] = spec.split("@");
       if (!byId[id]) throw new Error(`No segment "${id}". Segments: ${Object.keys(byId).join(", ")}`);
-      fs.writeFileSync(path.join(OUT, `frame-${id}-${at}.png`), rasterise(byId[id].render(Number(at))));
+      fs.writeFileSync(path.join(OUT, `frame-${id}-${at}-${layout}.png`), rasterise(byId[id].render(Number(at), layout)));
     });
     console.info(`Wrote ${frameArgs.length} frame${frameArgs.length === 1 ? "" : "s"}.`);
     return;
   }
 
-  // Posters: one still per cut, from the moment that best explains it.
-  cuts.forEach((cut) => {
+  const suffix = (layout) => (layout === "square" ? "" : `-${layout}`);
+
+  // Posters: one still per cut and shape, from the moment that best explains it.
+  layouts.forEach((layout) => cuts.forEach((cut) => {
     const seg = byId[cut.poster];
-    fs.writeFileSync(path.join(OUT, `${cut.file}.png`), rasterise(seg.render(seg.poster)));
+    fs.writeFileSync(path.join(OUT, `${cut.file}${suffix(layout)}.png`), rasterise(seg.render(seg.poster, layout)));
+  }));
+  // Captions: the same words in both shapes, so one file per cut.
+  cuts.forEach((cut) => {
+    const cues = cutCues(cut, byId, offsetsOf(cut, byId));
+    fs.writeFileSync(path.join(OUT, `${cut.file}.srt`), toSrt(cues));
+    if (cut.file === "the-blueprint") fs.writeFileSync(path.join(OUT, `${cut.file}.vtt`), toVtt(cues));
   });
-  console.info(`Wrote ${cuts.length} poster${cuts.length === 1 ? "" : "s"}.`);
+  console.info(`Wrote ${cuts.length * layouts.length} posters and ${cuts.length} subtitle files.`);
   if (stillsOnly) return;
 
   const ffmpeg = await findFfmpeg();
   const needed = [...new Set(cuts.flatMap((c) => c.segments))];
-  for (const id of needed) { // eslint-disable-line no-restricted-syntax
-    const seg = byId[id];
-    const file = path.join(WORK, `${id}.mp4`);
-    if (reuse && fs.existsSync(file)) {
-      console.info(`  reused ${id}`);
-      continue; // eslint-disable-line no-continue
-    }
-    const started = Date.now();
-    // eslint-disable-next-line no-await-in-loop -- one ffmpeg at a time keeps memory flat
-    await encodeSegment(ffmpeg, seg, rasterise, file);
-    console.info(`  ${String(frameCount(seg.duration)).padStart(4)} frames  ${String(Date.now() - started).padStart(6)}ms  ${id}`);
+  const jobs = layouts.flatMap((layout) => needed.map((id) => `${id}@${layout}`))
+    .filter((job) => !(reuse && fs.existsSync(segFile(...job.split("@")))));
+  if (jobs.length) {
+    const snapshotFile = path.join(WORK, "snapshot.json");
+    fs.writeFileSync(snapshotFile, JSON.stringify(snapshot));
+    await runWorkers(jobs, byId, snapshotFile);
   }
 
   const sfxFiles = silent ? {} : extractSfx(ffmpeg);
-  cuts.forEach((cut) => {
-    let offset = 0;
-    const events = [];
-    cut.segments.forEach((id) => {
-      const seg = byId[id];
-      (seg.sfx || []).forEach((e) => events.push({ name: e.name, at: offset + e.at }));
-      offset += frameCount(seg.duration) / FPS;
-    });
-    const list = path.join(WORK, `${cut.file}.txt`);
-    fs.writeFileSync(list, cut.segments.map((id) => `file '${path.join(WORK, `${id}.mp4`)}'`).join("\n"));
-    const video = path.join(WORK, `${cut.file}.video.mp4`);
+  layouts.forEach((layout) => cuts.forEach((cut) => {
+    const offsets = offsetsOf(cut, byId);
+    const events = cut.segments.flatMap((id) => (byId[id].sfx || []).map((e) => ({ name: e.name, at: offsets[id] + e.at })));
+    const name = `${cut.file}${suffix(layout)}`;
+    const list = path.join(WORK, `${name}.txt`);
+    fs.writeFileSync(list, cut.segments.map((id) => `file '${segFile(id, layout)}'`).join("\n"));
+    const video = path.join(WORK, `${name}.video.mp4`);
     run(ffmpeg, ["-y", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", video]);
-    const out = path.join(OUT, `${cut.file}.mp4`);
+    const out = path.join(OUT, `${name}.mp4`);
     mux(ffmpeg, {
-      video, events, duration: offset, sfxFiles, out,
+      video, events, duration: offsets.__end, sfxFiles, out,
     });
     const kb = Math.round(fs.statSync(out).size / 1024);
-    console.info(`${cut.file}.mp4  ${offset.toFixed(1)}s  ${kb.toLocaleString("en-IN")} KB`);
-  });
+    console.info(`${name}.mp4  ${offsets.__end.toFixed(1)}s  ${kb.toLocaleString("en-IN")} KB`);
+  }));
+
+  if (publish) {
+    const cut = cuts.find((c) => c.file === "the-blueprint");
+    const offsets = offsetsOf(cut, byId);
+    publishFilm(ffmpeg, {
+      cut, byId, offsets, cues: cutCues(cut, byId, offsets), rev: data.rev,
+    });
+  }
 
   if (!process.argv.includes("--keep")) fs.rmSync(WORK, { recursive: true, force: true });
   console.info(`\nDone: ${path.relative(ROOT, OUT)}/`);
