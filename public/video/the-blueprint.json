@@ -1,0 +1,39 @@
+{
+  "title": "The Blueprint",
+  "duration": 110.4,
+  "rev": "v20.1.1",
+  "rendered": "2026-10-08",
+  "narration": "Piper TTS, en_GB-cori-high",
+  "chapters": [
+    {
+      "sheet": "A-01",
+      "title": "Site plan",
+      "start": 7
+    },
+    {
+      "sheet": "A-02",
+      "title": "Section",
+      "start": 25.2
+    },
+    {
+      "sheet": "A-03",
+      "title": "The Ask circuit",
+      "start": 41.9
+    },
+    {
+      "sheet": "A-04",
+      "title": "Unfurl bench",
+      "start": 57.1
+    },
+    {
+      "sheet": "A-05",
+      "title": "Shell switch",
+      "start": 73
+    },
+    {
+      "sheet": "A-06",
+      "title": "Tag loom",
+      "start": 89
+    }
+  ]
+}

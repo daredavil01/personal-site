@@ -342,6 +342,48 @@ export const commitGraph = ({ width = 380, height = 260, accent = COLORS.amber }
   ].join("");
 };
 
+// --- /blueprint ---------------------------------------------------------------
+
+// The site plan from the page: eleven rooms on a structural grid, one of them
+// redlined, and the entrance. Geometry only — like the commit graph it carries
+// no numbers, so the card never asserts a count the page did not compute.
+// The rectangles are the page's own 960x600 plan (src/components/Blueprint/
+// features.js), restated here because src/lib/og must not import components.
+const PLAN_ROOMS = [
+  [0, 0, 260, 190], [260, 0, 260, 190], [520, 0, 220, 190], [740, 0, 220, 190],
+  [0, 190, 520, 210], [520, 190, 220, 210], [740, 190, 220, 210],
+  [0, 400, 240, 200], [240, 400, 280, 200], [520, 400, 220, 200], [740, 400, 220, 200],
+];
+
+export const floorPlan = ({ width = 460, height = 300, accent = COLORS.red, lit = 1 } = {}) => {
+  const pad = 26;
+  const k = Math.min((width - pad * 2) / 960, (height - pad * 2) / 600);
+  const x = (v) => (pad + v * k).toFixed(1);
+  const y = (v) => (pad + v * k).toFixed(1);
+  const len = (v) => (v * k).toFixed(1);
+  const [lx, ly, lw, lh] = PLAN_ROOMS[lit] || PLAN_ROOMS[1];
+  const hatch = Array.from({ length: 14 }, (_, i) => {
+    const off = i * 34 - 120;
+    return `<line x1="${x(lx + off)}" y1="${y(ly + lh)}" x2="${x(lx + off + lh)}" y2="${y(ly)}" stroke="${accent}" stroke-width="2" opacity="0.45"/>`;
+  }).join("");
+  const grid = [0, 260, 520, 740, 960].map((gx) => `<line x1="${x(gx)}" y1="${(pad - 16).toFixed(1)}" x2="${x(gx)}" y2="${(pad + 600 * k + 10).toFixed(1)}" stroke="${COLORS.textFaint}" stroke-width="1" stroke-dasharray="8 4 2 4" opacity="0.6"/>`).join("");
+  const walls = PLAN_ROOMS.map(([rx, ry, rw, rh]) => `<rect x="${x(rx)}" y="${y(ry)}" width="${len(rw)}" height="${len(rh)}" fill="none" stroke="${COLORS.textDim}" stroke-width="2.5"/>`).join("");
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<defs><clipPath id="lit"><rect x="${x(lx)}" y="${y(ly)}" width="${len(lw)}" height="${len(lh)}"/></clipPath></defs>`,
+    grid,
+    `<rect x="${x(lx)}" y="${y(ly)}" width="${len(lw)}" height="${len(lh)}" fill="${accent}" opacity="0.18"/>`,
+    `<g clip-path="url(#lit)">${hatch}</g>`,
+    walls,
+    `<rect x="${x(0)}" y="${y(0)}" width="${len(960)}" height="${len(600)}" fill="none" stroke="${COLORS.text}" stroke-width="5"/>`,
+    `<rect x="${x(lx)}" y="${y(ly)}" width="${len(lw)}" height="${len(lh)}" fill="none" stroke="${accent}" stroke-width="4"/>`,
+    // The entrance: a gap in the outer wall and the arrow in.
+    `<rect x="${x(330)}" y="${(pad + 600 * k - 4).toFixed(1)}" width="${len(70)}" height="8" fill="${COLORS.ink}"/>`,
+    `<path d="M${x(350)},${(pad + 600 * k + 18).toFixed(1)} L${x(365)},${(pad + 600 * k + 6).toFixed(1)} L${x(380)},${(pad + 600 * k + 18).toFixed(1)}" fill="none" stroke="${accent}" stroke-width="3"/>`,
+    "</svg>",
+  ].join("");
+};
+
 // --- /newsletter --------------------------------------------------------------
 
 // The month as a wall calendar: one square per day, lit where something

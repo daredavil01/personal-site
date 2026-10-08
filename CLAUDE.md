@@ -78,7 +78,8 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
 step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
-(run after content moves, then commit the PNGs), `newsletter:draft` (monthly).
+(run after content moves, then commit the PNGs), `newsletter:draft` (monthly),
+`blueprint:film` (renders video into `knowledge_base/`, nothing to commit).
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
 have no npm entry — run them with `node`.
 
@@ -446,8 +447,59 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |
+| Site blueprint (/blueprint) | `src/pages/Blueprint.js`, `src/components/Blueprint/` |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |
+
+## The Blueprint (/blueprint)
+
+The site's features drawn as architectural sheets: a floor plan (every feature
+a room), a section through the stack, the /ask pipeline as a circuit, an unfurl
+bench, the shell switch and a live tag loom. It lives in the Workshop region.
+
+- **Rooms are data:** `src/components/Blueprint/features.js` — each feature's
+  plan rectangle, specs and the file it touches on each floor of the section.
+  **When a feature ships or moves, update its room.** `features.test.js` fails
+  if a room links to a route that does not exist or the rooms stop tiling the
+  plan.
+- **No typed-in numbers.** Code facts are read from the modules that define
+  them (regions, quests, card slugs, the ask ladder); content counts come from
+  `useSiteStats` and are omitted, never zeroed, when missing.
+- **The drawings run the real code:** the shell switch calls
+  `resolveViewMode` (`shellLadder.test.js` checks every input combination), the
+  unfurl bench reads `PAGE_META` + `cardUrlForOrigin`, the circuit's rungs are
+  `DEFAULT_ASK_SETTINGS.tiers`.
+- Colours are CSS tokens in `blueprint.css` (`.bp-root`, dark under `.dark`);
+  the redline is the site's `#b22200`.
+- **The film:** `npm run blueprint:film` renders the sheets as illustrated
+  video into `knowledge_base/blueprint-film/` (gitignored): one ~2-minute film
+  plus one ~20-second episode per sheet for posting as a series, each in two
+  shapes — square 1080×1080 and vertical 1080×1920 (`-vertical`, for Reels,
+  Shorts and Stories) — with a poster PNG per cut and shape and an `.srt` of
+  the captions per cut. Frames are SVG from `scripts/blueprint-film/`,
+  rasterised by resvg (no browser) in parallel worker processes; the data is
+  the same modules and the live `/api/stats`, loaded through Vite's SSR
+  loader. Sound is the site's own Workshop loop and SFX sprite. Needs ffmpeg.
+  `-- --stills` writes posters and subtitles only, `-- --frame=<seg>@<s>[@layout]`
+  one frame, `-- --only=<name>` one cut, `-- --layout=square|vertical` one shape.
+  Like the cards, the numbers are baked in: re-run it after content moves.
+- **Audio description:** `-- --describe` adds a narrator to the full film
+  (`the-blueprint-described[-vertical].mp4`, plus the narration as `.srt`/`.vtt`):
+  the lines live beside the captions in `scripts/blueprint-film/film.mjs`, are
+  timed to the drawing, and are sped up (≤1.35×) only if a line overruns its
+  gap; the music ducks under the voice. `voice.mjs` speaks with Workers AI's
+  Aura 2 (the Atlas guide's voice) when `CF_ACCOUNT_ID`/`CF_API_TOKEN` are set,
+  else Piper (`PIPER_VOICE`=path to a voice `.onnx`, `PIPER_BIN`). The
+  published film was narrated with Piper `en_GB-cori-high` (public-domain
+  LibriVox data). `-- --describe-only` re-narrates the rendered film without
+  drawing a frame.
+- **The film on the page (A-07):** `-- --publish` also writes a lighter web
+  encode of the square film — the described cut when `--describe` is on — to
+  `public/video/the-blueprint.{mp4,jpg,vtt,json}` — video, poster, captions,
+  chapter starts — which **are committed**.
+  `FilmPlayer.js` reads the chapters from the JSON (`preload="none"`, so the
+  page costs a poster until someone presses play), and `film.test.js` fails
+  the build if any of the four is missing or the chapters disagree.
 
 ## Homepage Sections
 

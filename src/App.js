@@ -45,6 +45,7 @@ const ChangelogGraph = lazy(() => import("./pages/ChangelogGraph"));
 const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
+const Blueprint = lazy(() => import("./pages/Blueprint"));
 const TagsHub = lazy(() => import("./pages/TagsHub"));
 const TagDetail = lazy(() => import("./pages/TagDetail"));
 const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
@@ -111,6 +112,7 @@ const App = () => (
               <Route path="/treks" element={<TreksPage />} />
               <Route path="/interactive-me" element={<InteractiveMePage />} />
               <Route path="/mindmap" element={<MindMap />} />
+              <Route path="/blueprint" element={<Blueprint />} />
               <Route path="/tags" element={<TagsHub />} />
               <Route path="/tags/:name" element={<TagDetail />} />
               <Route path="/admin/*" element={<AdminApp />} />

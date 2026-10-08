@@ -117,5 +117,20 @@ export async function getMajorSummary(major) {
   };
 }
 
+/**
+ * Every major's one-line headline, newest first — the revision block on
+ * /blueprint. A major `npm run changelog` has not summarised yet is simply
+ * absent, so callers treat a missing headline as "none yet", not an error.
+ * @returns {Promise<{ major: number, headline: string }[]>}
+ */
+export async function getMajorHeadlines() {
+  const { data, error } = await supabase
+    .from("changelog_majors")
+    .select("major, headline")
+    .order("major", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
 export const getChangelog = changelog.list;
 export default changelog;

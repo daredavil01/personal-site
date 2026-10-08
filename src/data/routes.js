@@ -66,6 +66,7 @@ const routes = [
     subRoutes: [
       { label: "Interactive Me", path: "/interactive-me" },
       { label: "Mind Map", path: "/mindmap" },
+      { label: "Blueprint", path: "/blueprint" },
       { label: "Instagram", path: "/instagram" },
       { label: "Stats", path: "/stats" },
     ],

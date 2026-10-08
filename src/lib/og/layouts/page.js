@@ -13,7 +13,7 @@ import {
 import {
   spineStack, ridgeline, lostTrail, dotMatrix, progressBar, swatchCloud, radialSpokes,
   connectedCurve, slideFan, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
-  commitGraph, monthCalendar, envelope,
+  commitGraph, monthCalendar, envelope, floorPlan,
 } from "./figures.js";
 
 const col = (gap, ...children) => h("div", { style: { display: "flex", flexDirection: "column", gap } }, children);
@@ -83,6 +83,8 @@ const FIGURES = {
 
   changelog: (m) => inset(versionStack({ width: 380, height: 250, accent: m.accent }), 380, 250, { right: 72, bottom: 140 }),
   "changelog-graph": (m) => inset(commitGraph({ width: 380, height: 260, accent: m.accent }), 380, 260, { right: 72, bottom: 130 }),
+
+  blueprint: (m) => inset(floorPlan({ width: 470, height: 310, accent: m.accent }), 470, 310, { right: 48, bottom: 118 }),
 
   // The one card that shows six numbers: at thumbnail size the grid reads as
   // texture, and at full size every figure is countable.
@@ -205,7 +207,7 @@ export const pageCard = (model) => {
   const bleed = typeof figure === "function" ? figure(model) : null;
   // Leave room for whichever side the figure occupies so text never collides
   // with it. The full-bleed portraits are the exception: text sits over them.
-  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger"]
+  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger"]
     .includes(model.slug) ? 620 : CARD.width - 128;
 
   return Frame({

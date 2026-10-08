@@ -35,6 +35,7 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/treks` | TreksPage | `/og/treks.png` |
 | `/interactive-me` | InteractiveMePage | `/og/interactive-me.png` |
 | `/mindmap` | MindMap | `/og/mindmap.png` |
+| `/blueprint` | Blueprint | `/og/blueprint.png` |
 | `/tags` | TagsHub | `/og/tags.png` |
 | `/tags/:name` | TagDetail | the row's photo, else `/og/tags.png` |
 | `/admin/*` | AdminApp | none |

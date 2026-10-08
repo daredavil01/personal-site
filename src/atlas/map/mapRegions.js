@@ -109,6 +109,7 @@ const PATH_PREFIXES = [
   ["/books", "reader"],
   ["/projects", "creator"],
   ["/resume", "creator"],
+  ["/blueprint", "creator"],
   ["/100-days-to-offload", "writer"],
   ["/challenges", "writer"],
   ["/micro-blog", "writer"],

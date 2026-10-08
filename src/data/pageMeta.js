@@ -55,6 +55,15 @@ export const PAGE_META = {
     ogSlug: "ask",
     type: "website",
   },
+  "/blueprint": {
+    title: "The Blueprint",
+    description:
+      "How this site is built, drawn as architectural sheets: every feature as a room on a floor plan, a section through the stack, the /ask pipeline as a circuit, and how a shared link unfurls.",
+    image: `${SITE_URL}/og/blueprint.png`,
+    imageAlt: "A floor plan of the site's features with one room redlined",
+    ogSlug: "blueprint",
+    type: "website",
+  },
   "/books": {
     title: "Books",
     description:
@@ -257,8 +266,7 @@ export function composeTitle(title) {
 //     tags and shares have no photo at all, so they always take the card
 //   - `type` is the og:type. Detail pages are "article", which is what they are;
 //     the old code hardcoded "website" for every route on the site.
-const truncate = (str, max) =>
-  str.length > max ? `${str.slice(0, max - 3)}…` : str;
+const truncate = (str, max) => (str.length > max ? `${str.slice(0, max - 3)}…` : str);
 
 const sectionImage = (slug) => `${SITE_URL}/og/${slug}.png`;
 
@@ -303,8 +311,8 @@ export function buildSportMeta({
   return {
     title,
     description:
-      description ||
-      `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
+      description
+      || `Participated in the ${distance} race at ${place} on ${date}. Finishing time: ${time}.`,
     image: image || sectionImage("sports"),
     imageAlt: `Race card for ${title}`,
     type: "article",
@@ -315,8 +323,8 @@ export function buildBookMeta({ title, author, description, image } = {}) {
   return {
     title: `${title} by ${author}`,
     description:
-      description ||
-      `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
+      description
+      || `Read ${title} by ${author} — a review and analysis from Sanket Tambare's personal library.`,
     image: image || sectionImage("books"),
     imageAlt: `Book card for ${title}`,
     type: "article",
@@ -327,8 +335,8 @@ export function buildBlogMeta({ title, description, image } = {}) {
   return {
     title,
     description:
-      description ||
-      `A blog post from the 100 Days to Offload challenge: ${title}.`,
+      description
+      || `A blog post from the 100 Days to Offload challenge: ${title}.`,
     image: image || sectionImage("100-days-to-offload"),
     imageAlt: `Blog post card for ${title}`,
     type: "article",
@@ -399,8 +407,8 @@ export function buildTagMeta({
   return {
     title: `#${label}`,
     description:
-      description ||
-      `Everything in Sanket Tambare's archive tagged ${label}${category ? ` — a ${category} tag` : ""}.`,
+      description
+      || `Everything in Sanket Tambare's archive tagged ${label}${category ? ` — a ${category} tag` : ""}.`,
     image: image || sectionImage("tags"),
     imageAlt: `Tag card for ${label}`,
     type: "website",

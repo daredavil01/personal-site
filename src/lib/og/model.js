@@ -111,6 +111,11 @@ export function pageModel(slug, payload, {
       title: "What each release cost",
       lede: "Every version, the commits behind it, and the lines it moved.",
     },
+    blueprint: {
+      eyebrow: "The Blueprint",
+      title: "How this site is built",
+      lede: "Every feature, drawn as a floor plan.",
+    },
     contact: {
       eyebrow: "Contact",
       title: "Let's talk",
@@ -274,7 +279,7 @@ export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
-  "ask-share", "newsletter",
+  "ask-share", "newsletter", "blueprint",
 ];
 
 // One issue's card, from issueModel() (src/lib/newsletterIssue.js). Rendered by
