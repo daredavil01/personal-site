@@ -13,6 +13,18 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v21.1.1] — 2026-10-08
+
+### Fixed
+
+- **Lint** (`src/data/pageMeta.js`): the six `operator-linebreak` / `no-confusing-arrow` errors that failed `npm run lint` — the first step of Node.js CI, so build and tests never ran — are fixed. Formatting only: the `||` fallbacks in four meta builders move to the start of their line and `truncate` gets a parenthesised body.
+
+## [v21.1.1] — 2026-10-08
+
+### Fixed
+
+- **Lint** (`src/data/pageMeta.js`): the six `operator-linebreak` / `no-confusing-arrow` errors that had `npm run lint` — the first step of Node.js CI — failing on `main` are fixed. Formatting only: the `||` fallbacks in four meta builders move to the start of the line and `truncate` gets a parenthesised body.
+
 ## [v21.1.0] — 2026-10-08
 
 ### Added
