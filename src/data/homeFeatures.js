@@ -54,6 +54,12 @@ const HOME_FEATURES = [
     icon: "account_tree",
   },
   {
+    title: "The Blueprint",
+    desc: "How this site is built, drawn as architectural sheets — a floor plan of every feature, a section through the stack, the Ask pipeline as a circuit you can switch off rung by rung.",
+    path: "/blueprint",
+    icon: "architecture",
+  },
+  {
     title: "Vital Stats",
     desc: "A data-driven snapshot of my activities: from the number of books read and kilometers run to the lines of code written.",
     path: "/stats",

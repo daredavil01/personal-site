@@ -55,6 +55,15 @@ export const PAGE_META = {
     ogSlug: "ask",
     type: "website",
   },
+  "/blueprint": {
+    title: "The Blueprint",
+    description:
+      "How this site is built, drawn as architectural sheets: every feature as a room on a floor plan, a section through the stack, the /ask pipeline as a circuit, and how a shared link unfurls.",
+    image: `${SITE_URL}/og/blueprint.png`,
+    imageAlt: "A floor plan of the site's features with one room redlined",
+    ogSlug: "blueprint",
+    type: "website",
+  },
   "/books": {
     title: "Books",
     description:

@@ -1,0 +1,186 @@
+/* The Blueprint page (/blueprint).
+ *
+ * Every sheet is drawn in two inks: the drawing itself and a redline for
+ * whatever the reader has selected — architects mark up a drawing in red, and
+ * the site's own accent (#b22200) already is one. Light mode is a whiteprint
+ * (blue lines on pale paper), dark mode a cyanotype (pale lines on blue). All
+ * colour goes through these tokens so the SVGs need no dark: variants. */
+
+.bp-root {
+  --bp-paper: #f2f5f9;
+  --bp-panel: #ffffff;
+  --bp-ink: #163a63;
+  --bp-ink-soft: rgba(22, 58, 99, 0.62);
+  --bp-ink-faint: rgba(22, 58, 99, 0.16);
+  --bp-grid: rgba(22, 58, 99, 0.06);
+  --bp-grid-bold: rgba(22, 58, 99, 0.11);
+  --bp-fill: rgba(22, 58, 99, 0.05);
+  --bp-red: #b22200;
+  --bp-red-soft: rgba(178, 34, 0, 0.14);
+  color: var(--bp-ink);
+}
+
+.dark .bp-root {
+  --bp-paper: #0c2342;
+  --bp-panel: #0f2a4f;
+  --bp-ink: #d4e5fb;
+  --bp-ink-soft: rgba(212, 229, 251, 0.66);
+  --bp-ink-faint: rgba(212, 229, 251, 0.18);
+  --bp-grid: rgba(212, 229, 251, 0.05);
+  --bp-grid-bold: rgba(212, 229, 251, 0.1);
+  --bp-fill: rgba(212, 229, 251, 0.05);
+  --bp-red: #ff7a5c;
+  --bp-red-soft: rgba(255, 122, 92, 0.16);
+}
+
+/* A drawing sheet: the grid, a double border, and registration marks. */
+.bp-sheet {
+  position: relative;
+  background-color: var(--bp-paper);
+  background-image:
+    linear-gradient(var(--bp-grid-bold) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-grid-bold) 1px, transparent 1px),
+    linear-gradient(var(--bp-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-grid) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+  border: 1.5px solid var(--bp-ink);
+  box-shadow: inset 0 0 0 4px var(--bp-paper), inset 0 0 0 5px var(--bp-ink-faint);
+}
+
+.bp-sheet::before,
+.bp-sheet::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  border-color: var(--bp-red);
+  border-style: solid;
+}
+
+.bp-sheet::before {
+  top: -1.5px;
+  left: -1.5px;
+  border-width: 3px 0 0 3px;
+}
+
+.bp-sheet::after {
+  right: -1.5px;
+  bottom: -1.5px;
+  border-width: 0 3px 3px 0;
+}
+
+.bp-panel {
+  background: var(--bp-panel);
+  border: 1px solid var(--bp-ink-faint);
+}
+
+.bp-rule { border-color: var(--bp-ink-faint); }
+.bp-ink { color: var(--bp-ink); }
+.bp-soft { color: var(--bp-ink-soft); }
+.bp-red { color: var(--bp-red); }
+.bp-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* SVG paint, so no drawing needs a dark-mode branch. */
+.bp-stroke { stroke: var(--bp-ink); }
+.bp-stroke-soft { stroke: var(--bp-ink-soft); }
+.bp-stroke-faint { stroke: var(--bp-ink-faint); }
+.bp-stroke-red { stroke: var(--bp-red); }
+.bp-fill-ink { fill: var(--bp-ink); }
+.bp-fill-soft { fill: var(--bp-ink-soft); }
+.bp-fill-faint { fill: var(--bp-fill); }
+.bp-fill-paper { fill: var(--bp-paper); }
+.bp-fill-red { fill: var(--bp-red); }
+.bp-fill-red-soft { fill: var(--bp-red-soft); }
+
+.bp-svg-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bp-svg-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Controls drawn on the sheet. */
+.bp-chip {
+  border: 1px solid var(--bp-ink-faint);
+  background: var(--bp-panel);
+  color: var(--bp-ink-soft);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.bp-chip:hover { color: var(--bp-red); border-color: var(--bp-red); }
+
+.bp-chip[aria-pressed="true"],
+.bp-chip[aria-checked="true"] {
+  color: var(--bp-paper);
+  background: var(--bp-ink);
+  border-color: var(--bp-ink);
+}
+
+.bp-chip-red[aria-pressed="true"],
+.bp-chip-red[aria-checked="true"] {
+  background: var(--bp-red);
+  border-color: var(--bp-red);
+}
+
+/* Interactive SVG regions: hover and keyboard focus draw a dashed redline. */
+.bp-hit { cursor: pointer; outline: none; }
+.bp-hit .bp-hit-shape { fill: transparent; stroke: transparent; stroke-width: 3; }
+
+.bp-hit:hover .bp-hit-shape,
+.bp-hit:focus-visible .bp-hit-shape {
+  stroke: var(--bp-red);
+  stroke-dasharray: 7 5;
+}
+
+/* Current flowing along a wire. */
+@keyframes bp-flow {
+  to { stroke-dashoffset: -24; }
+}
+
+.bp-flow {
+  stroke-dasharray: 8 4;
+  animation: bp-flow 0.9s linear infinite;
+}
+
+/* A line drawn on, once. Paths using it set pathLength="1". */
+@keyframes bp-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+.bp-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: bp-draw 0.9s ease-out both;
+}
+
+@keyframes bp-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.bp-fade-in { animation: bp-fade-in 0.35s ease-out both; }
+
+@keyframes bp-blink {
+  50% { opacity: 0.25; }
+}
+
+.bp-blink { animation: bp-blink 1.2s ease-in-out infinite; }
+
+/* Horizontally scrollable drawings on narrow screens: a plan shrunk to 340px
+ * is texture, not a drawing. */
+.bp-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-flow,
+  .bp-draw,
+  .bp-fade-in,
+  .bp-blink { animation: none; }
+}

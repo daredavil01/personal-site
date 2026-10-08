@@ -71,6 +71,7 @@ export const ACCENTS = {
   "ask-share": COLORS.cyan,
   notfound: COLORS.textFaint,
   "writing-ledger": COLORS.amber,
+  blueprint: COLORS.red,
 };
 
 export const FONTS = {

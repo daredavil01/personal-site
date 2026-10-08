@@ -446,8 +446,30 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |
+| Site blueprint (/blueprint) | `src/pages/Blueprint.js`, `src/components/Blueprint/` |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |
+
+## The Blueprint (/blueprint)
+
+The site's features drawn as architectural sheets: a floor plan (every feature
+a room), a section through the stack, the /ask pipeline as a circuit, an unfurl
+bench, the shell switch and a live tag loom. It lives in the Workshop region.
+
+- **Rooms are data:** `src/components/Blueprint/features.js` — each feature's
+  plan rectangle, specs and the file it touches on each floor of the section.
+  **When a feature ships or moves, update its room.** `features.test.js` fails
+  if a room links to a route that does not exist or the rooms stop tiling the
+  plan.
+- **No typed-in numbers.** Code facts are read from the modules that define
+  them (regions, quests, card slugs, the ask ladder); content counts come from
+  `useSiteStats` and are omitted, never zeroed, when missing.
+- **The drawings run the real code:** the shell switch calls
+  `resolveViewMode` (`shellLadder.test.js` checks every input combination), the
+  unfurl bench reads `PAGE_META` + `cardUrlForOrigin`, the circuit's rungs are
+  `DEFAULT_ASK_SETTINGS.tiers`.
+- Colours are CSS tokens in `blueprint.css` (`.bp-root`, dark under `.dark`);
+  the redline is the site's `#b22200`.
 
 ## Homepage Sections
 

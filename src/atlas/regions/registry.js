@@ -66,6 +66,7 @@ const PRESENTATION = {
     pages: [
       { path: "/projects", label: "Projects", icon: "code" },
       { path: "/resume", label: "Résumé", icon: "badge" },
+      { path: "/blueprint", label: "Blueprint", icon: "architecture" },
     ],
   },
   person: {
