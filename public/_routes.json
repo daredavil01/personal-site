@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Functions run everywhere except /video/*: an asset served through the middleware's next() ignores Range, so Safari cannot play the Blueprint film and chapter seeks re-download it from the start.",
+  "include": ["/*"],
+  "exclude": ["/video/*"]
+}

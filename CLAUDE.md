@@ -500,6 +500,10 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   `FilmPlayer.js` reads the chapters from the JSON (`preload="none"`, so the
   page costs a poster until someone presses play), and `film.test.js` fails
   the build if any of the four is missing or the chapters disagree.
+  **`/video/*` is excluded from Functions** in `public/_routes.json`: served
+  through the middleware's `next()` an asset ignores `Range`, and Safari will
+  not play a video without `206` byte ranges (and seeking re-downloads). Any
+  new media folder that must stream or seek needs the same exclusion.
 
 ## Homepage Sections
 
