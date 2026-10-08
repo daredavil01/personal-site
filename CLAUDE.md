@@ -78,7 +78,8 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
 step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
-(run after content moves, then commit the PNGs), `newsletter:draft` (monthly).
+(run after content moves, then commit the PNGs), `newsletter:draft` (monthly),
+`blueprint:film` (renders video into `knowledge_base/`, nothing to commit).
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
 have no npm entry — run them with `node`.
 
@@ -470,6 +471,15 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   `DEFAULT_ASK_SETTINGS.tiers`.
 - Colours are CSS tokens in `blueprint.css` (`.bp-root`, dark under `.dark`);
   the redline is the site's `#b22200`.
+- **The film:** `npm run blueprint:film` renders the sheets as illustrated
+  video into `knowledge_base/blueprint-film/` (gitignored): one ~2-minute film
+  plus one ~20-second episode per sheet for posting as a series, 1080×1080
+  MP4 with a poster PNG each. Frames are SVG from `scripts/blueprint-film/`,
+  rasterised by resvg (no browser); the data is the same modules and the live
+  `/api/stats`, loaded through Vite's SSR loader. Sound is the site's own
+  Workshop loop and SFX sprite. Needs ffmpeg. `-- --stills` writes the posters
+  only, `-- --frame=<segment>@<seconds>` one frame, `-- --only=<name>` one cut.
+  Like the cards, the numbers are baked in: re-run it after content moves.
 
 ## Homepage Sections
 

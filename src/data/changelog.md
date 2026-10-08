@@ -13,6 +13,12 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v21.1.0] — 2026-10-08
+
+### Added
+
+- **The Blueprint film** (`scripts/generate-blueprint-film.mjs`, `scripts/blueprint-film/`): `npm run blueprint:film` turns the `/blueprint` sheets into illustrated video for sharing as a series — a full film (cover, six sheets, end card) and one short episode per sheet (title card, the sheet, end card), 1080×1080 H.264 at 30 fps with a poster PNG each, written to `knowledge_base/blueprint-film/`. Each sheet is animated rather than recorded: the plan's walls draw themselves and the redline walks from room to room, a riser grows down the section, a question runs through the Ask circuit while the first model's switch is thrown open, three links unfurl into their real committed cards, three visitors drop down the shell chute, and the tag loom weaves and is rewoven without the micro-blog. Frames are SVG rasterised by resvg with the card fonts (unwrapped from WOFF by `scripts/blueprint-film/woff.mjs`); the content is the page's own modules — `features.js`, `circuitSequence()`, `decideShell()`, `pageMeta.js` — loaded through Vite's SSR loader, plus the live `/api/stats` snapshot and changelog. The soundtrack is the site's own Workshop ambient loop with the stamp, chime and whoosh sprite. Requires ffmpeg; `--stills`, `--frame=`, `--only=` and `--no-audio` for quicker passes.
+
 ## [v21.0.0] — 2026-10-08
 
 ### Added

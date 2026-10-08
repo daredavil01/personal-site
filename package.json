@@ -29,6 +29,7 @@
     "dev:ask": "npm run build && wrangler pages dev build --port 8788",
     "og:preview": "node scripts/og-preview.mjs",
     "og:fallbacks": "node scripts/og-preview.mjs --fallbacks",
+    "blueprint:film": "node scripts/generate-blueprint-film.mjs",
     "newsletter:draft": "node scripts/newsletter-draft.mjs"
   },
   "dependencies": {
