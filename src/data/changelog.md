@@ -18,7 +18,6 @@ minor version per calendar week), patch for fixes and tweaks.
 ### Fixed
 
 - **Lint** (`src/data/pageMeta.js`): the six `operator-linebreak` / `no-confusing-arrow` errors that failed `npm run lint` — the first step of Node.js CI, so build and tests never ran — are fixed. Formatting only: the `||` fallbacks in four meta builders move to the start of their line and `truncate` gets a parenthesised body.
-- **The Blueprint film would not play on iPhone, and chapter seeks restarted it** (`public/_routes.json`): with no `_routes.json`, Pages sent every path — static files too — through `functions/_middleware.js`, and an asset handed back by its `next()` ignores `Range`, answering `200` with the whole 4 MB file. Safari will not play a video without `206` byte ranges, and a seek to an unbuffered chapter re-downloads from the start. `/video/*` is now excluded from Functions, so the asset server answers it directly; the middleware already passed any dotted path straight through, so nothing else changes.
 
 ## [v21.1.1] — 2026-10-08
 
