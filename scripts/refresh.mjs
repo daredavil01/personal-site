@@ -22,7 +22,7 @@ const DIR = path.dirname(fileURLToPath(import.meta.url));
 // `dry` = the script understands --dry-run.
 const STEPS = {
   changelog: [
-    ["push-changelog.mjs", true],
+    // ["push-changelog.mjs", true],
     ["summarise-changelog.mjs", true],
     ["summarise-majors.mjs", true],
   ],

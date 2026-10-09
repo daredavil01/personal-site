@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 99,
-    "blogs": 68,
+    "blogs": 69,
     "books": 51,
     "treks": 20,
     "sports": 26,
@@ -41,9 +41,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-06",
-      "t": "सातपुड्यात भटकताना, मला सापडलेलो मी…",
-      "u": "/100-days-to-offload/68"
+      "d": "2026-10-09",
+      "t": "The friction in the modern mind!",
+      "u": "/100-days-to-offload/69"
     },
     "writing": {
       "d": "2025-12-31",
@@ -819,7 +819,7 @@
     },
     {
       "name": "self-reflection",
-      "total": 459
+      "total": 460
     },
     {
       "name": "marathi",
@@ -839,11 +839,11 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 132
+      "total": 133
     },
     {
       "name": "calmness",
-      "total": 125
+      "total": 126
     },
     {
       "name": "philosophy",
@@ -855,7 +855,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 115
+      "total": 116
     },
     {
       "name": "latepost",
@@ -863,7 +863,7 @@
     },
     {
       "name": "digital detox",
-      "total": 74
+      "total": 75
     },
     {
       "name": "politics",
@@ -940,14 +940,14 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-09T13:01:00.1796+00:00",
+  "generated_at": "2026-10-09T17:07:58.837306+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 68,
+    "blog": 69,
     "book": 51,
     "page": 1,
-    "site": 23,
+    "site": 24,
     "trek": 20,
     "sport": 26,
     "stats": 10,

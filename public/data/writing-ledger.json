@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-09T13:00:14.292Z",
+  "generatedAt": "2026-10-09T17:07:42.092Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 111,
-    "words": 108886,
-    "averageWords": 981,
-    "trackedPosts": 68,
+    "posts": 112,
+    "words": 110247,
+    "averageWords": 984,
+    "trackedPosts": 69,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-06",
+    "latestPost": "2026-10-09",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,8 +26,8 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 68,
-      "words": 75948
+      "posts": 69,
+      "words": 77309
     },
     "activeMonths": 35
   },
@@ -36,37 +36,37 @@
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 2,
-      "words": 2530,
+      "posts": 3,
+      "words": 3891,
       "daysElapsed": 9,
-      "wordsPerDay": 281,
+      "wordsPerDay": 432,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -80.1
+      "changeVsPreviousMonth": -69.4
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 68,
-      "words": 75948,
+      "posts": 69,
+      "words": 77309,
       "daysElapsed": 282,
-      "wordsPerDay": 269,
+      "wordsPerDay": 274,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7826,
         "throughDate": "2025-10-09"
       },
-      "changeVsPriorYear": 870.5
+      "changeVsPriorYear": 887.8
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 82,
-      "words": 83060,
+      "posts": 83,
+      "words": 84421,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 68,
-      "words": 75948
+      "posts": 69,
+      "words": 77309
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 2,
-      "words": 2530
+      "posts": 3,
+      "words": 3891
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 108886,
-      "posts": 111
+      "words": 110247,
+      "posts": 112
     }
   ],
   "byDayOfWeek": [
@@ -565,8 +565,8 @@
     },
     {
       "day": "Friday",
-      "posts": 9,
-      "words": 8528
+      "posts": 10,
+      "words": 9889
     },
     {
       "day": "Saturday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 56,
-      "words": 63886
+      "posts": 57,
+      "words": 65247
     },
     {
       "section": "Uncategorised",
@@ -594,8 +594,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 53,
-      "words": 58533
+      "posts": 54,
+      "words": 59894
     },
     {
       "tag": "digital-wellbeing",
@@ -604,8 +604,8 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 18,
-      "words": 19420
+      "posts": 19,
+      "words": 20781
     },
     {
       "tag": "Travel Blogs",
@@ -703,6 +703,11 @@
       "words": 2949
     },
     {
+      "tag": "philosophy",
+      "posts": 2,
+      "words": 2745
+    },
+    {
       "tag": "claudecode",
       "posts": 2,
       "words": 2364
@@ -761,11 +766,6 @@
       "tag": "ethics-morals",
       "posts": 2,
       "words": 1480
-    },
-    {
-      "tag": "philosophy",
-      "posts": 1,
-      "words": 1384
     },
     {
       "tag": "challenges",
@@ -1088,7 +1088,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 42
+      "posts": 43
     },
     {
       "label": "1,500–1,999",
@@ -1207,6 +1207,28 @@
     }
   ],
   "posts": [
+    {
+      "title": "The friction in the modern mind!",
+      "date": "2026-10-09",
+      "publishedAt": "2026-10-09T16:55:05.967Z",
+      "url": "https://sankettambare.substack.com/p/the-friction-in-the-modern-mind",
+      "platform": "Substack",
+      "words": 1361,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "philosophy",
+        "self-reflection",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!xNlj!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Ff8dc4133-d4d3-49c5-97c2-488b07f55a42_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 69,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "सातपुड्यात भटकताना, मला सापडलेलो मी…",
       "date": "2026-10-06",

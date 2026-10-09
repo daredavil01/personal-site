@@ -7,18 +7,18 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 479 | Mind & Life |
-| `self-reflection` | 459 | Mind & Life |
+| `self-reflection` | 460 | Mind & Life |
 | `marathi` | 269 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 134 | Personal |
-| `personaldevelopment` | 132 | Mind & Life |
-| `calmness` | 125 | Mind & Life |
+| `personaldevelopment` | 133 | Mind & Life |
+| `calmness` | 126 | Mind & Life |
 | `philosophy` | 122 | Society & Ideas |
 | `travel` | 119 | Travel & Outdoors |
-| `digital wellbeing` | 115 | Digital Life |
+| `digital wellbeing` | 116 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 74 | Digital Life |
+| `digital detox` | 75 | Digital Life |
 | `politics` | 72 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 65 | Society & Ideas |
@@ -35,9 +35,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `nirman` | 35 | Society & Ideas |
 | `daredavil01` | 30 | Personal |
 | `भटकंती` | 30 | Travel & Outdoors |
+| `100_days_to_offload` | 29 | Writing & Blogging |
 | `konkan` | 29 | Travel & Outdoors |
-| `100_days_to_offload` | 28 | Writing & Blogging |
-| `self-help` | 27 | Books & Reading |
+| `self-help` | 28 | Books & Reading |
 | `digital manipulation` | 26 | Digital Life |
 | `स्थितप्रज्ञ` | 26 | Mind & Life |
 | `book review` | 23 | Books & Reading |
