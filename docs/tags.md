@@ -7,14 +7,14 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 479 | Mind & Life |
-| `self-reflection` | 457 | Mind & Life |
-| `marathi` | 268 | Books & Reading |
+| `self-reflection` | 459 | Mind & Life |
+| `marathi` | 269 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 134 | Personal |
-| `personaldevelopment` | 131 | Mind & Life |
+| `personaldevelopment` | 132 | Mind & Life |
 | `calmness` | 125 | Mind & Life |
-| `philosophy` | 121 | Society & Ideas |
+| `philosophy` | 122 | Society & Ideas |
 | `travel` | 119 | Travel & Outdoors |
 | `digital wellbeing` | 115 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
@@ -31,8 +31,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `खंडेराव` | 41 | Writing & Blogging |
 | `desperate me` | 40 | People & Feelings |
 | `forts` | 38 | Travel & Outdoors |
+| `running` | 36 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
-| `running` | 35 | Running & Fitness |
 | `daredavil01` | 30 | Personal |
 | `भटकंती` | 30 | Travel & Outdoors |
 | `konkan` | 29 | Travel & Outdoors |
@@ -43,7 +43,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `book review` | 23 | Books & Reading |
 | `mydesigns` | 22 | Arts & Culture |
 | `youth` | 22 | Society & Ideas |
-| `marathon` | 19 | Running & Fitness |
+| `marathon` | 20 | Running & Fitness |
 | `scientific temperament` | 19 | Society & Ideas |
 | `history` | 18 | Society & Ideas |
 | `privacy` | 18 | Digital Life |
@@ -74,6 +74,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `vibe-coding` | 4 | Technology & Data |
 | `data visualization` | 3 | Technology & Data |
 | `floating_in_sea🌊` | 3 | Travel & Outdoors |
+| `learning` | 3 | — |
 | `nda marathon` | 3 | Running & Fitness |
 | `roadtrip🏍️` | 3 | Travel & Outdoors |
 | `the matrix` | 3 | Digital Life |
@@ -92,7 +93,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `harihareshwar` | 1 | Travel & Outdoors |
 | `kailasgad` | 1 | Travel & Outdoors |
 | `krantismritivan` | 1 | Travel & Outdoors |
-| `learning` | 1 | — |
 | `obsidian` | 1 | Writing & Blogging |
 | `panhala🏞️` | 1 | Travel & Outdoors |
 | `pegasus` | 1 | Digital Life |
