@@ -11,7 +11,7 @@ See [entities.md](entities.md) for what these tables mean.
 
 Every book read, with the review link when there is one. `year` is the year READ, not published.
 
-Rows: **51** · indexed as `book`
+Rows: **52** · indexed as `book`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **69** · indexed as `blog`
+Rows: **70** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1670** · indexed as `microblog`
+Rows: **1671** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3748**
+Rows: **3764**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3119**
+Rows: **3127**
 
 | column | type | null | default |
 |---|---|---|---|

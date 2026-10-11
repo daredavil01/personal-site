@@ -7,25 +7,25 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 479 | Mind & Life |
-| `self-reflection` | 460 | Mind & Life |
-| `marathi` | 269 | Books & Reading |
+| `self-reflection` | 462 | Mind & Life |
+| `marathi` | 270 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
+| `personaldevelopment` | 134 | Mind & Life |
 | `sanky` | 134 | Personal |
-| `personaldevelopment` | 133 | Mind & Life |
-| `calmness` | 126 | Mind & Life |
-| `philosophy` | 122 | Society & Ideas |
+| `calmness` | 127 | Mind & Life |
+| `philosophy` | 123 | Society & Ideas |
 | `travel` | 119 | Travel & Outdoors |
-| `digital wellbeing` | 116 | Digital Life |
+| `digital wellbeing` | 117 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
 | `digital detox` | 75 | Digital Life |
-| `politics` | 72 | Society & Ideas |
+| `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
-| `social` | 65 | Society & Ideas |
+| `social` | 67 | Society & Ideas |
 | `technology` | 65 | Technology & Data |
 | `choices` | 54 | Mind & Life |
+| `maharashtra` | 51 | Travel & Outdoors |
 | `ai` | 50 | Technology & Data |
-| `maharashtra` | 49 | Travel & Outdoors |
 | `मन` | 46 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
 | `खंडेराव` | 41 | Writing & Blogging |
@@ -33,14 +33,14 @@ Names are lowercase and URI-encoded rather than slugified.
 | `forts` | 38 | Travel & Outdoors |
 | `running` | 36 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
+| `100_days_to_offload` | 30 | Writing & Blogging |
 | `daredavil01` | 30 | Personal |
 | `भटकंती` | 30 | Travel & Outdoors |
-| `100_days_to_offload` | 29 | Writing & Blogging |
 | `konkan` | 29 | Travel & Outdoors |
-| `self-help` | 28 | Books & Reading |
+| `self-help` | 29 | Books & Reading |
 | `digital manipulation` | 26 | Digital Life |
 | `स्थितप्रज्ञ` | 26 | Mind & Life |
-| `book review` | 23 | Books & Reading |
+| `book review` | 24 | Books & Reading |
 | `mydesigns` | 22 | Arts & Culture |
 | `youth` | 22 | Society & Ideas |
 | `marathon` | 20 | Running & Fitness |
@@ -59,9 +59,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `digital technology` | 9 | Digital Life |
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
+| `non-fiction` | 8 | Books & Reading |
 | `bioscope` | 7 | Mind & Life |
 | `data` | 7 | Technology & Data |
-| `non-fiction` | 7 | Books & Reading |
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
 | `newsletter` | 6 | Writing & Blogging |

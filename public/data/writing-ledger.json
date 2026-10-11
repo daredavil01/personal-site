@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-09T17:07:42.092Z",
+  "generatedAt": "2026-10-11T19:28:10.062Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 112,
-    "words": 110247,
+    "posts": 113,
+    "words": 111196,
     "averageWords": 984,
-    "trackedPosts": 69,
+    "trackedPosts": 70,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-09",
+    "latestPost": "2026-10-12",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,47 +26,47 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 69,
-      "words": 77309
+      "posts": 70,
+      "words": 78258
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-09",
+    "asOf": "2026-10-12",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 3,
-      "words": 3891,
-      "daysElapsed": 9,
-      "wordsPerDay": 432,
+      "posts": 4,
+      "words": 4840,
+      "daysElapsed": 12,
+      "wordsPerDay": 403,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -69.4
+      "changeVsPreviousMonth": -61.9
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 69,
-      "words": 77309,
-      "daysElapsed": 282,
-      "wordsPerDay": 274,
+      "posts": 70,
+      "words": 78258,
+      "daysElapsed": 285,
+      "wordsPerDay": 275,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 7,
         "words": 7826,
-        "throughDate": "2025-10-09"
+        "throughDate": "2025-10-12"
       },
-      "changeVsPriorYear": 887.8
+      "changeVsPriorYear": 900
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 83,
-      "words": 84421,
+      "posts": 84,
+      "words": 85370,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 69,
-      "words": 77309
+      "posts": 70,
+      "words": 78258
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 3,
-      "words": 3891
+      "posts": 4,
+      "words": 4840
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 110247,
-      "posts": 112
+      "words": 111196,
+      "posts": 113
     }
   ],
   "byDayOfWeek": [
@@ -545,8 +545,8 @@
     },
     {
       "day": "Monday",
-      "posts": 17,
-      "words": 19174
+      "posts": 18,
+      "words": 20123
     },
     {
       "day": "Tuesday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 57,
-      "words": 65247
+      "posts": 58,
+      "words": 66196
     },
     {
       "section": "Uncategorised",
@@ -594,13 +594,13 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 54,
-      "words": 59894
+      "posts": 55,
+      "words": 60843
     },
     {
       "tag": "digital-wellbeing",
-      "posts": 21,
-      "words": 26404
+      "posts": 22,
+      "words": 27353
     },
     {
       "tag": "self-reflection",
@@ -1084,7 +1084,7 @@
     },
     {
       "label": "500–999",
-      "posts": 44
+      "posts": 45
     },
     {
       "label": "1,000–1,499",
@@ -1207,6 +1207,27 @@
     }
   ],
   "posts": [
+    {
+      "title": "The calm mind is all you need!",
+      "date": "2026-10-12",
+      "publishedAt": "2026-10-11T19:21:20.534Z",
+      "url": "https://sankettambare.substack.com/p/the-calm-mind-is-all-you-need",
+      "platform": "Substack",
+      "words": 949,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "100_days_to_offload",
+        "digital-wellbeing"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!DrbI!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F923474f5-d053-43ec-ae60-41f0f41985cf_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 70,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "The friction in the modern mind!",
       "date": "2026-10-09",

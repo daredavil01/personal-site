@@ -1,7 +1,7 @@
 {
   "books": {
     "by_status": {
-      "read": 51
+      "read": 52
     },
     "year_range": {
       "max": 2026,
@@ -11,7 +11,7 @@
       "Sports": 2,
       "Fiction": 7,
       "History": 5,
-      "Society": 7,
+      "Society": 8,
       "Philosophy": 4,
       "Technology": 9,
       "Public Policy": 4,
@@ -21,18 +21,18 @@
     },
     "by_language": {
       "English": 30,
-      "Marathi": 21
+      "Marathi": 22
     }
   },
   "counts": {
     "tags": 99,
-    "blogs": 69,
-    "books": 51,
+    "blogs": 70,
+    "books": 52,
     "treks": 20,
     "sports": 26,
     "projects": 19,
     "instagram": 11,
-    "microblog": 1670
+    "microblog": 1671
   },
   "latest": {
     "now": {
@@ -41,9 +41,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-09",
-      "t": "The friction in the modern mind!",
-      "u": "/100-days-to-offload/69"
+      "d": "2026-10-11",
+      "t": "The calm mind is all you need!",
+      "u": "/100-days-to-offload/70"
     },
     "writing": {
       "d": "2025-12-31",
@@ -51,9 +51,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-10-09",
-      "t": "#1465 Consistency...!",
-      "u": "/micro-blog/1670"
+      "d": "2026-10-10",
+      "t": "#१४६६ So called democracy...!",
+      "u": "/micro-blog/1671"
     }
   },
   "resume": {
@@ -81,6 +81,11 @@
         "d": "2026-10-15",
         "t": "त्सुबाकी स्टेशनर्स",
         "u": "/books/51"
+      },
+      {
+        "d": "2026-10-10",
+        "t": "बाभळीच्या बाया...",
+        "u": "/books/52"
       },
       {
         "d": "2026-07-23",
@@ -819,11 +824,11 @@
     },
     {
       "name": "self-reflection",
-      "total": 460
+      "total": 462
     },
     {
       "name": "marathi",
-      "total": 269
+      "total": 270
     },
     {
       "name": "social media",
@@ -834,20 +839,20 @@
       "total": 137
     },
     {
+      "name": "personaldevelopment",
+      "total": 134
+    },
+    {
       "name": "sanky",
       "total": 134
     },
     {
-      "name": "personaldevelopment",
-      "total": 133
-    },
-    {
       "name": "calmness",
-      "total": 126
+      "total": 127
     },
     {
       "name": "philosophy",
-      "total": 122
+      "total": 123
     },
     {
       "name": "travel",
@@ -855,7 +860,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 116
+      "total": 117
     },
     {
       "name": "latepost",
@@ -867,7 +872,7 @@
     },
     {
       "name": "politics",
-      "total": 72
+      "total": 73
     },
     {
       "name": "psychology",
@@ -875,7 +880,7 @@
     },
     {
       "name": "social",
-      "total": 65
+      "total": 67
     },
     {
       "name": "technology",
@@ -886,12 +891,12 @@
       "total": 54
     },
     {
-      "name": "ai",
-      "total": 50
+      "name": "maharashtra",
+      "total": 51
     },
     {
-      "name": "maharashtra",
-      "total": 49
+      "name": "ai",
+      "total": 50
     },
     {
       "name": "मन",
@@ -916,7 +921,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 480,
+      "text": 481,
       "photo": 953,
       "quote": 237
     },
@@ -929,10 +934,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 101
+      "2026": 102
     },
     "date_range": {
-      "max": "2026-10-09",
+      "max": "2026-10-10",
       "min": "2018-03-19"
     }
   },
@@ -940,12 +945,12 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-09T17:07:58.837306+00:00",
+  "generated_at": "2026-10-11T19:28:55.694051+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 69,
-    "book": 51,
+    "blog": 70,
+    "book": 52,
     "page": 1,
     "site": 24,
     "trek": 20,
@@ -956,7 +961,7 @@
     "writing": 43,
     "changelog": 96,
     "instagram": 11,
-    "microblog": 1670,
+    "microblog": 1671,
     "presentation": 15
   },
   "tags_by_category": {
