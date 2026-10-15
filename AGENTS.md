@@ -263,7 +263,7 @@ Full reference: `docs/newsletter.md`.
   `issueToHtml`) — both layouts, share cards, the OG card, the middleware and
   the `/ask` source. Never recompute an issue's numbers elsewhere.
 - **Monthly workflow:** `/newsletter <YYYY-MM>` (the Codex skill in
-  `.Codex/skills/newsletter/`) or `npm run newsletter:draft -- <YYYY-MM>`.
+  `.agents/skills/newsletter/`) or `npm run newsletter:draft -- <YYYY-MM>`.
   The script merges the month's rows (`mergeMonthRecords`, idempotent, adds
   `ref: {type, id}` to each), renders the card to Storage at
   `media/og/newsletter-<slug>.png` (flat name so `isCardImage` matches), and
@@ -415,7 +415,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Major-version summaries | `supabase/migrations/0030_changelog_majors.sql`, `scripts/summarise-majors.mjs` |
 | Commit history + graph page | `supabase/migrations/0029_repo_history.sql`, `scripts/sync-repo-history.mjs`, `src/pages/ChangelogGraph.js` |
 | Graph maths (lanes, weeks, streaks) | `src/lib/repoGraph.js` |
-| Newsletter model / script / skill | `src/lib/newsletterIssue.js`, `scripts/newsletter-draft.mjs`, `.Codex/skills/newsletter/SKILL.md` |
+| Newsletter model / script / skill | `src/lib/newsletterIssue.js`, `scripts/newsletter-draft.mjs`, `.agents/skills/newsletter/SKILL.md` |
 | Newsletter pages + layouts | `src/pages/Newsletter.js`, `src/pages/NewsletterIssue.js`, `src/components/Newsletter/` |
 | Newsletter schema + feedback | `supabase/migrations/0032_newsletter.sql`, `functions/api/newsletter-feedback.js` |
 | Page layout + Helmet | `src/layouts/Main.js` |
