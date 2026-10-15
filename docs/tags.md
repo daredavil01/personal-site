@@ -6,32 +6,32 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 479 | Mind & Life |
-| `self-reflection` | 462 | Mind & Life |
-| `marathi` | 270 | Books & Reading |
+| `life` | 480 | Mind & Life |
+| `self-reflection` | 465 | Mind & Life |
+| `marathi` | 271 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
 | `personaldevelopment` | 134 | Mind & Life |
 | `sanky` | 134 | Personal |
 | `calmness` | 127 | Mind & Life |
-| `philosophy` | 123 | Society & Ideas |
+| `philosophy` | 126 | Society & Ideas |
 | `travel` | 119 | Travel & Outdoors |
-| `digital wellbeing` | 117 | Digital Life |
+| `digital wellbeing` | 118 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 75 | Digital Life |
+| `digital detox` | 76 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
 | `technology` | 65 | Technology & Data |
 | `choices` | 54 | Mind & Life |
+| `ai` | 51 | Technology & Data |
 | `maharashtra` | 51 | Travel & Outdoors |
-| `ai` | 50 | Technology & Data |
 | `मन` | 46 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
-| `खंडेराव` | 41 | Writing & Blogging |
+| `खंडेराव` | 43 | Writing & Blogging |
 | `desperate me` | 40 | People & Feelings |
 | `forts` | 38 | Travel & Outdoors |
-| `running` | 36 | Running & Fitness |
+| `running` | 37 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
 | `100_days_to_offload` | 30 | Writing & Blogging |
 | `daredavil01` | 30 | Personal |
@@ -43,14 +43,14 @@ Names are lowercase and URI-encoded rather than slugified.
 | `book review` | 24 | Books & Reading |
 | `mydesigns` | 22 | Arts & Culture |
 | `youth` | 22 | Society & Ideas |
-| `marathon` | 20 | Running & Fitness |
+| `marathon` | 21 | Running & Fitness |
+| `privacy` | 19 | Digital Life |
 | `scientific temperament` | 19 | Society & Ideas |
 | `history` | 18 | Society & Ideas |
-| `privacy` | 18 | Digital Life |
 | `data privacy` | 16 | Digital Life |
+| `claude code` | 15 | Technology & Data |
 | `fiction` | 15 | Books & Reading |
 | `information age` | 15 | Digital Life |
-| `claude code` | 14 | Technology & Data |
 | `youtube` | 14 | Digital Life |
 | `biography` | 13 | Books & Reading |
 | `auto-biography` | 12 | Books & Reading |
@@ -67,6 +67,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `newsletter` | 6 | Writing & Blogging |
 | `the social dilemma` | 6 | Digital Life |
 | `digitalnomad` | 5 | Digital Life |
+| `learning` | 5 | — |
 | `sports` | 5 | Running & Fitness |
 | `the_trip` | 5 | Travel & Outdoors |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
@@ -74,7 +75,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `vibe-coding` | 4 | Technology & Data |
 | `data visualization` | 3 | Technology & Data |
 | `floating_in_sea🌊` | 3 | Travel & Outdoors |
-| `learning` | 3 | — |
 | `nda marathon` | 3 | Running & Fitness |
 | `roadtrip🏍️` | 3 | Travel & Outdoors |
 | `the matrix` | 3 | Digital Life |
@@ -104,5 +104,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `tata` | 1 | Society & Ideas |
 | `tsunami_island🏝️` | 1 | Travel & Outdoors |
 | `turtle festival` | 1 | Travel & Outdoors |
+| `web design` | 1 | — |
 | `पट्यारा` | 1 | Books & Reading |
 <!-- generated:tags end -->

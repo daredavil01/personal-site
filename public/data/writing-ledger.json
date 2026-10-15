@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T19:28:10.062Z",
+  "generatedAt": "2026-10-15T13:20:21.178Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
@@ -32,14 +32,14 @@
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-12",
+    "asOf": "2026-10-15",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
       "posts": 4,
       "words": 4840,
-      "daysElapsed": 12,
-      "wordsPerDay": 403,
+      "daysElapsed": 15,
+      "wordsPerDay": 323,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
@@ -51,15 +51,15 @@
       "year": "2026",
       "posts": 70,
       "words": 78258,
-      "daysElapsed": 285,
-      "wordsPerDay": 275,
+      "daysElapsed": 288,
+      "wordsPerDay": 272,
       "priorYearSamePeriod": {
         "year": "2025",
-        "posts": 7,
-        "words": 7826,
-        "throughDate": "2025-10-12"
+        "posts": 8,
+        "words": 11355,
+        "throughDate": "2025-10-15"
       },
-      "changeVsPriorYear": 900
+      "changeVsPriorYear": 589.2
     }
   },
   "byPlatform": [

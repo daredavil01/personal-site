@@ -25,14 +25,14 @@
     }
   },
   "counts": {
-    "tags": 99,
+    "tags": 100,
     "blogs": 70,
     "books": 52,
     "treks": 20,
     "sports": 26,
     "projects": 19,
     "instagram": 11,
-    "microblog": 1671
+    "microblog": 1674
   },
   "latest": {
     "now": {
@@ -51,9 +51,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-10-10",
-      "t": "#१४६६ So called democracy...!",
-      "u": "/micro-blog/1671"
+      "d": "2026-10-15",
+      "t": "#1469 Creativity in the modern era!",
+      "u": "/micro-blog/1674"
     }
   },
   "resume": {
@@ -718,6 +718,11 @@
     ],
     "presentation": [
       {
+        "d": "2026-10-14",
+        "t": "Low Cost Clinic — One Tap to the Clinic",
+        "u": "/presentations/16"
+      },
+      {
         "d": "2026-09-30",
         "t": "Drafts, Not Decisions: AI in the Yung Foundation admin",
         "u": "/presentations/15"
@@ -820,15 +825,15 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 479
+      "total": 480
     },
     {
       "name": "self-reflection",
-      "total": 462
+      "total": 465
     },
     {
       "name": "marathi",
-      "total": 270
+      "total": 271
     },
     {
       "name": "social media",
@@ -852,7 +857,7 @@
     },
     {
       "name": "philosophy",
-      "total": 123
+      "total": 126
     },
     {
       "name": "travel",
@@ -860,7 +865,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 117
+      "total": 118
     },
     {
       "name": "latepost",
@@ -868,7 +873,7 @@
     },
     {
       "name": "digital detox",
-      "total": 75
+      "total": 76
     },
     {
       "name": "politics",
@@ -891,12 +896,12 @@
       "total": 54
     },
     {
-      "name": "maharashtra",
+      "name": "ai",
       "total": 51
     },
     {
-      "name": "ai",
-      "total": 50
+      "name": "maharashtra",
+      "total": 51
     },
     {
       "name": "मन",
@@ -908,7 +913,7 @@
     },
     {
       "name": "खंडेराव",
-      "total": 41
+      "total": 43
     },
     {
       "name": "desperate me",
@@ -921,7 +926,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 481,
+      "text": 484,
       "photo": 953,
       "quote": 237
     },
@@ -934,10 +939,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 102
+      "2026": 105
     },
     "date_range": {
-      "max": "2026-10-10",
+      "max": "2026-10-15",
       "min": "2018-03-19"
     }
   },
@@ -945,7 +950,7 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-11T19:28:55.694051+00:00",
+  "generated_at": "2026-10-15T13:20:32.057004+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
@@ -959,16 +964,16 @@
     "resume": 21,
     "project": 18,
     "writing": 43,
-    "changelog": 96,
+    "changelog": 100,
     "instagram": 11,
-    "microblog": 1671,
-    "presentation": 15
+    "microblog": 1674,
+    "presentation": 16
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 1,
+    "uncategorised": 2,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,
