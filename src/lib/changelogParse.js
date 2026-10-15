@@ -124,4 +124,29 @@ export function parseChangelog(md) {
   return entries;
 }
 
+/**
+ * Parse the staging buffer for publishing, throwing on anything that would
+ * publish wrong. Shared by `npm run changelog` and /admin/changelog/sync.
+ *
+ * - A heading the parser did not recognise is a version whose bullets get
+ *   attached to the version above it — the eight oldest "## [v2.0.0] — 2025-03
+ *   (Sports Page Launch)" headings did that before the date pattern was
+ *   widened — so the heading count is compared rather than trusted.
+ * - A version heading twice (a merge that kept both sides) makes one upsert
+ *   batch touch the same row twice, which Postgres refuses outright.
+ */
+export function parseBuffer(md) {
+  const entries = parseChangelog(md);
+  const headings = (md || "").split(/\r?\n/).filter((l) => VERSION_HEADING_RE.test(l)).length;
+  if (headings !== entries.length) {
+    throw new Error(`${headings} version headings in the buffer but ${entries.length} parsed — one is malformed. Fix the heading and re-run.`);
+  }
+  const seen = new Set();
+  const dupes = entries.map((e) => e.version).filter((v) => seen.has(v) || !seen.add(v));
+  if (dupes.length) {
+    throw new Error(`${[...new Set(dupes)].join(", ")} appears more than once in the buffer. Merge or renumber, then re-run.`);
+  }
+  return entries;
+}
+
 export default parseChangelog;

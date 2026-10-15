@@ -13,11 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
-## [v21.1.1] — 2026-10-08
+## [v21.1.2] — 2026-10-15
 
 ### Fixed
 
-- **Lint** (`src/data/pageMeta.js`): the six `operator-linebreak` / `no-confusing-arrow` errors that failed `npm run lint` — the first step of Node.js CI, so build and tests never ran — are fixed. Formatting only: the `||` fallbacks in four meta builders move to the start of their line and `truncate` gets a parenthesised body.
+- **Changelog push** (`src/lib/changelogParse.js`, `scripts/push-changelog.mjs`, `src/pages/admin/ChangelogSync.js`): `npm run refresh` died with "ON CONFLICT DO UPDATE command cannot affect row a second time" because the buffer carried `v21.1.1` twice (the same lint fix, logged by both sides of a merge). The duplicate is removed, and the new `parseBuffer()` — now the one path both the script and `/admin/changelog/sync` take — refuses a buffer with a repeated version, as it already refused a malformed heading, before anything is written.
 
 ## [v21.1.1] — 2026-10-08
 

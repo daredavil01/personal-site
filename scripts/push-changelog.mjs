@@ -24,7 +24,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeClient } from "./build-docs.mjs";
-import { parseChangelog, VERSION_HEADING_RE } from "../src/lib/changelogParse.js";
+import { parseBuffer } from "../src/lib/changelogParse.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FILE = path.join(ROOT, "src", "data", "changelog.md");
@@ -54,24 +54,13 @@ const UPSERT_BATCH = 50;
 
 async function main() {
   const md = fs.readFileSync(FILE, "utf8").replace(/^---[\s\S]*?---\r?\n/, "");
-  const entries = parseChangelog(md);
+  // Throws before anything is written (or the file cleared) on a malformed or
+  // duplicated heading — see parseBuffer.
+  const entries = parseBuffer(md);
 
   if (!entries.length) {
     console.log("Buffer holds no versions. Nothing to push.");
     return;
-  }
-
-  // A heading the parser did not recognise is a version whose bullets get
-  // attached to the version above it — and then this script clears the file.
-  // That is exactly what the eight oldest "## [v2.0.0] — 2025-03 (Sports Page
-  // Launch)" headings did before the date pattern was widened, so the count is
-  // compared rather than trusted.
-  const headings = md.split(/\r?\n/).filter((l) => VERSION_HEADING_RE.test(l)).length;
-  if (headings !== entries.length) {
-    throw new Error(
-      `${headings} version headings in the buffer but ${entries.length} parsed. `
-      + "One is malformed — fix the heading and re-run. Nothing was written.",
-    );
   }
 
   const rows = entries.map((e) => ({

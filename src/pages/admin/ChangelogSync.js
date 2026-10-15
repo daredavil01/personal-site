@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import changelogUrl from "../../data/changelog.md?url";
-import { parseChangelog, VERSION_HEADING_RE } from "../../lib/changelogParse";
+import { parseBuffer } from "../../lib/changelogParse";
 import changelog, { getChangelog } from "../../lib/api/changelog";
 import PageHeader from "./ui/PageHeader";
 import Card from "./ui/Card";
@@ -55,18 +55,8 @@ const ChangelogSync = () => {
         getChangelog(),
       ]);
       const body = md.replace(/^---[\s\S]*?---\s*\n/, "");
-      const entries = parseChangelog(body);
-
-      // A heading the parser does not recognise is a version whose bullets are
-      // silently attached to the version above it. Counted rather than
-      // trusted: the eight oldest headings in this file did exactly that until
-      // the date pattern was widened to accept a month with no day.
-      const headings = body.split(/\r?\n/).filter((l) => VERSION_HEADING_RE.test(l)).length;
-      if (headings !== entries.length) {
-        throw new Error(
-          `${headings} version headings in the buffer but ${entries.length} parsed — one is malformed. Fix the heading and reload.`,
-        );
-      }
+      // Throws on a malformed or duplicated heading — see parseBuffer.
+      const entries = parseBuffer(body);
 
       const byVersion = new Map(rows.map((r) => [r.version, r]));
       const next = entries.map((entry) => {
