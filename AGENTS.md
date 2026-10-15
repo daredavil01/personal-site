@@ -1,0 +1,795 @@
+# AGENTS.md — Personal Site
+
+## Project Overview
+
+React 18 single-page application (personal portfolio). Key stack:
+
+- **React 18** with `react-router-dom` v6 for routing
+- **react-helmet-async** for per-page `<head>` metadata
+- **Tailwind CSS** for styling
+- **Supabase** (Postgres + Storage + Row-Level Security) as the content store and backend
+- **Built with Vite** (`vite.config.js`) — JSX lives in `.js` files via an esbuild loader shim; `process.env.PUBLIC_URL` is shimmed to `""` with `define`.
+- **Deployed on Cloudflare Pages** — build command is `npm run build` (`vite build`, output in `build/`). Server-side logic lives in `functions/` as Cloudflare Pages Functions (file-based routing).
+
+## Content Store (Single Source of Truth)
+
+**All dynamic content lives in Supabase Postgres.** There is no markdown/CMS
+pipeline — the old `src/cms-content/` + `npm run cms:sync` flow, `public/cms/`
+Decap config, and generated `src/data/*.js` content files were removed. Supabase
+is canonical.
+
+- **Schema:** `supabase/migrations/*.sql` (tables, RLS policies, indexes, RPCs).
+  Apply via the Supabase SQL editor or `supabase db push`.
+- **Client data access:** `src/lib/api/*.js` — each module wraps one table with the
+  `createResource` CRUD factory (`_crud.js`) and `fromRow` / `toRow` mappers.
+  Full lists are loaded lazily and cached through `src/context/ContentContext.js`,
+  which exposes hooks: `useBooks`, `useSports`, `useTreks`, `useProjects`,
+  `useBlogs`, `useInstagram`, `useResume`, `useNowMeta`, `useNowMonths`,
+  `useTags` (each returns `{ data, loading, error }`), plus `useTagColors`
+  (tag name → color map) and `useContentRefresh` (re-fetch one key).
+- **Microblog is the exception** — 1,600+ rows, so it is **not** in the context.
+  Query it directly via `src/lib/api/microblog.js` (server-side paginated search
+  plus `getMicroblogMonths` / `getMicroblogByMonth` date helpers).
+- **Editing content:** the admin dashboard at `/admin` (`src/pages/admin/`). Forms
+  are schema-driven from `src/pages/admin/resources.js` — each resource's `fields`
+  match the shape its api's `toRow` expects. Postgres auto-assigns row `id`s.
+- **Bulk seeding script** (`scripts/`, requires `SUPABASE_SERVICE_ROLE_KEY` in
+  `.env`): `npm run microblog:import` (Tumblr archive, idempotent upsert).
+
+## Tags (Centralized)
+
+Tags are **not** columns on content rows. One `tags` table holds each tag's
+metadata (lowercase `name`, `display_name`, `color`, `category`,
+`description`); a polymorphic `tag_associations` table (`entity_type`,
+`entity_id`, `tag_id`, `position`) links tags to rows in `books`, `blogs`,
+`instagram`, `microblog`, `sports`, `treks`, `projects`. Schema + RPCs:
+`supabase/migrations/0003_centralized_tags.sql`. Resume skill categories are
+**not** tags (`resume_skills.category` stays a plain `text[]`).
+
+- **Reads:** select `*, tag_names` — `tag_names(<table>)` is a PostgREST computed
+  field. `_crud.js` does this automatically for resources created with
+  `tagType`; each `fromRow` maps `r.tag_names` onto its `tags` (blogs:
+  `blog_tags`) field, so components still read `.tags`.
+- **Writes:** `_crud.js` calls `rpc("set_entity_tags", { p_type, p_id, p_names })`
+  after saving the row. It normalizes (lowercase/trim/dedupe), creates missing
+  tags, and replaces the row's tag set atomically. Never write tag arrays to
+  content tables.
+- **Other RPCs:** `tags_with_counts()` (hub/admin/colors), `tag_entities(name)`
+  (cross-entity results), `merge_tags(from, into)`, `microblog_tag_facets()`,
+  `microblog_month_tags()`. Deleting a content row deletes its associations
+  (trigger).
+- **Admin:** `/admin/tags` (`src/pages/admin/TagManager.js`) — edit color /
+  display name / category, rename, merge duplicates, delete, JSON export/import
+  of metadata. Form tag fields with `suggest: true` autocomplete from the
+  central list.
+- **Public:** `/tags` (`src/pages/TagsHub.js`) and `/tags/:name`
+  (`src/pages/TagDetail.js`). Link with `tagPath(name)` from
+  `src/lib/api/tags.js` (URI-encoded, never slugified — Marathi names).
+  Tag colors resolve through `colorForTag` in `src/lib/generativeArt.js`
+  (stored color, else a hue hashed from the name).
+- **Compare tags case-insensitively** — names are stored lowercase.
+- **Hand-maintained files NOT in Supabase:** `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
+  `src/data/pageMeta.js`, `src/data/stats/personal.js`.
+
+## Periodic upkeep
+
+`npm run refresh` runs, in order: `changelog` (push, notes, majors), `repo`
+(commit graph), `blogs` (word counts), `ask` (index + docs). Name steps to run
+some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
+step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
+steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
+(run after content moves, then commit the PNGs), `newsletter:draft` (monthly),
+`blueprint:film` (renders video into `knowledge_base/`, nothing to commit).
+One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
+have no npm entry — run them with `node`.
+
+## Docs (read before touching a table)
+
+`docs/` is the deep reference; this file is the summary.
+
+- `docs/data-model.md` — every table's columns, types, CHECK constraints and live
+  row counts, generated from the database.
+- `docs/entities.md` — what each content type *means* (hand-written, and the part
+  that is not derivable from the schema).
+- `docs/routes.md`, `docs/tags.md` — route map and the tag vocabulary.
+- `docs/newsletter.md` — the monthly newsletter: workflow, entity map, why it
+  is built this way (hand-written; the source for presenting the feature).
+- `docs/chatbot-context.md` — the ~1,200-token card `/ask` injects; derived, never
+  hand-edited.
+
+Regenerate with `npm run docs:build` (or `npm run ask:index`, which calls it).
+Generated blocks live between `<!-- generated:NAME start/end -->` markers; prose
+outside them survives. See `docs/README.md`.
+
+## Per-Route Meta and OG Cards
+
+**Every route unfurls with a real 1200×630 image, and a new route is not
+shippable until it does** — a route that unfurls as a generic logo is a bug, and
+`src/data/routeManifest.test.js` fails the build if one ships.
+
+Two kinds of image, and **nothing renders at request time**:
+
+- **A fixed route** advertises its own generated card, committed to
+  `public/og/<slug>.png`.
+- **A detail route** advertises **the row's own photo** when it has one (treks,
+  races, projects, photo micro-posts) and its section's committed card when it
+  does not (books, blogs, decks, tags, shares — none of which have an image).
+
+Three files move together when you add a route to `src/App.js`:
+
+1. **`src/data/routeManifest.js`** — one declarative entry (`path`, `component`,
+   `meta`, `og.strategy`, `indexable`). The guard test asserts **set equality**
+   against `src/App.js`, so a route that is added *or deleted* without updating
+   this list fails. `docs/routes.md` is generated from it.
+2. **`src/data/pageMeta.js`** — `title`, `description`, `image`, `imageAlt`,
+   `ogSlug` and `type` for a fixed route; a `build<Thing>Meta` builder for a
+   parameterised one, whose `image` argument is the row's photo and whose
+   fallback is the section card. **This module must stay import-free** (no
+   imports, no `process.env`, plain literals) because esbuild bundles it into
+   the Worker. It is read by `src/components/Template/PageMeta.js` (client)
+   *and* `functions/_middleware.js` (crawlers) — never add a tag to one without
+   the other. `og:site_name` belongs to neither: `index.html` carries it
+   globally.
+3. **The card.** Add a layout to `FIGURES` in `src/lib/og/layouts/page.js`, its
+   slug to `PAGE_SLUGS` in `src/lib/og/model.js`, then `npm run og:fallbacks`
+   and commit the resulting `public/og/<slug>.png`.
+
+**Each section gets its own figure, not a shared template** — the card should be
+recognisable as that section before the text is readable. Cards must survive a
+WhatsApp thumbnail (~300 px): headline ≤ 6 words at ≥ 64 px, at most three
+numbers, one accent colour, photos duotoned. Read stats from `computeSiteStats`,
+colours from `colorForTag`, art from `postArt` — never recompute, and never
+hardcode a number into a figure. A stat with no value is **omitted**, never
+rendered as `0`; a figure with no data renders **nothing**, never a placeholder.
+
+Layout code lives in `src/lib/og/`, **not** under `functions/` (Pages routes
+every file there), and contains **no JSX and no React** — satori trees are built
+with the `h()` hyperscript in `src/lib/og/h.js`.
+
+Four things to know before touching this:
+
+- **Do not move rendering back to the edge.** It was there, on demand at
+  `/api/og/…`; Workers Free allows 10 ms CPU per request and a render costs
+  ~400 ms, so production returned 1102 and links unfurled with **no image at
+  all**. `wrangler pages dev` does not enforce the limit, so local success
+  proves nothing. satori and resvg are devDependencies for that reason.
+- **The numbers are baked in and go stale.** Re-run `npm run og:fallbacks`
+  after content moves, the way `npm run blogs:wordcount` is re-run. There is no
+  nightly job by choice.
+- **resvg cannot decode WebP**, and `/admin` uploads `.webp` whenever a source
+  image has transparency — satori embeds it and resvg silently draws nothing.
+  The generator only inlines `image/(jpeg|png|gif)`.
+- **satori is pinned to 0.32.0.** 0.33+ adds HarfBuzz (correct Devanagari
+  conjuncts) but could not run on Workers. That constraint is gone now that
+  nothing renders at the edge, so it is upgradable — read `docs/og-cards.md`
+  first.
+
+**Card URLs are re-hosted onto the serving origin** by `cardUrlForOrigin`
+(`src/lib/og/paths.js`) — `url.origin` in the middleware, `window.location.origin`
+on the client. `pageMeta.js` has to hard-code `SITE_URL`, so without this a Pages
+**preview** advertises production's card; and a missing `/og/*.png` does not 404,
+it gets the SPA shell as `200 text/html`, so the unfurl silently shows no image.
+`canonical` and `og:url` stay on `SITE_URL`, and a row's own photo is never
+rewritten. `public/writing-ledger.html` authors its tags by hand (the middleware
+skips any path with a dot) and so cannot re-host.
+
+`og:image` is **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
+LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**
+for our own cards (`isCardImage`), never for a row's photo — asserting a size we
+do not know makes every platform crop it wrong. Keep a card **under 300 KB**, the
+same cap as any other image on the site; the three portrait/photo cards are
+currently over it (see `docs/og-cards.md`).
+
+## Second Brain (/ask)
+
+Natural-language chat over the whole content store.
+
+- **Index:** `content_chunks` (`supabase/migrations/0009_second_brain.sql`), one
+  embedded chunk per row, built by `npm run ask:index`
+  (`scripts/build-content-index.mjs`). Idempotent and incremental. Needs
+  `CF_ACCOUNT_ID` / `CF_API_TOKEN` for Workers AI embeddings.
+- **Retrieval:** `hybrid_search()` fuses tsvector keyword ranking with pgvector
+  semantic ranking via RRF, and runs keyword-only when the caller passes a null
+  embedding. It returns `match_score` / `match_kind` and drops semantic matches
+  below `min_similarity` (the `semantic_floor` setting) — without that floor the
+  semantic half always returns its nearest rows however unrelated. It returns
+  **no** `embedding` or `fts` column: nothing reads them and they dominated the
+  payload. `site_facts()` supplies the counting/aggregate answers, plus `roster`
+  (every book, trek, race, project, deck and photo set as `{t,d,u}`, newest
+  first) and `latest` for the types too big to list. Enumeration and recency are
+  answered from those, never from search.
+- **Type chips re-rank, they do not scope.** The worker over-fetches unscoped
+  (`match_count * 3`) and `src/lib/askRetrieval.js` picks from that: it keeps the
+  chosen types, widens back to everything when fewer than three survive, sinks
+  `site`/`page` chunks unless the question is about the site, and caps chunks per
+  entity. Passing the chips as `p_types` filtered *before* ranking, which is why
+  a scoped question used to return eight confident, unrelated items.
+- **Endpoint:** `functions/api/ask.js` — `/api/ask`, **not** `/ask`: a Function
+  at `/ask` would shadow the `/ask` page. Streams SSE (sources first, then the
+  answer); `?stream` off falls back to one JSON response. Shared helpers live in
+  `src/data/askConfig.js`, `src/lib/askTiers.js`, `src/lib/askRetrieval.js` and
+  `src/lib/askFormat.js` — NOT under `functions/`, because Pages routes every
+  file there.
+- **Model ladder:** Gemini → Workers AI → Workers AI → search-only. Order and
+  model ids are rows in `ask_settings`, not constants — a retired model is an
+  `/admin` edit. The one hard-coded model is the **embedding** model
+  (`EMBEDDING_MODEL` in `askConfig.js`): changing it invalidates every stored
+  vector, so it is a re-index, not a setting.
+- **Config + caps:** the `ask_settings` singleton, edited at `/admin/ask/settings`,
+  read by the worker with a 60-second cache. Quotas are counted in `ask_usage`
+  through the `ask_quota()` RPC and fail closed.
+- **UI:** `src/pages/Ask.js` (`/ask`) and `src/components/Ask/AskLauncher.js`
+  (site-wide, mounted in `Main.js`), both rendering `AskChat.js`. Local dev
+  needs `npm run dev:ask` beside `npm run dev` — Vite proxies `/api` to it.
+- **Starter chips** come from `ask_settings.question_pool` (jsonb `[{q, c}]`,
+  edited at `/admin/ask/settings`), sampled by `src/lib/askQuestions.js`: one
+  question from each of four random categories per page load, four chips on
+  `/ask` and three in the launcher. Stratified rather than shuffled, because a
+  flat draw keeps offering four book questions at once. `GET /api/ask` appends
+  one or two chips built from the facts roster, so they name whatever is newest.
+  An empty pool falls back to `suggested_questions`. Only add a question the
+  archive answers well — a chip that refuses reads as a broken feature.
+- **Conversation log:** `ask_conversations` / `ask_messages`, written by the
+  `ask_log()` RPC from `waitUntil()` so it can never slow an answer. Owner-only;
+  read and exported at `/admin/ask/conversations`.
+- **Shared conversations** (`0021`): a reader presses Share and the thread is
+  snapshotted into `ask_shares`, served read-only at `/ask/s/<token>`.
+  **`ask_shares` is owner-only RLS on purpose** — an anon select policy would let
+  anyone `GET /rest/v1/ask_shares?select=*` and enumerate every shared
+  conversation, so "unlisted" would be a fiction. The public reaches it only
+  through `get_ask_share(token)` / `bump_ask_share_view(token)`, both SECURITY
+  DEFINER and token-gated. `create_ask_share` is **service-role only** and called
+  from `functions/api/share.js`: the per-IP daily cap (`daily_share_cap`) is
+  meaningless if the caller can pick its own `ip_hash`, and only the edge knows
+  the real address. Snapshot shape and the derived columns come from
+  `src/lib/askShareSnapshot.js`. Managed at `/admin/ask/shares` — filter, search
+  the stored text, open, revoke (reversible, keeps the record) or delete.
+- **Related content:** `related_content_ranked()` powers the "more like this"
+  strip on every detail page from the same embeddings — no model call at read
+  time.
+
+## Newsletter (/newsletter)
+
+A monthly issue per month, built from the archive plus a hand-written letter.
+Full reference: `docs/newsletter.md`.
+
+- **An issue IS a `now_months` row** (`0032_newsletter.sql` adds `slug`,
+  `headline`, `note`, `poll`, `published_at`, `card_url`). There is no issues
+  table. `/now` shows only the current month; every published month is
+  `/newsletter/<YYYY-MM>`. RLS: the public reads a month only when it is
+  published or current; the page shows an unpublished one only when signed in.
+- **Everything reads an issue through `src/lib/newsletterIssue.js`**
+  (`issueModel`, `issueStats`, `issueDays`, `issueRefs`, `issueQuestions`,
+  `issueToHtml`) — both layouts, share cards, the OG card, the middleware and
+  the `/ask` source. Never recompute an issue's numbers elsewhere.
+- **Monthly workflow:** `/newsletter <YYYY-MM>` (the Codex skill in
+  `.Codex/skills/newsletter/`) or `npm run newsletter:draft -- <YYYY-MM>`.
+  The script merges the month's rows (`mergeMonthRecords`, idempotent, adds
+  `ref: {type, id}` to each), renders the card to Storage at
+  `media/og/newsletter-<slug>.png` (flat name so `isCardImage` matches), and
+  writes a brief to `knowledge_base/newsletter/`. The model writes prose from
+  that brief only; `--note file.md` writes it back. **Nothing publishes but a
+  person** pressing Publish at `/admin/now/months`, which also has "Copy for
+  Substack". `--all` re-runs every month.
+- **Two layouts, one model:** `IssueLetter` (atlas) and `IssueMagazine`
+  (classic), picked by `useViewMode()` in `src/pages/NewsletterIssue.js`.
+- **Feedback** (`newsletter_feedback`) is owner-only RLS. Writes go through
+  `functions/api/newsletter-feedback.js` (Turnstile per `ask_settings`, IP
+  hashed at the edge) into the service-role-only `newsletter_feedback_add()`;
+  the public reads counts through `newsletter_feedback_summary()`, which never
+  returns a reply.
+- **Ask focus:** the issue's chat sends `focus: {type: "now", id, refs}`;
+  `functions/api/ask.js` reads those chunks by key and puts them ahead of search
+  (`withFocus` in `src/lib/askRetrieval.js`). Any page can pin itself this way.
+
+## Ask Sources, Stats Snapshot and Feedback
+
+- **Sources are files.** Every `scripts/ask-sources/*.mjs` is a source (`type`,
+  `load`, `toChunks`); the indexer loads the whole folder. Since `0016` no
+  migration is needed per type. How-to: `scripts/ask-sources/README.md`.
+- **Incremental by content.** `npm run ask:index` hashes each chunk: unchanged
+  rows are skipped, text that moved reuses its vector, only new text is embedded.
+  `-- --dry-run` prints the plan per type; `-- --full` re-embeds everything.
+- **Full blog text** (every Substack + WordPress post) comes from
+  `knowledge_base/blog-posts-text.json`, written by `npm run blogs:wordcount` as
+  a cache — only new or edited posts are downloaded. Never written to `public/`.
+- **/stats numbers have one implementation: `src/lib/siteStats.js`.** The page
+  renders from `GET /api/stats` (edge-cached for an hour, `src/lib/statsEndpoint.js`;
+  computed in the browser if the endpoint is unreachable), and the `/ask` facts
+  card and the `stats` source read the same snapshot. Never recompute a stat
+  inside a component — add it to `computeSiteStats`.
+- **Writing Ledger:** `public/writing-ledger.html` fetches
+  `public/data/writing-ledger.json`; month/year-to-date are recomputed at read
+  time (`src/lib/writingPeriod.js`). See `docs/writing-ledger.md`.
+- **Answers** may only link to, or show, URLs the archive supplied:
+  `sanitiseAnswer` (`src/lib/askFormat.js`) runs in the worker and in the UI.
+  Links and images are **separate** allow-lists — a retrieved item's photo is not
+  a valid link target — and the worker passes the roster urls as extra allowed
+  links, so the UI pass needs the same list (`linkable`) or it strips them.
+- **Feedback** (thumbs, reason tags, comment) is written onto the answer's
+  `ask_messages` row by `ask_feedback()`, which checks the browser session. The
+  admin Conversations page filters and summarises the log and exports rated
+  exchanges as evals JSONL.
+- **Admin evals** (`0017`): the Conversations page's "Eval mode" toggle adds a
+  per-answer form (verdict, 1–5 score, tags, notes, ideal answer) saved to the
+  `eval_*` columns on `ask_messages` — separate from reader `feedback_*`, written
+  directly under owner RLS. Filter by evaluated / not evaluated.
+- **Automatic evals** (`0022`, `docs/ask-evals.md` — read it before touching the
+  rubric): a "Grade N" button on the Conversations page sends the filtered,
+  ungraded answers to **Jev** (TypeSafe AI's System One model — typed decisions,
+  no prose, `$0.042/MTok` in with output free) and fills the same `eval_*` columns,
+  marked `eval_source = 'auto'`. **Off by default** behind
+  `ask_settings.auto_eval_enabled`, and off in `DEFAULT_ASK_SETTINGS` too, so an
+  unreachable Supabase switches it off rather than on.
+  - **The rubric lives in `src/lib/askJudge.js`** — four dimensions, of which link
+    compliance and the citation habit never reach a model because `sanitiseAnswer`
+    and a regex already decide them exactly, for free. `JUDGE_RUBRIC_VERSION` is
+    stamped on every row: rewording a criterion redefines every grade after it.
+  - **The judge sees one line about the archive, not just the extracts** (`r2`).
+    The extracts say what retrieval found and nothing about what it missed, so
+    without `buildArchiveNote`'s summary from `site_facts()` an answer refusing a
+    question the rosters plainly answer scores `refused_correctly` — correct by the
+    rubric and wrong in fact. `answerable` is the cross-check, and `over-refusal`
+    is what it produces. When `site_facts()` cannot be read the block is left out
+    and `answerable` stops counting.
+  - **A fallback rung's confidence is not taken at face value.** On an uncalibrated
+    rung a self-reported confidence at or above `SELF_REPORT_CEILING` is discarded
+    and a margin — distance from the thresholds that actually decided the verdict —
+    stands in its place. Without it 63 of 98 grades read 1.00 and `needs-review`
+    fired once.
+  - **Grades are versioned and re-runnable.** Each carries the `rubric` and `model`
+    that made it; a grade by either an older rubric or a rung that no longer
+    answers is *stale*, counted on the page from the `rubric`/`judgeModel` the GET
+    returns. **Re-grade N** (`mode: "regrade"`) runs the whole filtered set
+    uncapped and keeps what it replaced in `eval_auto.history` (5 deep). On a
+    hand-graded row it writes **`eval_auto` alone** — that is how a machine verdict
+    and yours end up on the same row, which is where Judge agreement comes from —
+    and both write rules are PostgREST filters, not branches.
+  - **A hand grade is never overwritten.** The write is a PostgREST
+    `PATCH … &evaluated_at=is.null`, so Postgres refuses rather than a client-side
+    `if`. And `eval_auto` keeps the machine's verdict after you replace it, which
+    is what makes the Judge agreement number possible.
+  - **Groundedness is judged against chunk text re-fetched from `content_chunks`**
+    — `ask_log` stores source cards only, so the text the answering model saw was
+    never logged, and re-indexing may have moved it since.
+  - **The endpoint is `functions/api/ask-eval.js`** (not `functions/api/ask/eval.js`,
+    which would collide with `/api/ask`). It verifies the caller with the existing
+    `is_owner()` RPC called with their own access token, then checks the flag, the
+    key, the row state and `ask_eval_budget()` — reserve-then-check like
+    `ask_quota()` — before a single token is spent. `mode: "estimate"` spends
+    nothing and fills the confirm dialog.
+  - **The judge has its own ladder** (`ask_settings.auto_eval_tiers`,
+    `src/lib/askJudgeTiers.js`): `jev` → `gemini` → `workers-ai`, tried in order,
+    same row shape as `tiers`. Gemini's free tier and the Workers AI allowance cost
+    nothing and already exist on this deployment, so **grading is free with no new
+    key at all**. They answer the same rubric as JSON, and because a language
+    model's confidence is not calibrated the way Jev's is, those grades are tagged
+    `judge-fallback` and `eval_auto.calibrated` is false.
+  - **`auto_eval_allow_metered` is off by default**, and a rung billed per token is
+    filtered out of the ladder before anything runs — key present or not, enabled
+    or not. When no usable rung can cost anything the token budget is skipped too,
+    because a cap on free work only stops free work.
+  - **The two Jev routes are not the same API.** Vercel's AI Gateway (where the
+    free monthly credit is) serves evaluation through the AI SDK only, with
+    `boolean` questions and index-keyed score probabilities; `api.typesafe.ai`
+    takes a plain POST with `noul`. Hence `toGatewayQuestions` /
+    `toNativeQuestions`. The AI SDK takes the Functions bundle from 30 KB to
+    281 KB gzipped — the first dependency any Function here has had.
+  - Jev cannot explain itself, so a separate button escalates only the
+    low-confidence rows to the existing free Gemini rung, appending one sentence
+    under the numbers.
+- **Nightly:** `.github/workflows/ask-refresh.yml` (02:00 IST) runs
+  `blogs:wordcount` + `ask:index` and commits the ledger JSON only when posts
+  changed. Repo secrets: `SUPABASE_SERVICE_ROLE_KEY`, `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
+
+## Environment Variables
+
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — client (baked into the
+  bundle by Vite). Public; committed in `wrangler.toml` `[vars]`.
+- `SUPABASE_SERVICE_ROLE_KEY` — **secret**, server/scripts only. Never commit;
+  set via `wrangler pages secret put` or the Cloudflare dashboard.
+- `AI_GATEWAY_API_KEY` / `TYPESAFE_API_KEY` — **secret**, optional, and only for
+  the Jev rungs of the judge ladder. Neither is needed to grade: the free Gemini
+  and Workers AI rungs use `GEMINI_API_KEY` and the `AI` binding, which are already
+  set. `TYPESAFE_API_KEY` is metered and also needs `auto_eval_allow_metered`.
+
+## Images (Supabase Storage)
+
+Images live in the public **`media`** storage bucket, not the repo. Admin form
+image / `slideImages` fields upload through `src/lib/api/storage.js`
+(`uploadImage(file, folder)` → `media/<folder>/…` and returns the public URL).
+At read time, `toStorageUrl` / `toStorageImages` (in `src/lib/supabaseClient.js`)
+prefix stored relative paths with the bucket URL. Admin uploads are **resized and
+compressed automatically** in the browser by `src/lib/imageCompress.js` (see
+Image Compression below).
+Uploads are grouped by type folder (`sports`, `treks`, etc.).
+
+## Key File Locations
+
+| Purpose | Path |
+|---|---|
+| Changelog staging buffer | `src/data/changelog.md` |
+| Changelog table + API | `supabase/migrations/0028_changelog.sql`, `src/lib/api/changelog.js` |
+| Changelog markdown parser | `src/lib/changelogParse.js` |
+| Changelog publish (admin / CLI) | `src/pages/admin/ChangelogSync.js`, `scripts/push-changelog.mjs` |
+| Major-version summaries | `supabase/migrations/0030_changelog_majors.sql`, `scripts/summarise-majors.mjs` |
+| Commit history + graph page | `supabase/migrations/0029_repo_history.sql`, `scripts/sync-repo-history.mjs`, `src/pages/ChangelogGraph.js` |
+| Graph maths (lanes, weeks, streaks) | `src/lib/repoGraph.js` |
+| Newsletter model / script / skill | `src/lib/newsletterIssue.js`, `scripts/newsletter-draft.mjs`, `.Codex/skills/newsletter/SKILL.md` |
+| Newsletter pages + layouts | `src/pages/Newsletter.js`, `src/pages/NewsletterIssue.js`, `src/components/Newsletter/` |
+| Newsletter schema + feedback | `supabase/migrations/0032_newsletter.sql`, `functions/api/newsletter-feedback.js` |
+| Page layout + Helmet | `src/layouts/Main.js` |
+| App routes | `src/App.js` |
+| Nav menu | `src/data/routes.js` |
+| Supabase client + storage helpers | `src/lib/supabaseClient.js` |
+| Content API layer (per table) | `src/lib/api/*.js` |
+| Content context hooks | `src/context/ContentContext.js` |
+| Admin dashboard | `src/pages/admin/` |
+| Admin form schema | `src/pages/admin/resources.js` |
+| DB schema / migrations | `supabase/migrations/` |
+| Tag API / admin / public pages | `src/lib/api/tags.js`, `src/pages/admin/TagManager.js`, `src/pages/TagsHub.js`, `src/pages/TagDetail.js` |
+| Tag colors + micro-blog art | `src/lib/generativeArt.js` |
+| Per-route meta (single source) | `src/data/pageMeta.js` (consumed by `Main.js` + middleware) |
+| Route manifest (meta + card guard) | `src/data/routeManifest.js` |
+| OG card layouts / models / figures | `src/lib/og/` |
+| OG card generator | `scripts/og-preview.mjs` (`npm run og:fallbacks`) |
+| The committed share cards | `public/og/*.png` |
+| Card fonts (build-time only) | `scripts/og-fonts/` |
+| Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
+| Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
+| Second brain endpoint | `functions/api/ask.js` |
+| Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |
+| Ask UI | `src/pages/Ask.js`, `src/components/Ask/` |
+| Ask sources (plug-in registry) | `scripts/ask-sources/`, `scripts/lib/registry.mjs` |
+| /stats numbers + hourly snapshot | `src/lib/siteStats.js`, `functions/api/stats.js` |
+| Answer link/image rules | `src/lib/askFormat.js` |
+| Automatic eval rubric + ladder + endpoint | `src/lib/askJudge.js`, `src/lib/askJudgeTiers.js`, `functions/api/ask-eval.js` |
+| Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
+| Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
+| Generated + hand-written docs | `docs/` |
+| Site blueprint (/blueprint) | `src/pages/Blueprint.js`, `src/components/Blueprint/` |
+| Page components | `src/pages/` |
+| Reusable components | `src/components/` |
+
+## The Blueprint (/blueprint)
+
+The site's features drawn as architectural sheets: a floor plan (every feature
+a room), a section through the stack, the /ask pipeline as a circuit, an unfurl
+bench, the shell switch and a live tag loom. It lives in the Workshop region.
+
+- **Rooms are data:** `src/components/Blueprint/features.js` — each feature's
+  plan rectangle, specs and the file it touches on each floor of the section.
+  **When a feature ships or moves, update its room.** `features.test.js` fails
+  if a room links to a route that does not exist or the rooms stop tiling the
+  plan.
+- **No typed-in numbers.** Code facts are read from the modules that define
+  them (regions, quests, card slugs, the ask ladder); content counts come from
+  `useSiteStats` and are omitted, never zeroed, when missing.
+- **The drawings run the real code:** the shell switch calls
+  `resolveViewMode` (`shellLadder.test.js` checks every input combination), the
+  unfurl bench reads `PAGE_META` + `cardUrlForOrigin`, the circuit's rungs are
+  `DEFAULT_ASK_SETTINGS.tiers`.
+- Colours are CSS tokens in `blueprint.css` (`.bp-root`, dark under `.dark`);
+  the redline is the site's `#b22200`.
+- **The film:** `npm run blueprint:film` renders the sheets as illustrated
+  video into `knowledge_base/blueprint-film/` (gitignored): one ~2-minute film
+  plus one ~20-second episode per sheet for posting as a series, each in two
+  shapes — square 1080×1080 and vertical 1080×1920 (`-vertical`, for Reels,
+  Shorts and Stories) — with a poster PNG per cut and shape and an `.srt` of
+  the captions per cut. Frames are SVG from `scripts/blueprint-film/`,
+  rasterised by resvg (no browser) in parallel worker processes; the data is
+  the same modules and the live `/api/stats`, loaded through Vite's SSR
+  loader. Sound is the site's own Workshop loop and SFX sprite. Needs ffmpeg.
+  `-- --stills` writes posters and subtitles only, `-- --frame=<seg>@<s>[@layout]`
+  one frame, `-- --only=<name>` one cut, `-- --layout=square|vertical` one shape.
+  Like the cards, the numbers are baked in: re-run it after content moves.
+- **Audio description:** `-- --describe` adds a narrator to the full film
+  (`the-blueprint-described[-vertical].mp4`, plus the narration as `.srt`/`.vtt`):
+  the lines live beside the captions in `scripts/blueprint-film/film.mjs`, are
+  timed to the drawing, and are sped up (≤1.35×) only if a line overruns its
+  gap; the music ducks under the voice. `voice.mjs` speaks with Workers AI's
+  Aura 2 (the Atlas guide's voice) when `CF_ACCOUNT_ID`/`CF_API_TOKEN` are set,
+  else Piper (`PIPER_VOICE`=path to a voice `.onnx`, `PIPER_BIN`). The
+  published film was narrated with Piper `en_GB-cori-high` (public-domain
+  LibriVox data). `-- --describe-only` re-narrates the rendered film without
+  drawing a frame.
+- **The film on the page (A-07):** `-- --publish` also writes a lighter web
+  encode of the square film — the described cut when `--describe` is on — to
+  `public/video/the-blueprint.{mp4,jpg,vtt,json}` — video, poster, captions,
+  chapter starts — which **are committed**.
+  `FilmPlayer.js` reads the chapters from the JSON (`preload="none"`, so the
+  page costs a poster until someone presses play), and `film.test.js` fails
+  the build if any of the four is missing or the chapters disagree.
+
+## Homepage Sections
+
+`src/pages/Index.js` composes, in order: `LifeStats` (aggregate KPI tiles), an
+"In 1 Minute" intro, **`LatestPosts`** (live Substack RSS feed proxied by
+`functions/rss-feed.js`, scroll-to-reveal), **`MonthlyDigest`** (auto-aggregated
+monthly digest of blogs / treks / marathons / micro-posts — uses
+`src/lib/monthDigest.js` to reconcile the differing date formats), then the
+"Explore" grid. Section meta comes from `src/data/pageMeta.js`.
+
+## Changelog Rule
+
+**Always update `src/data/changelog.md` when making any code change.**
+
+`src/data/changelog.md` is a **staging buffer, not the archive.** The published
+version history lives in the `changelog` table (`0028_changelog.sql`), which is
+what `/changelog` and `/ask` read. The file is where an entry waits to be
+reviewed: it lands in the same commit and the same diff as the code it
+describes, which is the only reason it is still a file.
+
+Publishing an entry is a separate, explicit step:
+
+- **`/admin/changelog/sync`** — parses the buffer, shows each version as *new*,
+  *edited* or *already published*, and writes the ones you tick. Runs as the
+  owner under RLS, so it needs no service-role key. It cannot empty the file (a
+  browser cannot write to the repo) — clear the buffer in your next commit.
+- **`npm run changelog`** — the same job headlessly, then the per-version
+  notes and the major summaries, in that order. It *does* empty the buffer.
+  `-- --dry-run` prints each plan; for `--keep`, `--force` etc. run the script
+  directly (`node scripts/push-changelog.mjs --keep`).
+
+Both refuse to run if a `## [vX.Y.Z]` heading fails to parse, because an
+unparsed heading silently attaches its bullets to the version above it.
+
+Edit a published version at **`/admin/changelog`**; the notes step
+(`summarise-changelog.mjs`) writes each version's reader-facing paragraph into
+its `summary` column, and the majors step (`summarise-majors.mjs`) writes the
+chapter summary for a whole major into `changelog_majors` — headline, paragraph, and the additions and fixes worth
+naming. Both answer to the existing `release_notes` AI feature switch, and both
+skip work whose input has not changed. `/changelog` renders the chapter summary
+**first** and collapses the engineering entries under each release.
+
+### The commit graph (`/changelog/graph`)
+
+`npm run repo:sync` reads the **local clone** with `git log --numstat` and
+writes `repo_commits` plus each version's cost onto its `changelog` row. There
+is no GitHub API call anywhere in this: an unauthenticated api.github.com allows
+60 requests an hour, and per-commit stats there are one request per commit.
+
+- **A version's release commit is the one that added its `## [vX.Y.Z]` heading**
+  to the buffer — there are no git tags in this repository. Several versions can
+  share one commit (the nine oldest were back-written into `3c57c76`); the diff
+  is attributed to the **newest** version in that group and the others are left
+  **null**, never zero.
+- **Run it from a full clone.** A `fetch-depth: 1` checkout sees one commit; the
+  script refuses rather than publishing a history of one.
+- `package-lock.json` and sourcemaps are excluded from a version's line count —
+  one lockfile bump would dwarf every real change. Per-commit numbers are git's
+  own, unfiltered.
+
+- Add the entry to the **top** of the file following the versioning rules below.
+- Choose the version bump:
+  - **Major** (e.g. `v5.0.0` → `v6.0.0`): new page addition, major code refactor, or full redesign. A new route counts as a new page — and it also needs its own share card (see **Per-Route Meta and OG Cards**).
+  - **Minor** (e.g. `v5.1.0` → `v5.2.0`): new features, new components, data updates, content additions.
+  - **Patch** (e.g. `v5.1.0` → `v5.1.1`): bug fixes, copy/style tweaks, metadata changes, documentation updates.
+
+#### Weekly Minor Version Rule
+
+- Create **at most one minor version per calendar week** (Monday–Sunday).
+- If a minor change is made and a minor version already exists for the current week: **do not bump** — instead update the date on the existing version header to today and append the new change entries to that block.
+- Only create a new minor version if no minor version exists yet for the current week, or if the previous change was a major bump.
+- Patch versions are not subject to the weekly cap — create a new patch entry whenever a bug fix is needed.
+
+### Changelog Format
+
+Follow this exact format (taken from the existing entries):
+
+```markdown
+## [vX.Y.Z] — YYYY-MM-DD
+
+### Added
+- **Component or Feature Name** (`file/path.js`): What was added and why.
+
+### Changed
+- **Component Name** (`file/path.js`): What was changed and what it affects.
+
+### Fixed
+- **Component Name** (`file/path.js`): What was broken and how it was fixed.
+```
+
+- Only include sections (`### Added`, `### Changed`, `### Fixed`) that are relevant to the change.
+- Use **bold** for the component/feature name, backtick path in parentheses, then a colon and description.
+- Omit the path if the change spans multiple files or is conceptual.
+
+---
+
+## Dynamic Content Update Instructions
+
+Add/edit any content type through the **admin dashboard** (`/admin`), which writes
+to Supabase via `src/lib/api/*`. The field lists below are what to collect from the
+user; the concrete form schema (types, options, required flags) lives in
+`src/pages/admin/resources.js`. Postgres assigns the `id`.
+
+### Image Compression
+
+**Admin uploads compress themselves — drop the full-size photo in.**
+`src/lib/imageCompress.js` runs in the browser on every `image` / `slideImages`
+field, so no manual pre-step is needed for anything added through `/admin`. The
+field shows the before/after size and the final dimensions once it's done.
+
+**Targets** (the constants in `imageCompress.js` — keep this list and that file
+in sync):
+
+- Max long edge: 1200px (landscape/square), 900px (portrait)
+- Quality: ladders 85% → 50%, stopping at the first size that fits
+- Target file size: ≤150 KB per image; **hard cap 300 KB** (mobile-network
+  audience). If quality alone can't get there the long edge steps down
+  (1200 → 1000 → 800 → 640) until it does.
+- Output: `.jpeg`, or `.webp` when the source actually has transparency.
+  Extensions are lowercased — hosting is case-sensitive.
+- Images already under 150 KB and within bounds are uploaded untouched rather
+  than re-encoded.
+
+**HEIC is rejected, not converted** — Chrome and Firefox can't decode it.
+Convert iPhone photos first:
+
+```bash
+convert input.heic -auto-orient -strip -quality 80 -resize "1200x>" output.jpeg
+```
+
+---
+
+### Now Page and Newsletter Issues
+
+**Tables:** `now_months` + `now_meta` (Supabase), read via `useNowMonths` /
+`useNowMeta`. Edit in the admin dashboard → **Newsletter issues** (and the
+Now-meta editor, `src/pages/admin/NowMetaEditor.js`). `/now` shows the current
+month; each other month is a newsletter issue (see **Newsletter** above) —
+prefer `npm run newsletter:draft` over filling a month by hand.
+
+Each `now_months` row has `month`, `year`, `isCurrent` (boolean), and a `sections`
+JSON blob keyed by any of `blogs`, `running`, `books`, `events`, `projects`,
+`website`, `stats`, `certificates`, `misc` (see existing rows for field shapes).
+
+When pushing a new month's update:
+
+1. Add a `now_months` row with `isCurrent: true` and the month's `sections`.
+2. Set `isCurrent: false` on the previous month's row (saving a current month
+   in `/admin` does this for you).
+3. Write and publish the previous month's issue (`/newsletter <YYYY-MM>`).
+
+**Questions to ask:** "What month and year? (e.g., May, 2026)" and "What are the
+bullet-point activities for this month?"
+
+---
+
+### Books Page
+
+**Table:** `books` (`src/lib/api/books.js`), admin → **Books**. Collect:
+
+1. `title`, 2. `author`, 3. `category` (comma-separated genres),
+4. `language` (English/Marathi), 5. `translator` (optional),
+6. `blog_link` (optional review URL), 7. `blog_platform` (optional),
+8. `description` (2–4 sentences), 9. `year`, 10. `tags` (comma-separated).
+
+No images.
+
+---
+
+### Sports Page
+
+**Table:** `sports` (`src/lib/api/sports.js`), admin → **Sports / Races**. Collect:
+
+1. `title`, 2. `date` (**Month DD, YYYY** — e.g. `February 22, 2026`),
+3. `description`, 4. `place`, 5. `distance` (`10 Kms` / `21 Kms` / `35 Kms` /
+`42 Kms` / `50 Kms`, or other), 6. `time` (HH:MM:SS), 7. `timeCertificateLink`,
+8. `bibNumber`, 9. `tags` (optional, e.g. `marathon`), 10. Images.
+
+Add photos via the form's **Images** (`slideImages`) field — full-size files are
+fine, they're compressed in the browser on the way to the `media` bucket
+(`sports` folder).
+
+---
+
+### Treks Page
+
+**Table:** `treks` (`src/lib/api/treks.js`), admin → **Treks**. Collect:
+
+1. `fort_name`, 2. `trek_time` (e.g. `2 Hrs`), 3. `endurance_level`
+(Easy/Medium/Hard), 4. `date` (**DD-MM-YYYY** — e.g. `17-02-2019`),
+5. `blog_link` (optional), 6. `tags` (optional, e.g. `forts`), 7. Images.
+
+Add photos via the **Images** (`slideImages`) field — full-size files are fine,
+they're compressed in the browser on the way to the `media` bucket (`treks`
+folder).
+
+---
+
+### Projects Page
+
+**Table:** `projects` (`src/lib/api/projects.js`), admin → **Projects**. Collect:
+
+1. `title`, 2. `subtitle`, 3. `date` (**YYYY-MM-DD**, optional — a real Postgres
+`date` since `0005`), 4. `category` (Web App / Website / Data Story / Tool /
+Design / Other), 5. `status` (Live / In Progress / Archived / Concept),
+6. `role`, 7. `org` (blank for personal), 8. `featured` (pins it to the
+spotlight), 9. `visible` (off = draft), 10. `link` (required primary URL),
+11. `image` (optional cover), 12. `techStack`, 13. `tags`, 14. `links`
+(`{label, url}` rows — GitHub repo, demo, write-up), 15. `desc`,
+16. `highlights`, 17. `problem` / `solution` / `outcome`, 18. Screenshots.
+
+Add screenshots via the form's **Screenshots** (`slideImages`) field — full-size
+files are fine, they're compressed in the browser on the way to the `media`
+bucket (`projects` folder). A project with no cover image falls back to its first
+screenshot.
+
+- **Visibility is enforced in Postgres, not React.** `0005` narrows the table's
+  RLS select policy to `visible or is_owner()`, so a hidden project never reaches
+  an anonymous payload, its `/tags` pages, its share card, or the public counts.
+  `/admin` is authenticated as the owner and still sees everything.
+- **`tech_stack` is a plain `text[]`, not tags.** `set_entity_tags` replaces an
+  entity's *entire* tag set, so it can't back two independent tag fields on one
+  row. Central `tags` stay the topical axis; tech stack is the build axis. Both
+  are filterable on `/projects`.
+- **Ordering is featured-first, then newest-first.** The old `sort_order` column
+  was dropped in `0005`; don't reintroduce it.
+- **Public page:** `src/pages/Projects.js` composes four views from
+  `src/components/Projects/` (Showcase, Timeline, Statistics, Table) over one
+  `useProjectFilters` hook. Filters and `?view=` are both URL state, so merge
+  into existing search params — never `setSearchParams({ view })`, which wipes
+  the filters.
+
+---
+
+### Presentations Page
+
+**Table:** `presentations` (`src/lib/api/presentations.js`), admin → **Presentations**. Collect:
+
+1. `title`, 2. `url` (required, https link to the HTML deck), 3. `date`
+(**YYYY-MM-DD**, optional), 4. `tags`, 5. `description`.
+
+- **Decks are embedded by URL, never copied.** The deck stays on its host
+  (GitHub Pages) and renders in an iframe on `/presentations` (live scaled
+  previews) and `/presentations/:id` (viewer). Adding a deck is an `/admin`
+  edit, not a deploy.
+- **The host must allow framing** — no `X-Frame-Options` / CSP
+  `frame-ancestors`. GitHub Pages sends neither. If an embed goes blank, the
+  viewer's "Open original" link still works.
+- **Supabase Storage can't host decks** — it serves `.html` as `text/plain`.
+- `/ask` indexes the deck's slide text (fetched by `scripts/ask-sources/presentation.mjs`)
+  on the next `npm run ask:index`.
+- Previews load every deck on the list page; switch to image thumbnails if the
+  list grows past ~20 decks.
+
+---
+
+### 100 Days To Offload
+
+**Table:** `blogs` (`src/lib/api/blogs.js`), admin → **100 Days (Blogs)**. Collect:
+
+- `blog_title`, `blog_description`, `blog_date` (**YYYY-MM-DD**), `blog_link`,
+  `blog_platform` (Substack/Medium/Ghost/WordPress/Other), `language`
+  (English/Marathi), `blog_tags` (list), `challenge_id` (`100_days_to_offload`).
+
+---
+
+### Micro-Blog Page
+
+**Table:** the Supabase `microblog` table. This page is a bulk-imported social
+archive with server-side full-text search; there is no generated JS data file.
+
+- **Schema:** `supabase/migrations/0002_microblog.sql` (`microblog` table +
+  `search_tsv` GIN index + RLS). Tags live in the central tag tables (0003);
+  `microblog_tag_facets()` and the `?tags=` filter read them via `tag_names`.
+  Apply migrations via the Supabase SQL editor or `supabase db push` before importing.
+- **Seeding from the Tumblr export:** `npm run microblog:import` reads
+  `knowledge_base/tumblr_posts.json`, cleans each post (HTML-entity decode,
+  `<br>` → newline, post_type mapping), and **upserts on `(source, source_id)`**.
+  It is idempotent (re-runnable, no duplicates) and **non-destructive** — it
+  never clears the table, so admin-authored `manual` posts survive re-imports.
+  Export tags are written through `set_entity_tags` (only for posts that have
+  them). Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env`.
+- **Pinboard art:** each card draws seeded generative art (`src/lib/generativeArt.js`)
+  from its tags' colors, or a palette seeded by post id when untagged.
+- **Adding posts by hand:** admin dashboard → **Micro Blog** tab
+  (`src/pages/admin/MicroblogManager.js`). New posts default to `source: manual`
+  with a null `source_id`.
+- **`source` column** (`tumblr` | `instagram` | `manual`) lets other archives
+  (e.g. an Instagram text export) share this table later.
+- **Photo posts:** ~59% of Tumblr posts are photos whose images aren't in the
+  repo; `image_url` is currently blank. To backfill, upload the Tumblr export's
+  `media/` folder to the `media` storage bucket and set each row's `image_url`
+  (the source filename is `<source_id>.png`).
