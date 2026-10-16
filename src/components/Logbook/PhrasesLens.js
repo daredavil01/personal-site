@@ -1,177 +1,224 @@
 import React, { useMemo, useState } from "react";
-import PropTypes from "prop-types";
-import { fmt, langProps, textLang, yearOf } from "./shared";
+import { perThousand, pickLine } from "./model";
+import {
+  fmt, langProps, shortDate, textLang, yearOf,
+} from "./shared";
 
-// The habits of the hand: phrases that recur across essays (counted by
-// scripts/build-logbook.mjs, which drops one essay's subject repeating itself),
-// each year's most-used words, how loud each year was, and a game — one
-// sentence from the archive, guess the year it was written.
+// IV · Phrases. The habits of the hand: phrases that recur across essays
+// (counted by scripts/build-logbook.mjs, which drops one essay's subject
+// repeating itself), each year's most-used words, how loud each year was,
+// and a game — one sentence from the archive, guess the year it was written.
 
-const Heat = ({ phrases, years, lang }) => {
+const Ledger = ({ phrases, years, lang }) => {
+  const [all, setAll] = useState(false);
+  const [hover, setHover] = useState(null);
+  const shown = all ? phrases : phrases.slice(0, 12);
   const max = Math.max(1, ...phrases.flatMap((p) => Object.values(p.years)));
+  const maxPosts = Math.max(1, ...phrases.map((p) => p.posts));
+  const lp = langProps(lang);
+  const focus = hover || phrases[0];
+  const peak = focus && Object.entries(focus.years).sort((a, b) => b[1] - a[1])[0];
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-separate" style={{ borderSpacing: 3 }}>
-        <thead>
-          <tr>
-            <th className="text-left font-label text-[10px] uppercase tracking-wider lb-soft font-normal">Phrase</th>
-            {years.map((y) => <th key={y} className="font-label text-[10px] lb-soft font-normal w-10">{String(y).slice(2)}</th>)}
-            <th className="font-label text-[10px] uppercase tracking-wider lb-soft font-normal text-right">Essays</th>
-          </tr>
-        </thead>
-        <tbody>
-          {phrases.map((p) => (
-            <tr key={p.p}>
-              <td className={`font-body text-sm lb-ink pr-2 whitespace-nowrap ${langProps(lang).className || ""}`} lang={langProps(lang).lang}>{`“${p.p}”`}</td>
+    <div className="lb-card p-4 md:p-5 flex flex-col gap-3">
+      <div className="lb-phrase-row lb-phrase-head">
+        <p className="lb-kicker lb-accent m-0 lb-phrase-name">Signature phrases</p>
+        <div className="flex gap-[6px] lb-phrase-dots" aria-hidden="true">
+          {years.map((y) => <span key={y} className="lb-meta lb-soft lb-num w-[22px] text-center">{`’${String(y).slice(2)}`}</span>)}
+        </div>
+        <span className="lb-meta lb-soft text-right lb-phrase-count">Essays</span>
+      </div>
+      <ol className="list-none p-0 m-0 flex flex-col">
+        {shown.map((p) => (
+          <li
+            key={p.p}
+            className="lb-phrase-row"
+            onMouseEnter={() => setHover(p)}
+            onMouseLeave={() => setHover(null)}
+          >
+            <span className={`lb-quote lb-phrase-name text-[19px] md:text-[21px] truncate ${lp.className || ""}`} lang={lp.lang}>
+              {`“${p.p}”`}
+            </span>
+            <span className="flex gap-[6px] lb-phrase-dots" aria-hidden="true">
               {years.map((y) => {
                 const n = p.years[y] || 0;
                 return (
-                  <td key={y} title={n ? `${n} in ${y}` : `none in ${y}`} className="h-6 rounded" style={{ background: n ? "var(--lb-accent)" : "var(--lb-rule)", opacity: n ? 0.18 + 0.82 * (n / max) : 1 }} />
+                  <svg key={y} width="22" height="22" viewBox="0 0 22 22">
+                    <circle cx="11" cy="11" r="1.4" fill="var(--lb-faint)" />
+                    {n > 0 && <circle cx="11" cy="11" r={2.5 + 8.5 * Math.sqrt(n / max)} fill="var(--lb-accent)" opacity={0.25 + 0.75 * Math.sqrt(n / max)} />}
+                  </svg>
                 );
               })}
-              <td className="font-body text-xs lb-soft text-right">{p.posts}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-Heat.propTypes = {
-  phrases: PropTypes.arrayOf(PropTypes.shape({ p: PropTypes.string, years: PropTypes.shape({}) })).isRequired,
-  years: PropTypes.arrayOf(PropTypes.number).isRequired,
-  lang: PropTypes.string.isRequired,
-};
-
-const GuessYear = ({ lines, byId, years, onSelect }) => {
-  const [seed, setSeed] = useState(() => Math.floor(Math.random() * lines.length));
-  const [guess, setGuess] = useState(null);
-  const [score, setScore] = useState({ right: 0, played: 0 });
-  const line = lines[seed % lines.length];
-  const post = byId.get(line.post);
-  const answer = yearOf(post);
-
-  const pick = (y) => {
-    if (guess != null) return;
-    setGuess(y);
-    setScore((s) => ({ right: s.right + (y === answer ? 1 : 0), played: s.played + 1 }));
-  };
-  const next = () => {
-    setGuess(null);
-    setSeed((s) => s + 1 + Math.floor(Math.random() * (lines.length - 1)));
-  };
-
-  return (
-    <div className="lb-panel p-4 flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="font-label text-[10px] uppercase tracking-[0.25em] font-bold lb-accent m-0">Guess the year</p>
-        {score.played > 0 && <p className="font-body text-xs lb-soft m-0">{`${score.right} of ${score.played}`}</p>}
-      </div>
-      <p className={`font-headline text-xl lb-ink m-0 leading-snug ${langProps(post.lang).className || ""}`} lang={langProps(post.lang).lang}>{`“${line.s}”`}</p>
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Which year?">
-        {years.map((y) => {
-          let style;
-          if (guess != null && y === answer) style = { background: "var(--lb-mr)", color: "var(--lb-panel)", borderColor: "var(--lb-mr)" };
-          else if (guess === y) style = { background: "var(--lb-accent)", color: "var(--lb-panel)", borderColor: "var(--lb-accent)" };
-          return (
-            <button key={y} type="button" onClick={() => pick(y)} disabled={guess != null} className="lb-chip font-label text-[11px] px-3 py-1.5" style={style}>
-              {y}
-            </button>
-          );
-        })}
-      </div>
-      {guess != null && (
-        <p className="font-body text-sm lb-ink m-0" aria-live="polite">
-          {guess === answer ? "Right — " : `It was ${answer}. `}
-          <button type="button" onClick={() => onSelect(post.id)} className="bg-transparent border-0 p-0 underline cursor-pointer lb-ink">
-            <span {...langProps(textLang(post.title))}>{post.title}</span>
-          </button>
-          {"  "}
-          <button type="button" onClick={next} className="lb-chip font-label text-[10px] uppercase tracking-wider px-2.5 py-1 ml-2">Next line →</button>
+            </span>
+            <span className="flex flex-col items-end gap-1 lb-phrase-count" aria-hidden="true">
+              <span className="lb-display text-[20px] leading-none lb-num">{p.posts}</span>
+              <span className="block h-[3px] rounded-full" style={{ width: `${(p.posts / maxPosts) * 100}%`, background: "var(--lb-ink)", opacity: 0.4 }} />
+            </span>
+          </li>
+        ))}
+      </ol>
+      {focus && (
+        <p className="font-body text-sm lb-ink-2 m-0 min-h-[2.6em]" aria-live="polite">
+          <span className={`lb-quote text-[17px] ${lp.className || ""}`} lang={lp.lang}>{`“${focus.p}”`}</span>
+          {` turns up ${fmt(focus.n)} times in ${focus.posts} essays${peak ? `, most of all in ${peak[0]} (${peak[1]})` : ""}.`}
         </p>
+      )}
+      {phrases.length > 12 && (
+        <button type="button" className="lb-btn lb-btn--sm self-start" onClick={() => setAll((a) => !a)}>
+          {all ? "Fewer" : `All ${phrases.length} phrases`}
+        </button>
       )}
     </div>
   );
 };
 
-GuessYear.propTypes = {
-  lines: PropTypes.arrayOf(PropTypes.shape({ s: PropTypes.string, post: PropTypes.string })).isRequired,
-  byId: PropTypes.instanceOf(Map).isRequired,
-  years: PropTypes.arrayOf(PropTypes.number).isRequired,
-  onSelect: PropTypes.func.isRequired,
+const WordsOfTheYear = ({ words, lang }) => {
+  const lp = langProps(lang);
+  const rows = Object.entries(words).sort((a, b) => Number(b[0]) - Number(a[0]));
+  return (
+    <div className="lb-card p-4 md:p-5 flex flex-col gap-3">
+      <p className="lb-kicker lb-accent m-0">Words of the year</p>
+      <dl className="m-0 flex flex-col">
+        {rows.map(([y, list]) => {
+          const top = list.slice(0, 6);
+          const max = Math.max(1, ...top.map(([, n]) => n));
+          return (
+            <div key={y} className="lb-words-row">
+              <dt className="lb-italic text-[22px] lb-accent lb-num leading-none">{y}</dt>
+              <dd className={`m-0 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 ${lp.className || ""}`} lang={lp.lang}>
+                {top.map(([w, n], i) => (
+                  <span key={w} className="lb-display leading-tight" style={{ fontSize: `${14 + 14 * (n / max)}px`, opacity: 1 - i * 0.1 }} title={`${n} times`}>
+                    {w}
+                  </span>
+                ))}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    </div>
+  );
+};
+
+const Volume = ({ byYear, totals }) => {
+  const rows = byYear.map((y) => ({ year: y.year, rate: perThousand(y.exclaims, y.words) || 0 }));
+  return (
+    <div className="lb-card p-4 md:p-5 flex flex-col gap-3">
+      <p className="lb-kicker lb-accent m-0">How loud was each year?</p>
+      <ol className="list-none p-0 m-0 flex flex-col gap-1" aria-label="Exclamation marks per thousand words, by year">
+        {rows.map((r) => (
+          <li key={r.year} className="grid items-center gap-3" style={{ gridTemplateColumns: "3rem minmax(0, 1fr) 2.5rem" }}>
+            <span className="lb-italic text-[20px] lb-num">{r.year}</span>
+            <span className="lb-display lb-accent text-[20px] leading-none tracking-[-0.08em] whitespace-nowrap overflow-hidden" aria-hidden="true">
+              {"!".repeat(Math.max(1, Math.round(r.rate / 2)))}
+            </span>
+            <span className="lb-display text-[20px] text-right lb-num" aria-label={`${r.year}: ${Math.round(r.rate)} per thousand words`}>{Math.round(r.rate)}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="font-body text-[13px] lb-soft m-0">
+        {`Exclamation marks per 1,000 words; each mark drawn is two. ${fmt(totals.exclaims)} in all, and ${fmt(totals.questions)} question marks.`}
+      </p>
+    </div>
+  );
+};
+
+const GuessYear = ({ lines, byId, years, onSelect }) => {
+  const yearOfLine = (l) => yearOf(byId.get(l.post));
+  const [line, setLine] = useState(() => pickLine(lines, yearOfLine));
+  const [guess, setGuess] = useState(null);
+  const [score, setScore] = useState({ right: 0, played: 0, streak: 0 });
+  const post = byId.get(line.post);
+  const answer = yearOf(post);
+  const lp = langProps(post.lang);
+
+  const pick = (y) => {
+    if (guess != null) return;
+    setGuess(y);
+    setScore((s) => ({ right: s.right + (y === answer ? 1 : 0), played: s.played + 1, streak: y === answer ? s.streak + 1 : 0 }));
+  };
+  const next = () => {
+    let l = pickLine(lines, yearOfLine);
+    for (let i = 0; i < 4 && l.id === line.id; i += 1) l = pickLine(lines, yearOfLine);
+    setLine(l);
+    setGuess(null);
+  };
+  const state = (y) => {
+    if (guess == null) return undefined;
+    if (y === answer) return "right";
+    if (y === guess) return "wrong";
+    return "dim";
+  };
+  const off = guess != null ? Math.abs(guess - answer) : 0;
+  let verdict = null;
+  if (guess != null) {
+    verdict = guess === answer
+      ? "Right."
+      : `Not quite — it was ${answer}, ${off} year${off === 1 ? "" : "s"} ${guess < answer ? "later" : "earlier"}.`;
+  }
+
+  return (
+    <div className="lb-paper p-5 md:p-8 flex flex-col gap-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="lb-kicker lb-accent m-0">A game · Guess the year</p>
+        {score.played > 0 && (
+          <p className="lb-meta lb-soft m-0 lb-num">
+            {`${score.right} of ${score.played}${score.streak > 1 ? ` · streak of ${score.streak}` : ""}`}
+          </p>
+        )}
+      </div>
+      <p key={line.id} className={`lb-quote lb-line-in text-[26px] md:text-[34px] leading-[1.2] m-0 max-w-3xl ${lp.className || ""}`} lang={lp.lang}>
+        {`“${line.s}”`}
+      </p>
+      <div className="lb-years" role="group" aria-label="Which year was this written?">
+        {years.map((y) => (
+          <button key={y} type="button" className="lb-year-btn lb-num" data-state={state(y)} disabled={guess != null} onClick={() => pick(y)} aria-label={`${y}${state(y) === "right" ? ", the answer" : ""}`}>
+            {y}
+          </button>
+        ))}
+      </div>
+      <div className="min-h-[3rem] flex flex-wrap items-center gap-x-4 gap-y-2" aria-live="polite">
+        {guess != null && (
+          <>
+            <p className="font-body text-[15px] lb-ink m-0">
+              {`${verdict} From `}
+              <button type="button" className="lb-link" onClick={() => onSelect(post.id)}>
+                <span {...langProps(textLang(post.title))}>{post.title}</span>
+              </button>
+              {`, ${shortDate(post.date)}.`}
+            </p>
+            <button type="button" className="lb-btn lb-btn--ink lb-btn--sm" onClick={next}>Another line →</button>
+          </>
+        )}
+        {guess == null && <p className="font-body text-[13px] lb-soft m-0">Every year is equally likely to come up, however many essays it has.</p>}
+      </div>
+    </div>
+  );
 };
 
 const PhrasesLens = ({ data, byId, onSelect }) => {
   const [lang, setLang] = useState("en");
   const years = useMemo(() => data.byYear.map((y) => y.year), [data.byYear]);
-  const phrases = (data.phrases[lang] || []).slice(0, 14);
-  const loud = data.byYear.map((y) => ({ year: y.year, rate: y.words ? (y.exclaims / y.words) * 1000 : 0 }));
-  const maxRate = Math.max(1, ...loud.map((l) => l.rate));
+  const phrases = data.phrases[lang] || [];
   const words = data.words[lang] || {};
+  const lines = useMemo(() => data.lines.filter((l) => byId.has(l.post)), [data.lines, byId]);
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="lb-sheet p-4 md:p-5 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="font-label text-[10px] uppercase tracking-[0.25em] font-bold lb-accent m-0">Signature phrases, by year</p>
-          <div className="flex gap-1.5" role="group" aria-label="Language">
-            <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")} className="lb-chip font-label text-[10px] uppercase tracking-wider px-2.5 py-1">English</button>
-            <button type="button" aria-pressed={lang === "mr"} onClick={() => setLang("mr")} className="lb-chip text-[11px] px-2.5 py-1 lb-mr-text" lang="mr">मराठी</button>
-          </div>
-        </div>
-        <Heat phrases={phrases} years={years} lang={lang} />
-        <p className="font-body text-xs lb-soft m-0">A phrase counts only once it turns up in several different essays: these are habits, not subjects.</p>
+      <div className="lb-seg self-start" role="group" aria-label="Language">
+        <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>English</button>
+        <button type="button" aria-pressed={lang === "mr"} onClick={() => setLang("mr")} className="lb-mr-text" lang="mr">मराठी</button>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="lb-panel p-4 flex flex-col gap-2">
-          <p className="font-label text-[10px] uppercase tracking-[0.25em] font-bold lb-accent m-0">Exclamation marks per 1,000 words</p>
-          <svg viewBox={`0 0 ${loud.length * 50} 130`} className="w-full h-auto" role="img" aria-label={loud.map((l) => `${l.year}: ${Math.round(l.rate)}`).join(", ")}>
-            {loud.map((l, i) => {
-              const h = (l.rate / maxRate) * 90;
-              return (
-                <g key={l.year}>
-                  <rect x={i * 50 + 10} y={100 - h} width="30" height={h} rx="3" fill="var(--lb-accent)" opacity="0.85" />
-                  <text x={i * 50 + 25} y={95 - h} textAnchor="middle" fontSize="11" fill="var(--lb-ink)" fontFamily="Inter, sans-serif">{Math.round(l.rate)}</text>
-                  <text x={i * 50 + 25} y={118} textAnchor="middle" fontSize="11" fill="var(--lb-soft)" fontFamily="Plus Jakarta Sans, sans-serif">{l.year}</text>
-                </g>
-              );
-            })}
-          </svg>
-          <p className="font-body text-xs lb-soft m-0">{`${fmt(data.totals.exclaims)} in all. And ${fmt(data.totals.questions)} question marks.`}</p>
-        </div>
-
-        <div className="lb-panel p-4 flex flex-col gap-2">
-          <p className="font-label text-[10px] uppercase tracking-[0.25em] font-bold lb-accent m-0">Words of the year</p>
-          <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
-            {Object.entries(words).map(([y, list]) => (
-              <React.Fragment key={y}>
-                <dt className="font-label text-[11px] lb-soft">{y}</dt>
-                <dd className={`m-0 font-body text-sm lb-ink ${langProps(lang).className || ""}`} lang={langProps(lang).lang}>
-                  {list.slice(0, 5).map(([w]) => w).join(" · ")}
-                </dd>
-              </React.Fragment>
-            ))}
-          </dl>
+      <div className="lb-habits">
+        <Ledger key={lang} phrases={phrases} years={years} lang={lang} />
+        <div className="flex flex-col gap-4">
+          <WordsOfTheYear words={words} lang={lang} />
+          <Volume byYear={data.byYear} totals={data.totals} />
         </div>
       </div>
-
-      {data.lines.length > 0 && <GuessYear lines={data.lines} byId={byId} years={years} onSelect={onSelect} />}
+      {lines.length > 0 && <GuessYear lines={lines} byId={byId} years={years} onSelect={onSelect} />}
     </div>
   );
-};
-
-PhrasesLens.propTypes = {
-  data: PropTypes.shape({
-    byYear: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-    phrases: PropTypes.shape({}).isRequired,
-    words: PropTypes.shape({}).isRequired,
-    lines: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-    totals: PropTypes.shape({}).isRequired,
-  }).isRequired,
-  byId: PropTypes.instanceOf(Map).isRequired,
-  onSelect: PropTypes.func.isRequired,
 };
 
 export default PhrasesLens;

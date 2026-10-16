@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import {
   MAX_EXCERPT_WORDS, cleanText, isMarathi, openingOf, pairLetters, phrases, pickLines,
-  punctuationOf, splitSentences, wordsOf,
+  punctuationOf, splitSentences, startsLikeSentence, wordsOf,
 } from "./logbook";
 
 describe("cleanText", () => {
@@ -85,6 +85,13 @@ describe("excerpts", () => {
     const got = openingOf(["Hi.", long]);
     expect(got.split(/\s+/).length).toBeLessThanOrEqual(MAX_EXCERPT_WORDS);
     expect(got.endsWith("…")).toBe(true);
+  });
+
+  it("never starts a line on a digit, in either script", () => {
+    expect(startsLikeSentence("।हा")).toBe(false);
+    expect(startsLikeSentence("“Quoted,” he said")).toBe(true);
+    const s = ["५० वाजता एस एम जोशीला पोहोचलो आणि थांबलो.", "50 people ran with me that cold morning.", "मग आम्ही सगळे गडावर पोहोचलो आणि थांबलो."];
+    expect(pickLines("u", s).map((l) => l.s)).toEqual([s[2]]);
   });
 
   it("picks lines of 5–18 words with stable ids", () => {

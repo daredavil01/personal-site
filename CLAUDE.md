@@ -251,9 +251,34 @@ Natural-language chat over the whole content store.
 
 ## The Logbook (/logbook)
 
-Every essay (Substack + WordPress, English and Marathi) read as data: a scrolly
-intro, then six lenses — Atlas, Sky, Fingerprint, Phrases, Letters, Found
-poems — and a drawer with an `/ask` chat pinned to the selected essay.
+Every essay (Substack + WordPress, English and Marathi) read as data, bound as
+a field journal: a cover with the route inked across the chart, a five-step
+scrollytelling prologue, a contents page, six chapters — Atlas, Sky,
+Fingerprint, Phrases, Letters, Found poems — an index, and any essay opened as
+a slide-over page with an `/ask` chat pinned to it.
+
+- **Components:** `src/pages/Logbook.js` composes `src/components/Logbook/`:
+  `Cover`, `Prologue`, `Chapters.js` (the chapter list — its ids are the old
+  `?lens=` tab names, so earlier links still land — plus `Contents` and the
+  floating `ChapterDock`), one file per chapter, `EntryIndex` and
+  `EntrySheet`. Pure geometry lives in `model.js` (tested); `ChartBase.js`
+  grows each region's island from its own essays' positions with an SVG
+  "gooey" filter, shared by the cover, Atlas, the prologue and the sheet.
+- **URL state:** `?post=` opens an essay, `?lens=` lands on a chapter, `?poem=`
+  and `?lock=` hold the found poem — always merged, so `?view=` survives.
+- **Figures draw at their real pixel width** (`useWidth`), never a scaled
+  viewBox, so type stays legible on a phone; layouts switch on container width
+  (`.lb-cq` container queries), because the classic shell's sidebar makes
+  viewport breakpoints lie.
+- **Colour:** tokens in `logbook.css`. English is indigo and a circle, Marathi
+  saffron and a diamond, on every chapter. Draw a diamond with `diamond()`
+  (a polygon): CSS `transform-origin` re-anchors an SVG `rotate()` attribute
+  and the mark leaves the chart.
+- **Fonts:** Instrument Serif and Tiro Devanagari Marathi, loaded by Helmet on
+  this page only.
+- **Poem export:** html-to-image draws the paper-grain data URI as solid black
+  and bakes the node's margins in, hence `lb-poem--flat` while it captures and
+  the margin on a wrapper.
 
 - **Data is a committed file:** `public/data/logbook.json`, built by
   `npm run logbook` (`scripts/build-logbook.mjs`) from

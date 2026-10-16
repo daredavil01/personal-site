@@ -141,11 +141,15 @@ export function openingOf(sentences) {
   return clip(s);
 }
 
-// A line must start like a sentence — a capital, Devanagari or an opening
-// quote — so a fragment split off mid-thought ("in ; so, I…") never ships.
+// A line must start like a sentence — a capital, a Devanagari letter or an
+// opening quote — so a fragment split off mid-thought ("in ; so, I…") never
+// ships. Not a digit of either script: "६.५० वाजता…" splits at its decimal
+// point and leaves "५० वाजता…" behind.
+export const startsLikeSentence = (s) => /^[\u0904-\u0939\u0958-\u0961\u0972-\u097FA-Z"“‘(]/.test(String(s));
+
 const lineOk = (s) => {
   const n = wordsOf(s).length;
-  return n >= 5 && n <= 18 && !/\d{3,}|[:@;]/.test(s) && /^[\u0900-\u097FA-Z"“‘(]/.test(s);
+  return n >= 5 && n <= 18 && !/\d{3,}|[:@;]/.test(s) && startsLikeSentence(s);
 };
 
 /** Up to `max` sentences of 5–18 words, spread across the post, with stable ids. */
