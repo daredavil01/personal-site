@@ -13,6 +13,26 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.0.0] — 2026-10-16
+
+### Changed
+- **Wanderer's Logbook, redesigned** (`src/pages/Logbook.js`, `src/components/Logbook/`): The page is now bound as a field journal rather than a dashboard of tabs. A cover inks the wanderer's route across the chart in writing order, every essay landing as the line reaches it; a five-step scrollytelling prologue (prose in its own column, a sticky figure, one dot per essay gliding from a ledger to a timeline, two language lanes, the map and the exclamation marks) replaces the scrolly film and its duplicate controls; a contents page draws each chapter's thumbnail from the real data; six chapters follow, each with a numeral and a floating dock to move between them, then an index and a colophon. Set in Instrument Serif and Tiro Devanagari Marathi, on warm paper by day and indigo by night, with English as indigo circles and Marathi as saffron diamonds throughout.
+- **Atlas** (`src/components/Logbook/AtlasLens.js`, `src/components/Logbook/ChartBase.js`): Each region is an island grown from its own essays' positions (blur, threshold, coastline, an offshore contour), named in italic map type. Search by title, tag or first line; keep one language; hover a territory to raise it or click to keep only it; a hover card reads an essay's first line; an opened essay stays marked with dashed lines to its three nearest neighbours; "Walk the route" draws the path in writing order with the month at its head.
+- **Sky** (`src/components/Logbook/SkyLens.js`): An observatory beside the sky draws the constellation in focus large, every star labelled with its word, the line tracing itself in; "Watch the sky fill" lights the essays in writing order with the year on the sky; arrow keys move through the sky with one tab stop.
+- **Fingerprint** (`src/components/Logbook/FingerprintLens.js`): A specimen takes one essay apart — the spiral large, its mix of full stops, commas, exclamation and question marks, its sentence rhythm, average and longest sentence, exclamations per 1,000 words — beside a cabinet of every spiral filed under its year (the old 103-card wall was 4,500 px tall). Sort by longest, loudest, most questions or calmest.
+- **Phrases** (`src/components/Logbook/PhrasesLens.js`): Signature phrases as a ledger with a dot per year sized by use; words of the year set in proportional type; each year's loudness as a row of exclamation marks; Guess the year now deals a year first, so the busiest year is not the safe answer, and keeps a streak and says how far off a guess was.
+- **Letters** (`src/components/Logbook/LettersLens.js`): Every then-and-now pair is an arc across the years above a single pair of postmarked letters with their closeness in meaning; step, shuffle or pick an arc (the old column of 22 pairs ran 5,800 px).
+- **Found poems** (`src/components/Logbook/PoemMachine.js`): A framed paper card with drawn padlocks; a shuffle inks only the new lines in, one after another; the year stays with its line's last word.
+- **Essay page** (`src/components/Logbook/EntrySheet.js`): Opening an essay slides in a page of its own (a bottom sheet on a phone) with its photo duotoned, opening line, words and reading time, fingerprint and rhythm, its place on a mini chart with its neighbours, and the pinned Ask chat. It is a dialog: focus moves in and stays, Esc closes, ← and → turn the page in writing order, and focus returns to what opened it.
+
+### Added
+- **Index** (`src/components/Logbook/EntryIndex.js`): Every entry as a ledger grouped by year — search titles, tags and first lines in either script, filter by language, order by newest, oldest or longest.
+- **Logbook geometry** (`src/components/Logbook/model.js`, `model.test.js`): Prologue layouts, spirals, phyllotaxis, arcs, year ticks, search and the game's year-first draw as pure, tested functions.
+
+### Fixed
+- **Sentence fragments in the game and poems** (`src/lib/logbook.js`): A line could start on a digit — "६.५० वाजता…" split at its decimal point left "५० वाजता…" — so `startsLikeSentence` now requires a letter or an opening quote, at build time and again on the page for the committed file.
+- **Unreadable map on a phone**: Every figure now draws at its real pixel width instead of scaling a 1,000-px drawing down, so region names and labels stay legible at 390 px.
+
 ## [v22.0.1] — 2026-10-16
 
 ### Fixed
