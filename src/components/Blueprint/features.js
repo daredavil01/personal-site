@@ -70,6 +70,7 @@ export const FEATURES = [
     blurb: "An illustrated world map in front of the same content. Each region is one of the things the site is about, and every page is a place inside one of them.",
     specs: [
       () => `${REGION_LIST.length} regions. Picking one flies the camera in before the page opens.`,
+      "Held upright, a phone gets the same art re-laid down a tall portrait canvas with labels it can read.",
       () => `${QUESTS.length} quests, ${ACHIEVEMENTS.length} achievements and ${EGG_COUNT} hidden easter eggs, stamped into a passport.`,
       "Day and night follow the visitor's clock. Sound is opt-in WebAudio whose ambient loops crossfade between regions.",
       "One persisted world document, atlas.v1, holds every stamp, quest and preference.",

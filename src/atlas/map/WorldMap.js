@@ -19,7 +19,7 @@ import usePanZoom from "../../hooks/usePanZoom";
 import { playSfx } from "../audio/sfxBus";
 import { useWorld } from "../world/WorldContext";
 import { EGGS } from "../gamification/easterEggs";
-import { REGIONS, FULL_VIEW, INTRO_VIEW, MAP_W, MAP_H } from "./mapRegions";
+import { LAYOUTS, MAP_W, MAP_H } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
 import EasterEggHotspot from "./EasterEggHotspot";
 import StatsWidget from "./StatsWidget";
@@ -45,21 +45,11 @@ const ART = {
   person: BiomeSquare,
 };
 
-// Roads out of Hometown Square, drawn under the biomes.
-const ROADS = [
-  "M1000,740 Q860,650 700,585",
-  "M1090,720 Q1220,690 1345,660",
-  "M960,760 Q760,740 620,730",
-  "M1090,800 Q1300,880 1480,960",
-  "M980,810 Q850,930 740,1010",
-];
-
 // Extends past the canvas edges so the far layer's parallax lag (±90 world
 // units, see parallax.js) can never expose a gap at the map's borders.
 const FAR_RANGE = "M-140,466 Q-30,398 90,462 Q210,396 330,464 Q450,398 600,465 "
   + "Q780,396 960,462 Q1140,400 1320,465 Q1500,396 1680,462 Q1840,404 2000,460 "
   + "Q2070,428 2140,458 L2140,540 L-140,540 Z";
-const GROUND = "M0,470 C300,432 700,455 1000,445 C1400,432 1700,455 2000,440 L2000,1250 L0,1250 Z";
 const SEA = "M0,830 C180,845 320,900 430,975 C540,1050 640,1140 690,1250 L0,1250 Z";
 const SHORE = "M0,830 C180,845 320,900 430,975 C540,1050 640,1140 690,1250";
 
@@ -68,26 +58,26 @@ const prefersReducedMotion = () => typeof window !== "undefined"
   && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const MOBILE_MQ = "(max-width: 640px)";
+// Screens taller than wide get the portrait canvas (LAYOUTS in mapRegions.js).
+const PORTRAIT_MQ = "(orientation: portrait)";
 
-const smallViewport = () => typeof window !== "undefined"
+const matches = (query) => typeof window !== "undefined"
   && !!window.matchMedia
-  && window.matchMedia(MOBILE_MQ).matches;
+  && window.matchMedia(query).matches;
 
-// The resting view is always the whole map, so every region sits in one
-// window. On a tall phone that only works when the SVG is told to *fit* the
-// viewBox (letterboxing into the sky) instead of *slice* it — slice would crop
-// the left/right regions off-screen. See `fit` in the component.
-const restingView = () => FULL_VIEW;
+const smallViewport = () => matches(MOBILE_MQ);
 
-// preserveAspectRatio per viewport: phones fit the whole map (all six regions
-// visible), centered vertically so the scene sits in the middle of a tall
-// screen with sky filling evenly above and below; wider screens keep the
+// preserveAspectRatio per viewport: the resting view is always the whole map,
+// so every region sits in one window. Small screens and the portrait canvas
+// *fit* it (letterboxing into the sky); wider landscape screens keep the
 // immersive full-bleed slice, where the landscape map already fills the frame.
 const MOBILE_FIT = "xMidYMid meet";
 const DESKTOP_FIT = "xMidYMid slice";
 const fitFor = (small) => (small ? MOBILE_FIT : DESKTOP_FIT);
 
-const WorldMap = ({ entry }) => {
+const MapCanvas = ({ entry, layout }) => {
+  const REGIONS = layout.regions;
+  const restingView = () => layout.fullView;
   const navigate = useNavigate();
   const { state } = useLocation();
   const { world, foundEgg } = useWorld();
@@ -107,13 +97,15 @@ const WorldMap = ({ entry }) => {
   // as the clouds part (entry="intro"); else on the returning region for the
   // reverse fly-in; else the resting view (the whole map).
   const initialViewBox = useMemo(() => {
-    if (entry === "intro" && !prefersReducedMotion()) return INTRO_VIEW;
+    if (entry === "intro" && !prefersReducedMotion()) return layout.introView;
     const back = state?.toRegion && REGIONS.find((r) => r.key === state.toRegion);
     if (back && !prefersReducedMotion()) return back.viewBox;
     return restingView();
   }, []); // mount-only: the entry camera is captured once
 
-  const { svgRef, viewBox, animateTo, zoomCenter, didDrag, handlers } = usePanZoom({ initialViewBox, minWidth: 480, maxWidth: 2600 });
+  const { svgRef, viewBox, animateTo, zoomCenter, didDrag, handlers } = usePanZoom({
+    initialViewBox, minWidth: layout.zoom[0], maxWidth: layout.zoom[1],
+  });
 
   // Fly the camera home — the resting view (the whole map). Shared by the
   // Escape key and the Reset control.
@@ -267,7 +259,7 @@ const WorldMap = ({ entry }) => {
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
         width="100%"
         height="100%"
-        preserveAspectRatio={fit}
+        preserveAspectRatio={layout.key === "portrait" ? MOBILE_FIT : fit}
         onPointerDown={handlers.onPointerDown}
         onPointerMove={handlers.onPointerMove}
         onPointerUp={handlers.onPointerUp}
@@ -277,45 +269,51 @@ const WorldMap = ({ entry }) => {
       >
         <g aria-hidden="true">
           <g ref={skyRef}>
-            <SkyLayer />
+            <SkyLayer {...layout.sky} />
           </g>
 
           {/* FarLayer (parallax factor: lags the camera, see parallax.js) */}
           <g ref={farRef}>
-            <path d={FAR_RANGE} fill="var(--atlas-foliage-3)" opacity=".38" />
+            {/* Inner group: parallax owns the outer one's transform. */}
+            <g transform={layout.far}>
+              <path d={FAR_RANGE} fill="var(--atlas-foliage-3)" opacity=".38" />
+            </g>
           </g>
 
           {/* Ground, sea, roads */}
-          <path d={GROUND} fill="var(--atlas-foliage-1)" />
+          <path d={layout.ground} fill="var(--atlas-foliage-1)" />
           <ellipse
-            cx="1030"
-            cy="770"
-            rx="500"
-            ry="210"
+            cx={layout.glow[0]}
+            cy={layout.glow[1]}
+            rx={layout.glow[2]}
+            ry={layout.glow[3]}
             fill="var(--atlas-horizon)"
             opacity=".16"
           />
-          <path d={SEA} fill="var(--atlas-water)" />
-          <path
-            d={SHORE}
-            fill="none"
-            stroke="var(--atlas-parchment)"
-            strokeWidth="6"
-            opacity=".55"
-          />
-          <g
-            stroke="#ffffff"
-            strokeWidth="4"
-            strokeLinecap="round"
-            opacity=".3"
-          >
-            <path d="M120,980 h55" />
-            <path d="M240,1080 h48" />
-            <path d="M420,1150 h60" />
-            <path d="M150,1160 h40" />
+          {/* The sea rides with the coast (portrait moves both together). */}
+          <g transform={layout.sea}>
+            <path d={SEA} fill="var(--atlas-water)" />
+            <path
+              d={SHORE}
+              fill="none"
+              stroke="var(--atlas-parchment)"
+              strokeWidth="6"
+              opacity=".55"
+            />
+            <g
+              stroke="#ffffff"
+              strokeWidth="4"
+              strokeLinecap="round"
+              opacity=".3"
+            >
+              <path d="M120,980 h55" />
+              <path d="M240,1080 h48" />
+              <path d="M420,1150 h60" />
+              <path d="M150,1160 h40" />
+            </g>
           </g>
           <g fill="none" strokeLinecap="round">
-            {ROADS.map((d) => (
+            {layout.roads.map((d) => (
               <path
                 key={d}
                 d={d}
@@ -324,7 +322,7 @@ const WorldMap = ({ entry }) => {
                 opacity=".45"
               />
             ))}
-            {ROADS.map((d) => (
+            {layout.roads.map((d) => (
               <path
                 key={`top-${d}`}
                 d={d}
@@ -343,7 +341,7 @@ const WorldMap = ({ entry }) => {
                 <g
                   key={r.key}
                   data-region={r.key}
-                  transform={`translate(${r.at[0]},${r.at[1]})`}
+                  transform={r.art}
                 >
                   <g
                     className={`atlas-lift${liftedKey === r.key ? " is-lifted" : ""}`}
@@ -356,16 +354,18 @@ const WorldMap = ({ entry }) => {
           </g>
 
           {/* NearLayer — foreground props, leading the camera slightly */}
-          <g ref={nearRef} className="atlas-near-layer">
-            <NearProps />
-          </g>
+          {layout.near && (
+            <g ref={nearRef} className="atlas-near-layer">
+              <NearProps />
+            </g>
+          )}
 
           {/* LabelLayer — plaques lift with their region */}
           <g>
             {REGIONS.map((r) => {
               const [px, py, pw] = r.plaque;
               return (
-                <g key={r.key} transform={`translate(${px},${py})`}>
+                <g key={r.key} transform={`translate(${px},${py}) scale(${r.plaqueScale})`}>
                   <g
                     className={`atlas-lift${liftedKey === r.key ? " is-lifted" : ""}`}
                   >
@@ -417,11 +417,14 @@ const WorldMap = ({ entry }) => {
 
         {/* StatsLayer — a shortcut placard hanging above the Book Forest that
             jumps to /stats. Interactive, so outside the aria-hidden art. */}
-        <StatsWidget onActivate={(source) => goToLandmark("/stats", source)} />
+        <StatsWidget at={layout.stats} onActivate={(source) => goToLandmark("/stats", source)} />
 
         {/* LighthouseLayer — the coast's lighthouse opens /ask. After the
             RegionLayer so it wins the click inside the Marathons hotspot. */}
-        <AskLighthouse onActivate={(source) => goToLandmark("/ask", source)} />
+        <AskLighthouse
+          {...layout.lighthouse}
+          onActivate={(source) => goToLandmark("/ask", source)}
+        />
 
         {/* EggLayer (§4.6) — interactive, so it lives outside the aria-hidden
             art; hints are vague on purpose. Suppressed during a fly-in. */}
@@ -429,7 +432,7 @@ const WorldMap = ({ entry }) => {
           {EGGS.map((egg) => (
             <EasterEggHotspot
               key={egg.id}
-              egg={egg}
+              egg={{ ...egg, at: layout.eggAt(egg) }}
               found={!!world.eggs[egg.id]}
               onFound={foundEgg}
             />
@@ -449,9 +452,41 @@ const WorldMap = ({ entry }) => {
   );
 };
 
+const entryProp = PropTypes.oneOf(["intro", "return", "direct"]);
+
+MapCanvas.propTypes = {
+  entry: entryProp,
+  layout: PropTypes.shape({
+    key: PropTypes.string.isRequired,
+    regions: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  }).isRequired,
+};
+
+MapCanvas.defaultProps = {
+  entry: null,
+};
+
+// Picks the canvas for the screen's orientation and remounts the map when it
+// flips: the entry camera, the parallax rest point and the zoom limits are all
+// captured at mount, in the coordinates of one canvas.
+const WorldMap = ({ entry }) => {
+  const [portrait, setPortrait] = useState(() => matches(PORTRAIT_MQ));
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(PORTRAIT_MQ);
+    const sync = () => setPortrait(mq.matches);
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const layout = LAYOUTS[portrait ? "portrait" : "landscape"];
+  return <MapCanvas key={layout.key} layout={layout} entry={entry} />;
+};
+
 WorldMap.propTypes = {
   // "intro" = post-dive center pull-out; "return"/"direct"/null = existing reads.
-  entry: PropTypes.oneOf(["intro", "return", "direct"]),
+  entry: entryProp,
 };
 
 WorldMap.defaultProps = {

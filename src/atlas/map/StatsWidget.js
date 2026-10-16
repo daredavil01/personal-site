@@ -31,8 +31,9 @@ const STATS = [
 const ariaLabel = `Life in numbers — ${ATLAS_STATS.books} books, ${ATLAS_STATS.treks} treks, `
   + `${ATLAS_STATS.races} races, ${fmtK(ATLAS_STATS.microPosts)} micro-posts. Open the full stats page.`;
 
-const StatsWidget = ({ onActivate }) => (
-  <g className="atlas-stats-widget" data-region="reader" transform={`translate(${X},${Y})`}>
+// `at` = [x, y, scale]; the portrait map hangs the card in its own sky.
+const StatsWidget = ({ onActivate, at: [x, y, k] }) => (
+  <g className="atlas-stats-widget" data-region="reader" transform={`translate(${x},${y}) scale(${k})`}>
     <g className="atlas-lift atlas-stats-card" aria-hidden="true">
       {/* Dropped shadow + downward tail pointing at the forest below. */}
       <rect x="3" y="9" width={W} height={H} rx="16" fill="var(--atlas-shadow)" />
@@ -138,6 +139,11 @@ const StatsWidget = ({ onActivate }) => (
 
 StatsWidget.propTypes = {
   onActivate: PropTypes.func.isRequired,
+  at: PropTypes.arrayOf(PropTypes.number),
+};
+
+StatsWidget.defaultProps = {
+  at: [X, Y, 1],
 };
 
 export default StatsWidget;

@@ -13,6 +13,14 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.1.3] — 2026-10-16
+
+### Added
+- **Portrait Atlas map** (`src/atlas/map/mapRegions.js`, `src/atlas/map/WorldMap.js`): a screen taller than wide now gets its own 900×1950 canvas. The same biome art is re-placed down a column (the ridge on top, then the Scriptorium and the Book Forest, Hometown Square, Projects, and the coast with its lighthouse at the bottom), and plaques are drawn 1.8× larger. On a 375 px phone the labels read at 13 px instead of ~3 px, and the map fills the screen instead of a 257 px strip. Everything that differs between the two canvases is one `LAYOUTS` table. WorldMap picks a layout by `(orientation: portrait)` and remounts when the screen rotates. Landscape and desktop draw exactly as before. Portrait skips the near-layer props (laid out along the landscape bottom edge), and its bottom plaques sit clear of the zoom cluster and the guide.
+
+### Changed
+- **SkyLayer, StatsWidget, AskLighthouse** (`src/atlas/map/art/SkyLayer.js`, `src/atlas/map/StatsWidget.js`, `src/atlas/map/AskLighthouse.js`): take their size or position as props. The defaults are the landscape values, so the landscape map passes none.
+
 ## [v23.1.2] — 2026-10-16
 
 ### Added
