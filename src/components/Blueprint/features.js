@@ -99,7 +99,7 @@ export const FEATURES = [
       "An answer may only link to URLs the archive supplied, and a conversation can be shared read-only.",
     ],
     layers: {
-      shell: "AskLauncher on every page, AskChat",
+      shell: "AskLauncher on every page, the Atlas lighthouse, AskChat",
       pages: "Ask.js, AskShare.js (/ask/s/<token>)",
       data: "askRetrieval.js re-ranks, askFormat.js sanitises",
       edge: "functions/api/ask.js streams SSE",

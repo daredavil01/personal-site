@@ -1,5 +1,5 @@
 import React from "react";
-import Main from "../layouts/Main";
+import PageShell from "../atlas/PageShell";
 import AskChat from "../components/Ask/AskChat";
 import { PAGE_META } from "../data/pageMeta";
 
@@ -8,7 +8,7 @@ const meta = PAGE_META["/ask"] || {};
 // The full-page surface. AskLauncher renders the same AskChat in a corner
 // panel, so this file is only the frame around it.
 const Ask = () => (
-  <Main title={meta.title} description={meta.description} image={meta.image}>
+  <PageShell region="person" title={meta.title} description={meta.description} image={meta.image}>
     <article className="flex flex-col gap-6 max-w-3xl">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl md:text-3xl font-semibold">Ask the archive</h1>
@@ -30,7 +30,7 @@ const Ask = () => (
         reblogged — treat them as passing thoughts, not positions.
       </footer>
     </article>
-  </Main>
+  </PageShell>
 );
 
 export default Ask;

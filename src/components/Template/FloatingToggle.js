@@ -21,7 +21,7 @@ const FloatingToggle = ({ showAtlasSwitch = true }) => {
   const { setView } = useWorld();
   const mode = useViewMode();
 
-  const buttonCls = "p-4 rounded-full bg-stone-900 dark:bg-stone-50 text-stone-50 dark:text-stone-900 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group flex items-center justify-center border border-stone-200/10";
+  const buttonCls = "p-[11px] rounded-full bg-stone-900 dark:bg-stone-50 text-stone-50 dark:text-stone-900 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group flex items-center justify-center border border-stone-200/10";
   const labelCls = "max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap font-label text-[10px] uppercase tracking-widest ml-0 group-hover:ml-2 font-bold opacity-0 group-hover:opacity-100";
 
   const enterAtlas = () => {
@@ -37,10 +37,10 @@ const FloatingToggle = ({ showAtlasSwitch = true }) => {
         <button
           type="button"
           onClick={enterAtlas}
-          className="p-4 rounded-full bg-gradient-to-br from-sky-600 to-emerald-600 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group flex items-center justify-center border border-white/10"
+          className="p-[11px] rounded-full bg-gradient-to-br from-sky-600 to-emerald-600 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group flex items-center justify-center border border-white/10"
           aria-label="Enter the Wanderer's Atlas"
         >
-          <span className="material-symbols-outlined text-2xl transition-transform duration-500 group-hover:rotate-12">
+          <span className="material-symbols-outlined text-xl leading-none transition-transform duration-500 group-hover:rotate-12">
             explore
           </span>
           <span className={labelCls}>Enter the Atlas</span>
@@ -53,7 +53,7 @@ const FloatingToggle = ({ showAtlasSwitch = true }) => {
         className={buttonCls}
         aria-label="Toggle Dark Mode"
       >
-        <span className="material-symbols-outlined text-2xl transition-transform duration-500 group-hover:rotate-12">
+        <span className="material-symbols-outlined text-xl leading-none transition-transform duration-500 group-hover:rotate-12">
           {theme === "dark" ? "light_mode" : "dark_mode"}
         </span>
         <span className={labelCls}>{theme === "dark" ? "Light View" : "Dark View"}</span>

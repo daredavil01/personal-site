@@ -58,6 +58,7 @@ describe("regionForPath", () => {
     ["/books/9", "reader"],
     ["/projects/2", "creator"],
     ["/resume", "creator"],
+    ["/presentations/4", "creator"],
     ["/100-days-to-offload/day-8", "writer"],
     ["/challenges", "writer"],
     ["/micro-blog/abc", "writer"],
@@ -66,6 +67,8 @@ describe("regionForPath", () => {
     ["/now", "person"],
     ["/mindmap", "person"],
     ["/interactive-me", "person"],
+    ["/ask", "person"],
+    ["/tags/forts", "person"],
   ])("%s → %s", (path, region) => {
     expect(regionForPath(path)).toBe(region);
   });

@@ -68,6 +68,7 @@ const PRESENTATION = {
       { path: "/projects", label: "Projects", icon: "code" },
       { path: "/resume", label: "Résumé", icon: "badge" },
       { path: "/blueprint", label: "Blueprint", icon: "architecture" },
+      { path: "/presentations", label: "Presentations", icon: "slideshow" },
     ],
   },
   person: {
@@ -80,6 +81,8 @@ const PRESENTATION = {
       { path: "/newsletter", label: "Newsletter", icon: "mail" },
       { path: "/instagram", label: "Instagram", icon: "photo_camera" },
       { path: "/stats", label: "Stats", icon: "monitoring" },
+      { path: "/ask", label: "Ask the Archive", icon: "forum" },
+      { path: "/tags", label: "Tags", icon: "sell" },
       { path: "/mindmap", label: "Observatory", icon: "hub" },
       { path: "/interactive-me", label: "Gallery Trail", icon: "collections" },
       { path: "/contact", label: "Contact", icon: "mail" },

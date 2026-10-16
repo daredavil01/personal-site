@@ -21,9 +21,14 @@ const AskLauncher = () => {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="ask-panel"
-        className="fixed bottom-5 left-5 z-40 rounded-full bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 shadow-lg px-4 py-2.5 text-[13px] font-medium hover:opacity-90 transition-opacity"
+        aria-label={open ? "Close the archive chat" : "Ask the archive"}
+        title={open ? "Close" : "Ask the archive"}
+        // Same 44px circle as FloatingToggle's buttons, so the corners match.
+        className="fixed bottom-6 left-6 z-40 p-[11px] rounded-full bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 shadow-lg border border-stone-200/10 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
       >
-        {open ? "Close" : "Ask the archive"}
+        <span className="material-symbols-outlined text-xl leading-none" aria-hidden="true">
+          {open ? "close" : "forum"}
+        </span>
       </button>
 
       {open && (

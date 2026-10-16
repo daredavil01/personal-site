@@ -101,25 +101,30 @@
    A floating "Life in Numbers" card above the Book Forest that links to /stats.
    The transparent hit rect sits over the aria-hidden card art; the card lifts
    (via the shared .atlas-lift group) on hover/focus, same read as a region. */
-.atlas-stats-hit {
+.atlas-stats-hit,
+.atlas-landmark-hit {
   fill: transparent;
   cursor: pointer;
   outline: none;
 }
 
 .atlas-stats-widget:hover .atlas-stats-card,
-.atlas-stats-widget:focus-within .atlas-stats-card {
+.atlas-stats-widget:focus-within .atlas-stats-card,
+.atlas-landmark:hover .atlas-landmark-plaque,
+.atlas-landmark:focus-within .atlas-landmark-plaque {
   transform: translateY(-8px);
 }
 
-.atlas-stats-hit:focus-visible {
+.atlas-stats-hit:focus-visible,
+.atlas-landmark-hit:focus-visible {
   stroke: var(--atlas-glow);
   stroke-width: 6;
   stroke-dasharray: 20 12;
 }
 
 /* During a fly-in the map is a camera, not a control surface. */
-.atlas-map-viewport.is-flying .atlas-stats-hit {
+.atlas-map-viewport.is-flying .atlas-stats-hit,
+.atlas-map-viewport.is-flying .atlas-landmark-hit {
   pointer-events: none;
 }
 

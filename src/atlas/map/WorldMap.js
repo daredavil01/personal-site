@@ -23,6 +23,7 @@ import { REGIONS, FULL_VIEW, INTRO_VIEW, MAP_W, MAP_H } from "./mapRegions";
 import RegionHotspot from "./RegionHotspot";
 import EasterEggHotspot from "./EasterEggHotspot";
 import StatsWidget from "./StatsWidget";
+import AskLighthouse from "./AskLighthouse";
 import MapControls from "./MapControls";
 import initMapParallax from "./parallax";
 import SkyLayer from "./art/SkyLayer";
@@ -181,14 +182,14 @@ const WorldMap = ({ entry }) => {
     );
   };
 
-  // The stats placard above the Book Forest is a shortcut into /stats. It's not
-  // a region on the map, so it navigates straight there (no camera fly); the
-  // didDrag guard still stops a map-drag that ends over it from firing.
-  const goToStats = (source) => {
+  // Landmarks (the stats placard above the Book Forest, the lighthouse into
+  // /ask) are shortcuts, not regions, so they navigate straight there (no
+  // camera fly); the didDrag guard still stops a map-drag that ends over one.
+  const goToLandmark = (path, source) => {
     if (flying || (source === "pointer" && didDrag.current)) return;
     setHoverKey(null);
     playSfx("chime");
-    navigate("/stats", { state: { fromMap: true } });
+    navigate(path, { state: { fromMap: true } });
   };
 
   const moveRoving = (delta) => {
@@ -250,6 +251,11 @@ const WorldMap = ({ entry }) => {
           <li>
             <Link to="/stats" state={{ fromMap: true }}>
               Statistics — life in numbers
+            </Link>
+          </li>
+          <li>
+            <Link to="/ask" state={{ fromMap: true }}>
+              Lighthouse — ask the archive
             </Link>
           </li>
         </ul>
@@ -411,7 +417,11 @@ const WorldMap = ({ entry }) => {
 
         {/* StatsLayer — a shortcut placard hanging above the Book Forest that
             jumps to /stats. Interactive, so outside the aria-hidden art. */}
-        <StatsWidget onActivate={goToStats} />
+        <StatsWidget onActivate={(source) => goToLandmark("/stats", source)} />
+
+        {/* LighthouseLayer — the coast's lighthouse opens /ask. After the
+            RegionLayer so it wins the click inside the Marathons hotspot. */}
+        <AskLighthouse onActivate={(source) => goToLandmark("/ask", source)} />
 
         {/* EggLayer (§4.6) — interactive, so it lives outside the aria-hidden
             art; hints are vague on purpose. Suppressed during a fly-in. */}

@@ -110,6 +110,7 @@ const PATH_PREFIXES = [
   ["/projects", "creator"],
   ["/resume", "creator"],
   ["/blueprint", "creator"],
+  ["/presentations", "creator"],
   ["/100-days-to-offload", "writer"],
   ["/challenges", "writer"],
   ["/micro-blog", "writer"],
@@ -123,6 +124,8 @@ const PATH_PREFIXES = [
   ["/changelog", "person"],
   ["/mindmap", "person"],
   ["/interactive-me", "person"],
+  ["/ask", "person"],
+  ["/tags", "person"],
 ];
 
 export const regionForPath = (pathname) => {
