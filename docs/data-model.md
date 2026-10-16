@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3183**
+Rows: **3184**
 
 | column | type | null | default |
 |---|---|---|---|
