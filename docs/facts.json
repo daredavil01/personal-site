@@ -718,6 +718,11 @@
     ],
     "presentation": [
       {
+        "d": "2026-10-16",
+        "t": "The Wanderer's Logbook — every essay, read as data",
+        "u": "/presentations/17"
+      },
+      {
         "d": "2026-10-14",
         "t": "Low Cost Clinic — One Tap to the Clinic",
         "u": "/presentations/16"
@@ -833,7 +838,7 @@
     },
     {
       "name": "marathi",
-      "total": 271
+      "total": 272
     },
     {
       "name": "social media",
@@ -889,7 +894,7 @@
     },
     {
       "name": "technology",
-      "total": 65
+      "total": 66
     },
     {
       "name": "choices",
@@ -897,7 +902,7 @@
     },
     {
       "name": "ai",
-      "total": 51
+      "total": 52
     },
     {
       "name": "maharashtra",
@@ -950,7 +955,7 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-16T05:25:14.274116+00:00",
+  "generated_at": "2026-10-16T14:18:52.136224+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
@@ -964,10 +969,10 @@
     "resume": 21,
     "project": 18,
     "writing": 43,
-    "changelog": 100,
+    "changelog": 104,
     "instagram": 11,
     "microblog": 1674,
-    "presentation": 16
+    "presentation": 17
   },
   "tags_by_category": {
     "Personal": 2,

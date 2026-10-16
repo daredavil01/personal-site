@@ -8,7 +8,7 @@ Names are lowercase and URI-encoded rather than slugified.
 |---|---|---|
 | `life` | 480 | Mind & Life |
 | `self-reflection` | 465 | Mind & Life |
-| `marathi` | 271 | Books & Reading |
+| `marathi` | 272 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
 | `personaldevelopment` | 134 | Mind & Life |
@@ -22,9 +22,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
-| `technology` | 65 | Technology & Data |
+| `technology` | 66 | Technology & Data |
 | `choices` | 54 | Mind & Life |
-| `ai` | 51 | Technology & Data |
+| `ai` | 52 | Technology & Data |
 | `maharashtra` | 51 | Travel & Outdoors |
 | `मन` | 46 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
@@ -47,8 +47,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `privacy` | 19 | Digital Life |
 | `scientific temperament` | 19 | Society & Ideas |
 | `history` | 18 | Society & Ideas |
+| `claude code` | 16 | Technology & Data |
 | `data privacy` | 16 | Digital Life |
-| `claude code` | 15 | Technology & Data |
 | `fiction` | 15 | Books & Reading |
 | `information age` | 15 | Digital Life |
 | `youtube` | 14 | Digital Life |
@@ -59,21 +59,21 @@ Names are lowercase and URI-encoded rather than slugified.
 | `digital technology` | 9 | Digital Life |
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
+| `data` | 8 | Technology & Data |
 | `non-fiction` | 8 | Books & Reading |
 | `bioscope` | 7 | Mind & Life |
-| `data` | 7 | Technology & Data |
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
+| `learning` | 6 | — |
 | `newsletter` | 6 | Writing & Blogging |
 | `the social dilemma` | 6 | Digital Life |
 | `digitalnomad` | 5 | Digital Life |
-| `learning` | 5 | — |
 | `sports` | 5 | Running & Fitness |
 | `the_trip` | 5 | Travel & Outdoors |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
+| `data visualization` | 4 | Technology & Data |
 | `three.js` | 4 | Technology & Data |
 | `vibe-coding` | 4 | Technology & Data |
-| `data visualization` | 3 | Technology & Data |
 | `floating_in_sea🌊` | 3 | Travel & Outdoors |
 | `nda marathon` | 3 | Running & Fitness |
 | `roadtrip🏍️` | 3 | Travel & Outdoors |

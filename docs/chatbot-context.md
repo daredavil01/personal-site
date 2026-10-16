@@ -37,7 +37,7 @@ answering rules live with the prompt, and are not repeated here.
 ## Tags
 
 100 tags, shared across every content type, always lowercase.
-Most used: life (480), self-reflection (465), marathi (271), social media (145), love (137), personaldevelopment (134), sanky (134), calmness (127), philosophy (126), travel (119), digital wellbeing (118), latepost (109), digital detox (76), politics (73), psychology (70), social (67), technology (65), choices (54), ai (51), maharashtra (51).
+Most used: life (480), self-reflection (465), marathi (272), social media (145), love (137), personaldevelopment (134), sanky (134), calmness (127), philosophy (126), travel (119), digital wellbeing (118), latepost (109), digital detox (76), politics (73), psychology (70), social (67), technology (66), choices (54), ai (52), maharashtra (51).
 Tag pages live at /tags/:name.
 
 ## What a micro post is

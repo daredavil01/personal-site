@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **16** · indexed as `presentation`
+Rows: **17** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3784**
+Rows: **3791**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3184**
+Rows: **3214**
 
 | column | type | null | default |
 |---|---|---|---|
