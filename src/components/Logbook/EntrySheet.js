@@ -209,7 +209,7 @@ const EntrySheet = ({
                   Ask about this essay
                 </button>
               ) : (
-                <div className="lb-card p-3 max-h-[28rem] flex flex-col">
+                <div className="lb-card p-3 flex flex-col">
                   <Suspense fallback={<p className="font-body text-sm lb-soft m-0">Waking up…</p>}>
                     <AskChat
                       compact

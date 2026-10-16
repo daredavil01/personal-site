@@ -81,7 +81,7 @@ export const IssueAsk = ({ row, model }) => (
     <p className="font-body text-sm text-stone-600 dark:text-stone-400 mb-0">
       {`Curious about something in ${model.label}? The archive answers from this letter and everything it links to.`}
     </p>
-    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 p-4 max-h-[32rem] flex flex-col">
+    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 p-4 flex flex-col">
       <Suspense fallback={<p className="font-body text-sm text-stone-500 mb-0">Waking up…</p>}>
         <AskChat
           compact

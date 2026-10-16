@@ -65,7 +65,7 @@ const SourceCard = ({ source, index, colors }) => {
           {source.image ? `${index}. ` : ""}
           {source.title || "Untitled"}
         </span>
-        <span className="block text-[11px] text-stone-500 dark:text-stone-400">
+        <span className="block text-[11px] text-stone-500 dark:text-stone-400 truncate">
           {entityLabel(source.entity_type)}
           {source.date ? ` · ${source.date}` : ""}
           {source.domain ? ` · ${source.domain} ↗` : ""}
@@ -124,7 +124,7 @@ const Bubble = ({
       </div>
 
       {!!turn.sources?.length && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(16rem,100%),1fr))] gap-2 w-full">
           {turn.sources.map((s, i) => (
             <SourceCard
               key={`${s.entity_type}-${s.entity_id}`}
