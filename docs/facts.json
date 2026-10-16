@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 100,
-    "blogs": 70,
+    "blogs": 71,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -41,9 +41,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-11",
-      "t": "The calm mind is all you need!",
-      "u": "/100-days-to-offload/70"
+      "d": "2026-10-16",
+      "t": "Small things that great people do!",
+      "u": "/100-days-to-offload/71"
     },
     "writing": {
       "d": "2025-12-31",
@@ -830,11 +830,11 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 480
+      "total": 481
     },
     {
       "name": "self-reflection",
-      "total": 465
+      "total": 466
     },
     {
       "name": "marathi",
@@ -850,7 +850,7 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 134
+      "total": 135
     },
     {
       "name": "sanky",
@@ -862,7 +862,7 @@
     },
     {
       "name": "philosophy",
-      "total": 126
+      "total": 127
     },
     {
       "name": "travel",
@@ -878,7 +878,7 @@
     },
     {
       "name": "digital detox",
-      "total": 76
+      "total": 77
     },
     {
       "name": "politics",
@@ -955,11 +955,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-16T14:18:52.136224+00:00",
+  "generated_at": "2026-10-16T19:24:21.870874+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 70,
+    "blog": 71,
     "book": 52,
     "page": 1,
     "site": 25,
@@ -969,7 +969,7 @@
     "resume": 21,
     "project": 18,
     "writing": 43,
-    "changelog": 104,
+    "changelog": 107,
     "instagram": 11,
     "microblog": 1674,
     "presentation": 17

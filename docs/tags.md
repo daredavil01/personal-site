@@ -6,19 +6,19 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 480 | Mind & Life |
-| `self-reflection` | 465 | Mind & Life |
+| `life` | 481 | Mind & Life |
+| `self-reflection` | 466 | Mind & Life |
 | `marathi` | 272 | Books & Reading |
 | `social media` | 145 | Digital Life |
 | `love` | 137 | People & Feelings |
-| `personaldevelopment` | 134 | Mind & Life |
+| `personaldevelopment` | 135 | Mind & Life |
 | `sanky` | 134 | Personal |
 | `calmness` | 127 | Mind & Life |
-| `philosophy` | 126 | Society & Ideas |
+| `philosophy` | 127 | Society & Ideas |
 | `travel` | 119 | Travel & Outdoors |
 | `digital wellbeing` | 118 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 76 | Digital Life |
+| `digital detox` | 77 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
@@ -33,11 +33,11 @@ Names are lowercase and URI-encoded rather than slugified.
 | `forts` | 38 | Travel & Outdoors |
 | `running` | 37 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
-| `100_days_to_offload` | 30 | Writing & Blogging |
+| `100_days_to_offload` | 31 | Writing & Blogging |
 | `daredavil01` | 30 | Personal |
+| `self-help` | 30 | Books & Reading |
 | `भटकंती` | 30 | Travel & Outdoors |
 | `konkan` | 29 | Travel & Outdoors |
-| `self-help` | 29 | Books & Reading |
 | `digital manipulation` | 26 | Digital Life |
 | `स्थितप्रज्ञ` | 26 | Mind & Life |
 | `book review` | 24 | Books & Reading |

@@ -11,7 +11,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Micro posts** (1674) — /micro-blog/:id. A Tumblr archive,
   2018-03-19 → 2026-10-15,
   English and Marathi, short and unedited. Many are photo posts with no text.
-- **Blog posts** (70) — /100-days-to-offload/:id. Ledger rows that link out
+- **Blog posts** (71) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
 - **Projects** (19) — /projects/:id. Status: Live: 15, Concept: 1, Archived: 3.
@@ -37,7 +37,7 @@ answering rules live with the prompt, and are not repeated here.
 ## Tags
 
 100 tags, shared across every content type, always lowercase.
-Most used: life (480), self-reflection (465), marathi (272), social media (145), love (137), personaldevelopment (134), sanky (134), calmness (127), philosophy (126), travel (119), digital wellbeing (118), latepost (109), digital detox (76), politics (73), psychology (70), social (67), technology (66), choices (54), ai (52), maharashtra (51).
+Most used: life (481), self-reflection (466), marathi (272), social media (145), love (137), personaldevelopment (135), sanky (134), calmness (127), philosophy (127), travel (119), digital wellbeing (118), latepost (109), digital detox (77), politics (73), psychology (70), social (67), technology (66), choices (54), ai (52), maharashtra (51).
 Tag pages live at /tags/:name.
 
 ## What a micro post is
