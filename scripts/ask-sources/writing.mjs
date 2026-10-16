@@ -7,7 +7,8 @@
 // straight out to the post.
 //
 // The text never leaves the index and the gitignored knowledge_base/ — nothing
-// here is written to public/.
+// here is written to public/. (/logbook ships single sentences that link back
+// to their post, never paragraphs: see scripts/build-logbook.mjs.)
 
 import fs from "fs";
 import path from "path";

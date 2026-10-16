@@ -42,7 +42,7 @@ const stat = (value, label) => {
 // here: CLAUDE.md puts every site number in computeSiteStats, and a card that
 // did its own arithmetic would drift from the page it summarises.
 export function pageModel(slug, payload, {
-  siteUrl = "", portrait: portraitOverride = null, photos = {}, ledger = null,
+  siteUrl = "", portrait: portraitOverride = null, photos = {}, ledger = null, logbook = null,
 } = {}) {
   const s = (payload && payload.stats) || {};
   const micro = (payload && payload.micro) || {};
@@ -50,6 +50,10 @@ export function pageModel(slug, payload, {
   // public/data/writing-ledger.json, the same file the ledger page fetches.
   const months = (ledger && Array.isArray(ledger.byMonth) ? ledger.byMonth : []).slice(-12);
   const ledgerTotals = (ledger && ledger.totals) || {};
+  // public/data/logbook.json, the same file /logbook fetches (npm run logbook).
+  const lb = (logbook && logbook.totals) || {};
+  const lbPosts = (logbook && Array.isArray(logbook.posts)) ? logbook.posts : [];
+  const lbLanguages = [lb.en, lb.mr].filter((n) => n > 0).length;
 
   // The three identity cards carry the portrait. The generator passes it as an
   // inlined data URI, since satori has to read the pixels to composite them —
@@ -240,6 +244,17 @@ export function pageModel(slug, payload, {
       ].filter(Boolean),
       figure: { names: [s.latestTrek || "ridge"] },
     },
+    logbook: {
+      eyebrow: "Wanderer's Logbook",
+      title: "Six years of essays, mapped",
+      stats: [
+        stat(lb.posts, "Essays"),
+        stat(lb.words, "Words"),
+        stat(lbLanguages || null, "Languages"),
+      ].filter(Boolean),
+      // The newest essay's opening line, drawn as the page's sky draws it.
+      figure: { sentence: lbPosts.length ? lbPosts[lbPosts.length - 1].opening : null },
+    },
     "writing-ledger": {
       eyebrow: "Writing Ledger",
       title: "Words, month by month",
@@ -279,7 +294,7 @@ export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
-  "ask-share", "newsletter", "blueprint",
+  "ask-share", "newsletter", "blueprint", "logbook",
 ];
 
 // One issue's card, from issueModel() (src/lib/newsletterIssue.js). Rendered by

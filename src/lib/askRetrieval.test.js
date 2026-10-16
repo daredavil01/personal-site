@@ -216,6 +216,11 @@ describe("ask about this page", () => {
     expect(focusTargets(null)).toEqual([]);
   });
 
+  it("accepts a writing essay's 15-digit synthetic id, and nothing longer", () => {
+    expect(focusTargets({ type: "writing", id: 253803020549855 })).toEqual([{ type: "writing", id: "253803020549855" }]);
+    expect(focusTargets({ type: "writing", id: "1234567890123456" })).toEqual([]);
+  });
+
   it("takes the page's chunks and one chunk per ref, in the page's order", () => {
     const rows = [chunk("trek", 9, 1), chunk("trek", 9, 0), chunk("now", 12, 1), chunk("now", 12, 0), chunk("sport", 5, 0)];
     const picked = pickFocusChunks(rows, focusTargets(focus));

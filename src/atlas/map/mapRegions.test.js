@@ -61,6 +61,7 @@ describe("regionForPath", () => {
     ["/100-days-to-offload/day-8", "writer"],
     ["/challenges", "writer"],
     ["/micro-blog/abc", "writer"],
+    ["/logbook", "writer"],
     ["/about", "person"],
     ["/now", "person"],
     ["/mindmap", "person"],

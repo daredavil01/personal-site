@@ -113,6 +113,7 @@ const PATH_PREFIXES = [
   ["/100-days-to-offload", "writer"],
   ["/challenges", "writer"],
   ["/micro-blog", "writer"],
+  ["/logbook", "writer"],
   ["/about", "person"],
   ["/now", "person"],
   ["/newsletter", "person"],

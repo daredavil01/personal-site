@@ -127,6 +127,15 @@ export const PAGE_META = {
     ogSlug: "interactive-me",
     type: "website",
   },
+  "/logbook": {
+    title: "Wanderer's Logbook",
+    description:
+      "Six years of essays in English and Marathi, read as data: a map of what I write about, opening lines as constellations, the punctuation of every post, the phrases I keep reaching for, and letters between my past and present self.",
+    image: `${SITE_URL}/og/logbook.png`,
+    imageAlt: "An essay's opening sentence drawn as a constellation of stars",
+    ogSlug: "logbook",
+    type: "website",
+  },
   "/micro-blog": {
     title: "Micro Blog",
     description:

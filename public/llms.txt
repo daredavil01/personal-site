@@ -17,6 +17,7 @@
 - [Projects](https://sankettambare.in/projects): Full-stack experiments and production apps — social platforms, AI-powered tools, and web applications built with modern tech stacks.
 - [Presentations](https://sankettambare.in/presentations): Talks, dossiers and data stories built as HTML slide decks, viewable in place.
 - [100 Days To Offload](https://sankettambare.in/100-days-to-offload): Following the #100DaysToOffload challenge — publishing 100 blog posts in a year, with progress tracking and interactive filtering of every post.
+- [Wanderer's Logbook](https://sankettambare.in/logbook): Every essay in English and Marathi read as data — a map of subjects from embeddings, opening lines as constellations, punctuation fingerprints, signature phrases, letters between past and present, and a found-poem machine.
 - [Micro Blog](https://sankettambare.in/micro-blog): Searchable archive of 1 600+ short posts, quotes, and captures imported from Tumblr — years of thoughts, one micro-post at a time.
 - [Instagram](https://sankettambare.in/instagram): Curated visual archive of captured moments, textures, and stories — preserved from before the Instagram account was deleted.
 

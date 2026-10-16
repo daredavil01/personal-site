@@ -132,6 +132,7 @@ export const ROUTE_MANIFEST = [
   },
   { path: "/mindmap", component: "MindMap", og: { strategy: "page", slug: "mindmap" }, indexable: true },
   { path: "/blueprint", component: "Blueprint", og: { strategy: "page", slug: "blueprint" }, indexable: true },
+  { path: "/logbook", component: "Logbook", og: { strategy: "page", slug: "logbook" }, indexable: true },
   { path: "/tags", component: "TagsHub", og: { strategy: "page", slug: "tags" }, indexable: true },
   {
     path: "/tags/:name",

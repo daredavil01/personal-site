@@ -79,6 +79,13 @@
   </url>
 
   <url>
+    <loc>https://sankettambare.in/logbook</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://sankettambare.in/micro-blog</loc>
     <lastmod>2026-06-14</lastmod>
     <changefreq>weekly</changefreq>

@@ -3,8 +3,11 @@
 #   1. blogs:wordcount — re-counts every Substack/WordPress post and refreshes
 #      the post-text cache (only new or edited posts are downloaded).
 #   2. ask:index       — re-indexes every source; only new text is embedded.
-#   3. Commits public/data/writing-ledger.json when its contents changed — not
-#      when only the generation date moved — which triggers a Pages deploy.
+#   3. logbook         — rebuilds public/data/logbook.json (/logbook) from the
+#      text cache and the embeddings step 2 just wrote.
+#   4. Commits public/data/writing-ledger.json and public/data/logbook.json
+#      when their contents changed — not when only the generation date moved —
+#      which triggers a Pages deploy.
 #
 # Repository secrets: SUPABASE_SERVICE_ROLE_KEY, CF_ACCOUNT_ID, CF_API_TOKEN.
 # If `main` is branch-protected against bot pushes, the commit step fails;
@@ -65,32 +68,39 @@ jobs:
       - name: Index new content
         run: npm run ask:index -- ${{ inputs.dry_run && '--dry-run' || '' }}
 
-      - name: Commit the ledger data if it changed
+      - name: Rebuild the Logbook data
+        if: ${{ !inputs.dry_run }}
+        run: npm run logbook
+
+      - name: Commit the ledger and Logbook data if they changed
         if: ${{ !cancelled() && !inputs.dry_run }}
         run: |
           node -e '
             const fs = require("fs");
             const { execSync } = require("child_process");
-            const file = "public/data/writing-ledger.json";
+            // Fields every run rewrites; a file whose rest is unchanged is not committed.
+            const VOLATILE = ["generatedAt", "currentPeriod"];
             const strip = (text) => {
               const j = JSON.parse(text);
-              delete j.generatedAt;
-              delete j.currentPeriod; // recomputed by every reader
+              VOLATILE.forEach((k) => delete j[k]);
               return JSON.stringify(j);
             };
-            let before = "";
-            try { before = execSync(`git show HEAD:${file}`, { encoding: "utf8", maxBuffer: 1e8 }); } catch (_) {}
-            const changed = !before || strip(before) !== strip(fs.readFileSync(file, "utf8"));
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);
-            console.log(changed ? "Ledger data changed." : "Ledger data unchanged apart from dates.");
-          ' > /dev/null
-          if git diff --quiet -- public/data/writing-ledger.json || \
-             ! grep -q "changed=true" "$GITHUB_OUTPUT"; then
+            const changed = ["public/data/writing-ledger.json", "public/data/logbook.json"].filter((file) => {
+              if (!fs.existsSync(file)) return false;
+              let before = "";
+              try { before = execSync(`git show HEAD:${file}`, { encoding: "utf8", maxBuffer: 1e8 }); } catch (_) {}
+              return !before || strip(before) !== strip(fs.readFileSync(file, "utf8"));
+            });
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `files=${changed.join(" ")}\n`);
+            console.log(changed.length ? `Changed: ${changed.join(", ")}` : "Data unchanged apart from dates.");
+          '
+          files=$(grep "^files=" "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)
+          if [ -z "$files" ]; then
             echo "Nothing to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/writing-ledger.json
-          git commit -m "chore(ledger): refresh writing ledger data"
+          git add $files
+          git commit -m "chore(ledger): refresh writing ledger and logbook data"
           git push

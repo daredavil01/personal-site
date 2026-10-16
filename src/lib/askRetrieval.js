@@ -210,7 +210,9 @@ export function applyRerank(chunks, ranking) {
 // archive for "race" and answers about the wrong one.
 
 const FOCUS_TYPE = /^[a-z][a-z0-9_]*$/;
-const FOCUS_ID = /^\d{1,12}$/;
+// 15 digits: a `writing` entity's id is syntheticId() — 12 hex digits of a
+// sha1, up to 2.8e14 — and /logbook pins those essays too.
+const FOCUS_ID = /^\d{1,15}$/;
 
 /**
  * The validated entities a focus names — the page itself first, then its refs,

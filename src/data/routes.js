@@ -36,6 +36,7 @@ const routes = [
       { label: "Micro Blog", path: "/micro-blog" },
       { label: "Challenges", path: "/challenges" },
       { label: "100 Days To Offload", path: "/100-days-to-offload" },
+      { label: "Wanderer's Logbook", path: "/logbook" },
       { label: "Writing Ledger", path: "/writing-ledger.html", external: true },
       { label: "Tags", path: "/tags" },
     ],

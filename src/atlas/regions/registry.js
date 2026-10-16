@@ -49,6 +49,7 @@ const PRESENTATION = {
       { path: "/100-days-to-offload", label: "100 Days to Offload", icon: "history_edu" },
       { path: "/challenges", label: "Challenges", icon: "flag" },
       { path: "/micro-blog", label: "Micro Blog", icon: "chat" },
+      { path: "/logbook", label: "Wanderer's Logbook", icon: "auto_stories" },
     ],
   },
   reader: {

@@ -1,0 +1,137 @@
+/* The Wanderer's Logbook (/logbook).
+ *
+ * Two inks, like a field journal: sepia on cream paper by day, warm light on
+ * indigo by night. The Sky lens is always night — constellations need it. All
+ * colour goes through these tokens so the SVGs need no dark: variants. English
+ * and Marathi each keep one colour on every lens. */
+
+.lb-root {
+  --lb-paper: #f6f1e7;
+  --lb-panel: #fffdf8;
+  --lb-ink: #2b2118;
+  --lb-soft: rgba(43, 33, 24, 0.66);
+  --lb-faint: rgba(43, 33, 24, 0.14);
+  --lb-rule: rgba(43, 33, 24, 0.07);
+  --lb-accent: #c2410c;
+  --lb-accent-soft: rgba(194, 65, 12, 0.14);
+  --lb-en: #c2410c;
+  --lb-mr: #0f766e;
+  --lb-sky: #151129;
+  --lb-sky-ink: #f5ecd9;
+  --lb-sky-soft: rgba(245, 236, 217, 0.6);
+  color: var(--lb-ink);
+}
+
+.dark .lb-root {
+  --lb-paper: #14111f;
+  --lb-panel: #1c1830;
+  --lb-ink: #efe7d8;
+  --lb-soft: rgba(239, 231, 216, 0.68);
+  --lb-faint: rgba(239, 231, 216, 0.16);
+  --lb-rule: rgba(239, 231, 216, 0.05);
+  --lb-accent: #fb923c;
+  --lb-accent-soft: rgba(251, 146, 60, 0.16);
+  --lb-en: #fb923c;
+  --lb-mr: #2dd4bf;
+  --lb-sky: #0b0918;
+}
+
+.lb-ink { color: var(--lb-ink); }
+.lb-soft { color: var(--lb-soft); }
+.lb-accent { color: var(--lb-accent); }
+.lb-en { color: var(--lb-en); }
+.lb-mr { color: var(--lb-mr); }
+
+/* A logbook page: cream paper with faint ruled lines and a margin rule. */
+.lb-sheet {
+  position: relative;
+  background-color: var(--lb-paper);
+  background-image:
+    linear-gradient(90deg, transparent 38px, var(--lb-accent-soft) 38px, var(--lb-accent-soft) 39px, transparent 39px),
+    repeating-linear-gradient(transparent 0 27px, var(--lb-rule) 27px 28px);
+  border: 1px solid var(--lb-faint);
+  border-radius: 14px;
+}
+
+.lb-panel {
+  background: var(--lb-panel);
+  border: 1px solid var(--lb-faint);
+  border-radius: 12px;
+}
+
+.lb-sky {
+  background: radial-gradient(ellipse at 50% 40%, #241d45 0%, var(--lb-sky) 70%);
+  color: var(--lb-sky-ink);
+  border-radius: 14px;
+}
+
+.lb-chip {
+  border: 1px solid var(--lb-faint);
+  background: var(--lb-panel);
+  color: var(--lb-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.lb-chip:hover { color: var(--lb-accent); border-color: var(--lb-accent); }
+.lb-chip:disabled { cursor: not-allowed; opacity: 0.45; }
+.lb-chip[aria-pressed="true"],
+.lb-chip[aria-selected="true"] {
+  color: var(--lb-paper);
+  background: var(--lb-ink);
+  border-color: var(--lb-ink);
+}
+.lb-chip:focus-visible,
+.lb-hit:focus-visible { outline: 2px dashed var(--lb-accent); outline-offset: 2px; }
+
+.lb-hit { cursor: pointer; }
+.lb-hit:focus { outline: none; }
+.lb-hit:focus-visible .lb-mark { stroke: var(--lb-accent); stroke-width: 2.5; }
+
+/* The scrolly graphic: dots glide between layouts. */
+.lb-dot {
+  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.6s, fill 0.6s, r 0.9s;
+}
+.lb-fade { transition: opacity 0.6s; }
+
+.lb-film-controls {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.lb-film-caption { line-height: 1.35; }
+.lb-film-seek {
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--lb-accent);
+  cursor: pointer;
+}
+
+.lb-step-card {
+  background: color-mix(in srgb, var(--lb-panel) 92%, transparent);
+  border: 1px solid var(--lb-faint);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes lb-rain {
+  from { transform: translateY(-30px); opacity: 0; }
+  20% { opacity: 1; }
+  to { transform: translateY(420px); opacity: 0; }
+}
+.lb-rain { animation: lb-rain 2.6s linear infinite; }
+
+@keyframes lb-twinkle {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.9; }
+}
+.lb-twinkle { animation: lb-twinkle 4s ease-in-out infinite; }
+
+.lb-mr-text { font-family: "Noto Sans Devanagari", "Tiro Devanagari Marathi", "Mangal", "Nirmala UI", sans-serif; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-dot, .lb-fade { transition: none; }
+  .lb-rain, .lb-twinkle { animation: none; }
+}

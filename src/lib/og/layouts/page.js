@@ -13,7 +13,7 @@ import {
 import {
   spineStack, ridgeline, lostTrail, dotMatrix, progressBar, swatchCloud, radialSpokes,
   connectedCurve, slideFan, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
-  commitGraph, monthCalendar, envelope, floorPlan,
+  commitGraph, monthCalendar, envelope, floorPlan, constellation,
 } from "./figures.js";
 
 const col = (gap, ...children) => h("div", { style: { display: "flex", flexDirection: "column", gap } }, children);
@@ -136,6 +136,11 @@ const FIGURES = {
     );
   },
 
+  logbook: (m) => {
+    const svg = constellation(m.figure && m.figure.sentence, { size: 400, accent: m.accent });
+    return svg ? inset(svg, 400, 400, { right: 70, bottom: 110 }) : null;
+  },
+
   "writing-ledger": (m) => {
     const months = (m.figure && m.figure.months) || [];
     if (months.length < 2) return null;
@@ -207,7 +212,7 @@ export const pageCard = (model) => {
   const bleed = typeof figure === "function" ? figure(model) : null;
   // Leave room for whichever side the figure occupies so text never collides
   // with it. The full-bleed portraits are the exception: text sits over them.
-  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger"]
+  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger", "logbook"]
     .includes(model.slug) ? 620 : CARD.width - 128;
 
   return Frame({

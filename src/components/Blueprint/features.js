@@ -175,6 +175,7 @@ export const FEATURES = [
         : "The micro-blog is too big for that, so it is searched and paged in Postgres."),
       "A detail page unfurls with the row's own photo, or the section's card when it has none.",
       "\"More like this\" comes from the same embeddings as /ask, with no model call when a page is read.",
+      "The Logbook reads every essay as data: a map from those embeddings, opening lines as constellations, punctuation spirals and found poems.",
     ],
     layers: {
       shell: "PageShell: identical content, either shell",
@@ -182,7 +183,7 @@ export const FEATURES = [
       data: "ContentContext: each list fetched once",
       edge: "_middleware.js: per-row meta",
       db: "one table each; micro-blog via tsvector",
-      jobs: "blogs:wordcount feeds the Writing Ledger",
+      jobs: "blogs:wordcount feeds the Writing Ledger and the Logbook",
     },
   },
   {

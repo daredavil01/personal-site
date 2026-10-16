@@ -180,6 +180,12 @@ async function main() {
   } catch (_) {
     console.warn("  ! public/data/writing-ledger.json missing; the ledger card renders without figures");
   }
+  let logbook = null;
+  try {
+    logbook = JSON.parse(await fs.promises.readFile(path.join(ROOT, "public", "data", "logbook.json"), "utf8"));
+  } catch (_) {
+    console.warn("  ! public/data/logbook.json missing; the logbook card renders without figures (npm run logbook)");
+  }
   console.info(`Stats from ${from}; ${(photos.instagram || []).length + (photos.projects || []).length} cover photos.`);
 
   const outDir = writeFallbacks ? path.join(ROOT, "public", "og") : OUT;
@@ -198,7 +204,7 @@ async function main() {
   for (const slug of slugs) {
     const job = { name: slug, label: `page / ${slug}` };
     try {
-      const model = pageModel(slug, payload, { portrait, photos, ledger });
+      const model = pageModel(slug, payload, { portrait, photos, ledger, logbook });
       const started = Date.now();
       // eslint-disable-next-line no-await-in-loop -- sequential keeps peak memory flat and timings honest
       const png = await render(pageCard(model));

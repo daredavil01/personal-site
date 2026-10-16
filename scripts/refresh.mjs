@@ -29,6 +29,7 @@ const STEPS = {
   repo: [["sync-repo-history.mjs", true]],
   blogs: [["blog-word-counts.mjs", false]],
   ask: [["build-content-index.mjs", true]], // also runs docs:build
+  logbook: [["build-logbook.mjs", true]], // after ask: the map reads its embeddings
 };
 
 const args = process.argv.slice(2);

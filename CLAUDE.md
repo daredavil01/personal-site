@@ -74,7 +74,8 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 ## Periodic upkeep
 
 `npm run refresh` runs, in order: `changelog` (push, notes, majors), `repo`
-(commit graph), `blogs` (word counts), `ask` (index + docs). Name steps to run
+(commit graph), `blogs` (word counts), `ask` (index + docs), `logbook`
+(`/logbook` data). Name steps to run
 some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
 step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
@@ -247,6 +248,32 @@ Natural-language chat over the whole content store.
 - **Related content:** `related_content_ranked()` powers the "more like this"
   strip on every detail page from the same embeddings — no model call at read
   time.
+
+## The Logbook (/logbook)
+
+Every essay (Substack + WordPress, English and Marathi) read as data: a scrolly
+intro, then six lenses — Atlas, Sky, Fingerprint, Phrases, Letters, Found
+poems — and a drawer with an `/ask` chat pinned to the selected essay.
+
+- **Data is a committed file:** `public/data/logbook.json`, built by
+  `npm run logbook` (`scripts/build-logbook.mjs`) from
+  `knowledge_base/blog-posts-text.json` plus the `content_chunks` embeddings.
+  No model calls. Run it **after** `ask:index` (it is the `logbook` step of
+  `npm run refresh` and of the nightly workflow); an essay with no chunks yet is
+  left off the atlas, never placed at the origin.
+- **The excerpt rule:** single sentences may ship (each links to its essay),
+  paragraphs never do. `MAX_EXCERPT_WORDS` in `src/lib/logbook.js` is the rule
+  and `src/lib/logbook.test.js` holds the committed JSON to it, plus a 200 KB
+  budget. The full text stays in gitignored `knowledge_base/`.
+- **Analysis lives in `src/lib/logbook.js`** (cleaning, Devanagari detection by
+  share of letters, sentences, phrases, letter pairs, `constellationOf`). The
+  share card's constellation and the Sky lens both call `constellationOf`, so
+  they draw the same shape.
+- **The map** is UMAP (`umap-js`, devDependency, seeded) over each essay's mean
+  chunk vector; regions are k-means on the 2D layout, named by tags. bge-m3 is
+  multilingual, so Marathi and English essays on one subject sit together.
+- **Ask focus** sends `{type: "blog"|"writing", id}`; a `writing` id is
+  `syntheticId()` (15 digits), which is why `FOCUS_ID` allows 15.
 
 ## Newsletter (/newsletter)
 
@@ -445,6 +472,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Answer link/image rules | `src/lib/askFormat.js` |
 | Automatic eval rubric + ladder + endpoint | `src/lib/askJudge.js`, `src/lib/askJudgeTiers.js`, `functions/api/ask-eval.js` |
 | Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
+| Logbook data / analysis / page | `public/data/logbook.json` (`npm run logbook`), `src/lib/logbook.js`, `src/pages/Logbook.js`, `src/components/Logbook/` |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |
 | Site blueprint (/blueprint) | `src/pages/Blueprint.js`, `src/components/Blueprint/` |

@@ -23,6 +23,7 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/100-days-to-offload` | OneHundredDays | `/og/100-days-to-offload.png` |
 | `/micro-blog` | MicroBlog | `/og/micro-blog.png` |
 | `/micro-blog/:id` | MicroBlogPost | the row's photo, else `/og/micro-blog.png` |
+| `/logbook` | Logbook | `/og/logbook.png` |
 | `/treks/:id` | TrekPost | the row's photo, else `/og/treks.png` |
 | `/sports/:id` | SportPost | the row's photo, else `/og/sports.png` |
 | `/books/:id` | BookPost | the row's photo, else `/og/books.png` |

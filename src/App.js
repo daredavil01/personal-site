@@ -46,6 +46,7 @@ const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
 const Blueprint = lazy(() => import("./pages/Blueprint"));
+const Logbook = lazy(() => import("./pages/Logbook"));
 const TagsHub = lazy(() => import("./pages/TagsHub"));
 const TagDetail = lazy(() => import("./pages/TagDetail"));
 const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
@@ -100,6 +101,7 @@ const App = () => (
               <Route path="/100-days-to-offload" element={<OneHundredDays />} />
               <Route path="/micro-blog" element={<MicroBlog />} />
               <Route path="/micro-blog/:id" element={<MicroBlogPost />} />
+              <Route path="/logbook" element={<Logbook />} />
               <Route path="/treks/:id" element={<TrekPost />} />
               <Route path="/sports/:id" element={<SportPost />} />
               <Route path="/books/:id" element={<BookPost />} />

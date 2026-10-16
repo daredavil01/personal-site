@@ -7,6 +7,7 @@
 // list always draws the same ridge.
 
 import { hashString, seededRandom, colorForTag } from "../../generativeArt.js";
+import { constellationOf } from "../../logbook.js";
 import { COLORS, RIBBON } from "../tokens.js";
 
 const esc = (value) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -380,6 +381,32 @@ export const floorPlan = ({ width = 460, height = 300, accent = COLORS.red, lit 
     // The entrance: a gap in the outer wall and the arrow in.
     `<rect x="${x(330)}" y="${(pad + 600 * k - 4).toFixed(1)}" width="${len(70)}" height="8" fill="${COLORS.ink}"/>`,
     `<path d="M${x(350)},${(pad + 600 * k + 18).toFixed(1)} L${x(365)},${(pad + 600 * k + 6).toFixed(1)} L${x(380)},${(pad + 600 * k + 18).toFixed(1)}" fill="none" stroke="${accent}" stroke-width="3"/>`,
+    "</svg>",
+  ].join("");
+};
+
+// --- /logbook -----------------------------------------------------------------
+
+// The newest essay's opening sentence as a constellation — the same geometry
+// the /logbook sky draws (constellationOf), over a faint field of stars seeded
+// from the sentence. No sentence, no figure.
+export const constellation = (sentence, { size = 380, accent = COLORS.orange } = {}) => {
+  const stars = constellationOf(sentence || "");
+  if (stars.length < 2) return "";
+  const pad = 30;
+  const at = (v) => (pad + v * (size - pad * 2)).toFixed(1);
+  const rand = seededRandom(hashString(sentence));
+  const field = Array.from({ length: 46 }, () => `<circle cx="${(rand() * size).toFixed(1)}" cy="${(rand() * size).toFixed(1)}" r="${(0.6 + rand() * 1.4).toFixed(1)}" fill="${COLORS.textFaint}" opacity="${(0.25 + rand() * 0.4).toFixed(2)}"/>`).join("");
+  const path = stars.map((s, i) => `${i ? "L" : "M"}${at(s.x)},${at(s.y)}`).join(" ");
+  const dots = stars.map((s) => {
+    const r = Math.max(2.5, s.r * (size - pad * 2) * 0.32);
+    return `<circle cx="${at(s.x)}" cy="${at(s.y)}" r="${(r * 2.4).toFixed(1)}" fill="${accent}" opacity="0.16"/><circle cx="${at(s.x)}" cy="${at(s.y)}" r="${r.toFixed(1)}" fill="${COLORS.text}"/>`;
+  }).join("");
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`,
+    field,
+    `<path d="${path}" fill="none" stroke="${accent}" stroke-width="2.5" stroke-linejoin="round" opacity="0.85"/>`,
+    dots,
     "</svg>",
   ].join("");
 };
