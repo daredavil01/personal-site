@@ -7,7 +7,7 @@ import {
   SPIRAL_BOX, perThousand, readingMinutes, rhythmStats, spiralPaths, titleCase,
 } from "./model";
 import {
-  fmt, langName, langProps, shortDate, textLang, useWidth, yearOf,
+  fmt, langName, langProps, shortDate, textLang, useModal, useWidth, yearOf,
 } from "./shared";
 
 const AskChat = lazy(() => import("../Ask/AskChat"));
@@ -55,33 +55,18 @@ const Section = ({ title, children }) => (
   </section>
 );
 
-const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
-
 const EntrySheet = ({
   post, data, byId, index, onSelect, onClose,
 }) => {
   const sheetRef = useRef(null);
   const bodyRef = useRef(null);
   const closeRef = useRef(null);
-  const openerRef = useRef(null);
   const [asking, setAsking] = useState(false);
   const [imageOk, setImageOk] = useState(true);
   const { posts } = data;
   const prev = posts[index - 1] || null;
   const next = posts[index + 1] || null;
-
-  // Remember who opened the sheet, lock the page behind it, and give focus back on close.
-  useEffect(() => {
-    openerRef.current = document.activeElement;
-    const html = document.documentElement;
-    const was = html.style.overflow;
-    html.style.overflow = "hidden";
-    return () => {
-      html.style.overflow = was;
-      const el = openerRef.current;
-      if (el && typeof el.focus === "function" && document.contains(el)) el.focus({ preventScroll: true });
-    };
-  }, []);
+  const modalKeys = useModal(sheetRef, onClose);
 
   // A new essay: back to the top of the page, a fresh chat, the photo retried.
   useEffect(() => {
@@ -95,28 +80,14 @@ const EntrySheet = ({
   }, [post.id]);
 
   const onKeyDown = (e) => {
+    if (modalKeys(e)) return;
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
-    if (e.key === "Escape") {
-      e.stopPropagation();
-      onClose();
-    } else if (!typing && e.key === "ArrowLeft" && prev) {
+    if (!typing && e.key === "ArrowLeft" && prev) {
       e.preventDefault();
       onSelect(prev.id);
     } else if (!typing && e.key === "ArrowRight" && next) {
       e.preventDefault();
       onSelect(next.id);
-    } else if (e.key === "Tab" && sheetRef.current) {
-      const els = [...sheetRef.current.querySelectorAll(FOCUSABLE)].filter((el) => el.offsetParent !== null);
-      if (!els.length) return;
-      const first = els[0];
-      const last = els[els.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
     }
   };
 

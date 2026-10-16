@@ -13,6 +13,15 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.1.0] — 2026-10-16
+
+### Added
+- **The Logbook tour** (`src/components/Logbook/TourDialog.js`, `public/video/the-logbook.mp4`): A narrated, vertical film of the page in use at phone size — the route inking across the cover, the prologue's dots, the Atlas hover card and walked route, the sky filling, a fingerprint, a guessed year, letters paged through, a poem locked and shuffled, and an essay opening as its own page — each chapter titled and captioned on screen, so it plays with the sound off, over the Scriptorium's own music. "Watch the tour" on the cover (or a `?tour` link) opens it in a dialog with a chapter list that seeks, the narration as captions, and a download link; `preload="none"` keeps it off the page's weight until it plays.
+- **Tour guard** (`src/components/Logbook/tour.test.js`): Fails the build if the video, poster, captions or chapter list is missing, the chapters stop following the page's order, or the web encode outgrows 6 MB.
+
+### Changed
+- **Dialog mechanics** (`src/components/Logbook/shared.js`, `src/components/Logbook/EntrySheet.js`): The focus trap, Escape, page scroll lock and focus return move into a `useModal` hook shared by the essay page and the tour.
+
 ## [v23.0.0] — 2026-10-16
 
 ### Changed

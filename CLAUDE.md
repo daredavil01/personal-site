@@ -279,6 +279,17 @@ a slide-over page with an `/ask` chat pinned to it.
 - **Poem export:** html-to-image draws the paper-grain data URI as solid black
   and bakes the node's margins in, hence `lb-poem--flat` while it captures and
   the margin on a wrapper.
+- **The tour** (`TourDialog.js`, "Watch the tour" on the cover, or `?tour`): a
+  narrated vertical film of the page in use at phone size, committed as
+  `public/video/the-logbook.{mp4,jpg,vtt,json}` — a 720×1280 web encode, its
+  poster, the narration as WebVTT and the chapter starts. `preload="none"`, so
+  the page costs nothing until it plays. `tour.test.js` fails the build if a
+  file is missing, the chapters stop following the page's, or the MP4 passes
+  6 MB. It was recorded once by a hand-run Playwright screencast (414×690 at
+  2×), narrated with Piper `en_GB-cori-high` over `loop-writer.m4a` and cut
+  with ffmpeg; **no npm script rebuilds it**, so re-record it by hand after
+  the page changes visibly. Its dialog mechanics (focus trap, Esc, scroll
+  lock, focus returned) are `useModal` in `shared.js`, shared with `EntrySheet`.
 
 - **Data is a committed file:** `public/data/logbook.json`, built by
   `npm run logbook` (`scripts/build-logbook.mjs`) from

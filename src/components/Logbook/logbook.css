@@ -659,11 +659,56 @@
 .dark .lb-duotone img { mix-blend-mode: screen; opacity: 0.85; filter: grayscale(1) contrast(1.1) brightness(0.9); }
 .lb-duotone:hover img { filter: none; mix-blend-mode: normal; opacity: 1; }
 
+/* ---- The tour (a vertical film in a dialog) ---------------------------- */
+
+.lb-tour-layer { position: fixed; inset: 0; z-index: 130; display: grid; place-items: center; padding: 16px; }
+.lb-tour {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 300px);
+  gap: 1.5rem;
+  align-items: start;
+  max-height: calc(100vh - 32px);
+  padding: 1.25rem;
+  overflow-y: auto;
+  background-color: var(--lb-paper);
+  background-image: var(--lb-grain);
+  border: 1px solid var(--lb-faint);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.55);
+  color: var(--lb-ink);
+  animation: lb-tour-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes lb-tour-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+.lb-tour video {
+  display: block;
+  width: auto;
+  height: min(80vh, 760px, calc((100vw - 64px) * 16 / 9));
+  aspect-ratio: 9 / 16;
+  border-radius: 16px;
+  background: var(--lb-paper-2);
+  object-fit: contain;
+}
+.lb-tour-close { position: absolute; top: 14px; right: 14px; z-index: 2; }
+.lb-tour-chapter {
+  display: flex; align-items: baseline; gap: 0.6rem; width: 100%;
+  padding: 0.45rem 0.6rem; border: 0; border-radius: 10px;
+  background: transparent; color: var(--lb-ink); text-align: left; cursor: pointer;
+  transition: background-color 0.15s;
+}
+.lb-tour-chapter:hover { background: var(--lb-hair); }
+.lb-tour-chapter[aria-pressed="true"] { background: var(--lb-accent-soft); }
+@media (max-width: 720px) {
+  .lb-tour-layer { padding: 0; }
+  .lb-tour { grid-template-columns: 1fr; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border-radius: 0; border: 0; padding: 3.5rem 0.75rem 1.5rem; }
+  .lb-tour video { margin: 0 auto; height: min(78vh, calc((100vw - 24px) * 16 / 9)); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lb-dot, .lb-fade, .lb-mark, .lb-toc-card, .lb-letter, .lb-pro-card { transition: none; }
   .lb-rain, .lb-twinkle, .lb-pulse { animation: none; }
   .lb-route { animation: none; stroke-dashoffset: 0; }
   .lb-route-dot, .lb-star-in { animation: none; opacity: 1; }
   .lb-draw { animation: none; stroke-dashoffset: 0; }
-  .lb-line-in, .lb-letter-in, .lb-sheet, .lb-sheet-backdrop { animation: none; }
+  .lb-line-in, .lb-letter-in, .lb-sheet, .lb-sheet-backdrop, .lb-tour { animation: none; }
 }
