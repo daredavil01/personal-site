@@ -110,6 +110,47 @@ export function useRoving(count, onActivate, initial = 0) {
   return { active, setActive, props };
 }
 
+const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, video[controls], [tabindex]:not([tabindex="-1"])';
+
+/**
+ * A dialog's housekeeping: remember what had focus, lock the page behind it,
+ * and give focus back when it closes. Returns a keydown handler that closes
+ * on Escape and keeps Tab inside `ref`; it returns true when it handled the
+ * key, so a dialog can add keys of its own after it.
+ */
+export function useModal(ref, onClose) {
+  useEffect(() => {
+    const opener = document.activeElement;
+    const html = document.documentElement;
+    const was = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = was;
+      if (opener && typeof opener.focus === "function" && document.contains(opener)) opener.focus({ preventScroll: true });
+    };
+  }, []);
+  return (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      onClose();
+      return true;
+    }
+    if (e.key !== "Tab" || !ref.current) return false;
+    const els = [...ref.current.querySelectorAll(FOCUSABLE)].filter((el) => el.offsetParent !== null);
+    if (!els.length) return true;
+    const first = els[0];
+    const last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+    return true;
+  };
+}
+
 /**
  * Region labels above their centroids; when two would overlap, the lower one
  * steps down until it clears. `charW` is the width of a character at the

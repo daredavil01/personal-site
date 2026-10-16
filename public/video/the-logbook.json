@@ -1,0 +1,63 @@
+{
+ "duration": 79.8,
+ "chapters": [
+  {
+   "id": "cover",
+   "numeral": "",
+   "title": "Wanderer's Logbook",
+   "start": 0.0
+  },
+  {
+   "id": "prologue",
+   "numeral": "",
+   "title": "Prologue",
+   "start": 9.4
+  },
+  {
+   "id": "atlas",
+   "numeral": "I",
+   "title": "Atlas",
+   "start": 19.4
+  },
+  {
+   "id": "sky",
+   "numeral": "II",
+   "title": "Sky",
+   "start": 30.4
+  },
+  {
+   "id": "fingerprint",
+   "numeral": "III",
+   "title": "Fingerprint",
+   "start": 37.4
+  },
+  {
+   "id": "phrases",
+   "numeral": "IV",
+   "title": "Phrases",
+   "start": 44.8
+  },
+  {
+   "id": "letters",
+   "numeral": "V",
+   "title": "Letters",
+   "start": 52.3
+  },
+  {
+   "id": "poem",
+   "numeral": "VI",
+   "title": "Found poems",
+   "start": 58.8
+  },
+  {
+   "id": "entry",
+   "numeral": "§",
+   "title": "Every essay, its own page",
+   "start": 66.3
+  }
+ ],
+ "narration": "Piper TTS, en_GB-cori-high (trained on public-domain LibriVox recordings)",
+ "music": "the Scriptorium loop",
+ "rendered": "2026-10-16",
+ "rev": "5921ae7"
+}

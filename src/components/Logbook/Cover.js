@@ -112,7 +112,9 @@ const Stat = ({ n, label }) => (n ? (
   </div>
 ) : null);
 
-const Cover = ({ data, onBegin, onContents, onRandom }) => {
+const Cover = ({
+  data, onBegin, onTour, onContents, onRandom,
+}) => {
   const t = data ? data.totals : null;
   return (
     <header className="lb-paper lb-cover lb-cq px-5 py-8 sm:px-8 md:px-10 md:py-12">
@@ -143,6 +145,10 @@ const Cover = ({ data, onBegin, onContents, onRandom }) => {
             <button type="button" className="lb-btn lb-btn--ink" onClick={onBegin} disabled={!data}>
               Begin reading
               <span aria-hidden="true">↓</span>
+            </button>
+            <button type="button" className="lb-btn" onClick={onTour}>
+              <span aria-hidden="true">▶</span>
+              Watch the tour
             </button>
             <button type="button" className="lb-btn" onClick={onContents} disabled={!data}>Contents</button>
             <button type="button" className="lb-btn lb-btn--ghost" onClick={onRandom} disabled={!data}>

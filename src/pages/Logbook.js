@@ -17,6 +17,7 @@ import LettersLens from "../components/Logbook/LettersLens";
 import PoemMachine from "../components/Logbook/PoemMachine";
 import EntryIndex from "../components/Logbook/EntryIndex";
 import EntrySheet from "../components/Logbook/EntrySheet";
+import TourDialog from "../components/Logbook/TourDialog";
 import { prefersReducedMotion } from "../components/Logbook/shared";
 import { startsLikeSentence } from "../lib/logbook";
 import "../components/Logbook/logbook.css";
@@ -28,8 +29,9 @@ import "../components/Logbook/logbook.css";
 // post text and the /ask embeddings; this page only draws it.
 //
 // The open essay lives in ?post=, the chapter last jumped to in ?lens= (the
-// old tab name, so earlier links still land), the poem in ?poem= and ?lock=
-// — all merged into the existing params so ?view= (the shell switch) survives.
+// old tab name, so earlier links still land), the poem in ?poem= and ?lock=,
+// the narrated tour in ?tour — all merged into the existing params so ?view=
+// (the shell switch) survives.
 
 const FONTS = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap";
 
@@ -85,6 +87,7 @@ const Logbook = () => {
   const byId = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
   const order = useMemo(() => new Map(posts.map((p, i) => [p.id, i])), [posts]);
   const selected = byId.get(searchParams.get("post")) || null;
+  const touring = searchParams.has("tour");
 
   const setParam = useCallback((key, value) => {
     setRef.current((prev) => {
@@ -100,6 +103,8 @@ const Logbook = () => {
     setParam("lens", id);
     scrollToId(sectionId(id));
   }, [setParam]);
+  const openTour = useCallback(() => setParam("tour", "1"), [setParam]);
+  const closeTour = useCallback(() => setParam("tour", null), [setParam]);
   const random = useCallback(() => {
     if (posts.length) select(posts[Math.floor(Math.random() * posts.length)].id);
   }, [posts, select]);
@@ -125,6 +130,7 @@ const Logbook = () => {
         <Cover
           data={data}
           onBegin={() => scrollToId("lb-prologue")}
+          onTour={openTour}
           onContents={() => scrollToId("lb-contents")}
           onRandom={random}
         />
@@ -180,7 +186,7 @@ const Logbook = () => {
         )}
       </div>
 
-      {data && <ChapterDock current={current} hidden={!!selected} onJump={jump} />}
+      {data && <ChapterDock current={current} hidden={!!selected || touring} onJump={jump} />}
       {selected && (
         <EntrySheet
           post={selected}
@@ -191,6 +197,7 @@ const Logbook = () => {
           onClose={close}
         />
       )}
+      {touring && <TourDialog onClose={closeTour} />}
     </PageShell>
   );
 };
