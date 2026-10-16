@@ -9,6 +9,12 @@
 #      when their contents changed — not when only the generation date moved —
 #      which triggers a Pages deploy.
 #
+# Substack challenges GitHub runner IPs (403 on the API, post bodies and the
+# RSS feed, whatever the User-Agent), so this job cannot see new essays. It
+# says so in the run summary, and the essay chunks and logbook.json are kept
+# as they are rather than rebuilt from a cache that lacks Substack bodies.
+# Essays land from `npm run refresh -- blogs ask logbook` on a home connection.
+#
 # Repository secrets: SUPABASE_SERVICE_ROLE_KEY, CF_ACCOUNT_ID, CF_API_TOKEN.
 # If `main` is branch-protected against bot pushes, the commit step fails;
 # switch it to opening a pull request.

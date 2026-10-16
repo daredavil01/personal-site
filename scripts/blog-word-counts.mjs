@@ -243,9 +243,20 @@ async function fetchSubstack() {
   });
 }
 
-// Substack answers 403 to GitHub Actions runner IPs (the same request works from
-// a home connection). Rather than fail the nightly job, reuse the Substack posts
-// from the last committed ledger; their bodies come from the text cache, since
+// A warning that cannot hide: an annotation plus a line in the run's summary
+// page on GitHub Actions, a bullet anywhere else.
+function notice(msg) {
+  console.log(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `  • ${msg}`);
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `> [!WARNING]\n> ${msg}\n\n`);
+  }
+}
+
+// Substack answers GitHub Actions runner IPs (and, intermittently, Cloudflare
+// Workers) with a 403 Cloudflare challenge — the archive API, post bodies and
+// the RSS feed alike, whatever the User-Agent. A home connection is not
+// challenged. Rather than fail the nightly job, reuse the Substack posts from
+// the last committed ledger; their bodies come from the text cache, since
 // `version` is rebuilt exactly as fetchSubstack builds it. New Substack posts
 // only land from a run on a machine Substack does not block.
 function substackFromLastLedger(err) {
@@ -258,8 +269,10 @@ function substackFromLastLedger(err) {
       version: `${p.publishedAt}|${p.words}`,
     }));
   if (kept.length === 0) throw err;
-  const msg = `Substack unreachable (${err.message}); reusing ${kept.length} posts from the last ledger`;
-  console.log(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `  • ${msg}`);
+  notice(
+    `Substack unreachable (${err.message}); reusing ${kept.length} posts from the last ledger. ` +
+      "New essays are not counted until `npm run blogs:wordcount` runs where Substack answers.",
+  );
   return kept;
 }
 
@@ -554,6 +567,10 @@ async function collectTexts(posts) {
   let downloaded = 0;
   let fromCache = 0;
   const failed = [];
+  // Substack posts whose body could not be had (no slug means the listing came
+  // from the last ledger because Substack was unreachable). Written into the
+  // cache so its readers refuse it rather than mistake a gap for a deletion.
+  const missing = [];
   const out = [];
   for (const p of posts) {
     let text = p.text || null; // WordPress bodies came with the listing
@@ -561,6 +578,9 @@ async function collectTexts(posts) {
     if (!text && hit?.text && hit.version === p.version) {
       text = hit.text;
       fromCache += 1;
+    } else if (!text && p.platform === "Substack" && !p.slug) {
+      text = hit?.text || null; // a stale body beats a missing one
+      if (!text) missing.push(p.url);
     } else if (!text && p.platform === "Substack" && p.slug) {
       try {
         const full = await getJson(`${SUBSTACK_HOST}/api/v1/posts/${p.slug}`);
@@ -572,6 +592,7 @@ async function collectTexts(posts) {
       } catch (err) {
         failed.push(`${p.title}: ${err.message}`);
         text = hit?.text || null; // a stale body beats a missing one
+        if (!text) missing.push(p.url);
       }
     }
     if (text) {
@@ -596,7 +617,13 @@ async function collectTexts(posts) {
       `${failed.length ? `, ${failed.length} failed` : ""})`,
   );
   failed.forEach((f) => console.log(`    • ${f}`));
-  return out;
+  if (missing.length) {
+    notice(
+      `${missing.length} Substack posts have no text in the cache; ask:index keeps their ` +
+        "existing chunks and the logbook keeps its last build.",
+    );
+  }
+  return { texts: out, missing };
 }
 
 // --- main ------------------------------------------------------------------
@@ -638,7 +665,7 @@ async function main() {
     };
   });
 
-  const texts = await collectTexts(posts);
+  const { texts, missing } = await collectTexts(posts);
   // Text and fetch bookkeeping stay out of the public report.
   const report = buildReport(
     posts.map(({ text, slug, version, ...rest }) => rest),
@@ -673,7 +700,7 @@ async function main() {
   fs.mkdirSync(path.dirname(TEXT_FILE), { recursive: true });
   fs.writeFileSync(
     TEXT_FILE,
-    `${JSON.stringify({ generatedAt: report.generatedAt, posts: texts })}\n`,
+    `${JSON.stringify({ generatedAt: report.generatedAt, missing, posts: texts })}\n`,
     "utf8",
   );
 

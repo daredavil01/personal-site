@@ -25,7 +25,15 @@ export default {
     if (!fs.existsSync(abs)) {
       throw new Error(`${TEXT_CACHE} is missing — run \`npm run blogs:wordcount\` first`);
     }
-    const { posts } = JSON.parse(fs.readFileSync(abs, "utf8"));
+    const { posts, missing = [] } = JSON.parse(fs.readFileSync(abs, "utf8"));
+    // Substack blocks CI runners, so the nightly cache lacks their bodies.
+    // Indexing it anyway deleted every Substack body chunk each night.
+    if (missing.length) {
+      throw Object.assign(
+        new Error(`${missing.length} posts have no text (Substack unreachable?) — kept their chunks`),
+        { keep: true },
+      );
+    }
     return (posts || []).filter((p) => p.text);
   },
   toChunks: (posts, { compose, splitProse, entityUrl, syntheticId }) => posts.flatMap((p) => {

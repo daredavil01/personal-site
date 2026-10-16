@@ -48,6 +48,8 @@ export async function loadSources(dir = SOURCES_DIR) {
  * Runs every source. A source that throws is reported and its types — its own
  * plus any it declares in `owns` — are marked failed, so the caller never
  * deletes their existing chunks. A Substack outage must not empty the index.
+ * An error carrying `keep: true` is a source sitting the run out on purpose:
+ * its chunks are protected the same way, but the run is not a failure.
  */
 export async function collectChunks(sources, ctx) {
   const chunks = [];
@@ -66,7 +68,7 @@ export async function collectChunks(sources, ctx) {
     } catch (err) {
       failedTypes.add(source.type);
       (source.owns || []).forEach((t) => failedTypes.add(t));
-      report.push({ type: source.type, file: source.file, error: err.message || String(err) });
+      report.push({ type: source.type, file: source.file, error: err.message || String(err), keep: Boolean(err.keep) });
     }
   }
   return { chunks, failedTypes, report };

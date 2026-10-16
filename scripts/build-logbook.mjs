@@ -119,7 +119,13 @@ const round = (x, d = 3) => Math.round(x * 10 ** d) / 10 ** d;
 
 async function main() {
   if (!fs.existsSync(TEXT_CACHE)) throw new Error("knowledge_base/blog-posts-text.json is missing — run `npm run blogs:wordcount` first");
-  const { posts: raw } = JSON.parse(fs.readFileSync(TEXT_CACHE, "utf8"));
+  const { posts: raw, missing = [] } = JSON.parse(fs.readFileSync(TEXT_CACHE, "utf8"));
+  // An incomplete cache (Substack unreachable, as on CI) would drop those
+  // essays from the map; the last full build is the better answer.
+  if (missing.length) {
+    console.log(`  • ${missing.length} posts have no text (Substack unreachable?) — kept ${path.relative(ROOT, OUT)} as it is`);
+    return;
+  }
 
   const posts = raw
     .filter((p) => p.text && p.words >= MIN_POST_WORDS)

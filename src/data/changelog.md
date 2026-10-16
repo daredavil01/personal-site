@@ -13,6 +13,13 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v22.0.1] — 2026-10-16
+
+### Fixed
+- **Nightly essay wipe** (`scripts/blog-word-counts.mjs`, `scripts/ask-sources/writing.mjs`, `scripts/lib/registry.mjs`): Substack answers GitHub runners with a 403 challenge on the archive API, post bodies and the RSS feed alike, so the nightly text cache held only the 29 WordPress bodies — and `ask:index` deleted the 509 Substack body chunks every night that a local run had embedded. The cache now lists the posts it lacks in `missing`; the `writing` source then sits the run out with `keep: true`, which protects its chunks without failing the job.
+- **Logbook on an incomplete cache** (`scripts/build-logbook.mjs`): `npm run logbook` keeps the last `logbook.json` instead of committing a map without the Substack essays.
+- **Hidden Substack outage** (`scripts/blog-word-counts.mjs`, `.github/workflows/ask-refresh.yml`): The unreachable-Substack warning, and the count of posts without text, now go into the run's summary page as well as an annotation.
+
 ## [v22.0.0] — 2026-10-16
 
 ### Added

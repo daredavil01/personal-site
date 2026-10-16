@@ -4,6 +4,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { collectChunks, loadSources, planChunks, planOrphans } from "./registry.mjs";
 import { hashChunk, splitProse, syntheticId } from "./chunking.mjs";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import writing, { TEXT_CACHE } from "../ask-sources/writing.mjs";
 
 test("syntheticId is stable and bigint-safe", () => {
   assert.equal(syntheticId("https://example.com/p/a"), syntheticId("https://example.com/p/a"));
@@ -42,6 +46,20 @@ test("a throwing source protects its chunks (and owned types) from deletion", as
     { entity_type: "blog", entity_id: 4, chunk_index: 2 },
   ];
   assert.deepEqual(planOrphans(existing, chunks, failedTypes), [existing[0]]);
+});
+
+test("an incomplete text cache keeps every essay chunk without failing the run", async () => {
+  const ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "writing-"));
+  fs.mkdirSync(path.join(ROOT, "knowledge_base"));
+  fs.writeFileSync(path.join(ROOT, TEXT_CACHE), JSON.stringify({
+    missing: ["https://example.substack.com/p/new"],
+    posts: [{ url: "https://example.wordpress.com/old", text: "only the WordPress body survived" }],
+  }));
+  const { chunks, failedTypes, report } = await collectChunks([{ file: "writing.mjs", ...writing }], { ROOT });
+  assert.equal(chunks.length, 0);
+  assert.deepEqual([...failedTypes].sort(), ["blog", "writing"]);
+  assert.equal(report[0].keep, true);
+  fs.rmSync(ROOT, { recursive: true, force: true });
 });
 
 test("only new text is embedded; moved and retitled text is not", () => {

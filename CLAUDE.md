@@ -408,6 +408,11 @@ Full reference: `docs/newsletter.md`.
 - **Nightly:** `.github/workflows/ask-refresh.yml` (02:00 IST) runs
   `blogs:wordcount` + `ask:index` and commits the ledger JSON only when posts
   changed. Repo secrets: `SUPABASE_SERVICE_ROLE_KEY`, `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
+  **Substack 403s every GitHub runner request** (API, bodies, RSS), so new
+  essays only arrive from a local `npm run refresh -- blogs ask logbook`. The
+  text cache then lists the posts it lacks in `missing`, and the `writing`
+  source and `npm run logbook` keep what they have (`keep: true` in
+  `scripts/lib/registry.mjs`) instead of deleting the essays' chunks.
 
 ## Environment Variables
 

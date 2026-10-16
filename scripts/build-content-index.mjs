@@ -208,8 +208,9 @@ async function main() {
   };
   const { chunks: raw, failedTypes, report } = await collectChunks(sources, ctx);
   report.forEach((r) => console.log(
-    r.error ? `  ✗ ${r.type.padEnd(10)} ${r.error}` : `  ✓ ${r.type.padEnd(10)} ${r.chunks} chunks`,
+    r.error ? `  ${r.keep ? "–" : "✗"} ${r.type.padEnd(10)} ${r.error}` : `  ✓ ${r.type.padEnd(10)} ${r.chunks} chunks`,
   ));
+  const failed = report.some((r) => r.error && !r.keep);
 
   const keys = new Set();
   raw.forEach((c) => {
@@ -239,7 +240,7 @@ async function main() {
       byType[r.entity_type].remove += 1;
     });
     console.table(byType);
-    if (failedTypes.size) process.exitCode = 1;
+    if (failed) process.exitCode = 1;
     return;
   }
 
@@ -264,8 +265,8 @@ async function main() {
     + `unchanged ${plan.unchanged.length} · removed ${orphans.length}`,
   );
   if (failedTypes.size) {
-    console.warn(`  ! kept existing chunks for failed sources: ${[...failedTypes].join(", ")}`);
-    process.exitCode = 1;
+    console.warn(`  ! kept existing chunks for: ${[...failedTypes].join(", ")}`);
+    if (failed) process.exitCode = 1;
   }
 
   console.log("Regenerating docs/…");
