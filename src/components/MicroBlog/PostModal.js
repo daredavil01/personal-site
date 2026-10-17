@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ExportImageButton from "./ExportImageButton";
 import { sourceLabels } from "./constants";
+import { photoAlt } from "../../lib/seo/text";
 
 const PostModal = ({ post, onClose }) => {
   const [copyState, setCopyState] = useState('idle');
@@ -72,7 +73,7 @@ const PostModal = ({ post, onClose }) => {
           </span>
         </div>
 
-        {post.imageUrl && <img src={post.imageUrl} alt="" className="w-full rounded-lg mb-4" />}
+        {post.imageUrl && <img src={post.imageUrl} alt={photoAlt(post.title || post.text, "From the micro-blog")} className="w-full rounded-lg mb-4" />}
 
         {body ? (
           <p className="font-body text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-line mb-6">

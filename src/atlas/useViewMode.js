@@ -12,12 +12,12 @@
 // Everything is resolved synchronously from state initializers / context so
 // the first render is deterministic — no post-mount mode flip, no flash.
 //
-// PRERENDER CONSTRAINT: react-snap is NOT in dependencies today; the
-// hydrateRoot branch in src/index.js is a legacy guard that never fires. If
-// prerendering is ever added, this synchronous localStorage/matchMedia read
-// would make server and client markup diverge — view-mode would have to
-// become a post-mount upgrade instead. Revisit this file before adding any
-// prerender step.
+// PRERENDER CONSTRAINT: nothing hydrates today. The edge middleware puts a
+// plain-HTML crawler fallback in #root, and src/index.js always createRoot()s
+// over it. If real React prerendering (hydrateRoot) is ever added, this
+// synchronous localStorage/matchMedia read would make server and client markup
+// diverge — view-mode would have to become a post-mount upgrade instead.
+// Revisit this file before adding any prerender step.
 
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";

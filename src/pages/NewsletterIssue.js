@@ -35,7 +35,7 @@ const NewsletterIssue = () => {
   // but its letter is not written yet, so it gets pointed at /now instead.
   if (!row || (!row.publishedAt && !session)) {
     return (
-      <PageShell region="person" title="Issue not found">
+      <PageShell region="person" title="Issue not found" noindex>
         <div className="flex flex-col gap-4 max-w-xl">
           <h1 className="font-headline text-3xl font-black text-stone-900 dark:text-stone-100">No letter for that month</h1>
           <p className="font-body text-stone-500 dark:text-stone-400">

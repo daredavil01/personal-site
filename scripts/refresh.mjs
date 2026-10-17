@@ -7,7 +7,8 @@
  *   npm run refresh -- --dry-run        forwarded; steps without one are skipped
  *
  * Steps: changelog (push buffer, per-version notes, major summaries),
- * repo (commit graph), blogs (word counts), ask (index + docs).
+ * repo (commit graph), blogs (word counts), ask (index + docs), logbook,
+ * indexnow (tell Bing about URLs changed in the last 3 days).
  * `npm run ask:gaps` is left out: it spends model tokens on a report.
  * Stops at the first failure. Each script still runs alone:
  * `node scripts/<file>.mjs`.
@@ -30,6 +31,7 @@ const STEPS = {
   blogs: [["blog-word-counts.mjs", false]],
   ask: [["build-content-index.mjs", true]], // also runs docs:build
   logbook: [["build-logbook.mjs", true]], // after ask: the map reads its embeddings
+  indexnow: [["indexnow.mjs", true]], // reads the live sitemap, so it is last
 };
 
 const args = process.argv.slice(2);

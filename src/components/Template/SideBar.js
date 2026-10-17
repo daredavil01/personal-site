@@ -67,7 +67,7 @@ const SideBar = () => {
       <section className="pt-8 border-t border-stone-100 dark:border-stone-800 mt-auto">
         <ContactIcons />
         <p className="mt-4 text-[10px] uppercase tracking-widest font-bold text-stone-300 dark:text-stone-600">
-          &copy; Sanket Tambare <Link to="/" className="hover:text-secondary">daredavil01.com</Link>
+          &copy; Sanket Tambare <Link to="/" className="hover:text-secondary">sankettambare.in</Link>
         </p>
       </section>
     </section>

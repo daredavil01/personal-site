@@ -49,9 +49,11 @@ describe('renders the app', () => {
     expect(mainElement).toBeInTheDocument();
   });
 
+  // The home page writes its title out whole (PAGE_META["/"].fullTitle), so a
+  // search for the name finds who, not just whose, site this is.
   it('should render the title', async () => {
     render(<App />);
-    await waitFor(() => expect(document.title).toBe('Sanket Tambare'), { timeout });
+    await waitFor(() => expect(document.title).toBe('Sanket Tambare — Software Engineer, Ultramarathoner & Writer'), { timeout });
   });
 
   it('can navigate to /about', async () => {

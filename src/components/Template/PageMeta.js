@@ -18,6 +18,11 @@ import { isCardImage, cardUrlForOrigin } from "../../lib/og/paths";
 // with it. Adding a tag to one without the other is the drift this pairing
 // exists to prevent. og:site_name is absent from both on purpose — index.html
 // carries it globally, and adding it here would duplicate the tag.
+//
+// The middleware marks its tags data-rh="true", Helmet's own marker, so on
+// mount these REPLACE the served tags rather than sitting beside them. The
+// JSON-LD and the robots tag it serves carry no marker and are left alone;
+// `noindex` here only keeps a client-rendered "not found" in agreement.
 const PageMeta = (props) => {
   const { pathname } = useLocation();
   const pathKey = pathname.replace(/\/$/, "") || "/";
@@ -25,6 +30,9 @@ const PageMeta = (props) => {
   // Cloudflare middleware); props act as overrides for unrouted pages (404).
   const pageMeta = PAGE_META[pathKey] || DEFAULT_META;
   const title = props.title || pageMeta.title;
+  // The home page's title is written out whole rather than composed — see
+  // `fullTitle` in src/data/pageMeta.js — so it bypasses the template.
+  const fullTitle = !props.title && pageMeta.fullTitle ? pageMeta.fullTitle : null;
   const description = props.description || pageMeta.description;
   const canonicalUrl = `${SITE_URL}${pathKey === "/" ? "" : pathKey}`;
   // A fixed route's card is `pageMeta.image`, a committed public/og/*.png. A
@@ -39,15 +47,15 @@ const PageMeta = (props) => {
   // Declared only for our own 1200x630 cards — see functions/_middleware.js.
   const sized = isCardImage(ogImage);
   const ogType = props.ogType || pageMeta.type || "website";
-  const ogTitle = composeTitle(title);
+  const ogTitle = fullTitle || composeTitle(title);
 
   return (
     <Helmet
-      titleTemplate="%s | Sanket Tambare"
+      titleTemplate={fullTitle ? "%s" : "%s | Sanket Tambare"}
       defaultTitle="Sanket Tambare"
       defer={false}
     >
-      {title && <title>{title}</title>}
+      {(fullTitle || title) && <title>{fullTitle || title}</title>}
       <link rel="canonical" href={canonicalUrl} />
       <meta name="description" content={description} />
       {props.noindex && <meta name="robots" content="noindex" />}

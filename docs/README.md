@@ -37,6 +37,7 @@ paragraph matters, keep it outside.
 `npm run ask:index` runs this as its last step, so rebuilding the search index
 and refreshing the docs are the same command.
 
+- `seo.md` — how search engines and AI crawlers see the site: the crawler fallback, JSON-LD, 404/noindex rules, the generated sitemap/feed/llms files, IndexNow, and the dashboard settings only the owner can change.
 - `og-cards.md` — the per-route share cards: how they render, the Workers CPU bet, the Devanagari limitation, and development status.
 - `ask-evals.md` — the automatic judge for /ask answers: the rubric, the two routes, every spend gate, and how to turn it off.
 - `ai-features-proposal.md` — a shortlist of what Workers AI, Gemini and Jev could do outside `/ask`, with the cost, runtime and risk of each. A proposal, not a plan of record.

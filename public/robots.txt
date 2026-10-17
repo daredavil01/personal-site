@@ -1,21 +1,28 @@
+# sankettambare.in — every page here is meant to be read, by people, search
+# engines and AI assistants alike. Only the admin dashboard and the API are
+# off limits.
+
 User-agent: *
-Disallow: /admin/
-Disallow: /api
+Allow: /
+Disallow: /admin
+Disallow: /api/
 
-# AI crawlers — explicitly welcome
+# AI search and assistant crawlers — explicitly welcome.
+# A crawler obeys only the most specific group that names it, so this group
+# repeats the disallows above; without them these bots could crawl /admin.
 User-agent: GPTBot
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
 User-agent: CCBot
 Allow: /
-
-User-agent: anthropic-ai
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
+Disallow: /admin
+Disallow: /api/
 
 Sitemap: https://sankettambare.in/sitemap.xml

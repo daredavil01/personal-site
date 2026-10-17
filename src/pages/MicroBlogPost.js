@@ -4,6 +4,8 @@ import RelatedContent from "../components/Ask/RelatedContent";
 import PageShell from "../atlas/PageShell";
 import { getMicroblogPost } from "../lib/api/microblog";
 import { buildMicroblogMeta } from "../data/pageMeta";
+import { photoAlt } from "../lib/seo/text";
+import { isMarathi } from "../lib/logbook";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import ExportImageButton from "../components/MicroBlog/ExportImageButton";
 import ReadAloud from "../components/ReadAloud";
@@ -90,7 +92,10 @@ const MicroBlogPost = () => {
         {error && <ErrorBlock />}
 
         {post && (
-          <article className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-2xl p-8 flex flex-col gap-6">
+          <article lang={isMarathi(body) ? "mr" : undefined} className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-2xl p-8 flex flex-col gap-6">
+            {/* The page's heading, for the outline and for search; the post's
+                own words below are the visible content. */}
+            <h1 className="sr-only">{meta.title}</h1>
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs text-stone-400 dark:text-stone-500">{post.date}</span>
               <span
@@ -113,7 +118,7 @@ const MicroBlogPost = () => {
             </div>
 
             {post.imageUrl && (
-              <img src={post.imageUrl} alt="" className="w-full rounded-xl" />
+              <img src={post.imageUrl} alt={photoAlt(post.title || post.text, "From the micro-blog")} className="w-full rounded-xl" />
             )}
 
             {body ? (

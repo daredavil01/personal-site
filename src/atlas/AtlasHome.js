@@ -96,7 +96,7 @@ const AtlasHome = () => {
     <>
       <PageMeta />
       <div className="atlas-root atlas-map-stage" data-time={time}>
-        <h1 className="atlas-sr-only">The Wanderer&apos;s Atlas — world map</h1>
+        <h1 className="atlas-sr-only">Sanket Tambare — The Wanderer&apos;s Atlas, a world map</h1>
 
         {stage === "orbit" && (
           <OrbitStage ref={globeApiRef} onEnter={handleEnter} onSkip={handleSkip} />

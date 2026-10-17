@@ -15,7 +15,7 @@ import useViewMode from "./useViewMode";
 const RegionShell = React.lazy(() => import("./regions/RegionShell"));
 
 const PageShell = ({
-  region, title, description, image, imageAlt, ogType, children,
+  region, title, description, image, imageAlt, ogType, noindex, children,
 }) => {
   const mode = useViewMode();
 
@@ -29,6 +29,7 @@ const PageShell = ({
           image={image}
           imageAlt={imageAlt}
           ogType={ogType}
+          noindex={noindex}
         >
           {children}
         </RegionShell>
@@ -37,7 +38,7 @@ const PageShell = ({
   }
 
   return (
-    <Main title={title} description={description} image={image} imageAlt={imageAlt} ogType={ogType}>
+    <Main title={title} description={description} image={image} imageAlt={imageAlt} ogType={ogType} noindex={noindex}>
       {children}
     </Main>
   );
@@ -50,6 +51,9 @@ PageShell.propTypes = {
   image: PropTypes.string,
   imageAlt: PropTypes.string,
   ogType: PropTypes.string,
+  // A "not found" state: the edge already answers a missing row with a 404,
+  // and this keeps the client's own head in agreement.
+  noindex: PropTypes.bool,
   children: PropTypes.node,
 };
 
@@ -58,6 +62,7 @@ PageShell.defaultProps = {
   title: null,
   description: null,
   image: null,
+  noindex: false,
   children: null,
 };
 

@@ -297,7 +297,10 @@ const TreksDefault = ({ onTrekClick }) => {
                     className="font-label text-[10px] text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary transition-colors"
                     title="Permalink"
                   >
-                    ↗
+                    {/* The glyph alone is a link with no words; the hidden
+                        name is what screen readers and crawlers read. */}
+                    <span aria-hidden="true">↗</span>
+                    <span className="sr-only">{`${trek.fort_name} trek`}</span>
                   </Link>
                 </div>
               </div>

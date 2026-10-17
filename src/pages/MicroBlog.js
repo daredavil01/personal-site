@@ -381,7 +381,6 @@ const MicroBlog = () => {
     <PageShell
       region="writer"
       title="Micro Blog"
-      description="A searchable archive of short posts, quotes, and captures imported from Tumblr — spanning years of thoughts, one micro-post at a time."
     >
       <div className="flex flex-col gap-8 w-full max-w-4xl" id="micro-blog">
         {/* Hero */}

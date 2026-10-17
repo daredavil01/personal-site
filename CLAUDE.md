@@ -69,13 +69,13 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
   (stored color, else a hue hashed from the name).
 - **Compare tags case-insensitively** — names are stored lowercase.
 - **Hand-maintained files NOT in Supabase:** `src/data/about.md`, `src/data/contact.js`, `src/data/routes.js` (nav),
-  `src/data/pageMeta.js`, `src/data/stats/personal.js`.
+  `src/data/pageMeta.js`, `src/data/stats/personal.js`, `src/data/identity.js` (who the site is about).
 
 ## Periodic upkeep
 
 `npm run refresh` runs, in order: `changelog` (push, notes, majors), `repo`
 (commit graph), `blogs` (word counts), `ask` (index + docs), `logbook`
-(`/logbook` data). Name steps to run
+(`/logbook` data), `indexnow` (tell Bing what changed). Name steps to run
 some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
 step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
@@ -135,6 +135,11 @@ Three files move together when you add a route to `src/App.js`:
    slug to `PAGE_SLUGS` in `src/lib/og/model.js`, then `npm run og:fallbacks`
    and commit the resulting `public/og/<slug>.png`.
 
+A **detail** route also needs its kind in `src/lib/seo/entities.js` (see
+**Search & AI Crawlers**) so the crawler fallback, JSON-LD and sitemap know it.
+A fixed route needs nothing more: its `indexable` flag drives noindex, the
+sitemap and `/llms.txt`.
+
 **Each section gets its own figure, not a shared template** — the card should be
 recognisable as that section before the text is readable. Cards must survive a
 WhatsApp thumbnail (~300 px): headline ≤ 6 words at ≥ 64 px, at most three
@@ -180,6 +185,56 @@ for our own cards (`isCardImage`), never for a row's photo — asserting a size 
 do not know makes every platform crop it wrong. Keep a card **under 300 KB**, the
 same cap as any other image on the site; the three portrait/photo cards are
 currently over it (see `docs/og-cards.md`).
+
+## Search & AI Crawlers (SEO)
+
+Full reference: `docs/seo.md`. Every HTML response passes through
+`functions/_middleware.js`, which serves **the same document to everyone** (no
+user-agent sniffing) and does four things:
+
+- **Redirects duplicates:** `/about/` and `/About` are 301s to `/about` (GET/HEAD
+  only, never `/api/`). Matching mirrors React Router via
+  `src/lib/seo/routeMatch.js` over `ROUTE_MANIFEST`.
+- **Real status codes:** a path no route claims, a malformed id, or a row
+  Supabase says does not exist is a **404** + `noindex`. An *unreachable*
+  Supabase stays a 200 with the section's meta — an outage must never tell a
+  search engine every page is gone (`rest()` returns `{ ok, rows }` for this).
+- **noindex:** `indexable: false` routes, `/admin*`, `/ask/s/*` and micro-posts
+  with no text (`src/lib/seo/indexing.js`, shared with the sitemap so a listed
+  URL is never a noindexed one) get `X-Robots-Tag` + a robots meta.
+- **Head + body:** the meta tags carry `data-rh="true"` so react-helmet-async
+  *replaces* them on mount (one canonical in the rendered DOM); a JSON-LD
+  `@graph` (`src/lib/seo/structuredData.js`, stable `/#person` and `/#website`
+  ids) and the robots tag carry no marker so Helmet leaves them alone. `#root`
+  is filled with the page as plain HTML (`src/lib/seo/fallbackHtml.js`) because
+  GPTBot, ClaudeBot, PerplexityBot and most crawlers never run JS.
+  `index.html` hides it once JS runs (`.js .seo-fallback`) and
+  `src/index.js` always `createRoot`s over it — **never `hydrateRoot`**.
+
+Rules:
+
+- **One identity:** `src/data/identity.js` (import-free) is the single source for
+  name, job, employer, location, education, bio and `sameAs`. JSON-LD, the
+  fallback, `/llms.txt`, the About page's Bio and `public/agents.md` all say
+  what it says; a test fails if a `contact.js` profile is missing from `sameAs`
+  or `agents.md` drifts. Change a fact there, not in prose.
+- **Per-type reading lives in `src/lib/seo/entities.js`** — table, key pattern,
+  detail/list selects and a `view()` per kind. The middleware, sitemap, feed
+  and llms files all read rows through it. A new detail route needs a kind
+  there (plus `DETAIL_KINDS`), alongside the manifest/meta/card trio above.
+- **Generated, never hand-edited:** `/sitemap.xml`, `/feed.xml`, `/llms.txt`,
+  `/llms-full.txt` are Pages Functions (`functions/<name>.js`, dotted names
+  route as-is) built from the manifest + live tables, cached an hour
+  (`src/lib/seo/serve.js`). There is no static copy in `public/`.
+- **CPU:** Workers Free allows 10 ms; a page costs well under 1 ms of string
+  work. Keep list queries capped (`tag_entities?limit=200`, JSON-LD lists at 50)
+  and never parse a whole table in the middleware.
+- **IndexNow:** `npm run indexnow` posts URLs whose live sitemap `lastmod` moved
+  in the last 3 days (`--all` for everything). The key is public at
+  `public/indexnow-key.txt`. It runs nightly and as the last `refresh` step.
+- **Dashboard settings matter as much as code:** Cloudflare's AI Crawl Control
+  was returning 403 to GPTBot/ClaudeBot/CCBot despite `robots.txt` welcoming
+  them; Search Console and Bing Webmaster setup steps are in `docs/seo.md`.
 
 ## Second Brain (/ask)
 
@@ -503,7 +558,11 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | OG card generator | `scripts/og-preview.mjs` (`npm run og:fallbacks`) |
 | The committed share cards | `public/og/*.png` |
 | Card fonts (build-time only) | `scripts/og-fonts/` |
-| Social-share meta tags | `functions/_middleware.js` (Cloudflare Pages Function) |
+| Social-share meta tags, crawler fallback, 404s/redirects | `functions/_middleware.js` (Cloudflare Pages Function) |
+| Identity (Person facts, bio, sameAs) | `src/data/identity.js` |
+| SEO modules (entities, JSON-LD, fallback, sitemap, feed, llms) | `src/lib/seo/` |
+| Sitemap / feed / llms Functions | `functions/sitemap.xml.js`, `functions/feed.xml.js`, `functions/llms.txt.js`, `functions/llms-full.txt.js` |
+| IndexNow | `scripts/indexnow.mjs`, `public/indexnow-key.txt` |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Second brain endpoint | `functions/api/ask.js` |
 | Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |

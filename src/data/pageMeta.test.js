@@ -62,6 +62,13 @@ describe("buildTrekMeta", () => {
     expect(meta.image).toBe("https://i/t.jpg");
   });
 
+  it("reads as English: 'An easy', and no 'Fort fort'", () => {
+    const meta = buildTrekMeta({
+      fortName: "Ghangad Fort", enduranceLevel: "Easy", trekTime: "1.5 Hrs", date: "09-08-2026",
+    });
+    expect(meta.description).toBe("An easy endurance trek to Ghangad Fort on 09-08-2026. Trek duration: 1.5 Hrs.");
+  });
+
   it("defaults endurance to 'medium' and image to the section card", () => {
     const meta = buildTrekMeta({ fortName: "Tikona", trekTime: "2 Hrs", date: "01-01-2020" });
     expect(meta.description).toContain("A medium endurance trek");

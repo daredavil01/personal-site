@@ -64,7 +64,7 @@ const ProjectPost = () => {
   // entirely, so signed-out visitors simply never find it.
   if (!project) {
     return (
-      <PageShell region="creator" title="Project Not Found">
+      <PageShell region="creator" title="Project Not Found" noindex>
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/projects" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> Projects

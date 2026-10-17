@@ -1,14 +1,18 @@
 import React, { useMemo } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { bookShape } from "./shapes";
+import { openOnPlainClick } from "../../lib/plainClick";
 import BookCover from "./BookCover";
 import Stars from "./Stars";
 
+// A real link to the book's own page, so crawlers (and a middle-click) can
+// follow it; a plain click still opens the details modal in place.
 const BookCard = ({ book, onOpen }) => (
-  <button
-    type="button"
-    onClick={() => onOpen(book)}
-    className="group flex flex-col text-left bg-transparent border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-lg"
+  <Link
+    to={`/books/${book.id}`}
+    onClick={openOnPlainClick(() => onOpen(book))}
+    className="group flex flex-col text-left bg-transparent border-0 p-0 no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-lg"
   >
     <div className="relative w-full transition-transform duration-300 group-hover:-translate-y-1.5">
       <BookCover book={book} size="md" className="w-full" />
@@ -29,7 +33,7 @@ const BookCard = ({ book, onOpen }) => (
         {book.author}
       </p>
     </div>
-  </button>
+  </Link>
 );
 
 BookCard.propTypes = { book: bookShape.isRequired, onOpen: PropTypes.func.isRequired };

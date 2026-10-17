@@ -447,7 +447,10 @@ const OneHundredDays = () => {
                         className="font-label text-[10px] text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary transition-colors leading-none"
                         title="Permalink"
                       >
-                        ↗
+                        {/* The glyph alone is a link with no words; the hidden
+                            title is what screen readers and crawlers read. */}
+                        <span aria-hidden="true">↗</span>
+                        <span className="sr-only">{blog.blog_title}</span>
                       </Link>
                     </div>
                   </div>

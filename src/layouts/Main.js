@@ -19,6 +19,7 @@ const Main = (props) => (
       image={props.image}
       imageAlt={props.imageAlt}
       ogType={props.ogType}
+      noindex={props.noindex}
     />
 
     <div className="classic-root flex flex-col min-h-screen bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-body transition-colors duration-300">
@@ -49,6 +50,7 @@ Main.propTypes = {
   image: PropTypes.string,
   imageAlt: PropTypes.string,
   ogType: PropTypes.string,
+  noindex: PropTypes.bool,
 };
 
 Main.defaultProps = {
@@ -58,6 +60,7 @@ Main.defaultProps = {
   image: null,
   imageAlt: null,
   ogType: null,
+  noindex: false,
 };
 
 export default Main;

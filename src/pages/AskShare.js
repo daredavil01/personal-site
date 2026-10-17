@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Main from "../layouts/Main";
-import { SITE_URL } from "../data/pageMeta";
-import { ogStaticUrl, CARD_FALLBACKS } from "../lib/og/paths";
+import { buildShareMeta } from "../data/pageMeta";
 import AnswerBody from "../components/Ask/AnswerBody";
 import { entityLabel } from "../data/askConfig";
 import { bumpShareView, getShare } from "../lib/api/askShares";
@@ -66,6 +65,7 @@ const AskShare = () => {
 
   const { loading, share } = state;
   const turns = share?.thread || [];
+  const meta = buildShareMeta({ title: share?.title, summary: share?.summary });
   const lastQuestion = [...turns].reverse().find((t) => t.role === "user")?.content || "";
 
   // A revoked share and a mistyped token read the same on purpose: the page has
@@ -145,11 +145,14 @@ const AskShare = () => {
 
   return (
     <Main
-      title={share?.title ? `${share.title} · Ask the archive` : "A shared conversation"}
-      description={share?.summary || "A conversation with Sanket Tambare's archive."}
-      imageAlt="A shared conversation with the archive"
-      ogType="article"
-      image={ogStaticUrl(CARD_FALLBACKS["ask-share"], SITE_URL)}
+      // The same builder the edge middleware uses, so the app and a crawler
+      // agree. Noindexed like the edge does: a share is an unlisted snapshot.
+      title={meta.title}
+      description={meta.description}
+      imageAlt={meta.imageAlt}
+      ogType={meta.type}
+      image={meta.image}
+      noindex
     >
       <article className="flex flex-col gap-6 max-w-3xl">
         <header className="flex flex-col gap-2">

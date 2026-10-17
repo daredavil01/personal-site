@@ -1,5 +1,11 @@
 {
- "name": "daredavil01.com",
+ "name": "Sanket Tambare",
+ "short_name": "Sanket",
+ "description": "Sanket Tambare — software engineer, ultramarathoner, fort-trekker and writer.",
+ "start_url": "/",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#ffffff",
  "icons": [
   {
    "src": "/images/favicon/android-icon-36x36.png",

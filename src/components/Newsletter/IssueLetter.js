@@ -159,7 +159,7 @@ const IssueLetter = ({
         <>
           <div className={`relative rounded-2xl border border-stone-300/70 dark:border-stone-700 shadow-xl px-6 sm:px-12 py-10 ${PAPER}`} style={RULED}>
             {hero && (
-              <img src={hero} alt="" className="float-right ml-4 mb-4 w-32 sm:w-44 rotate-2 border-[6px] border-white dark:border-stone-800 shadow-md" />
+              <img src={hero} alt={`${model.headline} — ${model.label}`} className="float-right ml-4 mb-4 w-32 sm:w-44 rotate-2 border-[6px] border-white dark:border-stone-800 shadow-md" />
             )}
             <p className="font-label text-[10px] uppercase tracking-[0.3em] text-stone-500 mb-4">{`Hometown Square · ${model.label}`}</p>
             <h1 className="text-5xl sm:text-6xl leading-none text-stone-900 dark:text-stone-50 mb-6" style={HAND}>{model.headline}</h1>
