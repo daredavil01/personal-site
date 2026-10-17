@@ -157,8 +157,6 @@ describe("sitemap", () => {
   const inventory = {
     book: [{ id: 12, updated_at: "2026-10-01T00:00:00+00:00" }, { id: 13, updated_at: "2026-10-05T00:00:00+00:00" }],
     microblog: [{ id: 5, updated_at: "2026-01-01T00:00:00+00:00" }],
-    newsletter: [{ slug: "2026-09", updated_at: "2026-10-02T00:00:00+00:00" }],
-    tag: [{ name: "घर", total: 3 }, { name: "unused", total: 0 }],
   };
 
   it("lists exactly the manifest's indexable, parameter-free routes", () => {
@@ -169,36 +167,21 @@ describe("sitemap", () => {
     expect(indexableFixedRoutes()).not.toContain("/ask/s/:token");
   });
 
-  it("lists every row, dated by its own updated_at", () => {
+  it("lists pages only, never an individual entity", () => {
     const entries = sitemapEntries(inventory);
-    expect(entries).toContainEqual({ path: "/books/12", lastmod: "2026-10-01T00:00:00+00:00" });
-    expect(entries).toContainEqual({ path: "/newsletter/2026-09", lastmod: "2026-10-02T00:00:00+00:00" });
+    expect(entries.map((e) => e.path).sort()).toEqual([...indexableFixedRoutes(), "/writing-ledger.html"].sort());
     expect(entries).toContainEqual({ path: "/writing-ledger.html", lastmod: null });
   });
 
-  it("leaves micro-post and 100-days permalinks out, but dates their sections", () => {
-    const entries = sitemapEntries({ ...inventory, blog: [{ id: 65, updated_at: "2026-02-01T00:00:00+00:00" }] });
-    const paths = entries.map((e) => e.path);
-    expect(paths).not.toContain("/micro-blog/5");
-    expect(paths).not.toContain("/100-days-to-offload/65");
-    expect(entries).toContainEqual({ path: "/micro-blog", lastmod: "2026-01-01T00:00:00+00:00" });
-    expect(entries).toContainEqual({ path: "/100-days-to-offload", lastmod: "2026-02-01T00:00:00+00:00" });
-  });
-
   it("dates a section page by its newest row", () => {
-    expect(sitemapEntries(inventory)).toContainEqual({ path: "/books", lastmod: "2026-10-05T00:00:00+00:00" });
-  });
-
-  it("lists tags in use, and only those", () => {
-    const paths = sitemapEntries(inventory).map((e) => e.path);
-    expect(paths).toContain(`/tags/${encodeURIComponent("घर")}`);
-    expect(paths).not.toContain("/tags/unused");
+    const entries = sitemapEntries(inventory);
+    expect(entries).toContainEqual({ path: "/books", lastmod: "2026-10-05T00:00:00+00:00" });
+    expect(entries).toContainEqual({ path: "/micro-blog", lastmod: "2026-01-01T00:00:00+00:00" });
   });
 
   it("still lists the fixed pages when a table could not be read", () => {
     const paths = sitemapEntries({ book: null }).map((e) => e.path);
     expect(paths).toContain("/books");
-    expect(paths).not.toContain("/books/12");
   });
 
   it("writes valid, escaped XML", () => {

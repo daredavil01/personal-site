@@ -1,29 +1,21 @@
-// /sitemap.xml — every indexable URL, built from the route manifest and the
-// live tables (src/lib/seo/sitemap.js). Replaces the hand-written file in
-// public/, which listed 19 pages and none of the ~2,000 detail pages.
+// /sitemap.xml — every indexable page, built from the route manifest
+// (src/lib/seo/sitemap.js). Individual entities are not listed; the tables are
+// read only to date each section page by its newest row.
 //
 // The site-wide _middleware.js skips this path: it has a file extension.
 import { loadInventory } from "../src/lib/seo/inventory";
 import { sitemapEntries, buildSitemap } from "../src/lib/seo/sitemap";
 import { serveCached, isComplete, HOUR } from "../src/lib/seo/serve";
 
-// A sitemap needs keys and dates, nothing else — the micro-blog alone is 1,600+
-// rows, so its text stays in the database. Micro-posts and 100-days posts are
-// read only to date their section pages (UNLISTED_KINDS in sitemap.js).
-const SELECT = {
-  book: "id,updated_at",
-  trek: "id,updated_at",
-  sport: "id,updated_at",
-  project: "id,updated_at",
-  blog: "id,updated_at",
-  presentation: "id,updated_at",
-  newsletter: "slug,updated_at",
-  microblog: "id,updated_at",
-};
+// Dates only — the micro-blog alone is 1,600+ rows. Tags are not read: their
+// rows carry no updated_at, so /tags has no lastmod either way.
+const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "newsletter", "microblog"];
+const SELECT = Object.fromEntries(KINDS.map((kind) => [kind, "updated_at"]));
 
 export async function onRequestGet(context) {
   return serveCached(context, async () => {
     const inventory = await loadInventory(context.env, {
+      kinds: KINDS,
       select: SELECT,
       cacheOrigin: new URL(context.request.url).origin,
       ttl: HOUR,

@@ -82,7 +82,7 @@ the URL as it was served.
 
 | URL | Built from | Function |
 |---|---|---|
-| `/sitemap.xml` | the manifest's indexable routes + every readable row except micro-posts and 100-days posts (`UNLISTED_KINDS`), `lastmod` = `updated_at` | `functions/sitemap.xml.js` |
+| `/sitemap.xml` | the manifest's indexable routes only — no individual entity; a section page's `lastmod` is its newest row's `updated_at` | `functions/sitemap.xml.js` |
 | `/feed.xml` | the newest 50 items across all types, RSS 2.0 | `functions/feed.xml.js` |
 | `/llms.txt` | `identity.js` + the nav + `PAGE_META` (no database read) | `functions/llms.txt.js` |
 | `/llms-full.txt` | the above + one line per essay, issue, book, race, trek, project and deck | `functions/llms-full.txt.js` |
@@ -97,7 +97,8 @@ stay static; a test holds `agents.md` to `identity.js`.
 the last 3 days to `api.indexnow.org` (Bing, Yandex, Seznam, Naver).
 `--all` submits everything — run it once after this ships. Micro-post
 permalinks (`/micro-blog/:id`) are never submitted, with or without `--all`:
-they are 1,600+ of the thinnest pages. Neither they nor the 100-days posts are in the sitemap; both stay discoverable through their section pages. The key is public at
+they are 1,600+ of the thinnest pages. The sitemap lists no detail page at all, so IndexNow submits
+only section pages whose newest row moved; detail pages are discovered through them. The key is public at
 `/indexnow-key.txt`. It runs in the nightly workflow and as the last step of
 `npm run refresh`. Bing's index is what ChatGPT search, Copilot and DuckDuckGo
 answer from, so this is the shortest path from an `/admin` edit to an AI answer.

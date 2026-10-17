@@ -368,7 +368,7 @@ export const KINDS = {
     detailSelect: "name,display_name,description,category",
     // Capped in the database: the busiest tag carries ~500 rows, and parsing
     // them all is the single largest CPU cost in the middleware. 200 links is
-    // plenty for a crawler; the sitemap lists every detail page regardless.
+    // plenty for a crawler.
     related: (key) => ({ path: `rpc/tag_entities?limit=${TAG_ITEMS}`, body: { p_name: key } }),
     list: { path: "rpc/tags_with_counts", body: {} },
     listItem: (r) => (r.total > 0

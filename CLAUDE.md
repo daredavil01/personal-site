@@ -202,6 +202,9 @@ user-agent sniffing) and does four things:
 - **noindex:** `indexable: false` routes, `/admin*`, `/ask/s/*` and micro-posts
   with no text (`src/lib/seo/indexing.js`, shared with the sitemap so a listed
   URL is never a noindexed one) get `X-Robots-Tag` + a robots meta.
+- **Sitemap lists pages, never entities:** `/sitemap.xml` is the manifest's
+  indexable routes only; tables are read just to date each section page.
+  Detail pages are found through their section pages.
 - **Head + body:** the meta tags carry `data-rh="true"` so react-helmet-async
   *replaces* them on mount (one canonical in the rendered DOM); a JSON-LD
   `@graph` (`src/lib/seo/structuredData.js`, stable `/#person` and `/#website`

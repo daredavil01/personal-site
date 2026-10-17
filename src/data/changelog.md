@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.1.9] — 2026-10-17
+
+### Changed
+- **Sitemap** (`src/lib/seo/sitemap.js`, `functions/sitemap.xml.js`): `/sitemap.xml` now lists pages only — the manifest's indexable routes plus `/writing-ledger.html` — and no individual entity (books, treks, races, projects, decks, newsletter issues, tags). Tables are read for `updated_at` alone to date each section page, and tags are no longer read at all. Detail pages stay crawlable through their section pages; IndexNow now submits section pages whose newest row moved.
+
 ## [v23.1.8] — 2026-10-17
 
 ### Changed

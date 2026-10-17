@@ -1,27 +1,21 @@
 // /sitemap.xml, built from the route manifest and the live tables.
 //
-// The old file was hand-written: 19 URLs, no detail page at all (about 2,000
-// missing), and a lastmod four months stale. This one cannot drift — a route is
-// listed because the manifest says it is indexable, a row because it exists and
-// RLS lets the public read it, and lastmod is the row's own updated_at.
+// Pages only, never individual entities: a route is listed because the
+// manifest says it is indexable, and a section page is dated by the newest
+// row it lists. Detail pages (/books/12, /micro-blog/5, /tags/x …) stay
+// crawlable through their section pages, which link every one.
 //
 // Pure: functions/sitemap.xml.js does the reading and passes the inventory in.
 
 import { SITE_URL } from "../../data/pageMeta";
 import { ROUTE_MANIFEST } from "../../data/routeManifest";
-import { KINDS, detailPath, keyColumnOf, SECTION_KINDS } from "./entities";
+import { SECTION_KINDS } from "./entities";
 import { isNeverIndexed } from "./indexing";
 import { newestUpdate } from "./inventory";
 import { escXml } from "./text";
 
 // Static pages served straight out of public/, which the manifest cannot see.
 export const STATIC_PAGES = ["/writing-ledger.html"];
-
-// Kinds whose detail pages stay off the sitemap. Their section pages are still
-// listed (dated by the newest row), and the permalinks stay crawlable through
-// them: 1,600+ micro-posts and the 100-days posts (each a pointer to an essay
-// hosted elsewhere) are thin pages, and listing each one dilutes the sitemap.
-export const UNLISTED_KINDS = new Set(["microblog", "blog"]);
 
 const isLiteral = (path) => !path.includes(":") && !path.includes("*");
 
@@ -41,15 +35,7 @@ export function sitemapEntries(inventory = {}) {
     const kind = SECTION_KINDS[path];
     return { path, lastmod: kind ? newestUpdate(inventory[kind]) : null };
   });
-  const details = Object.keys(KINDS).filter((kind) => !UNLISTED_KINDS.has(kind)).flatMap((kind) => (inventory[kind] || [])
-    // A tag nobody uses yet has no page worth listing.
-    .filter((row) => kind !== "tag" || row.total > 0)
-    .map((row) => ({ path: detailPath(kind, row[keyColumnOf(kind)]), lastmod: row.updated_at || null })));
-  return [
-    ...fixed,
-    ...STATIC_PAGES.map((path) => ({ path, lastmod: null })),
-    ...details,
-  ];
+  return [...fixed, ...STATIC_PAGES.map((path) => ({ path, lastmod: null }))];
 }
 
 export function buildSitemap(entries) {
