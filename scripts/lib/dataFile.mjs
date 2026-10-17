@@ -1,12 +1,14 @@
-// Committed data files (public/data/*.json) carry fields every run rewrites:
-// the build time, and the month/year-to-date figures readers recompute anyway.
-// A file whose rest is unchanged is left alone, so a refresh with nothing new
-// leaves no diff. The nightly workflow's commit step strips the same keys.
+// Committed data files (public/data/*.json, docs/facts.json) carry fields every
+// run rewrites: the build time, and the month/year-to-date figures readers
+// recompute anyway. A file whose rest is unchanged is left alone, so a refresh
+// with nothing new leaves no diff. The nightly workflow's commit step strips
+// the same keys from the two public/data files.
 
 import fs from "node:fs";
 import path from "node:path";
 
-export const VOLATILE = ["generatedAt", "currentPeriod"];
+// generated_at is site_facts()'s own stamp (docs/facts.json).
+export const VOLATILE = ["generatedAt", "generated_at", "currentPeriod"];
 
 const stable = (text) => {
   const j = JSON.parse(text);

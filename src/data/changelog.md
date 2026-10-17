@@ -12,3 +12,8 @@ pages/refactors/redesigns, minor for features and content additions (at most one
 minor version per calendar week), patch for fixes and tweaks.
 
 ---
+
+## [v23.1.7] — 2026-10-17
+
+### Fixed
+- **Refresh noise** (`scripts/build-docs.mjs`, `scripts/lib/dataFile.mjs`): `npm run docs:build` (and the `ask` refresh step that calls it) no longer rewrites `docs/facts.json` when only `site_facts()`'s `generated_at` stamp would change.

@@ -29,6 +29,7 @@ import { manifestFor } from "../src/data/routeManifest.js";
 import { CARD_FALLBACKS } from "../src/lib/og/paths.js";
 import { createClient } from "@supabase/supabase-js";
 import { getStatsPayload } from "./lib/statsSource.mjs";
+import { writeJsonIfChanged } from "./lib/dataFile.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = path.join(ROOT, "docs");
@@ -305,12 +306,9 @@ export async function buildDocs(supabase) {
     ),
   );
 
-  fs.writeFileSync(
-    path.join(DOCS, "facts.json"),
-    `${JSON.stringify(facts, null, 2)}\n`,
-    "utf8",
-  );
-  written.push(path.join(DOCS, "facts.json"));
+  if (writeJsonIfChanged(path.join(DOCS, "facts.json"), `${JSON.stringify(facts, null, 2)}\n`)) {
+    written.push(path.join(DOCS, "facts.json"));
+  }
 
   // Same hourly snapshot the /stats page renders; a docs run never fails on it.
   const statsPayload = await getStatsPayload().then((r) => r.payload).catch(() => null);
