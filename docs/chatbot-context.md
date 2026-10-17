@@ -14,7 +14,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Blog posts** (71) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
-- **Projects** (19) — /projects/:id. Status: Live: 15, Concept: 1, Archived: 3.
+- **Projects** (20) — /projects/:id. Status: Live: 16, Concept: 1, Archived: 3.
 - **Races** (26) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 19, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
@@ -28,16 +28,16 @@ answering rules live with the prompt, and are not repeated here.
 - Reading: 52 books, ~17.2k pages, 30 English / 22 Marathi; top genres Technology, Society, Fiction.
 - Running: 26 races, 598 km. PBs: marathon 05:05:53 (Tata Mumbai Marathon 2026), half 1:59:57 (NMDC Hyderabad Marathon 2025), 10K 00:55:28 (IPA Neerathon 2026).
 - Treks: 20 (3 hard) over 5 years; latest Ghangad Fort.
-- 100 Days To Offload: 70 of 100 posts.
+- 100 Days To Offload: 71 of 100 posts.
 - Micro posts: 1674; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 6 organisations, 18 projects, 12 certifications (latest: AWS Fundamentals Specialization).
-- Based in Barshi, MH.
+- Work: 6 organisations, 19 projects, 12 certifications (latest: AWS Fundamentals Specialization).
+- Based in Pune, MH.
 
 ## Tags
 
-100 tags, shared across every content type, always lowercase.
-Most used: life (481), self-reflection (466), marathi (272), social media (145), love (137), personaldevelopment (135), sanky (134), calmness (127), philosophy (127), travel (119), digital wellbeing (118), latepost (109), digital detox (77), politics (73), psychology (70), social (67), technology (66), choices (54), ai (52), maharashtra (51).
+102 tags, shared across every content type, always lowercase.
+Most used: life (481), self-reflection (466), marathi (272), social media (145), love (137), personaldevelopment (135), sanky (134), calmness (127), philosophy (127), travel (119), digital wellbeing (118), latepost (109), digital detox (77), politics (73), psychology (70), social (67), technology (66), ai (54), choices (54), maharashtra (51).
 Tag pages live at /tags/:name.
 
 ## What a micro post is

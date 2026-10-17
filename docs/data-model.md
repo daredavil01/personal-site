@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **19** · indexed as `project`
+Rows: **20** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **17** · indexed as `presentation`
+Rows: **18** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -239,7 +239,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **100**
+Rows: **102**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3798**
+Rows: **3806**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3219**
+Rows: **3232**
 
 | column | type | null | default |
 |---|---|---|---|

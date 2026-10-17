@@ -25,12 +25,12 @@
     }
   },
   "counts": {
-    "tags": 100,
+    "tags": 102,
     "blogs": 71,
     "books": 52,
     "treks": 20,
     "sports": 26,
-    "projects": 19,
+    "projects": 20,
     "instagram": 11,
     "microblog": 1674
   },
@@ -569,6 +569,11 @@
     ],
     "project": [
       {
+        "d": "2026-10-17",
+        "t": "Dare Write's Brand Kit",
+        "u": "/projects/20"
+      },
+      {
         "d": "2026-09-25",
         "t": "Learning Hub",
         "u": "/projects/19"
@@ -718,6 +723,11 @@
     ],
     "presentation": [
       {
+        "d": "2026-10-17",
+        "t": "One Diary, Three Moods — Dare Write's Brand Kit",
+        "u": "/presentations/18"
+      },
+      {
         "d": "2026-10-16",
         "t": "The Wanderer's Logbook — every essay, read as data",
         "u": "/presentations/17"
@@ -815,13 +825,13 @@
   },
   "projects": {
     "by_status": {
-      "Live": 15,
+      "Live": 16,
       "Concept": 1,
       "Archived": 3
     },
     "by_category": {
       "Tool": 2,
-      "Design": 2,
+      "Design": 3,
       "Web App": 7,
       "Website": 4,
       "Data Story": 4
@@ -897,12 +907,12 @@
       "total": 66
     },
     {
-      "name": "choices",
+      "name": "ai",
       "total": 54
     },
     {
-      "name": "ai",
-      "total": 52
+      "name": "choices",
+      "total": 54
     },
     {
       "name": "maharashtra",
@@ -955,7 +965,7 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-16T19:24:21.870874+00:00",
+  "generated_at": "2026-10-17T10:10:00.079416+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
@@ -967,18 +977,18 @@
     "sport": 26,
     "stats": 10,
     "resume": 21,
-    "project": 18,
+    "project": 19,
     "writing": 43,
-    "changelog": 107,
+    "changelog": 110,
     "instagram": 11,
     "microblog": 1674,
-    "presentation": 17
+    "presentation": 18
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 2,
+    "uncategorised": 4,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,

@@ -23,8 +23,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
 | `technology` | 66 | Technology & Data |
+| `ai` | 54 | Technology & Data |
 | `choices` | 54 | Mind & Life |
-| `ai` | 52 | Technology & Data |
 | `maharashtra` | 51 | Travel & Outdoors |
 | `मन` | 46 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
@@ -34,14 +34,14 @@ Names are lowercase and URI-encoded rather than slugified.
 | `running` | 37 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
 | `100_days_to_offload` | 31 | Writing & Blogging |
-| `daredavil01` | 30 | Personal |
+| `daredavil01` | 31 | Personal |
 | `self-help` | 30 | Books & Reading |
 | `भटकंती` | 30 | Travel & Outdoors |
 | `konkan` | 29 | Travel & Outdoors |
 | `digital manipulation` | 26 | Digital Life |
 | `स्थितप्रज्ञ` | 26 | Mind & Life |
 | `book review` | 24 | Books & Reading |
-| `mydesigns` | 22 | Arts & Culture |
+| `mydesigns` | 23 | Arts & Culture |
 | `youth` | 22 | Society & Ideas |
 | `marathon` | 21 | Running & Fitness |
 | `privacy` | 19 | Digital Life |
@@ -80,7 +80,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `the matrix` | 3 | Digital Life |
 | `traditionallook😍` | 3 | Arts & Culture |
 | `bankot fort` | 2 | Travel & Outdoors |
+| `brandkit` | 2 | — |
 | `data journalism` | 2 | Technology & Data |
+| `design` | 2 | — |
 | `hyderabad` | 2 | Travel & Outdoors |
 | `knowledgeeconomy` | 2 | Society & Ideas |
 | `note-taking` | 2 | Writing & Blogging |
