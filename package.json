@@ -16,7 +16,7 @@
     "preview": "vite preview",
     "lint": "eslint src functions --ext .js",
     "test": "jest",
-    "test:scripts": "node --test scripts/lib/registry.test.mjs scripts/lib/indexnow.test.mjs",
+    "test:scripts": "node --test scripts/lib/registry.test.mjs scripts/lib/indexnow.test.mjs scripts/lib/dataFile.test.mjs",
     "analyze": "npm run build && source-map-explorer build/assets/*.js",
     "microblog:import": "node scripts/import-tumblr-microblog.mjs",
     "repo:sync": "node scripts/sync-repo-history.mjs",

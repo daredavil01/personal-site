@@ -21,6 +21,7 @@ import { fileURLToPath } from "url";
 import { UMAP } from "umap-js";
 import { makeClient } from "./build-docs.mjs";
 import { splitProse, syntheticId } from "./lib/chunking.mjs";
+import { writeJsonIfChanged } from "./lib/dataFile.mjs";
 import { seededRandom } from "../src/lib/generativeArt.js";
 import {
   MIN_POST_WORDS, cleanText, cosine, isMarathi, openingOf, pairLetters, phrases,
@@ -258,9 +259,8 @@ async function main() {
     + `${out.lines.length} lines, ${out.letters.length} letters, ${(json.length / 1024).toFixed(0)} KB`);
   clusters.forEach((c) => console.log(`  region ${c.id}: ${c.label} (${c.size})`));
   if (DRY_RUN) return;
-  fs.mkdirSync(path.dirname(OUT), { recursive: true });
-  fs.writeFileSync(OUT, `${json}\n`);
-  console.log(`Wrote ${path.relative(ROOT, OUT)}`);
+  const wrote = writeJsonIfChanged(OUT, `${json}\n`);
+  console.log(`${wrote ? "Wrote" : "Unchanged apart from dates:"} ${path.relative(ROOT, OUT)}`);
 }
 
 main().catch((e) => {

@@ -30,6 +30,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { currentPeriod } from "../src/lib/writingPeriod.js";
+import { writeJsonIfChanged } from "./lib/dataFile.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // The ledger report — no post text — served at /data/writing-ledger.json and read
@@ -672,8 +673,7 @@ async function main() {
     tracked,
   );
 
-  fs.mkdirSync(path.dirname(LEDGER_FILE), { recursive: true });
-  fs.writeFileSync(LEDGER_FILE, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+  const wroteLedger = writeJsonIfChanged(LEDGER_FILE, `${JSON.stringify(report, null, 2)}\n`);
   const wordsById = Object.fromEntries(
     report.posts
       .filter((p) => p.blogId && p.words)
@@ -754,7 +754,7 @@ async function main() {
     console.log(`  • ${kind}: ${count}`);
   }
   for (const a of report.anomalies.filter(
-    (x) => x.kind === "malformed_blog_date",
+    (x) => x.kind === "malformed_blog_date",  
   )) {
     console.log(
       `    blogs id ${a.blogId} — ${JSON.stringify(a.value)} (${a.title})`,
@@ -762,7 +762,7 @@ async function main() {
   }
 
   console.log(
-    `\nWrote ${path.relative(ROOT, LEDGER_FILE)} and ${path.relative(ROOT, TEXT_FILE)}\n`,
+    `\n${wroteLedger ? "Wrote" : "Unchanged apart from dates:"} ${path.relative(ROOT, LEDGER_FILE)}; wrote ${path.relative(ROOT, TEXT_FILE)}\n`,
   );
 }
 
