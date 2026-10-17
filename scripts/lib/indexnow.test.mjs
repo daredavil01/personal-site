@@ -32,6 +32,17 @@ test("submits only what changed in the window, unless asked for all", () => {
   assert.equal(changedSince(entries, { all: true, now }).length, 3);
 });
 
+test("never submits micro-post permalinks, but keeps the /micro-blog page", () => {
+  const entries = parseSitemap(`<urlset>
+    <url><loc>https://sankettambare.in/micro-blog</loc><lastmod>2026-10-16T00:00:00Z</lastmod></url>
+    <url><loc>https://sankettambare.in/micro-blog/42</loc><lastmod>2026-10-16T00:00:00Z</lastmod></url>
+  </urlset>`);
+  const now = new Date("2026-10-17T00:00:00Z");
+  const only = ["https://sankettambare.in/micro-blog"];
+  assert.deepEqual(changedSince(entries, { days: 3, now }), only);
+  assert.deepEqual(changedSince(entries, { all: true, now }), only);
+});
+
 test("splits into protocol-sized batches and names the key file", () => {
   const urls = Array.from({ length: MAX_URLS + 1 }, (_, i) => `https://sankettambare.in/micro-blog/${i}`);
   const out = payloads(urls, { site: "https://sankettambare.in", key: "k" });

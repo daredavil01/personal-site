@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.1.5] — 2026-10-17
+
+### Changed
+- **IndexNow** (`scripts/lib/indexnow.mjs`): micro-post permalinks (`/micro-blog/:id`) are no longer submitted, with or without `--all` — 1,600+ of the thinnest pages would crowd out the essays, books and races. The `/micro-blog` page is still sent, and the posts stay in the sitemap.
+
 ## [v23.1.4] — 2026-10-17
 
 ### Added

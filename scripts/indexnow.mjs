@@ -7,6 +7,8 @@
  *   npm run indexnow -- --all         every URL in the sitemap (first run, after a move)
  *   npm run indexnow -- --dry-run     list what would be sent, send nothing
  *
+ * Micro-post permalinks (/micro-blog/:id) are always skipped.
+ *
  * Reads the LIVE sitemap, so it submits what is actually deployed. Needs no
  * secret: the key is public at /indexnow-key.txt. Runs nightly in
  * .github/workflows/ask-refresh.yml and as the last step of `npm run refresh`.

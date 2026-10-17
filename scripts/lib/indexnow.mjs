@@ -20,15 +20,21 @@ export function parseSitemap(xml) {
   })).filter((u) => u.loc);
 }
 
+/** A single micro-post (`/micro-blog/:id`). The `/micro-blog` page itself is kept. */
+export const isMicroPost = (loc) => /^\/micro-blog\/./.test(new URL(loc).pathname);
+
 /**
  * The URLs worth submitting: everything with `all`, else what changed in the
  * last `days` days. An entry with no lastmod is only sent with `all` — there
- * is no telling whether it changed.
+ * is no telling whether it changed. Micro-post permalinks are never sent:
+ * 1,600+ of them would spend the batch on the thinnest pages; crawlers still
+ * find them through the sitemap.
  */
 export function changedSince(entries, { days = 3, all = false, now = new Date() } = {}) {
-  if (all) return entries.map((e) => e.loc);
+  const pages = entries.filter((e) => !isMicroPost(e.loc));
+  if (all) return pages.map((e) => e.loc);
   const cutoff = now.getTime() - days * 24 * 60 * 60 * 1000;
-  return entries
+  return pages
     .filter((e) => e.lastmod && new Date(e.lastmod).getTime() >= cutoff)
     .map((e) => e.loc);
 }

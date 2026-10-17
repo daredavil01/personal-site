@@ -95,7 +95,9 @@ stay static; a test holds `agents.md` to `identity.js`.
 
 `npm run indexnow` reads the live sitemap and submits URLs whose `lastmod` is in
 the last 3 days to `api.indexnow.org` (Bing, Yandex, Seznam, Naver).
-`--all` submits everything — run it once after this ships. The key is public at
+`--all` submits everything — run it once after this ships. Micro-post
+permalinks (`/micro-blog/:id`) are never submitted, with or without `--all`:
+they are 1,600+ of the thinnest pages and stay discoverable through the sitemap. The key is public at
 `/indexnow-key.txt`. It runs in the nightly workflow and as the last step of
 `npm run refresh`. Bing's index is what ChatGPT search, Copilot and DuckDuckGo
 answer from, so this is the shortest path from an `/admin` edit to an AI answer.
