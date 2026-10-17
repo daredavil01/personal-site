@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { colorForTag, postArt } from "../../lib/generativeArt";
+import { photoAlt } from "../../lib/seo/text";
 
 // One piece of paper on the Scriptorium pinboard. The paper itself carries the
 // post type — sticky note for text, a slip with a drop quotation mark for
@@ -107,7 +108,7 @@ const PinboardCard = ({ post, onOpen, tagColors = NO_COLORS }) => {
 
       {post.postType === "photo" && (
         post.imageUrl ? (
-          <img src={post.imageUrl} alt="" loading="lazy" className="w-full h-36 object-cover rounded-[2px] mb-2" />
+          <img src={post.imageUrl} alt={photoAlt(post.title || post.text, "From the micro-blog")} loading="lazy" className="w-full h-36 object-cover rounded-[2px] mb-2" />
         ) : (
           <div
             aria-hidden="true"

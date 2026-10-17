@@ -26,7 +26,7 @@ const PresentationPost = () => {
   const deck = decks.find((d) => String(d.id) === id);
   if (!deck) {
     return (
-      <PageShell region="creator" title="Presentation Not Found">
+      <PageShell region="creator" title="Presentation Not Found" noindex>
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <BackLink />
           <p className="font-body text-stone-500 dark:text-stone-400">Presentation not found.</p>

@@ -29,8 +29,12 @@ export const PERSON_IMAGE = `${SITE_URL}/images/me.jpg`;
 export const PAGE_META = {
   "/": {
     title: null,
+    // The home page is what a search for the name lands on, so its title says
+    // who, not just whose. `fullTitle` replaces the composed "<title> | Sanket
+    // Tambare" outright (see composeTitle's callers).
+    fullTitle: "Sanket Tambare — Software Engineer, Ultramarathoner & Writer",
     description:
-      "Sanket Tambare's personal portfolio hub. Software engineer, marathoner, and digital curator.",
+      "Sanket Tambare: software engineer at Bridgenext in Pune, ultramarathoner, Sahyadri fort-trekker and writer in English and Marathi. Books, races, treks, essays.",
     image: `${SITE_URL}/og/home.png`,
     imageAlt:
       "Sanket Tambare — engineer, marathoner, fort-trekker and writer, with his reading, racing and trekking counts",
@@ -67,7 +71,7 @@ export const PAGE_META = {
   "/books": {
     title: "Books",
     description:
-      "An interactive catalog of 100+ books read, with reviews and ratings spanning design, philosophy, technology, and Marathi literature.",
+      "An interactive catalog of every book read, in English and Marathi, with reviews and ratings spanning philosophy, technology, public policy, and Marathi literature.",
     image: `${SITE_URL}/og/books.png`,
     imageAlt: "A shelf of book spines with the reading counts",
     ogSlug: "books",
@@ -212,7 +216,7 @@ export const PAGE_META = {
   "/sports": {
     title: "Physical Endurance",
     description:
-      "Race logs, marathon results, and performance stats from 10K to Full Marathon — tracking every kilometer of the endurance journey from 2023 onwards.",
+      "Race logs, marathon results, and performance stats from 10K to a 50K ultra — tracking every kilometer of the endurance journey from 2023 onwards.",
     image: `${SITE_URL}/og/sports.png`,
     imageAlt: "A distance dial with personal-best race times",
     ogSlug: "sports",
@@ -256,7 +260,8 @@ export const DEFAULT_META = {
   type: "website",
 };
 
-// "About" -> "About | Sanket Tambare"; null -> "Sanket Tambare"
+// "About" -> "About | Sanket Tambare"; null -> "Sanket Tambare". A meta entry's
+// `fullTitle`, when it has one, is used as-is instead (the home page).
 export function composeTitle(title) {
   return title ? `${title} | ${SITE_NAME}` : SITE_NAME;
 }
@@ -299,9 +304,13 @@ export function buildTrekMeta({
   date,
   image,
 } = {}) {
+  const level = (enduranceLevel || "medium").toLowerCase();
+  // "An easy trek", and "Ghangad Fort", never "Ghangad Fort fort".
+  const article = /^[aeiou]/.test(level) ? "An" : "A";
+  const place = /\bfort\b/i.test(fortName || "") ? fortName : `${fortName} fort`;
   return {
     title: `${fortName} Trek`,
-    description: `A ${(enduranceLevel || "medium").toLowerCase()} endurance trek to ${fortName} fort on ${date}. Trek duration: ${trekTime}.`,
+    description: `${article} ${level} endurance trek to ${place} on ${date}. Trek duration: ${trekTime}.`,
     image: image || sectionImage("treks"),
     imageAlt: `Trek card for ${fortName}`,
     type: "article",

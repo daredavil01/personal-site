@@ -25,7 +25,7 @@ import { getRegion } from "./registry";
 const MAP_PATH = ATLAS_LIVE ? "/" : "/world";
 
 const RegionShell = ({
-  region, title, description, image, imageAlt, ogType, children,
+  region, title, description, image, imageAlt, ogType, noindex, children,
 }) => {
   const meta = getRegion(region);
   const { world, visitRegion } = useWorld();
@@ -62,6 +62,7 @@ const RegionShell = ({
         image={image}
         imageAlt={imageAlt}
         ogType={ogType}
+        noindex={noindex}
       />
 
       <header className="atlas-region-header">
@@ -104,6 +105,7 @@ RegionShell.propTypes = {
   image: PropTypes.string,
   imageAlt: PropTypes.string,
   ogType: PropTypes.string,
+  noindex: PropTypes.bool,
   children: PropTypes.node,
 };
 
@@ -114,6 +116,7 @@ RegionShell.defaultProps = {
   image: null,
   imageAlt: null,
   ogType: null,
+  noindex: false,
   children: null,
 };
 

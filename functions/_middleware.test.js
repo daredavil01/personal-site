@@ -21,9 +21,11 @@ import { PAGE_META } from "../src/data/pageMeta";
 const ORIGINAL = {
   HTMLRewriter: global.HTMLRewriter,
   fetch: global.fetch,
+  Response: global.Response,
+  Headers: global.Headers,
 };
 
-// Captures what HeadInjector appends, which is the whole output of this module.
+// Captures what each handler writes, which is the whole output of this module.
 class FakeRewriter {
   constructor() {
     this.handlers = {};
@@ -37,30 +39,59 @@ class FakeRewriter {
   transform() {
     let injected = "";
     let title = "";
+    let root = null;
     this.handlers.head?.element({
       append: (html) => { injected += html; },
     });
     this.handlers.title?.element({
       setInnerContent: (text) => { title = text; },
     });
-    return { injected, title };
+    this.handlers["#root"]?.element({
+      setInnerContent: (html) => { root = html; },
+    });
+    const out = { injected, title, root, headers: new Map(), status: 200 };
+    out.body = out;
+    return out;
+  }
+}
+
+// Just enough of the Fetch API for the status / header / redirect paths.
+class FakeHeaders extends Map {
+  constructor(init) {
+    super(init instanceof Map ? init : []);
+  }
+}
+
+class FakeResponse {
+  constructor(body, init = {}) {
+    Object.assign(this, body, { status: init.status, headers: init.headers });
+  }
+
+  static redirect(location, status) {
+    const r = new FakeResponse({}, { status, headers: new FakeHeaders() });
+    r.location = location;
+    return r;
   }
 }
 
 const HTML_RESPONSE = () => ({ headers: { get: () => "text/html; charset=utf-8" } });
 
 // `rows` maps a PostgREST path fragment to the array that query returns.
-const run = async (pathname, rows = {}, origin = "https://sankettambare.in") => {
+// `fail: true` makes every Supabase read throw, like an outage.
+const run = async (pathname, rows = {}, origin = "https://sankettambare.in", { fail = false, method } = {}) => {
   global.HTMLRewriter = FakeRewriter;
+  global.Response = FakeResponse;
+  global.Headers = FakeHeaders;
   global.fetch = jest.fn(async (url) => {
-    const match = Object.keys(rows).find((key) => String(url).includes(key));
+    if (fail) throw new Error("supabase is down");
+    const match = Object.keys(rows).find((key) => decodeURIComponent(String(url)).includes(key));
     return { ok: true, json: async () => (match ? rows[match] : []) };
   });
   // Imported lazily so each case gets the stubs in place first.
   // eslint-disable-next-line global-require
   const { onRequest } = require("./_middleware");
   return onRequest({
-    request: { url: `${origin}${pathname}` },
+    request: { url: `${origin}${pathname}`, method },
     next: async () => HTML_RESPONSE(),
     env: {
       VITE_SUPABASE_URL: "https://db.co",
@@ -70,13 +101,20 @@ const run = async (pathname, rows = {}, origin = "https://sankettambare.in") => 
 };
 
 const tag = (html, property) => {
-  const m = html.match(new RegExp(`<meta (?:property|name)="${property}" content="([^"]*)">`));
+  const m = html.match(new RegExp(`<meta (?:property|name)="${property}" content="([^"]*)"[^>]*>`));
   return m ? m[1] : null;
+};
+
+const jsonLd = (html) => {
+  const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  return m ? JSON.parse(m[1]) : null;
 };
 
 afterEach(() => {
   global.HTMLRewriter = ORIGINAL.HTMLRewriter;
   global.fetch = ORIGINAL.fetch;
+  global.Response = ORIGINAL.Response;
+  global.Headers = ORIGINAL.Headers;
   jest.resetModules();
 });
 
@@ -216,12 +254,15 @@ describe("a newsletter issue", () => {
 });
 
 describe("when the row cannot be read", () => {
-  it("degrades to the section's card and the section's copy", async () => {
-    const { injected } = await run("/books/999");
+  it("degrades to the section's card and the section's copy, still a 200", async () => {
+    const { injected, status } = await run("/books/999", {}, undefined, { fail: true });
     expect(tag(injected, "og:image")).toBe("https://sankettambare.in/og/books.png");
     // Asserted against PAGE_META rather than a literal: the invariant is that
     // an unreadable row inherits its parent page, not any particular wording.
     expect(tag(injected, "og:description")).toBe(PAGE_META["/books"].description);
+    // An outage must never tell a search engine the page is gone.
+    expect(status).toBe(200);
+    expect(tag(injected, "robots")).toBeNull();
   });
 });
 
@@ -243,7 +284,7 @@ describe("on a Pages preview deployment", () => {
   it("keeps canonical and og:url on the real site", async () => {
     const { injected } = await run("/micro-blog", {}, PREVIEW);
     expect(tag(injected, "og:url")).toBe("https://sankettambare.in/micro-blog");
-    expect(injected).toContain('<link rel="canonical" href="https://sankettambare.in/micro-blog">');
+    expect(injected).toContain('<link rel="canonical" href="https://sankettambare.in/micro-blog"');
   });
 
   it("leaves a row's own photo alone, since it is host-independent", async () => {
@@ -266,5 +307,198 @@ describe("tags that belong to index.html", () => {
   it("never emits og:site_name", async () => {
     const { injected } = await run("/books");
     expect(injected).not.toContain("og:site_name");
+  });
+});
+
+describe("the page body crawlers read", () => {
+  // GPTBot, ClaudeBot and PerplexityBot do not run JavaScript; without this,
+  // every URL reached them as an empty <div id="root">.
+  it("fills #root with the row as plain HTML", async () => {
+    const { root } = await run("/books/12", {
+      "books?id=eq.12": [{
+        id: 12,
+        title: "Vyakti ani Valli",
+        author: "P. L. Deshpande",
+        language: "Marathi",
+        description: "Sketches of people.",
+        year: 2024,
+        rating: 5,
+        tag_names: ["humour"],
+      }],
+    });
+    expect(root).toContain("<h1>Vyakti ani Valli by P. L. Deshpande</h1>");
+    expect(root).toContain("<p>Sketches of people.</p>");
+    expect(root).toContain('<main lang="mr">');
+    expect(root).toContain('href="/tags/humour"');
+    expect(root).toContain('href="/books"');
+  });
+
+  it("lists a section's rows as real links", async () => {
+    const { root } = await run("/treks", {
+      "treks?select=": [{ id: 7, fort_name: "Ghangad", endurance_level: "Hard", date: "17-02-2019" }],
+    });
+    expect(root).toContain('<a href="/treks/7">Ghangad Trek</a>');
+  });
+
+  it("gives the home page the bio and the name as its heading", async () => {
+    const { root, title } = await run("/");
+    expect(root).toContain("<h1>Sanket Tambare</h1>");
+    expect(root).toContain("Bridgenext");
+    expect(title).toBe("Sanket Tambare — Software Engineer, Ultramarathoner & Writer");
+  });
+
+  it("escapes row text", async () => {
+    const { root } = await run("/micro-blog/5", {
+      "microblog?id=eq.5": [{ id: 5, title: "", text: "<img src=x onerror=alert(1)>", date: "2014-01-01" }],
+    });
+    expect(root).not.toContain("<img src=x");
+    expect(root).toContain("&lt;img src=x");
+  });
+
+  it("leaves the admin dashboard alone", async () => {
+    const { root } = await run("/admin/books");
+    expect(root).toBeNull();
+  });
+});
+
+describe("structured data", () => {
+  it("names the same Person on every page", async () => {
+    const graph = jsonLd((await run("/stats")).injected)["@graph"];
+    const person = graph.find((n) => n["@type"] === "Person");
+    expect(person["@id"]).toBe("https://sankettambare.in/#person");
+    expect(person.worksFor.name).toBe("Bridgenext");
+    expect(person.sameAs).toContain("https://github.com/daredavil01");
+  });
+
+  it("makes the home and about pages a ProfilePage about that Person", async () => {
+    const graph = jsonLd((await run("/about")).injected)["@graph"];
+    const page = graph.find((n) => n["@type"] === "ProfilePage");
+    expect(page.mainEntity).toEqual({ "@id": "https://sankettambare.in/#person" });
+  });
+
+  it("describes a book as a Book reviewed by the Person", async () => {
+    const graph = jsonLd((await run("/books/12", {
+      "books?id=eq.12": [{ id: 12, title: "Sapiens", author: "Yuval Noah Harari", language: "English", description: "d", year: 2023, rating: 4 }],
+    })).injected)["@graph"];
+    const book = graph.find((n) => n["@type"] === "Book");
+    expect(book.author.name).toBe("Yuval Noah Harari");
+    expect(book.review.author).toEqual({ "@id": "https://sankettambare.in/#person" });
+    expect(book.review.reviewRating.ratingValue).toBe(4);
+    const crumbs = graph.find((n) => n["@type"] === "BreadcrumbList");
+    expect(crumbs.itemListElement.map((c) => c.item)).toEqual([
+      "https://sankettambare.in",
+      "https://sankettambare.in/books",
+      "https://sankettambare.in/books/12",
+    ]);
+  });
+
+  it("cannot be closed early by a row containing </script>", async () => {
+    const { injected } = await run("/micro-blog/5", {
+      "microblog?id=eq.5": [{ id: 5, title: "", text: "a </script><script>alert(1)</script>", date: "2014-01-01" }],
+    });
+    const body = injected.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
+    expect(body).not.toContain("</script>");
+    expect(JSON.parse(body)["@graph"].find((n) => n["@type"] === "SocialMediaPosting").articleBody)
+      .toContain("</script>");
+  });
+
+  it("marks head tags for Helmet to replace, so the rendered DOM has one of each", async () => {
+    const { injected } = await run("/about");
+    expect(injected).toMatch(/<link rel="canonical" href="[^"]+" data-rh="true">/);
+    expect(injected).toMatch(/<meta name="description" content="[^"]+" data-rh="true">/);
+  });
+});
+
+describe("status codes", () => {
+  it("answers a path no route claims with a 404 and noindex", async () => {
+    const res = await run("/this-does-not-exist");
+    expect(res.status).toBe(404);
+    expect(res.headers.get("X-Robots-Tag")).toBe("noindex");
+    expect(tag(res.injected, "robots")).toBe("noindex");
+  });
+
+  it("answers a row that does not exist with a 404", async () => {
+    const res = await run("/books/99999");
+    expect(res.status).toBe(404);
+    // Still unfurls as the section rather than as nothing.
+    expect(tag(res.injected, "og:image")).toBe("https://sankettambare.in/og/books.png");
+  });
+
+  it("answers a malformed id with a 404 without asking the database", async () => {
+    const res = await run("/treks/not-a-number");
+    expect(res.status).toBe(404);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("answers an unknown or draft newsletter month with a 404", async () => {
+    expect((await run("/newsletter/2031-01")).status).toBe(404);
+  });
+
+  it("serves a real page as a plain 200", async () => {
+    const res = await run("/treks");
+    expect(res.status).toBe(200);
+    expect(tag(res.injected, "robots")).toBeNull();
+  });
+});
+
+describe("noindex", () => {
+  it("keeps the admin dashboard out of the index", async () => {
+    const res = await run("/admin");
+    expect(res.headers.get("X-Robots-Tag")).toBe("noindex");
+  });
+
+  it("keeps shared /ask conversations out of the index, but still unfurls them", async () => {
+    const res = await run("/ask/s/abcdefgh12", {
+      "rpc/get_ask_share": { title: "Which forts has Sanket climbed?", summary: "s" },
+    });
+    expect(res.headers.get("X-Robots-Tag")).toBe("noindex");
+    expect(res.title).toBe("Which forts has Sanket climbed? | Sanket Tambare");
+  });
+
+  it("noindexes a photo micro-post with no words, and indexes one with text", async () => {
+    const photo = await run("/micro-blog/9", {
+      "microblog?id=eq.9": [{ id: 9, title: "", text: "", date: "2015-03-01", post_type: "photo" }],
+    });
+    expect(tag(photo.injected, "robots")).toBe("noindex");
+    const words = await run("/micro-blog/10", {
+      "microblog?id=eq.10": [{ id: 10, title: "", text: "Rain on the fort.", date: "2015-03-01" }],
+    });
+    expect(tag(words.injected, "robots")).toBeNull();
+  });
+});
+
+describe("one URL per page", () => {
+  it("redirects a trailing slash, keeping the query", async () => {
+    const res = await run("/about/?ref=x");
+    expect(res.status).toBe(301);
+    expect(res.location).toBe("https://sankettambare.in/about?ref=x");
+  });
+
+  it("redirects a mis-cased route to its real spelling", async () => {
+    const res = await run("/About");
+    expect(res.status).toBe(301);
+    expect(res.location).toBe("https://sankettambare.in/about");
+  });
+
+  it("fixes the case of a route's fixed part but never of an ordinary parameter", async () => {
+    const res = await run("/Ask/s/AbCdEfGh12");
+    expect(res.location).toBe("https://sankettambare.in/ask/s/AbCdEfGh12");
+  });
+
+  it("lowercases a tag name, the way every internal tag link spells it", async () => {
+    const res = await run("/Tags/Running");
+    expect(res.location).toBe("https://sankettambare.in/tags/running");
+  });
+
+  it("leaves a Marathi tag alone — it has no case", async () => {
+    const res = await run("/tags/%E0%A4%98%E0%A4%B0", {
+      "tags?name=eq.": [{ name: "घर", display_name: "घर" }],
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("never redirects a POST", async () => {
+    const res = await run("/about/", {}, undefined, { method: "POST" });
+    expect(res.status).not.toBe(301);
   });
 });

@@ -13,11 +13,12 @@ const Index = () => (
   <Main>
     <article className="w-full flex flex-col gap-12">
       <header className="mb-4">
+        {/* The name is the heading: it is what a search for it should find. */}
         <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4">
-          Sanket Tambare
+          The Digital Hub
         </p>
         <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-[0.9] tracking-tighter mb-6">
-          The Digital Hub.
+          Sanket Tambare.
         </h1>
         <p className="font-body text-lg text-stone-500 dark:text-stone-400 max-w-2xl leading-relaxed">
           Welcome to my digital garden — an intentional archive of professional

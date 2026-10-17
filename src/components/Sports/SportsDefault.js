@@ -274,7 +274,10 @@ const SportsDefault = ({ onRaceClick }) => {
                       className="shrink-0 p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors text-stone-300 dark:text-stone-600 hover:text-secondary dark:hover:text-secondary"
                       title="Permalink"
                     >
-                      <span className="material-symbols-outlined text-[16px]">link</span>
+                      {/* An icon ligature reads as the word "link"; the hidden
+                          name is what screen readers and crawlers read. */}
+                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">link</span>
+                      <span className="sr-only">{race.title}</span>
                     </Link>
                   </div>
                 </div>

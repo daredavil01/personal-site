@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot, hydrateRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
 
@@ -14,10 +14,9 @@ const StrictApp = () => (
 
 const rootElement = document.getElementById('root');
 
-// hydrate is required by react-snap.
-if (rootElement.hasChildNodes()) {
-  hydrateRoot(rootElement, <StrictApp />);
-} else {
-  const root = createRoot(rootElement);
-  root.render(<StrictApp />);
-}
+// Always a fresh render, never hydrate. #root arrives holding the crawler
+// fallback the edge middleware writes (src/lib/seo/fallbackHtml.js) — plain
+// HTML, not React output — and createRoot clears it on the first commit.
+// hydrateRoot would try to adopt it and fail. (The old hydrate branch was for
+// react-snap, which is no longer installed.)
+createRoot(rootElement).render(<StrictApp />);

@@ -60,7 +60,7 @@ const BlogPost = () => {
 
   if (!blog) {
     return (
-      <PageShell region="writer" title="Post Not Found">
+      <PageShell region="writer" title="Post Not Found" noindex>
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/100-days-to-offload" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> 100 Days to Offload
@@ -101,7 +101,8 @@ const BlogPost = () => {
           </div>
         </div>
 
-        <article className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-2xl p-8 flex flex-col gap-6">
+        {/* lang tells search engines and screen readers a Marathi post is Marathi. */}
+        <article lang={/marathi/i.test(blog.language || "") ? "mr" : undefined} className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-2xl p-8 flex flex-col gap-6">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-mono text-xs text-stone-400 dark:text-stone-500">{blog.blog_date}</span>
             {blog.blog_platform && (

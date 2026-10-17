@@ -1,5 +1,5 @@
 <!doctype html>
-<html itemscope="" itemtype="http://schema.org/WebPage" lang="en">
+<html lang="en">
   <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -8,6 +8,27 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
+    <!--
+      The edge middleware fills #root with the page as plain HTML for crawlers
+      that do not run JavaScript (src/lib/seo/fallbackHtml.js). With JS running
+      the app replaces it on mount, so hide it from the first paint and nobody
+      sees it flash; without JS it is the page.
+    -->
+    <script>document.documentElement.classList.add("js");</script>
+    <style>
+      .js .seo-fallback { display: none; }
+      .seo-fallback { max-width: 44rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; font: 400 17px/1.6 Inter, system-ui, sans-serif; color: #1c1917; }
+      .seo-fallback a { color: #b22200; }
+      .seo-fallback h1, .seo-fallback h2 { font-family: "Noto Serif", Georgia, serif; }
+      .seo-fallback h1 { font-size: 2.2rem; line-height: 1.15; margin: 1.5rem 0 1rem; }
+      .seo-fallback h2 { font-size: 1.3rem; margin: 2rem 0 0.5rem; }
+      .seo-fallback nav, .seo-fallback footer { margin-top: 3rem; border-top: 1px solid #e7e5e4; font-size: 0.9rem; }
+      .seo-fallback nav ul, .seo-fallback footer ul { padding-left: 1.2rem; }
+      .seo-fallback dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
+      .seo-fallback dt { font-weight: 700; }
+      .seo-fallback dd { margin: 0; }
+      .seo-fallback small { color: #78716c; }
+    </style>
     <!-- Google tag (gtag.js) -->
     <script
       async
@@ -91,6 +112,8 @@
       sizes="16x16"
       href="/images/favicon/favicon-16x16.png"
     />
+    <!-- Browsers and search engines ask for /favicon.ico at the root first. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="manifest" href="/images/favicon/manifest.json" />
     <meta name="msapplication-TileColor" content="#ffffff" />
     <meta
@@ -100,6 +123,7 @@
     <meta name="theme-color" content="#ffffff" />
     <title>Sanket Tambare</title>
     <meta property="og:site_name" content="Sanket Tambare" />
+    <link rel="alternate" type="application/rss+xml" title="Sanket Tambare" href="/feed.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

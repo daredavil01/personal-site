@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useSports, useTreks, useBooks, useBlogs, useProjects } from '../../context/ContentContext';
 import ContactIcons from '../Contact/ContactIcons';
 import OneMinuteIntro from '../common/OneMinuteIntro';
+import SectionHeader from '../common/SectionHeader';
+import { IDENTITY } from '../../data/identity';
 
 const useCountUp = (target, duration, active) => {
   const [count, setCount] = useState(0);
@@ -21,15 +23,6 @@ const useCountUp = (target, duration, active) => {
   }, [active, target, duration]);
   return count;
 };
-
-const SectionHeader = ({ label }) => (
-  <div className="flex items-center gap-4 mb-6">
-    <p className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary font-bold whitespace-nowrap mb-0">
-      {label}
-    </p>
-    <div className="flex-1 h-px bg-stone-100 dark:bg-stone-800" />
-  </div>
-);
 
 const AboutDocument = () => {
   const statsRef = useRef(null);
@@ -184,6 +177,15 @@ const AboutDocument = () => {
         </div>
       </section>
 
+      {/* The same paragraph the site gives search engines and AI assistants
+          (JSON-LD, /llms.txt, the crawler fallback) — one bio, said one way. */}
+      <section>
+        <SectionHeader label="Bio" />
+        <p className="font-body text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-0">
+          {IDENTITY.bio}
+        </p>
+      </section>
+
       <section>
         <SectionHeader label="More Details" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,9 +196,9 @@ const AboutDocument = () => {
             >
               <div className="flex items-center gap-3 mb-3">
                 <span className={`material-symbols-outlined text-xl ${p.iconColor}`}>{p.icon}</span>
-                <h2 className="font-headline font-bold text-stone-900 dark:text-stone-100 text-lg mb-0">
+                <h3 className="font-headline font-bold text-stone-900 dark:text-stone-100 text-lg mb-0">
                   {p.title}
-                </h2>
+                </h3>
               </div>
               <p className="font-label text-xs text-stone-500 dark:text-stone-400 leading-relaxed mb-0">
                 {p.chips.join(' · ')}

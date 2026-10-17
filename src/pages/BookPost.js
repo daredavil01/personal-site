@@ -56,7 +56,7 @@ const BookPost = () => {
 
   if (!book) {
     return (
-      <PageShell region="reader" title="Book Not Found">
+      <PageShell region="reader" title="Book Not Found" noindex>
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <Link to="/books" className="inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors self-start">
             <span className="material-symbols-outlined text-sm">arrow_back</span> Books
@@ -107,7 +107,8 @@ const BookPost = () => {
           </div>
         </div>
 
-        <article className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-2xl p-6 sm:p-8 flex flex-col gap-6">
+        {/* lang tells search engines and screen readers a Marathi book is Marathi. */}
+        <article lang={/marathi/i.test(book.language || "") ? "mr" : undefined} className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-2xl p-6 sm:p-8 flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row gap-6">
             <BookCover book={book} size="lg" className="w-32 sm:w-40 shrink-0" />
 

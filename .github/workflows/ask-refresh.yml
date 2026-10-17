@@ -8,6 +8,9 @@
 #   4. Commits public/data/writing-ledger.json and public/data/logbook.json
 #      when their contents changed — not when only the generation date moved —
 #      which triggers a Pages deploy.
+#   5. indexnow        — submits URLs whose live sitemap lastmod moved in the
+#      last 3 days to IndexNow (Bing, and through it ChatGPT search and
+#      Copilot). No secret: the key is public at /indexnow-key.txt.
 #
 # Substack challenges GitHub runner IPs (403 on the API, post bodies and the
 # RSS feed, whatever the User-Agent), so this job cannot see new essays. It
@@ -110,3 +113,9 @@ jobs:
           git add $files
           git commit -m "chore(ledger): refresh writing ledger and logbook data"
           git push
+
+      - name: Tell IndexNow what changed
+        if: ${{ !cancelled() && !inputs.dry_run }}
+        # A refused or unreachable IndexNow is not a failed refresh.
+        continue-on-error: true
+        run: npm run indexnow

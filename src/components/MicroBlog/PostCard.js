@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { typeColors } from "./constants";
+import { photoAlt } from "../../lib/seo/text";
 
 // Clickable cards use div[role="button"] like the rest of the site (see
 // OneHundredDays.js). That began as a workaround for the legacy HTML5UP CSS,
@@ -53,7 +54,7 @@ const PostCard = ({ post, onOpen }) => {
       </div>
 
       {post.imageUrl && (
-        <img src={post.imageUrl} alt="" loading="lazy" className="w-full h-40 object-cover rounded-lg" />
+        <img src={post.imageUrl} alt={photoAlt(post.title || post.text, "From the micro-blog")} loading="lazy" className="w-full h-40 object-cover rounded-lg" />
       )}
 
       {body ? (

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { itemTitle } from "../../lib/newsletterIssue";
+import { photoAlt } from "../../lib/seo/text";
 import { getMicroblogPost } from "../../lib/api/microblog";
 import ShareImageModal from "../share/ShareImageModal";
 import { detailPath } from "./issueHooks";
@@ -73,7 +74,7 @@ ItemShare.propTypes = { item: PropTypes.shape({ ref: PropTypes.shape({ type: Pro
 const MicroItem = ({ item, to }) => (
   <div className="flex flex-col gap-2">
     {item.imageUrl && (
-      <img src={item.imageUrl} alt="" loading="lazy" className="w-full max-w-xs rounded-lg border border-stone-200 dark:border-stone-800" />
+      <img src={item.imageUrl} alt={photoAlt(item.text || item.title, "From the micro-blog")} loading="lazy" className="w-full max-w-xs rounded-lg border border-stone-200 dark:border-stone-800" />
     )}
     {item.text && (
       <p className="font-body text-sm text-stone-700 dark:text-stone-300 whitespace-pre-line line-clamp-5 mb-0">{item.text}</p>

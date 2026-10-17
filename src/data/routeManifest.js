@@ -21,7 +21,9 @@
 //     "entity" — the row's own photo when it has one, else the section card
 //                that CARD_FALLBACKS maps `og.kind` to
 //     "none"   — deliberately no card; must also be `indexable: false`
-//   indexable  — whether the route should carry real, indexable meta
+//   indexable  — whether search engines may index it. false makes the edge
+//                send `noindex` (meta + X-Robots-Tag) and keeps the route out
+//                of /sitemap.xml and /llms.txt (src/lib/seo/)
 //
 // Import-free, like src/data/pageMeta.js, so the esbuild-bundled Worker can
 // read it without dragging anything in.
@@ -30,12 +32,14 @@ export const ROUTE_MANIFEST = [
   { path: "/", component: "HomeRoute", og: { strategy: "page", slug: "home" }, indexable: true },
   { path: "/about", component: "About", og: { strategy: "page", slug: "about" }, indexable: true },
   { path: "/ask", component: "Ask", og: { strategy: "page", slug: "ask" }, indexable: true },
+  // Unfurls with a card, but noindexed: a reader-made snapshot is unlisted,
+  // user-generated, and a near-duplicate of every other share.
   {
     path: "/ask/s/:token",
     component: "AskShare",
     meta: "buildShareMeta",
     og: { strategy: "entity", kind: "ask-share" },
-    indexable: true,
+    indexable: false,
   },
   { path: "/projects", component: "Projects", og: { strategy: "page", slug: "projects" }, indexable: true },
   { path: "/stats", component: "Stats", og: { strategy: "page", slug: "stats" }, indexable: true },

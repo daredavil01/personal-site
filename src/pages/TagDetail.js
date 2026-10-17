@@ -3,8 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import { useTags } from "../context/ContentContext";
 import { getTagEntities } from "../lib/api/tags";
-import { SITE_URL } from "../data/pageMeta";
-import { ogStaticUrl, CARD_FALLBACKS } from "../lib/og/paths";
+import { buildTagMeta } from "../data/pageMeta";
 import { colorForTag } from "../lib/generativeArt";
 import { ErrorBlock, LoadingBlock } from "../components/common/AsyncStates";
 
@@ -46,6 +45,9 @@ const TagDetail = () => {
 
   const tag = tags.find((t) => t.name === name);
   const label = tag?.displayName || name;
+  const meta = buildTagMeta({
+    name, displayName: tag?.displayName, description: tag?.description, category: tag?.category,
+  });
   const color = colorForTag(name, tag?.color);
 
   if (error) return <PageShell region="person"><ErrorBlock /></PageShell>;
@@ -69,12 +71,13 @@ const TagDetail = () => {
   return (
     <PageShell
       region="person"
-      title={`#${label}`}
-      description={tag?.description || `Everything on the site tagged #${label} — ${items.length} item${items.length === 1 ? "" : "s"}.`}
-      imageAlt={`Tag card for ${label}`}
-      // A tag has no image of its own, so every tag page unfurls as the tags
-      // card. Stated here because this route has no PAGE_META entry to carry it.
-      image={ogStaticUrl(CARD_FALLBACKS.tag, SITE_URL)}
+      // The same builder the edge middleware uses, so a crawler and the app
+      // agree on this page's title and description. A tag has no image of its
+      // own, so the builder always returns the tags card.
+      title={meta.title}
+      description={meta.description}
+      imageAlt={meta.imageAlt}
+      image={meta.image}
     >
       <article className="flex flex-col gap-10 w-full max-w-3xl">
         <BackLink />

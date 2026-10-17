@@ -7,7 +7,8 @@ const BIRTH_DATE = "1999-01-22T21:23:00";
 const personalFacts = {
   name: "Sanket Tambare",
   birthDate: BIRTH_DATE,
-  city: "Barshi, MH",
+  // Where he lives now; src/data/identity.js says the same.
+  city: "Pune, MH",
   /** Whole years on `date`. */
   ageOn(date) {
     const birth = new Date(BIRTH_DATE);

@@ -9,13 +9,13 @@ And, here's  what I wish to do: critically engage in new developments across tec
 
 # Currently
 
-At [Emtec Inc.](https://www.linkedin.com/company/emtec-inc/mycompany/verification/), working as software development engineer learning stuff across variety of domains including full-stack development, data analytics, ci-cd and DevOps. Just developing things everyday. Besides that I am part of variety of social organizations like [Nirman](https://nirman.mkcl.org/).
+Software engineer at Bridgenext in Pune, working on full-stack development, data pipelines and DORA metrics. Before that, a software development engineer at Emtec Inc. Besides that I am part of variety of social organizations like [Nirman](https://nirman.mkcl.org/).
 
-Research Fellow at Network for  Advanced Study of Technology Geopolitics [(NAST)](https://takshashila.org.in/network-for-advanced-study-of-technology-geopolitics) Fellowship.
+Earlier, a fellow of the Network for Advanced Study of Technology Geopolitics [(NAST)](https://takshashila.org.in/network-for-advanced-study-of-technology-geopolitics) at the Takshashila Institution, working on AI governance.
 
 # Some interesting facts about me
 
-- As of now, I am trying to balance few things simultaneously in life, doing full time job as Software Developer (Focused on full stack development and Data Engineering), a research fellow at [NAST](https://takshashila.org.in/network-for-advanced-study-of-technology-geopolitics) (Network for  Advanced Study of Technology Geopolitics (NAST) Fellowship) and actively training for Marathons (5 Days a week)!  
+- As of now, I am trying to balance few things simultaneously in life, doing full time job as Software Developer (Focused on full stack development and Data Engineering) and actively training for marathons and ultras (5 days a week)!
 - Besides technical stuff, I am interested in blogging, designing, video editing and digital wellbeing. Checkout my [portfolio links](https://linktr.ee/daredavil).
 - I am interested in technology, society, psychology, blogging, desigining, video editing, digital well-being, in short towards variety of issues, technologies, topics and interests.
 - I actively try to engage in variety of social activities. Starting from tree plantations in college to social organizations like [Nirman](https://nirman.mkcl.org/).

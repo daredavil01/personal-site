@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { bookShape, filtersShape } from "./shapes";
+import { openOnPlainClick } from "../../lib/plainClick";
 import Stars from "./Stars";
 import { formatReadDate } from "../../lib/bookDate";
 
@@ -74,10 +76,12 @@ const BooksTable = ({
             className="border-b border-stone-50 dark:border-stone-800/60 last:border-0 hover:bg-stone-50 dark:hover:bg-stone-900/60 transition-colors cursor-pointer"
           >
             <td className="py-3 px-4">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onOpen(book); }}
-                className="text-left bg-transparent border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
+              {/* A real link to /books/:id for crawlers and new tabs; a plain
+                  click opens the modal like the rest of the row. */}
+              <Link
+                to={`/books/${book.id}`}
+                onClick={(e) => { e.stopPropagation(); openOnPlainClick(() => onOpen(book))(e); }}
+                className="block text-left no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
               >
                 <span className="block font-body font-bold text-sm text-stone-800 dark:text-stone-100">{book.title}</span>
                 {book.translator && (
@@ -85,7 +89,7 @@ const BooksTable = ({
                     {`Tr. ${book.translator}`}
                   </span>
                 )}
-              </button>
+              </Link>
             </td>
             <td className="py-3 px-4 font-body text-xs text-stone-500 dark:text-stone-400">{book.author}</td>
             <td className="py-3 px-4 font-body text-xs text-stone-500 dark:text-stone-400">{book.category || "—"}</td>

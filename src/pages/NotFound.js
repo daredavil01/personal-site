@@ -69,6 +69,7 @@ const PageNotFound = () => {
   return (
     <Main
       title="404 Not Found"
+      noindex
       description="The page you are looking for cannot be found. Return to the homepage."
     >
       <article className="flex flex-col gap-8 w-full">
