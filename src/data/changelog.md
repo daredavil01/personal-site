@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.1.8] — 2026-10-17
+
+### Changed
+- **Sitemap** (`src/lib/seo/sitemap.js`): `/sitemap.xml` no longer lists individual micro-post (`/micro-blog/:id`) or 100-days post (`/100-days-to-offload/:id`) URLs. Their section pages stay listed and dated by the newest row, and the permalinks remain reachable through them. IndexNow follows automatically, since it reads the live sitemap.
+
 ## [v23.1.7] — 2026-10-17
 
 ### Fixed

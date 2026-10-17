@@ -8,8 +8,8 @@ import { sitemapEntries, buildSitemap } from "../src/lib/seo/sitemap";
 import { serveCached, isComplete, HOUR } from "../src/lib/seo/serve";
 
 // A sitemap needs keys and dates, nothing else — the micro-blog alone is 1,600+
-// rows, so its text stays in the database. The filter is isIndexableMicroblog:
-// a photo post with no words is noindexed and must not be listed.
+// rows, so its text stays in the database. Micro-posts and 100-days posts are
+// read only to date their section pages (UNLISTED_KINDS in sitemap.js).
 const SELECT = {
   book: "id,updated_at",
   trek: "id,updated_at",

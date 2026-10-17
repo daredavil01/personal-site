@@ -17,6 +17,12 @@ import { escXml } from "./text";
 // Static pages served straight out of public/, which the manifest cannot see.
 export const STATIC_PAGES = ["/writing-ledger.html"];
 
+// Kinds whose detail pages stay off the sitemap. Their section pages are still
+// listed (dated by the newest row), and the permalinks stay crawlable through
+// them: 1,600+ micro-posts and the 100-days posts (each a pointer to an essay
+// hosted elsewhere) are thin pages, and listing each one dilutes the sitemap.
+export const UNLISTED_KINDS = new Set(["microblog", "blog"]);
+
 const isLiteral = (path) => !path.includes(":") && !path.includes("*");
 
 /** Indexable routes with no parameter: the pages every visitor can reach. */
@@ -35,7 +41,7 @@ export function sitemapEntries(inventory = {}) {
     const kind = SECTION_KINDS[path];
     return { path, lastmod: kind ? newestUpdate(inventory[kind]) : null };
   });
-  const details = Object.keys(KINDS).flatMap((kind) => (inventory[kind] || [])
+  const details = Object.keys(KINDS).filter((kind) => !UNLISTED_KINDS.has(kind)).flatMap((kind) => (inventory[kind] || [])
     // A tag nobody uses yet has no page worth listing.
     .filter((row) => kind !== "tag" || row.total > 0)
     .map((row) => ({ path: detailPath(kind, row[keyColumnOf(kind)]), lastmod: row.updated_at || null })));

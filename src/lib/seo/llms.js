@@ -137,7 +137,7 @@ export function buildLlmsFullTxt(inventory = {}) {
     "",
     "## Micro-blog",
     "",
-    line("Micro Blog", "/micro-blog", `${describe("/micro-blog")} Too many posts to list here; each has its own page at /micro-blog/<id>, and the sitemap lists every one with text.`),
+    line("Micro Blog", "/micro-blog", `${describe("/micro-blog")} Too many posts to list here; each has its own page at /micro-blog/<id>.`),
     "",
   );
   return out.join("\n");

@@ -173,8 +173,16 @@ describe("sitemap", () => {
     const entries = sitemapEntries(inventory);
     expect(entries).toContainEqual({ path: "/books/12", lastmod: "2026-10-01T00:00:00+00:00" });
     expect(entries).toContainEqual({ path: "/newsletter/2026-09", lastmod: "2026-10-02T00:00:00+00:00" });
-    expect(entries).toContainEqual({ path: "/micro-blog/5", lastmod: "2026-01-01T00:00:00+00:00" });
     expect(entries).toContainEqual({ path: "/writing-ledger.html", lastmod: null });
+  });
+
+  it("leaves micro-post and 100-days permalinks out, but dates their sections", () => {
+    const entries = sitemapEntries({ ...inventory, blog: [{ id: 65, updated_at: "2026-02-01T00:00:00+00:00" }] });
+    const paths = entries.map((e) => e.path);
+    expect(paths).not.toContain("/micro-blog/5");
+    expect(paths).not.toContain("/100-days-to-offload/65");
+    expect(entries).toContainEqual({ path: "/micro-blog", lastmod: "2026-01-01T00:00:00+00:00" });
+    expect(entries).toContainEqual({ path: "/100-days-to-offload", lastmod: "2026-02-01T00:00:00+00:00" });
   });
 
   it("dates a section page by its newest row", () => {
