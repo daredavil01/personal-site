@@ -23,7 +23,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
 | `technology` | 66 | Technology & Data |
-| `ai` | 54 | Technology & Data |
+| `ai` | 55 | Technology & Data |
 | `choices` | 54 | Mind & Life |
 | `maharashtra` | 51 | Travel & Outdoors |
 | `मन` | 46 | Mind & Life |
@@ -33,7 +33,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `forts` | 38 | Travel & Outdoors |
 | `running` | 37 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
-| `100_days_to_offload` | 31 | Writing & Blogging |
+| `100_days_to_offload` | 32 | Writing & Blogging |
 | `daredavil01` | 31 | Personal |
 | `self-help` | 30 | Books & Reading |
 | `भटकंती` | 30 | Travel & Outdoors |

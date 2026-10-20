@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-16T19:24:08.580Z",
+  "generatedAt": "2026-10-20T19:15:04.909Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 114,
-    "words": 112335,
-    "averageWords": 985,
-    "trackedPosts": 71,
+    "posts": 115,
+    "words": 113407,
+    "averageWords": 986,
+    "trackedPosts": 72,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-17",
+    "latestPost": "2026-10-21",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,47 +26,47 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 71,
-      "words": 79397
+      "posts": 72,
+      "words": 80469
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-17",
+    "asOf": "2026-10-21",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 5,
-      "words": 5979,
-      "daysElapsed": 17,
-      "wordsPerDay": 352,
+      "posts": 6,
+      "words": 7051,
+      "daysElapsed": 21,
+      "wordsPerDay": 336,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -53
+      "changeVsPreviousMonth": -44.5
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 71,
-      "words": 79397,
-      "daysElapsed": 290,
+      "posts": 72,
+      "words": 80469,
+      "daysElapsed": 294,
       "wordsPerDay": 274,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
-        "throughDate": "2025-10-17"
+        "throughDate": "2025-10-21"
       },
-      "changeVsPriorYear": 566.9
+      "changeVsPriorYear": 575.9
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 85,
-      "words": 86509,
+      "posts": 86,
+      "words": 87581,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 71,
-      "words": 79397
+      "posts": 72,
+      "words": 80469
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 5,
-      "words": 5979
+      "posts": 6,
+      "words": 7051
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 112335,
-      "posts": 114
+      "words": 113407,
+      "posts": 115
     }
   ],
   "byDayOfWeek": [
@@ -555,8 +555,8 @@
     },
     {
       "day": "Wednesday",
-      "posts": 16,
-      "words": 15362
+      "posts": 17,
+      "words": 16434
     },
     {
       "day": "Thursday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 59,
-      "words": 67335
+      "posts": 60,
+      "words": 68407
     },
     {
       "section": "Uncategorised",
@@ -594,8 +594,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 56,
-      "words": 61982
+      "posts": 57,
+      "words": 63054
     },
     {
       "tag": "digital-wellbeing",
@@ -604,8 +604,8 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 20,
-      "words": 21920
+      "posts": 21,
+      "words": 22992
     },
     {
       "tag": "Travel Blogs",
@@ -678,6 +678,11 @@
       "words": 4135
     },
     {
+      "tag": "claudecode",
+      "posts": 3,
+      "words": 3436
+    },
+    {
       "tag": "nmdc-hyderabad-marathon",
       "posts": 2,
       "words": 3376
@@ -706,11 +711,6 @@
       "tag": "philosophy",
       "posts": 2,
       "words": 2745
-    },
-    {
-      "tag": "claudecode",
-      "posts": 2,
-      "words": 2364
     },
     {
       "tag": "bharatekkhoj",
@@ -826,6 +826,11 @@
       "tag": "engineering",
       "posts": 1,
       "words": 1091
+    },
+    {
+      "tag": "website",
+      "posts": 1,
+      "words": 1072
     },
     {
       "tag": "instagram",
@@ -1088,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 44
+      "posts": 45
     },
     {
       "label": "1,500–1,999",
@@ -1207,6 +1212,29 @@
     }
   ],
   "posts": [
+    {
+      "title": "The brief for the personal website!",
+      "date": "2026-10-21",
+      "publishedAt": "2026-10-20T19:06:13.280Z",
+      "url": "https://sankettambare.substack.com/p/the-brief-for-the-personal-website",
+      "platform": "Substack",
+      "words": 1072,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "self-reflection",
+        "claudecode",
+        "100_days_to_offload",
+        "website"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!-la8!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7836aaa6-f95d-47f5-b547-595fa48d9736_1448x1086.png",
+      "trackedInBlogsTable": true,
+      "blogId": 72,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "Small things that great people do!",
       "date": "2026-10-17",

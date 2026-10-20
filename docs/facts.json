@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 107,
-    "blogs": 71,
+    "blogs": 72,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -41,9 +41,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-16",
-      "t": "Small things that great people do!",
-      "u": "/100-days-to-offload/71"
+      "d": "2026-10-21",
+      "t": "The brief for the personal website!",
+      "u": "/100-days-to-offload/72"
     },
     "writing": {
       "d": "2025-12-31",
@@ -923,7 +923,7 @@
     },
     {
       "name": "ai",
-      "total": 54
+      "total": 55
     },
     {
       "name": "choices",
@@ -980,11 +980,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-20T18:10:00.534011+00:00",
+  "generated_at": "2026-10-20T19:15:21.855971+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 71,
+    "blog": 72,
     "book": 52,
     "page": 1,
     "site": 25,
