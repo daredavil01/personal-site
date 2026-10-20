@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1674** · indexed as `microblog`
+Rows: **1675** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **20** · indexed as `project`
+Rows: **22** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **18** · indexed as `presentation`
+Rows: **19** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -239,7 +239,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **102**
+Rows: **107**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -263,7 +263,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3806**
+Rows: **3824**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -280,7 +280,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3235**
+Rows: **3262**
 
 | column | type | null | default |
 |---|---|---|---|

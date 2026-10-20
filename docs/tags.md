@@ -6,19 +6,19 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 481 | Mind & Life |
-| `self-reflection` | 466 | Mind & Life |
+| `life` | 482 | Mind & Life |
+| `self-reflection` | 467 | Mind & Life |
 | `marathi` | 272 | Books & Reading |
-| `social media` | 145 | Digital Life |
+| `social media` | 147 | Digital Life |
 | `love` | 137 | People & Feelings |
-| `personaldevelopment` | 135 | Mind & Life |
+| `personaldevelopment` | 136 | Mind & Life |
 | `sanky` | 134 | Personal |
+| `philosophy` | 128 | Society & Ideas |
 | `calmness` | 127 | Mind & Life |
-| `philosophy` | 127 | Society & Ideas |
+| `digital wellbeing` | 120 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
-| `digital wellbeing` | 118 | Digital Life |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 77 | Digital Life |
+| `digital detox` | 79 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
@@ -44,10 +44,10 @@ Names are lowercase and URI-encoded rather than slugified.
 | `mydesigns` | 23 | Arts & Culture |
 | `youth` | 22 | Society & Ideas |
 | `marathon` | 21 | Running & Fitness |
-| `privacy` | 19 | Digital Life |
+| `privacy` | 21 | Digital Life |
 | `scientific temperament` | 19 | Society & Ideas |
 | `history` | 18 | Society & Ideas |
-| `claude code` | 16 | Technology & Data |
+| `claude code` | 17 | Technology & Data |
 | `data privacy` | 16 | Digital Life |
 | `fiction` | 15 | Books & Reading |
 | `information age` | 15 | Digital Life |
@@ -91,8 +91,11 @@ Names are lowercase and URI-encoded rather than slugified.
 | `search` | 2 | Society & Ideas |
 | `sexual-drama` | 2 | Books & Reading |
 | `wardha` | 2 | Travel & Outdoors |
+| `accessibility` | 1 | — |
+| `digital-wellbeing` | 1 | — |
 | `google sites` | 1 | Writing & Blogging |
 | `harihareshwar` | 1 | Travel & Outdoors |
+| `interactive-storytelling` | 1 | — |
 | `kailasgad` | 1 | Travel & Outdoors |
 | `krantismritivan` | 1 | Travel & Outdoors |
 | `obsidian` | 1 | Writing & Blogging |
@@ -100,7 +103,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | `pegasus` | 1 | Digital Life |
 | `rafting_amidst_the_waves🏖️` | 1 | Travel & Outdoors |
 | `republic day` | 1 | Society & Ideas |
+| `research-communication` | 1 | — |
 | `rock_garden` | 1 | Travel & Outdoors |
+| `scrollytelling` | 1 | — |
 | `sea_at_night🌃🌊` | 1 | Travel & Outdoors |
 | `semiconductor` | 1 | Technology & Data |
 | `tata` | 1 | Society & Ideas |

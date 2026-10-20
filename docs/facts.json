@@ -25,14 +25,14 @@
     }
   },
   "counts": {
-    "tags": 102,
+    "tags": 107,
     "blogs": 71,
     "books": 52,
     "treks": 20,
     "sports": 26,
-    "projects": 20,
+    "projects": 22,
     "instagram": 11,
-    "microblog": 1674
+    "microblog": 1675
   },
   "latest": {
     "now": {
@@ -51,9 +51,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-10-15",
-      "t": "#1469 Creativity in the modern era!",
-      "u": "/micro-blog/1674"
+      "d": "2026-10-20",
+      "t": "#1470 The quiet efforts!",
+      "u": "/micro-blog/1675"
     }
   },
   "resume": {
@@ -569,6 +569,16 @@
     ],
     "project": [
       {
+        "d": "2026-10-19",
+        "t": "45 Days",
+        "u": "/projects/22"
+      },
+      {
+        "d": "2026-10-19",
+        "t": "After the Feed",
+        "u": "/projects/21"
+      },
+      {
         "d": "2026-10-17",
         "t": "Dare Write's Brand Kit",
         "u": "/projects/20"
@@ -723,6 +733,11 @@
     ],
     "presentation": [
       {
+        "d": "2026-10-19",
+        "t": "After the Feed, a Trilogy",
+        "u": "/presentations/19"
+      },
+      {
         "d": "2026-10-17",
         "t": "One Diary, Three Moods — Dare Write's Brand Kit",
         "u": "/presentations/18"
@@ -825,26 +840,26 @@
   },
   "projects": {
     "by_status": {
-      "Live": 16,
+      "Live": 18,
       "Concept": 1,
       "Archived": 3
     },
     "by_category": {
       "Tool": 2,
       "Design": 3,
-      "Web App": 7,
+      "Web App": 8,
       "Website": 4,
-      "Data Story": 4
+      "Data Story": 5
     }
   },
   "top_tags": [
     {
       "name": "life",
-      "total": 481
+      "total": 482
     },
     {
       "name": "self-reflection",
-      "total": 466
+      "total": 467
     },
     {
       "name": "marathi",
@@ -852,7 +867,7 @@
     },
     {
       "name": "social media",
-      "total": 145
+      "total": 147
     },
     {
       "name": "love",
@@ -860,27 +875,27 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 135
+      "total": 136
     },
     {
       "name": "sanky",
       "total": 134
     },
     {
+      "name": "philosophy",
+      "total": 128
+    },
+    {
       "name": "calmness",
       "total": 127
     },
     {
-      "name": "philosophy",
-      "total": 127
+      "name": "digital wellbeing",
+      "total": 120
     },
     {
       "name": "travel",
       "total": 119
-    },
-    {
-      "name": "digital wellbeing",
-      "total": 118
     },
     {
       "name": "latepost",
@@ -888,7 +903,7 @@
     },
     {
       "name": "digital detox",
-      "total": 77
+      "total": 79
     },
     {
       "name": "politics",
@@ -941,7 +956,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 484,
+      "text": 485,
       "photo": 953,
       "quote": 237
     },
@@ -954,10 +969,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 105
+      "2026": 106
     },
     "date_range": {
-      "max": "2026-10-15",
+      "max": "2026-10-20",
       "min": "2018-03-19"
     }
   },
@@ -965,7 +980,7 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-17T11:04:17.000365+00:00",
+  "generated_at": "2026-10-20T18:10:00.534011+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
@@ -977,18 +992,18 @@
     "sport": 26,
     "stats": 10,
     "resume": 21,
-    "project": 19,
+    "project": 21,
     "writing": 43,
     "changelog": 113,
     "instagram": 11,
-    "microblog": 1674,
-    "presentation": 18
+    "microblog": 1675,
+    "presentation": 19
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 4,
+    "uncategorised": 9,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,
