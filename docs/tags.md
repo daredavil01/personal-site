@@ -6,23 +6,23 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 482 | Mind & Life |
-| `self-reflection` | 467 | Mind & Life |
+| `life` | 483 | Mind & Life |
+| `self-reflection` | 468 | Mind & Life |
 | `marathi` | 272 | Books & Reading |
-| `social media` | 147 | Digital Life |
+| `social media` | 148 | Digital Life |
 | `love` | 137 | People & Feelings |
-| `personaldevelopment` | 136 | Mind & Life |
+| `personaldevelopment` | 137 | Mind & Life |
 | `sanky` | 134 | Personal |
 | `philosophy` | 128 | Society & Ideas |
 | `calmness` | 127 | Mind & Life |
-| `digital wellbeing` | 120 | Digital Life |
+| `digital wellbeing` | 121 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 79 | Digital Life |
+| `digital detox` | 80 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
 | `social` | 67 | Society & Ideas |
-| `technology` | 66 | Technology & Data |
+| `technology` | 67 | Technology & Data |
 | `ai` | 55 | Technology & Data |
 | `choices` | 54 | Mind & Life |
 | `maharashtra` | 51 | Travel & Outdoors |

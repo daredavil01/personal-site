@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-10-20T19:15:04.909Z",
+  "generatedAt": "2026-10-21T17:19:16.964Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 115,
-    "words": 113407,
-    "averageWords": 986,
-    "trackedPosts": 72,
+    "posts": 116,
+    "words": 114659,
+    "averageWords": 988,
+    "trackedPosts": 73,
     "firstPost": "2020-08-17",
     "latestPost": "2026-10-21",
     "longestPost": {
@@ -26,8 +26,8 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 72,
-      "words": 80469
+      "posts": 73,
+      "words": 81721
     },
     "activeMonths": 35
   },
@@ -36,37 +36,37 @@
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 6,
-      "words": 7051,
+      "posts": 7,
+      "words": 8303,
       "daysElapsed": 21,
-      "wordsPerDay": 336,
+      "wordsPerDay": 395,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -44.5
+      "changeVsPreviousMonth": -34.7
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 72,
-      "words": 80469,
+      "posts": 73,
+      "words": 81721,
       "daysElapsed": 294,
-      "wordsPerDay": 274,
+      "wordsPerDay": 278,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
         "throughDate": "2025-10-21"
       },
-      "changeVsPriorYear": 575.9
+      "changeVsPriorYear": 586.4
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 86,
-      "words": 87581,
+      "posts": 87,
+      "words": 88833,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 72,
-      "words": 80469
+      "posts": 73,
+      "words": 81721
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 6,
-      "words": 7051
+      "posts": 7,
+      "words": 8303
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 113407,
-      "posts": 115
+      "words": 114659,
+      "posts": 116
     }
   ],
   "byDayOfWeek": [
@@ -555,8 +555,8 @@
     },
     {
       "day": "Wednesday",
-      "posts": 17,
-      "words": 16434
+      "posts": 18,
+      "words": 17686
     },
     {
       "day": "Thursday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 60,
-      "words": 68407
+      "posts": 61,
+      "words": 69659
     },
     {
       "section": "Uncategorised",
@@ -594,13 +594,13 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 57,
-      "words": 63054
+      "posts": 58,
+      "words": 64306
     },
     {
       "tag": "digital-wellbeing",
-      "posts": 22,
-      "words": 27353
+      "posts": 23,
+      "words": 28605
     },
     {
       "tag": "self-reflection",
@@ -608,14 +608,14 @@
       "words": 22992
     },
     {
+      "tag": "ai",
+      "posts": 14,
+      "words": 15596
+    },
+    {
       "tag": "Travel Blogs",
       "posts": 16,
       "words": 15557
-    },
-    {
-      "tag": "ai",
-      "posts": 13,
-      "words": 14344
     },
     {
       "tag": "life",
@@ -1093,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 45
+      "posts": 46
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1212,28 @@
     }
   ],
   "posts": [
+    {
+      "title": "Traversing the complex path towards better digital life!",
+      "date": "2026-10-21",
+      "publishedAt": "2026-10-21T17:08:14.963Z",
+      "url": "https://sankettambare.substack.com/p/complex-digital-world-traversal",
+      "platform": "Substack",
+      "words": 1252,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "ai",
+        "100_days_to_offload",
+        "digital-wellbeing"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!6X7i!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fdac70565-a580-45e4-9f6d-2fe03e503dc0_1536x1024.png",
+      "trackedInBlogsTable": true,
+      "blogId": 73,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "The brief for the personal website!",
       "date": "2026-10-21",

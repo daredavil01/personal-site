@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 107,
-    "blogs": 72,
+    "blogs": 73,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -42,8 +42,8 @@
     },
     "blog": {
       "d": "2026-10-21",
-      "t": "The brief for the personal website!",
-      "u": "/100-days-to-offload/72"
+      "t": "Traversing the complex path towards better digital life! 🌱📱",
+      "u": "/100-days-to-offload/73"
     },
     "writing": {
       "d": "2025-12-31",
@@ -855,11 +855,11 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 482
+      "total": 483
     },
     {
       "name": "self-reflection",
-      "total": 467
+      "total": 468
     },
     {
       "name": "marathi",
@@ -867,7 +867,7 @@
     },
     {
       "name": "social media",
-      "total": 147
+      "total": 148
     },
     {
       "name": "love",
@@ -875,7 +875,7 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 136
+      "total": 137
     },
     {
       "name": "sanky",
@@ -891,7 +891,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 120
+      "total": 121
     },
     {
       "name": "travel",
@@ -903,7 +903,7 @@
     },
     {
       "name": "digital detox",
-      "total": 79
+      "total": 80
     },
     {
       "name": "politics",
@@ -919,7 +919,7 @@
     },
     {
       "name": "technology",
-      "total": 66
+      "total": 67
     },
     {
       "name": "ai",
@@ -980,11 +980,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-20T19:15:21.855971+00:00",
+  "generated_at": "2026-10-21T17:19:34.234418+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 72,
+    "blog": 73,
     "book": 52,
     "page": 1,
     "site": 25,

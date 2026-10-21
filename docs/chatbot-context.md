@@ -11,7 +11,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Micro posts** (1675) — /micro-blog/:id. A Tumblr archive,
   2018-03-19 → 2026-10-20,
   English and Marathi, short and unedited. Many are photo posts with no text.
-- **Blog posts** (72) — /100-days-to-offload/:id. Ledger rows that link out
+- **Blog posts** (73) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
 - **Projects** (22) — /projects/:id. Status: Live: 18, Concept: 1, Archived: 3.
@@ -28,7 +28,7 @@ answering rules live with the prompt, and are not repeated here.
 - Reading: 52 books, ~17.2k pages, 30 English / 22 Marathi; top genres Technology, Society, Fiction.
 - Running: 26 races, 598 km. PBs: marathon 05:05:53 (Tata Mumbai Marathon 2026), half 1:59:57 (NMDC Hyderabad Marathon 2025), 10K 00:55:28 (IPA Neerathon 2026).
 - Treks: 20 (3 hard) over 5 years; latest Ghangad Fort.
-- 100 Days To Offload: 72 of 100 posts.
+- 100 Days To Offload: 73 of 100 posts.
 - Micro posts: 1675; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
 - Work: 6 organisations, 21 projects, 12 certifications (latest: AWS Fundamentals Specialization).
@@ -37,7 +37,7 @@ answering rules live with the prompt, and are not repeated here.
 ## Tags
 
 107 tags, shared across every content type, always lowercase.
-Most used: life (482), self-reflection (467), marathi (272), social media (147), love (137), personaldevelopment (136), sanky (134), philosophy (128), calmness (127), digital wellbeing (120), travel (119), latepost (109), digital detox (79), politics (73), psychology (70), social (67), technology (66), ai (55), choices (54), maharashtra (51).
+Most used: life (483), self-reflection (468), marathi (272), social media (148), love (137), personaldevelopment (137), sanky (134), philosophy (128), calmness (127), digital wellbeing (121), travel (119), latepost (109), digital detox (80), politics (73), psychology (70), social (67), technology (67), ai (55), choices (54), maharashtra (51).
 Tag pages live at /tags/:name.
 
 ## What a micro post is
