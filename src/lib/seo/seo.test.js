@@ -169,8 +169,8 @@ describe("sitemap", () => {
 
   it("lists pages only, never an individual entity", () => {
     const entries = sitemapEntries(inventory);
-    expect(entries.map((e) => e.path).sort()).toEqual([...indexableFixedRoutes(), "/writing-ledger.html"].sort());
-    expect(entries).toContainEqual({ path: "/writing-ledger.html", lastmod: null });
+    expect(entries.map((e) => e.path).sort()).toEqual([...indexableFixedRoutes(), "/writing-ledger"].sort());
+    expect(entries).toContainEqual({ path: "/writing-ledger", lastmod: null });
   });
 
   it("dates a section page by its newest row", () => {

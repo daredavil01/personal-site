@@ -658,6 +658,7 @@ const AskChat = ({ compact, focus, starters: givenStarters }) => {
               value={draft}
               maxLength={max}
               placeholder="Ask something…"
+              aria-label="Ask the archive a question"
               onChange={(e) => { setDraft(e.target.value); setSpokenLanguage(null); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {

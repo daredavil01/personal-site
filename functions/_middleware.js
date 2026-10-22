@@ -238,6 +238,21 @@ export async function onRequest(context) {
   // middleware to bail before injecting any metadata.
   const lastSegment = url.pathname.split("/").pop();
   if (lastSegment.includes(".")) {
+    const res = await next();
+    // Pages answers a missing file with the SPA shell as 200 text/html, so an
+    // agent probing /.well-known/mcp.json or /humans.txt reads it as existing.
+    // A dotted path that comes back as HTML is a miss unless it asked for .html.
+    const type = res.headers.get("content-type") || "";
+    if (type.startsWith("text/html") && !/\.html?$/i.test(lastSegment)) {
+      return new Response(res.body, { status: 404, headers: res.headers });
+    }
+    return res;
+  }
+
+  // Pages 308s "/writing-ledger.html" to "/writing-ledger" (no dot), which no
+  // React route claims, so it was served as a 404 with the SPA's meta pasted
+  // over the ledger's own. It is a static page that authors its own tags.
+  if (url.pathname === "/writing-ledger") {
     return next();
   }
 

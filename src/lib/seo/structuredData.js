@@ -153,7 +153,7 @@ function mainEntity(view, url) {
         ...common,
         headline: view.title,
         description: view.description,
-        about: { "@type": "LandmarksOrHistoricalBuildings", name: `${view.place} Fort`, containedInPlace: { "@type": "Place", name: "Maharashtra, India" } },
+        about: { "@type": "LandmarksOrHistoricalBuildings", name: /\bfort\b/i.test(view.place || "") ? view.place : `${view.place} Fort`, containedInPlace: { "@type": "Place", name: "Maharashtra, India" } },
         ...authored,
       });
     case "sport":

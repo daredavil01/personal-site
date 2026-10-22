@@ -13,6 +13,22 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v23.2.1] — 2026-10-22
+
+### Fixed
+- **Soft 404 on dotted paths** (`functions/_middleware.js`): `/.well-known/mcp.json`, `/humans.txt`, `/index.md` and other missing files returned the SPA shell as `200 text/html`, so agents probing discovery files read them as existing. A dotted, non-`.html` path that comes back as HTML is now a 404.
+- **Trek JSON-LD place name** (`src/lib/seo/structuredData.js`): "Ghangad Fort Fort" — " Fort" is appended only when the name lacks it, matching `buildTrekMeta`.
+- **Trailing spaces in machine-read fields** (`src/lib/seo/entities.js`): `viewOf` trims every string column, so race names, places and book authors reach JSON-LD, meta and llms files unpadded.
+- **Trek date in descriptions** (`src/data/pageMeta.js`): "on 09-08-2026" read as 8 September to most agents; now "9 August 2026".
+- **/ask input label** (`src/components/Ask/AskChat.js`): the textarea had only a placeholder; it now has an `aria-label` for accessibility-tree agents.
+- **Writing Ledger served as a 404** (`functions/_middleware.js`): Pages 308s `/writing-ledger.html` to `/writing-ledger`, which no React route claims, so the ledger went out with status 404, `noindex` and the SPA's meta over its own. The middleware now passes it through, and the sitemap, `llms.txt`, nav, `/ask` stats source and the page's canonical/`og:url` use `/writing-ledger`.
+- **Generated-file cache key** (`src/lib/seo/serve.js`): `/sitemap.xml`, `/feed.xml` and the llms files keyed the edge cache on the full URL, so any query string forced a rebuild and fresh table reads; keyed on the path now.
+
+### Added
+- **Agent-readiness audit** (`docs/agent-audit-2026-10.md`): live probe of crawlers, answer engines and browsing agents, findings and re-run commands.
+
+---
+
 ## [v23.2.0] — 2026-10-22
 
 ### Added

@@ -40,7 +40,7 @@ export default {
     const bridges = themes.filter((x) => Object.values(x.counts).filter((c) => c > 0).length >= 2);
 
     return [
-      chunk(1, "The Writing Ledger", "/writing-ledger.html", [
+      chunk(1, "The Writing Ledger", "/writing-ledger", [
         ["Writing ledger", "every blog post on Substack and WordPress, counted word by word"],
         ["Total", `${n(t.words)} words across ${n(t.posts)} posts`],
         ["Average", `${n(t.averageWords)} words per post`],

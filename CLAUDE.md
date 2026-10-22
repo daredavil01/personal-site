@@ -176,8 +176,9 @@ on the client. `pageMeta.js` has to hard-code `SITE_URL`, so without this a Page
 **preview** advertises production's card; and a missing `/og/*.png` does not 404,
 it gets the SPA shell as `200 text/html`, so the unfurl silently shows no image.
 `canonical` and `og:url` stay on `SITE_URL`, and a row's own photo is never
-rewritten. `public/writing-ledger.html` authors its tags by hand (the middleware
-skips any path with a dot) and so cannot re-host.
+rewritten. `public/writing-ledger.html` authors its tags by hand and so cannot re-host;
+Pages serves it at `/writing-ledger` (308 from `.html`), which the middleware
+passes through untouched — link to that URL, not the `.html`.
 
 `og:image` is **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
 LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**

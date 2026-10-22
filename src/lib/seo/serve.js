@@ -15,7 +15,10 @@ export const HOUR = 60 * 60;
  */
 export async function serveCached(context, build, contentType) {
   const cache = (typeof caches !== "undefined" && caches.default) || null;
-  const key = new URL(context.request.url).toString();
+  // Path only: a query string is not part of these documents, and keying on it
+  // would let "?1", "?2"… force a fresh build (and table reads) per request.
+  const { origin, pathname } = new URL(context.request.url);
+  const key = `${origin}${pathname}`;
   if (cache) {
     const hit = await cache.match(key);
     if (hit) return hit;

@@ -440,8 +440,13 @@ export function listQuery(kind, { select, limit, filter } = {}) {
 }
 
 /** A row as a crawler should read it. */
-export function viewOf(kind, row, { supabaseUrl = "", related = null } = {}) {
+export function viewOf(kind, raw, { supabaseUrl = "", related = null } = {}) {
   const k = KINDS[kind];
+  // Admin-typed values carry trailing spaces ("Pune "); trim once here so no
+  // name, title or place reaches JSON-LD, meta or llms.txt padded.
+  const row = Object.fromEntries(
+    Object.entries(raw).map(([col, v]) => [col, typeof v === "string" ? v.trim() : v]),
+  );
   const key = row[keyColumnOf(kind)];
   const view = k.view(row, supabaseUrl, related);
   return {
