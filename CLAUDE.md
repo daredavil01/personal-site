@@ -176,8 +176,9 @@ on the client. `pageMeta.js` has to hard-code `SITE_URL`, so without this a Page
 **preview** advertises production's card; and a missing `/og/*.png` does not 404,
 it gets the SPA shell as `200 text/html`, so the unfurl silently shows no image.
 `canonical` and `og:url` stay on `SITE_URL`, and a row's own photo is never
-rewritten. `public/writing-ledger.html` authors its tags by hand (the middleware
-skips any path with a dot) and so cannot re-host.
+rewritten. `public/writing-ledger.html` authors its tags by hand and so cannot re-host;
+Pages serves it at `/writing-ledger` (308 from `.html`), which the middleware
+passes through untouched — link to that URL, not the `.html`.
 
 `og:image` is **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
 LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**
@@ -649,7 +650,10 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
 
 ## Homepage Sections
 
-`src/pages/Index.js` composes, in order: `LifeStats` (aggregate KPI tiles), an
+`src/pages/Index.js` composes, in order: `GlobeShowcase` ("My World"),
+**`Trailer`** (the 90-second vertical trailer, `public/video/the-trailer.*`,
+re-published by `npm run trailer -- --publish` after a re-render — see
+`scripts/trailer/render.mjs`), `LifeStats` (aggregate KPI tiles), an
 "In 1 Minute" intro, **`LatestPosts`** (live Substack RSS feed proxied by
 `functions/rss-feed.js`, scroll-to-reveal), **`MonthlyDigest`** (auto-aggregated
 monthly digest of blogs / treks / marathons / micro-posts — uses

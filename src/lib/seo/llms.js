@@ -17,7 +17,7 @@ import { clip } from "./text";
 
 // Pages served from public/ that the nav links to but PAGE_META cannot describe.
 const STATIC_DESCRIPTIONS = {
-  "/writing-ledger.html":
+  "/writing-ledger":
     "Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform.",
 };
 

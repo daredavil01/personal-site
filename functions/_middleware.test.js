@@ -507,3 +507,20 @@ describe("one URL per page", () => {
     expect(res.status).not.toBe(301);
   });
 });
+
+describe("dotted paths", () => {
+  // Pages serves the SPA shell for a missing file; an agent probing a
+  // discovery file must get a 404, not a 200 page that looks like it exists.
+  it("404s a missing file that came back as the HTML shell", async () => {
+    expect((await run("/.well-known/mcp.json")).status).toBe(404);
+    expect((await run("/humans.txt")).status).toBe(404);
+  });
+
+  it("passes a real .html page through", async () => {
+    expect((await run("/writing-ledger.html")).status).not.toBe(404);
+  });
+});
+
+it("serves the static Writing Ledger untouched at its extensionless URL", async () => {
+  expect((await run("/writing-ledger")).status).not.toBe(404);
+});

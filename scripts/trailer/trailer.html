@@ -1,0 +1,999 @@
+<!doctype html>
+<!--
+  The trailer, as one page that draws any moment of itself: renderAt(t) sets
+  every element from the time alone, so frames render in any order, on any
+  number of tabs, and always come out the same. scripts/trailer/render.mjs
+  seeks it frame by frame and screenshots each one.
+
+  Music is 120 BPM (score.mjs): a beat is 0.5 s, a bar 2 s, and every cut
+  below lands on one. The numbers come from window.TRAILER (data.js, written
+  by render.mjs from the live /api/stats); nothing here is typed in.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Noto+Serif:wght@700;900&family=Tiro+Devanagari+Marathi&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #06070b; }
+  body { font-family: Inter, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+  .layer, .scene { position: absolute; inset: 0; }
+  .scene { display: none; transform-origin: 540px 960px; }
+  .c { position: absolute; left: 0; top: 0; will-change: transform; white-space: nowrap; }
+  .ch { display: inline-block; white-space: pre; }
+  .anton { font-family: Anton, sans-serif; text-transform: uppercase; line-height: .92; letter-spacing: 1px; }
+  .serif { font-family: "Noto Serif", serif; font-weight: 900; line-height: .95; letter-spacing: -2px; }
+  .inst { font-family: "Instrument Serif", serif; font-style: italic; line-height: 1; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .deva { font-family: "Tiro Devanagari Marathi", serif; }
+  .lbl { font-family: Inter; font-weight: 800; letter-spacing: .32em; text-transform: uppercase; font-size: 24px; }
+  .chip { padding: 14px 26px; border-radius: 999px; font: 800 26px Inter; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 14px; }
+  .glass { background: rgba(14,16,24,.72); border: 1.5px solid rgba(255,255,255,.16); box-shadow: 0 30px 60px rgba(0,0,0,.45); backdrop-filter: blur(14px); }
+  .outline { color: transparent; -webkit-text-stroke: 3px rgba(255,255,255,.85); }
+  .sweep { background: linear-gradient(100deg, #fff 0%, #fff 42%, #ffd28a 50%, #fff 58%, #fff 100%); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* phone */
+  .phone { width: 600px; height: 1240px; border-radius: 86px; background: linear-gradient(145deg, #2b2d33, #0b0c10 40%, #1b1c21); padding: 20px;
+    box-shadow: 0 0 0 2px #45474f, 0 70px 140px rgba(0,0,0,.65), 0 0 120px var(--glow, rgba(0,0,0,0)); }
+  .scr { width: 560px; height: 1200px; border-radius: 66px; overflow: hidden; position: relative; background: #fff; }
+  .scr img { position: absolute; left: 0; top: 64px; width: 560px; }
+  .bar { position: absolute; left: 0; right: 0; top: 0; height: 64px; display: flex; justify-content: space-between; align-items: center; padding: 8px 52px 0; font: 700 22px Inter; z-index: 2; }
+  .island { position: absolute; top: 34px; left: 50%; width: 156px; height: 42px; margin-left: -78px; background: #000; border-radius: 21px; z-index: 3; }
+  .glare { position: absolute; inset: 20px; border-radius: 66px; background: linear-gradient(118deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 32%); z-index: 4; pointer-events: none; }
+  .ring { position: absolute; inset: 20px; border-radius: 66px; z-index: 5; }
+
+  /* tiles */
+  .tile { width: 460px; height: 250px; border-radius: 34px; padding: 30px 34px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.4); }
+  .tile .num { font: 400 128px Anton; line-height: 1; }
+  .tile .cap { font: 800 24px Inter; letter-spacing: .2em; text-transform: uppercase; opacity: .9; margin-top: 10px; }
+  .tile svg { position: absolute; right: 26px; top: 26px; width: 64px; height: 64px; opacity: .85; }
+  .tile .glint { position: absolute; top: -40%; bottom: -40%; width: 120px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); transform: rotate(20deg); }
+
+  #grain { position: absolute; inset: -200px; opacity: .085; mix-blend-mode: overlay; pointer-events: none; }
+  #vig { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 70% at 50% 50%, transparent 55%, rgba(0,0,0,.72) 100%); pointer-events: none; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #hud { position: absolute; inset: 0; pointer-events: none; }
+  .corner { position: absolute; width: 54px; height: 54px; border-color: #ff4a3d; border-style: solid; border-width: 0; }
+  #blinds div, #slices div { position: absolute; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg" class="layer"></div>
+  <canvas id="fx" class="layer" width="1080" height="1920"></canvas>
+  <div id="cam"></div>
+  <div id="blinds" class="layer"></div>
+  <div id="slices" class="layer"></div>
+  <canvas id="grainC" width="512" height="512" style="display:none"></canvas>
+  <div id="grain"></div>
+  <div id="vig"></div>
+  <div id="hud"></div>
+  <div id="flash"></div>
+</div>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const s = document.createElement("script");
+  s.src = params.get("data") || "data.js";
+  s.onload = () => boot().catch((e) => { window.__error = String(e && e.stack || e); });
+  s.onerror = () => { window.__error = "data.js failed to load"; };
+  document.head.appendChild(s);
+})();
+
+// ---------------------------------------------------------------- maths
+const W = 1080, H = 1920, BEAT = 0.5;
+const cl = (x) => Math.max(0, Math.min(1, x));
+const P = (t, a, b) => cl((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const Ez = {
+  out: (x) => 1 - (1 - x) ** 3,
+  in: (x) => x * x * x,
+  io: (x) => (x < .5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2),
+  expo: (x) => (x >= 1 ? 1 : 1 - 2 ** (-10 * x)),
+  expoIn: (x) => (x <= 0 ? 0 : 2 ** (10 * x - 10)),
+  back: (x) => { const c = 1.9, c3 = c + 1; return 1 + c3 * (x - 1) ** 3 + c * (x - 1) ** 2; },
+  elastic: (x) => (x <= 0 ? 0 : x >= 1 ? 1 : 2 ** (-10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI / 3)) + 1),
+};
+const win = (t, a, b, fi = .3, fo = .3) => Math.min(P(t, a, a + fi), 1 - P(t, b - fo, b));
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let r = Math.imul(a ^ (a >>> 15), 1 | a); r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r; return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+const hash = (n) => { const r = rng(n * 9973 + 17); return r(); };
+const fmt = (n) => Math.round(n).toLocaleString("en-IN");
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], k))).join(",")})`; };
+const isDeva = (s) => /[ऀ-ॿ]/.test(s);
+
+// ---------------------------------------------------------------- dom kit
+const cam = document.getElementById("cam");
+function el(parent, cls, html = "", css = "") {
+  const d = document.createElement("div");
+  d.className = cls;
+  if (html) d.innerHTML = html;
+  if (css) d.style.cssText += css;
+  parent.appendChild(d);
+  return d;
+}
+// Places an element by its centre. Every transform is rebuilt from scratch.
+function S(e, o = {}) {
+  const st = e.style;
+  const x = o.x ?? e._x ?? 540, y = o.y ?? e._y ?? 960;
+  let tf = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%)`;
+  if (o.p) tf += ` perspective(${o.p}px)`;
+  if (o.rx) tf += ` rotateX(${o.rx.toFixed(2)}deg)`;
+  if (o.ry) tf += ` rotateY(${o.ry.toFixed(2)}deg)`;
+  if (o.r) tf += ` rotate(${o.r.toFixed(2)}deg)`;
+  if (o.sk) tf += ` skewX(${o.sk.toFixed(2)}deg)`;
+  tf += ` scale(${(o.s ?? 1).toFixed(4)}${o.sy != null ? `,${o.sy.toFixed(4)}` : ""})`;
+  st.transform = tf;
+  const op = o.o ?? 1;
+  st.opacity = op.toFixed(3);
+  st.visibility = op <= 0.001 ? "hidden" : "visible";
+  st.filter = o.blur > 0.2 ? `blur(${o.blur.toFixed(1)}px)` : (o.f || "");
+  if (o.clip !== undefined) st.clipPath = o.clip;
+}
+const at = (e, x, y) => { e._x = x; e._y = y; S(e, { o: 0 }); return e; };
+// Text split into letters (words for Devanagari, whose letters join).
+function split(e) {
+  const txt = e.textContent;
+  const parts = isDeva(txt) ? txt.split(/(\s+)/) : [...txt];
+  e.innerHTML = parts.map((c) => `<span class="ch">${c === " " ? "&nbsp;" : c}</span>`).join("");
+  e._ch = [...e.children];
+  return e;
+}
+// Kinetic type: each letter enters in turn, and all leave together at `out`.
+function kin(e, t, t0, { mode = "rise", stg = .035, dur = .55, out = Infinity, od = .25 } = {}) {
+  const n = e._ch.length;
+  const ex = Ez.in(P(t, out - od, out));
+  e._ch.forEach((c, i) => {
+    const k = P(t, t0 + i * stg, t0 + i * stg + dur);
+    const q = mode === "drop" || mode === "pop" ? Ez.back(k) : Ez.expo(k);
+    let tf = "", f = 0;
+    if (mode === "rise") { tf = `translateY(${(1 - q) * 0.9}em) rotate(${(1 - q) * 9}deg)`; f = (1 - k) * 12; }
+    if (mode === "slam") { tf = `scale(${lerp(2.4, 1, q)})`; f = (1 - k) * 18; }
+    if (mode === "slideL") { tf = `translateX(${(1 - q) * -2}em) skewX(${(1 - q) * -25}deg)`; f = (1 - k) * 14; }
+    if (mode === "slideR") { tf = `translateX(${(1 - q) * 2}em) skewX(${(1 - q) * 25}deg)`; f = (1 - k) * 14; }
+    if (mode === "flip") { tf = `perspective(600px) rotateX(${(1 - q) * -100}deg)`; }
+    if (mode === "drop") { tf = `translateY(${(1 - q) * -1.6}em)`; }
+    if (mode === "pop") { tf = `scale(${q})`; }
+    if (ex > 0) { tf += ` translateY(${-ex * 0.5}em)`; f += ex * 14; }
+    c.style.transform = tf;
+    c.style.opacity = (Math.min(k * 1.6, 1) * (1 - ex)).toFixed(3);
+    c.style.filter = f > .3 ? `blur(${f.toFixed(1)}px)` : "";
+  });
+  e.style.opacity = t < t0 - .05 || ex >= 1 ? 0 : 1;
+  e.style.visibility = t < t0 - .05 || ex >= 1 ? "hidden" : "visible";
+}
+// A number that counts up to `n` over [t0, t0+d].
+const count = (e, t, t0, d, n, suffix = "") => { e.textContent = fmt(n * Ez.out(P(t, t0, t0 + d))) + suffix; };
+
+// Phone: a mockup holding any number of shots; show one, scroll it.
+function phone(parent, names, { bar = "#ffffff", ink = "#111" } = {}) {
+  const ph = el(parent, "phone c");
+  const scr = el(ph, "scr");
+  scr.style.background = bar;
+  ph._img = {};
+  names.forEach((nm) => {
+    const im = document.createElement("img");
+    im.src = T.shots[nm];
+    scr.appendChild(im);
+    ph._img[nm] = im;
+  });
+  el(scr, "bar", `<span style="color:${ink}">9:41</span><span style="color:${ink};letter-spacing:4px">▮▮▮ ◔</span>`, `background:${bar}`);
+  el(ph, "island");
+  el(ph, "glare");
+  ph._ring = el(ph, "ring");
+  return ph;
+}
+// shots: { name: opacity }, scroll in screen px (clamped to the shot's length).
+function show(ph, shots, scroll = 0, zoom = 1, pan = 0) {
+  Object.entries(ph._img).forEach(([nm, im]) => {
+    const o = shots[nm] || 0;
+    im.style.opacity = o;
+    im.style.visibility = o > 0 ? "visible" : "hidden";
+    if (o > 0) {
+      const max = Math.max(0, im.naturalHeight * (560 / im.naturalWidth) - 1136);
+      im.style.transform = `translateY(${-Math.min(scroll, max)}px) translateX(${pan}px) scale(${zoom})`;
+      im.style.transformOrigin = "50% 40%";
+    }
+  });
+}
+const ring = (ph, color, o) => { ph._ring.style.boxShadow = o > 0 ? `inset 0 0 0 ${6 * o}px ${color}, 0 0 ${80 * o}px ${color}` : ""; };
+
+// Simple line illustrations, drawn on with stroke-dashoffset.
+const ICON = {
+  run: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="14" cy="4" r="2"/><path d="M8 21l3-6 3 2 1 4M6 12l3-4 4 1 3 4 3 1M11 15l2-6"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M2 21l7-12 4 6 3-4 6 10z"/><path d="M13 9V2l5 2-5 2"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h6a3 3 0 013 3v13a2 2 0 00-2-2H4zM20 4h-5a2 2 0 00-2 2"/><path d="M20 4v14h-7"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 21c4-1 6-3 8-6l8-11-3-1-9 10c-2 3-3 5-4 8zM13 7l3 2"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16v12H9l-5 4z"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>',
+  tag: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+  medal: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="15" r="6"/><path d="M8 3l4 6 4-6"/></svg>',
+};
+
+// ---------------------------------------------------------------- scenes
+// a, b: on screen; enter/exit: how it arrives and leaves; tint: background.
+const SCENES = [];
+function scene(a, b, { enter = "cut", exit = "cut", tint = ["#0a0b12", "#0a0b12"], chapter = null }, build) {
+  const root = el(cam, "scene");
+  const sc = { a, b, enter, exit, tint, chapter, root };
+  sc.update = build(root, sc);
+  SCENES.push(sc);
+  return sc;
+}
+// Scene-level transitions, applied to the scene's root.
+function transition(sc, t) {
+  const o = { x: 540, y: 960, s: 1, o: 1, blur: 0, clip: "none", r: 0 };
+  const ei = P(t, sc.a - .15, sc.a + .3), eo = P(t, sc.b - .3, sc.b + .15);
+  switch (sc.enter) {
+    case "whip": o.x += (1 - Ez.expo(ei)) * 1300; o.blur += (1 - ei) * 40; o.sk = (1 - ei) * -12; break;
+    case "whipUp": o.y += (1 - Ez.expo(ei)) * 2100; o.blur += (1 - ei) * 40; break;
+    case "zoom": o.s *= lerp(.35, 1, Ez.expo(ei)); o.o *= ei; o.blur += (1 - ei) * 30; o.r += (1 - Ez.expo(ei)) * -8; break;
+    case "circle": { const k = Ez.io(P(t, sc.a, sc.a + .55)); o.clip = `circle(${(k * 1250).toFixed(0)}px at 540px 960px)`; break; }
+    case "wipeUp": { const k = Ez.io(P(t, sc.a - .1, sc.a + .45)); o.clip = `inset(${((1 - k) * 100).toFixed(1)}% 0 0 0)`; break; }
+    case "fade": o.o *= P(t, sc.a - .2, sc.a + .5); break;
+    default: break;
+  }
+  switch (sc.exit) {
+    case "whip": o.x -= Ez.expoIn(eo) * 1300; o.blur += eo * 40; o.sk = (o.sk || 0) + eo * 12; break;
+    case "whipUp": o.y -= Ez.expoIn(eo) * 2100; o.blur += eo * 40; break;
+    case "zoomThrough": o.s *= lerp(1, 6, Ez.expoIn(eo)); o.o *= 1 - eo; o.blur += eo * 20; break;
+    case "zoomOut": o.s *= lerp(1, .4, Ez.in(eo)); o.o *= 1 - eo; o.blur += eo * 25; break;
+    case "fade": o.o *= 1 - eo; break;
+    default: break;
+  }
+  S(sc.root, o);
+}
+
+function boot() {
+  window.T = window.TRAILER;
+  buildAll();
+  buildNet();
+  const imgs = [...document.images].map((im) => (im.complete ? im.decode().catch(() => {}) : new Promise((r) => { im.onload = () => im.decode().then(r, r); im.onerror = r; })));
+  const faces = ["400 40px Anton", "italic 40px 'Instrument Serif'", "900 40px 'Noto Serif'", "800 40px Inter", "700 40px 'JetBrains Mono'", "40px 'Tiro Devanagari Marathi'"];
+  return Promise.all([...imgs, ...faces.map((f) => document.fonts.load(f, "Aaमराठी"))])
+    .then(() => document.fonts.ready)
+    .then(() => { makeGrain(); window.__ready = true; });
+}
+
+function makeGrain() {
+  const c = document.getElementById("grainC"), g = c.getContext("2d"), r = rng(7);
+  const d = g.createImageData(512, 512);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  g.putImageData(d, 0, 0);
+  document.getElementById("grain").style.background = `url(${c.toDataURL()})`;
+}
+
+function buildAll() {
+  const D = T;
+  const RED = "#ff3b30", SAFF = "#ffb020", IND = "#6366f1", SKY = "#38bdf8", GRN = "#22c55e", PINK = "#ec4899", PURP = "#a855f7", TEAL = "#14b8a6";
+
+  // ============ 0–6  COLD OPEN: the numbers, on the heartbeat ============
+  scene(0, 6.05, { tint: ["#0a0204", "#05060a"] }, (root) => {
+    const slams = [
+      [D.km, "kilometres run"], [D.treks, "forts climbed"], [D.books, "books read"],
+      [D.micro, "short posts"], [null, "One person."], [null, "One website."],
+    ].map(([n, label], i) => {
+      const g = at(el(root, "c", "", "text-align:center"), 540, 930);
+      const num = n != null ? el(g, "anton", "", `font-size:330px;color:${RED};text-shadow:0 0 60px rgba(255,59,48,.5)`) : null;
+      const lab = split(el(g, "anton", label, `font-size:${n != null ? 92 : 168}px;margin-top:${n != null ? 10 : 0}px;letter-spacing:${n != null ? 8 : 2}px`));
+      return { g, num, lab, n, t0: i };
+    });
+    const pre = at(el(root, "c lbl", "Sankettambare.in · presents", `color:rgba(255,255,255,.5);font-size:26px`), 540, 1500);
+    return (t) => {
+      slams.forEach(({ g, num, lab, n, t0 }) => {
+        const k = P(t, t0, t0 + .28), out = P(t, t0 + .84, t0 + 1);
+        S(g, { s: lerp(1.5, 1, Ez.expo(k)) * lerp(1, .9, out) + (t - t0) * .03, o: (t >= t0 ? 1 : 0) * (1 - out), blur: (1 - k) * 22 + out * 10 });
+        if (num) count(num, t, t0, .45, n);
+        kin(lab, t, t0 + .06, { mode: n != null ? "slideR" : "slam", stg: .02, dur: .35 });
+      });
+      S(pre, { o: win(t, .3, 5.6, .6, .4) * .9 });
+    };
+  });
+
+  // ============ 6–10  TITLE: the name, and the dot that opens the world ============
+  scene(6, 10.25, { tint: ["#1a0506", "#06070c"] }, (root) => {
+    const halo = at(el(root, "c", `<svg width="640" height="640" viewBox="0 0 640 640"><circle cx="320" cy="320" r="300" fill="none" stroke="${RED}" stroke-width="3" stroke-dasharray="4 18"/><circle cx="320" cy="320" r="262" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="120 30 8 30"/></svg>`), 540, 560);
+    const face = at(el(root, "c", `<div style="width:440px;height:440px;border-radius:50%;overflow:hidden;position:relative"><img src="${D.me}" style="width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.25) brightness(1.05)"><div style="position:absolute;inset:0;background:linear-gradient(160deg,${RED},#3a0b6b);mix-blend-mode:multiply"></div></div>`), 540, 560);
+    const hub = split(at(el(root, "c lbl", "The Digital Hub", `color:${RED};font-size:30px`), 540, 870));
+    const n1 = split(at(el(root, "c serif", "Sanket", "font-size:196px"), 540, 1070));
+    const n2 = at(el(root, "c serif", `<span class="tx">Tambare</span><span class="dot" style="color:${RED};display:inline-block">.</span>`, "font-size:196px"), 540, 1265);
+    const tx = split(n2.querySelector(".tx"));
+    const dot = n2.querySelector(".dot");
+    const sub = split(at(el(root, "c inst", "a life, archived in a database.", "font-size:78px;color:rgba(255,255,255,.88)"), 540, 1480));
+    const portal = at(el(root, "c", "", `width:90px;height:90px;border-radius:50%;background:${RED}`), 540, 960);
+    return (t) => {
+      const k = Ez.expo(P(t, 6, 6.7)), gone = P(t, 9.25, 9.6);
+      S(halo, { s: lerp(.6, 1, k) * (1 + .02 * Math.sin(t * 3)), r: t * 22, o: k * (1 - gone) });
+      S(face, { s: lerp(.3, 1, Ez.back(P(t, 6.05, 6.7))), o: P(t, 6, 6.25) * (1 - gone), clip: `circle(${(Ez.out(P(t, 6, 6.6)) * 50).toFixed(1)}% at 50% 50%)` });
+      kin(hub, t, 6.45, { mode: "flip", stg: .03, out: 9.5 });
+      kin(n1, t, 6.3, { mode: "rise", stg: .06, dur: .6, out: 9.55 });
+      kin(tx, t, 6.6, { mode: "rise", stg: .06, dur: .6, out: 9.55 });
+      n1.style.opacity = n2.style.opacity = 1;
+      n1.style.visibility = n2.style.visibility = "visible";
+      S(n1, { s: 1 + (t - 6) * .012 }); S(n2, { s: 1 + (t - 6) * .012 });
+      dot.style.opacity = P(t, 7.0, 7.2) * (1 - P(t, 9.35, 9.4));
+      dot.style.transform = `scale(${lerp(3, 1, Ez.back(P(t, 7, 7.35)))})`;
+      kin(sub, t, 8.0, { mode: "rise", stg: .025, dur: .5, out: 9.45 });
+      // The full stop leaves its sentence and becomes the way in.
+      const pk = P(t, 9.35, 10.05);
+      const dr = dot.getBoundingClientRect();
+      const dx = lerp(dr.width ? dr.left + dr.width / 2 : 900, 540, Ez.io(P(t, 9.35, 9.7))), dy = lerp(dr.width ? dr.top + dr.height * .72 : 1300, 960, Ez.io(P(t, 9.35, 9.7)));
+      S(portal, { x: dx, y: dy, s: 1 + Ez.expoIn(pk) * 46, o: t >= 9.35 ? 1 : 0 });
+    };
+  });
+
+  // ============ 10–18  CHAPTER 01: THE WANDERER'S ATLAS ============
+  scene(10, 18, { enter: "circle", exit: "whip", tint: ["#0b3a63", "#0a1630"], chapter: "The Atlas" }, (root) => {
+    const chap = at(el(root, "c chip", `<span>Chapter 01</span>`, `background:${RED};font-size:24px`), 540, 250);
+    const l1 = split(at(el(root, "c anton", "Enter the", "font-size:96px;letter-spacing:10px;color:rgba(255,255,255,.85)"), 540, 350));
+    const l2 = split(at(el(root, "c anton", "Wanderer's", "font-size:178px"), 540, 490));
+    const l3 = at(el(root, "c anton sweep", "Atlas", "font-size:250px;letter-spacing:14px"), 540, 690);
+    const ph = phone(root, ["orbit", "map", "map-night"], { bar: "#9fd8ef", ink: "#123" });
+    at(ph, 540, 1340);
+    const bloom = el(ph.querySelector(".scr"), "", "", "position:absolute;inset:0;background:#fff;z-index:6;opacity:0");
+    const REG = [["The Coast", "races", SKY], ["The Ridge", "fort treks", GRN], ["Book Forest", "books", "#f97316"], ["The Workshop", "projects", PURP], ["Scriptorium", "writing", PINK], ["Hometown Square", "about · now", RED]];
+    const spots = [[220, 980], [860, 1060], [190, 1210], [880, 1300], [210, 1450], [850, 1540]];
+    const chips = REG.map(([nm, sub, c], i) => at(el(root, "c chip glass", `<i style="width:22px;height:22px;border-radius:50%;background:${c};box-shadow:0 0 20px ${c}"></i><span style="display:flex;flex-direction:column;line-height:1.05">${nm}<small style="font:600 19px Inter;letter-spacing:.12em;opacity:.65">${sub}</small></span>`, `border-color:${c}`), ...spots[i]));
+    const sw = at(el(root, "c chip glass", `<span class="d">Day</span><span style="position:relative;width:110px;height:54px;border-radius:30px;background:rgba(255,255,255,.18)"><b class="knob" style="position:absolute;top:6px;left:6px;width:42px;height:42px;border-radius:50%;background:${SAFF}"></b></span><span class="n">Night</span>`, "font-size:30px"), 540, 1790);
+    const knob = sw.querySelector(".knob");
+    return (t) => {
+      S(chap, { s: Ez.back(P(t, 10.2, 10.6)), o: P(t, 10.2, 10.35) });
+      kin(l1, t, 10.3, { mode: "slideL", stg: .03 });
+      kin(l2, t, 10.5, { mode: "rise", stg: .04 });
+      const k3 = Ez.expo(P(t, 10.8, 11.3));
+      S(l3, { s: lerp(2.2, 1, k3) * (1 + .015 * Math.sin(t * 2)), o: P(t, 10.8, 11), blur: (1 - k3) * 20 });
+      l3.style.backgroundPosition = `${lerp(110, -10, P(t, 11.2, 13.2))}% 0`;
+      // The phone tilts on a slow orbit; the dive whites it out at 12.
+      const pk = Ez.expo(P(t, 10.4, 11.2));
+      S(ph, { y: lerp(2200, 1340, pk), p: 1800, ry: Math.sin(t * .9) * 12, rx: 8 - pk * 4, s: .82 + .03 * Math.sin(t * .7) });
+      ph.style.setProperty("--glow", `rgba(56,189,248,${.35 + .2 * Math.sin(t * 4)})`);
+      const night = Ez.io(P(t, 16.2, 16.8));
+      show(ph, { orbit: t < 12.25 ? 1 : 0, map: t >= 12.25 ? 1 - night : 0, "map-night": t >= 12.25 ? night : 0 },
+        0, t < 12.25 ? lerp(1, 1.6, Ez.expoIn(P(t, 11, 12.25))) : lerp(1.35, 1.08, Ez.out(P(t, 12.25, 16))), t < 12.25 ? 0 : Math.sin((t - 12.25) * .8) * 20);
+      bloom.style.opacity = Math.max(P(t, 11.85, 12.25) , 0) * (1 - P(t, 12.25, 12.8));
+      ph.querySelector(".scr").style.background = night > .5 ? "#1a2550" : "#9fd8ef";
+      chips.forEach((c, i) => {
+        const t0 = 12.5 + i * .5, k = Ez.back(P(t, t0, t0 + .45)), ox = 540 - c._x, oy = 1340 - c._y, out = Ez.expoIn(P(t, 15.9 + i * .04, 16.25 + i * .04));
+        S(c, { x: c._x + ox * (1 - k) - ox * out * 1.6, y: c._y + oy * (1 - k) - oy * out * 1.6 + Math.sin(t * 2 + i) * 6, s: lerp(.3, 1, k), o: P(t, t0, t0 + .15) * (1 - out), r: (1 - k) * 15 });
+      });
+      S(sw, { s: Ez.back(P(t, 15.9, 16.3)), o: P(t, 15.9, 16.1) });
+      knob.style.transform = `translateX(${night * 56}px)`;
+      knob.style.background = night > .5 ? "#e5e7ff" : SAFF;
+      sw.querySelector(".d").style.opacity = 1 - night * .6;
+      sw.querySelector(".n").style.opacity = .4 + night * .6;
+    };
+  });
+
+  // ============ 18–26  CHAPTER 02: LIFE IN NUMBERS ============
+  scene(18, 26, { enter: "whip", exit: "zoomOut", tint: ["#3a0a0a", "#120612"], chapter: "Life in Numbers" }, (root) => {
+    const chap = at(el(root, "c chip", "Chapter 02", `background:${RED};font-size:24px`), 540, 250);
+    const t1 = split(at(el(root, "c anton", "Life in", "font-size:140px"), 540, 365));
+    const t2 = split(at(el(root, "c anton", "Numbers.", "font-size:170px;color:" + SAFF), 540, 515));
+    const TILES = [
+      [D.km, "Kilometres run", RED, "run"], [D.races, "Races finished", "#f97316", "medal"],
+      [D.treks, "Forts climbed", GRN, "flag"], [D.books, "Books read", SAFF, "book"],
+      [D.essays, "Essays written", IND, "pen"], [D.micro, "Short posts", PINK, "chat"],
+      [D.projects, "Projects built", PURP, "gear"], [D.tagCount, "Tags, one web", TEAL, "tag"],
+    ];
+    const times = [18.5, 19, 20, 20.5, 21.5, 22, 23, 23.5];
+    const tiles = TILES.map(([n, cap, c, ic], i) => {
+      const x = i % 2 ? 785 : 295, y = 800 + Math.floor(i / 2) * 280;
+      const tl = at(el(root, "c tile", `${ICON[ic]}<div class="num">0</div><div class="cap">${cap}</div><div class="glint"></div>`, `background:linear-gradient(135deg, ${c}, ${mix(c, "#000000", .45)})`), x, y);
+      return { tl, num: tl.querySelector(".num"), glint: tl.querySelector(".glint"), n, t0: times[i], side: i % 2 ? 1 : -1 };
+    });
+    return (t) => {
+      S(chap, { s: Ez.back(P(t, 18.1, 18.5)), o: P(t, 18.1, 18.25) });
+      kin(t1, t, 18.15, { mode: "slideR", stg: .03 });
+      kin(t2, t, 18.3, { mode: "slam", stg: .04, dur: .4 });
+      tiles.forEach(({ tl, num, glint, n, t0, side }, i) => {
+        const k = Ez.expo(P(t, t0, t0 + .45));
+        const ex = Ez.expoIn(P(t, 25.3, 25.95));
+        const dx = (tl._x - 540), dy = (tl._y - 1100);
+        S(tl, { x: tl._x + side * (1 - k) * 900 + dx * ex * 2.2, y: tl._y + dy * ex * 2.2 + Math.sin(t * 1.5 + i) * 4, sk: side * (1 - k) * -18, r: ex * side * 25, o: P(t, t0, t0 + .1), s: 1 + .04 * Math.exp(-(t - t0 - .45) * 6) * (t > t0 + .45 ? 1 : 0) });
+        count(num, t, t0 + .1, .7, n);
+        glint.style.left = `${lerp(-200, 620, P(t, t0 + .5, t0 + 1.1))}px`;
+      });
+    };
+  });
+
+  // ============ 26–30  CHAPTER 03a: RUN ============
+  scene(26, 30, { enter: "zoom", exit: "cut", tint: ["#0b1f4a", "#2a0710"], chapter: "Run · Climb" }, (root) => {
+    const big = at(el(root, "c anton outline", "Run", "font-size:560px;letter-spacing:20px"), 540, 470);
+    const bigF = at(el(root, "c anton", "Run", `font-size:560px;letter-spacing:20px;color:${RED}`), 540, 470);
+    const chap = at(el(root, "c chip", "Chapter 03 · The Coast", `background:${SKY};color:#062;font-size:24px;color:#04223a`), 540, 210);
+    const route = [[60, 1880], [160, 1650], [90, 1420], [260, 1260], [150, 1060], [330, 900], [520, 820], [760, 860], [1000, 760]];
+    const d = "M" + route.map((p) => p.join(",")).join(" L");
+    const svg = at(el(root, "c", `<svg width="1080" height="1920" viewBox="0 0 1080 1920"><path class="rt" d="${d}" fill="none" stroke="${SAFF}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 22"/><path class="rt2" d="${d}" fill="none" stroke="${SAFF}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><circle class="dotR" r="22" fill="#fff" stroke="${SAFF}" stroke-width="8"/></svg>`), 540, 960);
+    const rt2 = svg.querySelector(".rt2"), dotR = svg.querySelector(".dotR"), len = rt2.getTotalLength();
+    const ph = phone(root, ["sports"]);
+    at(ph, 690, 1260);
+    const PB = [["Marathon", D.pbMarathon], ["Half marathon", D.pbHalf], ["10K", D.pbTenK]].filter(([, p]) => p);
+    const badges = PB.map(([nm, pb], i) => at(el(root, "c glass", `<div class="lbl" style="font-size:20px;color:${SAFF}">${nm} · PB</div><div class="anton" style="font-size:96px;margin-top:6px">${pb.time}</div><div style="font:600 22px Inter;opacity:.7;margin-top:4px">${pb.place}</div>`, "padding:24px 34px;border-radius:28px;border-left:8px solid " + SAFF), 250, 980 + i * 250));
+    return (t) => {
+      const k = Ez.expo(P(t, 26, 26.6));
+      S(big, { x: 540 - (t - 26) * 40, s: lerp(1.4, 1, k), o: .7 * k });
+      S(bigF, { x: 540 - (t - 26) * 40, s: lerp(1.4, 1, k), o: k, clip: `inset(${(1 - Ez.io(P(t, 26.4, 27.4))) * 100}% 0 0 0)` });
+      S(chap, { o: P(t, 26.2, 26.4), s: Ez.back(P(t, 26.2, 26.6)) });
+      const r = Ez.io(P(t, 26.2, 29.6));
+      S(svg, { o: 1 });
+      rt2.setAttribute("stroke-dasharray", `${len} ${len}`);
+      rt2.setAttribute("stroke-dashoffset", String(len * (1 - r)));
+      const pt = rt2.getPointAtLength(len * r);
+      dotR.setAttribute("cx", pt.x); dotR.setAttribute("cy", pt.y);
+      dotR.setAttribute("r", String(18 + 6 * Math.abs(Math.sin(t * 2 * Math.PI))));
+      const pk = Ez.expo(P(t, 26.3, 27));
+      S(ph, { x: lerp(1500, 700, pk), p: 1800, ry: -22 + Math.sin(t) * 3, rx: 4, s: .8 });
+      show(ph, { sports: 1 }, Ez.io(P(t, 27, 30)) * 2600);
+      badges.forEach((b, i) => {
+        const t0 = 27 + i * .75, q = Ez.expo(P(t, t0, t0 + .4));
+        S(b, { x: lerp(-400, 250, q), sk: (1 - q) * 20, o: P(t, t0, t0 + .1), s: 1 + .06 * Math.exp(-(t - t0 - .4) * 8) * (t > t0 + .4 ? 1 : 0) });
+      });
+    };
+  });
+
+  // ============ 30–34  CHAPTER 03b: CLIMB ============
+  scene(30, 34, { enter: "cut", exit: "whipUp", tint: ["#0f3d2a", "#06131a"] }, (root) => {
+    const big = at(el(root, "c anton outline", "Climb", "font-size:400px;letter-spacing:12px"), 540, 400);
+    const bigF = at(el(root, "c anton", "Climb", `font-size:400px;letter-spacing:12px;color:${GRN}`), 540, 400);
+    const mtn = at(el(root, "c", `<svg width="1080" height="1100" viewBox="0 0 1080 1100">
+      <defs><linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f8f5a"/><stop offset="1" stop-color="#0d2b1f"/></linearGradient>
+      <linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a6b46"/><stop offset="1" stop-color="#071a12"/></linearGradient></defs>
+      <path class="far" d="M0 520 L160 330 L300 450 L470 240 L620 400 L790 260 L1080 500 V1100 H0Z" fill="#16402e" opacity=".8"/>
+      <path class="mid" d="M0 700 L200 460 L360 600 L560 180 L760 560 L900 430 L1080 640 V1100 H0Z" fill="url(#m1)"/>
+      <path class="snow" d="M500 300 L560 180 L620 300 L590 280 L560 310 L530 280Z" fill="#e8fff2"/>
+      <path class="trail" d="M150 1050 L320 900 L260 780 L420 650 L380 520 L500 400 L540 260 L560 190" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="14 16" stroke-linecap="round"/>
+      <path class="near" d="M0 900 L240 760 L420 880 L640 720 L860 860 L1080 780 V1100 H0Z" fill="url(#m2)"/>
+      <g class="flag"><line x1="560" y1="190" x2="560" y2="80" stroke="#fff" stroke-width="7"/><path class="cloth" fill="${RED}"/></g></svg>`), 540, 1370);
+    const trail = mtn.querySelector(".trail"), tlen = trail.getTotalLength(), flag = mtn.querySelector(".flag"), cloth = mtn.querySelector(".cloth");
+    const parts = ["far", "mid", "near", "snow"].map((c) => mtn.querySelector("." + c));
+    const ph = phone(root, ["treks-atlas", "treks"], { bar: "#a9dcf0", ink: "#123" });
+    at(ph, 330, 1250);
+    const FACTS = [`${D.treks} forts`, `${D.hardTreks} rated hard`, `${D.trekYears} years on the trail`, `Latest · ${D.latestTrek}`];
+    const chips = FACTS.map((f, i) => at(el(root, "c chip glass", f, `border-color:${GRN};font-size:28px`), 790, 900 + i * 130));
+    return (t) => {
+      const k = Ez.expo(P(t, 30, 30.5));
+      S(big, { y: lerp(560, 400, k), o: .8 * k, s: 1 + (t - 30) * .02 });
+      S(bigF, { y: lerp(560, 400, k), o: k, s: 1 + (t - 30) * .02, clip: `inset(0 ${(1 - Ez.io(P(t, 30.3, 31.2))) * 100}% 0 0)` });
+      S(mtn, { y: lerp(1900, 1370, Ez.expo(P(t, 30, 30.6))) });
+      parts.forEach((p, i) => p.setAttribute("transform", `translate(${(t - 30) * (i + 1) * -6},0)`));
+      trail.setAttribute("stroke-dasharray", "14 16");
+      trail.style.strokeDashoffset = 0;
+      trail.style.clipPath = "";
+      trail.setAttribute("opacity", "1");
+      const tr = Ez.io(P(t, 30.3, 31.1));
+      trail.setAttribute("stroke-dasharray", `${tlen * tr} ${tlen}`);
+      // The flag plants on the beat at 31, and flies.
+      const fk = Ez.back(P(t, 31, 31.3));
+      flag.setAttribute("transform", `translate(560 190) scale(1 ${fk.toFixed(3)}) translate(-560 -190)`);
+      flag.setAttribute("opacity", t >= 31 ? 1 : 0);
+      const w = (x) => 6 * Math.sin(t * 9 + x / 14);
+      cloth.setAttribute("d", `M560 80 Q600 ${70 + w(0)} 640 ${84 + w(40)} L640 ${84 + w(40) + 44} Q600 ${114 + w(80)} 560 ${124}Z`);
+      const pk = Ez.expo(P(t, 30.4, 31));
+      S(ph, { x: lerp(-400, 330, pk), p: 1800, ry: 20 + Math.sin(t) * 3, rx: 4, s: .74 });
+      const sw = P(t, 32, 32.4);
+      show(ph, { "treks-atlas": 1 - sw, treks: sw }, sw > 0 ? Ez.io(P(t, 32.2, 34)) * 1800 : 0);
+      chips.forEach((c, i) => {
+        const t0 = 31.5 + i * .5, q = Ez.back(P(t, t0, t0 + .4));
+        S(c, { x: lerp(1400, 790, Ez.expo(P(t, t0, t0 + .4))), s: q, o: P(t, t0, t0 + .1), r: (1 - q) * -10 });
+      });
+    };
+  });
+
+  // ============ 34–38  CHAPTER 04a: READ ============
+  scene(34, 38, { enter: "whipUp", exit: "cut", tint: ["#4a2a06", "#120a04"], chapter: "Read · Write" }, (root) => {
+    const chap = at(el(root, "c chip", "Chapter 04 · Book Forest", `background:${SAFF};color:#2a1500;font-size:24px`), 540, 230);
+    const t1 = split(at(el(root, "c anton", "Read.", "font-size:250px"), 360, 420));
+    const t2 = at(el(root, "c deva", "वाचा.", `font-size:150px;color:${SAFF}`), 860, 450);
+    const r = rng(11);
+    const COL = ["#ffb020", "#ef4444", "#22c55e", "#6366f1", "#ec4899", "#14b8a6", "#f97316", "#a855f7", "#e7e5e4"];
+    const spines = [];
+    let x = 70;
+    while (x < 1000) {
+      const w = 34 + r() * 30, h = 150 + r() * 90, c = COL[Math.floor(r() * COL.length)];
+      spines.push({ e: at(el(root, "c", `<div style="width:${w}px;height:${h}px;background:${c};border-radius:6px 6px 2px 2px;box-shadow:inset -6px 0 0 rgba(0,0,0,.18), inset 0 18px 0 rgba(255,255,255,.18), inset 0 -18px 0 rgba(0,0,0,.18)"></div>`), x + w / 2, 790 - h / 2), d: r() * .5 });
+      x += w + 6;
+    }
+    const shelf = at(el(root, "c", "", "width:980px;height:16px;border-radius:8px;background:#8b5a2b;box-shadow:0 14px 30px rgba(0,0,0,.5)"), 540, 800);
+    const ph = phone(root, ["books"]);
+    at(ph, 540, 1380);
+    const band = at(el(root, "c", "", `width:1500px;height:110px;background:${SAFF};color:#1d1100;display:flex;align-items:center;overflow:hidden`), 540, 1560);
+    const tick = el(band, "anton", "", "font-size:64px;letter-spacing:4px;white-space:nowrap");
+    const line = `${D.books} books ✦ ${D.booksMarathi} in मराठी ✦ ${D.booksReviewed} reviewed ✦ `;
+    tick.innerHTML = line.repeat(6).replace(/मराठी/g, '<span class="deva" style="font-size:58px">मराठी</span>');
+    return (t) => {
+      S(chap, { o: P(t, 34.15, 34.3), s: Ez.back(P(t, 34.15, 34.5)) });
+      kin(t1, t, 34.15, { mode: "drop", stg: .07, dur: .5 });
+      S(t2, { o: P(t, 34.7, 34.9), x: lerp(1100, 860, Ez.expo(P(t, 34.7, 35.2))), r: (1 - Ez.expo(P(t, 34.7, 35.2))) * 20 });
+      S(shelf, { o: P(t, 34.3, 34.5), s: Ez.expo(P(t, 34.3, 34.8)) });
+      spines.forEach(({ e, d }, i) => {
+        const t0 = 34.5 + i * .045 + d * .3, q = Ez.back(P(t, t0, t0 + .45));
+        S(e, { y: lerp(e._y - 900, e._y, q), o: P(t, t0, t0 + .05), r: (1 - q) * (i % 2 ? 20 : -20) });
+      });
+      S(ph, { y: lerp(2400, 1380, Ez.expo(P(t, 34.6, 35.3))), p: 1800, rx: 10, ry: Math.sin(t * 1.2) * 8, s: .78 });
+      show(ph, { books: 1 }, Ez.io(P(t, 35.3, 38)) * 2400);
+      S(band, { r: -5, o: P(t, 35.4, 35.6), sy: Ez.expo(P(t, 35.4, 35.8)) });
+      tick.style.transform = `translateX(${-(t - 34) * 260}px)`;
+    };
+  });
+
+  // ============ 38–42  CHAPTER 04b: WRITE (the Logbook) ============
+  scene(38, 42, { enter: "wipeUp", exit: "cut", tint: ["#efe5cf", "#e5d6b6"] }, (root) => {
+    const paper = el(root, "layer", "", "background:radial-gradient(ellipse at 50% 30%, #f6eedb, #e2d1ae)");
+    const INK = "#1f1b3a";
+    const t1 = split(at(el(root, "c inst", "Write.", `font-size:280px;color:${INK}`), 540, 360));
+    const und = at(el(root, "c", `<svg width="700" height="80" viewBox="0 0 700 80"><path class="u" d="M10 50 C120 10 220 75 340 40 S560 15 690 45" fill="none" stroke="#e8590c" stroke-width="9" stroke-linecap="round"/></svg>`), 540, 500);
+    const u = und.querySelector(".u"), ulen = u.getTotalLength();
+    const sub = split(at(el(root, "c lbl", "The Wanderer's Logbook", `color:${INK};font-size:30px`), 540, 590));
+    const words = at(el(root, "c inst", "0", `font-size:150px;color:${INK}`), 540, 1545);
+    const wl = at(el(root, "c lbl", "words, read as data", `color:#e8590c;font-size:26px`), 540, 1645);
+    const ess = at(el(root, "c", `<span class="deva">${D.essays} essays · ${D.essaysMr} in मराठी</span>`, `font:600 34px Inter;color:${INK}`), 540, 1680);
+    const ph = phone(root, ["logbook"], { bar: "#efe6d2", ink: "#222" });
+    at(ph, 380, 1060);
+    const ph2 = phone(root, ["micro-blog"]);
+    at(ph2, 760, 1080);
+    const mc = at(el(root, "c chip", `${fmt(D.micro)} short posts since ${D.microSince}`, `background:${INK};color:#fff;font-size:26px`), 760, 1300);
+    return (t) => {
+      // The paper carries the wipe, then hands over to the tint so the Logbook's sky shows through.
+      paper.style.opacity = 1 - P(t, 38.5, 39);
+      kin(t1, t, 38.2, { mode: "rise", stg: .06, dur: .6 });
+      u.setAttribute("stroke-dasharray", `${ulen} ${ulen}`);
+      u.setAttribute("stroke-dashoffset", String(ulen * (1 - Ez.io(P(t, 38.6, 39.2)))));
+      S(und, { o: t > 38.6 ? 1 : 0 });
+      kin(sub, t, 38.9, { mode: "flip", stg: .02 });
+      S(ph, { y: lerp(2300, 1000, Ez.expo(P(t, 38.5, 39.2))), p: 1600, ry: 14, rz: 0, r: -4, s: .62 });
+      show(ph, { logbook: 1 }, Ez.io(P(t, 39.2, 42)) * 1500);
+      const k2 = Ez.expo(P(t, 40, 40.6));
+      S(ph2, { x: lerp(1500, 770, k2), y: 1030, p: 1600, ry: -14, r: 5, s: .58, o: P(t, 40, 40.1) });
+      show(ph2, { "micro-blog": 1 }, Ez.io(P(t, 40.4, 42)) * 900);
+      S(mc, { o: P(t, 40.5, 40.7), s: Ez.back(P(t, 40.5, 40.9)) });
+      S(words, { o: P(t, 39.3, 39.5), s: Ez.back(P(t, 39.3, 39.7)) });
+      count(words, t, 39.3, 1.6, D.words);
+      S(wl, { o: P(t, 39.6, 39.8) });
+      S(ess, { o: P(t, 39.9, 40.1), y: lerp(1750, 1712, Ez.out(P(t, 39.9, 40.3))) });
+    };
+  });
+
+  // ============ 42–52  CHAPTER 05: ASK THE ARCHIVE ============
+  scene(42, 52, { enter: "cut", exit: "zoomThrough", tint: ["#1b0b3a", "#04121f"], chapter: "Ask the Archive" }, (root) => {
+    const chap = at(el(root, "c chip", "Chapter 05 · Second Brain", `background:${SKY};color:#04223a;font-size:24px`), 540, 230);
+    const t1 = split(at(el(root, "c anton", "Ask it", "font-size:200px"), 540, 400));
+    const t2 = at(el(root, "c anton sweep", "anything.", "font-size:200px"), 540, 580);
+    const pill = at(el(root, "c", `<div style="width:940px;min-height:128px;padding:18px 0;border-radius:64px;background:#fff;color:#111;display:flex;align-items:center;padding:0 40px;gap:22px;box-shadow:0 0 0 6px rgba(56,189,248,.35),0 30px 80px rgba(0,0,0,.5)"><span style="font-size:44px">⌕</span><span class="q mono" style="font-size:36px;font-weight:500;flex:1;white-space:normal;line-height:1.3"></span><span class="go" style="width:84px;height:84px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:44px">↑</span></div>`), 540, 780);
+    const qEl = pill.querySelector(".q"), go = pill.querySelector(".go");
+    const Q = D.question;
+    const NODES = [["Embed", "bge-m3, multilingual"], ["Keyword × Semantic", "tsvector + pgvector"], ["RRF fusion", "one ranked list"]];
+    const nodes = NODES.map(([a, b], i) => at(el(root, "c glass", `<div class="lbl" style="font-size:24px">${a}</div><div class="mono" style="font-size:22px;opacity:.6;margin-top:6px">${b}</div>`, "padding:22px 40px;border-radius:24px;text-align:center;min-width:560px"), 540, 680 + i * 170));
+    const rungs = D.rungs.map((nm, i) => at(el(root, "c glass mono", nm, "padding:18px 22px;border-radius:18px;font-size:23px;font-weight:700"), 540 + (i - (D.rungs.length - 1) / 2) * 260, 1220));
+    const wire = at(el(root, "c", `<svg width="40" height="600"><line x1="20" y1="0" x2="20" y2="600" stroke="${SKY}" stroke-width="4" stroke-dasharray="6 10"/><circle class="pulse" cx="20" cy="0" r="12" fill="${SKY}"/></svg>`), 540, 880);
+    const pulse = wire.querySelector(".pulse");
+    const ph = phone(root, ["ask"]);
+    at(ph, 540, 1300);
+    const cap1 = at(el(root, "c inst", "", "font-size:84px;text-align:center"), 540, 470);
+    cap1.innerHTML = `Answers in English <span style="color:${SAFF}">&amp;</span> <span class="deva" style="font-style:normal">मराठी</span>`;
+    const cap2 = at(el(root, "c lbl", "with the pages they came from", `font-size:26px;color:${SKY}`), 540, 580);
+    const SRC = D.askSources;
+    const srcs = SRC.map((s, i) => at(el(root, "c chip deva", s, `background:#fff1ee;color:#a11a0a;border:2px solid #f3b1a5;font-size:34px;text-transform:none;letter-spacing:0`), [230, 850, 260][i] || 540, [1080, 1260, 1520][i] || 1300));
+    return (t) => {
+      const head = 1 - Ez.in(P(t, 47.7, 48.1)), lift = Ez.io(P(t, 45.2, 45.6));
+      S(chap, { o: P(t, 42.1, 42.3) * head, s: Ez.back(P(t, 42.1, 42.5)) });
+      kin(t1, t, 42.1, { mode: "slam", stg: .05, dur: .35, out: 45.45 });
+      S(t2, { o: P(t, 42.45, 42.6) * (1 - lift), s: lerp(1.6, 1, Ez.expo(P(t, 42.45, 42.9))), blur: (1 - P(t, 42.45, 42.8)) * 16 });
+      t2.style.backgroundPosition = `${lerp(110, -10, P(t, 42.8, 44.5))}% 0`;
+      const pk = Ez.back(P(t, 42.7, 43.1));
+      const press = t > 45.1 && t < 45.35 ? .96 : 1;
+      S(pill, { s: pk * press, o: P(t, 42.7, 42.8) * head, y: lerp(780, 400, lift) });
+      const typed = Math.floor(Q.length * P(t, 43.1, 45));
+      qEl.textContent = Q.slice(0, typed) + ((t * 2) % 1 < .5 || t < 45 ? "▍" : " ");
+      go.style.background = t > 45.1 ? SKY : "#111";
+      // The pipeline: each stage lights as the pulse reaches it.
+      const stageT = [45.5, 46, 46.5];
+      nodes.forEach((nd, i) => {
+        const k = Ez.back(P(t, stageT[i] - .25, stageT[i] + .1));
+        const lit = P(t, stageT[i], stageT[i] + .1) * (1 - P(t, stageT[i] + .5, stageT[i] + .8) * .5);
+        S(nd, { s: k, o: P(t, stageT[i] - .25, stageT[i] - .15) * head });
+        nd.style.boxShadow = lit > 0 ? `0 0 0 3px ${SKY}, 0 0 ${60 * lit}px ${SKY}` : "";
+      });
+      S(wire, { o: P(t, 45.3, 45.5) * head, clip: `inset(0 0 ${(1 - P(t, 45.3, 47.2)) * 100}% 0)` });
+      pulse.setAttribute("cy", String(((t - 45.3) * 400) % 600));
+      rungs.forEach((rg, i) => {
+        const t0 = 46.9 + i * .12, k = Ez.back(P(t, t0, t0 + .3));
+        S(rg, { s: k, o: P(t, t0, t0 + .1) * head });
+        const on = i === 0 && t > 47.3;
+        rg.style.background = on ? SAFF : "";
+        rg.style.color = on ? "#1d1100" : "#fff";
+      });
+      const ak = Ez.expo(P(t, 47.9, 48.6));
+      S(ph, { y: lerp(2500, 1260, ak), p: 1800, rx: 6, ry: Math.sin(t * 1.1) * 6, s: .8 });
+      show(ph, { ask: 1 }, 220 + Ez.io(P(t, 49.5, 51.5)) * 120);
+      ring(ph, SAFF, P(t, 48.6, 49) * (1 - P(t, 51.5, 52)) * (.6 + .4 * Math.sin(t * 8)));
+      S(cap1, { o: P(t, 48.3, 48.5), y: lerp(520, 470, Ez.out(P(t, 48.3, 48.8))) });
+      S(cap2, { o: P(t, 48.7, 48.9) });
+      srcs.forEach((s, i) => {
+        const t0 = 49.6 + i * .45, k = Ez.back(P(t, t0, t0 + .4));
+        S(s, { s: k, o: P(t, t0, t0 + .1), r: (1 - k) * 12 * (i % 2 ? 1 : -1), y: s._y + Math.sin(t * 2 + i) * 8 });
+      });
+    };
+  });
+
+  // ============ 52–60  CHAPTER 06: THE WORKSHOP, a coverflow of four ============
+  scene(52, 60, { enter: "zoom", exit: "fade", tint: ["#2a0b4a", "#07081a"], chapter: "The Workshop" }, (root) => {
+    const chap = at(el(root, "c chip", "Chapter 06 · The Workshop", `background:${PURP};font-size:24px`), 540, 230);
+    const grid = at(el(root, "c", "", "width:1080px;height:1920px;background-image:linear-gradient(rgba(147,197,253,.18) 2px,transparent 2px),linear-gradient(90deg,rgba(147,197,253,.18) 2px,transparent 2px),linear-gradient(rgba(147,197,253,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(147,197,253,.08) 1px,transparent 1px);background-size:120px 120px,120px 120px,24px 24px,24px 24px;background-color:#0c2342"), 540, 960);
+    const SLIDES = [
+      { shot: "projects", n: D.projects, head: "projects", sub: "Shipped, live, archived", c: PURP },
+      { shot: "stats", n: null, head: "Metrics of intent", sub: "A year, kept like an almanac", c: SAFF },
+      { shot: "blueprint", n: null, head: "The Blueprint", sub: "The site, drawn as a building", c: "#93c5fd" },
+      { shot: "changelog-graph", n: D.commits, head: "commits", sub: `${D.version} · and counting`, c: GRN },
+    ];
+    const ph = phone(root, SLIDES.map((s) => s.shot));
+    at(ph, 540, 1250);
+    const heads = SLIDES.map((s) => {
+      const g = at(el(root, "c", "", "text-align:center"), 540, 470);
+      const num = s.n != null ? el(g, "anton", "0", `font-size:230px;color:${s.c}`) : null;
+      const h = split(el(g, "anton", s.head, `font-size:${s.n != null ? 110 : 118}px;${s.n == null ? "color:" + s.c : ""}`));
+      const sb = el(g, "lbl", s.sub, "font-size:26px;opacity:.75;margin-top:16px");
+      return { g, num, h, sb };
+    });
+    const PILLS = ["React 18", "Supabase", "Cloudflare", "pgvector", "Three.js", "GSAP", "Vite", "Workers AI", "Tailwind", "satori"];
+    const pills = PILLS.map((p, i) => at(el(root, "c chip glass", p, "font-size:24px"), 120 + (i % 5) * 210, 760 + Math.floor(i / 5) * 1000));
+    const years = D.booksPerYear.slice().sort((a, b) => a[0] - b[0]);
+    const maxY = Math.max(...years.map((y) => y[1]));
+    const bars = years.map(([y, n], i) => at(el(root, "c", `<div class="b" style="width:84px;background:linear-gradient(${SAFF},#b45309);border-radius:12px 12px 0 0"></div><div class="lbl" style="font-size:18px;text-align:center;margin-top:8px">${y}</div>`, "display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:420px"), 120 + i * (840 / Math.max(1, years.length - 1)), 1600));
+    const barH = bars.map((b, i) => [b.querySelector(".b"), (years[i][1] / maxY) * 360]);
+    const sq = at(el(root, "c", "", "display:grid;grid-template-columns:repeat(26,34px);gap:6px"), 540, 1700);
+    const R = rng(5);
+    const cells = Array.from({ length: 26 * 7 }, () => { const d = document.createElement("i"); d.style.cssText = "width:34px;height:34px;border-radius:7px;display:block"; sq.appendChild(d); return [d, R(), R()]; });
+    return (t) => {
+      const i = Math.max(0, Math.min(3, Math.floor((t - 52) / 2))), lt = (t - 52) - i * 2;
+      S(chap, { o: P(t, 52.1, 52.3), s: Ez.back(P(t, 52.1, 52.5)) });
+      S(grid, { o: win(t, 55.8, 58.1, .25, .25), s: 1 + (t - 55.8) * .03 });
+      // Coverflow: the phone spins out, the shot changes edge-on, it spins back.
+      const spinIn = Ez.expo(P(lt, 0, .5)), spinOut = i < 3 ? Ez.expoIn(P(lt, 1.7, 2)) : 0;
+      const ry = (1 - spinIn) * -75 + spinOut * 75;
+      S(ph, { p: 1600, ry, s: .78 * (1 - spinOut * .2), x: 540 + (1 - spinIn) * 300 - spinOut * 300, rx: 5 });
+      ph.style.setProperty("--glow", SLIDES[i].c + "88");
+      show(ph, Object.fromEntries(SLIDES.map((s, j) => [s.shot, j === i ? 1 : 0])), Ez.io(P(lt, .3, 2)) * 1300);
+      heads.forEach(({ g, num, h, sb }, j) => {
+        const t0 = 52 + j * 2, on = j === i;
+        S(g, { o: on ? 1 : 0, s: on ? lerp(1.3, 1, Ez.expo(P(t, t0, t0 + .4))) : 1, blur: on ? (1 - P(t, t0, t0 + .3)) * 12 : 0 });
+        kin(h, t, t0 + .05, { mode: j % 2 ? "slideL" : "rise", stg: .03, dur: .4 });
+        if (num) count(num, t, t0, .8, SLIDES[j].n);
+        sb.style.opacity = P(t, t0 + .3, t0 + .5);
+      });
+      pills.forEach((p, j) => {
+        const k = Ez.back(P(t, 52.3 + j * .08, 52.7 + j * .08)), out = P(t, 53.7, 54);
+        S(p, { s: k * (1 - out), o: (1 - out) * P(t, 52.3 + j * .08, 52.4 + j * .08), y: p._y + Math.sin(t * 2 + j) * 10, r: Math.sin(j) * 8 });
+      });
+      bars.forEach((b, j) => { S(b, { o: win(t, 54.2, 56, .1, .2) }); b.style.height = "420px"; barH[j][0].style.height = `${barH[j][1] * Ez.back(P(t, 54.3 + j * .08, 54.8 + j * .08))}px`; });
+      S(sq, { o: win(t, 58.1, 60.2, .15, .3) });
+      cells.forEach(([d, a, b]) => { const on = P(t, 58.2 + a * 1.4, 58.3 + a * 1.4); d.style.background = on > 0 ? `rgba(34,197,94,${(.25 + b * .75) * on})` : "rgba(255,255,255,.07)"; });
+    };
+  });
+
+  // ============ 60–68  BREAKDOWN: everything connected, then the letter ============
+  scene(60, 68, { enter: "fade", exit: "cut", tint: ["#04262a", "#03080c"], chapter: "One Web" }, (root) => {
+    const t1 = split(at(el(root, "c anton", `${D.tagCount} tags.`, "font-size:200px"), 540, 360));
+    const t2 = split(at(el(root, "c inst", "One web.", `font-size:190px;color:${TEAL}`), 540, 540));
+    const ph = phone(root, ["tags", "newsletter"]);
+    at(ph, 540, 1300);
+    const a1 = split(at(el(root, "c anton", "And once a month…", "font-size:110px"), 540, 400));
+    const a2 = split(at(el(root, "c inst", "a letter.", `font-size:220px;color:${SAFF}`), 540, 560));
+    const env = at(el(root, "c", `<svg width="260" height="180" viewBox="0 0 260 180"><rect x="6" y="6" width="248" height="168" rx="14" fill="#fff7ec" stroke="${SAFF}" stroke-width="6"/><path class="flap" d="M6 20 L130 110 L254 20" fill="none" stroke="${SAFF}" stroke-width="6"/></svg>`), 860, 860);
+    return (t) => {
+      const out1 = 64.4;
+      kin(t1, t, 60.4, { mode: "rise", stg: .05, dur: .7, out: out1 });
+      kin(t2, t, 61.4, { mode: "rise", stg: .05, dur: .7, out: out1 });
+      kin(a1, t, 64.6, { mode: "slideL", stg: .03, dur: .5, out: 67.8 });
+      kin(a2, t, 65.9, { mode: "drop", stg: .06, dur: .5, out: 67.8 });
+      const k = Ez.expo(P(t, 62.6, 63.4)), flip = P(t, 65.7, 66.2);
+      const suck = Ez.expoIn(P(t, 67.3, 68));
+      S(ph, { y: lerp(2400, 1300, k), p: 1600, ry: flip < 1 ? flip * 180 : 0, s: .76 * (1 - suck), o: 1 - suck, r: suck * 40 });
+      show(ph, { tags: flip < .5 ? 1 : 0, newsletter: flip >= .5 ? 1 : 0 }, flip < .5 ? Ez.io(P(t, 63.2, 65.6)) * 1400 : Ez.io(P(t, 66.2, 67.8)) * 1100);
+      S(env, { o: P(t, 66, 66.2) * (1 - suck), s: Ez.back(P(t, 66, 66.4)), r: Math.sin(t * 3) * 6, y: 860 + Math.sin(t * 2) * 12 });
+    };
+  });
+
+  // ============ 68–76  RE-DROP: the wall of pages ============
+  scene(68, 76, { enter: "cut", exit: "whip", tint: ["#2a0505", "#050508"], chapter: "Every Page" }, (root) => {
+    const ORDER = ["map", "treks", "sports", "books", "logbook", "ask", "stats", "projects", "micro-blog", "tags", "newsletter", "blueprint", "changelog-graph", "mindmap", "home", "map-night", "treks-atlas"];
+    const ROUTES = { map: "/", "map-night": "/ · night", treks: "/treks", sports: "/sports", books: "/books", logbook: "/logbook", ask: "/ask", stats: "/stats", projects: "/projects", "micro-blog": "/micro-blog", tags: "/tags", newsletter: "/newsletter", blueprint: "/blueprint", "changelog-graph": "/changelog/graph", mindmap: "/mindmap", home: "/?view=classic", "treks-atlas": "/treks · atlas" };
+    const wall = at(el(root, "c", "", "width:1700px;height:3400px"), 540, 960);
+    const cols = [0, 1, 2, 3, 4].map((ci) => {
+      const col = el(wall, "", "", `position:absolute;left:${ci * 340}px;top:0;width:320px`);
+      const items = [];
+      for (let j = 0; j < 6; j += 1) {
+        const nm = ORDER[(ci * 4 + j * 3) % ORDER.length];
+        const card = el(col, "", `<img src="${T.shots[nm]}" style="width:300px;display:block;border-radius:30px">`, `position:absolute;left:0;top:${j * 600}px;width:320px;height:580px;overflow:hidden;border-radius:38px;border:10px solid #15161b;background:#fff`);
+        card._nm = nm;
+        items.push(card);
+      }
+      return { col, items, dir: ci % 2 ? 1 : -1 };
+    });
+    const band = at(el(root, "c", "", "width:1080px;height:170px;background:rgba(6,7,11,.86);border-top:3px solid " + RED + ";border-bottom:3px solid " + RED), 540, 960);
+    const route = at(el(root, "c mono", "", "font-size:84px;font-weight:700"), 540, 960);
+    const TITLES = [[68.1, "Every page,"], [69.1, "a place."], [70.1, "37 doors in."], [72, "Classic or Atlas."], [73, "Light or dark."], [74, "English or मराठी."], [75, "Always live."]];
+    const titles = TITLES.map(([t0, s]) => ({ t0, e: split(at(el(root, "c anton", s, "font-size:130px;text-shadow:0 10px 40px rgba(0,0,0,.6)"), 540, 360)) }));
+    TITLES.forEach((tt, i) => { titles[i].end = TITLES[i + 1] ? TITLES[i + 1][0] : 76.2; });
+    // "37 doors in" is the route count, read rather than typed.
+    titles[2].e.textContent = `${D.routes} doors in.`; split(titles[2].e);
+    return (t) => {
+      const lt = Math.max(0, t - 68);
+      S(wall, { p: 2000, rx: 28, r: -14, s: lerp(1.6, 1.05, Ez.expo(P(t, 68, 68.8))) });
+      const beat = Math.floor(lt / BEAT);
+      const hot = ORDER[beat % ORDER.length];
+      cols.forEach(({ col, items, dir }, ci) => {
+        col.style.transform = `translateY(${(dir * lt * 140 + (dir > 0 ? -600 : 0)) % 600 - 300}px)`;
+        items.forEach((c) => {
+          const h = c._nm === hot && ci === beat % 5;
+          c.style.borderColor = h ? RED : "#15161b";
+          c.style.filter = h ? "brightness(1.15)" : `brightness(${.55 + .1 * Math.sin(lt * 3 + ci)})`;
+          c.style.boxShadow = h ? `0 0 80px ${RED}` : "";
+        });
+      });
+      const typed = (lt % BEAT) / .25;
+      const word = ROUTES[hot];
+      route.textContent = word.slice(0, Math.ceil(word.length * cl(typed))) + "▍";
+      S(band, { o: P(t, 68.3, 68.4), sy: Ez.expo(P(t, 68.3, 68.6)) });
+      S(route, { o: P(t, 68.4, 68.5) });
+      titles.forEach(({ t0, e, end }) => {
+        kin(e, t, t0, { mode: "slam", stg: .025, dur: .3, out: end, od: .12 });
+        const g = Math.exp(-(t - t0) * 8) * (t > t0 ? 1 : 0);
+        e.style.textShadow = g > .02 ? `${14 * g}px 0 #ff2a55, ${-14 * g}px 0 #22e1ff` : "0 10px 40px rgba(0,0,0,.6)";
+        S(e, { x: 540 + (g > .1 ? (hash(Math.floor(t * 30)) - .5) * 30 * g : 0), o: 1 });
+      });
+    };
+  });
+
+  // ============ 76–84  FINALE: not a portfolio ============
+  scene(76, 84.05, { enter: "whip", exit: "cut", tint: ["#30040a", "#000000"], chapter: "Coda" }, (root) => {
+    const a = split(at(el(root, "c anton", "This is not", "font-size:150px"), 540, 700));
+    const b = at(el(root, "c anton", "a portfolio.", "font-size:170px"), 540, 880);
+    const strike = at(el(root, "c", "", `width:1000px;height:22px;background:${RED};border-radius:11px;box-shadow:0 0 40px ${RED}`), 540, 890);
+    const c1 = split(at(el(root, "c anton", "It's a", "font-size:130px"), 540, 520));
+    const life = at(el(root, "c anton", "Life,", "font-size:470px;line-height:1.05;padding:0 30px;background:linear-gradient(120deg,#ffb020,#ff3b30,#ec4899,#a855f7,#ffb020);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent"), 540, 860);
+    const arch = split(at(el(root, "c inst", "archived.", `font-size:250px;color:${SAFF}`), 540, 1230));
+    const meta = at(el(root, "c lbl", `${fmt(D.commits)} commits · ${D.version} · updated nightly`, "font-size:26px;opacity:.75"), 540, 1420);
+    return (t) => {
+      kin(a, t, 76.2, { mode: "slideL", stg: .03, dur: .4, out: 78.8 });
+      const kb = Ez.expo(P(t, 76.7, 77.1));
+      S(b, { s: lerp(2.2, 1, kb), o: P(t, 76.7, 76.8) * (1 - P(t, 78.6, 78.8)), blur: (1 - kb) * 20 });
+      S(strike, { o: t > 77.5 && t < 78.8 ? 1 : 0, clip: `inset(0 ${(1 - Ez.expo(P(t, 77.5, 77.8))) * 100}% 0 0)`, r: -3 });
+      kin(c1, t, 79, { mode: "rise", stg: .04, out: 83.85, od: .2 });
+      const kl = Ez.expo(P(t, 79.5, 79.9));
+      S(life, { s: lerp(2.5, 1, kl) + (t - 79.5) * .02, o: P(t, 79.5, 79.6) * (1 - P(t, 83.6, 83.9)), blur: (1 - kl) * 26 });
+      life.style.backgroundPosition = `${(t - 79.5) * 25}% 0`;
+      kin(arch, t, 80.5, { mode: "rise", stg: .05, dur: .6, out: 83.85, od: .2 });
+      S(meta, { o: P(t, 81.5, 81.8) * (1 - P(t, 83.6, 83.9)) });
+    };
+  });
+
+  // ============ 84–90  END CARD ============
+  scene(84, 90.1, { enter: "cut", tint: ["#14060a", "#000000"] }, (root) => {
+    const logo = at(el(root, "c", `<img src="${D.logo}" style="width:300px;height:300px;border-radius:64px;box-shadow:0 0 120px rgba(255,59,48,.45)">`), 540, 470);
+    const sign = at(el(root, "c", `<img src="${D.sign}" style="width:500px">`), 540, 890);
+    const url = split(at(el(root, "c anton", "sankettambare.in", "font-size:128px;letter-spacing:3px"), 540, 1215));
+    const cta = at(el(root, "c chip", "Enter the World  →", `background:${SAFF};color:#1d1100;font-size:40px;padding:30px 60px`), 540, 1390);
+    const tail = at(el(root, "c", "Ask it anything · Read the Logbook · Get the letter", "font:600 32px Inter;opacity:.7"), 540, 1510);
+    const black = at(el(root, "c", "", "width:1080px;height:1920px;background:#000"), 540, 960);
+    return (t) => {
+      const k = Ez.back(P(t, 84.05, 84.6));
+      S(logo, { s: k, r: (1 - k) * -30, o: P(t, 84.05, 84.15) });
+      S(sign, { o: 1, clip: `inset(0 ${(1 - Ez.io(P(t, 84.6, 85.9))) * 100}% 0 0)` });
+      kin(url, t, 85.6, { mode: "drop", stg: .035, dur: .45 });
+      const pulse = 1 + .05 * Math.max(0, Math.sin((t - 86.5) * Math.PI * 2));
+      S(cta, { s: Ez.back(P(t, 86.5, 86.9)) * pulse, o: P(t, 86.5, 86.6) });
+      cta.style.boxShadow = `0 0 ${40 + 40 * Math.sin(t * 6)}px rgba(255,176,32,.7)`;
+      S(tail, { o: P(t, 87.1, 87.5), y: lerp(1540, 1510, Ez.out(P(t, 87.1, 87.6))) });
+      S(black, { o: P(t, 89.1, 90) });
+    };
+  });
+
+  // ---- HUD: corners, site, chapter, progress
+  const hud = document.getElementById("hud");
+  [["left:56px;top:56px", "border-left-width:6px;border-top-width:6px"], ["right:56px;top:56px", "border-right-width:6px;border-top-width:6px"],
+    ["left:56px;bottom:56px", "border-left-width:6px;border-bottom-width:6px"], ["right:56px;bottom:56px", "border-right-width:6px;border-bottom-width:6px"]]
+    .forEach(([pos, bw]) => el(hud, "corner", "", `${pos};${bw}`));
+  window.hudSite = el(hud, "lbl", "● sankettambare.in", "position:absolute;left:130px;top:72px;font-size:20px;color:rgba(255,255,255,.75)");
+  window.hudChap = el(hud, "lbl", "", "position:absolute;right:130px;top:72px;font-size:20px;color:rgba(255,255,255,.75);text-align:right");
+  window.hudBar = el(hud, "", "", `position:absolute;left:130px;bottom:78px;height:4px;width:0;background:${RED}`);
+
+  // ---- blinds and glitch slices (global transitions)
+  const blinds = document.getElementById("blinds");
+  window.blindEls = Array.from({ length: 9 }, (_, i) => el(blinds, "", "", `left:${i * 120}px;top:0;width:121px;height:1920px`));
+  const slices = document.getElementById("slices");
+  window.sliceEls = Array.from({ length: 14 }, () => el(slices, "", "", "left:0;width:1080px;mix-blend-mode:screen"));
+}
+
+// ---------------------------------------------------------------- global fx
+// Times the picture is hit: flash, shake, particle burst (score.mjs booms on these).
+const IMPACTS = [6, 10, 68, 76, 84];
+const BLINDS = [[30, "#22c55e"], [38, "#ffb020"]];
+const GLITCH = [42, 52, 60, 68, 72, 73, 74, 75];
+const STARS = (() => { const r = rng(3); return Array.from({ length: 420 }, () => [r() * 2 - 1, r() * 2 - 1, r()]); })();
+let NET = [];
+const buildNet = () => {
+  const r = rng(21);
+  NET = window.TRAILER.tagNodes.map((n, i) => {
+    const a = i * 2.39996, rad = 60 + Math.sqrt(i) * 64;
+    return { ...n, x: 540 + Math.cos(a) * rad + (r() - .5) * 40, y: 1000 + Math.sin(a) * rad * 1.15 + (r() - .5) * 40, ph: r() * 6 };
+  });
+};
+
+function grooving(t) { return (t >= 10 && t < 60) || (t >= 68 && t < 84); }
+
+function drawFx(t) {
+  const c = document.getElementById("fx"), g = c.getContext("2d");
+  g.clearRect(0, 0, W, H);
+  // Starfield: forward drift, warp streaks before each drop.
+  const warp = Math.max(Ez.expoIn(P(t, 9.2, 10)) * (t < 10.3 ? 1 : 0), Ez.expoIn(P(t, 67.2, 68)) * (t < 68.2 ? 1 : 0), Ez.expoIn(P(t, 83.2, 84)) * (t < 84.2 ? 1 : 0));
+  const starA = t < 10 ? 1 : t < 18 ? .25 : (t >= 60 && t < 68) ? .7 : t >= 76 ? 1 : .35;
+  const speed = .05 + warp * 2.2;
+  STARS.forEach(([sx, sy, sz], i) => {
+    const z = ((sz - t * speed * .3 - (warp > 0 ? warp * warp * .6 : 0)) % 1 + 1) % 1 + .02;
+    const x = 540 + (sx / z) * 260, y = 960 + (sy / z) * 260;
+    if (x < -50 || x > W + 50 || y < -50 || y > H + 50) return;
+    const a = Math.min(1, (1 - z) * 1.4) * starA;
+    g.strokeStyle = g.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+    if (warp > .05) {
+      const z2 = z + warp * .12;
+      g.lineWidth = 2.2 * (1 - z);
+      g.beginPath(); g.moveTo(x, y); g.lineTo(540 + (sx / z2) * 260, 960 + (sy / z2) * 260); g.stroke();
+    } else {
+      g.beginPath(); g.arc(x, y, (1 - z) * 3 + .4, 0, 7); g.fill();
+    }
+  });
+  // Heartbeat rings in the cold open.
+  if (t < 6) for (let k = 0; k <= Math.floor(t); k += 1) {
+    const q = t - k; if (q > 1.4) continue;
+    g.strokeStyle = `rgba(255,59,48,${(1 - q / 1.4) * .7})`; g.lineWidth = 6 * (1 - q / 1.4);
+    g.beginPath(); g.arc(540, 930, 120 + q * 700, 0, 7); g.stroke();
+  }
+  // Clouds drifting past the Atlas.
+  if (t >= 10 && t < 18.3) {
+    const r = rng(9);
+    for (let k = 0; k < 7; k += 1) {
+      const y = 300 + r() * 1400, sp = 60 + r() * 120, x = ((r() * 1600 + (t - 10) * sp) % 1700) - 300, s = .7 + r();
+      g.fillStyle = `rgba(255,255,255,${.12 + r() * .1})`;
+      [[0, 0, 90], [70, -30, 70], [130, 0, 80], [60, 20, 80]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(x + dx * s, y + dy * s, rr * s, 0, 7); g.fill(); });
+    }
+  }
+  // The Logbook's sky: English circles, Marathi diamonds, joined in order.
+  if (t >= 38 && t < 42.2) {
+    const r = rng(14), n = (window.TRAILER.essays || 100);
+    let px = null, py = null;
+    for (let k = 0; k < n; k += 1) {
+      const x = 60 + r() * 960, y = 700 + r() * 1150, mr = r() < (window.TRAILER.essaysMr / n);
+      const on = P(t, 38.4 + k * .025, 38.6 + k * .025);
+      if (on <= 0) break;
+      g.fillStyle = mr ? `rgba(232,89,12,${.7 * on})` : `rgba(67,56,202,${.6 * on})`;
+      g.beginPath();
+      if (mr) { g.moveTo(x, y - 9); g.lineTo(x + 9, y); g.lineTo(x, y + 9); g.lineTo(x - 9, y); } else g.arc(x, y, 7, 0, 7);
+      g.fill();
+      if (px != null && k % 3) { g.strokeStyle = `rgba(31,27,58,${.15 * on})`; g.lineWidth = 2; g.beginPath(); g.moveTo(px, py); g.lineTo(x, y); g.stroke(); }
+      px = x; py = y;
+    }
+  }
+  // The tag web.
+  if (t >= 60 && t < 68.1) {
+    const rot = (t - 60) * .06, fadeOut = 1 - P(t, 67.3, 68), dim = 1 - P(t, 62.6, 63.4) * .55;
+    const pos = NET.map((nd, i) => {
+      const k = Ez.expo(P(t, 60 + i * .012, 60.8 + i * .012));
+      const dx = nd.x - 540, dy = nd.y - 1000;
+      const s = lerp(.1, 1, k) * (1 - Ez.expoIn(P(t, 67.3, 68)));
+      return [540 + (dx * Math.cos(rot) - dy * Math.sin(rot)) * s, 1000 + (dx * Math.sin(rot) + dy * Math.cos(rot)) * s + Math.sin(t + nd.ph) * 6, k];
+    });
+    g.lineWidth = 1.5;
+    NET.forEach((nd, i) => {
+      const lk = P(t, 60.9 + i * .01, 61.6 + i * .01);
+      [i + 1, i + 7, i + 13].forEach((j) => {
+        if (!pos[j]) return;
+        g.strokeStyle = `rgba(94,234,212,${.22 * lk * fadeOut * dim})`;
+        g.beginPath(); g.moveTo(pos[i][0], pos[i][1]); g.lineTo(pos[j][0], pos[j][1]); g.stroke();
+      });
+    });
+    NET.forEach((nd, i) => {
+      const [x, y, k] = pos[i];
+      const rr = 5 + Math.sqrt(nd.total) * .9;
+      g.fillStyle = nd.color; g.globalAlpha = k * fadeOut * dim;
+      g.beginPath(); g.arc(x, y, rr, 0, 7); g.fill();
+      if (i < 12) { g.font = "700 30px Inter"; g.textAlign = "center"; g.fillStyle = "#fff"; g.fillText(nd.display, x, y - rr - 12); }
+      g.globalAlpha = 1;
+    });
+  }
+  // Particle bursts on every impact, and the finale's convergence.
+  IMPACTS.forEach((ti, n) => {
+    const q = t - ti; if (q < 0 || q > 1.6) return;
+    const r = rng(100 + n);
+    for (let k = 0; k < 140; k += 1) {
+      const a = r() * 7, v = 300 + r() * 1300, d = v * Ez.out(q / 1.6);
+      g.fillStyle = k % 3 ? `rgba(255,${120 + Math.floor(r() * 120)},60,${(1 - q / 1.6).toFixed(3)})` : `rgba(255,255,255,${(1 - q / 1.6).toFixed(3)})`;
+      g.beginPath(); g.arc(540 + Math.cos(a) * d, 960 + Math.sin(a) * d, 2 + r() * 5, 0, 7); g.fill();
+    }
+  });
+  if (t >= 82.4 && t < 84) {
+    const r = rng(77), q = Ez.expoIn(P(t, 82.4, 84));
+    for (let k = 0; k < 200; k += 1) {
+      const a = r() * 7, d = (400 + r() * 900) * (1 - q);
+      g.fillStyle = `rgba(255,${150 + Math.floor(r() * 100)},80,${.8 * q})`;
+      g.beginPath(); g.arc(540 + Math.cos(a) * d, 960 + Math.sin(a) * d, 2 + r() * 4, 0, 7); g.fill();
+    }
+  }
+}
+
+// ---------------------------------------------------------------- the frame
+window.renderAt = function renderAt(t) {
+  // Background: the current scene's tint, crossfaded into the next.
+  const cur = SCENES.filter((s) => t >= s.a - .2 && t <= s.b + .2);
+  const main = SCENES.find((s) => t >= s.a && t < s.b) || SCENES[SCENES.length - 1];
+  const nxt = SCENES[SCENES.indexOf(main) + 1];
+  const k = nxt ? P(t, main.b - .3, main.b) : 0;
+  const c1 = nxt ? mix(main.tint[0], nxt.tint[0], k) : main.tint[0], c2 = nxt ? mix(main.tint[1], nxt.tint[1], k) : main.tint[1];
+  const lx = 50 + Math.sin(t * .4) * 30, ly = 30 + Math.cos(t * .3) * 20;
+  document.getElementById("bg").style.background = `radial-gradient(ellipse 90% 60% at ${lx}% ${ly}%, ${c1}, transparent 70%), radial-gradient(ellipse 80% 60% at ${100 - lx}% ${100 - ly}%, ${c1}, transparent 70%), ${c2}`;
+
+  SCENES.forEach((s) => {
+    const on = cur.includes(s);
+    s.root.style.display = on ? "block" : "none";
+    if (on) { transition(s, t); s.update(t); }
+  });
+  drawFx(t);
+
+  // Camera: a kick of shake on each impact, a breath on each beat while the groove runs.
+  let sx = 0, sy = 0, rs = 0;
+  IMPACTS.forEach((ti) => { const q = t - ti; if (q >= 0 && q < .6) { const a = 26 * Math.exp(-q * 7); sx += (hash(Math.floor(t * 30) + ti) - .5) * a; sy += (hash(Math.floor(t * 30) * 3 + ti) - .5) * a; rs += (hash(Math.floor(t * 30) * 7) - .5) * a * .05; } });
+  const pump = grooving(t) ? .012 * Math.exp(-((t % BEAT) / BEAT) * 6) : 0;
+  cam.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) rotate(${rs.toFixed(2)}deg) scale(${(1 + pump).toFixed(4)})`;
+
+  // Flash: white on impacts, a softer one on each cold-open slam.
+  let fl = 0;
+  IMPACTS.forEach((ti) => { const q = t - ti; if (q >= 0 && q < .5) fl = Math.max(fl, Math.exp(-q * 9)); });
+  if (t < 6) { const q = t % 1; fl = Math.max(fl, .35 * Math.exp(-q * 14)); }
+  if (t >= 11.85 && t < 12.6) fl = Math.max(fl, .5 * P(t, 11.85, 12.25) * (1 - P(t, 12.25, 12.6)));
+  document.getElementById("flash").style.opacity = fl.toFixed(3);
+
+  // Blinds.
+  let bl = null;
+  BLINDS.forEach(([ti, col]) => { if (t > ti - .35 && t < ti + .35) bl = [ti, col]; });
+  window.blindEls.forEach((b, i) => {
+    if (!bl) { b.style.display = "none"; return; }
+    const [ti, col] = bl, d = i * .025;
+    const cover = Ez.io(P(t, ti - .33 + d, ti - .08 + d)), uncover = Ez.io(P(t, ti + .02 + d, ti + .3 + d));
+    b.style.display = "block"; b.style.background = col;
+    b.style.transformOrigin = uncover > 0 ? "50% 0%" : "50% 100%";
+    b.style.transform = `scaleY(${(uncover > 0 ? 1 - uncover : cover).toFixed(3)})`;
+  });
+
+  // Glitch slices.
+  const gq = GLITCH.map((ti) => t - ti).find((q) => q > -.12 && q < .22);
+  window.sliceEls.forEach((s, i) => {
+    if (gq === undefined) { s.style.display = "none"; return; }
+    const r = rng(Math.floor(t * 30) * 31 + i);
+    s.style.display = r() < .7 ? "block" : "none";
+    s.style.top = `${Math.floor(r() * 1920)}px`; s.style.height = `${4 + r() * 60}px`;
+    s.style.background = r() < .5 ? "rgba(34,225,255,.35)" : "rgba(255,42,85,.35)";
+    s.style.transform = `translateX(${(r() - .5) * 200}px)`;
+  });
+
+  // Grain moves every frame.
+  const gr = rng(Math.floor(t * 30));
+  document.getElementById("grain").style.transform = `translate(${Math.floor(gr() * 200 - 100)}px,${Math.floor(gr() * 200 - 100)}px)`;
+
+  // HUD.
+  const hudOn = t > 10 && t < 84 ? 1 : 0;
+  document.getElementById("hud").style.opacity = hudOn;
+  const chapScene = SCENES.slice().reverse().find((s) => s.chapter && t >= s.a);
+  window.hudChap.textContent = chapScene ? chapScene.chapter : "";
+  window.hudBar.style.width = `${(820 * t / 90).toFixed(1)}px`;
+  const cream = t >= 38 && t < 42;
+  window.hudSite.style.color = window.hudChap.style.color = cream ? "rgba(31,27,58,.75)" : "rgba(255,255,255,.75)";
+  document.getElementById("vig").style.opacity = cream ? .35 : 1;
+};
+</script>
+</body>
+</html>

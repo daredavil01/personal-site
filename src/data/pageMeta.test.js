@@ -58,7 +58,7 @@ describe("buildTrekMeta", () => {
       fortName: "Torna", enduranceLevel: "Hard", trekTime: "6 Hrs", date: "17-02-2019", image: "https://i/t.jpg",
     });
     expect(meta.title).toBe("Torna Trek");
-    expect(meta.description).toBe("A hard endurance trek to Torna fort on 17-02-2019. Trek duration: 6 Hrs.");
+    expect(meta.description).toBe("A hard endurance trek to Torna fort on 17 February 2019. Trek duration: 6 Hrs.");
     expect(meta.image).toBe("https://i/t.jpg");
   });
 
@@ -66,7 +66,7 @@ describe("buildTrekMeta", () => {
     const meta = buildTrekMeta({
       fortName: "Ghangad Fort", enduranceLevel: "Easy", trekTime: "1.5 Hrs", date: "09-08-2026",
     });
-    expect(meta.description).toBe("An easy endurance trek to Ghangad Fort on 09-08-2026. Trek duration: 1.5 Hrs.");
+    expect(meta.description).toBe("An easy endurance trek to Ghangad Fort on 9 August 2026. Trek duration: 1.5 Hrs.");
   });
 
   it("defaults endurance to 'medium' and image to the section card", () => {

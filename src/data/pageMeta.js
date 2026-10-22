@@ -297,6 +297,17 @@ export function buildMicroblogMeta({ title, text, date, image } = {}) {
   };
 }
 
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+  "August", "September", "October", "November", "December"];
+
+// Trek dates are stored DD-MM-YYYY; "09-08-2026" reads as 8 September to most
+// agents, so spell the month out. Anything else passes through unchanged.
+function longTrekDate(date) {
+  const m = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(String(date || "").trim());
+  if (!m || +m[2] < 1 || +m[2] > 12) return date;
+  return `${+m[1]} ${MONTHS[m[2] - 1]} ${m[3]}`;
+}
+
 export function buildTrekMeta({
   fortName,
   enduranceLevel,
@@ -310,7 +321,7 @@ export function buildTrekMeta({
   const place = /\bfort\b/i.test(fortName || "") ? fortName : `${fortName} fort`;
   return {
     title: `${fortName} Trek`,
-    description: `${article} ${level} endurance trek to ${place} on ${date}. Trek duration: ${trekTime}.`,
+    description: `${article} ${level} endurance trek to ${place} on ${longTrekDate(date)}. Trek duration: ${trekTime}.`,
     image: image || sectionImage("treks"),
     imageAlt: `Trek card for ${fortName}`,
     type: "article",

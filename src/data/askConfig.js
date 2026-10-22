@@ -44,7 +44,7 @@ export const ENTITY_TYPES = {
   // Types added by the source registry (scripts/ask-sources/). Their chunks
   // carry their own url; `list` is where "browse everything" points.
   resume: { label: "Résumé", list: "/resume", path: () => "/resume" },
-  writing: { label: "Essay", list: "/writing-ledger.html", path: () => null },
+  writing: { label: "Essay", list: "/writing-ledger", path: () => null },
   stats: { label: "Stats", list: "/stats", path: () => "/stats" },
   tag: { label: "Tag", list: "/tags", path: () => null },
   site: { label: "Site page", list: null, path: () => null },
