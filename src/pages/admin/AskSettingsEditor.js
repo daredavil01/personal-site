@@ -22,7 +22,7 @@ import ConfirmDialog from "./ui/ConfirmDialog";
 import { hairline, labelClass, mutedText, surface } from "./ui/tokens";
 import { RepeatableRows } from "./now/SectionEditors";
 
-const JUDGE_TIER_FIELDS = [
+export const JUDGE_TIER_FIELDS = [
   { name: "name", label: "Label", type: "text" },
   { name: "provider", label: "Provider", type: "select", options: ASK_JUDGE_PROVIDERS },
   {

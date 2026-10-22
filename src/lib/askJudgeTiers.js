@@ -23,7 +23,8 @@
 // under functions/.
 
 import {
-  buildJudgePrompt, JUDGE_JSON_SYSTEM, parseJudgeJson, toGatewayQuestions, toNativeQuestions,
+  buildJudgePrompt, JUDGE_JSON_SYSTEM, JUDGE_QUESTIONS, parseJudgeJson,
+  toGatewayQuestions, toNativeQuestions,
 } from "./askJudge";
 
 const TYPESAFE_URL = "https://api.typesafe.ai/v1/systemone";
@@ -58,7 +59,11 @@ const PROVIDERS = {
    * The one rung that is not a language model. Two dialects, because the gateway
    * and TypeSafe's own endpoint are not the same API — see askJudge.js.
    */
-  jev: async ({ tier, state, env, signal }) => {
+  // `spec` is the question set; the judge's rubric unless a caller (tag
+  // suggestions in /api/assist) brings its own.
+  jev: async ({
+    tier, state, env, signal, spec = JUDGE_QUESTIONS,
+  }) => {
     if ((tier.route || "gateway") === "gateway") {
       // The AI SDK, not a POST: Vercel serves the evaluation modality through the
       // SDK only. Imported here so nothing else pays to load it.
@@ -73,7 +78,7 @@ const PROVIDERS = {
       const result = await evaluate({
         model: gateway.evaluationModel(tier.model || "typesafe-ai/jev"),
         state,
-        questions: toGatewayQuestions(),
+        questions: toGatewayQuestions(spec),
       });
       if (!result?.answers) throw new Error("jev returned no answers");
       return {
@@ -92,7 +97,7 @@ const PROVIDERS = {
       body: JSON.stringify({
         model: tier.model || "jev-latest",
         state,
-        questions: toNativeQuestions(),
+        questions: toNativeQuestions(spec),
       }),
     });
     if (!res.ok) throw new Error(`jev ${res.status}`);
@@ -159,6 +164,20 @@ function withTimeout(promise, ms, controller) {
     }, ms);
   });
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+/** One Jev call with any question set, under the rung's timeout. */
+export function runJevRung({
+  tier, state, spec, env,
+}) {
+  const controller = new AbortController();
+  return withTimeout(
+    PROVIDERS.jev({
+      tier, state, env, spec, signal: controller.signal,
+    }),
+    tier.timeout_ms || 12000,
+    controller,
+  );
 }
 
 /** The rungs that could actually run, in order, with the metered ones filtered. */

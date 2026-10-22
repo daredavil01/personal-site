@@ -13,7 +13,7 @@ import { useToast } from "./ui/ToastContext";
 import useUnsavedGuard from "./ui/useUnsavedGuard";
 import { faintText, hairline, mutedText } from "./ui/tokens";
 import { refreshAiFeatures } from "./useAiFeatures";
-import { TierRows } from "./AskSettingsEditor";
+import { JUDGE_TIER_FIELDS, TierRows } from "./AskSettingsEditor";
 import { AI_FEATURES, AI_MASTER_KEY } from "../../data/askConfig";
 import {
   getAssistConfig, listAssistLog, pruneAssistLog, saveAssistConfig,
@@ -218,7 +218,7 @@ const AiAssist = () => {
 
       <Card
         title="Model ladder"
-        description="Tried top to bottom; the first rung that answers wins. Alt text only uses Gemini rungs — the others cannot see images."
+        description="Tried top to bottom; the first rung that answers wins. Jev rungs at the top answer tag suggestions only (one calibrated yes/no per tag); drafts skip them, and alt text uses Gemini rungs only."
       >
         {usingAsk && (
           <p className={`text-xs ${mutedText} mt-0 mb-3`}>
@@ -228,6 +228,10 @@ const AiAssist = () => {
         <TierRows
           rows={form.assistTiers}
           onChange={(v) => setForm((prev) => ({ ...prev, assistTiers: v }))}
+          // Same rows as the judge ladder: gemini, workers-ai, or jev with a route.
+          // The typesafe route is metered and runs only with "allow metered"
+          // on in Ask · Settings → Automatic evaluation.
+          fields={JUDGE_TIER_FIELDS}
           blank={{ name: "", provider: "gemini", model: "gemini-flash-lite-latest", timeout_ms: 8000, enabled: true }}
           noun="rung"
         />

@@ -25,7 +25,10 @@
 //   draft  one long-text field, returned as text
 //   tags   tag names for a row, returned as JSON and then intersected with the
 //          central tag list, so this can only ever propose tags that exist —
-//          creating one stays a deliberate act in the form.
+//          creating one stays a deliberate act in the form. When the ladder
+//          starts with `jev` rungs, those run first as classification: one
+//          calibrated yes/no per tag (src/lib/assistTags.js). Jev writes no
+//          prose, so draft and alt skip those rungs.
 //   alt    one sentence describing an uploaded image. Gemini rungs only: the
 //          Workers AI rungs of this ladder are text models, and askTiers maps a
 //          multimodal part list down to its text, so they would confidently
@@ -34,6 +37,8 @@
 import { DEFAULT_ASK_SETTINGS, aiFeatureOn } from "../../src/data/askConfig";
 import { json, restHeaders, rpc } from "../../src/lib/askServer";
 import { runTiers } from "../../src/lib/askTiers";
+import { runJevRung, usableRungs } from "../../src/lib/askJudgeTiers";
+import { pickTags, tagQuestions, tagState } from "../../src/lib/assistTags";
 
 // Trust boundary: the caller is the owner, but a form can still hold a pasted
 // essay, and the prompt is billed by length. Clamp rather than reject.
@@ -79,7 +84,7 @@ async function isOwner(env, request) {
 async function loadSettings(env) {
   try {
     const res = await fetch(
-      `${env.VITE_SUPABASE_URL}/rest/v1/ask_settings?id=eq.1&select=tiers,assist_tiers,ai_features&limit=1`,
+      `${env.VITE_SUPABASE_URL}/rest/v1/ask_settings?id=eq.1&select=tiers,assist_tiers,ai_features,auto_eval_allow_metered&limit=1`,
       { headers: restHeaders(env) },
     );
     if (!res.ok) throw new Error(`ask_settings ${res.status}`);
@@ -153,13 +158,13 @@ const TAGS_SYSTEM = [
  * threshold to tune for a prompt that is already small.
  * ponytail: send-them-all, shortlist by embedding if the vocabulary grows past a few hundred.
  */
-async function loadTagNames(env) {
+async function loadTags(env) {
   const res = await fetch(
-    `${env.VITE_SUPABASE_URL}/rest/v1/tags?select=name&order=name`,
+    `${env.VITE_SUPABASE_URL}/rest/v1/tags?select=name,description&order=name`,
     { headers: restHeaders(env) },
   );
   if (!res.ok) throw new Error(`tags ${res.status}`);
-  return (await res.json()).map((r) => r.name).filter(Boolean);
+  return (await res.json()).filter((r) => r.name);
 }
 
 /**
@@ -326,11 +331,13 @@ export async function onRequestPost(context) {
 
   let parts;
   let vocabulary = null;
+  let tags = null;
   try {
     if (body.task === "alt") {
       parts = buildAltParts(body);
     } else if (body.task === "tags") {
-      vocabulary = await loadTagNames(env);
+      tags = await loadTags(env);
+      vocabulary = tags.map((t) => t.name);
       parts = [{ text: buildTagPrompt(body, vocabulary) }];
     } else {
       parts = [{ text: buildPrompt(body) }];
@@ -348,23 +355,59 @@ export async function onRequestPost(context) {
   const configured = pick.find((t) => Array.isArray(t) && t.length) || [];
   // A vision task keeps only the rungs that can actually see: a text rung would
   // answer from the prompt alone and sound just as sure.
-  const tiers = task.vision ? configured.filter((t) => t.provider === "gemini") : configured;
-  if (!tiers.length) {
-    const note = "No vision-capable rung is enabled.";
-    return done(json({ error: "no_model", note }, 502), { status: "error", error: note });
+  let ladder = task.vision ? configured.filter((t) => t.provider === "gemini") : configured;
+  const isJev = (t) => t.provider === "jev";
+  const jevErrors = [];
+
+  // Jev rungs at the head of the ladder answer tags as classification. A
+  // metered (TypeSafe) rung runs only when auto_eval_allow_metered is on — the
+  // same switch the judge obeys. Jev rungs below a language-model rung are
+  // skipped: that rung's own ladder is the fallback from there.
+  if (body.task === "tags") {
+    const firstLm = ladder.findIndex((t) => !isJev(t));
+    const lead = firstLm < 0 ? ladder : ladder.slice(0, firstLm);
+    const rungs = usableRungs(lead, env, { allowMetered: !!settings.auto_eval_allow_metered });
+    if (rungs.length) {
+      const { spec, names } = tagQuestions(tags);
+      const state = tagState(body.resource, body.values);
+      for (let i = 0; i < rungs.length; i += 1) {
+        const rung = rungs[i].tier;
+        const name = rung.name || "jev";
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const out = await runJevRung({
+            tier: rung, state, spec, env,
+          });
+          const picked = pickTags(out.answers, names, body.values?.[body.field]);
+          return done(json({ ...picked, tier: name }), {
+            status: "ok", tier: name, failed_rungs: jevErrors, output: picked,
+          });
+        } catch (err) {
+          jevErrors.push(`${name}: ${String(err.message || err).slice(0, 280)}`);
+        }
+      }
+    }
+  }
+  ladder = ladder.filter((t) => !isJev(t));
+
+  if (!ladder.length) {
+    const note = task.vision ? "No vision-capable rung is enabled." : "No usable rung is enabled.";
+    return done(json({ error: "no_model", note }, 502), {
+      status: "error", error: [note, ...jevErrors].join("; "), failed_rungs: jevErrors,
+    });
   }
 
   const { tier, answer, errors } = await runTiers({
-    tiers,
+    tiers: ladder,
     system: task.system,
     user: [{ role: "user", parts }],
     env,
   });
 
-  const failed = (errors || []).map((e) => String(e).slice(0, 300));
+  const failed = [...jevErrors, ...(errors || [])].map((e) => String(e).slice(0, 300));
   if (!tier) {
-    return done(json({ error: "no_model", note: errors.join("; ") }, 502), {
-      status: "error", error: errors.join("; "), failed_rungs: failed,
+    return done(json({ error: "no_model", note: failed.join("; ") }, 502), {
+      status: "error", error: failed.join("; "), failed_rungs: failed,
     });
   }
   const failure = (note) => done(json({ error: "empty", note }, 502), {

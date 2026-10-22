@@ -80,7 +80,7 @@ edit; a form button fills an input that is only persisted on Save.
 | D1 | Tag descriptions | — | Gemini | one-off | **done** — 97 of 98 tags described; script removed |
 | A2 | Draft long-text fields | `draft_fields` | Gemini | request (owner-only) | **built** |
 | A5 | Book metadata gap-fill | — | Gemini | one-off | **removed** — script deleted unrun |
-| A1 | Tag suggestions on save | `tag_suggest` | Gemini (JSON) | request (owner-only) | **built** |
+| A1 | Tag suggestions on save | `tag_suggest` | Jev (one yes/no per tag), Gemini JSON fallback | request (owner-only) | **built**; Jev since 2026-10-22 |
 | C1 | Micro-blog bulk auto-tagging | — | Claude (Claude Code session) | one-off | **done** 2026-09-29 — 816 posts gained tags; script removed |
 | A3 | Image alt text | `image_alt` | Gemini vision | request (owner-only) | **built** for `slideImages` |
 | C3 | Micro-blog near-duplicates | — | none (embeddings) | one-off | **removed** |
@@ -285,7 +285,16 @@ would describe an image it never saw, just as confidently.
 
 ## Log
 
-### 2026-10-22 — `/admin/ai`
+### 2026-10-22 — `/admin/ai`, A1 on Jev
+
+- **A1 now runs on Jev, as the proposal specified.** `jev` rungs at the head of
+  `assist_tiers` answer the `tags` task through `runJevRung`
+  (`src/lib/askJudgeTiers.js`) with a question set from
+  `src/lib/assistTags.js`: one `bool` per tag ("the entry belongs under the tag
+  X (description)"), suggested at p >= 0.7, maybe at 0.4-0.7. A language-model
+  rung below them is the fallback. Measured on a book: 107 questions, ~4.2k
+  input tokens, 363 ms. The TypeSafe route is metered and runs only with
+  `auto_eval_allow_metered` on.
 
 - **Migration `0034`:** `ask_settings.assist_tiers` (the assist ladder; empty
   falls back to `tiers`) and `assist_log` (one row per `/api/assist` call:
