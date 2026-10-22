@@ -73,17 +73,19 @@ const must = ({ data, error }, what) => {
 // Raw rows, shaped the way src/lib/api/* hands them to collectMonthRecords.
 // Those modules cannot be imported here: they pull in the browser client.
 async function loadContent(supabase) {
-  const [blogs, sports, books, treks] = await Promise.all([
+  const [blogs, sports, books, treks, projects] = await Promise.all([
     supabase.from("blogs").select("id, blog_title, blog_description, blog_date, blog_link, blog_platform, created_at"),
     supabase.from("sports").select("id, title, date, description, place, distance, time, time_certificate_link, slide_images, created_at"),
     supabase.from("books").select("id, title, author, blog_link, date_finished, date_precision, created_at"),
     supabase.from("treks").select("id, fort_name, trek_time, endurance_level, date, blog_link, slide_images, created_at"),
+    supabase.from("projects").select("id, title, subtitle, link, date, description, visible, created_at"),
   ]);
   return {
     blogs: must(blogs, "blogs"),
     sports: must(sports, "sports").map((s) => ({ ...s, timeCertificateLink: s.time_certificate_link })),
     books: must(books, "books"),
     treks: must(treks, "treks"),
+    projects: must(projects, "projects"),
   };
 }
 

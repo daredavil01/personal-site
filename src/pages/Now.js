@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import MonthSection from "../components/Now/MonthSection";
-import { useNowMeta, useNowMonths } from "../context/ContentContext";
+import { useNowMeta, useNowMonths, useProjects } from "../context/ContentContext";
+import { monthSlug } from "../lib/api/now";
+import { mergeMonthRecords } from "../lib/nowAutofill";
 
 const Now = () => {
   const { data: nowMeta } = useNowMeta();
   const { data: nowData } = useNowMonths();
 
-  const current = nowData.find((m) => m.isCurrent);
+  const { data: projects } = useProjects();
+
+  // Projects dated this month join it on their own, no admin pull needed.
+  // Idempotent: a project already typed or pulled into the month is not repeated.
+  const stored = nowData.find((m) => m.isCurrent);
+  const current = useMemo(() => (stored
+    ? { ...stored, sections: mergeMonthRecords({ projects }, monthSlug(stored.month, stored.year), stored.sections || {}) }
+    : null), [stored, projects]);
   const lastUpdated = current ? `${current.month} ${current.year}` : "";
 
   return (

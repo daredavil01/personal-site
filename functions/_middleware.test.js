@@ -497,6 +497,11 @@ describe("one URL per page", () => {
     expect(res.status).toBe(200);
   });
 
+  it("never redirects to another host from a protocol-relative path", async () => {
+    const res = await run("//evil.example/");
+    if (res.status === 301) expect(res.location.startsWith("https://sankettambare.in/")).toBe(true);
+  });
+
   it("never redirects a POST", async () => {
     const res = await run("/about/", {}, undefined, { method: "POST" });
     expect(res.status).not.toBe(301);

@@ -327,7 +327,11 @@ const AskChat = ({ compact, focus, starters: givenStarters }) => {
     // someone is reading them.
   }, []);
 
+  // Follows the conversation, never an empty chat: this effect also runs on
+  // mount, and a chat embedded at the foot of a page (a newsletter issue) would
+  // otherwise drag the window to the bottom before anyone has read the top.
   useEffect(() => {
+    if (!turns.length) return;
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turns, pending]);
 

@@ -7,6 +7,8 @@
 //   - sport : date      "Month DD, YYYY" (parseable by new Date())
 //   - micro : date      "YYYY-MM-DD" (Postgres date)
 //   - presentation: date "YYYY-MM-DD" (nullable — undated decks bucket by created_at)
+//   - project: date "YYYY-MM-DD" (nullable — an undated project has no month;
+//             no created_at fallback, editing a row must not move it)
 //   - book  : date_finished "YYYY-MM-DD", trusted only when date_precision is
 //             "day" — a "year" row's month and day are filler (0008)
 // created_at is used only as a defensive fallback (all date columns are NOT NULL).
@@ -30,6 +32,7 @@ const rawDate = (item, type) => {
  */
 export function parseContentDate(item, type) {
   const value = rawDate(item, type);
+  if (type === "project" && !value) return null;
 
   if (typeof value === "string" && value.trim()) {
     if (type === "trek") {

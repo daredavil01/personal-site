@@ -1,3 +1,4 @@
+/* eslint-disable no-script-url -- the test feeds javascript: urls on purpose */
 import { buildShareSnapshot, MAX_TURNS } from "./askShareSnapshot";
 
 const user = (content) => ({ role: "user", content });
@@ -79,5 +80,25 @@ describe("buildShareSnapshot", () => {
     ));
     expect(buildShareSnapshot(long).reason).toBe("too-long");
     expect(buildShareSnapshot([user("q"), answer("x".repeat(120000))]).reason).toBe("too-large");
+  });
+
+  it("keeps only http(s) links and site paths from the visitor's thread", () => {
+    const evil = answer("hi", {
+      sources: [
+        { title: "a", url: "javascript:alert(1)", image: "data:image/svg+xml,x", external: true },
+        { title: "b", url: "//evil.example/x" },
+        { title: "c", url: "https://example.com/ok", external: false },
+      ],
+      linkable: ["javascript:alert(1)", "/treks/1"],
+    });
+    const { snapshot } = buildShareSnapshot([user("q"), evil]);
+    const [a, b, c] = snapshot.thread[1].sources;
+    expect(a.url).toBeNull();
+    expect(a.image).toBeNull();
+    expect(a.external).toBe(false);
+    expect(b.url).toBeNull();
+    expect(c.url).toBe("https://example.com/ok");
+    expect(c.external).toBe(true);
+    expect(snapshot.linkable).toEqual(["/treks/1"]);
   });
 });

@@ -78,3 +78,49 @@ export async function describeImage(file, context) {
   );
   return body.alt;
 }
+
+// --- /admin/ai: the assist switches, ladder and audit log (0034) -------------
+
+/** The three things /admin/ai edits or shows, read in one go. */
+export async function getAssistConfig() {
+  const { data, error } = await supabase
+    .from("ask_settings")
+    .select("ai_features, assist_tiers, tiers")
+    .eq("id", 1)
+    .single();
+  if (error) throw error;
+  return {
+    aiFeatures: data.ai_features || {},
+    assistTiers: Array.isArray(data.assist_tiers) ? data.assist_tiers : [],
+    askTiers: Array.isArray(data.tiers) ? data.tiers : [],
+  };
+}
+
+/** Writes only these two columns, so the /ask settings form is never clobbered. */
+export async function saveAssistConfig({ aiFeatures, assistTiers }) {
+  const { error } = await supabase
+    .from("ask_settings")
+    .update({ ai_features: aiFeatures, assist_tiers: assistTiers })
+    .eq("id", 1);
+  if (error) throw error;
+}
+
+/** Log rows newer than `days`, newest first. Owner-only (RLS). */
+export async function listAssistLog({ days = 30, limit = 1000 } = {}) {
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const { data, error } = await supabase
+    .from("assist_log")
+    .select("*")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
+/** Deletes rows older than `days`. */
+export async function pruneAssistLog(days = 90) {
+  const before = new Date(Date.now() - days * 86400000).toISOString();
+  const { error } = await supabase.from("assist_log").delete().lt("created_at", before);
+  if (error) throw error;
+}

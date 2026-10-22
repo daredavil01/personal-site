@@ -1,0 +1,40 @@
+# Weekly text backup of the Supabase content store into a private R2 bucket.
+# See scripts/backup-r2.mjs for what is in it and docs/backups.md to restore.
+
+name: Backup
+
+on:
+  schedule:
+    - cron: "0 21 * * 0" # Monday 02:30 IST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # No secrets in this step's environment: install scripts of every
+      # dependency run here, and none of them needs the service-role key.
+      - run: npm ci
+
+      - run: npm run backup
+        env:
+          VITE_SUPABASE_URL: https://xjqbvvurlmbslikiukdm.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          R2_BACKUP_BUCKET: ${{ vars.R2_BACKUP_BUCKET || 'personal-website-backups' }}

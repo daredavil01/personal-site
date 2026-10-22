@@ -175,7 +175,7 @@ const BLANK_TIER = {
 
 // The ladder is ordered, so this needs move up/down — which the shared
 // RepeatableRows does not do. Everything else about it is the same.
-const TierRows = ({ rows, onChange, fields = TIER_FIELDS, blank = BLANK_TIER, noun = "tier" }) => {
+export const TierRows = ({ rows, onChange, fields = TIER_FIELDS, blank = BLANK_TIER, noun = "tier" }) => {
   const set = (i, name, value) => onChange(rows.map((r, idx) => (idx === i ? { ...r, [name]: value } : r)));
   const move = (i, delta) => {
     const next = [...rows];

@@ -99,7 +99,7 @@ export async function onRequestPost(context) {
   let quota;
   const ipHash = await hashIp(request, env);
   try {
-    quota = await rpc(env, "ask_quota", { p_ip_hash: ipHash, p_kind: "voice" });
+    quota = await rpc(env, "ask_quota", { p_ip_hash: ipHash, p_kind: "voice" }, { serviceRole: true });
   } catch (_) {
     return json({ error: "unavailable" }, 503);
   }

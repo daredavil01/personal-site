@@ -15,6 +15,10 @@ export const MAX_TURNS = 20;
 export const MAX_BYTES = 100000;
 export const SUMMARY_CHARS = 200;
 
+// The thread comes from the visitor's browser, so a url is kept only when it is
+// an http(s) link or a site path — never javascript:, data: or //host.
+const safeLink = (url) => (/^(https?:\/\/|\/(?!\/))/i.test(String(url || "")) ? String(url) : null);
+
 // What a shared page needs to render a turn, and nothing else. Notably absent:
 // `linkable` (hoisted to the share, it is the same list every turn), `media`
 // (recomputed from the answer and its sources), `streaming` and `retry` (state
@@ -28,11 +32,11 @@ function slimTurn(turn) {
       entity_type: s.entity_type,
       entity_id: s.entity_id,
       title: s.title,
-      url: s.url,
+      url: safeLink(s.url),
       date: s.date,
-      image: s.image || null,
+      image: safeLink(s.image),
       tags: s.tags || [],
-      external: !!s.external,
+      external: /^https?:\/\//i.test(String(s.url || "")),
       domain: s.domain || null,
     })),
     widened: !!turn.widened,
@@ -65,7 +69,7 @@ export function buildShareSnapshot(turns, { types = [], refusalNote = "" } = {})
 
   // One list per share rather than per turn: it is the same roster every time,
   // and repeating ~100 urls per turn would be most of the row.
-  const linkable = [...new Set(usable.flatMap((t) => t.linkable || []).filter(Boolean))];
+  const linkable = [...new Set(usable.flatMap((t) => t.linkable || []).map(safeLink).filter(Boolean))];
 
   const title = firstBy(thread, "user")?.content?.trim() || "A conversation with the archive";
   const firstAnswer = stripMarkdownImages(answers[0]?.content || "").replace(/\s+/g, " ").trim();

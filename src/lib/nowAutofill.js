@@ -1,4 +1,4 @@
-// Maps existing content rows (blogs / sports / books / treks / micro-posts) into
+// Maps existing content rows (blogs / sports / books / treks / projects / micro-posts) into
 // the row shapes the Now page's month sections expect, so the admin month editor
 // can pre-fill a month instead of having it retyped.
 //
@@ -106,6 +106,22 @@ const SOURCES = [
     }),
   },
   {
+    key: "projects",
+    type: "project",
+    section: "projects",
+    label: "Projects",
+    // By the project's own date only; hidden drafts never reach a month.
+    note: "by project date",
+    usable: () => (p) => !!p.date && p.visible !== false,
+    map: (p) => ({
+      name: clean(p.title),
+      date: isoOf(p, "project"),
+      url: clean(p.link),
+      description: clean(p.subtitle) || clean(p.desc ?? p.description),
+      ref: refOf("project", p.id),
+    }),
+  },
+  {
     key: "micro",
     section: "micro",
     label: "Micro posts",
@@ -129,7 +145,7 @@ const SOURCES = [
 // The field that identifies a row within its section, for duplicate detection
 // and for the preview label.
 const TITLE_KEY = {
-  blogs: "title", running: "event", books: "title", events: "name", micro: "text",
+  blogs: "title", running: "event", books: "title", events: "name", projects: "name", micro: "text",
 };
 
 /**
@@ -162,7 +178,7 @@ const sameRace = (a, b) => {
 
 export function isDuplicate(existing, row, section) {
   const titleKey = TITLE_KEY[section];
-  const urlKey = section === "blogs" ? "url" : "link";
+  const urlKey = section === "blogs" || section === "projects" ? "url" : "link";
   const rowUrl = clean(row[urlKey]).toLowerCase();
   const rowTitle = clean(row[titleKey]).toLowerCase();
   return (existing || []).some((e) => {
@@ -219,7 +235,7 @@ const ellipsis = (text, max = 90) => (text.length > max ? `${text.slice(0, max).
  * `data.micro` is expected to be already restricted to the month (micro-posts
  * are fetched server-side); every other source is filtered here.
  *
- * @param {{blogs?: any[], sports?: any[], books?: any[], treks?: any[], micro?: any[]}} data
+ * @param {{blogs?: any[], sports?: any[], books?: any[], treks?: any[], projects?: any[], micro?: any[]}} data
  * @param {string} monthKey
  * @param {object} sections current sections blob (for duplicate filtering)
  * @returns {{key, label, section, note?, rows: {row, label, meta}[]}[]}

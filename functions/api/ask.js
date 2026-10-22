@@ -479,7 +479,7 @@ export async function onRequestPost(context) {
   let quota;
   const ipHash = await hashIp(request, env);
   try {
-    quota = await rpc(env, "ask_quota", { p_ip_hash: ipHash });
+    quota = await rpc(env, "ask_quota", { p_ip_hash: ipHash }, { serviceRole: true });
   } catch (_) {
     return json({ error: "unavailable" }, 503);
   }
@@ -661,7 +661,7 @@ export async function onRequestPost(context) {
         p_referer: request.headers.get("Referer"),
         p_message_uuid: messageId,
         p_types: types,
-      }).catch(() => {}),
+      }, { serviceRole: true }).catch(() => {}),
     );
   };
 
@@ -789,7 +789,7 @@ export async function onRequestPost(context) {
         });
         controller.close();
         context.waitUntil(
-          rpc(env, "ask_record_tier", { p_tier: streamedTier }).catch(() => {}),
+          rpc(env, "ask_record_tier", { p_tier: streamedTier }, { serviceRole: true }).catch(() => {}),
         );
         logExchange({
           answer: streamedText,
@@ -831,7 +831,7 @@ export async function onRequestPost(context) {
   const followups = buildFollowups(sources, browse);
   if (!cachedAnswer) storeAnswer(cleanAnswer, usedTier);
   context.waitUntil(
-    rpc(env, "ask_record_tier", { p_tier: usedTier }).catch(() => {}),
+    rpc(env, "ask_record_tier", { p_tier: usedTier }, { serviceRole: true }).catch(() => {}),
   );
   logExchange({
     answer: cleanAnswer,

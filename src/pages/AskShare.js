@@ -4,6 +4,7 @@ import Main from "../layouts/Main";
 import { buildShareMeta } from "../data/pageMeta";
 import AnswerBody from "../components/Ask/AnswerBody";
 import { entityLabel } from "../data/askConfig";
+import { isExternal } from "../lib/askFormat";
 import { bumpShareView, getShare } from "../lib/api/askShares";
 
 // A conversation someone pressed Share on, frozen at the moment they sent it.
@@ -42,11 +43,13 @@ const SourceCard = ({ source, index }) => {
     </>
   );
   const className = "group flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-800 px-3 py-2 hover:border-stone-400 dark:hover:border-stone-600 transition-colors";
-  return source.external ? (
-    <a href={source.url} target="_blank" rel="noreferrer" className={className}>{body}</a>
-  ) : (
-    <Link to={source.url || "/"} className={className}>{body}</Link>
-  );
+  // Decided from the url itself, never from the stored `external` flag: a
+  // share's sources came from the visitor's browser.
+  if (isExternal(source.url)) {
+    return <a href={source.url} target="_blank" rel="noreferrer" className={className}>{body}</a>;
+  }
+  const path = /^\/(?!\/)/.test(String(source.url || "")) ? source.url : "/";
+  return <Link to={path} className={className}>{body}</Link>;
 };
 
 const AskShare = () => {

@@ -285,6 +285,18 @@ would describe an image it never saw, just as confidently.
 
 ## Log
 
+### 2026-10-22 — `/admin/ai`
+
+- **Migration `0034`:** `ask_settings.assist_tiers` (the assist ladder; empty
+  falls back to `tiers`) and `assist_log` (one row per `/api/assist` call:
+  task, resource, field, rung, failed rungs, latency, prompt length, status,
+  error, output — never the prompt or image bytes). Owner-only RLS; the worker
+  writes with the service key from `waitUntil()`.
+- **`/admin/ai`** (`src/pages/admin/AiAssist.js`): the three assist switches
+  plus the shared master, the assist ladder (reuses `TierRows`), per-task
+  counts / errors / fallbacks / p50–p95, and the log. Saves only
+  `ai_features` and `assist_tiers`.
+
 ### 2026-09-22 — wave 3 (post_kind in retrieval, D5, E3, E5, E4, B2)
 
 - **No migration.** Every item reads a column, a settings field or a file that

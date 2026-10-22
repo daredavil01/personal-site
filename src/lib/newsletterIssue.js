@@ -118,7 +118,7 @@ export function monthGrid(slug) {
 }
 
 // Races and treks first — they are what an issue is remembered by.
-const REF_ORDER = ["running", "events", "books", "blogs", "micro"];
+const REF_ORDER = ["running", "events", "books", "projects", "blogs", "micro"];
 
 /** Archive rows the issue points at, most memorable first. */
 export function issueRefs(sections = {}, max = 8) {

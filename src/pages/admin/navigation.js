@@ -1,5 +1,6 @@
 import {
   Award,
+  Bot,
   BookOpen,
   Briefcase,
   Calendar,
@@ -70,6 +71,7 @@ export const NAV_GROUPS = [
       { to: "/admin/ask/settings", label: "Settings", icon: MessageCircle },
       { to: "/admin/ask/conversations", label: "Conversations", icon: MessagesSquare },
       { to: "/admin/ask/shares", label: "Shares", icon: Share2 },
+      { to: "/admin/ai", label: "AI assist", icon: Bot },
     ],
   },
   {

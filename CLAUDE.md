@@ -508,6 +508,21 @@ Full reference: `docs/newsletter.md`.
   source and `npm run logbook` keep what they have (`keep: true` in
   `scripts/lib/registry.mjs`) instead of deleting the essays' chunks.
 
+## Admin AI assist (/admin/ai)
+
+Draft, Suggest tags and alt text (`functions/api/assist.js`) run on
+`ask_settings.assist_tiers`, falling back to `tiers` when empty, and log every
+call to `assist_log` (`0034`, owner-only; no prompts or image bytes). The page
+is `src/pages/admin/AiAssist.js`; its switches are the same `ai_features` keys
+as Ask · Settings. Status and history: `docs/ai-features-status.md`.
+
+## Backups
+
+`npm run backup` (`scripts/backup-r2.mjs`) gzips 23 Supabase tables as JSON to
+R2 `personal-website-backups/text/<date>.json.gz`; `.github/workflows/backup.yml`
+runs it weekly. A bucket lifecycle rule expires them after 30 days. Restore:
+`docs/backups.md`. Security audit status: `docs/security-audit-2026-10.md`.
+
 ## Environment Variables
 
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — client (baked into the
@@ -778,6 +793,9 @@ JSON blob keyed by any of `blogs`, `running`, `books`, `events`, `projects`,
 When pushing a new month's update:
 
 1. Add a `now_months` row with `isCurrent: true` and the month's `sections`.
+   Projects dated in the month (visible, with a `date`) join its Projects
+   section on their own: live on /now, via the editor's pull button and via
+   `newsletter:draft` (`nowAutofill.js` SOURCES).
 2. Set `isCurrent: false` on the previous month's row (saving a current month
    in `/admin` does this for you).
 3. Write and publish the previous month's issue (`/newsletter <YYYY-MM>`).

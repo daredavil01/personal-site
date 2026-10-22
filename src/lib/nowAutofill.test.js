@@ -373,3 +373,32 @@ describe("release-note blockquotes", () => {
     expect(changelogHighlights(parseChangelog(plain), "2026-06")).toHaveLength(1);
   });
 });
+
+describe("projects join the month of their date", () => {
+  const projects = [
+    { id: 1, title: "Logbook", subtitle: "Essays as data", link: "https://x.dev/logbook", date: "2026-09-14", visible: true, created_at: "2026-10-01" },
+    { id: 2, title: "Undated", link: "https://x.dev/u", date: null, visible: true, created_at: "2026-09-03" },
+    { id: 3, title: "Hidden draft", link: "https://x.dev/h", date: "2026-09-20", visible: false },
+    { id: 4, title: "Old", link: "https://x.dev/o", date: "2026-08-02", visible: true },
+  ];
+
+  it("pulls only dated, visible projects of that month", () => {
+    const next = mergeMonthRecords({ projects }, "2026-09", {});
+    expect(next.projects).toEqual([{
+      name: "Logbook",
+      date: "2026-09-14",
+      url: "https://x.dev/logbook",
+      description: "Essays as data",
+      ref: { type: "project", id: 1 },
+    }]);
+  });
+
+  it("adopts the ref onto a hand-typed row with the same url instead of repeating it", () => {
+    const typed = { projects: [{ name: "The Logbook", url: "https://x.dev/logbook", description: "typed" }] };
+    const next = mergeMonthRecords({ projects }, "2026-09", typed);
+    expect(next.projects).toHaveLength(1);
+    expect(next.projects[0].description).toBe("typed");
+    expect(next.projects[0].ref).toEqual({ type: "project", id: 1 });
+    expect(mergeMonthRecords({ projects }, "2026-09", next)).toEqual(next);
+  });
+});

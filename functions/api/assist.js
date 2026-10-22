@@ -14,9 +14,12 @@
 // the is_owner() RPC called with the CALLER'S own access token, so the answer
 // comes from the same SQL the RLS policies use. Nothing is spent before it.
 //
-// The model ladder is ask_settings.tiers — the same one /ask answers with, so
-// Gemini is rung 1 here too and a retired model stays an /admin edit rather
-// than a deploy.
+// The model ladder is ask_settings.assist_tiers, edited at /admin/ai; when it
+// is empty, ask_settings.tiers — the one /ask answers with. Either way a retired
+// model stays an /admin edit rather than a deploy.
+//
+// Every call past the owner check leaves one assist_log row (0034): task, rung,
+// latency, outcome and what came back. Never the prompt, never image bytes.
 //
 // Two tasks:
 //   draft  one long-text field, returned as text
@@ -76,7 +79,7 @@ async function isOwner(env, request) {
 async function loadSettings(env) {
   try {
     const res = await fetch(
-      `${env.VITE_SUPABASE_URL}/rest/v1/ask_settings?id=eq.1&select=tiers,ai_features&limit=1`,
+      `${env.VITE_SUPABASE_URL}/rest/v1/ask_settings?id=eq.1&select=tiers,assist_tiers,ai_features&limit=1`,
       { headers: restHeaders(env) },
     );
     if (!res.ok) throw new Error(`ask_settings ${res.status}`);
@@ -252,6 +255,18 @@ const TASKS = {
   },
 };
 
+/**
+ * One audit row, written after the response is on its way. A failed write is
+ * dropped: the log must never be the reason an answer did not arrive.
+ */
+function writeLog(env, row) {
+  return fetch(`${env.VITE_SUPABASE_URL}/rest/v1/assist_log`, {
+    method: "POST",
+    headers: { ...restHeaders(env, { serviceRole: true }), Prefer: "return=minimal" },
+    body: JSON.stringify(row),
+  }).catch(() => {});
+}
+
 /** The first JSON object in an answer, or null. */
 function parseJson(text) {
   const match = String(text || "").match(/\{[\s\S]*\}/);
@@ -285,11 +300,28 @@ export async function onRequestPost(context) {
     return json({ error: "bad_request", note: `Unknown task ${body?.task || ""}`.trim() }, 400);
   }
 
+  const started = Date.now();
+  let promptChars = null;
+  // Logs the outcome and returns the response, so every exit below is one call.
+  const done = (response, fields) => {
+    context.waitUntil(writeLog(env, {
+      task: body.task,
+      resource: clamp(body.resource, 60) || null,
+      field: clamp(body.field, 60) || null,
+      latency_ms: Date.now() - started,
+      prompt_chars: promptChars,
+      failed_rungs: [],
+      ...fields,
+      error: fields.error ? String(fields.error).slice(0, 1000) : null,
+    }));
+    return response;
+  };
+
   // The switchboard is checked before the prompt is built, not after: nothing
   // is spent, and nothing is even assembled, for a feature that is switched off.
   const settings = await loadSettings(env);
   if (!aiFeatureOn(settings, task.feature)) {
-    return json({ error: "disabled", note: task.offNote }, 403);
+    return done(json({ error: "disabled", note: task.offNote }, 403), { status: "disabled" });
   }
 
   let parts;
@@ -304,17 +336,22 @@ export async function onRequestPost(context) {
       parts = [{ text: buildPrompt(body) }];
     }
   } catch (err) {
-    return json({ error: err.code || "unavailable", note: err.message }, err.code ? 400 : 503);
+    return done(
+      json({ error: err.code || "unavailable", note: err.message }, err.code ? 400 : 503),
+      { status: "error", error: err.message },
+    );
   }
+  promptChars = parts.reduce((n, p) => n + (p.text ? p.text.length : 0), 0);
 
-  const configured = Array.isArray(settings.tiers) && settings.tiers.length
-    ? settings.tiers
-    : DEFAULT_ASK_SETTINGS.tiers;
+  // The assist ladder when one is set at /admin/ai, else the /ask ladder.
+  const pick = [settings.assist_tiers, settings.tiers, DEFAULT_ASK_SETTINGS.tiers];
+  const configured = pick.find((t) => Array.isArray(t) && t.length) || [];
   // A vision task keeps only the rungs that can actually see: a text rung would
   // answer from the prompt alone and sound just as sure.
   const tiers = task.vision ? configured.filter((t) => t.provider === "gemini") : configured;
   if (!tiers.length) {
-    return json({ error: "no_model", note: "No vision-capable rung is enabled." }, 502);
+    const note = "No vision-capable rung is enabled.";
+    return done(json({ error: "no_model", note }, 502), { status: "error", error: note });
   }
 
   const { tier, answer, errors } = await runTiers({
@@ -324,21 +361,30 @@ export async function onRequestPost(context) {
     env,
   });
 
-  if (!tier) return json({ error: "no_model", note: errors.join("; ") }, 502);
+  const failed = (errors || []).map((e) => String(e).slice(0, 300));
+  if (!tier) {
+    return done(json({ error: "no_model", note: errors.join("; ") }, 502), {
+      status: "error", error: errors.join("; "), failed_rungs: failed,
+    });
+  }
+  const failure = (note) => done(json({ error: "empty", note }, 502), {
+    status: "error", tier, error: note, failed_rungs: failed,
+  });
 
   if (body.task === "tags") {
     const parsed = parseJson(answer);
-    if (!parsed) return json({ error: "empty", note: `${tier} returned no JSON.` }, 502);
+    if (!parsed) return failure(`${tier} returned no JSON.`);
     const suggested = knownOnly(parsed.suggested, vocabulary, body.values?.[body.field]);
-    return json({
-      suggested,
-      maybe: knownOnly(parsed.maybe, vocabulary, [...(body.values?.[body.field] || []), ...suggested]),
-      tier,
+    const maybe = knownOnly(parsed.maybe, vocabulary, [...(body.values?.[body.field] || []), ...suggested]);
+    return done(json({ suggested, maybe, tier }), {
+      status: "ok", tier, failed_rungs: failed, output: { suggested, maybe },
     });
   }
 
   const draft = tidy(answer);
-  if (!draft) return json({ error: "empty", note: `${tier} returned nothing usable.` }, 502);
+  if (!draft) return failure(`${tier} returned nothing usable.`);
 
-  return body.task === "alt" ? json({ alt: draft, tier }) : json({ draft, tier });
+  return done(body.task === "alt" ? json({ alt: draft, tier }) : json({ draft, tier }), {
+    status: "ok", tier, failed_rungs: failed, output: { text: draft.slice(0, 2000) },
+  });
 }

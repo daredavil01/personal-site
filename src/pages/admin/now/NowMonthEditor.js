@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import FormField from "../FormField";
 import { nowMonths, MONTH_ORDER } from "../../../lib/api/now";
 import {
-  useBlogs, useBooks, useSports, useTreks,
+  useBlogs, useBooks, useProjects, useSports, useTreks,
 } from "../../../context/ContentContext";
 import { monthLabel } from "../../../lib/monthDigest";
 import { getMicroblogByMonth } from "../../../lib/api/microblog";
@@ -83,6 +83,7 @@ const NowMonthEditor = () => {
   const { data: sports } = useSports();
   const { data: books } = useBooks();
   const { data: treks } = useTreks();
+  const { data: projects } = useProjects();
 
   const dirty = !!form && JSON.stringify(form) !== JSON.stringify(baseline);
   const unsaved = useUnsavedGuard(dirty);
@@ -206,7 +207,7 @@ const NowMonthEditor = () => {
       setPulling(false);
     }
     const groups = collectMonthRecords({
-      blogs, sports, books, treks, micro,
+      blogs, sports, books, treks, projects, micro,
     }, monthKey, sections).map((group) => ({
       key: group.key,
       label: `${group.label} → ${group.section}`,

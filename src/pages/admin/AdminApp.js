@@ -15,6 +15,7 @@ import NowMetaEditor from "./NowMetaEditor";
 import AskSettingsEditor from "./AskSettingsEditor";
 import AskConversations from "./AskConversations";
 import AskShares from "./AskShares";
+import AiAssist from "./AiAssist";
 import NowMonthEditor from "./now/NowMonthEditor";
 import { ToastProvider } from "./ui/ToastContext";
 import { Spinner } from "./ui/Feedback";
@@ -56,6 +57,7 @@ const AdminRoutes = ({ session }) => {
         <Route path="ask/settings" element={<AskSettingsEditor />} />
         <Route path="ask/conversations" element={<AskConversations />} />
         <Route path="ask/shares" element={<AskShares />} />
+        <Route path="ai" element={<AiAssist />} />
         <Route path="resume" element={<Navigate to="/admin/resume/experience" replace />} />
         <Route path="resume/:section" element={<ResumePage />} />
         {/* Static segments outrank this, so it only catches the schema-driven

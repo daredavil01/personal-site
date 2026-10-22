@@ -157,6 +157,9 @@ MarkdownImage.defaultProps = { src: "", alt: "", sources: [] };
 const AnswerBody = ({ text, sources, linkable }) => {
   const options = useMemo(() => ({
     forceBlock: true,
+    // Raw HTML renders as text. A shared conversation is stored from what the
+    // browser sent, so an <iframe srcdoc> in it would otherwise run on this origin.
+    disableParsingRawHTML: true,
     overrides: {
       // The answer lives in a chat bubble — headings would break it.
       h1: { component: "strong" },

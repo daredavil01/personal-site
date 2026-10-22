@@ -7,6 +7,7 @@ export {
   ArrowUpDown,
   Award,
   BookOpen,
+  Bot,
   Briefcase,
   Calendar,
   Camera,

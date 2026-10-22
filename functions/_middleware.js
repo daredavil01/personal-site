@@ -263,7 +263,9 @@ export async function onRequest(context) {
       if (key) target = tagHref(key);
     }
     if (target !== url.pathname) {
-      return Response.redirect(new URL(`${target}${url.search}`, url).toString(), 301);
+      // Pinned to our origin: "//evil.com/" strips to "//evil.com", which
+      // new URL() would read as a protocol-relative link to another host.
+      return Response.redirect(`${url.origin}${target}${url.search}`, 301);
     }
   }
 
