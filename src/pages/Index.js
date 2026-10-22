@@ -6,6 +6,7 @@ import LatestPosts from "../components/Index/LatestPosts";
 import MonthlyDigest from "../components/Index/MonthlyDigest";
 import OneMinuteIntro from "../components/common/OneMinuteIntro";
 import GlobeShowcase from "../components/Index/GlobeShowcase";
+import Trailer from "../components/Index/Trailer";
 import SectionHeader from "../components/common/SectionHeader";
 import HOME_FEATURES from "../data/homeFeatures";
 
@@ -27,6 +28,8 @@ const Index = () => (
       </header>
 
       <GlobeShowcase />
+
+      <Trailer />
 
       <LifeStats />
 
