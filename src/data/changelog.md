@@ -13,6 +13,13 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v24.1.0] — 2026-10-23
+
+### Added
+- **The /videos film** (`scripts/videos-film/`, `public/video/the-videos-story.{mp4,jpg,vtt}`): 90 seconds, vertical, narrated. It opens in orbit and zooms on real satellite imagery down to Pune, where a browser opens on the site; rewinds through the channel year by year since its first upload; counts what the site already tracked against the twelve fields a video took by hand; cuts the ribbons on /videos; walks the live page (the Shorts switch, search, filters, most viewed, play); then runs Sync now in the admin and follows the data from the YouTube Data API through the Cloudflare Worker into Postgres and onto the page. Each act has its own type and palette; the score is synthesised for it and the narrator is the Blueprint film's.
+- **Film pipeline** (`scripts/videos-film/capture.mjs`, `film.html`, `score.mjs`, `render.mjs`, `npm run videos:film`): capture once (satellite tiles, thumbnails, live phone shots, the admin against a replayed backend), render frame by frame like the homepage trailer, `--remix` for sound only, `--publish` for the web copy. Every number comes from the live videos table and /api/stats when it renders.
+- **Film on /videos** (`src/components/Videos/Story.js`, `src/pages/Videos.js`): the film sits in the page header with its poster and narration captions, and loads nothing until play is pressed; `story.test.js` holds the web encode under 8 MB.
+
 ## [v24.0.0] — 2026-10-23
 
 ### Added

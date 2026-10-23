@@ -1,0 +1,1270 @@
+<!doctype html>
+<!--
+  The /videos film: 90 seconds, vertical, one page that draws any moment of
+  itself. renderAt(t) sets every element from the time alone (it awaits only
+  the satellite tiles that moment needs), so frames render in any order, on
+  any number of tabs, and always come out the same. render.mjs seeks it frame
+  by frame, like the homepage trailer (scripts/trailer/).
+
+  Six acts, each in its own type and palette:
+    0–15   Orbit       Orbitron + Plex Mono over NASA's globe, then Esri
+                       satellite tiles all the way down to Pune; a browser opens
+    15–28  Back-story  a VHS rewind, then a scrapbook of the channel by year
+                       (DM Serif Display, Caveat)
+    28–34  The gap     the site's counts on index cards, and the chores of
+                       listing a video by hand (Special Elite, Bebas Neue)
+    34–40  Unveiling   crimson and gold; the ribbons come off (Abril Fatface)
+    40–63  Features    the live /videos page on a phone (Space Grotesk)
+    63–80  Under the hood   blueprint: the admin's Sync now, then the data
+                       flowing from YouTube to the site (JetBrains Mono)
+    80–90  Finale      back out to orbit, and the address (Anton)
+
+  The music is 120 BPM (score.mjs): a beat is 0.5 s, a bar 2 s. Every number
+  comes from window.FILM (data.js, written by render.mjs from the live videos
+  table and /api/stats); nothing here is typed in.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Anton&family=Bebas+Neue&family=Caveat:wght@600;700&family=Chakra+Petch:wght@600;700&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@500;800&family=Playfair+Display:ital,wght@1,600&family=Space+Grotesk:wght@500;700&family=Special+Elite&family=Tiro+Devanagari+Marathi&family=VT323&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  body { font-family: Inter, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .layer { position: absolute; inset: 0; }
+  #cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+  .scene { position: absolute; inset: 0; display: none; transform-origin: 540px 960px; overflow: hidden; }
+  .c { position: absolute; left: 0; top: 0; will-change: transform; white-space: nowrap; }
+  .ch { display: inline-block; white-space: pre; }
+  .full { position: absolute; inset: 0; }
+
+  .orb { font-family: Orbitron, sans-serif; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+  .plex { font-family: "IBM Plex Mono", monospace; }
+  .caveat { font-family: Caveat, cursive; font-weight: 700; }
+  .dms { font-family: "DM Serif Display", serif; }
+  .typer { font-family: "Special Elite", monospace; }
+  .bebas { font-family: "Bebas Neue", sans-serif; letter-spacing: .02em; line-height: .9; }
+  .abril { font-family: "Abril Fatface", serif; line-height: .95; }
+  .playi { font-family: "Playfair Display", serif; font-style: italic; font-weight: 600; }
+  .sg { font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .jb { font-family: "JetBrains Mono", monospace; }
+  .chakra { font-family: "Chakra Petch", sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .anton { font-family: Anton, sans-serif; text-transform: uppercase; line-height: .92; }
+  .vt { font-family: VT323, monospace; }
+  .deva { font-family: "Tiro Devanagari Marathi", serif; }
+
+  /* phone */
+  .phone { width: 600px; height: 1240px; border-radius: 86px; background: linear-gradient(145deg, #2b2d33, #0b0c10 40%, #1b1c21); padding: 20px;
+    box-shadow: 0 0 0 2px #45474f, 0 70px 140px rgba(0,0,0,.45); }
+  .scr { width: 560px; height: 1200px; border-radius: 66px; overflow: hidden; position: relative; background: #fff; }
+  .scr img.shot { position: absolute; left: 0; top: 64px; width: 560px; transform-origin: 50% 0; }
+  .sbar { position: absolute; left: 0; right: 0; top: 0; height: 64px; display: flex; justify-content: space-between; align-items: center; padding: 8px 52px 0; font: 700 22px Inter; z-index: 2; background: #fff; color: #111; }
+  .island { position: absolute; top: 34px; left: 50%; width: 156px; height: 42px; margin-left: -78px; background: #000; border-radius: 21px; z-index: 3; }
+  .glare { position: absolute; inset: 20px; border-radius: 66px; background: linear-gradient(118deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 30%); z-index: 6; pointer-events: none; }
+  .finger { position: absolute; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; background: rgba(255,255,255,.55); border: 3px solid rgba(0,0,0,.35); box-shadow: 0 8px 24px rgba(0,0,0,.3); z-index: 5; }
+  .ripple { position: absolute; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 5px solid #e11d2a; z-index: 5; }
+
+  /* browser window */
+  .win { border-radius: 26px; overflow: hidden; background: #fff; box-shadow: 0 50px 120px rgba(0,0,0,.55), 0 0 0 1.5px rgba(255,255,255,.18); }
+  .win .tabs { height: 64px; background: #dfe3ea; display: flex; align-items: flex-end; padding: 0 22px; gap: 10px; }
+  .win .dots { display: flex; gap: 12px; align-self: center; margin-right: 18px; }
+  .win .dots i { width: 18px; height: 18px; border-radius: 50%; display: block; }
+  .win .tab { height: 48px; padding: 0 22px; border-radius: 14px 14px 0 0; background: #fff; color: #222; font: 600 21px Inter; display: flex; align-items: center; gap: 12px; }
+  .win .addr { height: 76px; background: #fff; display: flex; align-items: center; gap: 18px; padding: 0 22px; border-bottom: 1.5px solid #e5e7eb; }
+  .win .url { flex: 1; height: 50px; border-radius: 25px; background: #f1f3f6; display: flex; align-items: center; gap: 12px; padding: 0 24px; font: 500 25px Inter; color: #111; }
+  .win .load { position: absolute; left: 0; height: 4px; background: #2563eb; }
+  .win .body { position: relative; overflow: hidden; background: #fff; }
+  .win .body img { position: absolute; left: 0; top: 0; }
+
+  /* scrapbook */
+  .paper { background: #f1e7d2; }
+  .polaroid { background: #fdfbf6; padding: 16px 16px 64px; box-shadow: 0 18px 40px rgba(60,40,10,.35); border-radius: 4px; }
+  .polaroid .ph { width: 100%; height: 100%; background-size: cover; background-position: center; }
+  .polaroid .cap { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font: 700 34px Caveat; color: #2a2118; }
+  .tape { position: absolute; width: 140px; height: 42px; background: rgba(255,240,170,.75); top: -18px; left: 50%; margin-left: -70px; transform: rotate(-4deg); box-shadow: 0 2px 4px rgba(0,0,0,.08); }
+  .gold .ch { background: linear-gradient(180deg, #fff6d8, #f5c451 55%, #b8860b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stamp { border: 8px solid #c81e1e; color: #c81e1e; padding: 10px 26px; border-radius: 14px; font-family: "Bebas Neue"; letter-spacing: .04em; mix-blend-mode: multiply; }
+
+  /* cards */
+  .card { background: #f6f1e6; color: #1d1b16; border-radius: 22px; box-shadow: 0 24px 50px rgba(0,0,0,.4); }
+  .glass { background: rgba(255,255,255,.82); border: 1.5px solid rgba(0,0,0,.06); box-shadow: 0 24px 60px rgba(40,10,10,.18); backdrop-filter: blur(10px); border-radius: 26px; color: #111; }
+  .neon { border: 2px solid rgba(103,232,249,.65); background: rgba(8,24,52,.85); box-shadow: 0 0 40px rgba(103,232,249,.18), inset 0 0 30px rgba(103,232,249,.08); border-radius: 22px; color: #e6f7ff; }
+
+  #grain { position: absolute; inset: -200px; opacity: .06; mix-blend-mode: overlay; pointer-events: none; }
+  #vig { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 70% at 50% 50%, transparent 55%, rgba(0,0,0,.6) 100%); pointer-events: none; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #hud { position: absolute; left: 54px; right: 54px; top: 70px; display: flex; justify-content: space-between; font: 600 22px "IBM Plex Mono"; letter-spacing: .14em; text-transform: uppercase; pointer-events: none; }
+  #hudbar { position: absolute; left: 54px; top: 112px; height: 3px; width: 0; }
+  #lines div { position: absolute; left: 0; right: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg" class="layer"></div>
+  <canvas id="earth" class="layer" width="1080" height="1920"></canvas>
+  <div id="cam"></div>
+  <canvas id="fx" class="layer" width="1080" height="1920"></canvas>
+  <div id="lines" class="layer"></div>
+  <canvas id="grainC" width="512" height="512" style="display:none"></canvas>
+  <div id="grain"></div>
+  <div id="vig"></div>
+  <div id="hud"><span id="hudChap"></span><span id="hudSite"></span></div>
+  <div id="hudbar"></div>
+  <div id="flash"></div>
+</div>
+<script>
+window.addEventListener("error", (e) => { window.__error = window.__error || String(e.message); });
+</script>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const s = document.createElement("script");
+  s.src = params.get("data") || "data.js";
+  s.onload = () => boot().catch((e) => { window.__error = String(e && e.stack || e); });
+  s.onerror = () => { window.__error = "data.js failed to load"; };
+  document.head.appendChild(s);
+})();
+
+// ---------------------------------------------------------------- maths
+const W = 1080, H = 1920, BEAT = 0.5;
+const cl = (x) => Math.max(0, Math.min(1, x));
+const P = (t, a, b) => cl((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const Ez = {
+  out: (x) => 1 - (1 - x) ** 3,
+  in: (x) => x * x * x,
+  io: (x) => (x < .5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2),
+  sine: (x) => -(Math.cos(Math.PI * x) - 1) / 2,
+  expo: (x) => (x >= 1 ? 1 : 1 - 2 ** (-10 * x)),
+  expoIn: (x) => (x <= 0 ? 0 : 2 ** (10 * x - 10)),
+  back: (x) => { const c = 1.9, c3 = c + 1; return 1 + c3 * (x - 1) ** 3 + c * (x - 1) ** 2; },
+  elastic: (x) => (x <= 0 ? 0 : x >= 1 ? 1 : 2 ** (-10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI / 3)) + 1),
+};
+const win = (t, a, b, fi = .3, fo = .3) => Math.min(P(t, a, a + fi), 1 - P(t, b - fo, b));
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let r = Math.imul(a ^ (a >>> 15), 1 | a); r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r; return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+const hash = (n) => rng(n * 9973 + 17)();
+const fmt = (n) => Math.round(n).toLocaleString("en-IN");
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], k))).join(",")})`; };
+const isDeva = (s) => /[ऀ-ॿ]/.test(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clip = (s, n) => (s.length > n ? `${s.slice(0, n - 1).trim()}…` : s);
+const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+// Monotone cubic through [t, v] keys (Fritsch–Carlson): smooth, never overshoots.
+function spline(keys) {
+  const n = keys.length, d = [], m = [];
+  for (let i = 0; i < n - 1; i += 1) d.push((keys[i + 1][1] - keys[i][1]) / (keys[i + 1][0] - keys[i][0]));
+  m.push(d[0]);
+  for (let i = 1; i < n - 1; i += 1) m.push(d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2);
+  m.push(d[n - 2]);
+  for (let i = 0; i < n - 1; i += 1) {
+    if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+    const a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
+    if (s > 9) { const tau = 3 / Math.sqrt(s); m[i] = tau * a * d[i]; m[i + 1] = tau * b * d[i]; }
+  }
+  return (t) => {
+    if (t <= keys[0][0]) return keys[0][1];
+    if (t >= keys[n - 1][0]) return keys[n - 1][1];
+    let i = 0;
+    while (t > keys[i + 1][0]) i += 1;
+    const h = keys[i + 1][0] - keys[i][0], u = (t - keys[i][0]) / h;
+    const h00 = 2 * u ** 3 - 3 * u ** 2 + 1, h10 = u ** 3 - 2 * u ** 2 + u, h01 = -2 * u ** 3 + 3 * u ** 2, h11 = u ** 3 - u ** 2;
+    return h00 * keys[i][1] + h10 * h * m[i] + h01 * keys[i + 1][1] + h11 * h * m[i + 1];
+  };
+}
+
+// ---------------------------------------------------------------- dom kit
+const cam = document.getElementById("cam");
+function el(parent, cls, html = "", css = "") {
+  const d = document.createElement("div");
+  d.className = cls;
+  if (html) d.innerHTML = html;
+  if (css) d.style.cssText += css;
+  parent.appendChild(d);
+  return d;
+}
+// Places an element by its centre. Every transform is rebuilt from scratch.
+function S(e, o = {}) {
+  const st = e.style;
+  const x = o.x ?? e._x ?? 540, y = o.y ?? e._y ?? 960;
+  let tf = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%)`;
+  if (o.p) tf += ` perspective(${o.p}px)`;
+  if (o.rx) tf += ` rotateX(${o.rx.toFixed(2)}deg)`;
+  if (o.ry) tf += ` rotateY(${o.ry.toFixed(2)}deg)`;
+  if (o.r) tf += ` rotate(${o.r.toFixed(2)}deg)`;
+  if (o.sk) tf += ` skewX(${o.sk.toFixed(2)}deg)`;
+  tf += ` scale(${(o.s ?? 1).toFixed(4)}${o.sy != null ? `,${o.sy.toFixed(4)}` : ""})`;
+  st.transform = tf;
+  const op = o.o ?? 1;
+  st.opacity = op.toFixed(3);
+  st.visibility = op <= 0.001 ? "hidden" : "visible";
+  st.filter = o.blur > 0.2 ? `blur(${o.blur.toFixed(1)}px)` : (o.f || "");
+  if (o.clip !== undefined) st.clipPath = o.clip;
+}
+const at = (e, x, y) => { e._x = x; e._y = y; S(e, { o: 0 }); return e; };
+// Text split into letters (words for Devanagari, whose letters join).
+function split(e) {
+  const txt = e.textContent;
+  const parts = isDeva(txt) ? txt.split(/(\s+)/) : [...txt];
+  e.innerHTML = parts.map((c) => `<span class="ch">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("");
+  e._ch = [...e.children];
+  return e;
+}
+// Kinetic type: each letter enters in turn, and all leave together at `out`.
+function kin(e, t, t0, { mode = "rise", stg = .035, dur = .55, out = Infinity, od = .25 } = {}) {
+  const ex = Ez.in(P(t, out - od, out));
+  e._ch.forEach((c, i) => {
+    const k = P(t, t0 + i * stg, t0 + i * stg + dur);
+    const q = mode === "drop" || mode === "pop" || mode === "bounce" ? Ez.back(k) : Ez.expo(k);
+    let tf = "", f = 0;
+    if (mode === "rise") { tf = `translateY(${(1 - q) * 0.9}em) rotate(${(1 - q) * 9}deg)`; f = (1 - k) * 12; }
+    if (mode === "slam") { tf = `scale(${lerp(2.4, 1, q)})`; f = (1 - k) * 18; }
+    if (mode === "slideL") { tf = `translateX(${(1 - q) * -2}em) skewX(${(1 - q) * -25}deg)`; f = (1 - k) * 14; }
+    if (mode === "slideR") { tf = `translateX(${(1 - q) * 2}em) skewX(${(1 - q) * 25}deg)`; f = (1 - k) * 14; }
+    if (mode === "flip") { tf = `perspective(600px) rotateX(${(1 - q) * -100}deg)`; }
+    if (mode === "drop") { tf = `translateY(${(1 - q) * -1.6}em)`; }
+    if (mode === "pop") { tf = `scale(${q})`; }
+    if (mode === "bounce") { tf = `translateY(${(1 - q) * 1.2}em) scale(${lerp(.4, 1, q)})`; }
+    if (mode === "type") { tf = ""; c.style.opacity = k > 0 ? 1 : 0; }
+    if (ex > 0) { tf += ` translateY(${-ex * 0.5}em)`; f += ex * 14; }
+    c.style.transform = tf;
+    if (mode !== "type") c.style.opacity = (Math.min(k * 1.6, 1) * (1 - ex)).toFixed(3);
+    else c.style.opacity = (k > 0 ? 1 - ex : 0).toFixed(3);
+    c.style.filter = f > .3 ? `blur(${f.toFixed(1)}px)` : "";
+  });
+  const off = t < t0 - .05 || ex >= 1;
+  e.style.opacity = off ? 0 : 1;
+  e.style.visibility = off ? "hidden" : "visible";
+}
+const count = (e, t, t0, d, n, suffix = "") => { e.textContent = fmt(n * Ez.out(P(t, t0, t0 + d))) + suffix; };
+// Typed text: the first k characters of `s`, with a caret while typing.
+const typed = (e, s, t, t0, cps, caret = true) => {
+  const n = Math.max(0, Math.min(s.length, Math.floor((t - t0) * cps)));
+  const blink = caret && (n < s.length || Math.floor(t * 2.5) % 2 === 0) && t >= t0 - .3;
+  e.innerHTML = esc(s.slice(0, n)) + (blink ? '<span style="opacity:.8">|</span>' : "");
+};
+
+// Phone: a mockup holding shots (FILM.shots); show one at a time, scroll it.
+const K = 560 / 828; // shot px → screen px; CSS px are 2 shot px.
+function phone(parent, names, { dark = false } = {}) {
+  const ph = el(parent, "phone c");
+  const scr = el(ph, "scr");
+  ph._scr = scr;
+  ph._img = {};
+  names.forEach((nm) => {
+    const im = document.createElement("img");
+    im.className = "shot";
+    im.src = F.shots[nm].url;
+    scr.appendChild(im);
+    ph._img[nm] = im;
+  });
+  ph._bar = el(scr, "sbar", '<span>9:41</span><span style="letter-spacing:4px">▮▮▮ ◔</span>');
+  if (dark) { ph._bar.style.background = "#0c0a09"; ph._bar.style.color = "#eee"; }
+  el(ph, "island");
+  el(ph, "glare");
+  ph._finger = el(scr, "finger");
+  ph._ripple = el(scr, "ripple");
+  ph._extra = el(scr, "full", "", "z-index:4;pointer-events:none");
+  return ph;
+}
+// shots: { name: opacity }; scroll in screen px (clamped to the shot's length).
+function show(ph, shots, scroll = 0, zoom = 1) {
+  Object.entries(ph._img).forEach(([nm, im]) => {
+    const o = shots[nm] || 0;
+    im.style.opacity = o;
+    im.style.visibility = o > 0 ? "visible" : "hidden";
+    if (o > 0) {
+      const max = Math.max(0, im.naturalHeight * (560 / im.naturalWidth) - 1136);
+      im.style.transform = `translateY(${-Math.min(scroll, max)}px) scale(${zoom})`;
+    }
+  });
+}
+// Where a page point (CSS px) of a shot lands on the phone screen.
+const onShot = (nm, p, scroll) => ({ x: p.x * 2 * K, y: (p.y - (F.shots[nm].from || 0)) * 2 * K + 64 - scroll });
+// A finger that arrives, presses at t0, and lifts.
+function tap(ph, pos, t, t0) {
+  const k = win(t, t0 - .45, t0 + .45, .25, .25);
+  const press = 1 - .25 * Math.exp(-(((t - t0) * 9) ** 2));
+  S(ph._finger, { x: pos.x + 42 + (1 - k) * 80, y: pos.y + 42 + (1 - k) * 140, o: k, s: press });
+  const q = P(t, t0, t0 + .5);
+  S(ph._ripple, { x: pos.x + 42, y: pos.y + 42, o: q > 0 && q < 1 ? 1 - q : 0, s: lerp(.4, 2.4, Ez.out(q)) });
+}
+const noTap = (ph) => { S(ph._finger, { o: 0 }); S(ph._ripple, { o: 0 }); };
+
+// A browser window: tab, address bar, and a body holding one image.
+function browser(parent, { w, h, title, img, imgW, dark = false }) {
+  const b = el(parent, "win c", "", `width:${w}px;height:${h}px`);
+  const tabs = el(b, "tabs");
+  el(tabs, "dots", '<i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>');
+  b._tab = el(tabs, "tab", `<span style="width:22px;height:22px;border-radius:6px;background:#13101e;display:inline-block"></span>${esc(title)}`);
+  const addr = el(b, "addr", '<span style="font:600 30px Inter;color:#9aa0a6">‹ ›</span>');
+  b._url = el(addr, "url");
+  b._load = el(b, "load", "", "top:140px;width:0");
+  b._body = el(b, "body", "", `height:${h - 140}px`);
+  b._start = el(b._body, "full", `<div style="position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);text-align:center;width:80%">
+    <div class="sg" style="font-size:64px;color:#202124;margin-bottom:40px">Where to?</div>
+    <div style="height:84px;border-radius:42px;border:2px solid #dadce0;display:flex;align-items:center;gap:20px;padding:0 30px;box-shadow:0 4px 14px rgba(0,0,0,.08)"><div style="width:36px;height:36px">${ICON.search("#9aa0a6")}</div><span style="font:400 30px Inter;color:#9aa0a6">Search or type a URL</span></div>
+    <div style="display:flex;justify-content:center;gap:34px;margin-top:56px">${["#ea4335", "#fbbc05", "#34a853", "#4285f4"].map((c) => `<i style="width:96px;height:96px;border-radius:24px;background:${c};opacity:.85;display:block"></i>`).join("")}</div></div>`, "background:#fff");
+  b._img = document.createElement("img");
+  b._img.src = img;
+  b._img.style.width = `${imgW || w}px`;
+  b._body.appendChild(b._img);
+  if (dark) b.style.background = "#111";
+  return b;
+}
+
+// Line icons, drawn on with stroke-dashoffset where it matters.
+const ICON = {
+  play: (c = "#fff") => `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="${c}"/></svg>`,
+  lock: (c = "#fff") => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>`,
+  search: (c = "#fff") => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>`,
+  cursor: '<svg viewBox="0 0 24 24"><path d="M4 2l15 9-6.5 1.5L16 20l-3 1.5-3.5-7.5L4 18z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  check: (c = "#16a34a") => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>`,
+  cloud: '<svg viewBox="0 0 64 40"><path d="M16 38h36a11 11 0 001-22 16 16 0 00-30-4A12 12 0 0016 38z" fill="#f6821f"/><path d="M33 9l-6 14h6l-3 11 10-15h-6l4-10z" fill="#fff"/></svg>',
+  db: '<svg viewBox="0 0 48 56"><ellipse cx="24" cy="9" rx="20" ry="7" fill="#3ecf8e"/><path d="M4 9v38c0 4 9 7 20 7s20-3 20-7V9c0 4-9 7-20 7S4 13 4 9z" fill="#24b47e"/><path d="M4 22c0 4 9 7 20 7s20-3 20-7M4 35c0 4 9 7 20 7s20-3 20-7" fill="none" stroke="#3ecf8e" stroke-width="2.5"/></svg>',
+};
+
+// ---------------------------------------------------------------- scenes
+const SCENES = [];
+function scene(a, b, { enter = "cut", exit = "cut", bg = null, chapter = null, ink = "#fff" }, build) {
+  const root = el(cam, "scene");
+  if (bg) root.style.background = bg;
+  const sc = { a, b, enter, exit, chapter, ink, root };
+  sc.update = build(root, sc);
+  SCENES.push(sc);
+  return sc;
+}
+function transition(sc, t) {
+  const o = { x: 540, y: 960, s: 1, o: 1, blur: 0, clip: "none", r: 0 };
+  const ei = P(t, sc.a - .15, sc.a + .3), eo = P(t, sc.b - .3, sc.b + .15);
+  switch (sc.enter) {
+    case "whip": o.x += (1 - Ez.expo(ei)) * 1300; o.blur += (1 - ei) * 40; o.sk = (1 - ei) * -12; break;
+    case "whipUp": o.y += (1 - Ez.expo(ei)) * 2100; o.blur += (1 - ei) * 40; break;
+    case "zoom": o.s *= lerp(.35, 1, Ez.expo(ei)); o.o *= ei; o.blur += (1 - ei) * 30; o.r += (1 - Ez.expo(ei)) * -8; break;
+    case "circle": { const k = Ez.io(P(t, sc.a, sc.a + .6)); o.clip = `circle(${(k * 1250).toFixed(0)}px at 540px 960px)`; break; }
+    case "wipeUp": { const k = Ez.io(P(t, sc.a - .1, sc.a + .45)); o.clip = `inset(${((1 - k) * 100).toFixed(1)}% 0 0 0)`; break; }
+    case "wipeDiag": { const k = Ez.io(P(t, sc.a - .1, sc.a + .5)); const p = lerp(-60, 160, k); o.clip = `polygon(0 0, ${p}% 0, ${p - 60}% 100%, 0 100%)`; break; }
+    case "fade": o.o *= P(t, sc.a - .2, sc.a + .5); break;
+    default: break;
+  }
+  switch (sc.exit) {
+    case "whip": o.x -= Ez.expoIn(eo) * 1300; o.blur += eo * 40; o.sk = (o.sk || 0) + eo * 12; break;
+    case "whipUp": o.y -= Ez.expoIn(eo) * 2100; o.blur += eo * 40; break;
+    case "zoomThrough": o.s *= lerp(1, 6, Ez.expoIn(eo)); o.o *= 1 - eo; o.blur += eo * 20; break;
+    case "zoomOut": o.s *= lerp(1, .4, Ez.in(eo)); o.o *= 1 - eo; o.blur += eo * 25; break;
+    case "fade": o.o *= 1 - eo; break;
+    default: break;
+  }
+  S(sc.root, o);
+}
+
+// ---------------------------------------------------------------- the earth
+// The globe (orthographic, drawn per pixel from Blue Marble) hands over to
+// Web Mercator satellite tiles at the zoom where the two agree in scale.
+const GEO = {};
+function worldPx(lat, lon, z) {
+  const size = 256 * 2 ** z, s = Math.sin((lat * Math.PI) / 180);
+  return { x: ((lon + 180) / 360) * size, y: (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * size };
+}
+// Globe radius (px) matching Mercator zoom z near the target's latitude.
+const radiusAt = (z) => (256 * 2 ** z) / (2 * Math.PI * Math.cos((F.geo.lat * Math.PI) / 180));
+const zoomAt = (R) => Math.log2((R * 2 * Math.PI * Math.cos((F.geo.lat * Math.PI) / 180)) / 256);
+
+// The camera, seconds → zoom. Below HANDOVER it is the globe.
+const HANDOVER = [4.45, 4.8];
+let ZOOM_IN, ZOOM_OUT;
+const TILES = new Map();
+function tile(z, x, y) {
+  const key = `${z}/${x}-${y}`;
+  if (!TILES.has(key)) {
+    const im = new Image();
+    im.src = `${F.geo.tiles}/${z}/${x}-${y}.jpg`;
+    TILES.set(key, im.decode().then(() => im, () => null));
+  }
+  return TILES.get(key);
+}
+async function tilesAt(L) {
+  const c = worldPx(F.geo.lat, F.geo.lon, L), n = 2 ** L, out = [];
+  for (let ty = Math.floor((c.y - H) / 256); ty <= Math.floor((c.y + H) / 256); ty += 1) {
+    for (let tx = Math.floor((c.x - W) / 256); tx <= Math.floor((c.x + W) / 256); tx += 1) {
+      if (ty >= 0 && ty < n) out.push(tile(L, ((tx % n) + n) % n, ty).then((im) => ({ im, tx, ty })));
+    }
+  }
+  // Keep only nearby levels decoded.
+  [...TILES.keys()].forEach((k) => { const lz = +k.split("/")[0]; if (Math.abs(lz - L) > 2) TILES.delete(k); });
+  return Promise.all(out);
+}
+async function drawMap(g, z, alpha, clipR = 0) {
+  const L = Math.max(F.geo.first, Math.min(F.geo.last, Math.ceil(z - 1e-6)));
+  const s = 2 ** (z - L);
+  const levels = L > F.geo.first ? [L - 1, L] : [L];
+  const sets = await Promise.all(levels.map((lv) => tilesAt(lv)));
+  g.save();
+  g.globalAlpha = alpha;
+  if (clipR) { g.beginPath(); g.arc(540, 960, clipR, 0, 7); g.clip(); }
+  sets.forEach((set, i) => {
+    const lv = levels[i], sc = 2 ** (z - lv), c = worldPx(F.geo.lat, F.geo.lon, lv);
+    set.forEach(({ im, tx, ty }) => {
+      if (!im) return;
+      const x = 540 + (tx * 256 - c.x) * sc, y = 960 + (ty * 256 - c.y) * sc, d = 256 * sc;
+      if (x > W || y > H || x + d < 0 || y + d < 0) return;
+      g.drawImage(im, x, y, d + .8, d + .8);
+    });
+  });
+  g.restore();
+  return s;
+}
+// A place on the ground → screen, at zoom z.
+const ground = (lat, lon, z) => {
+  const p = worldPx(lat, lon, z), c = worldPx(F.geo.lat, F.geo.lon, z);
+  return { x: 540 + p.x - c.x, y: 960 + p.y - c.y };
+};
+
+let TEX = null;
+function drawGlobe(g, { R, cx, cy, lon0, lat0, light = [-.45, .55, .7] }) {
+  const buf = GEO.buf, d = buf.data;
+  d.fill(0);
+  const { w: tw, h: th, data: tex } = TEX;
+  const sp = Math.sin(lat0 * Math.PI / 180), cp = Math.cos(lat0 * Math.PI / 180), l0 = lon0 * Math.PI / 180;
+  const ln = Math.hypot(...light), lx = light[0] / ln, ly = light[1] / ln, lz = light[2] / ln;
+  const y0 = Math.max(0, Math.floor(cy - R)), y1 = Math.min(H - 1, Math.ceil(cy + R));
+  for (let y = y0; y <= y1; y += 1) {
+    const ny = (cy - y) / R;
+    if (ny > 1 || ny < -1) continue;
+    const span = Math.sqrt(1 - ny * ny) * R;
+    const x0 = Math.max(0, Math.floor(cx - span)), x1 = Math.min(W - 1, Math.ceil(cx + span));
+    for (let x = x0; x <= x1; x += 1) {
+      const nx = (x - cx) / R, r2 = nx * nx + ny * ny;
+      if (r2 >= 1) continue;
+      const nz = Math.sqrt(1 - r2);
+      const wy = ny * cp + nz * sp, wz = -ny * sp + nz * cp;
+      const lat = Math.asin(wy), lon = l0 + Math.atan2(nx, wz);
+      let u = ((lon / (2 * Math.PI) + .5) % 1 + 1) % 1 * tw, v = (.5 - lat / Math.PI) * th;
+      if (v < 0) v = 0; if (v > th - 1.001) v = th - 1.001;
+      const ui = Math.floor(u), vi = Math.floor(v), fu = u - ui, fv = v - vi, u2 = (ui + 1) % tw;
+      const i00 = (vi * tw + ui) * 4, i10 = (vi * tw + u2) * 4, i01 = ((vi + 1) * tw + ui) * 4, i11 = ((vi + 1) * tw + u2) * 4;
+      const lam = Math.max(0, nx * lx + ny * ly + nz * lz);
+      const shade = .22 + .95 * lam;
+      const rim = (1 - nz) ** 3;
+      const o = (y * W + x) * 4;
+      for (let ch = 0; ch < 3; ch += 1) {
+        const c = (tex[i00 + ch] * (1 - fu) + tex[i10 + ch] * fu) * (1 - fv) + (tex[i01 + ch] * (1 - fu) + tex[i11 + ch] * fu) * fv;
+        const atm = [110, 170, 255][ch];
+        d[o + ch] = Math.min(255, c * shade * (1 - rim * .55) + atm * rim * .75);
+      }
+      // Anti-aliased limb.
+      d[o + 3] = Math.min(255, (1 - r2) * R * 255 * 1.2);
+    }
+  }
+  GEO.ctx.putImageData(buf, 0, 0);
+  // Atmosphere: a halo outside the limb, brighter on the lit side.
+  const halo = g.createRadialGradient(cx, cy, R * .98, cx, cy, R * 1.16);
+  halo.addColorStop(0, "rgba(120,180,255,.55)");
+  halo.addColorStop(.35, "rgba(80,140,255,.18)");
+  halo.addColorStop(1, "rgba(60,120,255,0)");
+  g.fillStyle = halo;
+  g.beginPath(); g.arc(cx, cy, R * 1.16, 0, 7); g.fill();
+  g.drawImage(GEO.cv, 0, 0);
+}
+
+const STARS = [];
+function drawStars(g, t, a, drift = 1) {
+  if (a <= 0) return;
+  STARS.forEach(([x, y, r, ph]) => {
+    const tw = .55 + .45 * Math.sin(t * 2.2 + ph);
+    g.fillStyle = `rgba(255,255,255,${(a * tw * (r > 1.6 ? 1 : .7)).toFixed(3)})`;
+    g.beginPath(); g.arc((x + t * 4 * drift) % W, y, r, 0, 7); g.fill();
+  });
+}
+
+// Orbit: where the globe looks and how big it is, before the hand-over.
+const ORBIT = {
+  R: (t) => lerp(250, radiusAt(HANDOVER[0]), Ez.in(P(t, .3, 5.8))),
+  lon: (t) => lerp(F.geo.lon - 95, F.geo.lon, Ez.io(P(t, 0, 5.4))),
+  lat: (t) => lerp(F.geo.lat - 14, F.geo.lat, Ez.io(P(t, 0, 5.4))),
+};
+
+async function drawEarth(t) {
+  const c = document.getElementById("earth"), g = c.getContext("2d");
+  const on = t < 15.4 || t >= 79.7;
+  c.style.display = on ? "block" : "none";
+  if (!on) return null;
+  g.fillStyle = "#020309";
+  g.fillRect(0, 0, W, H);
+  let z;
+  if (t < 15.4) z = ZOOM_IN(t);
+  else z = ZOOM_OUT(t);
+  const R = t < 6 ? ORBIT.R(t) : radiusAt(z);
+  const globeA = 1 - P(z, HANDOVER[0], HANDOVER[1]);
+  drawStars(g, t, cl(1 - (R - 700) / 600) * (t >= 80 ? P(t, 81.6, 83) : 1));
+  if (globeA > 0) {
+    const lon = t < 6 ? ORBIT.lon(t) : F.geo.lon, lat = t < 6 ? ORBIT.lat(t) : F.geo.lat;
+    // The planet keeps turning a little in the finale.
+    const spin = t >= 80 ? (t - 80) * -9 : 0;
+    drawGlobe(g, { R, cx: 540, cy: 960, lon0: lon + spin * P(R, 900, 400), lat0: lat });
+  }
+  if (globeA < 1) await drawMap(g, Math.max(z, HANDOVER[0]), 1 - globeA, globeA > 0 ? R : 0);
+  return { z, R };
+}
+
+// ---------------------------------------------------------------- boot
+function boot() {
+  window.F = window.FILM;
+  // Zoom keys (s, zoom): slow off the globe, quick through the middle,
+  // and a slow last descent onto Pune.
+  ZOOM_IN = spline([[5.8, HANDOVER[0]], [7.0, 5.7], [8.4, 7.4], [9.8, 10.4], [11.0, 14.0], [12.6, 15.6], [15.4, 16]]);
+  ZOOM_OUT = spline([[80, 15.6], [81.2, 13.5], [82.4, 9], [83.5, 5.2], [84.6, 3.6], [90, 3.2]]);
+  const r = rng(3);
+  for (let i = 0; i < 420; i += 1) STARS.push([r() * W, r() * H, r() < .08 ? 2.2 : .6 + r() * 1.1, r() * 7]);
+  GEO.cv = document.createElement("canvas");
+  GEO.cv.width = W; GEO.cv.height = H;
+  GEO.ctx = GEO.cv.getContext("2d");
+  GEO.buf = GEO.ctx.createImageData(W, H);
+  const globe = new Image();
+  globe.src = F.geo.globe;
+  buildAll();
+  const imgs = [...document.images].map((im) => (im.complete ? im.decode().catch(() => {}) : new Promise((res) => { im.onload = () => im.decode().then(res, res); im.onerror = res; })));
+  const faces = ["800 40px Orbitron", "400 40px 'IBM Plex Mono'", "800 40px Inter", "700 40px Caveat", "40px 'DM Serif Display'", "40px 'Special Elite'",
+    "40px 'Bebas Neue'", "40px 'Abril Fatface'", "italic 600 40px 'Playfair Display'", "700 40px 'Space Grotesk'", "700 40px 'JetBrains Mono'",
+    "700 40px 'Chakra Petch'", "40px Anton", "40px VT323", "40px 'Tiro Devanagari Marathi'"];
+  return Promise.all([...imgs, globe.decode(), ...faces.map((f) => document.fonts.load(f, "Aaपुणे"))])
+    .then(() => document.fonts.ready)
+    .then(() => {
+      const cv = document.createElement("canvas");
+      cv.width = globe.naturalWidth; cv.height = globe.naturalHeight;
+      const g = cv.getContext("2d");
+      g.drawImage(globe, 0, 0);
+      TEX = { w: cv.width, h: cv.height, data: g.getImageData(0, 0, cv.width, cv.height).data };
+      makeGrain();
+      window.__ready = true;
+    });
+}
+function makeGrain() {
+  const c = document.getElementById("grainC"), g = c.getContext("2d"), r = rng(7);
+  const d = g.createImageData(512, 512);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  g.putImageData(d, 0, 0);
+  document.getElementById("grain").style.background = `url(${c.toDataURL()})`;
+}
+
+// Moments the picture hits (score.mjs IMPACTS mirrors these).
+const IMPACTS = [12.6, 36, 84.6];
+
+function buildAll() {
+  const RED = "#e11d2a", GOLD = "#f5c451", CYAN = "#67e8f9", INK = "#13101e";
+  const st = F.stats;
+
+  // ============ 0–15.4  ORBIT → PUNE → A BROWSER ============
+  scene(0, 15.4, { chapter: "01 · Orbit" }, (root) => {
+    const ret = at(el(root, "c", `<svg width="560" height="560" viewBox="0 0 560 560" fill="none" stroke="rgba(160,220,255,.7)" stroke-width="2">
+      <circle cx="280" cy="280" r="250" stroke-dasharray="4 14"/><circle cx="280" cy="280" r="210" stroke-width="1"/>
+      <path d="M280 0v70M280 490v70M0 280h70M490 280h70"/><path d="M200 280h50M310 280h50M280 200v50M280 310v50" stroke="rgba(255,90,90,.9)" stroke-width="3"/></svg>`), 540, 960);
+    const pill = "background:rgba(2,6,16,.62);padding:10px 22px;border-radius:12px;border:1.5px solid rgba(160,220,255,.35)";
+    const alt = at(el(root, "c plex", "", `font-size:30px;color:#d6f0ff;letter-spacing:.12em;${pill}`), 290, 1630);
+    const pos = at(el(root, "c plex", "", `font-size:30px;color:#d6f0ff;letter-spacing:.12em;${pill}`), 790, 1630);
+    const lens = at(el(root, "c orb", "Lens 01 · Acquiring", "font-size:24px;color:#d6f0ff;text-shadow:0 2px 10px rgba(0,0,0,.9)"), 540, 1712);
+    const title = at(split(el(root, "c orb", "Somewhere on Earth", "font-size:58px;color:#fff;text-shadow:0 0 30px rgba(120,180,255,.6)")), 540, 300);
+    const credit = at(el(root, "c plex", "", "font-size:19px;color:rgba(255,255,255,.8);letter-spacing:.06em;text-shadow:0 1px 6px rgba(0,0,0,.9)"), 540, 1830);
+    const labels = [
+      { name: "India", sub: "भारत", lat: 22.5, lon: 79, show: [6.2, 8.2], size: 92 },
+      { name: "Maharashtra", sub: "महाराष्ट्र", lat: 19.6, lon: 76.0, show: [8.0, 9.9], size: 84 },
+    ].map((l) => ({ ...l, e: at(el(root, "c", `<div class="orb" style="font-size:${l.size}px;text-shadow:0 4px 30px rgba(0,0,0,.8)">${l.name}</div><div class="deva" style="font-size:${l.size * .55}px;text-align:center;opacity:.85;text-shadow:0 3px 20px rgba(0,0,0,.8)">${l.sub}</div>`, "text-align:center"), 0, 0) }));
+    const pin = at(el(root, "c", `<svg width="120" height="160" viewBox="0 0 24 32"><path d="M12 31s10-11 10-19A10 10 0 002 12c0 8 10 19 10 19z" fill="${RED}" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="4" fill="#fff"/></svg>`), 540, 880);
+    const pune = at(el(root, "c", `<div class="orb" style="font-size:120px;text-shadow:0 6px 40px rgba(0,0,0,.85)">${esc(F.geo.name)}</div><div class="deva" style="font-size:70px;text-align:center;text-shadow:0 4px 30px rgba(0,0,0,.9)">पुणे</div>`, "text-align:center"), 540, 520);
+    const coord = at(el(root, "c plex", `${F.geo.lat.toFixed(4)}° N · ${F.geo.lon.toFixed(4)}° E`, "font-size:34px;color:#fff;background:rgba(0,0,0,.55);padding:12px 26px;border-radius:12px;letter-spacing:.08em"), 540, 1120);
+    const place = at(el(root, "c caveat", esc(F.geo.place), "font-size:52px;color:#fff;text-shadow:0 3px 18px rgba(0,0,0,.9)"), 540, 1196);
+    // The browser that opens over the pin.
+    const shade = el(root, "full", "", "background:radial-gradient(ellipse at 50% 50%, rgba(10,8,20,.35), rgba(10,8,20,.8));opacity:0");
+    const bw = browser(root, { w: 900, h: 1500, title: "Sanket Tambare · The Digital Hub", img: F.shots.home.url, imgW: 900 });
+    at(bw, 540, 1000);
+    return (t, E) => {
+      const z = E ? E.z : 0;
+      S(ret, { o: win(t, .4, 11.6, .8, .6) * .8, s: 1 + .03 * Math.sin(t * 1.3), r: t * 4 });
+      const R = t < 6 ? ORBIT.R(t) : radiusAt(z);
+      // Ground width on screen → a camera altitude, as a lens would read it.
+      const mPerPx = R > 0 && t < 6 ? 6371000 / R : 156543.03 * Math.cos(F.geo.lat * Math.PI / 180) / 2 ** z;
+      const km = (W * mPerPx) / 1.155 / 1000;
+      alt.innerHTML = `ALT&nbsp;&nbsp;${km >= 100 ? fmt(km) : km.toFixed(1)} KM`;
+      const lon = t < 6 ? ORBIT.lon(t) : F.geo.lon, lat = t < 6 ? ORBIT.lat(t) : F.geo.lat;
+      pos.innerHTML = `${lat.toFixed(2)}°N&nbsp;&nbsp;${lon.toFixed(2)}°E`;
+      const hudA = win(t, .8, 12.4, .6, .5);
+      S(alt, { o: hudA }); S(pos, { o: hudA });
+      lens.textContent = t < 5.8 ? "Lens 01 · Acquiring" : t < 11 ? "Lens 01 · Descending" : "Lens 01 · Locked";
+      S(lens, { o: hudA * (.6 + .4 * Math.sin(t * 6) ** 2) });
+      kin(title, t, .9, { mode: "flip", stg: .045, dur: .6, out: 5.4, od: .4 });
+      credit.textContent = t < 6.2 ? F.credits.globe : F.credits.imagery;
+      S(credit, { o: win(t, 1, 12.5, .5, .5) });
+      labels.forEach((l) => {
+        const p = ground(l.lat, l.lon, z);
+        const k = win(t, l.show[0], l.show[1], .4, .5);
+        // Anchored to the ground, but never off the edge of the frame.
+        const half = (l.e.offsetWidth || 0) / 2 + 50;
+        S(l.e, { x: Math.max(half, Math.min(W - half, p.x)), y: p.y, o: k, s: lerp(.85, 1.05, P(t, l.show[0], l.show[1])), blur: (1 - k) * 8 });
+      });
+      const pk = Ez.back(P(t, 10.1, 10.6));
+      S(pin, { y: lerp(400, 878, Ez.out(P(t, 10.1, 10.5))), o: P(t, 10.1, 10.25) * (1 - P(t, 12.9, 13.2)), s: lerp(.6, 1, pk), sy: lerp(.6, 1, pk) * (1 - .12 * Math.exp(-(((t - 10.5) * 10) ** 2))) });
+      S(pune, { o: win(t, 10.0, 13.0, .5, .3), s: lerp(1.3, 1, Ez.expo(P(t, 10, 10.8))), blur: (1 - P(t, 10, 10.6)) * 20, y: 520 - (t - 10) * 6 });
+      S(coord, { o: win(t, 10.6, 13.0, .3, .3), s: lerp(.8, 1, Ez.back(P(t, 10.6, 11))) });
+      S(place, { o: win(t, 11.0, 13.0, .3, .3), r: -3 });
+      // 12.6: the browser springs out of the pin.
+      const b = P(t, 12.6, 13.3);
+      shade.style.opacity = (P(t, 12.5, 13.2) * .95).toFixed(3);
+      S(bw, { x: lerp(540, 540, b), y: lerp(880, 1000, Ez.out(b)), s: lerp(.04, 1, Ez.back(b)), rx: (1 - Ez.out(b)) * 30, p: 1600, o: P(t, 12.6, 12.75) * (1 - P(t, 15.1, 15.4)) });
+      typed(bw._url, F.host, t, 13.2, 18);
+      bw._url.innerHTML = `${ICON.lock("#5f6368").replace("<svg", '<svg width="24" height="24"')} ${bw._url.innerHTML}`;
+      const ld = P(t, 14.1, 14.6);
+      bw._load.style.width = `${(ld * 900).toFixed(0)}px`;
+      bw._load.style.opacity = ld < 1 ? 1 : 0;
+      bw._img.style.opacity = P(t, 14.3, 14.6).toFixed(3);
+      bw._start.style.opacity = (1 - P(t, 14.2, 14.4)).toFixed(3);
+      bw._tab.lastChild.textContent = t < 14.3 ? "New Tab" : "Sanket Tambare · The Digital Hub";
+      bw._img.style.transform = `translateY(${-Ez.io(P(t, 14.6, 15.4)) * 160}px)`;
+      // The VHS rewind starts by eating the browser.
+      root.style.filter = t > 15.0 ? `saturate(${1 - P(t, 15, 15.3)}) contrast(${1 + P(t, 15, 15.3)})` : "";
+    };
+  });
+
+  // ============ 15.2–16.6  REWIND ============
+  scene(15.2, 16.6, { bg: "#0a1aa8", chapter: "02 · The back-story" }, (root) => {
+    const osd = at(el(root, "c vt", "◀◀ REWIND", "font-size:120px;color:#fff;text-shadow:4px 0 0 rgba(255,0,80,.7),-4px 0 0 rgba(0,220,255,.7)"), 330, 230);
+    const year = at(el(root, "c vt", "", "font-size:430px;color:#fff;text-shadow:6px 0 0 rgba(255,0,80,.6),-6px 0 0 rgba(0,220,255,.6)"), 540, 900);
+    const sub = at(el(root, "c vt", "THE BACK-STORY", "font-size:110px;color:#fff;letter-spacing:.06em"), 540, 1250);
+    const tc = at(el(root, "c vt", "", "font-size:64px;color:#fff"), 760, 1700);
+    const bands = [...Array(7)].map(() => el(root, "full", "", "height:40px;background:rgba(255,255,255,.55);mix-blend-mode:overlay"));
+    const scan = el(root, "full", "", "background:repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 3px, transparent 3px 6px)");
+    scan.style.opacity = .7;
+    const years = [F.stops[F.stops.length - 1].year, st.since];
+    return (t) => {
+      const k = Ez.in(P(t, 15.3, 16.3));
+      year.textContent = String(Math.round(lerp(years[0], years[1], k)));
+      S(year, { s: 1 + Math.sin(t * 60) * .006, x: 540 + (hash(Math.floor(t * 30)) - .5) * 14 });
+      S(osd, { o: Math.floor(t * 4) % 2 ? 1 : .35 });
+      S(sub, { o: P(t, 15.5, 15.7) });
+      const s = Math.max(0, (16.3 - t) * 3600 * 3);
+      tc.textContent = `SP  ${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(Math.floor(s) % 60).padStart(2, "0")}`;
+      S(tc, { o: 1 });
+      bands.forEach((b, i) => {
+        const r = rng(Math.floor(t * 30) * 13 + i);
+        b.style.top = `${Math.floor(r() * 1900)}px`;
+        b.style.height = `${10 + r() * 70}px`;
+        b.style.transform = `translateX(${(r() - .5) * 120}px)`;
+        b.style.opacity = r() < .7 ? .6 : 0;
+      });
+      if (t > 16.35) { osd.textContent = "▶ PLAY"; } else { osd.textContent = "◀◀ REWIND"; }
+    };
+  });
+
+  // ============ 16.4–28.2  THE CHANNEL, YEAR BY YEAR ============
+  scene(16.4, 28.2, { bg: "#f1e7d2", chapter: "02 · The back-story", ink: "#2a2118", enter: "circle", exit: "whip" }, (root) => {
+    // Paper texture: ruled lines and a coffee ring.
+    el(root, "full", "", "background:repeating-linear-gradient(0deg, rgba(120,90,40,.08) 0 2px, transparent 2px 64px), radial-gradient(circle at 85% 12%, rgba(120,80,30,.12) 0 90px, transparent 92px 110px, rgba(120,80,30,.08) 112px, transparent 118px)");
+    const head = at(split(el(root, "c dms", "The channel", "font-size:110px;color:#2a2118")), 540, 190);
+    const handle = at(el(root, "c caveat", esc(F.channel.handle), `font-size:54px;color:${RED}`), 540, 290);
+    const track = el(root, "c", "", "left:0;top:0;width:1080px;height:1px;white-space:normal");
+    const stops = F.stops;
+    const GAP = 1260;
+    // The dashed road the years sit on.
+    const roadH = GAP * stops.length + 400;
+    const road = el(track, "", `<svg width="1080" height="${roadH}" viewBox="0 0 1080 ${roadH}"><path id="roadp" d="${(() => {
+      let d = "M540 0";
+      for (let i = 0; i < stops.length; i += 1) { const y = 380 + i * GAP; d += ` C ${i % 2 ? 860 : 220} ${y - 300}, ${i % 2 ? 860 : 220} ${y + 300}, 540 ${y + GAP / 2}`; }
+      return d;
+    })()}" fill="none" stroke="#b49b70" stroke-width="7" stroke-dasharray="2 22" stroke-linecap="round"/></svg>`, "position:absolute;left:0;top:0");
+    const items = stops.map((s, i) => {
+      const y = 520 + i * GAP;
+      const g = el(track, "", "", `position:absolute;left:0;top:${y}px;width:1080px;height:${GAP}px`);
+      const yr = el(g, "dms", String(s.year), `position:absolute;left:${i % 2 ? 80 : 560}px;top:-40px;font-size:230px;color:#2a2118;line-height:1`);
+      const lbl = el(g, "caveat", esc(s.label), `position:absolute;left:${i % 2 ? 90 : 570}px;top:210px;font-size:56px;color:#5b4630;width:440px;white-space:normal;line-height:1`);
+      const pics = s.ids.slice(0, 4).map((id, j) => {
+        const v = F.byId[id];
+        const p = el(g, "polaroid", `<div class="ph" style="background-image:url('${F.thumbs[id]}')"></div><div class="cap">${esc(clip(v.title.replace(/\s*\|\|.*$/, ""), 22))}</div><div class="tape"></div>`,
+          `position:absolute;width:420px;height:${v.kind === "short" ? 560 : 380}px;left:${i % 2 ? 560 - j * 26 : 80 + j * 26}px;top:${330 + j * 170}px`);
+        return { p, j };
+      });
+      const more = s.more ? el(g, "caveat", `+ ${s.more} more`, `position:absolute;left:${i % 2 ? 640 : 160}px;top:${330 + Math.min(4, s.ids.length) * 170 + 420}px;font-size:48px;color:#7a6142`) : null;
+      const star = s.top ? el(g, "stamp", `<div style="font-size:150px;line-height:.9">${fmt(F.top.views)}</div><div style="font-size:56px;text-align:center">views</div>`,
+        `position:absolute;left:${i % 2 ? 90 : 600}px;top:420px;transform:rotate(-8deg)`) : null;
+      return { g, yr, lbl, pics, more, star, i, s };
+    });
+    // A paper band under the heading, so the scrapbook scrolls beneath it.
+    el(root, "full", "", "bottom:auto;height:420px;background:linear-gradient(#f1e7d2 62%, rgba(241,231,210,0))");
+    root.appendChild(head);
+    root.appendChild(handle);
+    // Each stop gets the same share of the scene; the camera rests on each.
+    const per = (27.6 - 17.0) / stops.length;
+    return (t) => {
+      kin(head, t, 16.5, { mode: "drop", stg: .04, dur: .5 });
+      S(handle, { o: P(t, 16.9, 17.2), r: -2 });
+      const idx = (t - 17.0) / per;
+      const f = Math.floor(idx), q = idx - f;
+      const pos = Math.max(0, f + Ez.io(cl((q - .55) / .45)));
+      const y = 120 - Math.min(pos, stops.length - 1) * GAP;
+      track.style.transform = `translateY(${y.toFixed(1)}px)`;
+      const roadDraw = (t - 16.5) * 900;
+      road.firstChild.firstChild.style.strokeDashoffset = 0;
+      road.style.clipPath = `inset(0 0 ${Math.max(0, roadH - roadDraw - 600)}px 0)`;
+      items.forEach(({ yr, lbl, pics, more, star, i }) => {
+        const t0 = 17.0 + i * per - .15;
+        const k = P(t, t0, t0 + .5);
+        yr.style.transform = `translateY(${(1 - Ez.expo(k)) * 80}px)`;
+        yr.style.opacity = k;
+        lbl.style.opacity = P(t, t0 + .35, t0 + .7);
+        lbl.style.transform = `translateX(${(1 - Ez.out(P(t, t0 + .35, t0 + .7))) * (i % 2 ? -60 : 60)}px) rotate(-2deg)`;
+        pics.forEach(({ p, j }) => {
+          const pk = P(t, t0 + .15 + j * .14, t0 + .65 + j * .14);
+          const side = (i + j) % 2 ? 1 : -1;
+          p.style.transform = `translate(${(1 - Ez.expo(pk)) * side * 900}px, ${(1 - Ez.expo(pk)) * -120}px) rotate(${side * (4 + j * 3) + (1 - pk) * side * 30}deg)`;
+          p.style.opacity = pk > 0 ? 1 : 0;
+        });
+        if (more) more.style.opacity = P(t, t0 + .9, t0 + 1.1);
+        if (star) {
+          const sk = P(t, t0 + .9, t0 + 1.2);
+          star.style.transform = `rotate(-8deg) scale(${lerp(2.6, 1, Ez.back(sk))})`;
+          star.style.opacity = sk > 0 ? 1 : 0;
+          star.firstChild.textContent = fmt(F.top.views * Ez.out(P(t, t0 + .9, t0 + 1.8)));
+        }
+      });
+    };
+  });
+
+  // ============ 28–34  THE GAP: counted everything but the videos ============
+  scene(28, 34.1, { bg: "#16171f", chapter: "02 · The gap", enter: "whip", exit: "cut" }, (root) => {
+    const head = at(split(el(root, "c typer", `${F.host}, counting`, "font-size:62px;color:#f6f1e6")), 540, 300);
+    const cards = F.siteCounts.map(([label, n], i) => {
+      const c = el(root, "card c", `<div class="bebas" style="font-size:150px">${fmt(n)}</div><div class="typer" style="font-size:36px;margin-top:6px">${esc(label)}</div>
+        <div style="position:absolute;right:20px;top:18px;width:70px;height:70px">${ICON.check()}</div>`, "width:440px;height:280px;padding:30px 36px;white-space:normal");
+      return at(c, i % 2 ? 790 : 290, 600 + Math.floor(i / 2) * 330);
+    });
+    const vid = at(el(root, "c", `<div class="bebas" style="font-size:170px;color:#e8e2d4">?</div><div class="typer" style="font-size:40px;color:#e8e2d4">Videos</div>`,
+      "width:440px;height:280px;padding:30px 36px;border:5px dashed #e8e2d4;border-radius:22px;text-align:center;white-space:normal"), 0, 0);
+    const vi = cards.length;
+    vid._x = vi % 2 ? 790 : 290; vid._y = 600 + Math.floor(vi / 2) * 330;
+    // The form a video took by hand: every field, ×N.
+    const form = at(el(root, "card c", `<div class="typer" style="font-size:44px;border-bottom:3px solid #1d1b16;padding-bottom:12px;margin-bottom:18px">Add a video, by hand</div>
+      ${F.chores.map((c) => `<div class="typer chore" style="font-size:40px;line-height:1.5;display:flex;gap:18px;align-items:center"><span style="display:inline-block;width:30px;height:30px;border:3px solid #1d1b16;border-radius:4px"></span>${esc(c)}</div>`).join("")}`,
+      "width:760px;padding:40px 50px;white-space:normal"), 540, 1100);
+    const rows = [...form.querySelectorAll(".chore")];
+    const stack = [...Array(6)].map((_, i) => at(el(root, "card c", "", "width:760px;height:900px"), 540 + (i - 2.5) * 16, 1100 + i * 10));
+    root.appendChild(form);
+    const times = at(el(root, "c stamp", `× ${st.count}`, "font-size:230px;line-height:1;background:#f6f1e6;mix-blend-mode:normal;box-shadow:0 20px 40px rgba(0,0,0,.4)"), 800, 1470);
+    const tot = at(el(root, "c", "", "text-align:center"), 540, 1760);
+    tot.innerHTML = '<div class="bebas" style="font-size:150px;color:#ff5a4f"></div><div class="typer" style="font-size:40px;color:#f6f1e6">things to copy and paste</div>';
+    return (t) => {
+      kin(head, t, 28.1, { mode: "type", stg: .035, dur: .01, out: 30.5, od: .3 });
+      const gridOut = Ez.in(P(t, 30.3, 30.8));
+      cards.forEach((c, i) => {
+        const k = P(t, 28.4 + i * .22, 28.8 + i * .22);
+        S(c, { o: (k > 0 ? 1 : 0) * (1 - gridOut), s: lerp(.4, 1, Ez.back(k)) * (1 - gridOut * .4), r: (1 - k) * (i % 2 ? 12 : -12), y: c._y - gridOut * 300 });
+        c.lastElementChild.style.opacity = P(t, 28.7 + i * .22, 28.8 + i * .22);
+      });
+      const vk = P(t, 29.5, 29.8);
+      const flick = t > 29.8 && t < 30.4 ? (Math.floor(t * 14) % 3 ? 1 : .25) : 1;
+      S(vid, { o: (vk > 0 ? flick : 0) * (1 - gridOut), s: lerp(.4, 1, Ez.back(vk)) + (t > 30.3 ? gridOut * 1.5 : 0), x: lerp(vid._x, 540, gridOut), y: lerp(vid._y, 1000, gridOut), blur: gridOut * 10 });
+      const fk = P(t, 30.6, 31.0);
+      S(form, { o: fk, s: lerp(.6, 1, Ez.back(fk)) * (1 - .25 * P(t, 32.6, 33.2)), y: lerp(1100, 960, P(t, 32.6, 33.2)), r: lerp(-6, 0, Ez.out(fk)) });
+      rows.forEach((r, i) => { r.style.opacity = P(t, 30.9 + i * .1, 31.0 + i * .1); });
+      stack.forEach((s, i) => {
+        const k = P(t, 32.6 + i * .06, 32.9 + i * .06);
+        S(s, { o: k, r: (i - 2.5) * 5 * Ez.out(k), x: 540 + (i - 2.5) * 40 * Ez.out(k), y: lerp(1100, 960, P(t, 32.6, 33.2)) + i * 10, s: .75 });
+      });
+      const tk = P(t, 32.3, 32.5);
+      S(times, { o: tk > 0 ? 1 : 0, s: lerp(3, 1, Ez.back(tk)), r: -10 });
+      S(tot, { o: P(t, 32.8, 33.1) });
+      tot.firstChild.textContent = fmt(F.chores.length * st.count * Ez.out(P(t, 32.8, 33.6)));
+      // Everything blows away for the ribbon.
+      root.style.filter = t > 33.7 ? `blur(${P(t, 33.7, 34.1) * 30}px)` : "";
+      root.style.opacity = 1 - P(t, 33.8, 34.1);
+    };
+  });
+
+  // ============ 33.9–40.2  THE UNVEILING ============
+  scene(33.9, 40.2, { bg: "radial-gradient(ellipse at 50% 40%, #7a0b1c, #2a0309 70%)", chapter: "03 · The unveiling", enter: "fade", exit: "whip" }, (root) => {
+    // Rays and the curtain folds.
+    const rays = at(el(root, "c", `<svg width="2400" height="2400" viewBox="-1200 -1200 2400 2400">${[...Array(24)].map((_, i) => `<path d="M0 0 L${Math.cos(i / 24 * 6.283 - .06) * 1700} ${Math.sin(i / 24 * 6.283 - .06) * 1700} L${Math.cos(i / 24 * 6.283 + .06) * 1700} ${Math.sin(i / 24 * 6.283 + .06) * 1700}Z" fill="rgba(255,215,120,.09)"/>`).join("")}</svg>`), 540, 1060);
+    el(root, "full", "", "background:repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 30px, rgba(255,255,255,.03) 30px 70px, rgba(0,0,0,.18) 70px 110px);mix-blend-mode:multiply");
+    const pre = at(el(root, "c playi", "Something new on", `font-size:62px;color:${GOLD}`), 540, 190);
+    const host = at(el(root, "c abril", esc(F.host), "font-size:96px;color:#fff;text-shadow:0 6px 30px rgba(0,0,0,.5)"), 540, 290);
+    const ph = phone(root, ["videos"]);
+    at(ph, 540, 1130);
+    // The wrapping: a box over the phone, two ribbons, a bow.
+    // The wrapping paper, in two halves that open like doors.
+    const paper = (side) => `width:320px;height:1280px;border-radius:${side ? "0 70px 70px 0" : "70px 0 0 70px"};background:linear-gradient(135deg, #b3122a, #6d0717);box-shadow:inset 0 0 80px rgba(0,0,0,.35), 0 40px 90px rgba(0,0,0,.5);transform-origin:${side ? "100%" : "0"} 50%`;
+    const giftL = at(el(root, "c", "", paper(0)), 380, 1130);
+    const giftR = at(el(root, "c", "", paper(1)), 700, 1130);
+    const satin = (wd, ht, dir) => `width:${wd}px;height:${ht}px;background:linear-gradient(${dir}, #b8860b, #ffe08a 35%, #d4a017 55%, #fff1b8 70%, #b8860b);box-shadow:0 6px 18px rgba(0,0,0,.35)`;
+    const vTop = at(el(root, "c", "", satin(130, 650, "90deg")), 540, 815);
+    const vBot = at(el(root, "c", "", satin(130, 650, "90deg")), 540, 1445);
+    const hL = at(el(root, "c", "", satin(330, 130, "180deg")), 375, 1130);
+    const hR = at(el(root, "c", "", satin(330, 130, "180deg")), 705, 1130);
+    const loopSvg = (flip) => `<svg width="300" height="230" viewBox="0 0 300 230"><defs><linearGradient id="gl${flip}" x1="0" x2="1"><stop offset="0" stop-color="#b8860b"/><stop offset=".4" stop-color="#ffe08a"/><stop offset="1" stop-color="#c8960f"/></linearGradient></defs>
+      <path d="${flip ? "M10 115 C 60 -30, 290 -10, 280 110 C 270 220, 70 230, 10 115Z" : "M290 115 C 240 -30, 10 -10, 20 110 C 30 220, 230 230, 290 115Z"}" fill="url(#gl${flip})" stroke="#8a6508" stroke-width="5"/>
+      <path d="${flip ? "M40 115 C 90 40, 230 50, 240 110" : "M260 115 C 210 40, 70 50, 60 110"}" fill="none" stroke="rgba(120,80,0,.45)" stroke-width="8"/></svg>`;
+    const loopL = at(el(root, "c", loopSvg(0)), 410, 1080);
+    const loopR = at(el(root, "c", loopSvg(1)), 670, 1080);
+    const tail = (flip) => `<svg width="170" height="330" viewBox="0 0 170 330"><path d="${flip ? "M20 0 C 80 120, 40 200, 150 330 L 110 330 C 10 220, 40 120, -10 10Z" : "M150 0 C 90 120, 130 200, 20 330 L 60 330 C 160 220, 130 120, 180 10Z"}" fill="#e3b23c" stroke="#8a6508" stroke-width="4"/></svg>`;
+    const tailL = at(el(root, "c", tail(0)), 470, 1300);
+    const tailR = at(el(root, "c", tail(1)), 610, 1300);
+    const knot = at(el(root, "c", "", "width:120px;height:120px;border-radius:30px;background:radial-gradient(circle at 40% 35%, #fff1b8, #d4a017 60%, #8a6508);box-shadow:0 8px 20px rgba(0,0,0,.4)"), 540, 1130);
+    const sheen = el(root, "full", "", "background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%);mix-blend-mode:overlay");
+    const title = at(split(el(root, "c abril gold", "Videos.", "font-size:250px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45))")), 540, 300);
+    const live = at(el(root, "c", `<span style="width:18px;height:18px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 18px #22c55e"></span><span class="jb" style="font-size:38px">${esc(F.host)}/videos</span>`,
+      "display:flex;gap:18px;align-items:center;padding:16px 34px;border-radius:999px;background:rgba(0,0,0,.45);border:2px solid rgba(255,215,120,.6);color:#fff"), 540, 470);
+    const nw = at(el(root, "c bebas", "New", `font-size:80px;color:${INK};background:${GOLD};padding:6px 30px 0;border-radius:14px`), 830, 640);
+    return (t) => {
+      const shake = t < 36 ? P(t, 34.4, 36) ** 2 * 7 : 0;
+      const jx = (hash(Math.floor(t * 30)) - .5) * shake, jy = (hash(Math.floor(t * 30) + 5) - .5) * shake;
+      const pre1 = 1 - P(t, 35.85, 36.1);
+      S(pre, { o: P(t, 34.1, 34.5) * pre1, y: 190 - (1 - Ez.out(P(t, 34.1, 34.6))) * 40 });
+      S(host, { o: P(t, 34.3, 34.7) * pre1, s: lerp(1.2, 1, Ez.out(P(t, 34.3, 34.8))) });
+      sheen.style.transform = `translateX(${lerp(-1100, 1100, (t * .55) % 1)}px)`;
+      sheen.style.opacity = t < 36 ? .9 : 0;
+      // 36.0: everything that wrapped it flies off.
+      const u = P(t, 36, 36.9), ue = Ez.out(u), uo = 1 - P(t, 36.4, 36.9);
+      const wrapIn = Ez.back(P(t, 33.95, 34.5));
+      const door = Ez.io(P(t, 36.05, 36.6));
+      const sIn = lerp(.6, 1, wrapIn);
+      S(giftL, { x: 540 + jx - 160 * sIn - door * 700, y: 1130 + jy, s: sIn, ry: door * 70, p: 1800, o: P(t, 33.95, 34.2) * (1 - P(t, 36.4, 36.6)) });
+      S(giftR, { x: 540 + jx + 160 * sIn + door * 700, y: 1130 + jy, s: sIn, ry: door * -70, p: 1800, o: P(t, 33.95, 34.2) * (1 - P(t, 36.4, 36.6)) });
+      S(vTop, { x: 540 + jx, y: 815 + jy - ue * 1500, s: lerp(.6, 1, wrapIn), r: ue * -25, o: Math.min(P(t, 33.95, 34.2), uo) });
+      S(vBot, { x: 540 + jx, y: 1445 + jy + ue * 1500, s: lerp(.6, 1, wrapIn), r: ue * 25, o: Math.min(P(t, 33.95, 34.2), uo) });
+      S(hL, { x: 375 + jx - ue * 1300, y: 1130 + jy - ue * 300, s: lerp(.6, 1, wrapIn), r: ue * -40, o: Math.min(P(t, 33.95, 34.2), uo) });
+      S(hR, { x: 705 + jx + ue * 1300, y: 1130 + jy - ue * 300, s: lerp(.6, 1, wrapIn), r: ue * 40, o: Math.min(P(t, 33.95, 34.2), uo) });
+      const bow = Ez.back(P(t, 34.2, 34.8));
+      S(loopL, { x: 410 + jx - ue * 900, y: 1080 + jy - ue * 1100, s: bow * (1 + ue), r: ue * -200 + Math.sin(t * 9) * shake * .6, o: Math.min(1, bow) * uo });
+      S(loopR, { x: 670 + jx + ue * 900, y: 1080 + jy - ue * 1100, s: bow * (1 + ue), r: ue * 200 - Math.sin(t * 9) * shake * .6, o: Math.min(1, bow) * uo });
+      S(tailL, { x: 470 + jx - ue * 700, y: 1300 + jy + ue * 900, s: bow, r: Math.sin(t * 3) * 3 - ue * 90, o: Math.min(1, bow) * uo });
+      S(tailR, { x: 610 + jx + ue * 700, y: 1300 + jy + ue * 900, s: bow, r: -Math.sin(t * 3) * 3 + ue * 90, o: Math.min(1, bow) * uo });
+      S(knot, { x: 540 + jx, y: 1130 + jy, s: bow * (1 + ue * 2), o: Math.min(1, bow) * (1 - P(t, 36, 36.2)) });
+      const rv = P(t, 36, 36.7);
+      S(ph, { s: lerp(.82, .9, Ez.out(rv)) + Math.sin(t * 2) * .004, o: P(t, 35.9, 36.05), y: 1130 + Math.sin(t * 1.6) * 8, ry: Math.sin(t * .9) * 6, p: 2400 });
+      show(ph, { videos: 1 }, P(t, 37.4, 40) * 300);
+      noTap(ph);
+      S(rays, { r: t * 12, o: P(t, 35.9, 36.4), s: lerp(.6, 1, Ez.out(rv)) });
+      kin(title, t, 36.25, { mode: "slam", stg: .06, dur: .45 });
+      S(live, { o: P(t, 37.1, 37.4), s: lerp(.7, 1, Ez.back(P(t, 37.1, 37.5))) });
+      S(nw, { o: P(t, 37.4, 37.6), s: lerp(2.4, 1, Ez.back(P(t, 37.4, 37.75))), r: 12 });
+    };
+  });
+
+  // ============ 40–63  WHAT IT DOES (the live page) ============
+  scene(40, 63.2, { bg: "#fbf8f3", chapter: "04 · The features", ink: INK, enter: "whip", exit: "zoomThrough" }, (root) => {
+    const blobs = el(root, "full", "", `background:radial-gradient(circle at 15% 20%, rgba(225,29,42,.13), transparent 40%), radial-gradient(circle at 90% 75%, rgba(225,29,42,.10), transparent 45%), radial-gradient(circle at 80% 10%, rgba(19,16,30,.06), transparent 35%)`);
+    el(root, "full", "", "background-image:radial-gradient(rgba(19,16,30,.12) 1.6px, transparent 1.6px);background-size:36px 36px;opacity:.6");
+    const ph = phone(root, ["videos", "shorts", "search-1", "search-2", "search-3", "search-4", "year-2020", "sort-views", "short", "video"]);
+    at(ph, 540, 1190);
+    // Headlines, one per beat of the scene.
+    const heads = [
+      [40.15, 44.8, "Every upload.", "One page."],
+      [44.9, 49.4, "One tap.", "Shorts or videos."],
+      [49.5, 53.9, "Search it.", "Filter it."],
+      [54.0, 58.9, "Sort by", "what got watched."],
+      [59.0, 63.2, "Press play.", "Right here."],
+    ].map(([a, b, l1, l2]) => {
+      const g = at(el(root, "c", "", "text-align:center"), 540, 300);
+      const x = split(el(g, "sg", l1, `font-size:112px;color:${INK}`));
+      const y = split(el(g, "sg", l2, `font-size:112px;color:${RED}`));
+      return { a, b, g, x, y };
+    });
+    // Counters for the first beat.
+    const chips = [[st.count, "videos", INK], [st.longs, "long videos", "#475569"], [st.shorts, "Shorts", RED]].map(([n, l, c], i) => {
+      const e = at(el(root, "glass c", `<div class="bebas" style="font-size:120px;color:${c}">0</div><div class="sg" style="font-size:30px;color:#334155">${l}</div>`, "padding:22px 34px;text-align:center;min-width:240px"), 900, 700 + i * 260);
+      return { e, n, i };
+    });
+    // 16:9 → 9:16, the shape a Short takes.
+    const morph = at(el(root, "c", "", `border:8px solid ${RED};border-radius:18px;display:flex;align-items:center;justify-content:center`), 920, 860);
+    morph.innerHTML = `<div style="width:56px;height:56px">${ICON.play(RED)}</div>`;
+    const morphL = at(el(root, "c jb", "", `font-size:30px;color:${RED};font-weight:700`), 920, 1110);
+    // A keyboard for the search.
+    const kb = el(ph._extra, "", `${["qwertyuiop", "asdfghjkl", "zxcvbnm"].map((row) => `<div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px">${[...row].map((ch) => `<span data-k="${ch}" style="width:46px;height:62px;border-radius:9px;background:#fff;box-shadow:0 2px 0 #b5b9c0;display:flex;align-items:center;justify-content:center;font:500 30px Inter;color:#111">${ch}</span>`).join("")}</div>`).join("")}`,
+      "position:absolute;left:0;right:0;bottom:0;height:300px;background:#d3d6dc;padding:22px 6px 0");
+    const keys = Object.fromEntries([...kb.querySelectorAll("[data-k]")].map((k) => [k.dataset.k, k]));
+    const filt = F.filterChips.map((c, i) => at(el(root, "glass c sg", esc(c), "font-size:34px;padding:18px 30px;color:#111"), i % 2 ? 860 : 220, 760 + i * 120));
+    // The sort menu, from the page's own sort labels.
+    const menu = el(ph._extra, "", `<div class="sg" style="font-size:26px;color:#64748b;padding:22px 30px 10px">Sort by</div>${F.sorts.map((s, i) => `<div class="sg" data-i="${i}" style="font-size:36px;padding:20px 30px;color:#111;display:flex;justify-content:space-between">${esc(s)}<span></span></div>`).join("")}`,
+      "position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:34px 34px 0 0;box-shadow:0 -20px 50px rgba(0,0,0,.25);padding-bottom:30px");
+    const menuRows = [...menu.querySelectorAll("[data-i]")];
+    const viewsAt = F.sorts.findIndex((s) => /view/i.test(s));
+    // The stats wall.
+    const wall = [
+      [st.views, "views", RED, "#fff", 230],
+      [st.likes, "likes", INK, "#fff", 160],
+      [st.minutes, "minutes of video", "#fff", INK, 160],
+      [st.since, "first upload", "#fff", RED, 160],
+    ].map(([n, l, bg, fg, fs], i) => at(el(root, "c", `<div class="bebas" style="font-size:${fs}px;color:${fg}">0</div><div class="sg" style="font-size:36px;color:${fg};opacity:.85">${l}</div>`,
+      `background:${bg};padding:30px 46px;border-radius:30px;box-shadow:0 30px 60px rgba(40,10,10,.25);min-width:${i ? 420 : 900}px;${bg === "#fff" ? "border:2px solid #eee;" : ""}`), i === 0 ? 540 : i === 1 ? 310 : i === 2 ? 770 : 540, [650, 1020, 1020, 1380][i]));
+    const topV = at(el(root, "glass c", `<div style="display:flex;gap:24px;align-items:center"><div style="width:220px;height:124px;border-radius:14px;background:url('${F.thumbs[F.top.youtubeId]}') center/cover"></div><div style="white-space:normal;width:520px"><div class="sg" style="font-size:28px;color:${RED}">Most viewed</div><div class="sg" style="font-size:38px;line-height:1.1">${esc(clip(F.top.title, 40))}</div></div></div>`,
+      "padding:22px"), 540, 1700);
+    // Playing, drawn: the page's own frame, its own thumbnail, a red bar.
+    const sh = F.shots.short, box = sh.box;
+    const player = el(ph._extra, "", `<div style="position:absolute;inset:0;background:url('${F.thumbs[F.byShortId]}') center/cover;transform-origin:50% 50%" data-kb></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:220px;background:linear-gradient(transparent, rgba(0,0,0,.75))"></div>
+      <div style="position:absolute;left:24px;right:24px;bottom:96px;height:10px;border-radius:5px;background:rgba(255,255,255,.35)"><div data-bar style="height:100%;width:0;background:${RED};border-radius:5px;position:relative"><i style="position:absolute;right:-12px;top:-7px;width:24px;height:24px;border-radius:50%;background:${RED}"></i></div></div>
+      <div data-time class="jb" style="position:absolute;left:24px;bottom:122px;font-size:26px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.8)"></div>`,
+      `position:absolute;left:${box.x * 2 * K}px;top:${(box.y - (sh.from || 0)) * 2 * K + 64}px;width:${box.w * 2 * K}px;height:${box.h * 2 * K}px;border-radius:22px;overflow:hidden;background:#000`);
+    const kbImg = player.querySelector("[data-kb]"), bar = player.querySelector("[data-bar]"), ptime = player.querySelector("[data-time]");
+    const notes = [
+      [ICON.lock(INK), "Nothing loads from YouTube until you press play"],
+      [ICON.play(RED), "Shorts play 9:16, videos 16:9"],
+      [ICON.search(INK), "Its description, links and tags, and its own share card"],
+    ].map(([ic, txt], i) => at(el(root, "glass c", `<div style="display:flex;gap:22px;align-items:center"><div style="width:56px;height:56px;flex:none">${ic}</div><div class="sg" style="font-size:36px;white-space:normal;width:520px;line-height:1.15">${esc(txt)}</div></div>`, "padding:24px 30px"), 540, 560 + i * 0));
+    return (t) => {
+      blobs.style.transform = `translate(${Math.sin(t * .7) * 30}px, ${Math.cos(t * .5) * 30}px)`;
+      heads.forEach(({ a, b, g, x, y }) => {
+        const on = t > a - .1 && t < b + .1;
+        S(g, { o: on ? 1 : 0 });
+        if (!on) return;
+        kin(x, t, a, { mode: "slideR", stg: .03, dur: .4, out: b, od: .25 });
+        kin(y, t, a + .25, { mode: "slideR", stg: .03, dur: .4, out: b, od: .25 });
+      });
+      // --- 40–45: the list scrolls; the counts come in.
+      let shots = {}, scroll = 0, zoom = 1, phX = 540, phY = 1235, phS = .95, phR = 0;
+      noTap(ph);
+      if (t < 44.9) {
+        shots = { videos: 1 };
+        scroll = Ez.sine(P(t, 40.8, 44.6)) * 2600;
+        phX = lerp(540, 400, Ez.io(P(t, 41.0, 41.6)));
+      }
+      chips.forEach(({ e, n, i }) => {
+        const k = P(t, 41.4 + i * .35, 41.8 + i * .35);
+        S(e, { o: k * (1 - P(t, 44.6, 44.9)), x: lerp(1400, 850, Ez.expo(k)), s: lerp(.6, 1, Ez.back(k)) });
+        count(e.firstChild, t, 41.4 + i * .35, .8, n);
+      });
+      // --- 45–49.5: the Shorts switch.
+      if (t >= 44.9 && t < 49.5) {
+        const sTop = (F.shots.videos.toolbar) * 2 * K;
+        const sw = P(t, 46.05, 46.25);
+        shots = { videos: 1 - sw, shorts: sw };
+        scroll = sw > 0 ? Ez.sine(P(t, 46.6, 49.2)) * 1400 : sTop;
+        phX = lerp(400, 400, 0);
+        const pos = onShot("videos", F.taps.shorts, sTop);
+        if (t < 46.6) tap(ph, pos, t, 45.9);
+      }
+      const mk = P(t, 45.3, 45.6), mm = Ez.io(P(t, 46.1, 46.7));
+      S(morph, { o: mk * (1 - P(t, 49.1, 49.4)), s: lerp(.5, 1, Ez.back(mk)), x: 860 });
+      morph.style.width = `${lerp(300, 180, mm)}px`; morph.style.height = `${lerp(170, 320, mm)}px`;
+      morphL.textContent = mm < .5 ? "16:9" : "9:16";
+      S(morphL, { o: mk * (1 - P(t, 49.1, 49.4)), x: 860, y: 860 + lerp(130, 210, mm) });
+      // --- 49.5–54: search, then filters.
+      kb.style.transform = `translateY(${(1 - Ez.out(P(t, 49.75, 50.05)) + Ez.in(P(t, 51.5, 51.8))) * 320}px)`;
+      kb.style.display = t > 49.6 && t < 51.9 ? "block" : "none";
+      Object.values(keys).forEach((k) => { k.style.background = "#fff"; });
+      if (t >= 49.5 && t < 54) {
+        const word = F.shots["search-4"].text;
+        const n = Math.max(0, Math.min(word.length, Math.floor((t - 50.15) / .32) + 1));
+        const last = t < 52.6 ? (n > 0 ? `search-${n}` : "videos") : "year-2020";
+        shots = { [last]: 1 };
+        if (n > 0 && t < 51.6) { const kk = keys[word[n - 1]]; if (kk && (t - 50.15) % .32 < .16) kk.style.background = "#9aa0a8"; }
+        scroll = last === "videos" ? F.shots.videos.toolbar * 2 * K : 0;
+        if (t < 50) tap(ph, onShot("videos", F.taps.search, F.shots.videos.toolbar * 2 * K), t, 49.85);
+        if (t > 52.2 && t < 53.2) tap(ph, onShot("year-2020", F.taps.year, 0), t, 52.55);
+        phX = 400;
+      }
+      filt.forEach((f, i) => {
+        const k = P(t, 51.7 + i * .2, 52.1 + i * .2);
+        S(f, { o: k * (1 - P(t, 53.6, 53.9)), x: lerp(400, i % 2 ? 840 : 260, Ez.expo(k)) + (i % 2 ? 0 : 0), y: lerp(1200, 640 + i * 105, Ez.expo(k)), s: lerp(.3, 1, Ez.back(k)), r: (i % 2 ? 3 : -3) });
+      });
+      // --- 54–59: sort by views, then the numbers.
+      menu.style.transform = `translateY(${(1 - Ez.out(P(t, 54.5, 54.8)) + Ez.in(P(t, 55.2, 55.45))) * 700}px)`;
+      menu.style.display = t > 54.4 && t < 55.5 ? "block" : "none";
+      menuRows.forEach((r, i) => {
+        const on = i === viewsAt && t > 54.95;
+        r.style.background = on ? "rgba(225,29,42,.1)" : "";
+        r.style.color = on ? RED : "#111";
+        r.lastChild.innerHTML = on ? `<span style="display:inline-block;width:40px;height:40px">${ICON.check(RED)}</span>` : "";
+      });
+      if (t >= 54 && t < 59) {
+        const sv = P(t, 55.3, 55.5);
+        shots = sv > 0 ? { "sort-views": 1 } : { videos: 1 };
+        scroll = sv > 0 ? Ez.sine(P(t, 55.6, 56.4)) * 380 : F.shots.videos.toolbar * 2 * K;
+        if (t < 54.6) tap(ph, onShot("videos", F.taps.sort, F.shots.videos.toolbar * 2 * K), t, 54.35);
+        if (t > 54.75 && t < 55.3) tap(ph, { x: 300, y: 1200 - 30 - (F.sorts.length - viewsAt) * 86 + 40 }, t, 54.95);
+        phX = 400;
+        // The phone drops away for the numbers, and comes back to play.
+        const out = Ez.in(P(t, 56.1, 56.6));
+        phY = lerp(1235, 2700, out);
+      }
+      wall.forEach((w, i) => {
+        const k = P(t, 56.4 + i * .3, 56.8 + i * .3);
+        const from = i % 2 ? 1500 : -500;
+        S(w, { o: k * (1 - P(t, 58.7, 59)), x: lerp(from, w._x, Ez.expo(k)), r: (1 - k) * (i % 2 ? 20 : -20) });
+        const n = [st.views, st.likes, st.minutes, st.since][i];
+        w.firstChild.textContent = i === 3 ? String(n) : fmt(n * Ez.out(P(t, 56.5 + i * .3, 57.6 + i * .3)));
+      });
+      S(topV, { o: P(t, 57.7, 58) * (1 - P(t, 58.7, 59)), y: lerp(1900, 1720, Ez.expo(P(t, 57.7, 58.2))) });
+      // --- 59–63: play, drawn; then a long video's page.
+      player.style.display = t >= 59.9 && t < 61.5 ? "block" : "none";
+      if (t >= 59 && t < 63.2) {
+        shots = t < 61.5 ? { short: 1 } : { video: 1 };
+        scroll = t < 61.5 ? 0 : Ez.sine(P(t, 61.6, 63)) * 620;
+        if (t < 60.2) tap(ph, { x: sh.tap.x * 2 * K, y: (sh.tap.y - (sh.from || 0)) * 2 * K + 64 }, t, 59.8);
+        const pl = P(t, 59.9, 61.5);
+        kbImg.style.transform = `scale(${1.05 + pl * .12})`;
+        // A montage of play, not real time: a dozen seconds pass in 1.6.
+        const dur = F.byShortDur || 40, el2 = pl * Math.min(dur, 12);
+        bar.style.width = `${((el2 / dur) * 100).toFixed(1)}%`;
+        ptime.textContent = `${mmss(el2)} / ${mmss(dur)}`;
+        phX = 540;
+        phY = lerp(2700, 1235, Ez.out(P(t, 59, 59.5)));
+      }
+      notes.forEach((nn, i) => {
+        const a = [59.9, 60.6, 61.6][i];
+        const k = P(t, a, a + .35);
+        S(nn, { o: k * (1 - P(t, a + (i === 2 ? 1.4 : .65), a + (i === 2 ? 1.6 : .8))), y: 560, x: lerp(1500, 540, Ez.expo(k)) });
+      });
+      show(ph, shots, scroll, zoom);
+      const intro = Ez.back(P(t, 40.1, 40.7));
+      S(ph, { x: phX, y: phY + (1 - intro) * 800, s: phS, r: phR + Math.sin(t * .8) * .6, o: P(t, 40, 40.15) });
+    };
+  });
+
+  // ============ 63–80  UNDER THE HOOD ============
+  scene(63, 76.2, { bg: "#071328", chapter: "05 · Under the hood", enter: "zoom", exit: "wipeDiag" }, (root) => {
+    el(root, "full", "", "background-image:linear-gradient(rgba(103,232,249,.08) 2px, transparent 2px), linear-gradient(90deg, rgba(103,232,249,.08) 2px, transparent 2px), linear-gradient(rgba(103,232,249,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(103,232,249,.04) 1px, transparent 1px);background-size:180px 180px,180px 180px,36px 36px,36px 36px");
+    const title = at(split(el(root, "c chakra", "/admin · Sync now", `font-size:84px;color:${CYAN};text-shadow:0 0 30px rgba(103,232,249,.5)`)), 540, 200);
+    // The admin, in a browser; the camera moves in on the card that matters.
+    const aw = browser(root, { w: 1000, h: 765, title: "Admin · YouTube sync", img: F.shots["admin-0"].url, imgW: 1000 });
+    const imgs = ["admin-0", "admin-1", "admin-2", "admin-3"].map((nm) => {
+      const im = document.createElement("img");
+      im.src = F.shots[nm].url; im.style.width = "1000px"; im.style.position = "absolute"; im.style.left = 0; im.style.top = 0;
+      aw._body.appendChild(im); return im;
+    });
+    aw._img.style.display = "none";
+    aw._start.style.display = "none";
+    aw._url.innerHTML = `${ICON.lock("#5f6368").replace("<svg", '<svg width="24" height="24"')} ${esc(F.host)}/admin/videos/sync`;
+    at(aw, 540, 960);
+    const cap = at(el(root, "c jb", "owner-only · nothing to type", "font-size:34px;color:#9ad7ea;letter-spacing:.04em"), 540, 1460);
+    const cursor = el(aw._body, "", ICON.cursor, "position:absolute;width:54px;height:54px;z-index:3");
+    const ring = el(aw._body, "", "", `position:absolute;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;border:5px solid ${CYAN};z-index:3`);
+    const k1 = 1000 / 1280; // CSS px of the admin → window px
+    const tapA = F.shots["admin-0"].tap;
+    const badge = at(el(root, "c chakra", `${st.count} new`, `font-size:64px;color:#04121f;background:${CYAN};padding:10px 34px;border-radius:16px;box-shadow:0 0 40px rgba(103,232,249,.6)`), 760, 1360);
+    // The pipeline.
+    const nodes = [
+      { y: 470, icon: `<div style="width:120px;height:84px;border-radius:22px;background:${RED};display:flex;align-items:center;justify-content:center"><div style="width:52px;height:52px">${ICON.play("#fff")}</div></div>`, a: "YouTube Data API", b: "channels · playlistItems · videos" },
+      { y: 860, icon: `<div style="width:150px;height:94px">${ICON.cloud}</div>`, a: "Cloudflare Worker", b: "/api/youtube-sync · owner only" },
+      { y: 1250, icon: `<div style="width:90px;height:105px">${ICON.db}</div>`, a: "Supabase Postgres", b: "videos table" },
+      { y: 1640, icon: `<div style="width:120px;height:84px;border-radius:18px;border:5px solid ${CYAN};display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:7px">${"<i style='background:rgba(103,232,249,.7);border-radius:3px'></i>".repeat(6)}</div>`, a: F.host, b: "/videos" },
+    ].map((n) => {
+      const e = at(el(root, "neon c", `<div style="display:flex;align-items:center;gap:30px">${n.icon}<div><div class="chakra" style="font-size:44px">${esc(n.a)}</div><div class="jb" style="font-size:26px;color:#9ad7ea;margin-top:6px">${esc(n.b)}</div></div></div>`, "padding:24px 30px;width:660px"), 400, n.y);
+      return { ...n, e };
+    });
+    const flow = el(root, "full", `<svg width="1080" height="1920"><g fill="none" stroke="${CYAN}" stroke-width="4" stroke-dasharray="14 12">
+      ${nodes.slice(0, -1).map((n, i) => `<path data-l="${i}" d="M400 ${n.y + 85} L400 ${nodes[i + 1].y - 85}"/>`).join("")}</g></svg>`);
+    const lines = [...flow.querySelectorAll("[data-l]")];
+    // Packets: requests up, responses down, the Shorts checks, the rows.
+    const calls = F.calls.map((c, i) => at(el(root, "c jb", esc(c), `font-size:24px;padding:8px 18px;border-radius:999px;background:${CYAN};color:#04121f;font-weight:700`), 0, 0));
+    const json = at(el(root, "c jb", `{ "title", "duration", "viewCount", … } × ${st.count}`, "font-size:26px;padding:12px 22px;border-radius:12px;background:#0d2a4a;border:2px solid #9ad7ea;color:#e6f7ff"), 0, 0);
+    const probes = [...Array(st.probed)].map((_, i) => at(el(root, "c", "", "width:26px;height:26px;border-radius:50%;background:#fff"), 0, 0));
+    const probeL = at(el(root, "c jb", `HEAD /shorts/{id} × ${st.probed}`, `font-size:26px;color:#fff;background:rgba(0,0,0,.55);padding:6px 16px;border-radius:10px`), 880, 740);
+    const verdict = at(el(root, "c", `<span style="color:${RED}">●</span> ${st.shorts} Shorts&nbsp;&nbsp;<span style="color:${CYAN}">●</span> ${st.probed - st.shorts} videos`, "font:700 34px 'Chakra Petch';color:#fff;background:rgba(0,0,0,.55);padding:8px 20px;border-radius:12px"), 880, 600);
+    const rowsBox = at(el(root, "c", "", "width:330px;height:330px;overflow:hidden;border-radius:16px;border:2px solid rgba(62,207,142,.6);background:rgba(4,30,22,.9);white-space:normal"), 900, 1250);
+    const rows = F.videos.map((v) => el(rowsBox, "jb", `<span style="color:#3ecf8e">${fmt(v.views)}</span>&nbsp;&nbsp;${esc(clip(v.title, 16))}`, "font-size:20px;color:#d1fae5;padding:6px 14px;border-bottom:1px solid rgba(62,207,142,.18);white-space:nowrap;overflow:hidden"));
+    const upsert = at(el(root, "c jb", `upsert × ${st.count} · set_video_playlists(${st.playlists})`, "font-size:24px;padding:10px 20px;border-radius:999px;background:#3ecf8e;color:#04121f;font-weight:700"), 0, 0);
+    const grid = at(el(root, "c", F.videos.map((v) => `<i style="display:block;width:64px;height:40px;border-radius:6px;background:url('${F.thumbs[v.youtubeId]}') center/cover"></i>`).join(""),
+      "display:grid;grid-template-columns:repeat(4,64px);gap:8px;padding:12px;border-radius:16px;background:rgba(8,24,52,.9);border:2px solid rgba(103,232,249,.5);white-space:normal"), 920, 1640);
+    const gridTiles = [...grid.children];
+    const meter = at(el(root, "c jb", "", "font-size:30px;color:#9ad7ea;text-align:center"), 540, 1835);
+    const along = (y0, y1, k) => lerp(y0, y1, k);
+    return (t) => {
+      kin(title, t, 63.2, { mode: "slideR", stg: .03, dur: .4, out: 67.6, od: .3 });
+      // 63–67.6: the admin.
+      const aIn = Ez.back(P(t, 63.2, 63.8)), aOut = Ez.in(P(t, 67.2, 67.7));
+      // Into the Sync now card: its button, bar and result sit at about
+      // (370, 230) of the 1280-wide admin, i.e. (-211, -62) from the window's centre.
+      const zoomIn = Ez.io(P(t, 65.3, 66.0)), Z = 1.9;
+      S(aw, { s: lerp(.6, 1, aIn) * lerp(1, Z, zoomIn) * (1 - aOut * .7), o: P(t, 63.2, 63.4) * (1 - aOut), x: 540 + 211 * Z * zoomIn, y: 960 + 62 * Z * zoomIn - aOut * 600, rx: (1 - Ez.out(P(t, 63.2, 63.9))) * 25, p: 2000 });
+      S(cap, { o: P(t, 63.6, 64) * (1 - P(t, 65.2, 65.5)), y: 1460 + (1 - Ez.out(P(t, 63.6, 64.1))) * 40 });
+      const step = t < 64.65 ? 0 : t < 65.5 ? 1 : t < 66.3 ? 2 : 3;
+      imgs.forEach((im, i) => { im.style.opacity = i === step ? 1 : 0; });
+      const cx = tapA.x * k1, cy = tapA.y * k1;
+      const ck = Ez.io(P(t, 63.7, 64.45));
+      cursor.style.transform = `translate(${lerp(820, cx - 6, ck)}px, ${lerp(620, cy - 4, ck)}px) scale(${t > 64.5 && t < 64.62 ? .85 : 1})`;
+      const rq = P(t, 64.5, 65.0);
+      ring.style.transform = `translate(${cx}px, ${cy}px) scale(${lerp(.3, 2.2, Ez.out(rq))})`;
+      ring.style.opacity = rq > 0 && rq < 1 ? 1 - rq : 0;
+      S(badge, { o: P(t, 66.35, 66.55) * (1 - aOut), s: lerp(2.2, 1, Ez.back(P(t, 66.35, 66.7))), r: -6, x: 700, y: 1480 - aOut * 600 });
+      // 67.6–76: the pipeline.
+      const pin = (i) => P(t, 67.6 + i * .25, 68.0 + i * .25);
+      nodes.forEach((n, i) => S(n.e, { o: pin(i), x: lerp(i % 2 ? 1300 : -200, 400, Ez.expo(pin(i))), s: lerp(.8, 1, Ez.out(pin(i))) }));
+      lines.forEach((l, i) => {
+        l.style.opacity = P(t, 68.3 + i * .2, 68.6 + i * .2);
+        l.style.strokeDashoffset = String(-t * 60);
+      });
+      // Requests: worker → YouTube, one after another.
+      calls.forEach((c, i) => {
+        const k = P(t, 68.6 + i * .45, 69.2 + i * .45);
+        S(c, { x: 400, y: along(nodes[1].y - 90, nodes[0].y + 90, Ez.io(k)), o: k > 0 && k < 1 ? 1 : 0, s: 1 });
+      });
+      const jk = P(t, 69.6 + calls.length * .2, 70.6 + calls.length * .2);
+      S(json, { x: 400, y: along(nodes[0].y + 95, nodes[1].y - 95, Ez.io(jk)), o: jk > 0 && jk < 1 ? 1 : 0 });
+      // The Shorts checks: dots up to YouTube and back, coloured by the answer.
+      probes.forEach((p, i) => {
+        const a = 70.4 + i * .06;
+        const up = P(t, a, a + .45), dn = P(t, a + .55, a + 1.0);
+        const isShort = i < st.shorts;
+        const x = 400 + (i - (st.probed - 1) / 2) * 50;
+        const y = dn > 0 ? lerp(nodes[0].y + 90, nodes[1].y - 120, Ez.io(dn)) : lerp(nodes[1].y - 90, nodes[0].y + 90, Ez.io(up));
+        p.style.background = dn > 0 ? (isShort ? RED : CYAN) : "#fff";
+        S(p, { x, y, o: up > 0 && t < 73 ? 1 : 0, s: dn >= 1 ? 1.3 : 1 });
+      });
+      S(probeL, { o: win(t, 70.3, 72.6, .2, .3) });
+      S(verdict, { o: win(t, 71.6, 72.8, .2, .3) });
+      // Rows into the database.
+      const uk = P(t, 72.4, 73.3);
+      S(upsert, { x: 470, y: along(nodes[1].y + 95, nodes[2].y - 95, Ez.io(uk)), o: uk > 0 && uk < 1 ? 1 : 0 });
+      S(rowsBox, { o: P(t, 72.9, 73.2) });
+      rows.forEach((r, i) => {
+        const k = P(t, 73.0 + i * .07, 73.2 + i * .07);
+        r.style.opacity = k; r.style.transform = `translateX(${(1 - Ez.out(k)) * 80}px)`;
+      });
+      rowsBox.scrollTop = 0;
+      rowsBox.firstChild && (rowsBox.style.paddingTop = "0");
+      [...rowsBox.children].forEach((r) => { r.style.marginTop = ""; });
+      if (rows[0]) rows[0].style.marginTop = `${-Math.max(0, (t - 73.6) * 120)}px`;
+      // …and onto the page.
+      S(grid, { o: P(t, 74.2, 74.5), x: 905 });
+      gridTiles.forEach((g, i) => { const k = P(t, 74.4 + i * .05, 74.6 + i * .05); g.style.transform = `scale(${Ez.back(k)})`; g.style.opacity = k; });
+      meter.innerHTML = `API quota: <b style="color:#fff">${Math.round(st.quota * P(t, 68.6, 74))}</b> of 10,000 units a day`;
+      S(meter, { o: P(t, 68.6, 69) });
+      // The camera drifts down the pipeline.
+      root.style.transform = "";
+    };
+  });
+
+  // ============ 76–80  BEFORE / AFTER ============
+  scene(76, 80.2, { bg: "#071328", chapter: "05 · Under the hood", enter: "wipeDiag", exit: "zoomOut" }, (root) => {
+    const top = el(root, "", "", "position:absolute;left:0;right:0;top:0;height:960px;background:#e8e2d4;color:#2a2118;overflow:hidden");
+    const bot = el(root, "", "", "position:absolute;left:0;right:0;bottom:0;height:960px;background:#071328;color:#e6f7ff;overflow:hidden");
+    const tLab = el(top, "typer", "Before", "position:absolute;left:70px;top:150px;font-size:70px");
+    const tNum = el(top, "bebas", "", "position:absolute;left:66px;top:250px;font-size:330px;color:#9a3412");
+    const tTxt = el(top, "typer", "things copied by hand.<br>Views go stale. Every new upload: again.", "position:absolute;left:74px;top:590px;font-size:44px;line-height:1.35;white-space:normal;width:940px");
+    const bLab = el(bot, "chakra", "After", `position:absolute;left:70px;top:90px;font-size:70px;color:${CYAN}`);
+    const bNum = el(bot, "bebas", "1", "position:absolute;left:66px;top:180px;font-size:330px;color:#fff;text-shadow:0 0 50px rgba(103,232,249,.6)");
+    const bTxt = el(bot, "jb", "click. Views refresh on every sync,<br>Shorts sort themselves,<br>and nothing is ever deleted.", "position:absolute;left:74px;top:520px;font-size:42px;line-height:1.4;white-space:normal;width:940px");
+    const strike = el(top, "", "", "position:absolute;left:50px;top:420px;height:16px;background:#c81e1e;border-radius:8px;width:0;transform:rotate(-4deg)");
+    const divider = el(root, "", "", `position:absolute;left:0;top:952px;height:16px;background:${CYAN};box-shadow:0 0 30px ${CYAN};width:0`);
+    return (t) => {
+      const total = F.chores.length * st.count;
+      tNum.textContent = fmt(total * Ez.out(P(t, 76.2, 76.9)));
+      [tLab, tNum, tTxt].forEach((e, i) => { const k = P(t, 76.1 + i * .15, 76.5 + i * .15); e.style.opacity = k; e.style.transform = `translateX(${(1 - Ez.expo(k)) * -300}px)`; });
+      [bLab, bNum, bTxt].forEach((e, i) => { const k = P(t, 78.4 + i * .15, 78.8 + i * .15); e.style.opacity = k; e.style.transform = `translateX(${(1 - Ez.expo(k)) * 300}px)`; });
+      strike.style.width = `${Ez.out(P(t, 78.9, 79.3)) * 760}px`;
+      divider.style.width = `${Ez.io(P(t, 76, 76.6)) * 1080}px`;
+      top.style.filter = `grayscale(${P(t, 78.9, 79.5)})`;
+    };
+  });
+
+  // ============ 80–90  BACK OUT, AND THE ADDRESS ============
+  scene(80, 90, { chapter: "06 · See you there" }, (root) => {
+    const made = at(split(el(root, "c anton", "Made in Pune.", "font-size:150px;color:#fff;text-shadow:0 8px 40px rgba(0,0,0,.8)")), 540, 360);
+    const more = at(split(el(root, "c playi", "For every upload still to come.", "font-size:62px;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.8)")), 540, 500);
+    const url = at(el(root, "c", "", `font:700 66px 'Space Grotesk';color:#fff;padding:26px 48px;border-radius:999px;background:rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.5);box-shadow:0 0 50px rgba(225,29,42,.35)`), 540, 1380);
+    const sub = at(el(root, "c", `<span style="display:inline-block;width:44px;height:44px;vertical-align:middle">${ICON.play("#fff")}</span><span style="vertical-align:middle;margin-left:14px">Subscribe · ${esc(F.channel.handle)}</span>`,
+      `font:800 40px Inter;color:#fff;background:${RED};padding:22px 40px;border-radius:18px;box-shadow:0 20px 50px rgba(225,29,42,.45)`), 540, 1540);
+    const sign = at(el(root, "c", `<img src="${F.sign}" style="height:110px">`), 540, 1690);
+    const big = at(split(el(root, "c anton", "Videos.", "font-size:230px;color:#fff;text-shadow:0 0 60px rgba(225,29,42,.55)")), 540, 330);
+    const recap = at(el(root, "c sg", `${fmt(st.count)} videos · ${fmt(st.shorts)} Shorts · ${fmt(st.views)} views`, "font-size:44px;color:#fff;opacity:.9;text-shadow:0 2px 14px rgba(0,0,0,.8)"), 540, 490);
+    const credits = at(el(root, "c plex", esc(F.credits.line), "font-size:18px;color:rgba(255,255,255,.55);white-space:normal;width:960px;text-align:center;line-height:1.5"), 540, 1835);
+    return (t) => {
+      kin(made, t, 80.6, { mode: "rise", stg: .05, dur: .5, out: 84.2, od: .3 });
+      kin(more, t, 82.3, { mode: "rise", stg: .02, dur: .5, out: 84.2, od: .3 });
+      kin(big, t, 84.7, { mode: "slam", stg: .05, dur: .4 });
+      S(recap, { o: P(t, 85.4, 85.8), y: 490 + (1 - Ez.out(P(t, 85.4, 85.9))) * 30 });
+      typed(url, `${F.host}/videos`, t, 84.9, 16, true);
+      S(url, { o: P(t, 84.7, 84.9), s: lerp(.6, 1, Ez.back(P(t, 84.7, 85.1))) });
+      S(sub, { o: P(t, 86.2, 86.5), y: lerp(1640, 1540, Ez.back(P(t, 86.2, 86.7))), s: 1 + .03 * Math.sin((t - 86) * 6) * P(t, 86.7, 87) });
+      S(sign, { o: P(t, 86.8, 87.3) * .95 });
+      S(credits, { o: P(t, 87.4, 87.9) });
+      root.style.opacity = 1 - P(t, 89.4, 90);
+    };
+  });
+}
+
+// ---------------------------------------------------------------- effects
+function drawFx(t) {
+  const c = document.getElementById("fx"), g = c.getContext("2d");
+  g.clearRect(0, 0, W, H);
+  // Confetti from the ribbon: thrown, falling, tumbling — position from t alone.
+  if (t >= 36 && t < 40.5) {
+    const r = rng(36), q = t - 36;
+    const cols = ["#f5c451", "#fff1b8", "#e11d2a", "#ffffff", "#ff7a59", "#ffd166"];
+    for (let k = 0; k < 260; k += 1) {
+      const a = -Math.PI / 2 + (r() - .5) * 2.6, v = 900 + r() * 1700, drag = 1.6 + r() * 1.2;
+      const vx = Math.cos(a) * v, vy = Math.sin(a) * v;
+      const e = (1 - Math.exp(-drag * q)) / drag;
+      const x = 540 + vx * e + Math.sin(q * 4 + k) * 30, y = 1130 + vy * e + 520 * q * q * .55;
+      const rot = q * (4 + r() * 8) + k, w = 14 + r() * 16, h = 8 + r() * 10;
+      const col = cols[k % cols.length];
+      if (y > H + 40) continue;
+      g.save(); g.translate(x, y); g.rotate(rot); g.scale(1, Math.cos(q * 6 + k));
+      g.fillStyle = col; g.globalAlpha = 1 - P(t, 39.6, 40.4);
+      g.fillRect(-w / 2, -h / 2, w, h); g.restore();
+    }
+  }
+  // Sparkles around the wrapped gift.
+  if (t >= 34 && t < 40) {
+    const r = rng(12);
+    for (let k = 0; k < 26; k += 1) {
+      const x = 160 + r() * 760, y = 500 + r() * 1300, ph = r() * 6, s = (Math.sin(t * 5 + ph) + 1) / 2;
+      g.fillStyle = `rgba(255,236,170,${(s * .9).toFixed(3)})`;
+      g.beginPath(); g.moveTo(x, y - 14 * s); g.lineTo(x + 4, y); g.lineTo(x, y + 14 * s); g.lineTo(x - 4, y); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(x - 14 * s, y); g.lineTo(x, y + 4); g.lineTo(x + 14 * s, y); g.lineTo(x, y - 4); g.closePath(); g.fill();
+    }
+  }
+  // Stars behind the timeline's highlight; data sparks on the pipeline.
+  if (t >= 67.6 && t < 76.2) {
+    const r = rng(68);
+    for (let k = 0; k < 60; k += 1) {
+      const x = 80 + r() * 920, sp = 200 + r() * 400, y = ((r() * 1920 + (t - 67.6) * sp) % 1920);
+      g.fillStyle = `rgba(103,232,249,${(.15 + r() * .25).toFixed(3)})`;
+      g.fillRect(x, y, 3, 18);
+    }
+  }
+}
+
+// ---------------------------------------------------------------- the frame
+window.renderAt = async function renderAt(t) {
+  const E = await drawEarth(t);
+  const cur = SCENES.filter((s) => t >= s.a - .2 && t <= s.b + .2);
+  SCENES.forEach((s) => {
+    const on = cur.includes(s);
+    s.root.style.display = on ? "block" : "none";
+    if (on) { transition(s, t); s.update(t, E); }
+  });
+  drawFx(t);
+
+  // Camera: a kick on each impact.
+  let sx = 0, sy = 0, rs = 0;
+  IMPACTS.forEach((ti) => { const q = t - ti; if (q >= 0 && q < .6) { const a = 24 * Math.exp(-q * 7); sx += (hash(Math.floor(t * 30) + ti) - .5) * a; sy += (hash(Math.floor(t * 30) * 3 + ti) - .5) * a; rs += (hash(Math.floor(t * 30) * 7) - .5) * a * .05; } });
+  cam.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) rotate(${rs.toFixed(2)}deg)`;
+
+  let fl = 0;
+  IMPACTS.forEach((ti) => { const q = t - ti; if (q >= 0 && q < .5) fl = Math.max(fl, Math.exp(-q * 9) * (ti === 12.6 ? .4 : .9)); });
+  if (t >= 15.15 && t < 15.5) fl = Math.max(fl, .6 * (1 - P(t, 15.2, 15.5)));
+  document.getElementById("flash").style.opacity = fl.toFixed(3);
+
+  const gr = rng(Math.floor(t * 30));
+  document.getElementById("grain").style.transform = `translate(${Math.floor(gr() * 200 - 100)}px,${Math.floor(gr() * 200 - 100)}px)`;
+
+  const main = SCENES.slice().reverse().find((s) => t >= s.a) || SCENES[0];
+  const chap = SCENES.slice().reverse().find((s) => s.chapter && t >= s.a);
+  const hc = document.getElementById("hudChap"), hs = document.getElementById("hudSite"), hb = document.getElementById("hudbar");
+  hc.textContent = chap ? chap.chapter : "";
+  hs.textContent = F.host;
+  const ink = main.ink;
+  hc.style.color = hs.style.color = ink === "#fff" ? "rgba(255,255,255,.7)" : "rgba(19,16,30,.6)";
+  hb.style.background = ink === "#fff" ? "rgba(255,255,255,.7)" : "rgba(19,16,30,.5)";
+  hb.style.width = `${(972 * t / 90).toFixed(1)}px`;
+  const hudOn = t > 1.2 && t < 88.6 ? 1 : 0;
+  document.getElementById("hud").style.opacity = hudOn;
+  hb.style.opacity = hudOn;
+  document.getElementById("vig").style.opacity = ink === "#fff" ? 1 : .25;
+};
+</script>
+</body>
+</html>

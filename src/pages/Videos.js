@@ -3,13 +3,15 @@ import PageShell from "../atlas/PageShell";
 import { useVideos } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import VideoCard from "../components/Videos/VideoCard";
+import Story from "../components/Videos/Story";
 import useVideoFilters from "../components/Videos/useVideoFilters";
 import { UNDATED, VIDEO_SORTS, VIDEO_TYPES } from "../lib/videoFilters";
 import { YOUTUBE_CHANNEL } from "../lib/youtube";
 
 // /videos — the YouTube channel, filled by the owner's sync at
 // /admin/videos/sync. Filtering is src/lib/videoFilters.js; the state is in the
-// URL (useVideoFilters).
+// URL (useVideoFilters). The header carries the page's own 90-second film
+// (components/Videos/Story.js).
 
 const selectClass = "h-10 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg pl-3 pr-8 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors max-w-full";
 
@@ -31,23 +33,26 @@ const Videos = () => {
   return (
     <PageShell region="person">
       <div className="flex flex-col gap-10 w-full">
-        <header>
-          <p className="font-label text-xs uppercase tracking-widest text-secondary mb-4 font-bold">YouTube</p>
-          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-none tracking-tight mb-8">
-            Videos.
-          </h1>
-          <p className="max-w-2xl text-xl text-stone-500 dark:text-stone-400 font-light leading-relaxed mb-5">
-            Everything on the channel, long videos and Shorts. Search it, filter it, or open one to watch it here.
-          </p>
-          <a
-            href={YOUTUBE_CHANNEL.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-white font-label text-xs uppercase tracking-widest font-bold no-underline hover:opacity-90 transition-opacity"
-          >
-            <span className="material-symbols-outlined text-base">subscriptions</span>
-            Subscribe on YouTube
-          </a>
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
+            <p className="font-label text-xs uppercase tracking-widest text-secondary mb-4 font-bold">YouTube</p>
+            <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-none tracking-tight mb-8">
+              Videos.
+            </h1>
+            <p className="max-w-2xl text-xl text-stone-500 dark:text-stone-400 font-light leading-relaxed mb-5">
+              Everything on the channel, long videos and Shorts. Search it, filter it, or open one to watch it here.
+            </p>
+            <a
+              href={YOUTUBE_CHANNEL.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-white font-label text-xs uppercase tracking-widest font-bold no-underline hover:opacity-90 transition-opacity"
+            >
+              <span className="material-symbols-outlined text-base">subscriptions</span>
+              Subscribe on YouTube
+            </a>
+          </div>
+          <Story />
         </header>
 
         {loading && <LoadingBlock label="Loading videos…" />}
