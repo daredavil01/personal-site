@@ -33,6 +33,7 @@
     "blueprint:film": "node scripts/generate-blueprint-film.mjs",
     "trailer": "node --no-warnings scripts/trailer/render.mjs",
     "videos:film": "node --no-warnings scripts/videos-film/render.mjs",
+    "videos:slides": "node --no-warnings scripts/videos-film/slides.mjs",
     "newsletter:draft": "node scripts/newsletter-draft.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "backup": "node scripts/backup-r2.mjs"

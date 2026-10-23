@@ -82,7 +82,8 @@ step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
 (run after content moves, then commit the PNGs), `newsletter:draft` (monthly),
 `blueprint:film` (renders video into `knowledge_base/`, nothing to commit),
-`videos:film` (the /videos film; re-render and `-- --publish` after the channel moves).
+`videos:film` and `videos:slides` (the /videos film and its six slides; re-render,
+`-- --publish` and re-run the slides after the channel moves).
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
 have no npm entry — run them with `node`.
 
@@ -609,7 +610,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
-| Videos film: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*` |
+| Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
 | Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
 | Second brain endpoint | `functions/api/ask.js` |
 | Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |
@@ -984,6 +985,15 @@ YouTube channel **https://www.youtube.com/@sankettambare7474** — not typed in.
   Aura); `-- --publish` writes the web copy. `-- --remix` re-does only the
   sound, `-- --frame=t1,t2` writes stills. Its numbers are read when it renders
   and baked in: re-render after the channel moves.
+- **The slides:** the same story as six 4:5 slides closes the page
+  (`src/components/Videos/StorySlides.js`, a scroll-snap carousel with arrow
+  keys; the film's caption links to it). `npm run videos:slides`
+  (`scripts/videos-film/slides.mjs` over `slides.html`) pulls its pictures from
+  the rendered film at fixed moments (`FRAMES`, which follow `film.html`'s
+  acts), computes every number from the live table, and writes
+  `public/video/the-videos-story-slides/01–06.webp` (committed;
+  `story.test.js` holds each under 300 KB) plus a PDF of the six for a
+  LinkedIn document post into `knowledge_base/`. Run it after the film.
 
 ---
 

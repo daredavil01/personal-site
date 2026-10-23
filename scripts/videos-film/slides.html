@@ -1,0 +1,296 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..700&family=Hanken+Grotesk:wght@400;500;600&family=Martian+Mono:wght@400;500&display=block">
+<style>
+  /* The /videos release as six 1080×1350 slides (a 4:5 carousel), in the
+     light screening-room palette: projection-screen ground, plum ink, velvet
+     and gold. slides.mjs fills the data block from the live videos table and puts
+     the film's frames in frames/, then shoots each .slide. */
+  @page { size: 1080px 1350px; margin: 0; }
+  @media print { body { background: none; } .slide { break-after: page; } }
+  :root {
+    --stage: #f2f0ec; --surface: #faf9f7; --raised: #ffffff; --line: #dcd6cf;
+    --ink: #1c1722; --muted: #665f6e; --velvet: #a1233a; --gold: #8a641a;
+    --velvet-soft: rgba(161, 35, 58, .09); --gold-soft: rgba(138, 100, 26, .12);
+    --display: "Bodoni Moda", Georgia, serif; --body: "Hanken Grotesk", sans-serif; --mono: "Martian Mono", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1080px; background: #ccc; font: 400 22px/1.45 var(--body); color: var(--ink); }
+  .slide { width: 1080px; height: 1350px; position: relative; overflow: hidden; background: var(--stage); }
+  .slide canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
+  .inner { position: absolute; inset: 64px 72px 56px; display: flex; flex-direction: column; overflow: hidden; }
+  .mono { font-family: var(--mono); font-size: 15px; letter-spacing: .1em; text-transform: uppercase; }
+  .chrome { display: flex; justify-content: space-between; align-items: center; color: var(--muted); }
+  .chrome .eb { display: flex; align-items: center; gap: 12px; }
+  .chrome .eb::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--velvet); box-shadow: 0 0 0 5px var(--velvet-soft); }
+  .chrome .count b { color: var(--ink); font-weight: 500; }
+  .foot { margin-top: auto; flex: none; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 18px; color: var(--muted); }
+  .foot .swipe { color: var(--velvet); }
+  h1, h2, h3 { font-family: var(--display); font-weight: 500; letter-spacing: -.01em; }
+  .kicker { color: var(--gold); margin-top: 46px; }
+  h2 { font-size: 64px; line-height: 1.02; margin-top: 12px; }
+  .note { color: var(--muted); font-size: 22px; margin-top: 14px; max-width: 760px; }
+  .card { border-radius: 16px; overflow: hidden; box-shadow: 0 22px 50px rgba(28, 23, 34, .22), 0 0 0 1px rgba(28, 23, 34, .08); }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* 1 cover */
+  .cover-grid { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 40px; align-items: center; margin-top: 64px; }
+  h1 { font-size: 106px; line-height: .92; }
+  h1 em { font-style: italic; color: var(--velvet); font-weight: 600; }
+  .lede { font-size: 27px; color: var(--muted); margin-top: 30px; }
+  .lede b { color: var(--ink); font-weight: 600; }
+  .cover-frame { width: 290px; aspect-ratio: 9 / 16; }
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: auto; border-top: 1px solid var(--line); }
+  .facts div { padding: 20px 20px 0 0; }
+  .facts div + div { padding-left: 22px; border-left: 1px solid var(--line); }
+  .facts b { display: block; font: 500 72px/1 var(--display); font-variant-numeric: lining-nums; }
+  .facts span { display: block; color: var(--muted); margin-top: 10px; }
+  .tag { margin: 34px 0 40px; font: italic 500 30px/1.3 var(--display); }
+
+  /* 2 chapters */
+  .chs { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 34px; margin-top: 36px; }
+  .ch { display: grid; grid-template-columns: 160px 1fr; gap: 22px; align-items: start; }
+  .ch .card { width: 160px; aspect-ratio: 9 / 16; border-radius: 12px; }
+  .ch .mono { color: var(--muted); font-size: 13px; }
+  .ch .mono b { color: var(--velvet); font: italic 600 26px var(--display); letter-spacing: 0; margin-right: 8px; }
+  .ch h3 { font-size: 32px; line-height: 1.05; margin-top: 8px; }
+  .ch p { color: var(--muted); font-size: 19px; line-height: 1.4; margin-top: 10px; }
+
+  /* 3 channel */
+  .chart { position: relative; height: 380px; margin-top: 40px; }
+  .chart .axis { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--line); }
+  .chart .tick { position: absolute; bottom: -34px; transform: translateX(-50%); color: var(--muted); font-size: 14px; }
+  .chart .band { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, transparent 0 7px, var(--line) 7px 8px); border-radius: 8px; }
+  .chart .band span { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); white-space: nowrap; color: var(--muted); background: var(--stage); padding: 3px 8px; font-size: 12px; }
+  .dot { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); background: var(--ink); opacity: .85; }
+  .dot.short { background: transparent; box-shadow: inset 0 0 0 3px var(--velvet); opacity: 1; }
+  .dot.big { background: var(--velvet-soft); }
+  .legend { display: flex; gap: 28px; margin-top: 52px; color: var(--muted); font-size: 13px; }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 8px; }
+  .callout { display: grid; grid-template-columns: auto 1fr 260px; gap: 30px; align-items: center; margin-top: 44px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px 30px; }
+  .callout .big { font: 500 128px/0.9 var(--display); color: var(--velvet); }
+  .callout p { color: var(--muted); font-size: 21px; }
+  .callout p em { color: var(--ink); font-style: italic; }
+  .callout .card { width: 260px; aspect-ratio: 16 / 9; border-radius: 12px; }
+
+  /* 4 by hand */
+  .fields { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; max-width: 900px; }
+  .fields span { font: 500 13px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--surface); }
+  .swap { display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; margin-top: 40px; }
+  .grid { display: grid; grid-template-columns: repeat(12, 22px); gap: 5px; }
+  .grid i { width: 22px; height: 22px; border-radius: 4px; border: 1.5px solid #c9c2ba; display: block; }
+  .grid.on i { background: var(--velvet); border-color: var(--velvet); }
+  .gl h3 { font-size: 44px; margin-top: 20px; }
+  .gl .mono { color: var(--muted); font-size: 13px; margin-top: 6px; display: block; }
+  .arrow { display: grid; place-items: center; }
+  .arrow svg { width: 96px; height: 40px; }
+  .after { font-size: 24px; color: var(--muted); margin-top: 34px; max-width: 880px; }
+  .after b { color: var(--ink); font-weight: 600; }
+
+  /* 5 flow */
+  .flow { display: grid; gap: 0; margin-top: 34px; }
+  .stop { display: grid; grid-template-columns: 1fr 220px; gap: 30px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px 30px; }
+  .stop.end { border-color: var(--velvet); background: var(--velvet-soft); }
+  .stop .mono { color: var(--muted); font-size: 13px; }
+  .stop h3 { font-size: 38px; line-height: 1.05; margin-top: 6px; }
+  .stop p { color: var(--muted); font-size: 19px; line-height: 1.4; margin-top: 8px; }
+  .stop .n { border-left: 1px solid var(--line); padding-left: 26px; }
+  .stop .n b { display: block; font: 500 76px/1 var(--display); color: var(--gold); font-variant-numeric: lining-nums; }
+  .stop .n span { display: block; color: var(--muted); font-size: 16px; line-height: 1.3; margin-top: 6px; }
+  .link { height: 30px; display: grid; place-items: center; }
+  .link i { width: 2px; height: 30px; background: linear-gradient(var(--gold), var(--gold)) center / 2px 100% no-repeat; position: relative; }
+  .link i::after { content: ""; position: absolute; left: 50%; bottom: -2px; width: 10px; height: 10px; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: translateX(-50%) rotate(45deg); }
+
+  /* 6 end */
+  .end-grid { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 52px; align-items: center; margin: auto 0; }
+  .end-grid .card { width: 380px; aspect-ratio: 9 / 16; }
+  .end-grid h2 { font-size: 78px; }
+  .url { font: italic 500 40px/1.1 var(--display); color: var(--velvet); margin-top: 34px; white-space: nowrap; }
+  .pill { display: inline-flex; gap: 12px; align-items: center; background: var(--velvet); color: #fff; padding: 14px 26px; border-radius: 999px; font: 600 24px var(--body); margin-top: 28px; }
+  .film { color: var(--muted); font-size: 22px; margin-top: 30px; }
+  .credit { color: var(--muted); font-size: 12px; margin-top: 40px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<section class="slide" id="s1">
+  <canvas id="orbit" width="2160" height="2700"></canvas>
+  <div class="inner">
+    <div class="chrome mono"><span class="eb">sankettambare.in · Release 24</span><span class="count"><b>01</b> / 06</span></div>
+    <div class="cover-grid">
+      <div>
+        <h1>From orbit<br>to <em>/videos</em></h1>
+        <p class="lede" id="lede"></p>
+      </div>
+      <div class="card cover-frame"><img src="frames/cover.jpg" alt=""></div>
+    </div>
+    <div class="facts" id="facts"></div>
+    <p class="tag">A 90-second film, six chapters, one button.</p>
+    <div class="foot mono"><span>sankettambare.in/videos</span><span class="swipe">Swipe →</span></div>
+  </div>
+</section>
+
+<section class="slide" id="s2">
+  <div class="inner">
+    <div class="chrome mono"><span class="eb">sankettambare.in · Release 24</span><span class="count"><b>02</b> / 06</span></div>
+    <p class="mono kicker">The film, chapter by chapter</p>
+    <h2>Six chapters, ninety seconds</h2>
+    <div class="chs" id="chapters"></div>
+    <div class="foot mono"><span>sankettambare.in/videos</span><span class="swipe">Swipe →</span></div>
+  </div>
+</section>
+
+<section class="slide" id="s3">
+  <div class="inner">
+    <div class="chrome mono"><span class="eb">sankettambare.in · Release 24</span><span class="count"><b>03</b> / 06</span></div>
+    <p class="mono kicker">The channel, 2019 to 2026</p>
+    <h2 id="channelTitle"></h2>
+    <p class="note">Each circle is a video, sized by its views and placed on the day it went up.</p>
+    <div class="chart" id="chart"></div>
+    <div class="legend mono"><span><i style="background: var(--ink)"></i>Video</span><span><i style="box-shadow: inset 0 0 0 3px var(--velvet)"></i>Short</span><span>Area ∝ views</span></div>
+    <div class="callout"><span class="big" id="share"></span><p id="shareText"></p><div class="card"><img src="frames/top-short.jpg" alt=""></div></div>
+    <div class="foot mono"><span>sankettambare.in/videos</span><span class="swipe">Swipe →</span></div>
+  </div>
+</section>
+
+<section class="slide" id="s4">
+  <div class="inner">
+    <div class="chrome mono"><span class="eb">sankettambare.in · Release 24</span><span class="count"><b>04</b> / 06</span></div>
+    <p class="mono kicker">What the sync replaced</p>
+    <h2 id="swapTitle"></h2>
+    <div class="fields" id="fields"></div>
+    <div class="swap">
+      <div class="gl"><div class="grid" id="gBefore"></div><h3>By hand</h3><span class="mono" id="byHandSub"></span></div>
+      <div class="arrow"><svg viewBox="0 0 96 40" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h84M70 6l18 14-18 14"/></svg></div>
+      <div class="gl"><div class="grid on" id="gAfter"></div><h3>Sync now</h3><span class="mono">one click, every value</span></div>
+    </div>
+    <p class="after">Every new upload used to mean twelve more fields. Now <b>the same click adds it</b> and refreshes every view count. Nothing is ever deleted.</p>
+    <div class="foot mono"><span>sankettambare.in/videos</span><span class="swipe">Swipe →</span></div>
+  </div>
+</section>
+
+<section class="slide" id="s5">
+  <div class="inner">
+    <div class="chrome mono"><span class="eb">sankettambare.in · Release 24</span><span class="count"><b>05</b> / 06</span></div>
+    <p class="mono kicker">Under the hood</p>
+    <h2>How one click travels</h2>
+    <div class="flow" id="flow"></div>
+    <div class="foot mono"><span>sankettambare.in/videos</span><span class="swipe">Swipe →</span></div>
+  </div>
+</section>
+
+<section class="slide" id="s6">
+  <div class="inner">
+    <div class="chrome mono"><span class="eb">sankettambare.in · Release 24</span><span class="count"><b>06</b> / 06</span></div>
+    <div class="end-grid">
+      <div class="card"><img src="frames/end.jpg" alt=""></div>
+      <div>
+        <p class="mono kicker" style="margin-top: 0">See you there</p>
+        <h2>Every upload,<br>one page.</h2>
+        <p class="url">sankettambare.in/videos</p>
+        <span class="pill"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 4v16l13-8z" fill="#fff"/></svg>@sankettambare7474</span>
+        <p class="film">The 90-second film plays at the top of the page.</p>
+        <p class="credit mono">Frames from the film · Imagery © Esri, Maxar, Earthstar Geographics · Blue Marble: NASA</p>
+      </div>
+    </div>
+    <div class="foot mono"><span>sankettambare.in/videos</span><span>Search · filter · sort · play</span></div>
+  </div>
+</section>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const V = D.videos;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Math.round(n).toLocaleString("en-IN");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const views = V.reduce((n, v) => n + v.v, 0);
+  const shorts = V.filter((v) => v.s).length;
+  const minutes = Math.round(V.reduce((n, v) => n + v.len, 0) / 60);
+
+  // Small counts read better as words in a headline.
+  const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+    "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+  const word = (n) => WORDS[n] || fmt(n);
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const years = V.map((v) => +v.d.slice(0, 4));
+
+  // 1 · cover
+  $("lede").innerHTML = `For ${word(Math.max(...years) - Math.min(...years))} years the channel lived only on YouTube. Now <b>every upload has a home on the site</b>, filled by one button.`;
+  $("channelTitle").innerHTML = `${cap(word(V.length))} uploads,<br>one runaway Short`;
+  $("facts").innerHTML = [[V.length, "videos"], [shorts, "Shorts"], [fmt(views), "views"], [minutes, "minutes"]]
+    .map(([n, l]) => `<div><b>${n}</b><span class="mono">${l}</span></div>`).join("");
+  const cv = $("orbit"), g = cv.getContext("2d");
+  g.scale(2, 2);
+  const fx = 880, fy = 470;
+  for (let k = -2; k < 10; k += 1) {
+    const r = 14 * 1.62 ** (k + 0.65);
+    if (r < 6) continue;
+    g.strokeStyle = "#665f6e"; g.globalAlpha = 0.2 * Math.min(1, r / 60) * Math.max(0, 1 - r / 1400); g.lineWidth = 1;
+    g.setLineDash(k % 3 === 0 ? [2, 7] : []);
+    g.beginPath(); g.arc(fx, fy, r, 0, Math.PI * 2); g.stroke();
+  }
+  g.setLineDash([]); g.globalAlpha = 0.5; g.strokeStyle = "#8a641a";
+  g.beginPath(); g.ellipse(fx, fy, 430, 150, -0.35, 0, Math.PI * 2); g.stroke();
+
+  // 2 · chapters
+  const CH = [
+    ["01", "00:00", "Orbit", "From space down to a pin on Pune, where a browser opens on the site.", "ch1"],
+    ["02", "00:15", "The back-story", "The channel since 2019, and the twelve fields a video took by hand.", "ch2"],
+    ["03", "00:34", "The unveiling", "A gold bow on red velvet. The ribbons come off.", "ch3"],
+    ["04", "00:40", "The features", "The Shorts switch, search, five sorts, and play in place.", "ch4"],
+    ["05", "01:03", "Under the hood", "Sync now: from YouTube to the database in one click.", "ch5"],
+    ["06", "01:20", "See you there", "Back out to orbit, and the address.", "ch6"],
+  ];
+  $("chapters").innerHTML = CH.map(([n, tc, name, line, f]) => `<div class="ch"><div class="card"><img src="frames/${f}.jpg" alt=""></div><div><span class="mono"><b>${n}</b>${tc}</span><h3>${name}</h3><p>${line}</p></div></div>`).join("");
+
+  // 3 · channel
+  const maxV = Math.max(...V.map((v) => v.v));
+  const leader = V.find((v) => v.v === maxV);
+  $("share").textContent = `${Math.round((maxV / views) * 100)}%`;
+  $("shareText").innerHTML = `of every view went to one Short: <em>${esc(leader.t)}</em>, ${fmt(maxV)} views.`;
+  const chart = $("chart");
+  const W = chart.clientWidth, H = chart.clientHeight, mid = H * 0.55, maxR = 66;
+  const t0 = Date.parse("2019-01-01"), t1 = Date.parse("2027-01-01");
+  const x = (d) => ((Date.parse(d) - t0) / (t1 - t0)) * W;
+  let html = "";
+  for (let y = 2019; y <= 2026; y += 1) html += `<span class="tick mono" style="left:${x(`${y}-07-01`)}px">${y}</span>`;
+  html += `<div class="band" style="left:${x("2022-01-01")}px;width:${x("2024-01-01") - x("2022-01-01")}px"><span class="mono">No uploads</span></div><div class="axis"></div>`;
+  const placed = [];
+  V.forEach((v) => {
+    const r = Math.max(7, Math.sqrt(v.v / maxV) * maxR), cx = x(v.d);
+    let cy = mid;
+    for (const k of [0, -1, 1, -2, 2, -3, 3]) {
+      const y = mid + k * 0.42 * (r + 14);
+      if (placed.every((p) => Math.hypot(p.x - cx, p.y - y) >= p.r + r + 4)) { cy = y; break; }
+    }
+    placed.push({ x: cx, y: cy, r });
+    html += `<i class="dot${v.s ? " short" : ""}${v.v === maxV ? " big" : ""}" style="left:${cx}px;top:${cy}px;width:${r * 2}px;height:${r * 2}px"></i>`;
+  });
+  chart.innerHTML = html;
+
+  // 4 · by hand
+  const FIELDS = ["Link", "Title", "Description", "Date", "Length", "Short?", "Views", "Likes", "Comments", "Thumbnail", "Playlists", "Keywords"];
+  const total = FIELDS.length * V.length;
+  $("swapTitle").textContent = `${fmt(total)} copy-pastes, or one click`;
+  $("fields").innerHTML = FIELDS.map((f) => `<span>${f}</span>`).join("");
+  $("byHandSub").textContent = `${FIELDS.length} fields × ${V.length} videos`;
+  ["gBefore", "gAfter"].forEach((id) => { $(id).innerHTML = "<i></i>".repeat(total); });
+
+  // 5 · flow
+  const playlists = new Set(V.flatMap((v) => v.p)).size;
+  const quota = 1 + 2 * Math.ceil(V.length / 25) + 1 + playlists;
+  const probed = V.filter((v) => v.len <= 180).length;
+  const STOPS = [
+    ["01 · Source", "YouTube Data API", "Public uploads only, read 25 at a time, then filed into their playlists.", quota, "of 10,000 daily quota units per full sync"],
+    ["02 · Edge", "Cloudflare Worker", "Holds the key, lets only the owner in, and checks every upload under three minutes at /shorts/{id}.", probed, `checked for Shorts, ${shorts} confirmed`],
+    ["03 · Store", "Supabase Postgres", "One row per video. YouTube owns the facts; tags and overrides on the site are never touched.", V.length, "rows written in one sync"],
+    ["04 · Page", "/videos", "Search, filters, five sorts, and a player that loads only when you press play.", 5, "sorts, from newest to most viewed"],
+  ];
+  $("flow").innerHTML = STOPS.map(([k, name, text, n, l], i) => `${i ? '<div class="link"><i></i></div>' : ""}<div class="stop${i === 3 ? " end" : ""}"><div><span class="mono">${k}</span><h3>${esc(name)}</h3><p>${esc(text)}</p></div><div class="n"><b>${fmt(n)}</b><span>${esc(l)}</span></div></div>`).join("");
+  window.__ready = true;
+</script>
+</body>
+</html>
