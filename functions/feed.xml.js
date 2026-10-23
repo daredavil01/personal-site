@@ -8,7 +8,7 @@ import { serveCached, isComplete, HOUR } from "../src/lib/seo/serve";
 
 // Every table but the micro-blog is small enough to read whole; the micro-blog
 // contributes its newest posts with text, which is all a feed could show.
-const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "newsletter", "microblog"];
+const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "video", "newsletter", "microblog"];
 
 export async function onRequestGet(context) {
   return serveCached(context, async () => {

@@ -32,6 +32,7 @@ const TYPE_LABELS = {
   trek: "treks",
   project: "projects",
   presentation: "decks",
+  video: "videos",
 };
 
 const EMPTY_FORM = {

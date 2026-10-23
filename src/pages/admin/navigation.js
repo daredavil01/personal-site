@@ -5,11 +5,13 @@ import {
   Briefcase,
   Calendar,
   Camera,
+  Clapperboard,
   FileText,
   Footprints,
   GraduationCap,
   History,
   LayoutDashboard,
+  Megaphone,
   MessageCircle,
   MessagesSquare,
   MountainSnow,
@@ -48,6 +50,8 @@ export const NAV_GROUPS = [
       { to: "/admin/treks", label: "Treks", icon: MountainSnow, resource: "treks" },
       { to: "/admin/projects", label: "Projects", icon: Wrench, resource: "projects" },
       { to: "/admin/presentations", label: "Presentations", icon: Presentation, resource: "presentations" },
+      { to: "/admin/videos", label: "Videos", icon: Clapperboard, resource: "videos", end: true },
+      { to: "/admin/videos/sync", label: "YouTube sync", icon: RefreshCw },
       { to: "/admin/blogs", label: "100 Days", icon: FileText, resource: "blogs" },
       { to: "/admin/instagram", label: "Instagram", icon: Camera, resource: "instagram" },
       { to: "/admin/microblog", label: "Micro Blog", icon: Rss },
@@ -62,6 +66,13 @@ export const NAV_GROUPS = [
     items: [
       { to: "/admin/now/months", label: "Newsletter issues", icon: Calendar },
       { to: "/admin/now/meta", label: "Meta", icon: Sparkles },
+    ],
+  },
+  {
+    id: "share",
+    label: "Share",
+    items: [
+      { to: "/admin/social", label: "Social kit", icon: Megaphone },
     ],
   },
   {

@@ -23,6 +23,7 @@ const TYPES = [
   { key: "trek", label: "Treks", swatch: "bg-[#008300] dark:bg-[#008300]" },
   { key: "project", label: "Projects", swatch: "bg-[#4a3aa7] dark:bg-[#9085e9]" },
   { key: "presentation", label: "Presentations", swatch: "bg-stone-500 dark:bg-stone-400" },
+  { key: "video", label: "Videos", swatch: "bg-[#c4302b] dark:bg-[#e0524d]" },
 ];
 
 const TOP_THEMES = 12;

@@ -71,6 +71,7 @@ describe("regionForPath", () => {
     ["/interactive-me", "person"],
     ["/ask", "person"],
     ["/tags/forts", "person"],
+    ["/videos/7", "person"],
   ])("%s → %s", (path, region) => {
     expect(regionForPath(path)).toBe(region);
   });

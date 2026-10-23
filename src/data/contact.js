@@ -2,6 +2,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons/faGithub";
 import { faLinkedinIn } from "@fortawesome/free-brands-svg-icons/faLinkedinIn";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons/faTwitter";
 import { faWordpress } from "@fortawesome/free-brands-svg-icons/faWordpress";
+import { faYoutube } from "@fortawesome/free-brands-svg-icons/faYoutube";
 import { faNewspaper } from "@fortawesome/free-regular-svg-icons/faNewspaper";
 import { faAddressCard } from "@fortawesome/free-regular-svg-icons/faAddressCard";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons/faEnvelope";
@@ -54,6 +55,11 @@ const data = [
     link: "https://daredavil453624413.wordpress.com",
     label: "WordPress",
     icon: faWordpress,
+  },
+  {
+    link: "https://www.youtube.com/@sankettambare7474",
+    label: "YouTube",
+    icon: faYoutube,
   },
   {
     link: "mailto:sanket.tambare01@gmail.com",

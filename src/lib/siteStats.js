@@ -19,7 +19,7 @@ import {
 /* eslint-enable import/extensions */
 
 export const OFFLOAD_TAG = "100_days_to_offload";
-export const TAG_TYPES = ["blog", "book", "microblog", "instagram", "sport", "trek", "project", "presentation"];
+export const TAG_TYPES = ["blog", "book", "microblog", "instagram", "sport", "trek", "project", "presentation", "video"];
 export const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -135,6 +135,7 @@ export function computeSiteStats({
   instagram = [],
   projects = [],
   presentations = [],
+  videos = [],
   resume = {},
   now = new Date(),
 } = {}) {
@@ -182,6 +183,11 @@ export function computeSiteStats({
   // Treks
   const latestTrekRow = [...treks].sort((a, b) => parseTrekDate(b.date) - parseTrekDate(a.date))[0];
 
+  // Video. Rows arrive from Postgres (kind, kind_override, view_count) or in
+  // client shape (kind already resolved, viewCount).
+  const shortCount = videos.filter((v) => (v.kind_override || v.kind) === "short").length;
+  const viewCounts = videos.map((v) => v.view_count ?? v.viewCount).filter((n) => n != null && Number.isFinite(Number(n)));
+
   // Capture
   const instaTagCounts = {};
   instagram.forEach((post) => tagsOf(post).forEach((t) => { instaTagCounts[t] = (instaTagCounts[t] || 0) + 1; }));
@@ -220,6 +226,10 @@ export function computeSiteStats({
     degreeCount: degrees.length,
     projectCount: projects.length,
     presentationCount: presentations.length,
+    videoCount: videos.length - shortCount,
+    shortCount,
+    // Null, not 0, when no row has a count: an unknown total is omitted.
+    videoViews: viewCounts.length ? viewCounts.reduce((acc, n) => acc + Number(n), 0) : null,
 
     totalRaces: sports.length,
     totalKmRun: sports.reduce(

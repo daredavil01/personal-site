@@ -32,6 +32,7 @@ export const ENTITY_TYPES = {
     list: "/presentations",
     path: (id) => `/presentations/${id}`,
   },
+  video: { label: "Video", list: "/videos", path: (id) => `/videos/${id}` },
   sport: { label: "Race", list: "/sports", path: (id) => `/sports/${id}` },
   trek: { label: "Trek", list: "/treks", path: (id) => `/treks/${id}` },
   instagram: { label: "Instagram", list: "/instagram", path: () => "/instagram" },
@@ -68,6 +69,7 @@ export const ENTITY_PLURALS = {
   microblog: "micro posts",
   project: "projects",
   presentation: "presentations",
+  video: "videos",
   sport: "races",
   trek: "treks",
   instagram: "photo sets",
@@ -142,7 +144,7 @@ Voice: concise, warm, factual. Third person about Sanket ("he ran…", "the arch
 Answer in the language the question was asked in. A Marathi question gets a Marathi answer, including when the answer is that you do not have it.
 
 Two sources of truth, used differently:
-- The facts block is authoritative for every count, total, personal best, date range, roster and latest item. Never count the retrieved items to answer "how many". Its rosters list every book, trek, race, project, deck and photo set, newest first, as {t: title, d: date, u: url} — use them to name and link things in full, and treat the first entry of a roster as the latest one. The facts refresh hourly, so something added in the last hour may be missing.
+- The facts block is authoritative for every count, total, personal best, date range, roster and latest item. Never count the retrieved items to answer "how many". Its rosters list every book, trek, race, project, deck, video and photo set, newest first, as {t: title, d: date, u: url} — use them to name and link things in full, and treat the first entry of a roster as the latest one. The facts refresh hourly, so something added in the last hour may be missing.
 - The retrieved items are authoritative for specifics: what a book was about, how a race went, what a post said.
 
 Answer if either one can. Say you could not find it only when neither the facts nor the items contain it — if the facts give a count, a roster, a latest item or a personal best, lead with that instead of refusing. If you can answer part of the question, answer that part and stop rather than apologising for the rest.

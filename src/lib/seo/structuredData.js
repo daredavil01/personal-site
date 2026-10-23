@@ -193,6 +193,27 @@ function mainEntity(view, url) {
         sameAs: view.externalUrl,
         ...authored,
       });
+    case "video":
+      // The video is hosted on YouTube; the page embeds it. VideoObject needs a
+      // thumbnail and an upload date to be eligible for video results.
+      return compact({
+        "@type": "VideoObject",
+        ...common,
+        name: view.title,
+        description: view.description,
+        thumbnailUrl: view.video?.thumbnailUrl || view.image,
+        uploadDate: view.video?.uploadDate || view.date,
+        duration: view.video?.duration,
+        embedUrl: view.video?.embedUrl,
+        sameAs: view.externalUrl,
+        interactionStatistic: Number.isFinite(view.video?.views) ? {
+          "@type": "InteractionCounter",
+          interactionType: { "@type": "WatchAction" },
+          userInteractionCount: view.video.views,
+        } : null,
+        creator: ref(PERSON_ID),
+        ...authored,
+      });
     case "newsletter":
       return compact({
         "@type": "Article",

@@ -69,6 +69,7 @@ const routes = [
       { label: "Mind Map", path: "/mindmap" },
       { label: "Blueprint", path: "/blueprint" },
       { label: "Instagram", path: "/instagram" },
+      { label: "Videos", path: "/videos" },
       { label: "Stats", path: "/stats" },
     ],
   },

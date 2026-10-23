@@ -249,6 +249,15 @@ export const PAGE_META = {
     ogSlug: "treks",
     type: "website",
   },
+  "/videos": {
+    title: "Videos",
+    description:
+      "Every video and Short from the YouTube channel — treks, runs, books and builds — searchable, filterable by playlist, tag and year, and playable right on the page.",
+    image: `${SITE_URL}/og/videos.png`,
+    imageAlt: "A widescreen frame beside a phone-shaped Shorts frame, each with a play button",
+    ogSlug: "videos",
+    type: "website",
+  },
 };
 
 export const DEFAULT_META = {
@@ -403,6 +412,34 @@ export function buildPresentationMeta({ title, description, image } = {}) {
     description: description || `A presentation: ${title}.`,
     image: image || sectionImage("presentations"),
     imageAlt: `Slide deck card for ${title}`,
+    type: "article",
+  };
+}
+
+// A YouTube description opens with the useful sentence and trails links,
+// hashtags and credits; the meta description keeps the opening only.
+function videoSummary(description) {
+  const text = String(description || "")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/(^|\s)#[^\s#]+/g, " ")
+    .split(/\n\s*\n/)[0]
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= 200) return text;
+  return `${text.slice(0, 197).replace(/\s+\S*$/, "")}…`;
+}
+
+// One video. `image` is the video's own YouTube thumbnail (a JPEG), else the
+// /videos card.
+export function buildVideoMeta({
+  title, description, image, kind,
+} = {}) {
+  return {
+    title,
+    description: videoSummary(description)
+      || `${kind === "short" ? "A YouTube Short" : "A video"} by Sanket Tambare: ${title}.`,
+    image: image || sectionImage("videos"),
+    imageAlt: image ? `Thumbnail of ${title}` : `Video card for ${title}`,
     type: "article",
   };
 }

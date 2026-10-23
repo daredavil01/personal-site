@@ -24,7 +24,7 @@ is canonical.
   `createResource` CRUD factory (`_crud.js`) and `fromRow` / `toRow` mappers.
   Full lists are loaded lazily and cached through `src/context/ContentContext.js`,
   which exposes hooks: `useBooks`, `useSports`, `useTreks`, `useProjects`,
-  `useBlogs`, `useInstagram`, `useResume`, `useNowMeta`, `useNowMonths`,
+  `useBlogs`, `useInstagram`, `useVideos`, `useResume`, `useNowMeta`, `useNowMonths`,
   `useTags` (each returns `{ data, loading, error }`), plus `useTagColors`
   (tag name → color map) and `useContentRefresh` (re-fetch one key).
 - **Microblog is the exception** — 1,600+ rows, so it is **not** in the context.
@@ -42,7 +42,8 @@ Tags are **not** columns on content rows. One `tags` table holds each tag's
 metadata (lowercase `name`, `display_name`, `color`, `category`,
 `description`); a polymorphic `tag_associations` table (`entity_type`,
 `entity_id`, `tag_id`, `position`) links tags to rows in `books`, `blogs`,
-`instagram`, `microblog`, `sports`, `treks`, `projects`. Schema + RPCs:
+`instagram`, `microblog`, `sports`, `treks`, `projects`, `presentations`,
+`videos`. Schema + RPCs:
 `supabase/migrations/0003_centralized_tags.sql`. Resume skill categories are
 **not** tags (`resume_skills.category` stays a plain `text[]`).
 
@@ -438,12 +439,34 @@ Full reference: `docs/newsletter.md`.
   `blogs:wordcount` + `ask:index` and commits the ledger JSON only when posts
   changed. Repo secrets: `SUPABASE_SERVICE_ROLE_KEY`, `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
 
+## Social kit (/admin/social)
+
+Paste a blog link → the post's title, subtitle and text fill one form from the
+Substack RSS feed (`/rss-feed?full=1`, latest 20 posts; older or WordPress posts
+are pasted) → **Build prompts** fills researched templates in the browser and
+returns copy-ready **ChatGPT prompts**: three Substack Notes, a LinkedIn post,
+WhatsApp/Facebook/Threads messages, a combined "all posts in one chat" prompt,
+and an image prompt per chosen size (blog banner at a picked size, 4:5, 9:16,
+1.91:1). **No model is called and nothing runs per post or in the background.**
+
+- **Templates live only in `src/lib/socialPrompts.js`.** Every rule traces to a
+  source in `docs/social-kit.md` — read it before changing one, add the source
+  for a new rule, and bump `TEMPLATE_VERSION` (stored on each kit).
+- **The feed body stays HTML at the edge** and becomes text in the browser
+  (`src/lib/htmlText.js`, shared with `blogs:wordcount`): ~0.5 MB of
+  HTML-to-text could exceed the Worker's 10 ms of CPU.
+- **Kits are saved** in `social_kits` (`0036`, owner-only RLS for all, no public
+  policy), one per post keyed on `normaliseUrl`, read and written from the
+  browser (`src/lib/api/socialKits.js`).
+
 ## Environment Variables
 
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — client (baked into the
   bundle by Vite). Public; committed in `wrangler.toml` `[vars]`.
 - `SUPABASE_SERVICE_ROLE_KEY` — **secret**, server/scripts only. Never commit;
   set via `wrangler pages secret put` or the Cloudflare dashboard.
+- `YOUTUBE_API_KEY` — **secret**, read only by `functions/api/youtube-sync.js`
+  (the /videos sync). Restrict it to the YouTube Data API, not by referrer.
 - `AI_GATEWAY_API_KEY` / `TYPESAFE_API_KEY` — **secret**, optional, and only for
   the Jev rungs of the judge ladder. Neither is needed to grade: the free Gemini
   and Workers AI rungs use `GEMINI_API_KEY` and the `AI` binding, which are already
@@ -497,6 +520,9 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Sitemap / feed / llms Functions | `functions/sitemap.xml.js`, `functions/feed.xml.js`, `functions/llms.txt.js`, `functions/llms-full.txt.js` |
 | IndexNow | `scripts/indexnow.mjs`, `public/indexnow-key.txt` |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
+| Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
+| Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
+| Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
 | Second brain endpoint | `functions/api/ask.js` |
 | Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |
 | Ask UI | `src/pages/Ask.js`, `src/components/Ask/` |
@@ -813,6 +839,42 @@ screenshot.
   on the next `npm run ask:index`.
 - Previews load every deck on the list page; switch to image thumbnails if the
   list grows past ~20 decks.
+
+---
+
+### Videos Page
+
+**Table:** `videos` (`src/lib/api/videos.js`, `0035_videos.sql`), filled from the
+YouTube channel **https://www.youtube.com/@sankettambare7474** — not typed in.
+
+- **Sync:** `/admin/videos/sync` → **Sync now**. The owner-only endpoint
+  `functions/api/youtube-sync.js` holds `YOUTUBE_API_KEY` (a Cloudflare secret,
+  restricted to the YouTube Data API, **not** by HTTP referrer — a server request
+  has none). The browser drives the loop one page of 25 uploads per request,
+  because Workers Free allows 10 ms of CPU and 50 subrequests; then one
+  `playlists` step re-files every video (`set_video_playlists()`, service-role
+  only). "Add one video" takes any YouTube link. Nothing is deleted: a full run
+  lists stored videos it did not see, to hide by hand.
+- **Synced vs owned columns:** YouTube owns title, description, `date` (IST
+  publish day), duration, counts, thumbnail, playlists and `yt_tags`; the sync
+  rewrites them (`toVideoRow` in `src/lib/youtube.js` is the only shape it
+  writes). The site owns `kind_override`, `visible` and the tags; the sync never
+  sends them. So edit titles on YouTube, and tags/visibility in `/admin/videos`.
+- **Short or video:** the Data API has no Shorts flag. ≤ 180 s makes a candidate
+  and `HEAD /shorts/<id>` decides (200 = Short, redirect to `/watch` = video);
+  blocked → duration decides. A stored row keeps its kind unless "Re-check" is
+  ticked. `kind_override` wins everywhere (`effectiveKind`).
+- **`yt_tags` are search-only** — a channel's keywords never enter the central
+  tag tables.
+- **Public pages:** `/videos` (`src/pages/Videos.js`) filters through the pure
+  `src/lib/videoFilters.js` with URL state in `useVideoFilters` (`q`, `type`,
+  `tags`, `year`, `playlist`, `sort` — never `view`). `/videos/:id`
+  (`src/pages/VideoPost.js`) shows the thumbnail until play is pressed, then a
+  `youtube-nocookie.com` embed (9:16 for Shorts). Its share image is the row's
+  own thumbnail (JPEG, never the WebP variants).
+- **After content moves:** `npm run ask:index` (one chunk per video powers
+  "more like this" and the `video` roster), then `npm run og:fallbacks -- --only=videos`
+  so the card shows the counts.
 
 ---
 

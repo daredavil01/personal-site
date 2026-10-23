@@ -179,6 +179,15 @@ export function pageModel(slug, payload, {
       title: "Talks, built as decks",
       stats: [stat(s.presentationCount, "Decks")].filter(Boolean),
     },
+    videos: {
+      eyebrow: "Videos",
+      title: "On the channel",
+      stats: [
+        stat(s.videoCount, "Videos"),
+        stat(s.shortCount, "Shorts"),
+        stat(s.videoViews, "Views"),
+      ].filter(Boolean),
+    },
     projects: {
       eyebrow: "Projects",
       photos: photos.projects || [],
@@ -294,7 +303,7 @@ export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
-  "ask-share", "newsletter", "blueprint", "logbook",
+  "ask-share", "newsletter", "blueprint", "logbook", "videos",
 ];
 
 // One issue's card, from issueModel() (src/lib/newsletterIssue.js). Rendered by

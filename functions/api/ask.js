@@ -242,6 +242,7 @@ const ROSTER_LABELS = {
   sport: "races",
   project: "projects",
   presentation: "decks",
+  video: "videos",
   instagram: "photo sets",
 };
 
@@ -304,7 +305,7 @@ function buildSystemPrompt(settings, facts, chunks, scope, rosters, spokenLangua
     "## Facts (authoritative — use these for any counting, listing or aggregate question)",
     "`site_stats` holds every figure on the /stats page; `writing` is the Writing Ledger",
     "(word counts across all blog posts, with this month and year so far).",
-    "`roster` lists EVERY book, trek, race, project, deck and photo set, newest first,",
+    "`roster` lists EVERY book, trek, race, project, deck, video and photo set, newest first,",
     "as {t: title, d: date, u: url} — it is the complete list, so use it to answer",
     "\"which\" and \"list all\" questions in full rather than naming only what was",
     "retrieved. `latest` gives the newest micro post, blog post and essay; the",

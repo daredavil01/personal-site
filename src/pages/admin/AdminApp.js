@@ -11,6 +11,8 @@ import ResumePage from "./ResumePage";
 import MicroblogManager from "./MicroblogManager";
 import TagManager from "./TagManager";
 import ChangelogSync from "./ChangelogSync";
+import YoutubeSync from "./YoutubeSync";
+import SocialKit from "./SocialKit";
 import NowMetaEditor from "./NowMetaEditor";
 import AskSettingsEditor from "./AskSettingsEditor";
 import AskConversations from "./AskConversations";
@@ -52,12 +54,14 @@ const AdminRoutes = ({ session }) => {
         <Route path="tags" element={<TagManager />} />
         {/* Two segments, so the :resourceKey route below never sees it. */}
         <Route path="changelog/sync" element={<ChangelogSync />} />
+        <Route path="videos/sync" element={<YoutubeSync />} />
         <Route path="now/months" element={<NowMonthEditor />} />
         <Route path="now/meta" element={<NowMetaEditor />} />
         <Route path="ask/settings" element={<AskSettingsEditor />} />
         <Route path="ask/conversations" element={<AskConversations />} />
         <Route path="ask/shares" element={<AskShares />} />
         <Route path="ai" element={<AiAssist />} />
+        <Route path="social" element={<SocialKit />} />
         <Route path="resume" element={<Navigate to="/admin/resume/experience" replace />} />
         <Route path="resume/:section" element={<ResumePage />} />
         {/* Static segments outrank this, so it only catches the schema-driven

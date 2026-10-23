@@ -73,6 +73,21 @@ metadata; the deck is never copied into the repo or storage, so adding one is an
 optional; an undated deck buckets into the Monthly Digest by `created_at`. The
 indexer fetches each deck and indexes its slide text alongside the metadata.
 
+## Videos
+
+The YouTube channel (https://www.youtube.com/@sankettambare7474), one row per
+public upload, copied in by the owner's **Sync now** at `/admin/videos/sync`.
+YouTube owns the title, description, date, duration, counts, thumbnail and
+playlists — a sync rewrites them, so they are edited on YouTube. The site owns
+`kind_override`, `visible` and the tags, which a sync never touches.
+
+`kind` is `short` or `video`. The Data API has no Shorts flag, so a video of
+three minutes or less is a candidate and `/shorts/<id>` decides (200 for a
+Short, a redirect to `/watch` otherwise); when that check is blocked the
+duration decides, and `kind_override` corrects any mistake. `date` is the
+publish day in IST. `yt_tags` are the channel's YouTube keywords, kept for
+search only — they are never written into the central tag tables.
+
 ## Races (`sports`)
 
 `date` is free text in "February 22, 2026" form and `time` is chip time as

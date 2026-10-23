@@ -236,6 +236,40 @@ export const slideFan = ({ width = 520, height = 340, accent = COLORS.blue } = {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${frames}</svg>`;
 };
 
+// --- /videos ---------------------------------------------------------------
+
+// A 16:9 screen beside a 9:16 phone, each with a play triangle: the channel's
+// two shapes, long videos and Shorts, recognisable before any text is.
+export const screenAndPhone = ({ width = 500, height = 320, accent = COLORS.red } = {}) => {
+  const play = (cx, cy, r) => {
+    // The triangle's centroid sits a little right of its box, so nudge it back.
+    const x0 = cx - r * 0.42;
+    const p = [[x0, cy - r * 0.62], [x0, cy + r * 0.62], [x0 + r * 1.22, cy]]
+      .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+    return [
+      `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${accent}"/>`,
+      `<polygon points="${p}" fill="${COLORS.text}"/>`,
+    ].join("");
+  };
+  const phoneH = height - 8;
+  const phoneW = phoneH * (9 / 16);
+  const phoneX = width - phoneW - 4;
+  const screenW = phoneX - 28;
+  const screenH = screenW * (9 / 16);
+  const screenY = (height - screenH) / 2;
+  const bar = (x, y, w) => `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="8" rx="4" fill="${accent}" opacity="0.45"/>`;
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<rect x="2" y="${screenY.toFixed(1)}" width="${screenW.toFixed(1)}" height="${screenH.toFixed(1)}" rx="14" fill="${COLORS.panel}" stroke="${accent}" stroke-width="3"/>`,
+    play(2 + screenW / 2, screenY + screenH / 2, 34),
+    bar(22, screenY + screenH - 24, screenW * 0.55),
+    `<rect x="${phoneX.toFixed(1)}" y="4" width="${phoneW.toFixed(1)}" height="${phoneH.toFixed(1)}" rx="20" fill="${COLORS.panel}" stroke="${accent}" stroke-width="3"/>`,
+    play(phoneX + phoneW / 2, 4 + phoneH / 2, 26),
+    bar(phoneX + 16, 4 + phoneH - 28, phoneW * 0.5),
+    `</svg>`,
+  ].join("");
+};
+
 // --- /stats -----------------------------------------------------------------
 
 // A small bar series. Four of these tile into the "sparkline wall".

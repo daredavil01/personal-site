@@ -41,7 +41,7 @@ export async function loadSiteStatsInput({ url, key, fetchImpl = fetch }) {
 
   const [
     books, blogs, sports, treks, instagram, projects,
-    positions, degrees, certifications, skills, micro, tags, presentations,
+    positions, degrees, certifications, skills, micro, tags, presentations, videos,
   ] = await Promise.all([
     get("books", "select=*,tag_names&order=date_finished.desc.nullslast,id.asc"),
     get("blogs", withTags),
@@ -64,6 +64,9 @@ export async function loadSiteStatsInput({ url, key, fetchImpl = fetch }) {
       return res.json();
     }),
     get("presentations", withTags),
+    // The one optional table: until 0035 is applied it does not exist, and a
+    // missing channel must not take every other number on /stats down with it.
+    get("videos", "select=id,kind,kind_override,view_count,date,tag_names&order=id.asc").catch(() => []),
   ]);
 
   return {
@@ -74,6 +77,7 @@ export async function loadSiteStatsInput({ url, key, fetchImpl = fetch }) {
     instagram,
     projects,
     presentations,
+    videos,
     resume: { positions, degrees, certifications, skills },
     microDates: micro.map((r) => r.date),
     tags,

@@ -23,6 +23,7 @@ export const CARD_FALLBACKS = {
   trek: "treks",
   project: "projects",
   presentation: "presentations",
+  video: "videos",
   microblog: "micro-blog",
   tag: "tags",
   "ask-share": "ask-share",

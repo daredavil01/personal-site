@@ -96,7 +96,7 @@ export function buildLlmsTxt() {
     "",
     "## Optional",
     "",
-    line("Full inventory", "/llms-full.txt", "Every book, trek, race, project, essay, deck and newsletter issue on the site, one line each, with links."),
+    line("Full inventory", "/llms-full.txt", "Every book, trek, race, project, essay, deck, video and newsletter issue on the site, one line each, with links."),
     line("agents.md", "/agents.md", "A longer profile of Sanket Tambare and how this site is built."),
     line("Sitemap", "/sitemap.xml", "Every indexable page; items are linked from their sections."),
     line("Feed", "/feed.xml", "RSS of the newest additions."),
@@ -112,6 +112,7 @@ const FULL_SECTIONS = [
   { kind: "trek", heading: "Treks" },
   { kind: "project", heading: "Projects" },
   { kind: "presentation", heading: "Presentations" },
+  { kind: "video", heading: "Videos" },
 ];
 
 /**

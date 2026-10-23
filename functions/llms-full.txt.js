@@ -7,7 +7,7 @@ import { buildLlmsFullTxt } from "../src/lib/seo/llms";
 import { serveCached, isComplete, HOUR } from "../src/lib/seo/serve";
 
 // The micro-blog is summarised, not listed — 1,600+ lines would bury the rest.
-const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "newsletter", "tag"];
+const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "video", "newsletter", "tag"];
 
 export async function onRequestGet(context) {
   return serveCached(context, async () => {

@@ -42,3 +42,7 @@ binding = "AI"
 #   wrangler pages secret put AI_GATEWAY_API_KEY   (Vercel AI Gateway — free monthly credit)
 #   wrangler pages secret put TYPESAFE_API_KEY     (api.typesafe.ai direct — METERED, and
 #                                                   also needs auto_eval_allow_metered on)
+#
+# The /videos sync (functions/api/youtube-sync.js) needs a YouTube Data API key,
+# restricted to that API rather than by referrer (it is called server-side):
+#   wrangler pages secret put YOUTUBE_API_KEY

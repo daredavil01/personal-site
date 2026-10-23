@@ -36,6 +36,12 @@ const HOME_FEATURES = [
     icon: "co_present",
   },
   {
+    title: "Videos",
+    desc: "The YouTube channel in one place — long videos and Shorts, searchable and filterable by playlist, tag and year, playable right here.",
+    path: "/videos",
+    icon: "smart_display",
+  },
+  {
     title: "Sports Log",
     desc: "A record of my endurance journey, featuring marathon results, training logs, and personal bests from 10K to Full Marathons.",
     path: "/sports",

@@ -60,6 +60,7 @@ const TYPE_WORDS = {
   blog: /\b(blogs?|blog ?posts?|essays?|articles?|substack|wordpress)\b|ब्लॉग|लेख/i,
   microblog: /\b(micro ?blog|micro ?posts?|short posts?|tumblr)\b/i,
   presentation: /\b(presentations?|decks?|slides?|talks?)\b|सादरीकरण/i,
+  video: /\b(videos?|youtube|shorts|vlogs?|channel)\b|व्हिडि[ओओ]|यूट्यूब/i,
   instagram: /\b(instagram|photos?|photo sets?|pictures?)\b|फोटो/i,
   writing: /\b(writing ledger|word ?counts?)\b/i,
   resume: /\b(r[ée]sum[ée]|cv|jobs?|career|employers?|skills?)\b/i,

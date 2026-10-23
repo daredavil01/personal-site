@@ -43,6 +43,22 @@ describe("computeSiteStats", () => {
     expect(computeSiteStats({ now }).presentationCount).toBe(0);
     expect(computeSiteStats({ now, presentations: [{ id: 1 }, { id: 2 }] }).presentationCount).toBe(2);
   });
+
+  it("counts videos and Shorts apart, and omits views nobody reported", () => {
+    const empty = computeSiteStats({ now });
+    expect([empty.videoCount, empty.shortCount, empty.videoViews]).toEqual([0, 0, null]);
+    const s = computeSiteStats({
+      now,
+      videos: [
+        { id: 1, kind: "video", view_count: 100 },
+        { id: 2, kind: "video", kind_override: "short", view_count: 50 },
+        { id: 3, kind: "short", view_count: null },
+        { id: 4, kind: "video", viewCount: 7 },
+      ],
+    });
+    expect([s.videoCount, s.shortCount, s.videoViews]).toEqual([2, 2, 157]);
+    expect(computeSiteStats({ now, videos: [{ id: 1, kind: "video" }] }).videoViews).toBeNull();
+  });
 });
 
 it("microblogActivity finds the longest posting streak", () => {

@@ -141,6 +141,7 @@ describe("share-card metadata contract", () => {
     ["buildProjectMeta", { title: "P" }, "article"],
     ["buildShareMeta", { title: "Q?" }, "article"],
     ["buildPresentationMeta", { title: "Deck" }, "article"],
+    ["buildVideoMeta", { title: "V" }, "article"],
     ["buildTagMeta", { name: "मराठी", displayName: "मराठी" }, "website"],
   ];
 
@@ -152,6 +153,17 @@ describe("share-card metadata contract", () => {
     expect(meta.imageAlt).toBeTruthy();
     // og:type was hardcoded "website" for every route before this change.
     expect(meta.type).toBe(type);
+  });
+
+  it("summarises a YouTube description down to its opening, minus links and hashtags", () => {
+    const meta = pageMetaModule.buildVideoMeta({
+      title: "Sinhagad at dawn",
+      description: "Climbing Sinhagad before sunrise. https://example.com/gear #trek #सह्याद्री\n\nMusic: someone",
+      image: "https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg",
+    });
+    expect(meta.description).toBe("Climbing Sinhagad before sunrise.");
+    expect(meta.image).toBe("https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg");
+    expect(pageMetaModule.buildVideoMeta({ title: "S", kind: "short" }).description).toMatch(/^A YouTube Short/);
   });
 
   it("gives buildShareMeta a real image (it had no image param at all)", () => {
