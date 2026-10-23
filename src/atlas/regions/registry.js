@@ -80,6 +80,7 @@ const PRESENTATION = {
       { path: "/now", label: "Now", icon: "schedule" },
       { path: "/newsletter", label: "Newsletter", icon: "mail" },
       { path: "/instagram", label: "Instagram", icon: "photo_camera" },
+      { path: "/videos", label: "Videos", icon: "smart_display" },
       { path: "/stats", label: "Stats", icon: "monitoring" },
       { path: "/ask", label: "Ask the Archive", icon: "forum" },
       { path: "/tags", label: "Tags", icon: "sell" },

@@ -31,6 +31,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { currentPeriod } from "../src/lib/writingPeriod.js";
 import { writeJsonIfChanged } from "./lib/dataFile.mjs";
+import {
+  countHtmlWords, decodeEntities, htmlToText, normaliseUrl,
+} from "../src/lib/htmlText.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // The ledger report — no post text — served at /data/writing-ledger.json and read
@@ -125,81 +128,6 @@ function istParts(timestamp) {
     label: `${MONTH_NAMES[month]} ${year}`,
     year: String(year),
   };
-}
-
-const NAMED_ENTITIES = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-  hellip: "…",
-  mdash: "—",
-  ndash: "–",
-  rsquo: "’",
-  lsquo: "‘",
-  rdquo: "”",
-  ldquo: "“",
-  middot: "·",
-  bull: "•",
-  deg: "°",
-};
-
-function decodeEntities(text) {
-  return text
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) =>
-      String.fromCodePoint(parseInt(n, 16)),
-    )
-    .replace(
-      /&([a-z]+);/gi,
-      (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m,
-    );
-}
-
-/** Count words in an HTML body: drop script/style, strip tags, split on whitespace. */
-function countHtmlWords(html) {
-  if (!html) return 0;
-  const text = decodeEntities(
-    html
-      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-      .replace(/<[^>]+>/g, " "),
-  );
-  const words = text.replace(/\s+/g, " ").trim();
-  return words ? words.split(" ").length : 0;
-}
-
-/**
- * HTML body → plain text for the /ask index, keeping paragraph breaks so the
- * indexer can split on them. Word counts still come from countHtmlWords, so
- * this never moves a ledger number.
- */
-function htmlToText(html) {
-  if (!html) return "";
-  return decodeEntities(
-    html
-      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-      .replace(
-        /<\/(p|h[1-6]|li|blockquote|figcaption|pre)>|<br\s*\/?>/gi,
-        "\n\n",
-      )
-      .replace(/<[^>]+>/g, " "),
-  )
-    .split(/\n{2,}/)
-    .map((para) => para.replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .join("\n\n");
-}
-
-/** Normalise a post URL for cross-source matching. */
-function normaliseUrl(url) {
-  if (!url) return null;
-  const bare = url.split(/[?#]/)[0].replace(/\/+$/, "").toLowerCase();
-  // Substack posts are identified by their /p/<slug> segment; the host varies
-  // between the custom domain and the *.substack.com one.
-  if (bare.includes("/p/")) return `substack:${bare.split("/p/").pop()}`;
-  return bare.replace(/^https?:\/\//, "");
 }
 
 // --- sources ---------------------------------------------------------------

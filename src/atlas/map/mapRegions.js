@@ -240,6 +240,7 @@ const PATH_PREFIXES = [
   ["/newsletter", "person"],
   ["/contact", "person"],
   ["/instagram", "person"],
+  ["/videos", "person"],
   ["/stats", "person"],
   ["/changelog", "person"],
   ["/mindmap", "person"],

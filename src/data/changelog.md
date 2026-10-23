@@ -13,6 +13,27 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v24.0.0] — 2026-10-23
+
+### Added
+- **Videos page** (`src/pages/Videos.js`, `/videos`): every video and Short from the YouTube channel, with search, an All / Videos / Shorts switch, tag chips, year and playlist filters and five sorts (newest, oldest, most viewed, longest, shortest). Filtering is the pure `src/lib/videoFilters.js`; the state lives in the URL (`useVideoFilters`) and never touches `?view=`.
+- **Video detail pages** (`src/pages/VideoPost.js`, `/videos/:id`): the thumbnail until play is pressed, then a `youtube-nocookie.com` player (9:16 for Shorts), with date, duration, views, playlists, tags, a linkified description and "more like this". Each one unfurls with its own YouTube thumbnail.
+- **`videos` table** (`supabase/migrations/0035_videos.sql`): synced columns owned by YouTube, plus `kind_override`, `visible` and central tags owned by the site; tag wiring, a `tag_entities()` arm, `site_facts()` counts and a `video` roster, and the service-role-only `set_video_playlists()`.
+- **YouTube sync** (`functions/api/youtube-sync.js`, `src/pages/admin/YoutubeSync.js`, `/admin/videos/sync`): an owner-only **Sync now** that copies the channel's public uploads page by page (25 per request, inside Workers Free's CPU and subrequest limits), files them into playlists, detects Shorts (≤ 3 minutes, confirmed at `/shorts/<id>`), adds one video by link, and lists stored videos a run did not see. Never overwrites an override, a hidden flag or a tag. Helpers in `src/lib/youtube.js`.
+- **Videos in /admin** (`src/pages/admin/resources.js`): a Videos resource for tags, the Short/Video override and visibility.
+- **Videos share card** (`public/og/videos.png`, `src/lib/og/layouts/figures.js`): a widescreen frame beside a Shorts phone frame; counts appear once there are videos.
+- **Videos across the site:** JSON-LD `VideoObject`, the crawler fallback, sitemap, feed, `llms-full.txt`, tag pages, /stats tag analysis, `computeSiteStats` (`videoCount`, `shortCount`, `videoViews`), the nav, the atlas (Hometown Square), the home Explore grid, the Blueprint archives room, backups and the /ask index (`scripts/ask-sources/video.mjs`).
+- **YouTube profile** (`src/data/contact.js`, `src/data/identity.js`, `public/agents.md`): the channel joins the contact links and `sameAs`.
+- **Social kit** (`src/pages/admin/SocialKit.js`, `/admin/social`): paste a blog link, pull its title, subtitle and text from the Substack RSS feed (or paste them), and copy ready-made ChatGPT prompts for three Substack Notes, a LinkedIn post, WhatsApp/Facebook/Threads messages and graphics (a blog banner at a chosen size, plus 4:5, 9:16 and 1.91:1). No model is called; prompts are saved per post in `social_kits` (`0036_social_kits.sql`, owner-only).
+- **Prompt templates** (`src/lib/socialPrompts.js`, `docs/social-kit.md`): one module, every rule traced to a source — Notes end on an easy question that names its answer format, the LinkedIn headline fits the ~140 characters before "see more", the Threads link goes in a reply, image text is quoted and locked verbatim — and versioned on each saved kit.
+
+### Changed
+- **Substack RSS proxy** (`functions/rss-feed.js`): `?full=1` adds each post's body and cover image; the home page's response is unchanged.
+- **HTML-to-text helpers** (`src/lib/htmlText.js`): moved out of `scripts/blog-word-counts.mjs` so the Social kit shares them; the word counts are computed exactly as before.
+- **Blueprint alcoves** (`src/components/Blueprint/SitePlan.js`, `features.js`): the archives room draws as many alcoves as there are collections, and its counts of collections and routes come from the list instead of being typed in.
+
+---
+
 ## [v23.2.1] — 2026-10-22
 
 ### Fixed

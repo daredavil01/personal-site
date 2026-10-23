@@ -9,7 +9,7 @@ import { serveCached, isComplete, HOUR } from "../src/lib/seo/serve";
 
 // Dates only — the micro-blog alone is 1,600+ rows. Tags are not read: their
 // rows carry no updated_at, so /tags has no lastmod either way.
-const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "newsletter", "microblog"];
+const KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "video", "newsletter", "microblog"];
 const SELECT = Object.fromEntries(KINDS.map((kind) => [kind, "updated_at"]));
 
 export async function onRequestGet(context) {

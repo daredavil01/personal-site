@@ -35,7 +35,7 @@ export const LAYERS = [
   { id: "jobs", level: "B2", label: "Plant room", note: "Scripts, generators, the nightly job" },
 ];
 
-// The eight collections in the Archives room, each an alcove on the plan.
+// The collections in the Archives room, each an alcove on the plan.
 export const COLLECTIONS = [
   { id: "books", label: "Books", path: "/books", count: (c) => s(c).booksCount },
   { id: "races", label: "Races", path: "/sports", count: (c) => s(c).totalRaces },
@@ -44,6 +44,16 @@ export const COLLECTIONS = [
   { id: "micro", label: "Micro", path: "/micro-blog", count: (c) => c && c.micro && c.micro.total },
   { id: "projects", label: "Projects", path: "/projects", count: (c) => s(c).projectCount },
   { id: "decks", label: "Decks", path: "/presentations", count: (c) => s(c).presentationCount },
+  {
+    id: "videos",
+    label: "Videos",
+    path: "/videos",
+    // Long videos and Shorts are counted apart; the alcove holds both. Null
+    // (omitted) when neither is known, never 0.
+    count: (c) => (s(c).videoCount == null && s(c).shortCount == null
+      ? null
+      : (s(c).videoCount || 0) + (s(c).shortCount || 0)),
+  },
   { id: "photos", label: "Photo sets", path: "/instagram", count: (c) => s(c).instaPostCount },
 ];
 
@@ -149,12 +159,13 @@ export const FEATURES = [
       "Photos are resized and compressed in the browser before they reach Storage.",
       "Row-level security is the real lock: anyone may read, only is_owner() may write.",
       "Also here: the tag manager, changelog sync, newsletter publishing, /ask settings and graded conversations.",
+      "YouTube sync copies the channel into /videos a page at a time; the Social kit turns a blog post into ChatGPT prompts without calling a model.",
     ],
     layers: {
       shell: "No shell: the Atlas HUD stays out",
       pages: "src/pages/admin/, schema-driven forms",
       data: "api/_crud.js createResource",
-      edge: "api/ask-eval.js, owner-verified",
+      edge: "api/ask-eval.js, api/youtube-sync.js, owner-verified",
       db: "RLS: public read, is_owner() write",
     },
   },
@@ -168,7 +179,7 @@ export const FEATURES = [
     door: { x: 340, y: 400, dir: "h" },
     furniture: "alcoves",
     area: (ctx) => (archiveRows(ctx) ? `${fmt(archiveRows(ctx))} rows` : null),
-    blurb: "Eight collections, one table each. Every row has its own permalink, share card and a strip of related reading.",
+    blurb: `${COLLECTIONS.length} collections, one table each. Every row has its own permalink (photo sets aside), share card and a strip of related reading.`,
     specs: [
       "Each list is fetched once per visit and cached in ContentContext.",
       (ctx) => (fmt(ctx && ctx.micro && ctx.micro.total)
@@ -180,7 +191,8 @@ export const FEATURES = [
     ],
     layers: {
       shell: "PageShell: identical content, either shell",
-      pages: "8 list pages + 7 detail routes",
+      // Instagram is the one collection without a detail route.
+      pages: `${COLLECTIONS.length} list pages + ${COLLECTIONS.length - 1} detail routes`,
       data: "ContentContext: each list fetched once",
       edge: "_middleware.js: per-row meta",
       db: "one table each; micro-blog via tsvector",

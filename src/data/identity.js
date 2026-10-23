@@ -54,6 +54,7 @@ export const IDENTITY = {
     "https://twitter.com/i_daredavil",
     "https://sankettambare.substack.com",
     "https://daredavil453624413.wordpress.com",
+    "https://www.youtube.com/@sankettambare7474",
     "https://linktr.ee/daredavil",
     "https://card.sankettambare.in/",
   ],

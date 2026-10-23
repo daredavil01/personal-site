@@ -35,6 +35,7 @@ const TABLES = {
   instagram: ["id"],
   microblog: ["id"],
   presentations: ["id"],
+  videos: ["id"],
   now_meta: ["id"],
   now_months: ["id"],
   resume_positions: ["id"],
@@ -50,6 +51,7 @@ const TABLES = {
   ask_shares: ["id"],
   changelog: ["id"],
   changelog_majors: ["major"],
+  social_kits: ["id"],
 };
 
 // PostgREST caps an unbounded select at 1000 rows, so every table is paged.

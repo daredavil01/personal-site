@@ -18,6 +18,7 @@ import {
   buildBlogMeta,
   buildProjectMeta,
   buildPresentationMeta,
+  buildVideoMeta,
   buildTagMeta,
   buildNewsletterMeta,
 } from "../../data/pageMeta";
@@ -27,6 +28,9 @@ import {
   issueModel, issueStats, slugLabel, itemTitle, noteToHtml,
 } from "../newsletterIssue";
 import { isMarathi } from "../logbook";
+import {
+  effectiveKind, embedUrl, formatCount, formatDuration, isoDuration, watchUrl,
+} from "../youtube";
 import {
   clip, paragraphs, safeUrl, tagHref, escHtml,
 } from "./text";
@@ -43,6 +47,7 @@ export const ENTITY_TYPE_PATHS = {
   trek: "/treks",
   project: "/projects",
   presentation: "/presentations",
+  video: "/videos",
 };
 
 export const entityHref = (type, id) => {
@@ -277,6 +282,52 @@ export const KINDS = {
     },
   },
 
+  video: {
+    table: "videos",
+    section: "/videos",
+    keyPattern: /^\d+$/,
+    detailSelect: "id,youtube_id,title,description,date,published_at,duration_seconds,kind,kind_override,view_count,thumbnail_url,playlists,updated_at,tag_names",
+    listSelect: "id,title,description,date,kind,kind_override,updated_at,created_at",
+    listOrder: "date.desc.nullslast,id.desc",
+    listItem: (r) => ({
+      href: `/videos/${r.id}`,
+      text: r.title,
+      note: [effectiveKind(r) === "short" ? "Short" : null, r.date].filter(Boolean).join(" · "),
+    }),
+    view(r) {
+      const kind = effectiveKind(r);
+      const meta = buildVideoMeta({
+        title: r.title, description: r.description, image: r.thumbnail_url, kind,
+      });
+      const watch = watchUrl(r);
+      return {
+        title: r.title,
+        description: meta.description,
+        date: isoOf(r, "video"),
+        image: r.thumbnail_url || null,
+        lang: langOf(null, `${r.title || ""} ${r.description || ""}`),
+        facts: facts([
+          ["Published", r.date],
+          ["Type", kind === "short" ? "YouTube Short" : "YouTube video"],
+          ["Duration", formatDuration(r.duration_seconds) || null],
+          ["Views", Number.isFinite(r.view_count) ? formatCount(r.view_count) : null],
+          ["Playlists", Array.isArray(r.playlists) && r.playlists.length ? r.playlists.join(", ") : null],
+        ]),
+        body: paragraphs(r.description),
+        outbound: outbound(watch, "Watch on YouTube"),
+        externalUrl: safeUrl(watch),
+        video: r.youtube_id ? {
+          embedUrl: embedUrl(r.youtube_id),
+          uploadDate: r.published_at || r.date || null,
+          duration: isoDuration(r.duration_seconds),
+          thumbnailUrl: r.thumbnail_url || null,
+          views: Number.isFinite(r.view_count) ? r.view_count : null,
+        } : null,
+        meta,
+      };
+    },
+  },
+
   microblog: {
     table: "microblog",
     section: "/micro-blog",
@@ -410,6 +461,7 @@ export const DETAIL_KINDS = {
   "/projects/:id": "project",
   "/100-days-to-offload/:id": "blog",
   "/presentations/:id": "presentation",
+  "/videos/:id": "video",
   "/micro-blog/:id": "microblog",
   "/newsletter/:slug": "newsletter",
   "/tags/:name": "tag",

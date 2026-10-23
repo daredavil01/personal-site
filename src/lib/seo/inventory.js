@@ -9,7 +9,7 @@
 import { listQuery } from "./entities";
 import { rest, restAll } from "./rest";
 
-export const INVENTORY_KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "newsletter", "microblog", "tag"];
+export const INVENTORY_KINDS = ["book", "trek", "sport", "project", "blog", "presentation", "video", "newsletter", "microblog", "tag"];
 
 /**
  * @param {object} env  Pages env (Supabase URL + publishable key)

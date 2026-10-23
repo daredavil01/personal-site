@@ -114,6 +114,19 @@ export const ROUTE_MANIFEST = [
     indexable: true,
   },
   {
+    path: "/videos",
+    component: "Videos",
+    og: { strategy: "page", slug: "videos" },
+    indexable: true,
+  },
+  {
+    path: "/videos/:id",
+    component: "VideoPost",
+    meta: "buildVideoMeta",
+    og: { strategy: "entity", kind: "video" },
+    indexable: true,
+  },
+  {
     path: "/100-days-to-offload/:id",
     component: "BlogPost",
     meta: "buildBlogMeta",

@@ -31,6 +31,7 @@ For the live inventory — every page, and one line per book, race, trek, projec
 - **Fort trekking** — the historic hill forts of the Sahyadri in Maharashtra, at https://sankettambare.in/treks
 - **Reading** — books in English and Marathi, with notes and ratings, at https://sankettambare.in/books
 - **Writing** — essays on Substack and WordPress (the #100DaysToOffload challenge), a monthly newsletter at https://sankettambare.in/newsletter, and a micro-blog archive of more than a thousand short posts
+- **Video** — long videos and Shorts on YouTube, every one playable at https://sankettambare.in/videos
 - **Podcast** — *Dare Write's*, on books, technology and travel
 - **Community** — a member of [Nirman](https://nirman.mkcl.org/)
 
@@ -43,6 +44,7 @@ For the live inventory — every page, and one line per book, race, trek, projec
 | X (Twitter) | https://twitter.com/i_daredavil |
 | Substack | https://sankettambare.substack.com |
 | WordPress | https://daredavil453624413.wordpress.com |
+| YouTube | https://www.youtube.com/@sankettambare7474 |
 | Linktree | https://linktr.ee/daredavil |
 | Digital card | https://card.sankettambare.in/ |
 

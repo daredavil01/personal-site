@@ -169,13 +169,15 @@ const Furniture = ({ kind, cx, cy }) => {
 
 // The Archives room holds one alcove per collection, each a shelf of spines.
 const Alcoves = ({ room, ctx }) => {
-  const cols = 4;
+  // Two rows, as many columns as the collections need.
+  const rows = 2;
+  const cols = Math.ceil(COLLECTIONS.length / rows);
   const pad = 18;
   const gap = 10;
   const top = room.y + 78;
   const w = (room.w - pad * 2 - gap * (cols - 1)) / cols;
   // Leave the bottom clear for the door into the foyer.
-  const h = (room.h - (top - room.y) - 34 - gap) / 2;
+  const h = (room.h - (top - room.y) - 34 - gap * (rows - 1)) / rows;
   return COLLECTIONS.map((col, i) => {
     const x = room.x + pad + (i % cols) * (w + gap);
     const y = top + Math.floor(i / cols) * (h + gap);

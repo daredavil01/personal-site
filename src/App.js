@@ -39,6 +39,8 @@ const BookPost = lazy(() => import("./pages/BookPost"));
 const ProjectPost = lazy(() => import("./pages/ProjectPost"));
 const Presentations = lazy(() => import("./pages/Presentations"));
 const PresentationPost = lazy(() => import("./pages/PresentationPost"));
+const Videos = lazy(() => import("./pages/Videos"));
+const VideoPost = lazy(() => import("./pages/VideoPost"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const ChangelogGraph = lazy(() => import("./pages/ChangelogGraph"));
@@ -108,6 +110,8 @@ const App = () => (
               <Route path="/projects/:id" element={<ProjectPost />} />
               <Route path="/presentations" element={<Presentations />} />
               <Route path="/presentations/:id" element={<PresentationPost />} />
+              <Route path="/videos" element={<Videos />} />
+              <Route path="/videos/:id" element={<VideoPost />} />
               <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
               <Route path="/changelog" element={<Changelog />} />
               <Route path="/changelog/graph" element={<ChangelogGraph />} />

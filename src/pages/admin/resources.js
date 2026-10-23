@@ -4,6 +4,8 @@ import sports from "../../lib/api/sports";
 import treks from "../../lib/api/treks";
 import projects from "../../lib/api/projects";
 import presentations from "../../lib/api/presentations";
+import videos from "../../lib/api/videos";
+import { formatCount } from "../../lib/youtube";
 import changelog from "../../lib/api/changelog";
 import blogs from "../../lib/api/blogs";
 import instagram from "../../lib/api/instagram";
@@ -335,6 +337,79 @@ const resources = [
       },
       {
         name: "description", label: "Description", type: "textarea", span: "full", aiDraft: true,
+      },
+    ],
+  },
+  {
+    key: "videos",
+    label: "Videos",
+    singular: "video",
+    api: videos,
+    title: (r) => r.title,
+    searchKeys: ["title", "description", "youtubeId", "playlists", "ytTags"],
+    viewPath: (r) => `/videos/${r.id}`,
+    columns: [
+      { key: "title", label: "Title", sortable: true, primary: true },
+      {
+        key: "date",
+        label: "Date",
+        sortable: true,
+        width: "9rem",
+        sortValue: (r) => (r.date ? new Date(r.date).getTime() : null),
+      },
+      {
+        key: "kind",
+        label: "Kind",
+        sortable: true,
+        width: "7rem",
+        render: (r) => (
+          <span className="inline-flex gap-1">
+            <Badge tone={r.kind === "short" ? "accent" : "neutral"}>{r.kind}</Badge>
+            {!r.visible && <Badge tone="warning">hidden</Badge>}
+          </span>
+        ),
+      },
+      {
+        key: "viewCount",
+        label: "Views",
+        sortable: true,
+        width: "6rem",
+        render: (r) => formatCount(r.viewCount) || "—",
+      },
+      { key: "tags", label: "Tags", render: (r) => tagList(r.tags) },
+    ],
+    // YouTube owns the title, description, date and duration: the sync at
+    // /admin/videos/sync rewrites them, so they are here for videos added by
+    // hand and as a reference. The rest is the site's own and never synced.
+    fields: [
+      {
+        name: "url",
+        label: "YouTube link",
+        type: "url",
+        required: true,
+        span: "full",
+        hint: "Any YouTube link to the video. For the whole channel use YouTube sync instead",
+      },
+      { name: "title", label: "Title", type: "text", required: true, hint: "Synced from YouTube — edit it there" },
+      { name: "date", label: "Published", type: "isoDate", hint: "Synced from YouTube" },
+      {
+        name: "kindOverride",
+        label: "Short or video",
+        type: "select",
+        options: ["short", "video"],
+        hint: "— keeps what the sync detected. Set it when the detection got a video wrong",
+      },
+      {
+        name: "durationSeconds", label: "Duration (seconds)", type: "number", min: 0, hint: "Synced from YouTube",
+      },
+      {
+        name: "visible", label: "Visible on the site", type: "boolean", default: true, hint: "Off hides it from /videos, tags and counts",
+      },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, aiSuggest: true, span: "full", hint: "Topical tags, shared with /tags",
+      },
+      {
+        name: "description", label: "Description", type: "textarea", span: "full", hint: "Synced from YouTube",
       },
     ],
   },

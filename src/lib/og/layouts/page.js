@@ -12,7 +12,7 @@ import {
 } from "../primitives.js";
 import {
   spineStack, ridgeline, lostTrail, dotMatrix, progressBar, swatchCloud, radialSpokes,
-  connectedCurve, slideFan, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
+  connectedCurve, slideFan, screenAndPhone, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
   commitGraph, monthCalendar, envelope, floorPlan, constellation,
 } from "./figures.js";
 
@@ -80,6 +80,8 @@ const FIGURES = {
   }), CARD.width, 200, { bottom: 90, opacity: 0.8 }),
 
   presentations: (m) => inset(slideFan({ width: 480, height: 320, accent: m.accent }), 480, 320, { right: 50, bottom: 120, opacity: 0.85 }),
+
+  videos: (m) => inset(screenAndPhone({ width: 500, height: 300, accent: m.accent }), 500, 300, { right: 52, bottom: 130 }),
 
   changelog: (m) => inset(versionStack({ width: 380, height: 250, accent: m.accent }), 380, 250, { right: 72, bottom: 140 }),
   "changelog-graph": (m) => inset(commitGraph({ width: 380, height: 260, accent: m.accent }), 380, 260, { right: 72, bottom: 130 }),
@@ -212,7 +214,7 @@ export const pageCard = (model) => {
   const bleed = typeof figure === "function" ? figure(model) : null;
   // Leave room for whichever side the figure occupies so text never collides
   // with it. The full-bleed portraits are the exception: text sits over them.
-  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger", "logbook"]
+  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "videos", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger", "logbook"]
     .includes(model.slug) ? 620 : CARD.width - 128;
 
   return Frame({

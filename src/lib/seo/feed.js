@@ -19,6 +19,7 @@ const LABELS = {
   project: "Project",
   blog: "Essay",
   presentation: "Presentation",
+  video: "Video",
   newsletter: "Newsletter",
   microblog: "Micro-post",
 };

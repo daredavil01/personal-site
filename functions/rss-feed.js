@@ -8,6 +8,14 @@
 //
 // The site-wide _middleware.js also runs for this path but returns the response
 // unchanged because it only rewrites text/html responses (this emits JSON).
+//
+// `?full=1` adds each post's body (`html`, the raw content:encoded) and its
+// cover image. The Social kit in /admin reads it to fill a post's title,
+// subtitle and text from one request; the home page asks without it and gets
+// the same small payload as before. The body stays HTML here and becomes text
+// in the browser (src/lib/htmlText.js): turning ~0.5 MB of HTML into text is
+// the one step that could cost more than the Worker's 10 ms of CPU. The feed
+// carries the latest 20 posts — anything older is pasted in by hand.
 
 const FEED_URL = "https://sankettambare.substack.com/feed";
 const CACHE_TTL_SECONDS = 60 * 30; // 30 minutes
@@ -24,15 +32,24 @@ function extractTag(block, tag) {
 }
 
 // Minimal RSS <item> parser — no external deps, works in the Workers runtime.
-function parseRss(xml) {
+function parseRss(xml, { full = false } = {}) {
   const itemBlocks = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
-  return itemBlocks.map((block) => ({
-    title: extractTag(block, "title"),
-    link: extractTag(block, "link"),
-    pubDate: extractTag(block, "pubDate"),
-    description: extractTag(block, "description"),
-    guid: extractTag(block, "guid"),
-  }));
+  return itemBlocks.map((block) => {
+    const item = {
+      title: extractTag(block, "title"),
+      link: extractTag(block, "link"),
+      pubDate: extractTag(block, "pubDate"),
+      description: extractTag(block, "description"),
+      guid: extractTag(block, "guid"),
+    };
+    if (!full) return item;
+    const image = /<enclosure[^>]*\burl="([^"]+)"/.exec(block);
+    return {
+      ...item,
+      html: extractTag(block, "content:encoded") || "",
+      image: image ? image[1].replace(/&amp;/g, "&") : null,
+    };
+  });
 }
 
 export async function onRequestGet(context) {
@@ -62,7 +79,8 @@ export async function onRequestGet(context) {
   }
 
   const xml = await feedRes.text();
-  const items = parseRss(xml);
+  const full = new URL(context.request.url).searchParams.get("full") === "1";
+  const items = parseRss(xml, { full });
 
   const body = JSON.stringify({ items, fetchedAt: new Date().toISOString() });
   const response = new Response(body, {

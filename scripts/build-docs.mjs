@@ -93,6 +93,7 @@ export const CONTENT_TABLES = [
   { table: "microblog", entity: "microblog", purpose: "A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited." },
   { table: "projects", entity: "project", purpose: "Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React." },
   { table: "presentations", entity: "presentation", purpose: "HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time." },
+  { table: "videos", entity: "video", purpose: "The YouTube channel's public uploads, copied by the owner-only sync at /admin/videos/sync. YouTube owns the title/description/counts (re-synced); `kind_override`, `visible` and tags are the site's own. `date` is the IST publish day." },
   { table: "sports", entity: "sport", purpose: "Races run. `date` is free text ('February 22, 2026'), `time` is chip time HH:MM:SS." },
   { table: "treks", entity: "trek", purpose: "Forts and hills climbed. `date` is free text in DD-MM-YYYY." },
   { table: "instagram", entity: "instagram", purpose: "Photo sets mirrored from Instagram. No detail route — everything renders on /instagram." },

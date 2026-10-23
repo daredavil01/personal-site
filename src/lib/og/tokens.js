@@ -58,6 +58,8 @@ export const ACCENTS = {
   blog: COLORS.orange,
   presentations: COLORS.blue,
   presentation: COLORS.blue,
+  videos: COLORS.red,
+  video: COLORS.red,
   projects: COLORS.blueDeep,
   project: COLORS.blueDeep,
   resume: COLORS.violetLight,
