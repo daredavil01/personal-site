@@ -81,7 +81,8 @@ some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
 step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
 (run after content moves, then commit the PNGs), `newsletter:draft` (monthly),
-`blueprint:film` (renders video into `knowledge_base/`, nothing to commit).
+`blueprint:film` (renders video into `knowledge_base/`, nothing to commit),
+`videos:film` (the /videos film; re-render and `-- --publish` after the channel moves).
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
 have no npm entry — run them with `node`.
 
@@ -522,6 +523,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
+| Videos film: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*` |
 | Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
 | Second brain endpoint | `functions/api/ask.js` |
 | Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |
@@ -875,6 +877,20 @@ YouTube channel **https://www.youtube.com/@sankettambare7474** — not typed in.
 - **After content moves:** `npm run ask:index` (one chunk per video powers
   "more like this" and the `video` roster), then `npm run og:fallbacks -- --only=videos`
   so the card shows the counts.
+- **The film:** a 90-second vertical, narrated film of the page sits in its
+  header (`src/components/Videos/Story.js`, `public/video/the-videos-story.{mp4,jpg,vtt}`,
+  committed; `story.test.js` holds the MP4 under 8 MB). Three steps, all in
+  `scripts/videos-film/`: `node scripts/videos-film/capture.mjs` fetches the
+  footage once into gitignored `knowledge_base/videos-film/` (Esri satellite
+  tiles from orbit to Pune and NASA's Blue Marble, each video's thumbnail, the
+  live /videos pages at phone size, and `/admin/videos/sync` on a local build
+  whose session and endpoint are replayed — production's admin needs a sign-in
+  no script should hold); `npm run videos:film` renders `film.html` frame by
+  frame like the homepage trailer, with its own score (`score.mjs`) and the
+  Blueprint film's narrator (`scripts/blueprint-film/voice.mjs`, Piper or
+  Aura); `-- --publish` writes the web copy. `-- --remix` re-does only the
+  sound, `-- --frame=t1,t2` writes stills. Its numbers are read when it renders
+  and baked in: re-render after the channel moves.
 
 ---
 
