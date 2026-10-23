@@ -47,6 +47,7 @@ import {
 } from "./geo.mjs";
 import { OUT, liveVideos } from "./capture.mjs";
 import { renderScore, toWav } from "./score.mjs";
+import { clip, cleanTitle } from "./titles.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "../..");
@@ -111,10 +112,6 @@ const CHORES = ["Copy the link", "Title", "Description", "Date", "Length", "Shor
 // The Data API calls a sync makes (functions/api/youtube-sync.js).
 const CALLS = ["channels.list", "playlistItems.list", "videos.list", "playlists.list"];
 
-const clip = (s, n) => (s.length > n ? `${s.slice(0, n - 1).trim()}…` : s);
-const cleanTitle = (s) => s.replace(/\|\|\s*Sanket Tambare/gi, "").replace(/#shorts/gi, "").replace(/\s*\|\|\s*/g, " · ")
-  .replace(/\s+·\s*$/, "")
-  .trim();
 
 // The site's own modules (sort labels, the channel, the Short rule), through
 // Vite's SSR loader: src/ imports omit file extensions, which Node will not.

@@ -23,8 +23,16 @@ const Story = () => (
       <source src={`${STORY}.mp4`} type="video/mp4" />
       <track kind="captions" src={`${STORY}.vtt`} srcLang="en" label="English (narration)" />
     </video>
-    <figcaption className="mt-3 font-label text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400 dark:text-stone-500">
-      The story · 90 s · sound on
+    <figcaption className="mt-3 flex flex-col gap-1.5 font-label text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400 dark:text-stone-500">
+      <span>The story · 90 s · sound on</span>
+      {/* The slides at the foot of the page tell it without sound. */}
+      <button
+        type="button"
+        onClick={() => document.getElementById("the-story")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        className="self-start p-0 bg-transparent border-0 text-secondary uppercase tracking-[0.2em] font-bold cursor-pointer hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
+      >
+        Or read it in 6 slides ↓
+      </button>
     </figcaption>
   </figure>
 );

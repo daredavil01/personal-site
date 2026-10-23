@@ -4,6 +4,7 @@ import { useVideos } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import VideoCard from "../components/Videos/VideoCard";
 import Story from "../components/Videos/Story";
+import StorySlides from "../components/Videos/StorySlides";
 import useVideoFilters from "../components/Videos/useVideoFilters";
 import { UNDATED, VIDEO_SORTS, VIDEO_TYPES } from "../lib/videoFilters";
 import { YOUTUBE_CHANNEL } from "../lib/youtube";
@@ -11,7 +12,8 @@ import { YOUTUBE_CHANNEL } from "../lib/youtube";
 // /videos — the YouTube channel, filled by the owner's sync at
 // /admin/videos/sync. Filtering is src/lib/videoFilters.js; the state is in the
 // URL (useVideoFilters). The header carries the page's own 90-second film
-// (components/Videos/Story.js).
+// (components/Videos/Story.js), and the same story closes the page as six
+// slides (components/Videos/StorySlides.js).
 
 const selectClass = "h-10 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg pl-3 pr-8 font-label text-xs uppercase tracking-wider text-stone-800 dark:text-stone-200 outline-none cursor-pointer hover:border-secondary transition-colors max-w-full";
 
@@ -195,6 +197,8 @@ const Videos = () => {
             {filtered.map((v) => <VideoCard key={v.id} video={v} tall={shortsOnly} />)}
           </div>
         )}
+
+        <StorySlides />
       </div>
     </PageShell>
   );
