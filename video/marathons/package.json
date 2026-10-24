@@ -1,0 +1,21 @@
+{
+  "name": "marathons-film",
+  "private": true,
+  "scripts": {
+    "capture": "node scripts/capture.mjs",
+    "score": "node scripts/score.mjs",
+    "studio": "remotion studio src/index.js",
+    "render": "remotion render src/index.js Marathons out/marathons-film.mp4 --codec=h264 --crf=18",
+    "render:vertical": "remotion render src/index.js MarathonsVertical out/marathons-film-vertical.mp4 --codec=h264 --crf=18"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.538",
+    "@remotion/google-fonts": "4.0.538",
+    "d3-geo": "^3.1.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.538",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
+  }
+}
