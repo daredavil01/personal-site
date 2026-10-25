@@ -25,14 +25,15 @@
     }
   },
   "counts": {
-    "tags": 107,
+    "tags": 114,
     "blogs": 73,
     "books": 52,
     "treks": 20,
     "sports": 26,
-    "projects": 22,
+    "videos": 19,
+    "projects": 23,
     "instagram": 11,
-    "microblog": 1675
+    "microblog": 1677
   },
   "latest": {
     "now": {
@@ -42,8 +43,8 @@
     },
     "blog": {
       "d": "2026-10-21",
-      "t": "Traversing the complex path towards better digital life! 🌱📱",
-      "u": "/100-days-to-offload/73"
+      "t": "The brief for the personal website!",
+      "u": "/100-days-to-offload/72"
     },
     "writing": {
       "d": "2025-12-31",
@@ -51,9 +52,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-10-20",
-      "t": "#1470 The quiet efforts!",
-      "u": "/micro-blog/1675"
+      "d": "2026-10-23",
+      "t": "#1472 Creativity ✨",
+      "u": "/micro-blog/1677"
     }
   },
   "resume": {
@@ -567,7 +568,109 @@
         "u": "/sports/1"
       }
     ],
+    "video": [
+      {
+        "d": "2026-10-25",
+        "t": "22 Projects in 60 Seconds | NGOs, Data Stories, Games & More #shorts",
+        "u": "/videos/70"
+      },
+      {
+        "d": "2026-10-24",
+        "t": "I Turned 26 Races Into a Film With Code | React + Remotion #sports #marathon",
+        "u": "/videos/34"
+      },
+      {
+        "d": "2026-10-23",
+        "t": "My website now syncs my YouTube channel in one click 🎬 #Shorts",
+        "u": "/videos/17"
+      },
+      {
+        "d": "2026-10-23",
+        "t": "This is what Claude managed to create within a few minutes...!🚀",
+        "u": "/videos/1"
+      },
+      {
+        "d": "2026-10-20",
+        "t": "I left Instagram. Then I built three things for the weeks after.",
+        "u": "/videos/2"
+      },
+      {
+        "d": "2026-07-25",
+        "t": "Listream #1 | Blog Post Reading | The dilemmas of Maze-runner trapped in daily grind!",
+        "u": "/videos/3"
+      },
+      {
+        "d": "2026-07-19",
+        "t": "Starting something new, livestream sessions for blogs, projects and other content...!🎉",
+        "u": "/videos/4"
+      },
+      {
+        "d": "2024-08-18",
+        "t": "Sinhgad Trail Run | August 2024",
+        "u": "/videos/5"
+      },
+      {
+        "d": "2024-06-25",
+        "t": "#1294 Expectations, my mind, my space and my control!",
+        "u": "/videos/6"
+      },
+      {
+        "d": "2021-04-07",
+        "t": "NewPipe: Youtube without youtube || App of the Week || Sanket Tambare",
+        "u": "/videos/7"
+      },
+      {
+        "d": "2021-02-20",
+        "t": "App of the Week || Socratic by Google || Sanket Tambare",
+        "u": "/videos/8"
+      },
+      {
+        "d": "2021-02-11",
+        "t": "App of the Week || Atom || The Mediation App || Sanket Tambare",
+        "u": "/videos/9"
+      },
+      {
+        "d": "2021-01-31",
+        "t": "App of the Week || Woebot || Sanket Tambare || #Shorts",
+        "u": "/videos/10"
+      },
+      {
+        "d": "2020-12-23",
+        "t": "App of the Week || Snapseed || Sanket Tambare || #Shorts",
+        "u": "/videos/11"
+      },
+      {
+        "d": "2020-12-19",
+        "t": "Blogging: Live Demo || Part 2 || Sanket Tambare",
+        "u": "/videos/12"
+      },
+      {
+        "d": "2020-12-14",
+        "t": "My own social media app || Promo",
+        "u": "/videos/13"
+      },
+      {
+        "d": "2020-09-30",
+        "t": "Blogging: Why? What? How? || Part 1 || Sanket Tambare",
+        "u": "/videos/14"
+      },
+      {
+        "d": "2020-02-28",
+        "t": "Introduction to TECHNOSPHERE 2k20",
+        "u": "/videos/15"
+      },
+      {
+        "d": "2019-09-12",
+        "t": "Those two incredible days in Tarkarli || Introduction || Channel Information",
+        "u": "/videos/16"
+      }
+    ],
     "project": [
+      {
+        "d": "2026-10-23",
+        "t": "Vetal Tekdi Birding Marathon",
+        "u": "/projects/23"
+      },
       {
         "d": "2026-10-19",
         "t": "45 Days",
@@ -838,9 +941,15 @@
       "50 Kms": 1
     }
   },
+  "videos": {
+    "by_kind": {
+      "short": 7,
+      "video": 12
+    }
+  },
   "projects": {
     "by_status": {
-      "Live": 18,
+      "Live": 19,
       "Concept": 1,
       "Archived": 3
     },
@@ -848,7 +957,7 @@
       "Tool": 2,
       "Design": 3,
       "Web App": 8,
-      "Website": 4,
+      "Website": 5,
       "Data Story": 5
     }
   },
@@ -859,27 +968,27 @@
     },
     {
       "name": "self-reflection",
-      "total": 468
+      "total": 469
     },
     {
       "name": "marathi",
-      "total": 272
+      "total": 273
     },
     {
       "name": "social media",
       "total": 148
     },
     {
+      "name": "personaldevelopment",
+      "total": 138
+    },
+    {
       "name": "love",
       "total": 137
     },
     {
-      "name": "personaldevelopment",
-      "total": 137
-    },
-    {
       "name": "sanky",
-      "total": 134
+      "total": 135
     },
     {
       "name": "philosophy",
@@ -914,16 +1023,16 @@
       "total": 70
     },
     {
+      "name": "technology",
+      "total": 68
+    },
+    {
       "name": "social",
       "total": 67
     },
     {
-      "name": "technology",
-      "total": 67
-    },
-    {
       "name": "ai",
-      "total": 55
+      "total": 56
     },
     {
       "name": "choices",
@@ -956,7 +1065,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 485,
+      "text": 487,
       "photo": 953,
       "quote": 237
     },
@@ -969,10 +1078,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 106
+      "2026": 108
     },
     "date_range": {
-      "max": "2026-10-20",
+      "max": "2026-10-23",
       "min": "2018-03-19"
     }
   },
@@ -980,30 +1089,31 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-21T17:19:34.234418+00:00",
+  "generated_at": "2026-10-25T06:50:59.778942+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
     "blog": 73,
     "book": 52,
     "page": 1,
-    "site": 25,
+    "site": 26,
     "trek": 20,
     "sport": 26,
     "stats": 10,
+    "video": 19,
     "resume": 21,
-    "project": 21,
+    "project": 22,
     "writing": 43,
-    "changelog": 113,
+    "changelog": 117,
     "instagram": 11,
-    "microblog": 1675,
+    "microblog": 1677,
     "presentation": 19
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 9,
+    "uncategorised": 16,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,

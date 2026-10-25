@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1675** · indexed as `microblog`
+Rows: **1677** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **22** · indexed as `project`
+Rows: **23** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -152,6 +152,43 @@ Rows: **19** · indexed as `presentation`
 
 Constraints:
 - `CHECK ((url ~ '^https://'::text))`
+
+### `videos`
+
+The YouTube channel's public uploads, copied by the owner-only sync at /admin/videos/sync. YouTube owns the title/description/counts (re-synced); `kind_override`, `visible` and tags are the site's own. `date` is the IST publish day.
+
+Rows: **19** · indexed as `video`
+
+| column | type | null | default |
+|---|---|---|---|
+| `id` | bigint | no | — |
+| `youtube_id` | text | no | — |
+| `title` | text | no | — |
+| `description` | text | yes | — |
+| `date` | date | yes | — |
+| `published_at` | timestamp with time zone | yes | — |
+| `duration_seconds` | integer | yes | — |
+| `kind` | text | no | `'video'::text` |
+| `kind_override` | text | yes | — |
+| `view_count` | bigint | yes | — |
+| `like_count` | bigint | yes | — |
+| `comment_count` | bigint | yes | — |
+| `thumbnail_url` | text | yes | — |
+| `playlists` | text[] | no | `'{}'::text[]` |
+| `yt_tags` | text[] | no | `'{}'::text[]` |
+| `visible` | boolean | no | `true` |
+| `source` | text | no | `'manual'::text` |
+| `synced_at` | timestamp with time zone | yes | — |
+| `created_at` | timestamp with time zone | no | `now()` |
+| `updated_at` | timestamp with time zone | no | `now()` |
+
+Constraints:
+- `CHECK (((duration_seconds IS NULL) OR (duration_seconds >= 0)))`
+- `CHECK ((kind = ANY (ARRAY['short'::text, 'video'::text])))`
+- `CHECK ((kind_override = ANY (ARRAY['short'::text, 'video'::text])))`
+- `CHECK ((source = ANY (ARRAY['sync'::text, 'manual'::text])))`
+- `CHECK ((youtube_id ~ '^[A-Za-z0-9_-]{11}
+::text))`
 
 ### `sports`
 
@@ -239,7 +276,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **107**
+Rows: **114**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -263,7 +300,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3833**
+Rows: **3855**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -274,13 +311,13 @@ Rows: **3833**
 | `created_at` | timestamp with time zone | no | `now()` |
 
 Constraints:
-- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text, 'presentation'::text])))`
+- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text, 'presentation'::text, 'video'::text])))`
 
 ### `content_chunks`
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3277**
+Rows: **3307**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -350,6 +387,7 @@ Rows: **1**
 | `ai_features` | jsonb | no | `'{}'::jsonb` |
 | `daily_voice_global_cap` | integer | no | `200` |
 | `daily_voice_ip_cap` | integer | no | `20` |
+| `assist_tiers` | jsonb | no | `'[]'::jsonb` |
 
 Constraints:
 - `CHECK ((id = 1))`

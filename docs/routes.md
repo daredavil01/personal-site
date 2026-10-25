@@ -30,6 +30,8 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/projects/:id` | ProjectPost | the row's photo, else `/og/projects.png` |
 | `/presentations` | Presentations | `/og/presentations.png` |
 | `/presentations/:id` | PresentationPost | the row's photo, else `/og/presentations.png` |
+| `/videos` | Videos | `/og/videos.png` |
+| `/videos/:id` | VideoPost | the row's photo, else `/og/videos.png` |
 | `/100-days-to-offload/:id` | BlogPost | the row's photo, else `/og/100-days-to-offload.png` |
 | `/changelog` | Changelog | `/og/changelog.png` |
 | `/changelog/graph` | ChangelogGraph | `/og/changelog-graph.png` |
