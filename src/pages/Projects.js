@@ -10,6 +10,7 @@ import ProjectsTimeline from "../components/Projects/ProjectsTimeline";
 import ProjectsStatistics from "../components/Projects/ProjectsStatistics";
 import ProjectsTable from "../components/Projects/ProjectsTable";
 import ProjectDetailsModal from "../components/Projects/ProjectDetailsModal";
+import Story from "../components/Projects/Story";
 import { projectYear } from "../lib/projectDate";
 
 const VIEWS = [
@@ -66,7 +67,8 @@ const Projects = () => {
     <PageShell region="creator">
       <div className="flex flex-col gap-10 w-full">
         {/* Hero */}
-        <header>
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
           <p className="font-label text-xs uppercase tracking-widest text-secondary mb-4 font-bold">Portfolio Exhibit</p>
           <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-none tracking-tight mb-8">
             Curated <br />Works.
@@ -82,6 +84,8 @@ const Projects = () => {
               </p>
             )}
           </div>
+          </div>
+          <Story />
         </header>
 
         {/* View tabs */}

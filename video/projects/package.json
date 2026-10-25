@@ -1,0 +1,19 @@
+{
+  "name": "projects-film",
+  "private": true,
+  "scripts": {
+    "capture": "node scripts/capture.mjs",
+    "score": "node scripts/score.mjs",
+    "studio": "remotion studio src/index.js",
+    "render": "remotion render src/index.js Projects out/projects-film.mp4 --codec=h264 --crf=18",
+    "web": "remotion ffmpeg -y -i out/projects-film.mp4 -vf scale=720:1280 -c:v libx264 -crf 30 -preset slow -c:a aac -b:a 96k -movflags +faststart ../../public/video/the-projects-story.mp4 && remotion ffmpeg -y -ss 6.5 -i out/projects-film.mp4 -frames:v 1 -vf scale=720:1280 -q:v 4 ../../public/video/the-projects-story.jpg"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.538",
+    "@remotion/google-fonts": "4.0.538",
+    "playwright-core": "1.56.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.538"
+  }
+}

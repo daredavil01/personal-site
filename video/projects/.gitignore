@@ -1,0 +1,6 @@
+node_modules/
+public/shots/
+public/rec/
+public/covers/
+public/score.wav
+out/
