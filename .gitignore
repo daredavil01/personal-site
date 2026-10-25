@@ -67,3 +67,5 @@ supabase/.temp/
 .dev.vars
 
 launch.json
+
+/video
