@@ -6,14 +6,14 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 483 | Mind & Life |
-| `self-reflection` | 469 | Mind & Life |
+| `life` | 484 | Mind & Life |
+| `self-reflection` | 470 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
-| `social media` | 148 | Digital Life |
-| `personaldevelopment` | 138 | Mind & Life |
+| `social media` | 149 | Digital Life |
+| `personaldevelopment` | 139 | Mind & Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 135 | Personal |
-| `philosophy` | 128 | Society & Ideas |
+| `philosophy` | 129 | Society & Ideas |
 | `calmness` | 127 | Mind & Life |
 | `digital wellbeing` | 121 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
@@ -33,7 +33,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `forts` | 38 | Travel & Outdoors |
 | `running` | 38 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
-| `100_days_to_offload` | 32 | Writing & Blogging |
+| `100_days_to_offload` | 33 | Writing & Blogging |
 | `daredavil01` | 31 | Personal |
 | `self-help` | 31 | Books & Reading |
 | `भटकंती` | 30 | Travel & Outdoors |

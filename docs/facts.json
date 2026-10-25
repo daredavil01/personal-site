@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 114,
-    "blogs": 73,
+    "blogs": 74,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -42,9 +42,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-21",
-      "t": "The brief for the personal website!",
-      "u": "/100-days-to-offload/72"
+      "d": "2026-10-25",
+      "t": "How that insignificant self, searches for the significant soul within?",
+      "u": "/100-days-to-offload/74"
     },
     "writing": {
       "d": "2025-12-31",
@@ -964,11 +964,11 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 483
+      "total": 484
     },
     {
       "name": "self-reflection",
-      "total": 469
+      "total": 470
     },
     {
       "name": "marathi",
@@ -976,11 +976,11 @@
     },
     {
       "name": "social media",
-      "total": 148
+      "total": 149
     },
     {
       "name": "personaldevelopment",
-      "total": 138
+      "total": 139
     },
     {
       "name": "love",
@@ -992,7 +992,7 @@
     },
     {
       "name": "philosophy",
-      "total": 128
+      "total": 129
     },
     {
       "name": "calmness",
@@ -1089,11 +1089,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-25T06:50:59.778942+00:00",
+  "generated_at": "2026-10-25T19:17:21.753238+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 73,
+    "blog": 74,
     "book": 52,
     "page": 1,
     "site": 26,

@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-21T17:19:16.964Z",
+  "generatedAt": "2026-10-25T19:17:06.362Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 116,
-    "words": 114659,
+    "posts": 117,
+    "words": 115584,
     "averageWords": 988,
-    "trackedPosts": 73,
+    "trackedPosts": 74,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-21",
+    "latestPost": "2026-10-26",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,47 +26,47 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 73,
-      "words": 81721
+      "posts": 74,
+      "words": 82646
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-21",
+    "asOf": "2026-10-26",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 7,
-      "words": 8303,
-      "daysElapsed": 21,
-      "wordsPerDay": 395,
+      "posts": 8,
+      "words": 9228,
+      "daysElapsed": 26,
+      "wordsPerDay": 355,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -34.7
+      "changeVsPreviousMonth": -27.4
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 73,
-      "words": 81721,
-      "daysElapsed": 294,
-      "wordsPerDay": 278,
+      "posts": 74,
+      "words": 82646,
+      "daysElapsed": 299,
+      "wordsPerDay": 276,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
-        "throughDate": "2025-10-21"
+        "throughDate": "2025-10-26"
       },
-      "changeVsPriorYear": 586.4
+      "changeVsPriorYear": 594.2
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 87,
-      "words": 88833,
+      "posts": 88,
+      "words": 89758,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 73,
-      "words": 81721
+      "posts": 74,
+      "words": 82646
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 7,
-      "words": 8303
+      "posts": 8,
+      "words": 9228
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 114659,
-      "posts": 116
+      "words": 115584,
+      "posts": 117
     }
   ],
   "byDayOfWeek": [
@@ -545,8 +545,8 @@
     },
     {
       "day": "Monday",
-      "posts": 18,
-      "words": 20123
+      "posts": 19,
+      "words": 21048
     },
     {
       "day": "Tuesday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 61,
-      "words": 69659
+      "posts": 62,
+      "words": 70584
     },
     {
       "section": "Uncategorised",
@@ -594,8 +594,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 58,
-      "words": 64306
+      "posts": 59,
+      "words": 65231
     },
     {
       "tag": "digital-wellbeing",
@@ -604,8 +604,8 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 21,
-      "words": 22992
+      "posts": 22,
+      "words": 23917
     },
     {
       "tag": "ai",
@@ -619,8 +619,8 @@
     },
     {
       "tag": "life",
-      "posts": 9,
-      "words": 13443
+      "posts": 10,
+      "words": 14368
     },
     {
       "tag": "technology",
@@ -1089,7 +1089,7 @@
     },
     {
       "label": "500–999",
-      "posts": 45
+      "posts": 46
     },
     {
       "label": "1,000–1,499",
@@ -1212,6 +1212,28 @@
     }
   ],
   "posts": [
+    {
+      "title": "How that insignificant self, searches for the significant soul within?",
+      "date": "2026-10-26",
+      "publishedAt": "2026-10-25T19:10:55.851Z",
+      "url": "https://sankettambare.substack.com/p/the-insignificant-us",
+      "platform": "Substack",
+      "words": 925,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "self-reflection",
+        "life",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!jS3X!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F353d7eba-4468-4689-988e-53e4806ea6b2_1672x940.png",
+      "trackedInBlogsTable": true,
+      "blogId": 74,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "Traversing the complex path towards better digital life!",
       "date": "2026-10-21",
