@@ -7,9 +7,9 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 484 | Mind & Life |
-| `self-reflection` | 470 | Mind & Life |
+| `self-reflection` | 471 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
-| `social media` | 149 | Digital Life |
+| `social media` | 150 | Digital Life |
 | `personaldevelopment` | 139 | Mind & Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 135 | Personal |
@@ -21,7 +21,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `digital detox` | 80 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 70 | Society & Ideas |
-| `technology` | 68 | Technology & Data |
+| `technology` | 69 | Technology & Data |
 | `social` | 67 | Society & Ideas |
 | `ai` | 56 | Technology & Data |
 | `choices` | 54 | Mind & Life |
@@ -33,7 +33,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `forts` | 38 | Travel & Outdoors |
 | `running` | 38 | Running & Fitness |
 | `nirman` | 35 | Society & Ideas |
-| `100_days_to_offload` | 33 | Writing & Blogging |
+| `100_days_to_offload` | 34 | Writing & Blogging |
 | `daredavil01` | 31 | Personal |
 | `self-help` | 31 | Books & Reading |
 | `भटकंती` | 30 | Travel & Outdoors |
@@ -54,17 +54,17 @@ Names are lowercase and URI-encoded rather than slugified.
 | `youtube` | 14 | Digital Life |
 | `biography` | 13 | Books & Reading |
 | `auto-biography` | 12 | Books & Reading |
+| `digital technology` | 11 | Digital Life |
 | `public policy` | 11 | Society & Ideas |
 | `adventure` | 10 | Travel & Outdoors |
-| `digital technology` | 10 | Digital Life |
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
 | `data` | 8 | Technology & Data |
 | `non-fiction` | 8 | Books & Reading |
 | `bioscope` | 7 | Mind & Life |
+| `learning` | 7 | — |
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
-| `learning` | 6 | — |
 | `newsletter` | 6 | Writing & Blogging |
 | `sports` | 6 | Running & Fitness |
 | `the social dilemma` | 6 | Digital Life |

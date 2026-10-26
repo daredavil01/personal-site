@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-25T19:17:06.362Z",
+  "generatedAt": "2026-10-26T19:00:30.020Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 117,
-    "words": 115584,
-    "averageWords": 988,
-    "trackedPosts": 74,
+    "posts": 118,
+    "words": 116723,
+    "averageWords": 989,
+    "trackedPosts": 75,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-26",
+    "latestPost": "2026-10-27",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,47 +26,47 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 74,
-      "words": 82646
+      "posts": 75,
+      "words": 83785
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-26",
+    "asOf": "2026-10-27",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 8,
-      "words": 9228,
-      "daysElapsed": 26,
-      "wordsPerDay": 355,
+      "posts": 9,
+      "words": 10367,
+      "daysElapsed": 27,
+      "wordsPerDay": 384,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -27.4
+      "changeVsPreviousMonth": -18.5
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 74,
-      "words": 82646,
-      "daysElapsed": 299,
-      "wordsPerDay": 276,
+      "posts": 75,
+      "words": 83785,
+      "daysElapsed": 300,
+      "wordsPerDay": 279,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
-        "throughDate": "2025-10-26"
+        "throughDate": "2025-10-27"
       },
-      "changeVsPriorYear": 594.2
+      "changeVsPriorYear": 603.8
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 88,
-      "words": 89758,
+      "posts": 89,
+      "words": 90897,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 74,
-      "words": 82646
+      "posts": 75,
+      "words": 83785
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 8,
-      "words": 9228
+      "posts": 9,
+      "words": 10367
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 115584,
-      "posts": 117
+      "words": 116723,
+      "posts": 118
     }
   ],
   "byDayOfWeek": [
@@ -550,8 +550,8 @@
     },
     {
       "day": "Tuesday",
-      "posts": 25,
-      "words": 26913
+      "posts": 26,
+      "words": 28052
     },
     {
       "day": "Wednesday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 62,
-      "words": 70584
+      "posts": 63,
+      "words": 71723
     },
     {
       "section": "Uncategorised",
@@ -594,13 +594,13 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 59,
-      "words": 65231
+      "posts": 60,
+      "words": 66370
     },
     {
       "tag": "digital-wellbeing",
-      "posts": 23,
-      "words": 28605
+      "posts": 24,
+      "words": 29744
     },
     {
       "tag": "self-reflection",
@@ -623,6 +623,11 @@
       "words": 14368
     },
     {
+      "tag": "social-media",
+      "posts": 8,
+      "words": 11373
+    },
+    {
       "tag": "technology",
       "posts": 10,
       "words": 10736
@@ -631,11 +636,6 @@
       "tag": "marathon",
       "posts": 6,
       "words": 10653
-    },
-    {
-      "tag": "social-media",
-      "posts": 7,
-      "words": 10234
     },
     {
       "tag": "book-review",
@@ -1093,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 46
+      "posts": 47
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1212,28 @@
     }
   ],
   "posts": [
+    {
+      "title": "Breaking the ego chambers to relieve the information barriers!",
+      "date": "2026-10-27",
+      "publishedAt": "2026-10-26T18:54:07.900Z",
+      "url": "https://sankettambare.substack.com/p/information-barrier",
+      "platform": "Substack",
+      "words": 1139,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "100_days_to_offload",
+        "social-media",
+        "digital-wellbeing"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!KxVC!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F0bd85972-3d28-49f1-a548-c84489e4016f_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 75,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "How that insignificant self, searches for the significant soul within?",
       "date": "2026-10-26",

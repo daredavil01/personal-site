@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 114,
-    "blogs": 74,
+    "blogs": 75,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -42,9 +42,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-25",
-      "t": "How that insignificant self, searches for the significant soul within?",
-      "u": "/100-days-to-offload/74"
+      "d": "2026-10-26",
+      "t": "Breaking the ego chambers to relieve the information barriers!",
+      "u": "/100-days-to-offload/75"
     },
     "writing": {
       "d": "2025-12-31",
@@ -968,7 +968,7 @@
     },
     {
       "name": "self-reflection",
-      "total": 470
+      "total": 471
     },
     {
       "name": "marathi",
@@ -976,7 +976,7 @@
     },
     {
       "name": "social media",
-      "total": 149
+      "total": 150
     },
     {
       "name": "personaldevelopment",
@@ -1024,7 +1024,7 @@
     },
     {
       "name": "technology",
-      "total": 68
+      "total": 69
     },
     {
       "name": "social",
@@ -1089,11 +1089,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-25T19:17:21.753238+00:00",
+  "generated_at": "2026-10-26T19:00:47.691156+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 74,
+    "blog": 75,
     "book": 52,
     "page": 1,
     "site": 26,
