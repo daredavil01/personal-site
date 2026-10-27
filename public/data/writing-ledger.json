@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-10-26T19:00:30.020Z",
+  "generatedAt": "2026-10-27T17:40:24.252Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 118,
-    "words": 116723,
-    "averageWords": 989,
-    "trackedPosts": 75,
+    "posts": 119,
+    "words": 117860,
+    "averageWords": 990,
+    "trackedPosts": 76,
     "firstPost": "2020-08-17",
     "latestPost": "2026-10-27",
     "longestPost": {
@@ -26,8 +26,8 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 75,
-      "words": 83785
+      "posts": 76,
+      "words": 84922
     },
     "activeMonths": 35
   },
@@ -36,37 +36,37 @@
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 9,
-      "words": 10367,
+      "posts": 10,
+      "words": 11504,
       "daysElapsed": 27,
-      "wordsPerDay": 384,
+      "wordsPerDay": 426,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -18.5
+      "changeVsPreviousMonth": -9.5
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 75,
-      "words": 83785,
+      "posts": 76,
+      "words": 84922,
       "daysElapsed": 300,
-      "wordsPerDay": 279,
+      "wordsPerDay": 283,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
         "throughDate": "2025-10-27"
       },
-      "changeVsPriorYear": 603.8
+      "changeVsPriorYear": 613.3
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 89,
-      "words": 90897,
+      "posts": 90,
+      "words": 92034,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 75,
-      "words": 83785
+      "posts": 76,
+      "words": 84922
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 9,
-      "words": 10367
+      "posts": 10,
+      "words": 11504
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 116723,
-      "posts": 118
+      "words": 117860,
+      "posts": 119
     }
   ],
   "byDayOfWeek": [
@@ -550,8 +550,8 @@
     },
     {
       "day": "Tuesday",
-      "posts": 26,
-      "words": 28052
+      "posts": 27,
+      "words": 29189
     },
     {
       "day": "Wednesday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 63,
-      "words": 71723
+      "posts": 64,
+      "words": 72860
     },
     {
       "section": "Uncategorised",
@@ -594,8 +594,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 60,
-      "words": 66370
+      "posts": 61,
+      "words": 67507
     },
     {
       "tag": "digital-wellbeing",
@@ -604,8 +604,8 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 22,
-      "words": 23917
+      "posts": 23,
+      "words": 25054
     },
     {
       "tag": "ai",
@@ -623,6 +623,11 @@
       "words": 14368
     },
     {
+      "tag": "marathon",
+      "posts": 7,
+      "words": 11790
+    },
+    {
       "tag": "social-media",
       "posts": 8,
       "words": 11373
@@ -633,24 +638,19 @@
       "words": 10736
     },
     {
-      "tag": "marathon",
-      "posts": 6,
-      "words": 10653
-    },
-    {
       "tag": "book-review",
       "posts": 10,
       "words": 9980
     },
     {
+      "tag": "running",
+      "posts": 7,
+      "words": 9254
+    },
+    {
       "tag": "youth-flourishing",
       "posts": 7,
       "words": 8589
-    },
-    {
-      "tag": "running",
-      "posts": 6,
-      "words": 8117
     },
     {
       "tag": "artificial-intelligence",
@@ -1093,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 47
+      "posts": 48
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1212,29 @@
     }
   ],
   "posts": [
+    {
+      "title": "Running Alone: The anatomy of this interesting habit that has hooked me up for last 2 years!",
+      "date": "2026-10-27",
+      "publishedAt": "2026-10-27T17:37:13.902Z",
+      "url": "https://sankettambare.substack.com/p/running-alone-the-anatomy",
+      "platform": "Substack",
+      "words": 1137,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "running",
+        "self-reflection",
+        "100_days_to_offload",
+        "marathon"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!Jm7n!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F38229440-8b97-4bfb-a6da-b140ad3711d3_1448x1086.png",
+      "trackedInBlogsTable": true,
+      "blogId": 76,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "Breaking the ego chambers to relieve the information barriers!",
       "date": "2026-10-27",

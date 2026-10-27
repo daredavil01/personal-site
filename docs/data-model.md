@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **75** · indexed as `blog`
+Rows: **76** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -300,7 +300,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3867**
+Rows: **3876**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -317,7 +317,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3321**
+Rows: **3328**
 
 | column | type | null | default |
 |---|---|---|---|

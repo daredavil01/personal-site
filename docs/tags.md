@@ -7,20 +7,20 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 484 | Mind & Life |
-| `self-reflection` | 471 | Mind & Life |
+| `self-reflection` | 472 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
 | `social media` | 150 | Digital Life |
-| `personaldevelopment` | 139 | Mind & Life |
+| `personaldevelopment` | 140 | Mind & Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 135 | Personal |
-| `philosophy` | 129 | Society & Ideas |
+| `philosophy` | 130 | Society & Ideas |
 | `calmness` | 127 | Mind & Life |
 | `digital wellbeing` | 121 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
 | `latepost` | 109 | Writing & Blogging |
 | `digital detox` | 80 | Digital Life |
 | `politics` | 73 | Society & Ideas |
-| `psychology` | 70 | Society & Ideas |
+| `psychology` | 71 | Society & Ideas |
 | `technology` | 69 | Technology & Data |
 | `social` | 67 | Society & Ideas |
 | `ai` | 56 | Technology & Data |
@@ -30,10 +30,10 @@ Names are lowercase and URI-encoded rather than slugified.
 | `nightsky` | 45 | Travel & Outdoors |
 | `खंडेराव` | 43 | Writing & Blogging |
 | `desperate me` | 40 | People & Feelings |
+| `running` | 39 | Running & Fitness |
 | `forts` | 38 | Travel & Outdoors |
-| `running` | 38 | Running & Fitness |
+| `100_days_to_offload` | 35 | Writing & Blogging |
 | `nirman` | 35 | Society & Ideas |
-| `100_days_to_offload` | 34 | Writing & Blogging |
 | `daredavil01` | 31 | Personal |
 | `self-help` | 31 | Books & Reading |
 | `भटकंती` | 30 | Travel & Outdoors |
@@ -42,7 +42,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `digital manipulation` | 26 | Digital Life |
 | `book review` | 24 | Books & Reading |
 | `mydesigns` | 24 | Arts & Culture |
-| `marathon` | 22 | Running & Fitness |
+| `marathon` | 23 | Running & Fitness |
 | `youth` | 22 | Society & Ideas |
 | `privacy` | 21 | Digital Life |
 | `scientific temperament` | 19 | Society & Ideas |
@@ -60,13 +60,13 @@ Names are lowercase and URI-encoded rather than slugified.
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
 | `data` | 8 | Technology & Data |
+| `learning` | 8 | — |
 | `non-fiction` | 8 | Books & Reading |
 | `bioscope` | 7 | Mind & Life |
-| `learning` | 7 | — |
+| `sports` | 7 | Running & Fitness |
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
 | `newsletter` | 6 | Writing & Blogging |
-| `sports` | 6 | Running & Fitness |
 | `the social dilemma` | 6 | Digital Life |
 | `digitalnomad` | 5 | Digital Life |
 | `the_trip` | 5 | Travel & Outdoors |

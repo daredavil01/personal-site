@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 114,
-    "blogs": 75,
+    "blogs": 76,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -42,9 +42,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-26",
-      "t": "Breaking the ego chambers to relieve the information barriers!",
-      "u": "/100-days-to-offload/75"
+      "d": "2026-10-27",
+      "t": "Running Alone: The anatomy of this interesting habit that has hooked me up for last 2 years!",
+      "u": "/100-days-to-offload/76"
     },
     "writing": {
       "d": "2025-12-31",
@@ -968,7 +968,7 @@
     },
     {
       "name": "self-reflection",
-      "total": 471
+      "total": 472
     },
     {
       "name": "marathi",
@@ -980,7 +980,7 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 139
+      "total": 140
     },
     {
       "name": "love",
@@ -992,7 +992,7 @@
     },
     {
       "name": "philosophy",
-      "total": 129
+      "total": 130
     },
     {
       "name": "calmness",
@@ -1020,7 +1020,7 @@
     },
     {
       "name": "psychology",
-      "total": 70
+      "total": 71
     },
     {
       "name": "technology",
@@ -1059,8 +1059,8 @@
       "total": 40
     },
     {
-      "name": "forts",
-      "total": 38
+      "name": "running",
+      "total": 39
     }
   ],
   "microblog": {
@@ -1089,11 +1089,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-26T19:00:47.691156+00:00",
+  "generated_at": "2026-10-27T17:40:42.49966+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 75,
+    "blog": 76,
     "book": 52,
     "page": 1,
     "site": 26,
