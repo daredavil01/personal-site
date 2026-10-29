@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-27T17:40:24.252Z",
+  "generatedAt": "2026-10-29T05:22:26.155Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 119,
-    "words": 117860,
-    "averageWords": 990,
-    "trackedPosts": 76,
+    "posts": 120,
+    "words": 119153,
+    "averageWords": 993,
+    "trackedPosts": 77,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-27",
+    "latestPost": "2026-10-29",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -19,54 +19,54 @@
       "url": "https://sankettambare.substack.com/p/the-un-orthodox-ways-of-seeing"
     },
     "busiestMonth": {
-      "month": "2026-09",
-      "label": "September 2026",
-      "posts": 10,
-      "words": 12714
+      "month": "2026-10",
+      "label": "October 2026",
+      "posts": 11,
+      "words": 12797
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 76,
-      "words": 84922
+      "posts": 77,
+      "words": 86215
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-27",
+    "asOf": "2026-10-29",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 10,
-      "words": 11504,
-      "daysElapsed": 27,
-      "wordsPerDay": 426,
+      "posts": 11,
+      "words": 12797,
+      "daysElapsed": 29,
+      "wordsPerDay": 441,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": -9.5
+      "changeVsPreviousMonth": 0.7
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 76,
-      "words": 84922,
-      "daysElapsed": 300,
-      "wordsPerDay": 283,
+      "posts": 77,
+      "words": 86215,
+      "daysElapsed": 302,
+      "wordsPerDay": 285,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
-        "throughDate": "2025-10-27"
+        "throughDate": "2025-10-29"
       },
-      "changeVsPriorYear": 613.3
+      "changeVsPriorYear": 624.2
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 90,
-      "words": 92034,
+      "posts": 91,
+      "words": 93327,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 76,
-      "words": 84922
+      "posts": 77,
+      "words": 86215
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 10,
-      "words": 11504
+      "posts": 11,
+      "words": 12797
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 117860,
-      "posts": 119
+      "words": 119153,
+      "posts": 120
     }
   ],
   "byDayOfWeek": [
@@ -560,8 +560,8 @@
     },
     {
       "day": "Thursday",
-      "posts": 17,
-      "words": 19757
+      "posts": 18,
+      "words": 21050
     },
     {
       "day": "Friday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 64,
-      "words": 72860
+      "posts": 65,
+      "words": 74153
     },
     {
       "section": "Uncategorised",
@@ -594,8 +594,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 61,
-      "words": 67507
+      "posts": 62,
+      "words": 68800
     },
     {
       "tag": "digital-wellbeing",
@@ -609,8 +609,8 @@
     },
     {
       "tag": "ai",
-      "posts": 14,
-      "words": 15596
+      "posts": 15,
+      "words": 16889
     },
     {
       "tag": "Travel Blogs",
@@ -658,14 +658,19 @@
       "words": 6911
     },
     {
+      "tag": "flourishing",
+      "posts": 5,
+      "words": 6122
+    },
+    {
       "tag": "digital-brain",
       "posts": 4,
       "words": 4856
     },
     {
-      "tag": "flourishing",
+      "tag": "claudecode",
       "posts": 4,
-      "words": 4829
+      "words": 4729
     },
     {
       "tag": "Satpuda",
@@ -676,11 +681,6 @@
       "tag": "privacy",
       "posts": 4,
       "words": 4135
-    },
-    {
-      "tag": "claudecode",
-      "posts": 3,
-      "words": 3436
     },
     {
       "tag": "nmdc-hyderabad-marathon",
@@ -1093,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 48
+      "posts": 49
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1212,29 @@
     }
   ],
   "posts": [
+    {
+      "title": "How claude helped me to consolidate weeks of efforts in few hours!",
+      "date": "2026-10-29",
+      "publishedAt": "2026-10-29T05:20:02.046Z",
+      "url": "https://sankettambare.substack.com/p/claude-pump-storage-project-brief",
+      "platform": "Substack",
+      "words": 1293,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "flourishing",
+        "ai",
+        "claudecode",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!lfda!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F9aa5963f-607c-413c-9eee-28619cca891a_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 77,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "Running Alone: The anatomy of this interesting habit that has hooked me up for last 2 years!",
       "date": "2026-10-27",

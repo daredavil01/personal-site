@@ -23,16 +23,16 @@ Names are lowercase and URI-encoded rather than slugified.
 | `psychology` | 71 | Society & Ideas |
 | `technology` | 69 | Technology & Data |
 | `social` | 67 | Society & Ideas |
-| `ai` | 56 | Technology & Data |
+| `ai` | 57 | Technology & Data |
 | `choices` | 54 | Mind & Life |
-| `maharashtra` | 51 | Travel & Outdoors |
+| `maharashtra` | 52 | Travel & Outdoors |
 | `मन` | 46 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
 | `खंडेराव` | 43 | Writing & Blogging |
 | `desperate me` | 40 | People & Feelings |
 | `running` | 39 | Running & Fitness |
 | `forts` | 38 | Travel & Outdoors |
-| `100_days_to_offload` | 35 | Writing & Blogging |
+| `100_days_to_offload` | 36 | Writing & Blogging |
 | `nirman` | 35 | Society & Ideas |
 | `daredavil01` | 31 | Personal |
 | `self-help` | 31 | Books & Reading |
@@ -45,8 +45,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `marathon` | 23 | Running & Fitness |
 | `youth` | 22 | Society & Ideas |
 | `privacy` | 21 | Digital Life |
+| `claude code` | 19 | Technology & Data |
 | `scientific temperament` | 19 | Society & Ideas |
-| `claude code` | 18 | Technology & Data |
 | `history` | 18 | Society & Ideas |
 | `data privacy` | 16 | Digital Life |
 | `fiction` | 15 | Books & Reading |
@@ -71,6 +71,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `digitalnomad` | 5 | Digital Life |
 | `the_trip` | 5 | Travel & Outdoors |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
+| `data journalism` | 4 | Technology & Data |
 | `data visualization` | 4 | Technology & Data |
 | `three.js` | 4 | Technology & Data |
 | `vibe-coding` | 4 | Technology & Data |
@@ -81,20 +82,25 @@ Names are lowercase and URI-encoded rather than slugified.
 | `traditionallook😍` | 3 | Arts & Culture |
 | `accessibility` | 2 | — |
 | `bankot fort` | 2 | Travel & Outdoors |
+| `bilingual` | 2 | — |
 | `brandkit` | 2 | — |
-| `data journalism` | 2 | Technology & Data |
 | `design` | 2 | — |
+| `energy` | 2 | — |
+| `environment` | 2 | — |
 | `hyderabad` | 2 | Travel & Outdoors |
 | `knowledgeeconomy` | 2 | Society & Ideas |
 | `note-taking` | 2 | Writing & Blogging |
+| `pumped storage` | 2 | — |
+| `research-communication` | 2 | — |
 | `satara` | 2 | Travel & Outdoors |
 | `satpuda` | 2 | Travel & Outdoors |
 | `search` | 2 | Society & Ideas |
 | `sexual-drama` | 2 | Books & Reading |
 | `wardha` | 2 | Travel & Outdoors |
-| `bilingual` | 1 | — |
+| `astro` | 1 | — |
 | `birding` | 1 | — |
 | `citizen science` | 1 | — |
+| `civic tech` | 1 | — |
 | `conservation` | 1 | — |
 | `digital-wellbeing` | 1 | — |
 | `event website` | 1 | — |
@@ -104,14 +110,15 @@ Names are lowercase and URI-encoded rather than slugified.
 | `kailasgad` | 1 | Travel & Outdoors |
 | `krantismritivan` | 1 | Travel & Outdoors |
 | `obsidian` | 1 | Writing & Blogging |
+| `open data` | 1 | — |
 | `panhala🏞️` | 1 | Travel & Outdoors |
 | `pegasus` | 1 | Digital Life |
 | `performance` | 1 | — |
 | `pune` | 1 | — |
 | `rafting_amidst_the_waves🏖️` | 1 | Travel & Outdoors |
 | `republic day` | 1 | Society & Ideas |
-| `research-communication` | 1 | — |
 | `rock_garden` | 1 | Travel & Outdoors |
+| `sahyadri` | 1 | — |
 | `scrollytelling` | 1 | — |
 | `sea_at_night🌃🌊` | 1 | Travel & Outdoors |
 | `semiconductor` | 1 | Technology & Data |
@@ -119,5 +126,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `tsunami_island🏝️` | 1 | Travel & Outdoors |
 | `turtle festival` | 1 | Travel & Outdoors |
 | `web design` | 1 | — |
+| `western ghats` | 1 | — |
 | `पट्यारा` | 1 | Books & Reading |
 <!-- generated:tags end -->

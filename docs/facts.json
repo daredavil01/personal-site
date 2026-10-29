@@ -25,13 +25,13 @@
     }
   },
   "counts": {
-    "tags": 114,
-    "blogs": 76,
+    "tags": 122,
+    "blogs": 77,
     "books": 52,
     "treks": 20,
     "sports": 26,
-    "videos": 19,
-    "projects": 23,
+    "videos": 20,
+    "projects": 24,
     "instagram": 11,
     "microblog": 1677
   },
@@ -42,9 +42,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-27",
-      "t": "Running Alone: The anatomy of this interesting habit that has hooked me up for last 2 years!",
-      "u": "/100-days-to-offload/76"
+      "d": "2026-10-29",
+      "t": "How claude helped me to consolidate weeks of efforts in few hours!",
+      "u": "/100-days-to-offload/77"
     },
     "writing": {
       "d": "2025-12-31",
@@ -570,6 +570,11 @@
     ],
     "video": [
       {
+        "d": "2026-10-28",
+        "t": "Karjat's 48,557 Trees and 38 More Projects: Inside the Sahyadri \"Battery\" Plan",
+        "u": "/videos/127"
+      },
+      {
         "d": "2026-10-25",
         "t": "22 Projects in 60 Seconds | NGOs, Data Stories, Games & More #shorts",
         "u": "/videos/70"
@@ -666,6 +671,11 @@
       }
     ],
     "project": [
+      {
+        "d": "2026-10-28",
+        "t": "Pumped Storage Projects: Are They Really Useful?",
+        "u": "/projects/24"
+      },
       {
         "d": "2026-10-23",
         "t": "Vetal Tekdi Birding Marathon",
@@ -836,6 +846,11 @@
     ],
     "presentation": [
       {
+        "d": "2026-10-28",
+        "t": "Pumped Storage Projects: Are They Really Useful?",
+        "u": "/presentations/20"
+      },
+      {
         "d": "2026-10-19",
         "t": "After the Feed, a Trilogy",
         "u": "/presentations/19"
@@ -943,13 +958,13 @@
   },
   "videos": {
     "by_kind": {
-      "short": 7,
+      "short": 8,
       "video": 12
     }
   },
   "projects": {
     "by_status": {
-      "Live": 19,
+      "Live": 20,
       "Concept": 1,
       "Archived": 3
     },
@@ -958,7 +973,7 @@
       "Design": 3,
       "Web App": 8,
       "Website": 5,
-      "Data Story": 5
+      "Data Story": 6
     }
   },
   "top_tags": [
@@ -1032,7 +1047,7 @@
     },
     {
       "name": "ai",
-      "total": 56
+      "total": 57
     },
     {
       "name": "choices",
@@ -1040,7 +1055,7 @@
     },
     {
       "name": "maharashtra",
-      "total": 51
+      "total": 52
     },
     {
       "name": "मन",
@@ -1089,31 +1104,31 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-27T17:40:42.49966+00:00",
+  "generated_at": "2026-10-29T05:22:42.580079+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 76,
+    "blog": 77,
     "book": 52,
     "page": 1,
     "site": 26,
     "trek": 20,
     "sport": 26,
     "stats": 10,
-    "video": 19,
+    "video": 20,
     "resume": 21,
-    "project": 22,
+    "project": 23,
     "writing": 43,
     "changelog": 117,
     "instagram": 11,
     "microblog": 1677,
-    "presentation": 19
+    "presentation": 20
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 16,
+    "uncategorised": 24,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,

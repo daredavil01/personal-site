@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **76** · indexed as `blog`
+Rows: **77** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **23** · indexed as `project`
+Rows: **24** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **19** · indexed as `presentation`
+Rows: **20** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -157,7 +157,7 @@ Constraints:
 
 The YouTube channel's public uploads, copied by the owner-only sync at /admin/videos/sync. YouTube owns the title/description/counts (re-synced); `kind_override`, `visible` and tags are the site's own. `date` is the IST publish day.
 
-Rows: **19** · indexed as `video`
+Rows: **20** · indexed as `video`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -276,7 +276,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **114**
+Rows: **122**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -300,7 +300,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3876**
+Rows: **3895**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -317,7 +317,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3328**
+Rows: **3351**
 
 | column | type | null | default |
 |---|---|---|---|
