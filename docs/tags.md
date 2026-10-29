@@ -7,7 +7,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | tag | items | category |
 |---|---|---|
 | `life` | 484 | Mind & Life |
-| `self-reflection` | 472 | Mind & Life |
+| `self-reflection` | 473 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
 | `social media` | 150 | Digital Life |
 | `personaldevelopment` | 140 | Mind & Life |
@@ -15,10 +15,10 @@ Names are lowercase and URI-encoded rather than slugified.
 | `sanky` | 135 | Personal |
 | `philosophy` | 130 | Society & Ideas |
 | `calmness` | 127 | Mind & Life |
-| `digital wellbeing` | 121 | Digital Life |
+| `digital wellbeing` | 122 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
 | `latepost` | 109 | Writing & Blogging |
-| `digital detox` | 80 | Digital Life |
+| `digital detox` | 81 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 71 | Society & Ideas |
 | `technology` | 69 | Technology & Data |
@@ -49,12 +49,12 @@ Names are lowercase and URI-encoded rather than slugified.
 | `scientific temperament` | 19 | Society & Ideas |
 | `history` | 18 | Society & Ideas |
 | `data privacy` | 16 | Digital Life |
+| `information age` | 16 | Digital Life |
 | `fiction` | 15 | Books & Reading |
-| `information age` | 15 | Digital Life |
 | `youtube` | 14 | Digital Life |
 | `biography` | 13 | Books & Reading |
 | `auto-biography` | 12 | Books & Reading |
-| `digital technology` | 11 | Digital Life |
+| `digital technology` | 12 | Digital Life |
 | `public policy` | 11 | Society & Ideas |
 | `adventure` | 10 | Travel & Outdoors |
 | `ngo` | 9 | Society & Ideas |
@@ -85,6 +85,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `bilingual` | 2 | — |
 | `brandkit` | 2 | — |
 | `design` | 2 | — |
+| `digital-wellbeing` | 2 | — |
 | `energy` | 2 | — |
 | `environment` | 2 | — |
 | `hyderabad` | 2 | Travel & Outdoors |
@@ -102,7 +103,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `citizen science` | 1 | — |
 | `civic tech` | 1 | — |
 | `conservation` | 1 | — |
-| `digital-wellbeing` | 1 | — |
 | `event website` | 1 | — |
 | `google sites` | 1 | Writing & Blogging |
 | `harihareshwar` | 1 | Travel & Outdoors |

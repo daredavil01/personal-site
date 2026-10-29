@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 122,
-    "blogs": 77,
+    "blogs": 78,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -43,8 +43,8 @@
     },
     "blog": {
       "d": "2026-10-29",
-      "t": "How claude helped me to consolidate weeks of efforts in few hours!",
-      "u": "/100-days-to-offload/77"
+      "t": "Living off the grid!",
+      "u": "/100-days-to-offload/78"
     },
     "writing": {
       "d": "2025-12-31",
@@ -983,7 +983,7 @@
     },
     {
       "name": "self-reflection",
-      "total": 472
+      "total": 473
     },
     {
       "name": "marathi",
@@ -1015,7 +1015,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 121
+      "total": 122
     },
     {
       "name": "travel",
@@ -1027,7 +1027,7 @@
     },
     {
       "name": "digital detox",
-      "total": 80
+      "total": 81
     },
     {
       "name": "politics",
@@ -1104,11 +1104,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-29T05:22:42.580079+00:00",
+  "generated_at": "2026-10-29T18:27:54.153795+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 77,
+    "blog": 78,
     "book": 52,
     "page": 1,
     "site": 26,

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-10-29T05:22:26.155Z",
+  "generatedAt": "2026-10-29T18:27:36.710Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 120,
-    "words": 119153,
-    "averageWords": 993,
-    "trackedPosts": 77,
+    "posts": 121,
+    "words": 120513,
+    "averageWords": 996,
+    "trackedPosts": 78,
     "firstPost": "2020-08-17",
     "latestPost": "2026-10-29",
     "longestPost": {
@@ -21,13 +21,13 @@
     "busiestMonth": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 11,
-      "words": 12797
+      "posts": 12,
+      "words": 14157
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 77,
-      "words": 86215
+      "posts": 78,
+      "words": 87575
     },
     "activeMonths": 35
   },
@@ -36,37 +36,37 @@
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 11,
-      "words": 12797,
+      "posts": 12,
+      "words": 14157,
       "daysElapsed": 29,
-      "wordsPerDay": 441,
+      "wordsPerDay": 488,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": 0.7
+      "changeVsPreviousMonth": 11.3
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 77,
-      "words": 86215,
+      "posts": 78,
+      "words": 87575,
       "daysElapsed": 302,
-      "wordsPerDay": 285,
+      "wordsPerDay": 290,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
         "throughDate": "2025-10-29"
       },
-      "changeVsPriorYear": 624.2
+      "changeVsPriorYear": 635.6
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 91,
-      "words": 93327,
+      "posts": 92,
+      "words": 94687,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 77,
-      "words": 86215
+      "posts": 78,
+      "words": 87575
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 11,
-      "words": 12797
+      "posts": 12,
+      "words": 14157
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 119153,
-      "posts": 120
+      "words": 120513,
+      "posts": 121
     }
   ],
   "byDayOfWeek": [
@@ -560,8 +560,8 @@
     },
     {
       "day": "Thursday",
-      "posts": 18,
-      "words": 21050
+      "posts": 19,
+      "words": 22410
     },
     {
       "day": "Friday",
@@ -577,8 +577,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 65,
-      "words": 74153
+      "posts": 66,
+      "words": 75513
     },
     {
       "section": "Uncategorised",
@@ -594,18 +594,18 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 62,
-      "words": 68800
+      "posts": 63,
+      "words": 70160
     },
     {
       "tag": "digital-wellbeing",
-      "posts": 24,
-      "words": 29744
+      "posts": 25,
+      "words": 31104
     },
     {
       "tag": "self-reflection",
-      "posts": 23,
-      "words": 25054
+      "posts": 24,
+      "words": 26414
     },
     {
       "tag": "ai",
@@ -613,19 +613,24 @@
       "words": 16889
     },
     {
+      "tag": "life",
+      "posts": 11,
+      "words": 15728
+    },
+    {
       "tag": "Travel Blogs",
       "posts": 16,
       "words": 15557
     },
     {
-      "tag": "life",
-      "posts": 10,
-      "words": 14368
+      "tag": "marathon",
+      "posts": 8,
+      "words": 13150
     },
     {
-      "tag": "marathon",
-      "posts": 7,
-      "words": 11790
+      "tag": "technology",
+      "posts": 11,
+      "words": 12096
     },
     {
       "tag": "social-media",
@@ -633,14 +638,14 @@
       "words": 11373
     },
     {
-      "tag": "technology",
-      "posts": 10,
-      "words": 10736
-    },
-    {
       "tag": "book-review",
       "posts": 10,
       "words": 9980
+    },
+    {
+      "tag": "youth-flourishing",
+      "posts": 8,
+      "words": 9949
     },
     {
       "tag": "running",
@@ -648,19 +653,14 @@
       "words": 9254
     },
     {
-      "tag": "youth-flourishing",
-      "posts": 7,
-      "words": 8589
+      "tag": "flourishing",
+      "posts": 6,
+      "words": 7482
     },
     {
       "tag": "artificial-intelligence",
       "posts": 6,
       "words": 6911
-    },
-    {
-      "tag": "flourishing",
-      "posts": 5,
-      "words": 6122
     },
     {
       "tag": "digital-brain",
@@ -681,6 +681,11 @@
       "tag": "privacy",
       "posts": 4,
       "words": 4135
+    },
+    {
+      "tag": "philosophy",
+      "posts": 3,
+      "words": 4105
     },
     {
       "tag": "nmdc-hyderabad-marathon",
@@ -708,9 +713,9 @@
       "words": 2949
     },
     {
-      "tag": "philosophy",
-      "posts": 2,
-      "words": 2745
+      "tag": "ethics-morals",
+      "posts": 3,
+      "words": 2840
     },
     {
       "tag": "bharatekkhoj",
@@ -761,11 +766,6 @@
       "tag": "Book Review",
       "posts": 3,
       "words": 1510
-    },
-    {
-      "tag": "ethics-morals",
-      "posts": 2,
-      "words": 1480
     },
     {
       "tag": "challenges",
@@ -1093,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 49
+      "posts": 50
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1212,35 @@
     }
   ],
   "posts": [
+    {
+      "title": "Living off the grid!",
+      "date": "2026-10-29",
+      "publishedAt": "2026-10-29T18:22:28.851Z",
+      "url": "https://sankettambare.substack.com/p/living-off-the-grid",
+      "platform": "Substack",
+      "words": 1360,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "ethics-morals",
+        "flourishing",
+        "philosophy",
+        "self-reflection",
+        "technology",
+        "life",
+        "youth-flourishing",
+        "100_days_to_offload",
+        "marathon",
+        "digital-wellbeing"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!ZQzT!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fd768aafb-db17-4243-b45c-f7670a1fe6ab_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 78,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "How claude helped me to consolidate weeks of efforts in few hours!",
       "date": "2026-10-29",
