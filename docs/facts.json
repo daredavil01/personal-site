@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 122,
-    "blogs": 78,
+    "blogs": 79,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -42,9 +42,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-10-29",
-      "t": "Living off the grid!",
-      "u": "/100-days-to-offload/78"
+      "d": "2026-10-30",
+      "t": "What lies at the intersection of technology, society and policy?",
+      "u": "/100-days-to-offload/79"
     },
     "writing": {
       "d": "2025-12-31",
@@ -995,7 +995,7 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 140
+      "total": 141
     },
     {
       "name": "love",
@@ -1039,11 +1039,11 @@
     },
     {
       "name": "technology",
-      "total": 69
+      "total": 70
     },
     {
       "name": "social",
-      "total": 67
+      "total": 68
     },
     {
       "name": "ai",
@@ -1104,11 +1104,11 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-29T18:27:54.153795+00:00",
+  "generated_at": "2026-10-30T18:44:40.895465+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 98,
-    "blog": 78,
+    "blog": 79,
     "book": 52,
     "page": 1,
     "site": 26,

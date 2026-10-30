@@ -10,7 +10,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `self-reflection` | 473 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
 | `social media` | 150 | Digital Life |
-| `personaldevelopment` | 140 | Mind & Life |
+| `personaldevelopment` | 141 | Mind & Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 135 | Personal |
 | `philosophy` | 130 | Society & Ideas |
@@ -21,8 +21,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `digital detox` | 81 | Digital Life |
 | `politics` | 73 | Society & Ideas |
 | `psychology` | 71 | Society & Ideas |
-| `technology` | 69 | Technology & Data |
-| `social` | 67 | Society & Ideas |
+| `technology` | 70 | Technology & Data |
+| `social` | 68 | Society & Ideas |
 | `ai` | 57 | Technology & Data |
 | `choices` | 54 | Mind & Life |
 | `maharashtra` | 52 | Travel & Outdoors |
@@ -32,7 +32,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `desperate me` | 40 | People & Feelings |
 | `running` | 39 | Running & Fitness |
 | `forts` | 38 | Travel & Outdoors |
-| `100_days_to_offload` | 36 | Writing & Blogging |
+| `100_days_to_offload` | 37 | Writing & Blogging |
 | `nirman` | 35 | Society & Ideas |
 | `daredavil01` | 31 | Personal |
 | `self-help` | 31 | Books & Reading |
@@ -55,12 +55,12 @@ Names are lowercase and URI-encoded rather than slugified.
 | `biography` | 13 | Books & Reading |
 | `auto-biography` | 12 | Books & Reading |
 | `digital technology` | 12 | Digital Life |
-| `public policy` | 11 | Society & Ideas |
+| `public policy` | 12 | Society & Ideas |
 | `adventure` | 10 | Travel & Outdoors |
+| `learning` | 9 | — |
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
 | `data` | 8 | Technology & Data |
-| `learning` | 8 | — |
 | `non-fiction` | 8 | Books & Reading |
 | `bioscope` | 7 | Mind & Life |
 | `sports` | 7 | Running & Fitness |
@@ -84,6 +84,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `bankot fort` | 2 | Travel & Outdoors |
 | `bilingual` | 2 | — |
 | `brandkit` | 2 | — |
+| `civic tech` | 2 | — |
 | `design` | 2 | — |
 | `digital-wellbeing` | 2 | — |
 | `energy` | 2 | — |
@@ -101,7 +102,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `astro` | 1 | — |
 | `birding` | 1 | — |
 | `citizen science` | 1 | — |
-| `civic tech` | 1 | — |
 | `conservation` | 1 | — |
 | `event website` | 1 | — |
 | `google sites` | 1 | Writing & Blogging |

@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-29T18:27:36.710Z",
+  "generatedAt": "2026-10-30T18:44:24.860Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 121,
-    "words": 120513,
-    "averageWords": 996,
-    "trackedPosts": 78,
+    "posts": 122,
+    "words": 121856,
+    "averageWords": 999,
+    "trackedPosts": 79,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-29",
+    "latestPost": "2026-10-31",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -21,52 +21,52 @@
     "busiestMonth": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 12,
-      "words": 14157
+      "posts": 13,
+      "words": 15500
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 78,
-      "words": 87575
+      "posts": 79,
+      "words": 88918
     },
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-29",
+    "asOf": "2026-10-31",
     "monthToDate": {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 12,
-      "words": 14157,
-      "daysElapsed": 29,
-      "wordsPerDay": 488,
+      "posts": 13,
+      "words": 15500,
+      "daysElapsed": 31,
+      "wordsPerDay": 500,
       "previousMonth": {
         "month": "2026-09",
         "posts": 10,
         "words": 12714
       },
-      "changeVsPreviousMonth": 11.3
+      "changeVsPreviousMonth": 21.9
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 78,
-      "words": 87575,
-      "daysElapsed": 302,
-      "wordsPerDay": 290,
+      "posts": 79,
+      "words": 88918,
+      "daysElapsed": 304,
+      "wordsPerDay": 292,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
-        "throughDate": "2025-10-29"
+        "throughDate": "2025-10-31"
       },
-      "changeVsPriorYear": 635.6
+      "changeVsPriorYear": 646.9
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 92,
-      "words": 94687,
+      "posts": 93,
+      "words": 96030,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 78,
-      "words": 87575
+      "posts": 79,
+      "words": 88918
     }
   ],
   "byMonth": [
@@ -321,8 +321,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "posts": 12,
-      "words": 14157
+      "posts": 13,
+      "words": 15500
     }
   ],
   "cumulative": [
@@ -533,8 +533,8 @@
     {
       "month": "2026-10",
       "label": "October 2026",
-      "words": 120513,
-      "posts": 121
+      "words": 121856,
+      "posts": 122
     }
   ],
   "byDayOfWeek": [
@@ -570,15 +570,15 @@
     },
     {
       "day": "Saturday",
-      "posts": 13,
-      "words": 13753
+      "posts": 14,
+      "words": 15096
     }
   ],
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 66,
-      "words": 75513
+      "posts": 67,
+      "words": 76856
     },
     {
       "section": "Uncategorised",
@@ -594,28 +594,28 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 63,
-      "words": 70160
+      "posts": 64,
+      "words": 71503
     },
     {
       "tag": "digital-wellbeing",
-      "posts": 25,
-      "words": 31104
+      "posts": 26,
+      "words": 32447
     },
     {
       "tag": "self-reflection",
-      "posts": 24,
-      "words": 26414
+      "posts": 25,
+      "words": 27757
+    },
+    {
+      "tag": "life",
+      "posts": 12,
+      "words": 17071
     },
     {
       "tag": "ai",
       "posts": 15,
       "words": 16889
-    },
-    {
-      "tag": "life",
-      "posts": 11,
-      "words": 15728
     },
     {
       "tag": "Travel Blogs",
@@ -654,13 +654,18 @@
     },
     {
       "tag": "flourishing",
-      "posts": 6,
-      "words": 7482
+      "posts": 7,
+      "words": 8825
     },
     {
       "tag": "artificial-intelligence",
       "posts": 6,
       "words": 6911
+    },
+    {
+      "tag": "philosophy",
+      "posts": 4,
+      "words": 5448
     },
     {
       "tag": "digital-brain",
@@ -681,11 +686,6 @@
       "tag": "privacy",
       "posts": 4,
       "words": 4135
-    },
-    {
-      "tag": "philosophy",
-      "posts": 3,
-      "words": 4105
     },
     {
       "tag": "nmdc-hyderabad-marathon",
@@ -1093,7 +1093,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 50
+      "posts": 51
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1212,31 @@
     }
   ],
   "posts": [
+    {
+      "title": "What lies at the intersection of technology, society and policy?",
+      "date": "2026-10-31",
+      "publishedAt": "2026-10-30T18:40:39.017Z",
+      "url": "https://sankettambare.substack.com/p/tech-society-policy-intersection",
+      "platform": "Substack",
+      "words": 1343,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "flourishing",
+        "philosophy",
+        "self-reflection",
+        "life",
+        "100_days_to_offload",
+        "digital-wellbeing"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!GRZ4!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcad98e49-48a6-4389-be38-ef6e7adf7e60_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 79,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "Living off the grid!",
       "date": "2026-10-29",
