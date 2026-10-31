@@ -1,5 +1,5 @@
 import {
-  applyRerank, focusTargets, pickFocusChunks, retrievalQuery, selectChunks, typesNamed, withFocus,
+  applyRerank, focusTargets, mergeScoped, pickFocusChunks, retrievalQuery, selectChunks, typesNamed, withFocus,
 } from "./askRetrieval";
 
 // content_chunks rows keep their database spelling all the way to the worker.
@@ -109,6 +109,12 @@ describe("typesNamed", () => {
   it("reads Marathi", () => {
     expect(typesNamed("त्याने कोणते किल्ले सर केले?")).toContain("trek");
     expect(typesNamed("मला पुस्तका विषयी माहिती सांग")).toContain("book");
+  });
+
+  it("reads career questions as résumé", () => {
+    expect(typesNamed("What does he do for a living?")).toContain("resume");
+    expect(typesNamed("Where does he work as a developer?")).toContain("resume");
+    expect(typesNamed("त्याची नोकरी कोणती?")).toContain("resume");
   });
 
   it("names nothing for a question about no type in particular", () => {
@@ -234,5 +240,21 @@ describe("ask about this page", () => {
     const merged = withFocus(pinned, [chunk("sport", 5), chunk("book", 7), chunk("book", 8)], 3);
     expect(merged.map((c) => `${c.entity_type}:${c.entity_id}`)).toEqual(["now:12", "sport:5", "book:7"]);
     expect(withFocus([], forts, 8)).toBe(forts);
+  });
+});
+
+describe("mergeScoped", () => {
+  it("puts the first few scoped chunks ahead, without duplicates", () => {
+    const found = [chunk("changelog", 1), chunk("project", 6), chunk("video", 2)];
+    const scoped = [chunk("project", 6), chunk("project", 9), chunk("project", 11), chunk("project", 1), chunk("project", 2)];
+    const merged = mergeScoped(scoped, found, 3);
+    expect(merged.map((c) => `${c.entity_type}:${c.entity_id}`))
+      .toEqual(["project:6", "project:9", "project:11", "changelog:1", "video:2"]);
+  });
+
+  it("returns the unscoped list untouched when nothing was scoped", () => {
+    const found = [chunk("book", 1)];
+    expect(mergeScoped([], found)).toBe(found);
+    expect(mergeScoped(null, found)).toBe(found);
   });
 });

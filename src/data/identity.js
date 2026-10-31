@@ -12,6 +12,9 @@
 
 export const IDENTITY = {
   name: "Sanket Tambare",
+  // How the name is written in Marathi. /ask answers in Marathi and, left to
+  // itself, spelled it "संकित तांबे" or "संकेत Tambare".
+  nameMr: "संकेत तांबारे",
   givenName: "Sanket",
   familyName: "Tambare",
   // Handles people actually search for; both appear on the profiles below.

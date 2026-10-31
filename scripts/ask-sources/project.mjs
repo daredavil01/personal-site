@@ -19,6 +19,10 @@ export default {
         ["Tags", (r.tag_names || []).join(", ")],
         [null, r.description],
         ["Highlights", (r.highlights || []).join(" · ")],
+        // Where to see it: the live site, the repo, a write-up. Without these
+        // "tell me more" could describe a project but never say where it is.
+        ["Link", r.link],
+        ["Links", (r.links || []).filter((l) => l?.url).map((l) => `${l.label || "link"}: ${l.url}`).join(" · ")],
       ]);
       const detail = compose([
         ["Problem", r.problem],

@@ -63,7 +63,7 @@ const TYPE_WORDS = {
   video: /\b(videos?|youtube|shorts|vlogs?|channel)\b|व्हिडि[ओओ]|यूट्यूब/i,
   instagram: /\b(instagram|photos?|photo sets?|pictures?)\b|फोटो/i,
   writing: /\b(writing ledger|word ?counts?)\b/i,
-  resume: /\b(r[ée]sum[ée]|cv|jobs?|career|employers?|skills?)\b/i,
+  resume: /\b(r[ée]sum[ée]|cv|jobs?|career|employers?|employed|skills?|profession|occupation|for a living|day job|works? (at|as|for))\b|नोकरी|व्यवसाय/i,
 };
 
 /**
@@ -259,4 +259,24 @@ export function withFocus(focusChunks, picked, limit = 8) {
   const seen = new Set(pinned.map(key));
   const rest = (picked || []).filter((c) => !seen.has(key(c)));
   return [...pinned, ...rest].slice(0, Math.max(limit, pinned.length));
+}
+
+/**
+ * Puts the best few chunks of the types the question named ahead of the
+ * unscoped results, skipping any already there.
+ *
+ * The unscoped search ranks on the words, so "which projects has he built?"
+ * matched every deck, video and changelog with "projects" in its title, and
+ * the project rows themselves never made the cut. A second search scoped to
+ * the named types guarantees they are at least in the pool. Capped at `max`
+ * because a scoped search always returns rows of its type however unrelated —
+ * the reason the chips stopped being a hard scope.
+ */
+export function mergeScoped(scoped, found, max = 4) {
+  const key = (c) => `${c.entity_type}:${c.entity_id}:${c.chunk_index}`;
+  const rest = Array.isArray(found) ? found : [];
+  const front = (Array.isArray(scoped) ? scoped : []).slice(0, max);
+  if (!front.length) return rest;
+  const seen = new Set(front.map(key));
+  return [...front, ...rest.filter((c) => !seen.has(key(c)))];
 }

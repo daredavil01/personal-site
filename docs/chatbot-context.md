@@ -14,7 +14,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Blog posts** (79) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
-- **Projects** (24) — /projects/:id. Status: Live: 20, Concept: 1, Archived: 3.
+- **Projects** (23) — /projects/:id. Status: Live: 20, Concept: 1, Archived: 2.
 - **Races** (26) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 19, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
@@ -31,7 +31,7 @@ answering rules live with the prompt, and are not repeated here.
 - 100 Days To Offload: 79 of 100 posts.
 - Micro posts: 1677; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 6 organisations, 23 projects, 12 certifications (latest: AWS Fundamentals Specialization).
+- Work: 6 organisations, 23 projects, 13 certifications (latest: AWS Fundamentals Specialization).
 - Based in Pune, MH.
 
 ## Tags

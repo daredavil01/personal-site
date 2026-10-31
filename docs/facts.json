@@ -31,15 +31,15 @@
     "treks": 20,
     "sports": 26,
     "videos": 20,
-    "projects": 24,
+    "projects": 23,
     "instagram": 11,
     "microblog": 1677
   },
   "latest": {
     "now": {
       "d": "2026-10-01",
-      "t": "Now — October 2026",
-      "u": "/now"
+      "t": "Newsletter — October 2026",
+      "u": "/newsletter/2026-10"
     },
     "blog": {
       "d": "2026-10-30",
@@ -69,7 +69,7 @@
       "VivekVahini"
     ],
     "positions": 6,
-    "certifications": 12
+    "certifications": 13
   },
   "roster": {
     "book": [
@@ -674,117 +674,140 @@
       {
         "d": "2026-10-28",
         "t": "Pumped Storage Projects: Are They Really Useful?",
-        "u": "/projects/24"
+        "u": "/projects/24",
+        "x": "Data Story · Live"
       },
       {
         "d": "2026-10-23",
         "t": "Vetal Tekdi Birding Marathon",
-        "u": "/projects/23"
+        "u": "/projects/23",
+        "x": "Vetal Tekdi Bachav Kruti Samiti (VTBKS) · Website · Live"
       },
       {
         "d": "2026-10-19",
         "t": "45 Days",
-        "u": "/projects/22"
+        "u": "/projects/22",
+        "x": "Web App · Live"
       },
       {
         "d": "2026-10-19",
         "t": "After the Feed",
-        "u": "/projects/21"
+        "u": "/projects/21",
+        "x": "Data Story · Live"
       },
       {
         "d": "2026-10-17",
         "t": "Dare Write's Brand Kit",
-        "u": "/projects/20"
+        "u": "/projects/20",
+        "x": "Design · Live"
       },
       {
         "d": "2026-09-25",
         "t": "Learning Hub",
-        "u": "/projects/19"
+        "u": "/projects/19",
+        "x": "Web App · Live"
       },
       {
         "d": "2026-09-18",
         "t": "The Long Way Round",
-        "u": "/projects/17"
+        "u": "/projects/17",
+        "x": "Data Story · Live"
       },
       {
         "d": "2026-09-14",
         "t": "The Dividend Question",
-        "u": "/projects/18"
+        "u": "/projects/18",
+        "x": "Data Story · Live"
       },
       {
         "d": "2026-08-01",
         "t": "Personal Websites & Projects Directory",
-        "u": "/projects/13"
+        "u": "/projects/13",
+        "x": "Website · Live"
       },
       {
         "d": "2026-08-01",
         "t": "CMS Site Planner",
-        "u": "/projects/12"
+        "u": "/projects/12",
+        "x": "Tool · Live"
       },
       {
         "d": "2026-08-01",
         "t": "Antyodaya Foundation Website",
-        "u": "/projects/11"
+        "u": "/projects/11",
+        "x": "Antyodaya Punarvasan · Website · Live"
       },
       {
         "d": "2026-08-01",
         "t": "E20 ka Chakravyuha",
-        "u": "/projects/10"
+        "u": "/projects/10",
+        "x": "Data Story · Live"
       },
       {
         "d": "2026-08-01",
         "t": "Visiting Card",
-        "u": "/projects/8"
+        "u": "/projects/8",
+        "x": "Design · Live"
       },
       {
         "d": "2026-08-01",
         "t": "RunFolio",
-        "u": "/projects/7"
+        "u": "/projects/7",
+        "x": "Web App · Live"
       },
       {
         "d": "2026-08-01",
         "t": "YUNG Foundation Website",
-        "u": "/projects/6"
+        "u": "/projects/6",
+        "x": "YUNG Foundation · Website · Live"
       },
       {
         "d": "2026-07-06",
         "t": "The Self — Three.js Orb Prototype",
-        "u": "/projects/16"
+        "u": "/projects/16",
+        "x": "Design · Concept"
       },
       {
         "d": "2026-07-01",
         "t": "Young Foundation Nisarg School Management Portal",
-        "u": "/projects/9"
+        "u": "/projects/9",
+        "x": "YUNG Foundation · Web App · Live"
       },
       {
         "d": "2026-05-31",
         "t": "Adivasi Survey Dashboard — Nandurbar",
-        "u": "/projects/14"
+        "u": "/projects/14",
+        "x": "YUNG Foundation · Data Story · Live"
       },
       {
         "d": "2026-04-26",
         "t": "The Wanderer's Digital Escape",
-        "u": "/projects/15"
+        "u": "/projects/15",
+        "x": "Web App · Live"
       },
       {
         "d": "2026-03-01",
         "t": "RunSmart",
-        "u": "/projects/4"
+        "u": "/projects/4",
+        "x": "Tool · Live"
       },
       {
         "d": "2020-11-20",
         "t": "Social-Ape",
-        "u": "/projects/5"
+        "u": "/projects/5",
+        "x": "Web App · Archived"
       },
       {
         "d": "2020-10-20",
         "t": "Personal Website",
-        "u": "/projects/2"
+        "u": "/projects/2",
+        "x": "Website · Live"
       },
       {
         "d": "2020-10-20",
         "t": "Expense Management Web-App using firebase",
-        "u": "/projects/1"
+        "u": "/projects/1",
+        "x": "Web App · Archived"
       }
     ],
     "instagram": [
@@ -966,12 +989,12 @@
     "by_status": {
       "Live": 20,
       "Concept": 1,
-      "Archived": 3
+      "Archived": 2
     },
     "by_category": {
       "Tool": 2,
       "Design": 3,
-      "Web App": 8,
+      "Web App": 7,
       "Website": 5,
       "Data Story": 6
     }
@@ -1104,10 +1127,10 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-30T18:44:40.895465+00:00",
+  "generated_at": "2026-10-31T09:19:54.257397+00:00",
   "index_by_type": {
     "now": 14,
-    "tag": 98,
+    "tag": 122,
     "blog": 79,
     "book": 52,
     "page": 1,
@@ -1116,7 +1139,7 @@
     "sport": 26,
     "stats": 10,
     "video": 20,
-    "resume": 21,
+    "resume": 22,
     "project": 23,
     "writing": 43,
     "changelog": 117,

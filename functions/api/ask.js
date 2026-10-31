@@ -21,8 +21,10 @@ import {
 } from "../../src/data/askConfig";
 import { runTiers, streamTiers } from "../../src/lib/askTiers";
 import {
-  applyRerank, focusTargets, pickFocusChunks, retrievalQuery, selectChunks, typesNamed, withFocus,
+  applyRerank, focusTargets, mergeScoped, pickFocusChunks, retrievalQuery, selectChunks, typesNamed,
+  withFocus,
 } from "../../src/lib/askRetrieval";
+import { IDENTITY } from "../../src/data/identity";
 import FALLBACK_FACTS from "../../docs/facts.json";
 import {
   collectMedia, isExternal, linkDomain, sanitiseAnswer,
@@ -277,7 +279,9 @@ function rosterSections(facts, asked, question) {
       if (!rows.length) return null;
       const shown = rows.slice(0, ROSTER_MAX_LINES);
       const head = `### All ${ROSTER_LABELS[type]} (${rows.length}, newest first)`;
-      const lines = shown.map((r) => `- ${r.t} — ${r.d || "undated"} — ${r.u || ""}`.trim());
+      // `x` is a project's org · category · status (site_facts, 0037), so
+      // "which were built for NGOs?" can be answered from the complete list.
+      const lines = shown.map((r) => `- ${r.t} — ${r.d || "undated"} — ${r.u || ""}${r.x ? ` — ${r.x}` : ""}`.trim());
       const more = rows.length > shown.length
         ? [`- …and ${rows.length - shown.length} older ones.`]
         : [];
@@ -299,6 +303,7 @@ function rosterSections(facts, asked, question) {
 function buildSystemPrompt(settings, facts, chunks, scope, rosters, spokenLanguage) {
   return [
     settings.system_persona || DEFAULT_ASK_SETTINGS.system_persona,
+    `His name is ${IDENTITY.name}; in Marathi write it exactly ${IDENTITY.nameMr}.`,
     "",
     settings.context_doc || "",
     "",
@@ -518,8 +523,13 @@ export async function onRequestPost(context) {
   // (selectChunks). Passing them as p_types filtered before ranking, so a
   // narrowed search always returned match_count items of that type however
   // unrelated — which is what made the chips feel broken.
+  // One reading of the question, used three times: a second search scoped to
+  // the types it names, which types may exceed the per-type cap, and which
+  // rosters get spelled out.
+  const asked = typesNamed(message);
+
   const retrievalStart = Date.now();
-  const [found, facts, focused] = await Promise.all([
+  const [found, scoped, facts, focused] = await Promise.all([
     rpc(env, "hybrid_search", {
       query_text: retrievalQuery(message, history),
       query_embedding: embedding,
@@ -532,6 +542,20 @@ export async function onRequestPost(context) {
       // archive cannot answer still came back with match_count items.
       min_keyword_rank: settings.keyword_floor ?? DEFAULT_ASK_SETTINGS.keyword_floor,
     }).catch(() => []),
+    // The unscoped search ranks on words, so "which projects has he built?"
+    // returned decks and videos with "projects" in the title and no project.
+    asked.length
+      ? rpc(env, "hybrid_search", {
+        query_text: retrievalQuery(message, history),
+        query_embedding: embedding,
+        match_count: settings.match_count,
+        p_types: asked,
+        full_text_weight: settings.full_text_weight,
+        semantic_weight: settings.semantic_weight,
+        min_similarity: settings.semantic_floor ?? DEFAULT_ASK_SETTINGS.semantic_floor,
+        min_keyword_rank: settings.keyword_floor ?? DEFAULT_ASK_SETTINGS.keyword_floor,
+      }).catch(() => [])
+      : [],
     loadFacts(context),
     loadFocus(env, payload?.focus),
   ]);
@@ -547,10 +571,8 @@ export async function onRequestPost(context) {
     ranked = await rerank(env, message, ranked);
     timings.rerank_ms = Date.now() - rerankStart;
   }
-
-  // One reading of the question, used twice: which types may exceed the
-  // per-type cap, and which rosters get spelled out.
-  const asked = typesNamed(message);
+  // After the rerank, so the named types are not reordered out of the top.
+  ranked = mergeScoped(scoped, ranked, Math.ceil(settings.match_count / 2));
 
   const { picked, widened } = selectChunks({
     chunks: ranked,
