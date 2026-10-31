@@ -1127,7 +1127,7 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-31T09:19:54.257397+00:00",
+  "generated_at": "2026-10-31T09:29:41.004836+00:00",
   "index_by_type": {
     "now": 14,
     "tag": 122,
@@ -1142,7 +1142,7 @@
     "resume": 22,
     "project": 23,
     "writing": 43,
-    "changelog": 117,
+    "changelog": 118,
     "instagram": 11,
     "microblog": 1677,
     "presentation": 20
