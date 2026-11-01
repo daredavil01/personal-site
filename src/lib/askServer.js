@@ -52,7 +52,10 @@ export async function rpc(env, name, args, options) {
  * back to an IP.
  */
 export async function hashIp(request, env) {
-  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  // The v2 site proxies /api/ask, so CF-Connecting-IP is its Function's IP for
+  // every visitor. With the shared key it may name the visitor's own IP.
+  const proxied = env.ASK_PROXY_KEY && request.headers.get("X-Ask-Proxy-Key") === env.ASK_PROXY_KEY;
+  const ip = (proxied && request.headers.get("X-Forwarded-For")) || request.headers.get("CF-Connecting-IP") || "unknown";
   const data = new TextEncoder().encode(`${ip}:${env.ASK_IP_SALT || "ask"}`);
   const digest = await crypto.subtle.digest("SHA-256", data);
   return [...new Uint8Array(digest)]
