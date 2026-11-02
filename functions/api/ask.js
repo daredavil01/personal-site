@@ -31,6 +31,7 @@ import {
 } from "../../src/lib/askFormat";
 import { getStatsPayload } from "../../src/lib/statsEndpoint";
 import { currentPeriod } from "../../src/lib/writingPeriod";
+import { withReplyLanguage } from "../../src/lib/askLanguage";
 import {
   hashIp, json, restHeaders, rpc, verifyTurnstile,
 } from "../../src/lib/askServer";
@@ -140,6 +141,9 @@ async function answerCacheKey(origin, {
     // part of what makes an answer reusable.
     spokenLanguage || "",
     settings.updated_at || settings.system_persona || "",
+    // Bumped when the prompt changes how an answer reads, so replies stored
+    // under the old prompt (English questions answered in Marathi) are not served.
+    "reply-language-1",
   ]);
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(material));
   const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -354,7 +358,12 @@ function buildSystemPrompt(settings, facts, chunks, scope, rosters, spokenLangua
     "- If you cannot name specifics, do NOT narrate the gap. Give the count from",
     "  the facts, name whatever items you do have, and stop. The interface shows",
     "  a link to the full listing, so never apologise for not listing everything.",
-    "- Answer in the language the question was asked in, refusals included.",
+    "- Language: answer in the language of the visitor's latest question,",
+    "  refusals included. Default to English. Use Marathi only when the visitor",
+    "  writes in Marathi or asks for Marathi. Never switch language because the",
+    "  items, the facts or earlier answers are in Marathi. Keep titles, names and",
+    "  links exactly as they appear above. The latest question ends with a",
+    "  (Reply in …) line; follow it.",
     // Whisper reports the language it heard, which beats guessing from the
     // script: romanised Marathi is typed in Latin letters and reads as English.
     spokenLanguage
@@ -658,7 +667,9 @@ export async function onRequestPost(context) {
       role: turn.role === "assistant" ? "model" : "user",
       parts: [{ text: String(turn.content || "").slice(0, settings.max_message_chars) }],
     })),
-    { role: "user", parts: [{ text: message }] },
+    // The reply-language line goes to the model only; retrieval, ask_log and
+    // the cache key keep the raw question. It overrides Marathi in the history.
+    { role: "user", parts: [{ text: withReplyLanguage(message, spokenLanguage) }] },
   ];
 
   // Fire-and-forget conversation log. Runs in waitUntil AFTER the response is

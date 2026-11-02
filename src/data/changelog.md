@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v24.2.1] — 2026-11-02
+
+### Fixed
+- **/ask answered English questions in Marathi** (`src/lib/askLanguage.js`, `functions/api/ask.js`): the prompt only said "answer in the language the question was asked in", and Marathi sources, the Marathi spelling of the name and earlier Marathi answers often won — "Which marathons has Sanket run in the last 6 months?" came back in Marathi with an empty history. The system prompt now defaults to English and forbids switching because of sources or history, and the latest question goes to the model with a `(Reply in …)` line from `replyLanguage()`: Marathi only when asked for ("in Marathi", "मराठीत"; "marathon" does not count), a Devanagari question in its own language, a spoken one in the language Whisper heard, else English. Retrieval, `ask_log` and the `?q=` link keep the raw question; the answer-cache key is versioned so replies stored under the old prompt are not served.
+
 ## [v24.2.0] — 2026-10-31
 
 ### Added
