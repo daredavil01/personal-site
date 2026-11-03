@@ -3,20 +3,22 @@ import PropTypes from "prop-types";
 import ClassicHeader from "./ClassicHeader";
 import FilterBar from "./FilterBar";
 import Overview from "./Overview";
+import Facts from "./Facts";
 import ActivityLog from "./ActivityLog";
 import YearHeatmap from "../YearHeatmap";
 import StatsPRs from "../StatsPRs";
 import RouteGrid from "../RouteGrid";
 import { yearsOf } from "../../../lib/training";
 
-// The classic /training: a header of counters, then five tabs over one
-// filtered list — Overview, Log, Calendar, Stats & PRs, Routes. The tab is
+// The classic /training: a header of counters, then six tabs over one
+// filtered list — Overview, Log, Calendar, Facts, Stats & PRs, Routes. The tab is
 // URL state (`tab`; `view` belongs to useViewMode).
 
 const TABS = [
   { key: "overview", label: "Overview", icon: "dashboard" },
   { key: "log", label: "Log", icon: "list" },
   { key: "calendar", label: "Calendar", icon: "calendar_month" },
+  { key: "facts", label: "Facts", icon: "insights" },
   { key: "stats", label: "Stats & PRs", icon: "leaderboard" },
   { key: "routes", label: "Routes", icon: "route" },
 ];
@@ -76,6 +78,7 @@ const TrainingClassic = ({ rows, demo, filterState }) => {
         {tab === "calendar" && calendarYear && (
           <YearHeatmap rows={rows} year={calendarYear} years={years} onYear={(y) => setFilter("year", String(y))} demo={demo} />
         )}
+        {tab === "facts" && <Facts rows={rows} />}
         {tab === "stats" && <StatsPRs rows={rows} demo={demo} />}
         {tab === "routes" && <RouteGrid filters={filters} demo={demo} />}
       </div>

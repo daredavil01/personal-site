@@ -16,7 +16,11 @@ export const LIST_COLUMNS = [
   "distance", "moving_time", "elapsed_time", "total_elevation_gain", "average_speed",
   "average_heartrate", "max_heartrate", "suffer_score", "kudos_count", "pr_count",
   "achievement_count", "trainer", "commute", "gear_id", "sport_id", "visible", "private",
-  "visibility", "calories",
+  "visibility", "calories", "elev_high", "elev_low", "max_heartrate", "average_cadence",
+  "average_watts", "max_speed", "device_name",
+  // Every other exported column plus the import's per-second stats
+  // (extra._stats): what /training's Facts are computed from. ~1 KB a row.
+  "extra",
 ].join(",");
 
 const PAGE = 1000; // PostgREST's default max-rows

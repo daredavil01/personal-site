@@ -226,11 +226,11 @@ const TrainingPost = () => {
           ])}
         />
 
-        {Object.keys(a.extra).length > 0 && (
+        {Object.keys(a.extra).some((k) => !k.startsWith("_")) && (
           <section className="flex flex-col gap-3">
             <h2 className="font-headline text-2xl text-stone-900 dark:text-stone-100 mb-0">More from Strava</h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-0">
-              {Object.entries(a.extra).map(([k, v]) => (
+              {Object.entries(a.extra).filter(([k]) => !k.startsWith("_")).map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4 border-b border-stone-100 dark:border-stone-800 py-1">
                   <dt className="font-label text-[10px] uppercase tracking-widest text-stone-400">{k}</dt>
                   <dd className="text-sm text-stone-700 dark:text-stone-300 tabular-nums text-right mb-0 break-words min-w-0">{String(v)}</dd>

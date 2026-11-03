@@ -42,7 +42,7 @@ import { createClient } from "@supabase/supabase-js";
 import FitParser from "fit-file-parser";
 import {
   activityFromCsv, activityFromFit, activityFromGpx, csvObjects, detailFromTrack, findDuplicates,
-  gearFromCsv, profileFromTrack, rankBestEfforts, trackFromFit, trackFromGpx, trackFromTcx,
+  deepStatsOf, gearFromCsv, profileFromTrack, rankBestEfforts, trackFromFit, trackFromGpx, trackFromTcx,
 } from "../src/lib/stravaExport.js";
 import { sportFamily } from "../src/lib/training.js";
 
@@ -211,6 +211,9 @@ async function main() {
         // The streams and a strength session's sets, for every activity with
         // a file — a session that goes nowhere still has a heart rate.
         profile = track && track.points.length > 1 ? profileFromTrack(track, fit) : null;
+        // Per-second facts boiled down for /training's Facts (extra._stats).
+        const stats = track ? deepStatsOf(track, fit, { sportType: row.sport_type }) : null;
+        if (stats) row.extra = { ...(row.extra || {}), _stats: stats }; // eslint-disable-line no-param-reassign
         if (track && track.points.length > 1 && (row.distance || 0) > 0) {
           ({ detail, gps } = detailFromTrack(track, { isRun: sportFamily(row.sport_type) === "run", now }));
           withTrack += 1;

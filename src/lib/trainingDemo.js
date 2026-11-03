@@ -234,6 +234,15 @@ function build() {
         "Weather Temperature": Math.round(19 + r() * 12),
         Humidity: Number((0.45 + r() * 0.45).toFixed(2)),
         ...(isRun ? { "Total Steps": Math.round(km * 1000 * 1.38) } : {}),
+        // What the import's deepStatsOf keeps, roughly: the heart-rate
+        // histogram around the average, steps and the hottest lap.
+        _stats: family === "swim" ? null : {
+          hrBins: Object.fromEntries([-20, -10, 0, 10].map((d) => [Math.floor((hr + d) / 10) * 10, Math.round(moving * [0.1, 0.3, 0.45, 0.15][[-20, -10, 0, 10].indexOf(d)])])),
+          ...(family === "run" || family === "walk" || family === "hike" ? { steps: Math.round(km * 1000 * 1.38) } : {}),
+          tMax: Math.round(24 + r() * 10),
+          tMin: Math.round(19 + r() * 5),
+          streams: ["hr", "speed", "cad", "ele", ...(raw ? ["lat"] : [])],
+        },
       },
       visible: true,
       sportId: null,

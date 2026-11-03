@@ -1055,6 +1055,11 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
   Overview and atlas via `DayPicker`, and under a picked calendar day.
   Sessions without splits get `SessionStory` (heart rate + sets). It reads
   `profile` (`0040`: thinned streams, never a position, plus strength sets).
+- **Facts** (classic tab, atlas "By the numbers"; `src/lib/trainingFacts.js`,
+  tested): every fact the log supports plus `VARIABLES`, the inventory of
+  every kept variable with coverage. Deep facts (zones, drift, steps, peaks)
+  come from `extra._stats`, written at import by `deepStatsOf`; `extra` is in
+  `LIST_COLUMNS` for this. Add a new kept field to `VARIABLES` too.
 - **Sample data:** while the table is empty, or with `?demo=1`, everything runs
   on the seeded log in `src/lib/trainingDemo.js` (ids ≥ `DEMO_ID_BASE`,
   `trainingDemoId.js`, which `/training/:id` also reads) and says "Sample data".

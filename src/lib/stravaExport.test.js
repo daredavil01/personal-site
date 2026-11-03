@@ -367,3 +367,44 @@ describe("everything in the file", () => {
     expect(profileFromTrack({ points: [] }, null)).toBeNull();
   });
 });
+
+describe("deep stats", () => {
+  const { deepStatsOf } = require("./stravaExport"); // eslint-disable-line global-require
+  // 10 km in 10 s steps: first half 3.33 m/s at 140 bpm, second half 3.0 m/s at 150 bpm.
+  const pts = [];
+  let d = 0;
+  for (let i = 0; i <= 3200; i += 1) {
+    const second = d >= 5000;
+    pts.push({
+      t: i * 10, dist: d, hr: second ? 150 : 140, speed: second ? 3 : 3.33, watts: second ? 200 : 260, ele: 500 + (i % 50), cad: 80,
+    });
+    d += second ? 30 : 33.3;
+    if (d > 10000) break;
+  }
+  const fit = {
+    sessions: [{ total_cycles: 4500, avg_temperature: 30 }],
+    laps: [{ avg_temperature: 27 }, { avg_temperature: 34 }],
+  };
+
+  test("bins, halves, drift, peaks, steps", () => {
+    const s = deepStatsOf({ points: pts }, fit, { sportType: "Run" });
+    const binned = Object.values(s.hrBins).reduce((a, b) => a + b, 0);
+    expect(binned).toBe((pts.length - 1) * 10);
+    expect(Object.keys(s.hrBins).sort()).toEqual(["140", "150"]);
+    expect(s.negSplit).toBeGreaterThan(0); // second half slower
+    expect(s.drift).toBeGreaterThan(15); // more heart per metre
+    expect(s).toMatchObject({
+      tMax: 34, tMin: 27, pMax: 260, vMax: 3.33, altMax: 549, altMin: 500, steps: 9000,
+    });
+    expect(s.streams).toEqual(expect.arrayContaining(["hr", "speed", "cad", "ele", "watts"]));
+    expect(s.streams).not.toContain("lat");
+  });
+
+  test("a walk has no drift; nothing without a track", () => {
+    const s = deepStatsOf({ points: pts }, fit, { sportType: "Walk" });
+    expect(s.drift).toBeUndefined();
+    expect(s.steps).toBe(9000);
+    expect(deepStatsOf({ points: [] })).toBeNull();
+    expect(deepStatsOf({ points: pts }, null, { sportType: "WeightTraining" }).steps).toBeUndefined();
+  });
+});

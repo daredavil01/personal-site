@@ -45,6 +45,12 @@ archive and re-run the import.
 - **Not available from the export** — kudos/comment/achievement counts, segment
   efforts, `workout_type`, Strava's own totals and HR zones. Left null and
   omitted on the page.
+- **`extra._stats`** — per-second facts boiled down at import (`deepStatsOf`):
+  `hrBins` (seconds per 10-bpm bin), `drift` (aerobic decoupling, runs of
+  8 km+), `negSplit` (second-half minus first-half pace, s/km), `tMax`/`tMin`
+  (laps), `pMax`, `vMax` (GPS, spiky), `altMax`/`altMin`, `steps` (cycles × 2
+  on foot) and `streams` (which streams the file had). Read by the Facts tab
+  (`src/lib/trainingFacts.js`); never printed under "More from Strava".
 - **`profile` (jsonb, `0040`)** — the file's streams thinned to ~240 samples
   (by distance, or by time for a session that goes nowhere): `x`, `t`, and
   whichever of altitude `e`, heart rate `h`, speed `v`, cadence `c`, power
@@ -122,6 +128,8 @@ is no export folder.
 
 ## Where it shows up
 
+- `/training` — a **Facts** tab / "By the numbers" chapter: every fact the log
+  supports and every variable with its coverage (`src/lib/trainingFacts.js`).
 - `/training` — in the atlas, an animated story (route replay, a spiral of
   days, a race against past years' best efforts, weekly tides, a start-time
   dial, the shoe rack, records, milestones, a departures board, the full log);

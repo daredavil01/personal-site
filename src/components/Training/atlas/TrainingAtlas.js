@@ -12,6 +12,7 @@ import RecordMedals from "../RecordMedals";
 import Milestones from "../Milestones";
 import ActivityLog from "../classic/ActivityLog";
 import DayPicker from "../DayPicker";
+import ByTheNumbers from "./ByTheNumbers";
 import { useTrainingExtra } from "../useTrainingData";
 import { FAMILY_ICONS, famColor } from "../shared";
 import { FAMILY_LABELS, filterActivities, sportFamily } from "../../../lib/training";
@@ -86,6 +87,8 @@ const TrainingAtlas = ({ rows, demo, filterState }) => {
           <WeeklyTides rows={view} />
           <DayClock rows={view} />
           {gear && gear.length > 0 && (!lens || lens === "run" || lens === "ride") && <ShoeRack gear={gear} />}
+
+          <ByTheNumbers rows={view} />
 
           <section className="tr-night px-4 py-8 md:px-10 md:py-10" aria-labelledby="tr-medals-title">
             <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>The medal case</p>

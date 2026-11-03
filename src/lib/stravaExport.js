@@ -920,3 +920,87 @@ export function profileFromTrack(track, fit = null) {
   if (!profile && !sets.length) return null;
   return { ...(profile || {}), ...(sets.length ? { sets } : {}) };
 }
+
+// ---------------------------------------------------------------------------
+// Deep stats: per-second facts, boiled down to a few numbers per activity
+// ---------------------------------------------------------------------------
+//
+// The list page cannot read every activity's streams, so the import keeps
+// what /training's Facts need in `extra._stats` (keys starting with "_" are
+// never printed as "More from Strava"): seconds per 10-bpm heart-rate bin
+// (zones are drawn later from the observed max, so no zone setting is
+// stored), aerobic decoupling on long runs, the half-split, temperature and
+// power/speed/altitude peaks, steps, and which streams the file had.
+
+const HR_BIN_FROM = 40;
+const HR_BIN_TO = 210;
+const FOOT = /run|walk|hik/i;
+
+/** track (+ the parsed FIT, when there is one) → the `_stats` object, or null. */
+export function deepStatsOf(track, fit = null, { sportType = null } = {}) {
+  const pts = (track?.points || []).filter((p) => p.t != null);
+  if (pts.length < 2) return null;
+  const out = {};
+
+  // Heart-rate histogram: each sample counts for the seconds to the next one
+  // (capped at 30 s so a gap in the record is not credited to one bpm).
+  const bins = {};
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const h = pts[i].hr;
+    const dt = Math.min(30, pts[i + 1].t - pts[i].t);
+    if (h && dt > 0 && h >= HR_BIN_FROM && h < HR_BIN_TO) {
+      const b = Math.floor(h / 10) * 10;
+      bins[b] = (bins[b] || 0) + dt;
+    }
+  }
+  if (Object.keys(bins).length) out.hrBins = Object.fromEntries(Object.entries(bins).map(([k, v]) => [k, Math.round(v)]));
+
+  // Halves by distance: pace and heart rate in each.
+  const total = pts[pts.length - 1].dist || 0;
+  if (total >= 2000) {
+    const half = (from, to) => {
+      const seg = pts.filter((p) => p.dist >= from && p.dist <= to);
+      if (seg.length < 2) return null;
+      const dist = seg[seg.length - 1].dist - seg[0].dist;
+      const moving = movingBetween(seg, 0, seg.length - 1);
+      const hr = avg(seg.map((p) => p.hr));
+      return dist > 0 && moving > 0 ? { speed: dist / moving, hr } : null;
+    };
+    const a = half(0, total / 2);
+    const b = half(total / 2, total);
+    if (a && b) {
+      out.negSplit = Math.round(1000 / b.speed - 1000 / a.speed); // < 0: second half quicker
+      if (a.hr && b.hr && total >= 8000 && /run/i.test(String(sportType || ""))) {
+        out.drift = round1(((b.hr / b.speed) / (a.hr / a.speed) - 1) * 100);
+      }
+    }
+  }
+
+  const temps = (fit?.laps || []).map((l) => num(l.avg_temperature)).filter((v) => v != null);
+  const sessionTemp = num(fit?.sessions?.[0]?.avg_temperature);
+  if (temps.length || sessionTemp != null) {
+    out.tMax = Math.max(...temps, ...(sessionTemp != null ? [sessionTemp] : []));
+    out.tMin = Math.min(...temps, ...(sessionTemp != null ? [sessionTemp] : []));
+  }
+  const peak = (key) => {
+    const v = pts.map((p) => p[key]).filter((x) => x != null && x > 0);
+    return v.length ? Math.max(...v) : null;
+  };
+  const pMax = peak("watts");
+  if (pMax) out.pMax = Math.round(pMax);
+  const vMax = peak("speed");
+  if (vMax) out.vMax = round1(vMax * 100) / 100;
+  const alts = pts.map((p) => p.ele).filter((x) => x != null);
+  if (alts.length) {
+    out.altMax = Math.round(Math.max(...alts));
+    out.altMin = Math.round(Math.min(...alts));
+  }
+  const cycles = num(fit?.sessions?.[0]?.total_cycles);
+  if (cycles && FOOT.test(String(sportType || ""))) out.steps = Math.round(cycles * 2);
+
+  const streams = {
+    hr: "heart rate", speed: "speed", cad: "cadence", ele: "altitude", lat: "position", watts: "power", step: "step length", gct: "ground contact", vosc: "vertical oscillation",
+  };
+  out.streams = Object.keys(streams).filter((k) => pts.some((p) => p[k] != null && (k === "ele" || p[k] !== 0)));
+  return out;
+}
