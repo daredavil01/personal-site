@@ -609,6 +609,9 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | IndexNow | `scripts/indexnow.mjs`, `public/indexnow-key.txt` |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
+| Training (Strava): export import / helpers / admin | `scripts/strava-import.mjs`, `src/lib/stravaExport.js`, `src/lib/strava.js`, `src/pages/admin/TrainingRaces.js` |
+| Training film (Remotion): data / render / picture | `scripts/training-film/`, `public/video/the-training-story.*`, `src/components/Training/TrainingFilm.js` |
+| Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`atlas/`, `classic/`), `src/lib/training.js`, `src/lib/trainingDemo.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
 | Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
 | Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
@@ -994,6 +997,87 @@ YouTube channel **https://www.youtube.com/@sankettambare7474** — not typed in.
   `public/video/the-videos-story-slides/01–06.webp` (committed;
   `story.test.js` holds each under 300 KB) plus a PDF of the six for a
   LinkedIn document post into `knowledge_base/`. Run it after the film.
+
+---
+
+### Training Page (Strava)
+
+**Tables:** `strava_activities` + `strava_activity_private` / `strava_gear`
+(`0038_training.sql`, `0039_training_from_export.sql`, `0040_training_profile.sql`), filled from a **Strava
+bulk export** — not typed in, and **not the API** (it needs a paid subscription
+since June 2026). Full inventory and steps: `docs/strava.md`.
+
+- **Import:** request the archive on strava.com (language English), unzip into
+  `knowledge_base/strava-export/`, `npm run strava:import` (`-- --dry-run`,
+  `--csv-only`, `--tz=`). Upserts on Strava's id; re-run on each new export.
+  `src/lib/stravaExport.js` (pure, tested) reads `activities.csv` — repeated
+  headers become `"Name (2)"`, the raw copy wins — and the GPS files
+  (`.fit.gz` via `fit-file-parser`, a devDependency used only here; `.gpx` and
+  `.tcx` by regex). Splits, laps, best efforts and PR ranks are **computed**
+  from the track; the export has no segment efforts, kudos or workout_type.
+- **Files-only exports** (no `activities.csv`, just `activities/<id>.fit.gz|.gpx`)
+  import too: the FIT session is the summary (`activityFromFit`), a GPX keeps
+  its name (`activityFromGpx`), names default to Strava's "Morning Run".
+  Keep the raw unzip in gitignored `tmp/strava-export/` (`--dir=`).
+- **No duplicates:** upsert on id, plus `findDuplicates` skips another id that
+  starts within 60 s in the same sport; existing rows are re-sent without
+  `name`, so a generated name never replaces a real one.
+- **`extra` jsonb** keeps every other CSV column (weather, steps, training
+  load…) so nothing exported is lost; athlete weight goes to the private
+  table's `extra`. `media/` is never read (no photos).
+- **Privacy:** the files carry raw GPS without Strava's privacy zones, so it
+  lives in owner-only `strava_activity_private`. The public row has only
+  `route_polyline`, trimmed 400 m around start and finish. The export may not
+  say which activities are private: a visibility column is honoured if
+  present, otherwise everything is public until `visible` is turned off.
+- **Owned columns:** `visible`, `sport_id` (links a `/sports` race; its page
+  shows the splits — suggestions at `/admin/training/races`) and tags
+  (`entity_type = 'activity'`), edited at `/admin/training`. The resource has
+  `noCreate` — rows come only from the import, which never sends these.
+- **Numbers:** `src/lib/training.js` (filters, totals, heatmap, streaks,
+  `stravaMonthStats`), shared by `/training`, `/now`'s Strava group (via
+  `mergeMonthRecords`) and the `/ask` source; `/stats` and the card read
+  `activityCount` / `activityKm` / `activityHours` / `trainingDays` from
+  `computeSiteStats`.
+- **Not in ContentContext:** the page pages through light columns
+  (`listActivities`) and loads polylines only for the routes views.
+- **Two layouts, one data hook:** `useViewMode()` picks the atlas story
+  (`components/Training/atlas/TrainingAtlas.js`, lazy — chapters animate once
+  on first view via `useInView`, then are the reader's to drive) or the classic
+  tabs (`classic/TrainingClassic.js`: Overview, Log, Calendar, Stats & PRs,
+  Routes). Both read `useTrainingData()` and the URL filters
+  (`useTrainingFilters`; `tab`, never `view`). Sport colours are the
+  `--tr-<family>` tokens in `training.css` — a validated categorical set with
+  separate dark steps; text never wears them.
+- **The day story** (`DayStory.js`, model in `src/lib/dayStory.js`, tested):
+  an activity as its terrain line drawing itself on the activity's clock, a
+  group of ten walking at the tip, one staying at each moment
+  (`pickSlots`), the route map walked in step. On `/training/:id`, in the
+  Overview and atlas via `DayPicker`, and under a picked calendar day.
+  Sessions without splits get `SessionStory` (heart rate + sets). It reads
+  `profile` (`0040`: thinned streams, never a position, plus strength sets).
+- **Facts** (classic tab, atlas "By the numbers"; `src/lib/trainingFacts.js`,
+  tested): every fact the log supports plus `VARIABLES`, the inventory of
+  every kept variable with coverage. Deep facts (zones, drift, steps, peaks)
+  come from `extra._stats`, written at import by `deepStatsOf`; `extra` is in
+  `LIST_COLUMNS` for this. Add a new kept field to `VARIABLES` too.
+- **The film** (`TrainingFilm.js` in both headers): a 60-second vertical,
+  narrated film rendered with **Remotion** from the live table —
+  `npm run training:film -- --publish` (`scripts/training-film/`: `data.mjs`
+  reads through the page's own modules, `render.mjs` speaks each scene's line
+  and sizes the scenes around it, `score.mjs` the music, `remotion/` the
+  picture). Writes `public/video/the-training-story.{mp4,jpg,vtt,json}`
+  (committed; `film.test.js` holds the MP4 under 6 MB). Numbers are baked in:
+  re-render after an import. Details in `docs/strava.md`.
+- **Sample data:** while the table is empty, or with `?demo=1`, everything runs
+  on the seeded log in `src/lib/trainingDemo.js` (ids ≥ `DEMO_ID_BASE`,
+  `trainingDemoId.js`, which `/training/:id` also reads) and says "Sample data".
+  It disappears by itself after the first import; delete it once it is not
+  needed.
+- **`/ask`:** one chunk per month (`scripts/ask-sources/training.mjs`).
+  `ASK_SKIP_TRAINING=1` removes them — Strava's terms bar training AI models on
+  its data, and this is the closest use.
+- **After an import:** `npm run og:fallbacks -- --only=training`, `npm run ask:index`, `npm run training:film -- --publish`.
 
 ---
 

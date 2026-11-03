@@ -89,6 +89,23 @@ async function loadContent(supabase) {
   };
 }
 
+// The month's Strava activities, for the "Strava" stat group. The anon key, so
+// only public activities count — the same rule as /training. Optional: an
+// unapplied 0038 or an unsynced log leaves the group as it was.
+async function loadActivities(supabase, slug) {
+  const { start, endExclusive } = monthRange(slug);
+  const { data, error } = await supabase
+    .from("strava_activities")
+    .select("date, distance, moving_time, total_elevation_gain")
+    .gte("date", start)
+    .lt("date", endExclusive)
+    .limit(1000);
+  if (error) return [];
+  return data.map((r) => ({
+    date: r.date, distance: r.distance, movingTime: r.moving_time, elevationGain: r.total_elevation_gain,
+  }));
+}
+
 async function loadMicro(supabase, slug, url) {
   const { start, endExclusive } = monthRange(slug);
   const rows = must(await supabase
@@ -184,7 +201,8 @@ async function draftMonth(slug, ctx) {
   const before = existing?.sections || {};
 
   const micro = await loadMicro(supabase, slug, url);
-  const sections = mergeMonthRecords({ ...content, micro }, slug, before);
+  const activities = await loadActivities(supabase, slug);
+  const sections = mergeMonthRecords({ ...content, micro, activities }, slug, before);
   const letter = notePath ? readNote(notePath) : {};
 
   const row = {

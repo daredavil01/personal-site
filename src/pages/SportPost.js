@@ -10,6 +10,7 @@ import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
 import ImageSlider from "../components/Instagram/ImageSlider";
 import TagLinks from "../components/common/TagLinks";
+import RaceActivity from "../components/Training/RaceActivity";
 
 const keyActivate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
@@ -125,6 +126,8 @@ const SportPost = () => {
           )}
 
           <TagLinks tags={race.tags} className="px-8 pt-6" />
+
+          <RaceActivity sportId={race.id} />
 
           {race.slideImages?.length > 0 && (
             <div className="p-8">

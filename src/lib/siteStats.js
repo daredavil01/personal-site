@@ -136,6 +136,7 @@ export function computeSiteStats({
   projects = [],
   presentations = [],
   videos = [],
+  activities = [],
   resume = {},
   now = new Date(),
 } = {}) {
@@ -188,6 +189,25 @@ export function computeSiteStats({
   const shortCount = videos.filter((v) => (v.kind_override || v.kind) === "short").length;
   const viewCounts = videos.map((v) => v.view_count ?? v.viewCount).filter((n) => n != null && Number.isFinite(Number(n)));
 
+  // Training (Strava). Rows arrive from Postgres (distance, moving_time) or in
+  // client shape (movingTime). RLS has already removed private activities.
+  const actDistance = activities.reduce((acc, a) => acc + (Number(a.distance) || 0), 0);
+  const actSeconds = activities.reduce((acc, a) => acc + (Number(a.moving_time ?? a.movingTime) || 0), 0);
+  const actDays = new Set(activities.map((a) => a.date).filter(Boolean));
+  // Kilometres per day for the last 26 weeks, oldest first, Monday-aligned:
+  // the /training card's calendar figure.
+  const dayKm = new Map();
+  activities.forEach((a) => {
+    if (a.date) dayKm.set(a.date, (dayKm.get(a.date) || 0) + (Number(a.distance) || 0) / 1000);
+  });
+  const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const start = new Date(today);
+  start.setUTCDate(start.getUTCDate() - ((today.getUTCDay() + 6) % 7) - 25 * 7);
+  const trainingDays = [];
+  for (let d = new Date(start); d <= today; d.setUTCDate(d.getUTCDate() + 1)) {
+    trainingDays.push(Math.round((dayKm.get(d.toISOString().slice(0, 10)) || 0) * 10) / 10);
+  }
+
   // Capture
   const instaTagCounts = {};
   instagram.forEach((post) => tagsOf(post).forEach((t) => { instaTagCounts[t] = (instaTagCounts[t] || 0) + 1; }));
@@ -231,6 +251,13 @@ export function computeSiteStats({
     // Null, not 0, when no row has a count: an unknown total is omitted.
     videoViews: viewCounts.length ? viewCounts.reduce((acc, n) => acc + Number(n), 0) : null,
 
+    // Null, not 0, with no activities: an unsynced log is omitted, not zero.
+    activityCount: activities.length || null,
+    activityKm: activities.length ? Math.round(actDistance / 1000) : null,
+    activityHours: activities.length ? Math.round(actSeconds / 3600) : null,
+    activityDays: activities.length ? actDays.size : null,
+    trainingDays: activities.length ? trainingDays : null,
+
     totalRaces: sports.length,
     totalKmRun: sports.reduce(
       (acc, r) => acc + (parseFloat(String(r.distance || "").replace(/[^\d.]/g, "")) || 0),
@@ -259,7 +286,7 @@ export function computeSiteStats({
 
 // Bumped whenever the payload shape changes, so a reader never trusts an
 // older deployment's JSON.
-export const STATS_VERSION = 1;
+export const STATS_VERSION = 2; // 2: training (Strava) totals
 
 const pick = (row, keys) => (row ? Object.fromEntries(keys.map((k) => [k, row[k] ?? null])) : null);
 const RACE_FIELDS = ["id", "title", "time", "date", "distance", "place"];

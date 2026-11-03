@@ -97,6 +97,28 @@ number, so distance questions are string matches.
 `timeCertificateLink` is the official result certificate. If it is missing, the
 time is self-reported.
 
+## Training (`strava_activities`)
+
+Every activity recorded on Strava — runs, rides, walks, hikes, swims — read
+from a Strava bulk export by `npm run strava:import`, never typed. Full inventory and setup: [strava.md](strava.md).
+
+A race exists twice on purpose: once as a `sports` row (the hand-written story,
+the certificate, the photos) and once as a Strava activity (the measured
+numbers). `sport_id` joins them. The official race time lives on the `sports`
+row; the activity's `moving_time` is the watch's, and the two rarely agree to
+the second.
+
+Only public activities count anywhere outside `/admin`. The export may not
+mark private ones, so "public" can mean "not hidden by hand at
+`/admin/training`". Splits, laps and best efforts are computed from the
+activity's own GPS file, so they can differ from Strava's by a second or two;
+`extra` holds every other exported column (weather and the like). `/ask` sees training as one chunk per month, not per activity, so it can
+answer "how far in March?" and name the longest runs, but not recite a single
+Tuesday's jog.
+
+Distances are metres, times seconds, speeds metres per second, all as Strava
+sends them; the display helpers in `src/lib/strava.js` convert.
+
 ## Treks
 
 `date` is free text in `DD-MM-YYYY` — a different format from races, for

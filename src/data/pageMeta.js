@@ -258,6 +258,15 @@ export const PAGE_META = {
     ogSlug: "videos",
     type: "website",
   },
+  "/training": {
+    title: "Training",
+    description:
+      "Every run, ride, walk and swim logged on Strava — a searchable log, a year calendar, best efforts at every distance, gear mileage and the routes.",
+    image: `${SITE_URL}/og/training.png`,
+    imageAlt: "A year of training days as a grid of squares, with the activity count and distance",
+    ogSlug: "training",
+    type: "website",
+  },
 };
 
 export const DEFAULT_META = {
@@ -440,6 +449,20 @@ export function buildVideoMeta({
       || `${kind === "short" ? "A YouTube Short" : "A video"} by Sanket Tambare: ${title}.`,
     image: image || sectionImage("videos"),
     imageAlt: image ? `Thumbnail of ${title}` : `Video card for ${title}`,
+    type: "article",
+  };
+}
+
+// One Strava activity. Activities carry no photo (none are imported), so the
+// image is always the /training card. `summary` is "21.1 km · 1:55:50".
+export function buildTrainingMeta({ name, sport, date, summary } = {}) {
+  const what = [sport, date].filter(Boolean).join(" on ");
+  return {
+    title: name || "Activity",
+    description: [summary, what ? `A ${what} logged on Strava by Sanket Tambare.` : null]
+      .filter(Boolean).join(" — ") || "An activity logged on Strava by Sanket Tambare.",
+    image: sectionImage("training"),
+    imageAlt: `Training card for ${name || "an activity"}`,
     type: "article",
   };
 }

@@ -31,6 +31,7 @@ const PRESENTATION = {
     Header: CoastHeader,
     pages: [
       { path: "/sports", label: "Race Log", icon: "directions_run" },
+      { path: "/training", label: "Training", icon: "monitor_heart" },
     ],
   },
   treks: {

@@ -6,6 +6,8 @@ import projects from "../../lib/api/projects";
 import presentations from "../../lib/api/presentations";
 import videos from "../../lib/api/videos";
 import { formatCount } from "../../lib/youtube";
+import training from "../../lib/api/training";
+import { formatDistance, formatDuration, sportLabel } from "../../lib/strava";
 import changelog from "../../lib/api/changelog";
 import blogs from "../../lib/api/blogs";
 import instagram from "../../lib/api/instagram";
@@ -410,6 +412,60 @@ const resources = [
       },
       {
         name: "description", label: "Description", type: "textarea", span: "full", hint: "Synced from YouTube",
+      },
+    ],
+  },
+  {
+    // Strava activities. Every column but these three comes from the export
+    // and is rewritten by `npm run strava:import`, so the form edits only the site's own.
+    key: "training",
+    label: "Training",
+    singular: "activity",
+    api: training,
+    noCreate: true,
+    title: (r) => r.name,
+    searchKeys: ["name", "sport", "date", "description"],
+    viewPath: (r) => `/training/${r.id}`,
+    columns: [
+      { key: "name", label: "Activity", sortable: true, primary: true },
+      {
+        key: "date",
+        label: "Date",
+        sortable: true,
+        width: "9rem",
+        sortValue: (r) => (r.startDate ? Date.parse(r.startDate) : null),
+      },
+      {
+        key: "sport",
+        label: "Sport",
+        sortable: true,
+        width: "9rem",
+        render: (r) => (
+          <span className="inline-flex gap-1 flex-wrap">
+            <Badge>{sportLabel(r.sport)}</Badge>
+            {(r.private || (r.visibility && r.visibility !== "everyone")) && <Badge tone="warning">private</Badge>}
+            {!r.visible && <Badge tone="warning">hidden</Badge>}
+            {r.sportId && <Badge tone="accent">race</Badge>}
+          </span>
+        ),
+      },
+      {
+        key: "distance", label: "Distance", sortable: true, width: "7rem", render: (r) => formatDistance(r.distance) || "—",
+      },
+      {
+        key: "movingTime", label: "Time", sortable: true, width: "6rem", render: (r) => formatDuration(r.movingTime) || "—",
+      },
+      { key: "tags", label: "Tags", render: (r) => tagList(r.tags) },
+    ],
+    fields: [
+      {
+        name: "visible", label: "Visible on the site", type: "boolean", default: true, hint: "Off hides it from /training, tags and counts. Turn it off for anything private — the export does not say which activities are",
+      },
+      {
+        name: "sportId", label: "Race (sports row id)", type: "number", min: 1, hint: "Links this activity to a /sports race, whose page then shows its splits. Link races suggests matches",
+      },
+      {
+        name: "tags", label: "Tags", type: "tags", suggest: true, span: "full", hint: "Topical tags, shared with /tags",
       },
     ],
   },

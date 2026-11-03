@@ -10,6 +10,8 @@
 // Explicit extension: scripts/newsletter-draft.mjs imports this under Node.
 // eslint-disable-next-line import/extensions
 import { itemMonthKey, parseContentDate, toIsoDate } from "./monthDigest.js";
+// eslint-disable-next-line import/extensions
+import { stravaMonthStats } from "./training.js";
 
 const clean = (v) => (typeof v === "string" ? v.trim() : v) || "";
 
@@ -278,6 +280,12 @@ export function mergeMonthRecords(data, monthKey, sections = {}) {
   collectMonthRecords(data, monthKey, {}).forEach(({ section, rows }) => {
     next[section] = rows.reduce((merged, { row }) => absorb(merged, row, section), next[section] || []);
   });
+  // The Strava stat group, computed from /training's rows (client shape:
+  // date, distance, movingTime, elevationGain). A hand-typed group wins.
+  if (data.activities && !next.stats?.strava) {
+    const strava = stravaMonthStats(data.activities, monthKey);
+    if (strava) next.stats = { ...(next.stats || {}), strava };
+  }
   return next;
 }
 

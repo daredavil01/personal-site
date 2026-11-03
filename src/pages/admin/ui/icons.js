@@ -3,6 +3,7 @@
 //
 // Note: lucide dropped its brand icons, so Instagram is represented by `Camera`.
 export {
+  Activity,
   AlertTriangle,
   ArrowUpDown,
   Award,

@@ -54,6 +54,8 @@ export const COLLECTIONS = [
       ? null
       : (s(c).videoCount || 0) + (s(c).shortCount || 0)),
   },
+  // Strava activities (0038), synced rather than typed in.
+  { id: "training", label: "Training", path: "/training", count: (c) => s(c).activityCount },
   { id: "photos", label: "Photo sets", path: "/instagram", count: (c) => s(c).instaPostCount },
 ];
 
@@ -159,7 +161,7 @@ export const FEATURES = [
       "Photos are resized and compressed in the browser before they reach Storage.",
       "Row-level security is the real lock: anyone may read, only is_owner() may write.",
       "Also here: the tag manager, changelog sync, newsletter publishing, /ask settings and graded conversations.",
-      "YouTube sync copies the channel into /videos a page at a time; the Social kit turns a blog post into ChatGPT prompts without calling a model.",
+      "YouTube sync copies the channel into /videos a page at a time, and a Strava export becomes /training; the Social kit turns a blog post into ChatGPT prompts without calling a model.",
     ],
     layers: {
       shell: "No shell: the Atlas HUD stays out",

@@ -127,6 +127,19 @@ export const ROUTE_MANIFEST = [
     indexable: true,
   },
   {
+    path: "/training",
+    component: "Training",
+    og: { strategy: "page", slug: "training" },
+    indexable: true,
+  },
+  {
+    path: "/training/:id",
+    component: "TrainingPost",
+    meta: "buildTrainingMeta",
+    og: { strategy: "entity", kind: "activity" },
+    indexable: true,
+  },
+  {
     path: "/100-days-to-offload/:id",
     component: "BlogPost",
     meta: "buildBlogMeta",

@@ -12,6 +12,8 @@ export const STORY = "/video/the-projects-story";
 
 const Story = () => (
   <figure className="shrink-0 w-full max-w-[220px] md:max-w-[240px] m-0">
+    {/* Music and sound only, no speech, so there is nothing to caption (see above). */}
+    {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
     <video
       controls
       preload="none"

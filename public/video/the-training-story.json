@@ -1,0 +1,38 @@
+{
+  "duration": 60,
+  "narrator": "Piper TTS, en_GB-cori-high",
+  "chapters": [
+    {
+      "t": 0,
+      "title": "The watch"
+    },
+    {
+      "t": 4.6,
+      "title": "Every activity"
+    },
+    {
+      "t": 13.7,
+      "title": "Light painting"
+    },
+    {
+      "t": 19.6,
+      "title": "The streak"
+    },
+    {
+      "t": 25.5,
+      "title": "A day, replayed"
+    },
+    {
+      "t": 37.4,
+      "title": "By the numbers"
+    },
+    {
+      "t": 47,
+      "title": "Two ways in"
+    },
+    {
+      "t": 52.9,
+      "title": "Find your day"
+    }
+  ]
+}

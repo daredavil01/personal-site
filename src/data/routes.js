@@ -49,6 +49,7 @@ const routes = [
       { label: "Newsletter", path: "/newsletter" },
       { label: "Books", path: "/books" },
       { label: "Sports", path: "/sports" },
+      { label: "Training", path: "/training" },
       { label: "Treks", path: "/treks" },
     ],
   },

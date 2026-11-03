@@ -117,11 +117,11 @@ const ResourceManager = ({ resource }) => {
   // so a refresh doesn't reopen a blank form over the user's list.
   useEffect(() => {
     if (searchParams.get("new") !== "1") return;
-    openForm(null);
+    if (!resource.noCreate) openForm(null);
     const next = new URLSearchParams(searchParams);
     next.delete("new");
     setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, openForm]);
+  }, [searchParams, setSearchParams, openForm, resource.noCreate]);
 
   const onField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
 
@@ -294,7 +294,8 @@ const ResourceManager = ({ resource }) => {
       <PageHeader
         title={resource.label}
         description={rows ? `${rows.length} ${rows.length === 1 ? "entry" : "entries"}` : "Loading…"}
-        actions={(
+        // A synced resource (noCreate) gains rows only from its sync.
+        actions={resource.noCreate ? null : (
           <Button variant="primary" icon={Plus} onClick={() => openForm(null)}>
             {`New ${resource.singular ?? "entry"}`}
           </Button>
@@ -313,7 +314,7 @@ const ResourceManager = ({ resource }) => {
         selectedIds={selectedIds}
         onSelectedChange={setSelectedIds}
         renderActions={renderActions}
-        emptyAction={(
+        emptyAction={resource.noCreate ? null : (
           <Button variant="primary" icon={Plus} size="sm" onClick={() => openForm(null)}>
             {`New ${resource.singular ?? "entry"}`}
           </Button>

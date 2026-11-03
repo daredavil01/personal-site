@@ -121,6 +121,30 @@ export const dotMatrix = (filled, { total = 100, width = 620, columns = 20, acce
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${dots}</svg>`;
 };
 
+// --- /training ----------------------------------------------------------------
+
+// The last 26 weeks as a calendar of squares, Monday-first columns, each day
+// shaded by its kilometres relative to the busiest day. `days` is km per day,
+// oldest first (computeSiteStats' trainingDays). Empty days still draw, faint,
+// so the grid reads as a calendar even in a quiet stretch.
+export const dayGrid = (days, { width = 560, accent = COLORS.orange } = {}) => {
+  const list = Array.isArray(days) ? days : [];
+  const weeks = Math.max(1, Math.ceil(list.length / 7));
+  const step = width / weeks;
+  const size = step * 0.78;
+  const max = Math.max(0, ...list);
+  const cells = list.map((km, i) => {
+    const x = Math.floor(i / 7) * step;
+    const y = (i % 7) * step;
+    const level = km > 0 && max > 0 ? Math.min(4, Math.max(1, Math.ceil((km / max) * 4))) : 0;
+    const fill = level ? accent : COLORS.panelEdge;
+    const opacity = level ? [0, 0.35, 0.55, 0.78, 1][level] : 0.5;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${size.toFixed(1)}" height="${size.toFixed(1)}" rx="${(size * 0.18).toFixed(1)}" fill="${fill}" opacity="${opacity}"/>`;
+  }).join("");
+  const height = 7 * step;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height.toFixed(0)}" viewBox="0 0 ${width} ${height.toFixed(0)}">${cells}</svg>`;
+};
+
 export const progressBar = (pct, { width = 900, height = 48, accent = COLORS.orange } = {}) => {
   const clamped = Math.max(0, Math.min(100, Number(pct) || 0));
   return [

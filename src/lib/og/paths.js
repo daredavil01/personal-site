@@ -24,6 +24,7 @@ export const CARD_FALLBACKS = {
   project: "projects",
   presentation: "presentations",
   video: "videos",
+  activity: "training",
   microblog: "micro-blog",
   tag: "tags",
   "ask-share": "ask-share",
