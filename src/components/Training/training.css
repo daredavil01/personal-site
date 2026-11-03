@@ -184,3 +184,14 @@
   stroke-dashoffset: 1;
   animation: tr-dash 1.4s ease-out forwards;
 }
+
+/* ---- the day story's campfire ---- */
+.tr-flame {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: tr-flame 0.6s ease-in-out infinite alternate;
+}
+@keyframes tr-flame {
+  from { transform: scale(1, 1) skewX(-3deg); }
+  to { transform: scale(0.88, 1.14) skewX(4deg); }
+}

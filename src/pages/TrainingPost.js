@@ -5,6 +5,7 @@ import PageShell from "../atlas/PageShell";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import TagLinks from "../components/common/TagLinks";
 import RouteShape from "../components/Training/RouteShape";
+import DayStory from "../components/Training/DayStory";
 import { SampleRibbon } from "../components/Training/shared";
 import "../components/Training/training.css";
 import { buildTrainingMeta } from "../data/pageMeta";
@@ -59,35 +60,6 @@ const Table = ({ title, head, rows }) => (rows.length ? (
     </div>
   </section>
 ) : null);
-
-// The splits as a pace profile: one bar per kilometre, taller is faster,
-// the fastest split marked. Reads above the splits table it summarises.
-const SplitProfile = ({ splits, speed }) => {
-  if (!splits || splits.length < 3) return null;
-  const v = splits.map((x) => x.average_speed || 0);
-  const lo = Math.min(...v) * 0.9;
-  const hi = Math.max(...v);
-  const best = v.indexOf(hi);
-  return (
-    <section className="tr-root flex flex-col gap-2" aria-label="Pace per kilometre">
-      <div className="flex items-end gap-[3px] h-32 p-3 rounded-2xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
-        {splits.map((x, i) => (
-          <div key={x.split} className="group relative flex-1 h-full flex flex-col justify-end">
-            <span
-              className={`block rounded-t tr-grow ${i === best ? "bg-secondary" : "bg-secondary/40 group-hover:bg-secondary/70"}`}
-              style={{ height: `${10 + ((v[i] - lo) / (hi - lo || 1)) * 90}%`, animationDelay: `${i * 30}ms` }}
-              title={`Km ${x.split}: ${speed(x.average_speed)}`}
-            />
-          </div>
-        ))}
-      </div>
-      <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 mb-0">
-        {`Taller is faster · fastest: km ${splits[best].split}, ${speed(hi)}`}
-      </p>
-    </section>
-  );
-};
-SplitProfile.propTypes = { splits: PropTypes.arrayOf(PropTypes.shape({})).isRequired, speed: PropTypes.func.isRequired };
 
 Table.propTypes = {
   title: PropTypes.string.isRequired,
@@ -193,6 +165,8 @@ const TrainingPost = () => {
           <Stat label="Kudos" value={a.kudos || null} />
         </div>
 
+        <DayStory activity={a} />
+
         {a.route && (
           <section className="flex flex-col gap-2">
             <div className="aspect-[4/3] md:aspect-[2/1] w-full p-4 rounded-2xl border border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-secondary">
@@ -201,8 +175,6 @@ const TrainingPost = () => {
             <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 mb-0">Start and finish trimmed for privacy.</p>
           </section>
         )}
-
-        <SplitProfile splits={a.splits} speed={speed} />
 
         <Table
           title="Splits"

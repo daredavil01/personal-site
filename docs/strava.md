@@ -120,7 +120,11 @@ is no export folder.
   in classic, Overview / Log / Calendar / Stats & PRs / Routes tabs. Until the
   first import (or with `?demo=1`) both show a labelled sample log from
   `src/lib/trainingDemo.js`.
-- `/training/:id` — numbers, splits, laps, best efforts, route, "More from Strava".
+- `/training/:id` — numbers; "the day, kilometre by kilometre" (the terrain as a
+  line with figures at the start, fastest km, longest stop, biggest climb, heart
+  peak and finish, a heart-rate ribbon and a replay — `src/lib/dayStory.js`), or a
+  session card when there are no splits; then splits, laps, best efforts, route and
+  "More from Strava".
 - `/sports/:id` — the linked activity's numbers and splits. Link races at
   `/admin/training/races`, which suggests same-day, same-distance matches.
 - `/now` and newsletter issues — the "Strava" stat group is computed from the
