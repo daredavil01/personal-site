@@ -151,7 +151,7 @@ const DROPPED = new Set(["Media"]);
  * private note), it is honoured. Returns { private, visibility } or nulls.
  */
 export function visibilityOf(r) {
-  const key = Object.keys(r).find((k) => /visib/i.test(k) && text(r[k]));
+  const key = Object.keys(r).find((k) => /^(activity )?visibility$/i.test(k) && text(r[k]));
   if (key) {
     const v = r[key].toLowerCase().replace(/[^a-z]/g, "_");
     if (/only_me|private/.test(v)) return { private: true, visibility: "only_me" };
@@ -792,6 +792,24 @@ export function activityFromFit(fit, { id, timeZone = "Asia/Kolkata", now = new 
     },
     privateRow: { activity_id: Number(id), private_note: null, extra: null },
   };
+}
+
+/**
+ * A CSV row + the same activity's FIT summary → the row with every empty
+ * column filled from the file, and the file's fields added to `extra`. The CSV
+ * wins wherever both have a value, except that only the file knows a run was
+ * on a trail.
+ */
+export function mergeFitSummary(row, fitRow) {
+  if (!fitRow) return row;
+  const merged = { ...row };
+  Object.entries(fitRow).forEach(([k, v]) => {
+    if (merged[k] == null) merged[k] = v;
+  });
+  if (row.sport_type === "Run" && fitRow.sport_type === "TrailRun") merged.sport_type = "TrailRun";
+  const { source, ...fitExtra } = fitRow.extra || {};
+  merged.extra = { ...fitExtra, ...(row.extra || {}) };
+  return merged;
 }
 
 /** A GPX file → { row, privateRow }: name and type from <trk>, numbers from the track. */

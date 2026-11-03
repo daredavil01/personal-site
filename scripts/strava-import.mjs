@@ -42,7 +42,7 @@ import { createClient } from "@supabase/supabase-js";
 import FitParser from "fit-file-parser";
 import {
   activityFromCsv, activityFromFit, activityFromGpx, csvObjects, detailFromTrack, findDuplicates,
-  deepStatsOf, gearFromCsv, profileFromTrack, rankBestEfforts, trackFromFit, trackFromGpx, trackFromTcx,
+  deepStatsOf, gearFromCsv, mergeFitSummary, profileFromTrack, rankBestEfforts, trackFromFit, trackFromGpx, trackFromTcx,
 } from "../src/lib/stravaExport.js";
 import { sportFamily } from "../src/lib/training.js";
 
@@ -183,7 +183,7 @@ async function main() {
     if (undated) {
       console.warn(`  ! ${undated} activities have a date this script cannot read — is Strava's language English?`);
     }
-    if (!headers.some((h) => /visib|^(activity )?private$/i.test(h))) {
+    if (!headers.some((h) => /^(activity )?(visibility|private)$/i.test(h))) {
       console.log("  No visibility column in the export: every activity is public until hidden at /admin/training.");
     }
   } else {
@@ -208,6 +208,8 @@ async function main() {
       if (file) {
         // eslint-disable-next-line no-await-in-loop
         const { track, problem, fit } = await readTrack(file);
+        // What only the file has: device, temperature, running form, sets.
+        if (fit) Object.assign(row, mergeFitSummary(row, activityFromFit(fit, { id: row.id, timeZone, now })?.row));
         // The streams and a strength session's sets, for every activity with
         // a file — a session that goes nowhere still has a heart rate.
         profile = track && track.points.length > 1 ? profileFromTrack(track, fit) : null;

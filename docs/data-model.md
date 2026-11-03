@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **24** · indexed as `project`
+Rows: **26** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **20** · indexed as `presentation`
+Rows: **22** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -157,7 +157,7 @@ Constraints:
 
 The YouTube channel's public uploads, copied by the owner-only sync at /admin/videos/sync. YouTube owns the title/description/counts (re-synced); `kind_override`, `visible` and tags are the site's own. `date` is the IST publish day.
 
-Rows: **20** · indexed as `video`
+Rows: **24** · indexed as `video`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -276,7 +276,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **122**
+Rows: **132**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -300,7 +300,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3908**
+Rows: **3936**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -311,13 +311,13 @@ Rows: **3908**
 | `created_at` | timestamp with time zone | no | `now()` |
 
 Constraints:
-- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text, 'presentation'::text, 'video'::text])))`
+- `CHECK ((entity_type = ANY (ARRAY['book'::text, 'blog'::text, 'instagram'::text, 'microblog'::text, 'sport'::text, 'trek'::text, 'project'::text, 'presentation'::text, 'video'::text, 'activity'::text])))`
 
 ### `content_chunks`
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3399**
+Rows: **3499**
 
 | column | type | null | default |
 |---|---|---|---|

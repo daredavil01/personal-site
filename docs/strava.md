@@ -109,6 +109,10 @@ later import with the CSV renames it in place. There is no visibility or gear
 in the files. Keep the unzipped files in a gitignored folder, e.g.
 `tmp/strava-export/`, and pass `--dir=tmp/strava-export`.
 
+**CSV and files together.** With a CSV, each activity's FIT session still fills what the CSV lacks: device, average power and cadence where empty, and in `extra` temperature, minimum heart rate, step length, ground contact, vertical ratio, Effort Pace and a strength session's sets. A run the file marks as a trail becomes `TrailRun`. The CSV wins wherever both have a value (`mergeFitSummary`).
+
+**A file name is not an activity id.** The number in `activities/<number>.fit.gz` usually differs from the CSV's `Activity ID` (the real one, in strava.com/activities/<id>). A files-only import has only the file name, so it stores that number as the id; a later CSV import then sees the same start time under another id and skips it as a duplicate, leaving the default name. To correct that, delete the files-only rows and import with the CSV.
+
 **Never a duplicate row.** Rows upsert on Strava's id, so a re-run updates in
 place. Before writing, the script reads every stored id and start time; an
 activity that starts within 60 s of a stored one (or one earlier in the same

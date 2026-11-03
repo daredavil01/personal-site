@@ -1,37 +1,37 @@
 {
   "duration": 60,
-  "narrator": "Piper TTS, en_GB-cori-high",
+  "narrator": "Deepgram Aura 2 on Workers AI, the Atlas guide's voice",
   "chapters": [
     {
       "t": 0,
       "title": "The watch"
     },
     {
-      "t": 4.6,
+      "t": 5.2,
       "title": "Every activity"
     },
     {
-      "t": 13.7,
+      "t": 14.5,
       "title": "Light painting"
     },
     {
-      "t": 19.6,
+      "t": 20,
       "title": "The streak"
     },
     {
-      "t": 25.5,
+      "t": 25.7,
       "title": "A day, replayed"
     },
     {
-      "t": 37.4,
+      "t": 36.8,
       "title": "By the numbers"
     },
     {
-      "t": 47,
+      "t": 45.9,
       "title": "Two ways in"
     },
     {
-      "t": 52.9,
+      "t": 51.4,
       "title": "Find your day"
     }
   ]

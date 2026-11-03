@@ -14,7 +14,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Blog posts** (79) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
-- **Projects** (23) — /projects/:id. Status: Live: 20, Concept: 1, Archived: 2.
+- **Projects** (25) — /projects/:id. Status: Live: 22, Concept: 1, Archived: 2.
 - **Races** (26) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 19, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
@@ -31,12 +31,12 @@ answering rules live with the prompt, and are not repeated here.
 - 100 Days To Offload: 79 of 100 posts.
 - Micro posts: 1677; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 6 organisations, 23 projects, 13 certifications (latest: AWS Fundamentals Specialization).
+- Work: 6 organisations, 25 projects, 13 certifications (latest: AWS Fundamentals Specialization).
 - Based in Pune, MH.
 
 ## Tags
 
-122 tags, shared across every content type, always lowercase.
+132 tags, shared across every content type, always lowercase.
 Most used: life (484), self-reflection (473), marathi (273), social media (150), personaldevelopment (141), love (137), sanky (135), philosophy (130), calmness (127), digital wellbeing (122), travel (119), latepost (109), digital detox (81), politics (73), psychology (71), technology (70), social (68), ai (57), choices (54), maharashtra (52).
 Tag pages live at /tags/:name.
 

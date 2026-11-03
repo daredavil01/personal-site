@@ -1,6 +1,6 @@
 import {
   activityFromCsv, bestEffortsOf, csvObjects, detailFromTrack, gearFromCsv, lapsOf, parseCsv,
-  parseExportDate, rankBestEfforts, splitsOf, toLocal, toSportType, trackFromGpx, trackFromTcx,
+  mergeFitSummary, parseExportDate, rankBestEfforts, splitsOf, toLocal, toSportType, trackFromGpx, trackFromTcx,
   visibilityOf,
 } from "./stravaExport";
 import { decodePolyline, haversine } from "./strava";
@@ -90,6 +90,7 @@ describe("activityFromCsv", () => {
     expect(visibilityOf({ Visibility: "followers_only" })).toEqual({ private: false, visibility: "followers_only" });
     expect(visibilityOf({ Visibility: "everyone" })).toEqual({ private: false, visibility: "everyone" });
     expect(visibilityOf({ "Activity Private Note": "x" })).toEqual({ private: false, visibility: null });
+    expect(visibilityOf({ "Weather Visibility": "19125.0" })).toEqual({ private: false, visibility: null });
   });
 
   test("sport names match the API's", () => {
@@ -406,5 +407,25 @@ describe("deep stats", () => {
     expect(s.steps).toBe(9000);
     expect(deepStatsOf({ points: [] })).toBeNull();
     expect(deepStatsOf({ points: pts }, null, { sportType: "WeightTraining" }).steps).toBeUndefined();
+  });
+});
+
+describe("mergeFitSummary", () => {
+  const csv = { id: 1, name: "Sunday Long Run", sport_type: "Run", calories: 900, device_name: undefined, average_watts: null, extra: { Humidity: 0.5, "Max Cadence": 90 } };
+  const fit = { id: 1, name: "Morning Run", sport_type: "TrailRun", calories: 800, device_name: "COROS PACE 3", average_watts: 210, extra: { source: "fit", "Max Cadence": 88, "Average Temperature": 24 } };
+
+  test("the CSV wins; empty columns and new extras come from the file", () => {
+    const row = mergeFitSummary(csv, fit);
+    expect(row).toMatchObject({ name: "Sunday Long Run", calories: 900, device_name: "COROS PACE 3", average_watts: 210 });
+    expect(row.extra).toEqual({ Humidity: 0.5, "Max Cadence": 90, "Average Temperature": 24 });
+  });
+
+  test("only the file knows a run was on a trail", () => {
+    expect(mergeFitSummary(csv, fit).sport_type).toBe("TrailRun");
+    expect(mergeFitSummary({ ...csv, sport_type: "Hike" }, fit).sport_type).toBe("Hike");
+  });
+
+  test("no file, no change", () => {
+    expect(mergeFitSummary(csv, undefined)).toBe(csv);
   });
 });

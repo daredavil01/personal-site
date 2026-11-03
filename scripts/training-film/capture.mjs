@@ -4,6 +4,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { createRequire } from "node:module";
 
@@ -11,8 +12,8 @@ import { createRequire } from "node:module";
 // NODE_PATH (an ESM import would not look there).
 const { chromium } = createRequire(import.meta.url)("playwright");
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..");
-const CHROME = fs.existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : undefined;
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const CHROME = process.env.CHROME_PATH || (fs.existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : undefined);
 
 // The page reads the publishable key from VITE_*; wrangler.toml holds it.
 function loadVars() {

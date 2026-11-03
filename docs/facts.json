@@ -25,13 +25,13 @@
     }
   },
   "counts": {
-    "tags": 122,
+    "tags": 132,
     "blogs": 79,
     "books": 52,
     "treks": 20,
     "sports": 26,
-    "videos": 20,
-    "projects": 23,
+    "videos": 24,
+    "projects": 25,
     "instagram": 11,
     "microblog": 1677
   },
@@ -570,6 +570,26 @@
     ],
     "video": [
       {
+        "d": "2026-11-03",
+        "t": "358 Activities, 1,431 km, 1.5M Steps: My Year of Running as an Animated Story #Shorts",
+        "u": "/videos/190"
+      },
+      {
+        "d": "2026-11-02",
+        "t": "Introducing an upgraded version of my own personal website, Sanket, Loud out...!🚀",
+        "u": "/videos/191"
+      },
+      {
+        "d": "2026-10-31",
+        "t": "Where’s your marathon certificate from last year? 🏅 #running #marathon",
+        "u": "/videos/168"
+      },
+      {
+        "d": "2026-10-31",
+        "t": "October 2026 in 60 seconds: 77 km, 15,500 words, 5 builds 🏃✍️💻",
+        "u": "/videos/147"
+      },
+      {
         "d": "2026-10-28",
         "t": "Karjat's 48,557 Trees and 38 More Projects: Inside the Sahyadri \"Battery\" Plan",
         "u": "/videos/127"
@@ -671,6 +691,18 @@
       }
     ],
     "project": [
+      {
+        "d": "2026-11-02",
+        "t": "Museum of Failures",
+        "u": "/projects/26",
+        "x": "Web App · Live"
+      },
+      {
+        "d": "2026-11-01",
+        "t": "Sanket, Out Loud",
+        "u": "/projects/25",
+        "x": "Web App · Live"
+      },
       {
         "d": "2026-10-28",
         "t": "Pumped Storage Projects: Are They Really Useful?",
@@ -869,6 +901,16 @@
     ],
     "presentation": [
       {
+        "d": "2026-11-03",
+        "t": "Ten Set Out — building /training",
+        "u": "/presentations/22"
+      },
+      {
+        "d": "2026-11-01",
+        "t": "The Making of Sanket, Out Loud",
+        "u": "/presentations/21"
+      },
+      {
         "d": "2026-10-28",
         "t": "Pumped Storage Projects: Are They Really Useful?",
         "u": "/presentations/20"
@@ -981,20 +1023,20 @@
   },
   "videos": {
     "by_kind": {
-      "short": 8,
+      "short": 12,
       "video": 12
     }
   },
   "projects": {
     "by_status": {
-      "Live": 20,
+      "Live": 22,
       "Concept": 1,
       "Archived": 2
     },
     "by_category": {
       "Tool": 2,
       "Design": 3,
-      "Web App": 7,
+      "Web App": 9,
       "Website": 5,
       "Data Story": 6
     }
@@ -1093,12 +1135,12 @@
       "total": 43
     },
     {
-      "name": "desperate me",
-      "total": 40
+      "name": "running",
+      "total": 41
     },
     {
-      "name": "running",
-      "total": 39
+      "name": "desperate me",
+      "total": 40
     }
   ],
   "microblog": {
@@ -1127,31 +1169,32 @@
     "year": 2026,
     "month": "October"
   },
-  "generated_at": "2026-10-31T09:29:41.004836+00:00",
+  "generated_at": "2026-11-03T17:08:38.65635+00:00",
   "index_by_type": {
     "now": 14,
-    "tag": 122,
+    "tag": 132,
     "blog": 79,
     "book": 52,
     "page": 1,
-    "site": 26,
+    "site": 27,
     "trek": 20,
     "sport": 26,
     "stats": 10,
-    "video": 20,
+    "video": 24,
     "resume": 22,
-    "project": 23,
+    "project": 25,
     "writing": 43,
-    "changelog": 118,
+    "training": 29,
+    "changelog": 120,
     "instagram": 11,
     "microblog": 1677,
-    "presentation": 20
+    "presentation": 22
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 24,
+    "uncategorised": 34,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,

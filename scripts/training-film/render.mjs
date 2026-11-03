@@ -20,6 +20,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, renderStill, selectComposition } from "@remotion/renderer";
@@ -28,14 +29,14 @@ import { pickVoice, speak, voiceCredit, wavSeconds } from "../blueprint-film/voi
 import { renderScore } from "./score.mjs";
 import { capture } from "./capture.mjs";
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const WORK = path.join(ROOT, "knowledge_base", "training-film");
 const PUB = path.join(WORK, "public");
 const OUT = path.join(WORK, "the-training-story.mp4");
 const WEB = path.join(ROOT, "public", "video", "the-training-story");
 const FPS = 30;
 const SECONDS = 60;
-const CHROME = fs.existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : null;
+const CHROME = process.env.CHROME_PATH || (fs.existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : null);
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
