@@ -27,6 +27,9 @@ minor version per calendar week), patch for fixes and tweaks.
 ### Changed
 - **Privacy by table, not by column**: raw GPS, start/end points, the private note and athlete weight are in owner-only `strava_activity_private`, because the files ignore Strava's privacy zones; the public row carries only a route with 400 m cut around both ends. The export may not mark private activities, so a visibility column is honoured when present and `visible` hides the rest.
 
+### Fixed
+- **Lint failing on main** (`src/components/Projects/Story.js`, `src/lib/askLanguage.js`): the projects film is music only, so its missing caption track is now a documented exception rather than an error, and `withReplyLanguage` fits on one line.
+
 ### Removed
 - **Strava API sync** (`0039_training_from_export.sql`): the OAuth script, `/api/strava-sync`, the "Sync now" page, the nightly step and the `strava_auth` / `strava_athlete` tables — written first, then dropped for the export when the API went behind a paywall.
 

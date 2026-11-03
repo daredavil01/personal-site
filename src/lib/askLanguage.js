@@ -27,5 +27,4 @@ export function replyLanguage(q, spokenLanguage = null) {
 
 // The question as the model sees it. Only the model: retrieval, ask_log and
 // the ?q= link keep the raw question.
-export const withReplyLanguage = (q, spokenLanguage = null) =>
-  `${q}\n\n(${replyLanguage(q, spokenLanguage)})`;
+export const withReplyLanguage = (q, spokenLanguage = null) => `${q}\n\n(${replyLanguage(q, spokenLanguage)})`;
