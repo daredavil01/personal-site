@@ -204,3 +204,114 @@ describe("computed detail", () => {
     expect(detail.best_efforts).toBeNull();
   });
 });
+
+describe("files-only exports", () => {
+  const {
+    activityFromFit, activityFromGpx, defaultName, findDuplicates, sportTypeFromFit,
+  } = require("./stravaExport"); // eslint-disable-line global-require
+
+  test("FIT sports map to Strava sport types", () => {
+    expect(sportTypeFromFit("running", "generic")).toEqual({ sportType: "Run", trainer: false });
+    expect(sportTypeFromFit("running", "trail").sportType).toBe("TrailRun");
+    expect(sportTypeFromFit("running", "indoor_running")).toEqual({ sportType: "Run", trainer: true });
+    expect(sportTypeFromFit("training", "strength_training").sportType).toBe("WeightTraining");
+    expect(sportTypeFromFit("training", "yoga").sportType).toBe("Yoga");
+    expect(sportTypeFromFit("walking", null).sportType).toBe("Walk");
+    expect(sportTypeFromFit("cycling", "virtual_activity").sportType).toBe("VirtualRide");
+    expect(sportTypeFromFit("something_new", null).sportType).toBe("Workout");
+  });
+
+  test("names follow Strava's time of day", () => {
+    expect(defaultName("Run", 6)).toBe("Morning Run");
+    expect(defaultName("Walk", 13)).toBe("Afternoon Walk");
+    expect(defaultName("WeightTraining", 18)).toBe("Evening Weight Training");
+    expect(defaultName("Yoga", 22)).toBe("Night Yoga");
+    expect(defaultName("Hike", 2)).toBe("Night Hike");
+  });
+
+  test("a FIT session becomes a full row in IST", () => {
+    const fit = {
+      sessions: [{
+        sport: "running",
+        sub_sport: "generic",
+        start_time: "2026-10-31T00:51:10.000Z",
+        total_elapsed_time: 4234.08,
+        total_timer_time: 4200,
+        total_distance: 10009.41,
+        total_calories: 994,
+        avg_heart_rate: 147,
+        max_heart_rate: 162,
+        avg_cadence: 80,
+        total_ascent: 28,
+        total_descent: 26,
+        avg_speed: 2.364,
+        max_speed: 2.95,
+        avg_power: 214,
+        avg_temperature: 28,
+      }],
+      file_ids: [{ product_name: "COROS PACE 3" }],
+      records: [{ altitude: 566 }, { altitude: 580 }, { altitude: 560 }],
+    };
+    const { row, privateRow } = activityFromFit(fit, { id: "21962347491", now: "2026-11-03T00:00:00Z" });
+    expect(row).toMatchObject({
+      id: 21962347491,
+      name: "Morning Run",
+      sport_type: "Run",
+      start_date: "2026-10-31T00:51:10Z",
+      start_date_local: "2026-10-31T06:21:10",
+      date: "2026-10-31",
+      distance: 10009.41,
+      moving_time: 4200,
+      elapsed_time: 4234,
+      total_elevation_gain: 28,
+      elev_low: 560,
+      elev_high: 580,
+      average_heartrate: 147,
+      has_heartrate: true,
+      average_watts: 214,
+      calories: 994,
+      device_name: "COROS PACE 3",
+      trainer: false,
+    });
+    expect(row.extra).toMatchObject({ source: "fit", "Average Temperature": 28, "Elevation Loss": 26 });
+    expect(privateRow.activity_id).toBe(21962347491);
+    expect(activityFromFit({ sessions: [] }, { id: 1 })).toBeNull();
+  });
+
+  test("a FIT row has the same keys as a CSV row", () => {
+    const csvRow = activityFromCsv({ "Activity ID": "5", "Activity Date": "Feb 22, 2026, 12:45:00 AM", "Activity Type": "Run" }).row;
+    const fitRow = activityFromFit({ sessions: [{ sport: "walking", start_time: "2026-01-01T00:00:00Z" }] }, { id: 5 }).row;
+    expect(Object.keys(fitRow).filter((k) => !["device_name", "trainer"].includes(k)).sort()).toEqual(Object.keys(csvRow).sort());
+  });
+
+  test("a GPX file keeps its Strava name and computes its summary", () => {
+    const gpx = `<?xml version="1.0"?><gpx><metadata><time>2024-07-09T00:51:07Z</time></metadata>
+      <trk><name>Tuesday Slow Group Run</name><type>running</type><trkseg>
+      <trkpt lat="18.5000" lon="73.8000"><ele>570</ele><time>2024-07-09T00:51:07Z</time></trkpt>
+      <trkpt lat="18.5045" lon="73.8000"><ele>575</ele><time>2024-07-09T00:54:07Z</time></trkpt>
+      <trkpt lat="18.5090" lon="73.8000"><ele>572</ele><time>2024-07-09T00:57:07Z</time></trkpt>
+      </trkseg></trk></gpx>`;
+    const { row } = activityFromGpx(gpx, { id: 11842427390 });
+    expect(row.name).toBe("Tuesday Slow Group Run");
+    expect(row.sport_type).toBe("Run");
+    expect(row.date).toBe("2024-07-09");
+    expect(row.distance).toBeGreaterThan(990);
+    expect(row.distance).toBeLessThan(1010);
+    expect(row.elapsed_time).toBe(360);
+    expect(row.total_elevation_gain).toBe(5);
+    expect(row.extra).toEqual({ source: "gpx" });
+  });
+
+  test("duplicates: same start and sport under another id, never the same id", () => {
+    const existing = [{ id: 1, start_date: "2026-10-31T00:51:10Z", sport_type: "Run" }];
+    const cands = [
+      { id: 1, start_date: "2026-10-31T00:51:10Z", sport_type: "Run" }, // same row → update
+      { id: 2, start_date: "2026-10-31T00:51:40Z", sport_type: "TrailRun" }, // same run, other id
+      { id: 3, start_date: "2026-10-31T00:51:20Z", sport_type: "Walk" }, // other sport
+      { id: 4, start_date: "2026-10-31T00:53:00Z", sport_type: "Run" }, // 110 s later
+      { id: 5, start_date: "2026-11-01T06:00:00Z", sport_type: "Hike" },
+      { id: 6, start_date: "2026-11-01T06:00:30Z", sport_type: "Hike" }, // dup within the batch
+    ];
+    expect(findDuplicates(cands, existing).map((d) => [d.row.id, d.of])).toEqual([[2, 1], [6, 5]]);
+  });
+});

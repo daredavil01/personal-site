@@ -553,3 +553,269 @@ export function detailFromTrack(track, { isRun = false, now = new Date().toISOSt
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Files-only exports: no activities.csv, just activities/<id>.fit.gz | .gpx
+// ---------------------------------------------------------------------------
+//
+// Some archives (or a folder of files copied out of one) carry the original
+// files without the CSV. Each file is then the whole record: a FIT session
+// has the summary, a GPX its name and type and a track to compute one from.
+// The file name is the Strava activity id. Rows come out in exactly the shape
+// activityFromCsv produces, so the import writes them the same way.
+
+const FIT_SPORTS = {
+  running: "Run",
+  walking: "Walk",
+  hiking: "Hike",
+  cycling: "Ride",
+  swimming: "Swim",
+  e_biking: "EBikeRide",
+  rowing: "Rowing",
+  cross_country_skiing: "NordicSki",
+  alpine_skiing: "AlpineSki",
+  snowboarding: "Snowboard",
+  rock_climbing: "RockClimbing",
+  stand_up_paddleboarding: "StandUpPaddling",
+  kayaking: "Kayaking",
+};
+const FIT_SUB_SPORTS = {
+  trail: "TrailRun",
+  strength_training: "WeightTraining",
+  yoga: "Yoga",
+  pilates: "Pilates",
+  hiit: "HighIntensityIntervalTraining",
+  mountain: "MountainBikeRide",
+  gravel_cycling: "GravelRide",
+  virtual_activity: null, // decided by sport below
+  elliptical: "Elliptical",
+  stair_climbing: "StairStepper",
+};
+const INDOOR = new Set(["indoor_running", "treadmill", "indoor_cycling", "spin", "indoor_walking", "virtual_activity", "lap_swimming"]);
+
+/** A FIT session's sport + sub_sport → { sportType, trainer }. */
+export function sportTypeFromFit(sport, subSport) {
+  const sub = String(subSport || "").toLowerCase();
+  const base = String(sport || "").toLowerCase();
+  const trainer = INDOOR.has(sub) && sub !== "lap_swimming";
+  if (sub === "virtual_activity") {
+    if (base === "running") return { sportType: "VirtualRun", trainer: true };
+    if (base === "cycling") return { sportType: "VirtualRide", trainer: true };
+  }
+  if (FIT_SUB_SPORTS[sub]) return { sportType: FIT_SUB_SPORTS[sub], trainer };
+  if (FIT_SPORTS[base]) return { sportType: FIT_SPORTS[base], trainer };
+  if (base === "training" || base === "fitness_equipment") return { sportType: "Workout", trainer: true };
+  return { sportType: "Workout", trainer };
+}
+
+const SPORT_WORDS = {
+  WeightTraining: "Weight Training",
+  HighIntensityIntervalTraining: "HIIT",
+  TrailRun: "Trail Run",
+  VirtualRun: "Virtual Run",
+  VirtualRide: "Virtual Ride",
+  MountainBikeRide: "Mountain Bike Ride",
+  GravelRide: "Gravel Ride",
+  EBikeRide: "E-Bike Ride",
+};
+
+/** Strava's name for an unnamed upload: "Morning Run", "Evening Walk", "Night Yoga". */
+export function defaultName(sportType, localHour) {
+  const h = Number(localHour);
+  let part = "Night";
+  if (h >= 4 && h < 12) part = "Morning";
+  else if (h >= 12 && h < 17) part = "Afternoon";
+  else if (h >= 17 && h < 21) part = "Evening";
+  const word = SPORT_WORDS[sportType] || String(sportType || "Activity").replace(/([a-z])([A-Z])/g, "$1 $2");
+  return `${part} ${word}`;
+}
+
+// Session fields with a column of their own; the rest of the session goes
+// to `extra` under a readable name.
+const FIT_EXTRA = {
+  avg_temperature: "Average Temperature",
+  max_temperature: "Max Temperature",
+  total_descent: "Elevation Loss",
+  total_cycles: "Total Cycles",
+  total_strides: "Total Steps",
+  avg_step_length: "Average Step Length (mm)",
+  avg_vertical_oscillation: "Average Vertical Oscillation (mm)",
+  avg_vertical_ratio: "Average Vertical Ratio",
+  avg_stance_time: "Average Ground Contact Time (ms)",
+  max_cadence: "Max Cadence",
+  min_heart_rate: "Min Heart Rate",
+  total_training_effect: "Aerobic Training Effect",
+  total_anaerobic_training_effect: "Anaerobic Training Effect",
+  training_load_peak: "Training Load",
+  num_lengths: "Pool Lengths",
+  pool_length: "Pool Length",
+};
+
+const emptyRow = (id, now, timeZone) => ({
+  id,
+  name: "",
+  sport_type: null,
+  type: null,
+  start_date: null,
+  start_date_local: null,
+  date: null,
+  timezone: timeZone,
+  distance: null,
+  moving_time: null,
+  elapsed_time: null,
+  total_elevation_gain: null,
+  elev_high: null,
+  elev_low: null,
+  average_speed: null,
+  max_speed: null,
+  average_heartrate: null,
+  max_heartrate: null,
+  has_heartrate: false,
+  average_cadence: null,
+  average_watts: null,
+  max_watts: null,
+  weighted_average_watts: null,
+  kilojoules: null,
+  calories: null,
+  suffer_score: null,
+  perceived_exertion: null,
+  commute: false,
+  manual: false,
+  flagged: false,
+  private: false,
+  visibility: null,
+  gear_id: null,
+  description: null,
+  device_name: null,
+  trainer: false,
+  extra: null,
+  synced_at: now,
+});
+
+const minMax = (values) => {
+  const v = values.filter((x) => x != null);
+  return v.length ? [Math.min(...v), Math.max(...v)] : [null, null];
+};
+
+/**
+ * A parsed FIT file (fit-file-parser, mode "list") → { row, privateRow }, or
+ * null when it has no session. `id` is the Strava activity id (the file name).
+ */
+export function activityFromFit(fit, { id, timeZone = "Asia/Kolkata", now = new Date().toISOString() } = {}) {
+  const s = fit?.sessions?.[0];
+  const start = s ? fitTime(s.start_time) : null;
+  if (!id || !s || start == null) return null;
+  const startIso = new Date(start * 1000).toISOString().replace(".000Z", "Z");
+  const { local, date } = toLocal(startIso, timeZone);
+  const { sportType, trainer } = sportTypeFromFit(s.sport, s.sub_sport);
+  const device = fit.file_ids?.[0]?.product_name || fit.device_infos?.find((d) => d.product_name)?.product_name || null;
+  const [elevLow, elevHigh] = minMax((fit.records || []).map((r) => num(r.enhanced_altitude ?? r.altitude)));
+  const extra = { source: "fit" };
+  Object.entries(FIT_EXTRA).forEach(([k, label]) => {
+    if (num(s[k]) != null) extra[label] = num(s[k]);
+  });
+  const avgHr = num(s.avg_heart_rate);
+  const distance = num(s.total_distance);
+  return {
+    row: {
+      ...emptyRow(Number(id), now, timeZone),
+      name: defaultName(sportType, Number(local.slice(11, 13))),
+      sport_type: sportType,
+      type: sportType,
+      start_date: startIso,
+      start_date_local: local,
+      date,
+      distance: distance ?? 0,
+      moving_time: int(s.total_timer_time),
+      elapsed_time: int(s.total_elapsed_time),
+      total_elevation_gain: num(s.total_ascent),
+      elev_high: elevHigh,
+      elev_low: elevLow,
+      average_speed: num(s.enhanced_avg_speed ?? s.avg_speed),
+      max_speed: num(s.enhanced_max_speed ?? s.max_speed),
+      average_heartrate: avgHr,
+      max_heartrate: num(s.max_heart_rate),
+      has_heartrate: avgHr != null,
+      average_cadence: num(s.avg_cadence),
+      average_watts: num(s.avg_power),
+      max_watts: num(s.max_power),
+      weighted_average_watts: num(s.normalized_power),
+      kilojoules: num(s.total_work) == null ? null : num(s.total_work) / 1000,
+      calories: num(s.total_calories),
+      device_name: device,
+      trainer,
+      extra,
+    },
+    privateRow: { activity_id: Number(id), private_note: null, extra: null },
+  };
+}
+
+/** A GPX file → { row, privateRow }: name and type from <trk>, numbers from the track. */
+export function activityFromGpx(xml, { id, timeZone = "Asia/Kolkata", now = new Date().toISOString() } = {}) {
+  const { points } = trackFromGpx(xml);
+  if (!id || points.length < 2) return null;
+  const trk = (/<trk>([\s\S]*?)<trkseg/.exec(xml) || [])[1] || "";
+  const gpxType = inner(trk, "type");
+  const { sportType } = sportTypeFromFit(gpxType, null);
+  const startIso = new Date(points[0].t * 1000).toISOString().replace(".000Z", "Z");
+  const { local, date } = toLocal(startIso, timeZone);
+  const last = points[points.length - 1];
+  let climb = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const d = (points[i].ele ?? 0) - (points[i - 1].ele ?? 0);
+    if (points[i].ele != null && points[i - 1].ele != null && d > 0) climb += d;
+  }
+  const moving = movingBetween(points, 0, points.length - 1);
+  const [elevLow, elevHigh] = minMax(points.map((p) => p.ele));
+  const hrs = points.map((p) => p.hr).filter((v) => v != null);
+  return {
+    row: {
+      ...emptyRow(Number(id), now, timeZone),
+      name: text(inner(trk, "name")) || defaultName(sportType, Number(local.slice(11, 13))),
+      sport_type: sportType,
+      type: sportType,
+      start_date: startIso,
+      start_date_local: local,
+      date,
+      distance: Math.round(last.dist),
+      moving_time: Math.round(moving),
+      elapsed_time: Math.round(last.t - points[0].t),
+      total_elevation_gain: Math.round(climb),
+      elev_high: elevHigh,
+      elev_low: elevLow,
+      average_speed: moving ? Number((last.dist / moving).toFixed(3)) : null,
+      average_heartrate: hrs.length ? Math.round(hrs.reduce((a, b) => a + b, 0) / hrs.length) : null,
+      max_heartrate: hrs.length ? Math.max(...hrs) : null,
+      has_heartrate: hrs.length > 0,
+      extra: { source: "gpx" },
+    },
+    privateRow: { activity_id: Number(id), private_note: null, extra: null },
+  };
+}
+
+const FAMILIES = {
+  Run: "run", TrailRun: "run", VirtualRun: "run", Walk: "walk", Hike: "hike", Swim: "swim",
+};
+const familyOf = (t) => FAMILIES[t] || (/Ride$/.test(String(t)) ? "ride" : String(t || "other"));
+
+/**
+ * Rows in `candidates` that are an activity already in `existing` (or earlier
+ * in `candidates`) under a different id: same sport family, start within
+ * `windowSec`. The same id is not a duplicate — that row is updated in place.
+ * Returns [{ row, of }] where `of` is the id it duplicates.
+ */
+export function findDuplicates(candidates, existing = [], { windowSec = 60 } = {}) {
+  const seen = (existing || [])
+    .filter((e) => e.start_date)
+    .map((e) => ({ id: Number(e.id), t: Date.parse(e.start_date), family: familyOf(e.sport_type) }));
+  const out = [];
+  (candidates || []).forEach((row) => {
+    const t = Date.parse(row.start_date || "");
+    if (!Number.isFinite(t)) return;
+    const family = familyOf(row.sport_type);
+    const hit = seen.find((e) => e.id !== Number(row.id) && e.family === family && Math.abs(e.t - t) <= windowSec * 1000);
+    if (hit) out.push({ row, of: hit.id });
+    else seen.push({ id: Number(row.id), t, family });
+  });
+  return out;
+}

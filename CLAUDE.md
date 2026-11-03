@@ -1014,6 +1014,13 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
   (`.fit.gz` via `fit-file-parser`, a devDependency used only here; `.gpx` and
   `.tcx` by regex). Splits, laps, best efforts and PR ranks are **computed**
   from the track; the export has no segment efforts, kudos or workout_type.
+- **Files-only exports** (no `activities.csv`, just `activities/<id>.fit.gz|.gpx`)
+  import too: the FIT session is the summary (`activityFromFit`), a GPX keeps
+  its name (`activityFromGpx`), names default to Strava's "Morning Run".
+  Keep the raw unzip in gitignored `tmp/strava-export/` (`--dir=`).
+- **No duplicates:** upsert on id, plus `findDuplicates` skips another id that
+  starts within 60 s in the same sport; existing rows are re-sent without
+  `name`, so a generated name never replaces a real one.
 - **`extra` jsonb** keeps every other CSV column (weather, steps, training
   load…) so nothing exported is lost; athlete weight goes to the private
   table's `extra`. `media/` is never read (no photos).

@@ -83,6 +83,25 @@ which case it found. RLS shows the public a row only when it is `visible`, not
 5. `npm run og:fallbacks -- --only=training` (the card's numbers) and
    `npm run ask:index` (the monthly `/ask` chunks); commit the card.
 
+**Files-only exports.** An archive (or a folder copied out of one) with
+`activities/` but no `activities.csv` still imports: each
+`<activity id>.fit.gz` / `.gpx` / `.tcx.gz` is the record. A FIT session
+carries the summary (sport, start, distance, moving and elapsed time, heart
+rate, cadence, power, calories, climb, device, plus temperature, step length
+and the rest in `extra`); a GPX carries its Strava name and type, and its
+numbers are computed from the track. With no names in a FIT file, an activity
+gets Strava's own default ("Morning Run", "Evening Weight Training"), and a
+later import with the CSV renames it in place. There is no visibility or gear
+in the files. Keep the unzipped files in a gitignored folder, e.g.
+`tmp/strava-export/`, and pass `--dir=tmp/strava-export`.
+
+**Never a duplicate row.** Rows upsert on Strava's id, so a re-run updates in
+place. Before writing, the script reads every stored id and start time; an
+activity that starts within 60 s of a stored one (or one earlier in the same
+run) under a *different* id, in the same sport, is skipped and listed
+(`findDuplicates` in `src/lib/stravaExport.js`). A files-only run never sends
+`name` for a row that already exists, so it cannot overwrite a real name.
+
 Options: `--csv-only` skips the GPS files (keeps routes and splits already
 stored), `--dir=<path>` reads another folder, `--tz=<IANA zone>` (or
 `STRAVA_TZ`) changes the zone days are counted in.

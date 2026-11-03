@@ -3,7 +3,7 @@ import React, {
 } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import { decodePolyline, formatDistance } from "../../../lib/strava";
+import { decodePolyline, formatDistance, haversine } from "../../../lib/strava";
 import { sportFamily } from "../../../lib/training";
 import {
   Legend, Tip, famColor, pointIn, prefersReducedMotion, useInView,
@@ -18,13 +18,34 @@ import {
 const W = 1000;
 const SECONDS = 16; // a full replay at 1×
 
-function project(routes) {
+const HOME_METRES = 15000;
+const median = (arr) => {
+  const a = [...arr].sort((x, y) => x - y);
+  return a.length ? a[Math.floor(a.length / 2)] : 0;
+};
+
+/**
+ * Routes → SVG paths. `home` frames the home ground: the routes whose middle
+ * is within 15 km of the median route's, so a few hikes to distant forts do
+ * not shrink every street run to a speck (they run off the edge instead).
+ * Falls back to everything when the home ground is not most of the log.
+ */
+function project(routes, home) {
   const decoded = routes.map((r) => decodePolyline(r.route));
-  // Frame the bulk of the log, not its few longest rides: the 1st–99th
-  // percentile of every point, padded. Outliers run off the edge.
+  const centres = decoded.map((pts) => {
+    const mid = pts[Math.floor(pts.length / 2)] || [0, 0];
+    return mid;
+  });
+  const centre = [median(centres.map((c) => c[0])), median(centres.map((c) => c[1]))];
+  const isHome = centres.map((c) => haversine(c, centre) <= HOME_METRES);
+  const homeCount = isHome.filter(Boolean).length;
+  const zoomable = homeCount >= routes.length * 0.4 && homeCount < routes.length;
+  const framed = home && zoomable ? decoded.filter((_, i) => isHome[i]) : decoded;
+  // Frame the bulk of what is framed: the 1st–99th percentile of its points,
+  // padded, so a single long ride does not set the scale either.
   const lats = [];
   const lngs = [];
-  decoded.forEach((pts) => pts.forEach(([la, ln], i) => {
+  framed.forEach((pts) => pts.forEach(([la, ln], i) => {
     if (i % 3 === 0) { lats.push(la); lngs.push(ln); }
   }));
   lats.sort((a, b) => a - b);
@@ -45,7 +66,9 @@ function project(routes) {
   const ox = (W - spanX * s) / 2;
   const oy = (H - spanY * s) / 2;
   const paths = decoded.map((pts) => pts.map(([la, ln], i) => `${i ? "L" : "M"}${(ox + (ln - minLng) * k * s).toFixed(1)} ${(oy + (maxLat - la) * s).toFixed(1)}`).join(""));
-  return { paths, H };
+  return {
+    paths, H, zoomable, away: routes.length - homeCount,
+  };
 }
 
 const NightMap = ({ routes }) => {
@@ -53,7 +76,10 @@ const NightMap = ({ routes }) => {
   const [ref, seen] = useInView(0.3);
   const boxRef = useRef(null);
   const list = useMemo(() => [...routes].sort((a, b) => (a.startDate < b.startDate ? -1 : 1)), [routes]);
-  const { paths, H } = useMemo(() => project(list), [list]);
+  const [home, setHome] = useState(true);
+  const {
+    paths, H, zoomable, away,
+  } = useMemo(() => project(list, home), [list, home]);
   const cumulative = useMemo(() => {
     let s = 0;
     return list.map((r) => { s += Number(r.distance) || 0; return s; });
@@ -103,7 +129,10 @@ const NightMap = ({ routes }) => {
     const marks = [];
     list.forEach((r, i) => {
       const y = r.date?.slice(0, 4);
-      if (y && (!marks.length || marks[marks.length - 1].y !== y)) marks.push({ y, at: i / Math.max(1, N - 1) });
+      const at = i / Math.max(1, N - 1);
+      const prev = marks[marks.length - 1];
+      // A year with a handful of routes would print on top of the next one.
+      if (y && (!prev || (prev.y !== y && at - prev.at > 0.08))) marks.push({ y, at });
     });
     return marks;
   }, [list, N]);
@@ -208,6 +237,19 @@ const NightMap = ({ routes }) => {
             aria-label="Scrub through the routes"
           />
         </div>
+        {zoomable && (
+          <button
+            type="button"
+            onClick={() => setHome((h) => !h)}
+            aria-pressed={!home}
+            className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full border tr-kicker"
+            style={{ borderColor: "var(--tr-line)", color: "var(--tr-ink)" }}
+            title={home ? `Zoom out to the ${away} routes further afield` : "Zoom in on the home ground"}
+          >
+            <span className="material-symbols-outlined text-base" aria-hidden="true">{home ? "zoom_out_map" : "zoom_in_map"}</span>
+            {home ? "Everywhere" : "Home ground"}
+          </button>
+        )}
         <div className="inline-flex rounded-full border overflow-hidden" style={{ borderColor: "var(--tr-line)" }} role="group" aria-label="Replay speed">
           {[1, 3].map((s) => (
             <button
