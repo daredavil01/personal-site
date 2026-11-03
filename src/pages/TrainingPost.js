@@ -167,7 +167,7 @@ const TrainingPost = () => {
 
         <DayStory activity={a} />
 
-        {a.route && (
+        {a.route && a.splits.length < 2 && (
           <section className="flex flex-col gap-2">
             <div className="aspect-[4/3] md:aspect-[2/1] w-full p-4 rounded-2xl border border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-secondary">
               <RouteShape polyline={a.route} label={`Route of ${a.name}`} strokeWidth={3} animate />
@@ -176,17 +176,23 @@ const TrainingPost = () => {
           </section>
         )}
 
-        <Table
-          title="Splits"
-          head={["Km", "Time", isPaceSport(a.sport) ? "Pace" : "Speed", "Elev.", "HR"]}
-          rows={a.splits.map((s) => [
-            s.split,
-            formatDuration(s.moving_time),
-            speed(s.average_speed),
-            s.elevation_difference != null ? `${Math.round(s.elevation_difference)} m` : null,
-            round(s.average_heartrate),
-          ])}
-        />
+        {(() => {
+          // Running dynamics columns only when the watch recorded them.
+          const has = (k) => a.splits.some((x) => x[k] != null);
+          const cols = [
+            ["Km", (x) => x.split],
+            ["Time", (x) => formatDuration(x.moving_time)],
+            [isPaceSport(a.sport) ? "Pace" : "Speed", (x) => speed(x.average_speed)],
+            ["Elev.", (x) => (x.elevation_difference != null ? `${Math.round(x.elevation_difference)} m` : null)],
+            ["HR", (x) => round(x.average_heartrate)],
+            has("average_cadence") && ["Cadence", (x) => round(isPaceSport(a.sport) ? x.average_cadence * 2 : x.average_cadence)],
+            has("average_watts") && ["Power", (x) => (x.average_watts ? `${round(x.average_watts)} W` : null)],
+            has("average_step_length") && ["Stride", (x) => (x.average_step_length ? `${(x.average_step_length / 1000).toFixed(2)} m` : null)],
+            has("average_ground_contact") && ["Contact", (x) => (x.average_ground_contact ? `${round(x.average_ground_contact)} ms` : null)],
+            has("average_vertical_oscillation") && ["Bounce", (x) => (x.average_vertical_oscillation ? `${(x.average_vertical_oscillation / 10).toFixed(1)} cm` : null)],
+          ].filter(Boolean);
+          return <Table title="Splits" head={cols.map((c) => c[0])} rows={a.splits.map((x) => cols.map((c) => c[1](x)))} />;
+        })()}
 
         {a.laps.length > 1 && (
           <Table

@@ -23,6 +23,12 @@ export function projectRoute(encoded, size = 100, pad = 6) {
   return xy.map(([x, y]) => `${((x - minX) * scale + offX).toFixed(1)},${((y - minY) * scale + offY).toFixed(1)}`).join(" ");
 }
 
+/** The route as [[x, y]] in a `size` box (the same projection projectRoute draws). */
+export function projectRoutePoints(encoded, size = 100, pad = 6) {
+  const s = projectRoute(encoded, size, pad);
+  return s ? s.split(" ").map((p) => p.split(",").map(Number)) : null;
+}
+
 const RouteShape = ({
   polyline, label, className, strokeWidth, animate, color,
 }) => {

@@ -315,3 +315,55 @@ describe("files-only exports", () => {
     expect(findDuplicates(cands, existing).map((d) => [d.row.id, d.of])).toEqual([[2, 1], [6, 5]]);
   });
 });
+
+describe("everything in the file", () => {
+  const {
+    profileOf, setsFromFit, profileFromTrack, splitsOf: splits, activityFromFit: fromFit,
+  } = require("./stravaExport"); // eslint-disable-line global-require
+
+  // A 2 km run, one point every 10 s at 3.33 m/s, climbing 10 m.
+  const pts = Array.from({ length: 61 }, (_, i) => ({
+    t: 1000 + i * 10, dist: i * 33.33, ele: 560 + i / 6, hr: 140 + (i % 5), speed: 3.33, cad: 84, watts: 210, step: 1190, gct: 250, vosc: 85, lat: 18.5, lng: 73.8,
+  }));
+
+  test("splits carry running dynamics when the watch records them", () => {
+    const s = splits(pts);
+    expect(s[0]).toMatchObject({
+      average_cadence: 84, average_watts: 210, average_step_length: 1190, average_ground_contact: 250, average_vertical_oscillation: 85,
+    });
+    const bare = splits(pts.map(({ t, dist, ele }) => ({ t, dist, ele })));
+    expect(bare[0]).not.toHaveProperty("average_cadence");
+  });
+
+  test("the profile is thinned, by distance, and never holds a position", () => {
+    const p = profileOf(pts, 20);
+    expect(p.by).toBe("distance");
+    expect(p.x.length).toBeLessThanOrEqual(20);
+    expect(p.x[p.x.length - 1]).toBe(2000);
+    expect(p.t[p.t.length - 1]).toBe(600);
+    ["e", "h", "v", "c", "w", "s", "g", "o"].forEach((k) => expect(p[k]).toHaveLength(p.x.length));
+    expect(JSON.stringify(p)).not.toMatch(/18\.5|73\.8/);
+    const still = profileOf(pts.map((q) => ({ t: q.t, dist: 0, hr: q.hr })));
+    expect(still.by).toBe("time");
+    expect(Object.keys(still).sort()).toEqual(["by", "h", "t", "x"]);
+  });
+
+  test("strength sets come through, and summarise into extra", () => {
+    const fit = {
+      sessions: [{ sport: "training", sub_sport: "strength_training", start_time: "2026-05-20T00:42:38Z" }],
+      sets: [
+        { set_type: "active", start_time: "2026-05-20T00:43:38Z", duration: 45.2, repetitions: 12, category: ["bench_press"] },
+        { set_type: "rest", start_time: "2026-05-20T00:44:23Z", duration: 90 },
+        { set_type: "active", start_time: "2026-05-20T00:45:53Z", duration: 40, repetitions: 10, category: ["squat"], weight: 60 },
+      ],
+    };
+    expect(setsFromFit(fit)).toEqual([
+      { type: "active", start: 60, duration: 45, reps: 12, category: "bench press", weight: null },
+      { type: "rest", start: 105, duration: 90, reps: null, category: null, weight: null },
+      { type: "active", start: 195, duration: 40, reps: 10, category: "squat", weight: 60 },
+    ]);
+    expect(fromFit(fit, { id: 9 }).row.extra).toMatchObject({ Sets: 2, Repetitions: 22, Exercises: "bench press, squat" });
+    expect(profileFromTrack({ points: [] }, fit).sets).toHaveLength(3);
+    expect(profileFromTrack({ points: [] }, null)).toBeNull();
+  });
+});

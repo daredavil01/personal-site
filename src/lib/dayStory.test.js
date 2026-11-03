@@ -73,3 +73,46 @@ test("the replay walks, then waits at the stop", () => {
   expect(positionAt(s.points, s.points[3].at - 10)).toEqual({ p: 3, stopped: true });
   expect(positionAt(s.points, 1e9).p).toBe(5);
 });
+
+describe("the group of ten", () => {
+  // eslint-disable-next-line global-require
+  const { pickSlots, tipAt, terrainOf, GROUP } = require("./dayStory");
+  const many = Array.from({ length: 30 }, (_, k) => split(k + 1, { speed: 3 + (k % 3) * 0.1 }));
+  const s = storyOf(many, { sport: "Run" });
+
+  test("ten places: the moments first, the rest spread out", () => {
+    const slots = pickSlots(s.beats, (i) => i * 30, { gap: 64 });
+    expect(slots).toHaveLength(GROUP);
+    expect(slots[0].kind).toBe("start");
+    expect(slots[slots.length - 1].kind).toBe("finish");
+    const gaps = slots.slice(1).map((b, k) => b.i - slots[k].i);
+    expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(3);
+  });
+
+  test("fewer splits than ten: as many places as there are points", () => {
+    const small = storyOf([split(1), split(2), split(3)], { sport: "Run" });
+    expect(pickSlots(small.beats, (i) => i * 200)).toHaveLength(4);
+  });
+
+  test("the tip moves along the kilometres and stops at the stop", () => {
+    const st = storyOf(SPLITS, { sport: "Run" });
+    expect(tipAt(st.points, 0).km).toBe(0);
+    expect(tipAt(st.points, -3).km).toBe(0); // a frame stamped before the start
+    expect(tipAt(st.points, Number.NaN).km).toBe(0);
+    expect(tipAt(st.points, st.points[1].at / 2).km).toBeCloseTo(0.5, 1);
+    expect(tipAt(st.points, st.points[3].at - 5)).toEqual({ km: st.points[3].km, stopped: true });
+  });
+
+  test("terrain: the profile when there is one, else the splits", () => {
+    const st = storyOf(SPLITS, { sport: "Run" });
+    const flat = terrainOf(st.points, null);
+    expect(flat.elevAt(st.points[4].km)).toBe(22);
+    const prof = {
+      by: "distance", x: [1100, 2200, 3300, 4400], e: [500, 540, 520, 530],
+    };
+    const t = terrainOf(st.points, prof);
+    expect(t.elevAt(0)).toBe(0);
+    expect(t.elevAt(2.2)).toBeCloseTo(40);
+    expect(t.line[t.line.length - 1].km).toBeCloseTo(st.points[st.points.length - 1].km);
+  });
+});

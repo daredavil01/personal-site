@@ -42,7 +42,7 @@ import { createClient } from "@supabase/supabase-js";
 import FitParser from "fit-file-parser";
 import {
   activityFromCsv, activityFromFit, activityFromGpx, csvObjects, detailFromTrack, findDuplicates,
-  gearFromCsv, rankBestEfforts, trackFromFit, trackFromGpx, trackFromTcx,
+  gearFromCsv, profileFromTrack, rankBestEfforts, trackFromFit, trackFromGpx, trackFromTcx,
 } from "../src/lib/stravaExport.js";
 import { sportFamily } from "../src/lib/training.js";
 
@@ -204,9 +204,13 @@ async function main() {
       // activity, or one whose file cannot be read, gets nulls.
       let detail = { ...EMPTY_DETAIL };
       let gps = { ...EMPTY_GPS };
+      let profile = null;
       if (file) {
         // eslint-disable-next-line no-await-in-loop
-        const { track, problem } = await readTrack(file);
+        const { track, problem, fit } = await readTrack(file);
+        // The streams and a strength session's sets, for every activity with
+        // a file — a session that goes nowhere still has a heart rate.
+        profile = track && track.points.length > 1 ? profileFromTrack(track, fit) : null;
         if (track && track.points.length > 1 && (row.distance || 0) > 0) {
           ({ detail, gps } = detailFromTrack(track, { isRun: sportFamily(row.sport_type) === "run", now }));
           withTrack += 1;
@@ -215,7 +219,7 @@ async function main() {
           problems.push(`${row.id} ${file}: ${problem || "no track points"}`);
         }
       }
-      Object.assign(row, detail, { detail_synced_at: now });
+      Object.assign(row, detail, { profile, detail_synced_at: now });
       Object.assign(privateRow, gps);
     }
     rows.push(row);
@@ -257,6 +261,15 @@ async function main() {
     process.exit(1);
   }
   const supabase = createClient(url, key, { auth: { persistSession: false } });
+
+  // `profile` needs 0040. Without it the rest still imports.
+  const probe = await supabase.from("strava_activities").select("profile").limit(1);
+  if (probe.error) {
+    console.warn("  ! strava_activities.profile is missing — apply supabase/migrations/0040_training_profile.sql, then re-run to add the streams.");
+    rows.forEach((r) => { delete r.profile; }); // eslint-disable-line no-param-reassign
+  } else {
+    console.log(`Streams for ${rows.filter((r) => r.profile).length} activities, sets for ${rows.filter((r) => r.profile?.sets).length}.`);
+  }
 
   // Duplicate guard. Same id = the same activity, updated in place. Another
   // id starting within 60 s in the same sport = the same activity stored

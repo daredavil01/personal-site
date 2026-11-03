@@ -148,7 +148,9 @@ export function fitBeats(beats, pxOf, gap = 64) {
 }
 
 /** Where the replay figure is at `t` seconds: { p (point index, fractional), stopped }. */
-export function positionAt(points, t) {
+export function positionAt(points, tIn) {
+  // A requestAnimationFrame timestamp can predate the start by a few ms.
+  const t = Math.max(0, Number(tIn) || 0);
   for (let k = 1; k < points.length; k += 1) {
     const a = points[k - 1];
     const b = points[k];
@@ -162,4 +164,73 @@ export function positionAt(points, t) {
     }
   }
   return { p: points.length - 1, stopped: false };
+}
+
+/** The group that sets out together; one stays behind at each slot. */
+export const GROUP = 10;
+
+/**
+ * Up to `count` places along the line for the group to fill: every beat
+ * fitBeats keeps, then pace figures chosen one at a time as far as possible
+ * from every place already taken, so the rest end up spread evenly ("at the
+ * end they are distributed"). Sorted along the line.
+ */
+export function pickSlots(beats, pxOf, { count = GROUP, gap = 64 } = {}) {
+  // When more fit than the group has people, the moments win over pace figures.
+  const kept = fitBeats(beats, pxOf, gap).sort((a, b) => a.priority - b.priority || a.i - b.i).slice(0, count);
+  const spare = beats.filter((b) => b.kind === "pace" && !kept.includes(b));
+  while (kept.length < count && spare.length) {
+    let best = 0;
+    let bestD = -1;
+    spare.forEach((b, k) => {
+      const d = Math.min(...kept.map((x) => Math.abs(pxOf(x.i) - pxOf(b.i))));
+      if (d > bestD) { bestD = d; best = k; }
+    });
+    kept.push(spare.splice(best, 1)[0]);
+  }
+  return kept.sort((a, b) => a.i - b.i);
+}
+
+/** Kilometre reached at `t` seconds, and whether the group is stopped there. */
+export function tipAt(points, t) {
+  const { p, stopped } = positionAt(points, t);
+  const k = Math.max(0, Math.min(points.length - 2, Math.floor(p)));
+  const f = Math.max(0, Math.min(1, p - k));
+  return { km: points[k].km + (points[k + 1].km - points[k].km) * f, stopped };
+}
+
+/**
+ * The ground under the line: the profile's altitude stream when the file had
+ * one (240 samples, so a hill is a hill, not a kilometre's net change), else
+ * the splits' summed elevation. → { line: [{ km, elev }], elevAt(km) }, elev
+ * relative to the start.
+ */
+export function terrainOf(points, profile) {
+  let line;
+  if (profile && profile.by === "distance" && Array.isArray(profile.e) && profile.e.some((v) => v != null)) {
+    const base = profile.e.find((v) => v != null);
+    line = [{ km: 0, elev: 0 }];
+    profile.x.forEach((x, k) => {
+      if (profile.e[k] != null) line.push({ km: x / 1000, elev: profile.e[k] - base });
+    });
+    // Stretch to the splits' length so figures and line agree on where the end is.
+    const end = points[points.length - 1].km;
+    const last = line[line.length - 1].km || 1;
+    line = line.map((q) => ({ km: (q.km / last) * end, elev: q.elev }));
+  } else {
+    line = points.map((p) => ({ km: p.km, elev: p.elev }));
+  }
+  const elevAt = (km) => {
+    if (km <= line[0].km) return line[0].elev;
+    for (let k = 1; k < line.length; k += 1) {
+      if (km <= line[k].km) {
+        const a = line[k - 1];
+        const b = line[k];
+        const f = (km - a.km) / ((b.km - a.km) || 1);
+        return a.elev + (b.elev - a.elev) * f;
+      }
+    }
+    return line[line.length - 1].elev;
+  };
+  return { line, elevAt };
 }

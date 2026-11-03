@@ -364,6 +364,10 @@ export function trackFromFit(fit) {
     hr: num(r.heart_rate),
     cad: num(r.cadence),
     watts: num(r.power),
+    speed: num(r.enhanced_speed ?? r.speed),
+    step: num(r.step_length),
+    gct: num(r.stance_time) || null,
+    vosc: num(r.vertical_oscillation) || null,
   })).filter((p) => p.t != null);
   const laps = (fit?.laps || []).map((l) => ({
     start: fitTime(l.start_time),
@@ -419,7 +423,7 @@ export function splitsOf(points, size = 1000) {
       if (distance < 50 && last) break; // a few metres past the last whole km
       const elapsed = points[i].t - points[from].t;
       const moving = movingBetween(points, from, i);
-      out.push({
+      const split = {
         split: out.length + 1,
         distance: round1(distance),
         elapsed_time: Math.round(elapsed),
@@ -428,7 +432,18 @@ export function splitsOf(points, size = 1000) {
           ? round1(seg[seg.length - 1].ele - seg[0].ele) : null,
         average_speed: moving > 0 ? round1((distance / moving) * 100) / 100 : null,
         average_heartrate: round1(avg(seg.map((p) => p.hr))),
-      });
+      };
+      // Running dynamics, when the watch records them (null otherwise and
+      // dropped, so a GPX split keeps the API's shape).
+      const extras = {
+        average_cadence: round1(avg(seg.map((p) => p.cad))),
+        average_watts: round1(avg(seg.map((p) => p.watts))),
+        average_step_length: round1(avg(seg.map((p) => p.step))),
+        average_ground_contact: round1(avg(seg.map((p) => p.gct))),
+        average_vertical_oscillation: round1(avg(seg.map((p) => p.vosc))),
+      };
+      Object.entries(extras).forEach(([k, v]) => { if (v != null) split[k] = v; });
+      out.push(split);
       from = i;
       target += size;
       if (target > total + size) break;
@@ -649,6 +664,7 @@ const FIT_EXTRA = {
   training_load_peak: "Training Load",
   num_lengths: "Pool Lengths",
   pool_length: "Pool Length",
+  avg_stance_time_balance: "Ground Contact Balance (%)",
 };
 
 const emptyRow = (id, now, timeZone) => ({
@@ -697,6 +713,19 @@ const minMax = (values) => {
   return v.length ? [Math.min(...v), Math.max(...v)] : [null, null];
 };
 
+/** FIT `set` messages → [{ type, start (s into the session), duration, reps, category, weight }]. */
+export function setsFromFit(fit) {
+  const s0 = fitTime(fit?.sessions?.[0]?.start_time);
+  return (fit?.sets || []).map((x) => ({
+    type: x.set_type === "rest" ? "rest" : "active",
+    start: s0 != null && fitTime(x.start_time) != null ? Math.round(fitTime(x.start_time) - s0) : null,
+    duration: x.duration == null ? null : Math.round(num(x.duration)),
+    reps: num(x.repetitions),
+    category: Array.isArray(x.category) ? x.category.filter(Boolean).join(", ").replace(/_/g, " ") || null : (text(x.category) || "").replace(/_/g, " ") || null,
+    weight: num(x.weight),
+  }));
+}
+
 /**
  * A parsed FIT file (fit-file-parser, mode "list") → { row, privateRow }, or
  * null when it has no session. `id` is the Strava activity id (the file name).
@@ -714,6 +743,21 @@ export function activityFromFit(fit, { id, timeZone = "Asia/Kolkata", now = new 
   Object.entries(FIT_EXTRA).forEach(([k, label]) => {
     if (num(s[k]) != null) extra[label] = num(s[k]);
   });
+  // COROS's grade-adjusted pace arrives as a developer field in m/s.
+  const effort = num(s["Effort Pace"]);
+  if (effort) {
+    const secs = Math.round(1000 / effort);
+    extra["Effort Pace"] = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} /km`;
+  }
+  const sets = setsFromFit(fit);
+  const active = sets.filter((x) => x.type === "active");
+  if (active.length) {
+    extra.Sets = active.length;
+    const reps = active.reduce((a, x) => a + (x.reps || 0), 0);
+    if (reps) extra.Repetitions = reps;
+    const cats = [...new Set(active.map((x) => x.category).filter(Boolean))];
+    if (cats.length) extra.Exercises = cats.join(", ");
+  }
   const avgHr = num(s.avg_heart_rate);
   const distance = num(s.total_distance);
   return {
@@ -818,4 +862,61 @@ export function findDuplicates(candidates, existing = [], { windowSec = 60 } = {
     else seen.push({ id: Number(row.id), t, family });
   });
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// The profile: the file's streams, thinned, with no position in them
+// ---------------------------------------------------------------------------
+//
+// A watch records every second: heart rate, speed, altitude, cadence, power,
+// step length, ground contact, vertical oscillation. The splits average
+// those per kilometre; the profile keeps their shape — about 240 samples,
+// bucketed by distance (or by time for a session that goes nowhere, like
+// strength) — so the day story can draw the real terrain and heart rate.
+// No latitude or longitude ever goes in: it is public, like the splits.
+// Strength sessions add their sets (reps, duration, exercise).
+
+const PROFILE_SAMPLES = 240;
+const STREAMS = {
+  e: "ele", h: "hr", v: "speed", c: "cad", w: "watts", s: "step", g: "gct", o: "vosc",
+};
+const r1 = (v) => (v == null ? null : Math.round(v * 10) / 10);
+
+/** points → { by, x: [...], t: [...], e, h, v, c, w, s, g, o } (absent streams dropped), or null. */
+export function profileOf(points, samples = PROFILE_SAMPLES) {
+  const pts = (points || []).filter((p) => p.t != null);
+  if (pts.length < 2) return null;
+  const t0 = pts[0].t;
+  const total = pts[pts.length - 1].dist || 0;
+  const by = total >= 200 ? "distance" : "time";
+  const xOf = (p) => (by === "distance" ? p.dist : p.t - t0);
+  const span = xOf(pts[pts.length - 1]) || 1;
+  const n = Math.min(samples, pts.length);
+  const buckets = Array.from({ length: n }, () => []);
+  pts.forEach((p) => {
+    const k = Math.min(n - 1, Math.floor((xOf(p) / span) * n));
+    if (k >= 0) buckets[k].push(p);
+  });
+  const out = { by, x: [], t: [] };
+  Object.keys(STREAMS).forEach((k) => { out[k] = []; });
+  buckets.forEach((b) => {
+    if (!b.length) return;
+    const last = b[b.length - 1];
+    out.x.push(Math.round(xOf(last)));
+    out.t.push(Math.round(last.t - t0));
+    Object.entries(STREAMS).forEach(([k, field]) => {
+      const v = b.map((p) => p[field]).filter((x) => x != null && (field === "ele" || x > 0));
+      out[k].push(v.length ? r1(v.reduce((a, c) => a + c, 0) / v.length) : null);
+    });
+  });
+  Object.keys(STREAMS).forEach((k) => { if (out[k].every((v) => v == null)) delete out[k]; });
+  return out.x.length >= 2 ? out : null;
+}
+
+/** A track (and its FIT, when there is one) → the profile column, or null. */
+export function profileFromTrack(track, fit = null) {
+  const profile = profileOf(track?.points);
+  const sets = fit ? setsFromFit(fit) : [];
+  if (!profile && !sets.length) return null;
+  return { ...(profile || {}), ...(sets.length ? { sets } : {}) };
 }

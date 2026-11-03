@@ -5,6 +5,7 @@ import YearRace from "./YearRace";
 import MonthlyBars from "./MonthlyBars";
 import RecordMedals from "../RecordMedals";
 import Milestones from "../Milestones";
+import DayPicker from "../DayPicker";
 import RouteShape from "../RouteShape";
 import { FAMILY_ICONS, famColor } from "../shared";
 import {
@@ -53,7 +54,7 @@ const Sparkbars = ({ splits }) => {
 Sparkbars.propTypes = { splits: PropTypes.arrayOf(PropTypes.shape({})) };
 Sparkbars.defaultProps = { splits: [] };
 
-const Overview = ({ rows, today }) => {
+const Overview = ({ rows, today, demo }) => {
   const years = useMemo(() => yearsOf(rows), [rows]);
   const [year, setYear] = useState(years[0]);
   const fams = useMemo(() => totalsByFamily(rows), [rows]);
@@ -83,6 +84,10 @@ const Overview = ({ rows, today }) => {
         )}
       >
         <YearRace rows={rows} today={today} />
+      </Card>
+
+      <Card kicker="One day, up close" title="Ten set out; watch who stays where">
+        <DayPicker rows={rows} demo={demo} />
       </Card>
 
       <div className="grid lg:grid-cols-[1.6fr_1fr] gap-6">
@@ -178,7 +183,7 @@ const Overview = ({ rows, today }) => {
   );
 };
 
-Overview.propTypes = { rows: PropTypes.arrayOf(PropTypes.shape({})).isRequired, today: PropTypes.string };
-Overview.defaultProps = { today: undefined };
+Overview.propTypes = { rows: PropTypes.arrayOf(PropTypes.shape({})).isRequired, today: PropTypes.string, demo: PropTypes.bool };
+Overview.defaultProps = { today: undefined, demo: false };
 
 export default Overview;

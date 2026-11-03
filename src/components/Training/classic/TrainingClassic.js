@@ -69,12 +69,12 @@ const TrainingClassic = ({ rows, demo, filterState }) => {
       )}
 
       <div key={tab} className="tr-rise">
-        {tab === "overview" && <Overview rows={rows} />}
+        {tab === "overview" && <Overview rows={rows} demo={demo} />}
         {tab === "log" && (filtered.length
           ? <ActivityLog rows={filtered} />
           : <p className="text-stone-500 dark:text-stone-400 italic text-center py-12 mb-0">No activities match these filters.</p>)}
         {tab === "calendar" && calendarYear && (
-          <YearHeatmap rows={rows} year={calendarYear} years={years} onYear={(y) => setFilter("year", String(y))} />
+          <YearHeatmap rows={rows} year={calendarYear} years={years} onYear={(y) => setFilter("year", String(y))} demo={demo} />
         )}
         {tab === "stats" && <StatsPRs rows={rows} demo={demo} />}
         {tab === "routes" && <RouteGrid filters={filters} demo={demo} />}

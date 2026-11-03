@@ -64,6 +64,8 @@ export const fromActivityRow = (r) => ({
   description: r.description ?? "",
   route: r.route_polyline || null,
   splits: r.splits_metric || [],
+  // Thinned streams + strength sets (0040), only on a full-row read.
+  profile: r.profile || null,
   laps: r.laps || [],
   bestEfforts: r.best_efforts || [],
   segmentEfforts: r.segment_efforts || [],

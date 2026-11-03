@@ -11,6 +11,7 @@ import ShoeRack from "./ShoeRack";
 import RecordMedals from "../RecordMedals";
 import Milestones from "../Milestones";
 import ActivityLog from "../classic/ActivityLog";
+import DayPicker from "../DayPicker";
 import { useTrainingExtra } from "../useTrainingData";
 import { FAMILY_ICONS, famColor } from "../shared";
 import { FAMILY_LABELS, filterActivities, sportFamily } from "../../../lib/training";
@@ -72,6 +73,14 @@ const TrainingAtlas = ({ rows, demo, filterState }) => {
       ) : (
         <>
           {viewRoutes.length > 0 && <NightMap key={`map-${lens}`} routes={viewRoutes} />}
+          <section className="rounded-3xl px-4 py-8 md:px-10 md:py-10 bg-[#fbf3e2] dark:bg-stone-900 border border-[#efe0bf] dark:border-stone-800" aria-labelledby="tr-day-pick-title">
+            <p className="tr-kicker mb-2 text-[#b22200]">Interlude</p>
+            <h2 id="tr-day-pick-title" className="font-headline text-3xl md:text-5xl mb-1 text-stone-900 dark:text-stone-100">One day, up close</h2>
+            <p className="text-sm mb-6 max-w-lg text-stone-600 dark:text-stone-400">
+              Ten set out together. One stays wherever something happened — the fastest kilometre, a stop by the fire, the hardest climb — and the rest spread out to the finish.
+            </p>
+            <DayPicker rows={view} demo={demo} />
+          </section>
           <YearSpiral rows={view} />
           {showRace && efforts && efforts.length > 0 && <GhostRace efforts={efforts} />}
           <WeeklyTides rows={view} />

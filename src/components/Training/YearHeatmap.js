@@ -6,6 +6,7 @@ import {
 } from "../../lib/training";
 import { formatDistance, formatDuration } from "../../lib/strava";
 import { FAMILY_ICONS, famColor } from "./shared";
+import { DayLoader } from "./DayPicker";
 
 // One year as a grid of days, Monday-first weeks, shaded by distance relative
 // to the year's biggest day (one hue, light to dark). Pick a day to list what
@@ -27,7 +28,7 @@ const longDate = (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB
 });
 
 const YearHeatmap = ({
-  rows, year, years, onYear,
+  rows, year, years, onYear, demo,
 }) => {
   const grid = useMemo(() => heatmap(rows, year), [rows, year]);
   const yearRows = useMemo(() => rows.filter((r) => r.date && r.date.startsWith(String(year))), [rows, year]);
@@ -158,6 +159,11 @@ const YearHeatmap = ({
                 </li>
               ))}
             </ul>
+            {pickedRows[0] && (
+              <div className="mt-4">
+                <DayLoader key={pickedRows[0].id} id={pickedRows[0].id} demo={demo} title={pickedRows[0].name} />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -199,6 +205,9 @@ YearHeatmap.propTypes = {
   year: PropTypes.number.isRequired,
   years: PropTypes.arrayOf(PropTypes.number).isRequired,
   onYear: PropTypes.func.isRequired,
+  demo: PropTypes.bool,
 };
+
+YearHeatmap.defaultProps = { demo: false };
 
 export default YearHeatmap;

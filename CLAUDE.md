@@ -1002,7 +1002,7 @@ YouTube channel **https://www.youtube.com/@sankettambare7474** — not typed in.
 ### Training Page (Strava)
 
 **Tables:** `strava_activities` + `strava_activity_private` / `strava_gear`
-(`0038_training.sql`, `0039_training_from_export.sql`), filled from a **Strava
+(`0038_training.sql`, `0039_training_from_export.sql`, `0040_training_profile.sql`), filled from a **Strava
 bulk export** — not typed in, and **not the API** (it needs a paid subscription
 since June 2026). Full inventory and steps: `docs/strava.md`.
 
@@ -1048,6 +1048,13 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
   (`useTrainingFilters`; `tab`, never `view`). Sport colours are the
   `--tr-<family>` tokens in `training.css` — a validated categorical set with
   separate dark steps; text never wears them.
+- **The day story** (`DayStory.js`, model in `src/lib/dayStory.js`, tested):
+  an activity as its terrain line drawing itself on the activity's clock, a
+  group of ten walking at the tip, one staying at each moment
+  (`pickSlots`), the route map walked in step. On `/training/:id`, in the
+  Overview and atlas via `DayPicker`, and under a picked calendar day.
+  Sessions without splits get `SessionStory` (heart rate + sets). It reads
+  `profile` (`0040`: thinned streams, never a position, plus strength sets).
 - **Sample data:** while the table is empty, or with `?demo=1`, everything runs
   on the seeded log in `src/lib/trainingDemo.js` (ids ≥ `DEMO_ID_BASE`,
   `trainingDemoId.js`, which `/training/:id` also reads) and says "Sample data".

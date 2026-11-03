@@ -2,7 +2,7 @@
 
 Every Strava activity, read from a **Strava bulk export** into Supabase and
 shown at `/training`. Hand-written; the schema is
-`supabase/migrations/0038_training.sql` + `0039_training_from_export.sql`.
+`supabase/migrations/0038_training.sql` + `0039_training_from_export.sql` + `0040_training_profile.sql`.
 
 Why an export and not the API: since June 2026 Strava's API needs a paid
 subscription (about $11.99/month) even for a personal project reading its own
@@ -45,6 +45,14 @@ archive and re-run the import.
 - **Not available from the export** — kudos/comment/achievement counts, segment
   efforts, `workout_type`, Strava's own totals and HR zones. Left null and
   omitted on the page.
+- **`profile` (jsonb, `0040`)** — the file's streams thinned to ~240 samples
+  (by distance, or by time for a session that goes nowhere): `x`, `t`, and
+  whichever of altitude `e`, heart rate `h`, speed `v`, cadence `c`, power
+  `w`, step length `s`, ground contact `g`, vertical oscillation `o` the
+  watch recorded — **never a position**, so it is public like the splits —
+  plus a strength session's `sets` (type, start, duration, reps, exercise,
+  weight). Read only by `/training/:id`. Splits also carry per-km cadence,
+  power, step length, ground contact and vertical oscillation when recorded.
 - **The site's own** — `visible`, `sport_id` (the `/sports` race this activity
   is), tags. The import never writes these.
 
