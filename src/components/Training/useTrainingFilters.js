@@ -22,7 +22,7 @@ export default function useTrainingFilters(rows) {
     tags: parseList(searchParams.get("tags")),
     sort: searchParams.get("sort") ?? DEFAULTS.sort,
     races: searchParams.get("races") === "1",
-    tab: searchParams.get("tab") ?? "log",
+    tab: searchParams.get("tab") ?? "overview",
   }), [searchParams]);
 
   const update = useCallback((patch) => {
@@ -30,7 +30,7 @@ export default function useTrainingFilters(rows) {
     Object.entries(patch).forEach(([key, value]) => {
       let v = Array.isArray(value) ? value.join(",") : value;
       if (v === true) v = "1";
-      if (!v || v === DEFAULTS[key] || (key === "tab" && v === "log")) next.delete(key);
+      if (!v || v === DEFAULTS[key] || (key === "tab" && v === "overview")) next.delete(key);
       else next.set(key, String(v));
     });
     setSearchParams(next, { replace: true });

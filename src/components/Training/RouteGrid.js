@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import RouteShape from "./RouteShape";
 import { LoadingBlock } from "../common/AsyncStates";
-import { listRoutes } from "../../lib/api/training";
-import { filterActivities } from "../../lib/training";
+import { filterActivities, sportFamily } from "../../lib/training";
+import { famColor } from "./shared";
+import { useTrainingExtra } from "./useTrainingData";
 import { formatDistance } from "../../lib/strava";
 
 // Every route as a small drawing, newest first. The polylines are loaded only
@@ -13,15 +14,9 @@ import { formatDistance } from "../../lib/strava";
 
 const PAGE = 60;
 
-const RouteGrid = ({ filters }) => {
-  const [routes, setRoutes] = useState(null);
+const RouteGrid = ({ filters, demo }) => {
+  const routes = useTrainingExtra("routes", demo);
   const [shown, setShown] = useState(PAGE);
-
-  useEffect(() => {
-    let live = true;
-    listRoutes().then((d) => live && setRoutes(d)).catch(() => live && setRoutes([]));
-    return () => { live = false; };
-  }, []);
 
   const list = useMemo(() => filterActivities((routes || []).filter((r) => r.route), filters), [routes, filters]);
 
@@ -37,12 +32,16 @@ const RouteGrid = ({ filters }) => {
           <li key={r.id}>
             <Link
               to={`/training/${r.id}`}
-              className="group block aspect-square p-2 rounded-xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:text-secondary hover:border-secondary/40 no-underline"
+              className="group relative block aspect-square p-2 rounded-xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 no-underline overflow-hidden hover:-translate-y-0.5 hover:shadow-lg hover:border-secondary/40 transition-all"
               title={`${r.name} · ${r.date} · ${formatDistance(r.distance)}`}
             >
-              <RouteShape polyline={r.route} label={`Route of ${r.name}`} className="w-full h-[78%]" />
+              <RouteShape polyline={r.route} label={`Route of ${r.name}`} className="w-full h-[78%] transition-transform group-hover:scale-105" color={famColor(sportFamily(r.sport))} animate />
               <span className="block font-label text-[9px] uppercase tracking-widest text-stone-400 truncate text-center">
                 {formatDistance(r.distance)}
+              </span>
+              <span className="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-stone-900/85 text-white text-[10px] leading-tight translate-y-full group-hover:translate-y-0 transition-transform">
+                <span className="block truncate font-medium">{r.name}</span>
+                <span className="block opacity-70">{r.date}</span>
               </span>
             </Link>
           </li>
@@ -63,6 +62,8 @@ const RouteGrid = ({ filters }) => {
 
 RouteGrid.propTypes = {
   filters: PropTypes.shape({}).isRequired,
+  demo: PropTypes.bool,
 };
+RouteGrid.defaultProps = { demo: false };
 
 export default RouteGrid;

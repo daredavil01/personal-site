@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { FAMILY_LABELS, totalsByFamily, totalsByYear } from "../../lib/training";
 import { formatDistance, formatDuration } from "../../lib/strava";
-import { getBestEfforts, getGear } from "../../lib/api/training";
+import { useTrainingExtra } from "./useTrainingData";
 
 // Totals per year and sport, the fastest time at each standard distance per
 // year (activity_best_efforts RPC), and the shoes and bikes with their mileage.
 // Every number is computed from the public rows except gear distance, which is
-// Strava's own figure. A figure with no value is left out, never shown as 0.
+// summed from the imported activities. A figure with no value is left out, never shown as 0.
 
 // Strava's best-effort names, shortest first.
 const EFFORT_ORDER = ["400m", "1/2 mile", "1K", "1 mile", "2 mile", "5K", "10K", "15K", "10 mile", "20K",
@@ -30,16 +30,9 @@ const Section = ({ title, children }) => (
 
 Section.propTypes = { title: PropTypes.string.isRequired, children: PropTypes.node.isRequired };
 
-const StatsPRs = ({ rows }) => {
-  const [efforts, setEfforts] = useState(null);
-  const [gear, setGear] = useState(null);
-
-  useEffect(() => {
-    let live = true;
-    getBestEfforts().then((d) => live && setEfforts(d)).catch(() => live && setEfforts([]));
-    getGear().then((d) => live && setGear(d)).catch(() => live && setGear([]));
-    return () => { live = false; };
-  }, []);
+const StatsPRs = ({ rows, demo }) => {
+  const efforts = useTrainingExtra("efforts", demo);
+  const gear = useTrainingExtra("gear", demo);
 
   const years = useMemo(() => totalsByYear(rows), [rows]);
   const families = useMemo(() => totalsByFamily(rows), [rows]);
@@ -117,12 +110,16 @@ const StatsPRs = ({ rows }) => {
                 <tr>
                   <th className={th} scope="col">Distance</th>
                   <th className={th} scope="col">Best</th>
+                  <th className={th} scope="col">Since first year</th>
                   {effortTable.years.map((y) => <th key={y} className={th} scope="col">{y}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {effortTable.names.map((name) => {
                   const best = effortTable.best(name);
+                  const firstYear = Math.min(...Object.keys(effortTable.byName.get(name)).map(Number));
+                  const first = effortTable.byName.get(name)[firstYear];
+                  const gain = first && first.elapsed_time > best.elapsed_time ? (first.elapsed_time - best.elapsed_time) / first.elapsed_time : 0;
                   return (
                     <tr key={name} className="border-t border-stone-100 dark:border-stone-800">
                       <th scope="row" className={`${td} text-left font-normal`}>{name}</th>
@@ -130,6 +127,16 @@ const StatsPRs = ({ rows }) => {
                         <Link to={`/training/${best.activity_id}`} className="text-secondary no-underline">
                           {formatDuration(best.elapsed_time)}
                         </Link>
+                      </td>
+                      <td className={td}>
+                        {gain > 0 ? (
+                          <span className="inline-flex items-center gap-2" title={`${formatDuration(first.elapsed_time - best.elapsed_time)} faster than ${firstYear}`}>
+                            <span className="w-20 h-1.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden" aria-hidden="true">
+                              <span className="block h-full bg-emerald-600" style={{ width: `${Math.min(100, gain * 400)}%` }} />
+                            </span>
+                            <span className="text-emerald-700 dark:text-emerald-400 font-bold">{`−${formatDuration(first.elapsed_time - best.elapsed_time)}`}</span>
+                          </span>
+                        ) : <span className="text-stone-400">—</span>}
                       </td>
                       {effortTable.years.map((y) => {
                         const e = effortTable.byName.get(name)[y];
@@ -176,6 +183,8 @@ const StatsPRs = ({ rows }) => {
 
 StatsPRs.propTypes = {
   rows: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.number })).isRequired,
+  demo: PropTypes.bool,
 };
+StatsPRs.defaultProps = { demo: false };
 
 export default StatsPRs;

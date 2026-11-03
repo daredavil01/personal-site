@@ -89,3 +89,69 @@ describe("the /now Strava group", () => {
     expect(mergeMonthRecords({ activities: ROWS }, "2024-01", {}).stats).toBeUndefined();
   });
 });
+
+describe("redesign figures", () => {
+  const {
+    weekOf, weeklyTotals, cumulativeYear, monthGrid, startHours, records, howFar, dayOfYear,
+  // eslint-disable-next-line global-require
+  } = require("./training");
+
+  test("weeks start on Monday", () => {
+    expect(weekOf("2026-01-04")).toBe("2025-12-29"); // a Sunday
+    expect(weekOf("2026-01-05")).toBe("2026-01-05");
+    expect(dayOfYear("2026-02-10")).toBe(41);
+  });
+
+  test("weekly totals cover every week of the year", () => {
+    const weeks = weeklyTotals(ROWS, 2026);
+    expect(weeks[0].week).toBe("2026-01-05");
+    expect(weeks.every((w) => w.week.startsWith("2026"))).toBe(true);
+    expect(weeks.length).toBe(52);
+    expect(weeks.find((w) => w.week === "2026-02-09").distance).toBe(1500);
+  });
+
+  test("cumulative year stops at today", () => {
+    const c = cumulativeYear(ROWS, 2026, "2026-02-15");
+    expect(c.length).toBe(46);
+    expect(c[0]).toBe(5000);
+    expect(c[1]).toBe(43000);
+    expect(c[45]).toBe(44500);
+    expect(cumulativeYear(ROWS, 2025, "2026-02-15").length).toBe(365);
+  });
+
+  test("month grid splits by family", () => {
+    const g = monthGrid(ROWS);
+    expect(g[2026][0]).toEqual({ run: 13000, ride: 30000 });
+    expect(g[2026][1]).toEqual({ swim: 1500 });
+  });
+
+  test("start hours and records", () => {
+    const bins = startHours([{ startLocal: "2026-01-01T06:10:00" }, { startLocal: "2026-01-02T06:50:00" }, { startLocal: null }]);
+    expect(bins[6]).toBe(2);
+    const rec = records(ROWS);
+    expect(rec.longest.id).toBe(3);
+    expect(rec.longestRun.id).toBe(1);
+    expect(rec.biggestMonth).toEqual({ key: "2026-01", value: 43000 });
+    expect(records([]).longest).toBeNull();
+    expect(howFar(40075000).earth).toBe(1);
+  });
+});
+
+test("milestones: firsts and running-total marks, oldest first", () => {
+  // eslint-disable-next-line global-require
+  const { milestones } = require("./training");
+  const rows = [
+    row(10, "2024-01-01", "Run", 60000),
+    row(11, "2024-02-01", "Run", 21100),
+    row(12, "2024-03-01", "Ride", 30000),
+    row(13, "2024-04-01", "Run", 42195),
+  ];
+  const m = milestones(rows);
+  expect(m.filter((x) => x.kind === "first").map((x) => x.label)).toEqual([
+    "First 10K", "First half marathon", "First marathon", "First ultra",
+  ]);
+  expect(m.find((x) => x.label === "First 10K").row.id).toBe(10);
+  expect(m.find((x) => x.label === "100 km").row.id).toBe(12);
+  expect(m.find((x) => x.label === "First marathon").row.id).toBe(10);
+  expect(m[0].date).toBe("2024-01-01");
+});

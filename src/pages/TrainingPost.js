@@ -5,8 +5,11 @@ import PageShell from "../atlas/PageShell";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import TagLinks from "../components/common/TagLinks";
 import RouteShape from "../components/Training/RouteShape";
+import { SampleRibbon } from "../components/Training/shared";
+import "../components/Training/training.css";
 import { buildTrainingMeta } from "../data/pageMeta";
 import { getActivity } from "../lib/api/training";
+import { isDemoId } from "../lib/trainingDemoId";
 import {
   activityUrl, formatDistance, formatDuration, formatEffortSpeed, isPaceSport, sportLabel,
 } from "../lib/strava";
@@ -57,6 +60,35 @@ const Table = ({ title, head, rows }) => (rows.length ? (
   </section>
 ) : null);
 
+// The splits as a pace profile: one bar per kilometre, taller is faster,
+// the fastest split marked. Reads above the splits table it summarises.
+const SplitProfile = ({ splits, speed }) => {
+  if (!splits || splits.length < 3) return null;
+  const v = splits.map((x) => x.average_speed || 0);
+  const lo = Math.min(...v) * 0.9;
+  const hi = Math.max(...v);
+  const best = v.indexOf(hi);
+  return (
+    <section className="tr-root flex flex-col gap-2" aria-label="Pace per kilometre">
+      <div className="flex items-end gap-[3px] h-32 p-3 rounded-2xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
+        {splits.map((x, i) => (
+          <div key={x.split} className="group relative flex-1 h-full flex flex-col justify-end">
+            <span
+              className={`block rounded-t tr-grow ${i === best ? "bg-secondary" : "bg-secondary/40 group-hover:bg-secondary/70"}`}
+              style={{ height: `${10 + ((v[i] - lo) / (hi - lo || 1)) * 90}%`, animationDelay: `${i * 30}ms` }}
+              title={`Km ${x.split}: ${speed(x.average_speed)}`}
+            />
+          </div>
+        ))}
+      </div>
+      <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 mb-0">
+        {`Taller is faster · fastest: km ${splits[best].split}, ${speed(hi)}`}
+      </p>
+    </section>
+  );
+};
+SplitProfile.propTypes = { splits: PropTypes.arrayOf(PropTypes.shape({})).isRequired, speed: PropTypes.func.isRequired };
+
 Table.propTypes = {
   title: PropTypes.string.isRequired,
   head: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -76,7 +108,12 @@ const TrainingPost = () => {
       setState({ loading: false, activity: null, error: null });
       return undefined;
     }
-    getActivity(id)
+    // A sample row (shown on /training until the first import) is read from
+    // the seeded set, never from Supabase.
+    const read = isDemoId(id)
+      ? import("../lib/trainingDemo").then((m) => m.demoActivity(id))
+      : getActivity(id);
+    read
       .then((a) => live && setState({ loading: false, activity: a, error: null }))
       .catch((e) => live && setState({ loading: false, activity: null, error: e }));
     return () => { live = false; };
@@ -111,9 +148,11 @@ const TrainingPost = () => {
       <div className="flex flex-col gap-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <BackLink />
-          <a href={activityUrl(a.id)} target="_blank" rel="noopener noreferrer" className={`${toolLink} text-[#FC4C02]`}>
-            <span className="material-symbols-outlined text-sm">open_in_new</span> View on Strava
-          </a>
+          {isDemoId(a.id) ? <SampleRibbon /> : (
+            <a href={activityUrl(a.id)} target="_blank" rel="noopener noreferrer" className={`${toolLink} text-[#FC4C02]`}>
+              <span className="material-symbols-outlined text-sm">open_in_new</span> View on Strava
+            </a>
+          )}
         </div>
 
         <header className="flex flex-col gap-3">
@@ -157,11 +196,13 @@ const TrainingPost = () => {
         {a.route && (
           <section className="flex flex-col gap-2">
             <div className="aspect-[4/3] md:aspect-[2/1] w-full p-4 rounded-2xl border border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-secondary">
-              <RouteShape polyline={a.route} label={`Route of ${a.name}`} strokeWidth={3} />
+              <RouteShape polyline={a.route} label={`Route of ${a.name}`} strokeWidth={3} animate />
             </div>
             <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 mb-0">Start and finish trimmed for privacy.</p>
           </section>
         )}
+
+        <SplitProfile splits={a.splits} speed={speed} />
 
         <Table
           title="Splits"

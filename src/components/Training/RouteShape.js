@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import { decodePolyline } from "../../lib/strava";
 
@@ -24,17 +24,36 @@ export function projectRoute(encoded, size = 100, pad = 6) {
 }
 
 const RouteShape = ({
-  polyline, label, className, strokeWidth,
+  polyline, label, className, strokeWidth, animate, color,
 }) => {
   const points = useMemo(() => projectRoute(polyline), [polyline]);
+  const ref = useRef(null);
+
+  // Draw the line in once. The dash is measured in screen pixels, because a
+  // non-scaling stroke dashes in screen space (pathLength would be wrong as
+  // soon as the drawing is scaled up).
+  useEffect(() => {
+    const el = ref.current;
+    if (!animate || !el || typeof el.getTotalLength !== "function") return;
+    const scale = el.getScreenCTM ? Math.abs(el.getScreenCTM()?.a || 1) : 1;
+    const len = Math.ceil(el.getTotalLength() * scale) + 4;
+    el.style.transition = "none";
+    el.style.strokeDasharray = `${len}`;
+    el.style.strokeDashoffset = `${len}`;
+    el.getBoundingClientRect();
+    el.style.transition = "stroke-dashoffset 1.4s cubic-bezier(0.16, 1, 0.3, 1)";
+    el.style.strokeDashoffset = "0";
+  }, [animate, points]);
+
   if (!points) return null;
   return (
     <svg viewBox="0 0 100 100" role="img" aria-label={label} className={className}>
       <polyline
         points={points}
         fill="none"
-        stroke="currentColor"
+        stroke={color || "currentColor"}
         strokeWidth={strokeWidth}
+        ref={ref}
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
@@ -48,6 +67,9 @@ RouteShape.propTypes = {
   label: PropTypes.string,
   className: PropTypes.string,
   strokeWidth: PropTypes.number,
+  // Draw the line in, once, when it mounts (training.css).
+  animate: PropTypes.bool,
+  color: PropTypes.string,
 };
 
 RouteShape.defaultProps = {
@@ -55,6 +77,8 @@ RouteShape.defaultProps = {
   label: "Route",
   className: "w-full h-full",
   strokeWidth: 2,
+  animate: false,
+  color: null,
 };
 
 export default RouteShape;

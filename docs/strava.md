@@ -95,7 +95,12 @@ is no export folder.
 
 ## Where it shows up
 
-- `/training` — log, year calendar, stats & best efforts, gear, routes.
+- `/training` — in the atlas, an animated story (route replay, a spiral of
+  days, a race against past years' best efforts, weekly tides, a start-time
+  dial, the shoe rack, records, milestones, a departures board, the full log);
+  in classic, Overview / Log / Calendar / Stats & PRs / Routes tabs. Until the
+  first import (or with `?demo=1`) both show a labelled sample log from
+  `src/lib/trainingDemo.js`.
 - `/training/:id` — numbers, splits, laps, best efforts, route, "More from Strava".
 - `/sports/:id` — the linked activity's numbers and splits. Link races at
   `/admin/training/races`, which suggests same-day, same-distance matches.
