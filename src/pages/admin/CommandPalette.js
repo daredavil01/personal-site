@@ -27,7 +27,7 @@ const buildActions = () => {
   }));
 
   const creatable = [
-    ...NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.resource || i.to === "/admin/microblog"),
+    ...NAV_GROUPS.flatMap((g) => g.items).filter((i) => (i.resource && !i.noCreate) || i.to === "/admin/microblog"),
     ...RESUME_SECTIONS.map((s) => ({ to: `/admin/resume/${s.slug}`, label: s.label, icon: s.icon })),
   ];
 

@@ -1,4 +1,5 @@
 import {
+  Activity,
   Award,
   Bot,
   BookOpen,
@@ -52,6 +53,10 @@ export const NAV_GROUPS = [
       { to: "/admin/presentations", label: "Presentations", icon: Presentation, resource: "presentations" },
       { to: "/admin/videos", label: "Videos", icon: Clapperboard, resource: "videos", end: true },
       { to: "/admin/videos/sync", label: "YouTube sync", icon: RefreshCw },
+      {
+        to: "/admin/training", label: "Training", icon: Activity, resource: "training", noCreate: true, end: true,
+      },
+      { to: "/admin/training/sync", label: "Strava sync", icon: RefreshCw },
       { to: "/admin/blogs", label: "100 Days", icon: FileText, resource: "blogs" },
       { to: "/admin/instagram", label: "Instagram", icon: Camera, resource: "instagram" },
       { to: "/admin/microblog", label: "Micro Blog", icon: Rss },

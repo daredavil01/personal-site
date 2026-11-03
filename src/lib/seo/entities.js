@@ -19,6 +19,7 @@ import {
   buildProjectMeta,
   buildPresentationMeta,
   buildVideoMeta,
+  buildTrainingMeta,
   buildTagMeta,
   buildNewsletterMeta,
 } from "../../data/pageMeta";
@@ -35,6 +36,9 @@ import {
   clip, paragraphs, safeUrl, tagHref, escHtml,
 } from "./text";
 import { isIndexableMicroblog } from "./indexing";
+import {
+  activityUrl, formatDistance as formatKm, formatDuration as formatClock, formatEffortSpeed, sportLabel,
+} from "../strava";
 
 // Where each entity type's detail pages live. `instagram` has no detail route
 // (everything renders on /instagram), so tag_entities rows of that type link
@@ -48,6 +52,7 @@ export const ENTITY_TYPE_PATHS = {
   project: "/projects",
   presentation: "/presentations",
   video: "/videos",
+  activity: "/training",
 };
 
 export const entityHref = (type, id) => {
@@ -328,6 +333,49 @@ export const KINDS = {
     },
   },
 
+  // A Strava activity. RLS already withholds private and hidden ones from the
+  // anon key the middleware reads with, so they 404 here like a missing row.
+  // No image: activities carry no photo, so the /training card stands in.
+  activity: {
+    table: "strava_activities",
+    section: "/training",
+    keyPattern: /^\d{1,19}$/,
+    detailSelect: "id,name,sport_type,date,start_date,distance,moving_time,elapsed_time,total_elevation_gain,average_speed,average_heartrate,description,updated_at,tag_names",
+    listSelect: "id,name,sport_type,date,distance,updated_at,created_at",
+    listOrder: "start_date.desc,id.desc",
+    listItem: (r) => ({
+      href: `/training/${r.id}`,
+      text: r.name,
+      note: [sportLabel(r.sport_type), formatKm(r.distance), r.date].filter(Boolean).join(" · "),
+    }),
+    view(r) {
+      const summary = [formatKm(r.distance), formatClock(r.moving_time)].filter(Boolean).join(" · ");
+      const meta = buildTrainingMeta({
+        name: r.name, sport: sportLabel(r.sport_type), date: r.date, summary,
+      });
+      return {
+        title: r.name,
+        description: meta.description,
+        date: r.date || null,
+        image: null,
+        lang: "en",
+        facts: facts([
+          ["Date", r.date],
+          ["Sport", sportLabel(r.sport_type)],
+          ["Distance", formatKm(r.distance) || null],
+          ["Moving time", formatClock(r.moving_time) || null],
+          ["Pace / speed", formatEffortSpeed(r.sport_type, r.average_speed) || null],
+          ["Elevation gain", r.total_elevation_gain ? `${Math.round(r.total_elevation_gain)} m` : null],
+          ["Average heart rate", r.average_heartrate ? `${Math.round(r.average_heartrate)} bpm` : null],
+        ]),
+        body: paragraphs(r.description),
+        outbound: outbound(activityUrl(r.id), "View on Strava"),
+        externalUrl: safeUrl(activityUrl(r.id)),
+        meta,
+      };
+    },
+  },
+
   microblog: {
     table: "microblog",
     section: "/micro-blog",
@@ -462,6 +510,7 @@ export const DETAIL_KINDS = {
   "/100-days-to-offload/:id": "blog",
   "/presentations/:id": "presentation",
   "/videos/:id": "video",
+  "/training/:id": "activity",
   "/micro-blog/:id": "microblog",
   "/newsletter/:slug": "newsletter",
   "/tags/:name": "tag",

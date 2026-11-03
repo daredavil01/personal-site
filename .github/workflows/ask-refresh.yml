@@ -52,6 +52,9 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      # Optional: without them the Strava step says so and is skipped.
+      STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+      STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
 
     steps:
       - uses: actions/checkout@v4
@@ -73,6 +76,13 @@ jobs:
 
       - name: Count words and refresh post text
         run: npm run blogs:wordcount
+
+      # Never waits out Strava's 15-minute limit (the job has 20 minutes): a
+      # first backfill fills ~100 details a night, or run it locally once.
+      - name: Sync Strava activities
+        if: ${{ !inputs.dry_run }}
+        continue-on-error: true
+        run: npm run strava:import -- --no-wait
 
       - name: Index new content
         run: npm run ask:index -- ${{ inputs.dry_run && '--dry-run' || '' }}

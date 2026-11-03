@@ -188,6 +188,18 @@ export function pageModel(slug, payload, {
         stat(s.videoViews, "Views"),
       ].filter(Boolean),
     },
+    training: {
+      eyebrow: "Training",
+      title: "Every run, logged",
+      stats: [
+        stat(s.activityCount, "Activities"),
+        stat(s.activityKm == null ? null : `${compact(s.activityKm)} km`, "Distance"),
+        stat(s.activityHours == null ? null : `${compact(s.activityHours)} h`, "Moving"),
+      ].filter(Boolean),
+      figure: s.trainingDays ? { days: s.trainingDays } : null,
+      // Only when there is nothing to count yet (before the first sync).
+      lede: s.activityCount ? null : "Runs, rides, walks and swims from Strava: splits, best efforts and routes.",
+    },
     projects: {
       eyebrow: "Projects",
       photos: photos.projects || [],
@@ -303,7 +315,7 @@ export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
-  "ask-share", "newsletter", "blueprint", "logbook", "videos",
+  "ask-share", "newsletter", "blueprint", "logbook", "videos", "training",
 ];
 
 // One issue's card, from issueModel() (src/lib/newsletterIssue.js). Rendered by

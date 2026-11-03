@@ -553,6 +553,9 @@ runs it weekly. A bucket lifecycle rule expires them after 30 days. Restore:
   bundle by Vite). Public; committed in `wrangler.toml` `[vars]`.
 - `SUPABASE_SERVICE_ROLE_KEY` — **secret**, server/scripts only. Never commit;
   set via `wrangler pages secret put` or the Cloudflare dashboard.
+- `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET` — **secret**, read by
+  `functions/api/strava-sync.js` and the Strava scripts. The rotating refresh
+  token lives in the service-role-only `strava_auth` table, not a secret.
 - `YOUTUBE_API_KEY` — **secret**, read only by `functions/api/youtube-sync.js`
   (the /videos sync). Restrict it to the YouTube Data API, not by referrer.
 - `AI_GATEWAY_API_KEY` / `TYPESAFE_API_KEY` — **secret**, optional, and only for
@@ -609,6 +612,8 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | IndexNow | `scripts/indexnow.mjs`, `public/indexnow-key.txt` |
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
+| Training (Strava): sync / helpers / admin | `src/lib/stravaSync.js`, `src/lib/strava.js`, `functions/api/strava-sync.js`, `scripts/strava-import.mjs`, `src/pages/admin/TrainingSync.js` |
+| Training: pages + numbers | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/`, `src/lib/training.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
 | Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
 | Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
@@ -994,6 +999,42 @@ YouTube channel **https://www.youtube.com/@sankettambare7474** — not typed in.
   `public/video/the-videos-story-slides/01–06.webp` (committed;
   `story.test.js` holds each under 300 KB) plus a PDF of the six for a
   LinkedIn document post into `knowledge_base/`. Run it after the film.
+
+---
+
+### Training Page (Strava)
+
+**Tables:** `strava_activities` + `strava_activity_private` / `strava_gear` /
+`strava_athlete` / `strava_auth` (`0038_training.sql`), filled from Strava's API
+— not typed in. Full inventory and setup: `docs/strava.md`.
+
+- **Pulled:** every activity's summary and detail (splits, laps, best efforts,
+  segment efforts, calories, device), gear with mileage, Strava's totals and HR
+  zones. **Not pulled:** photos, per-second streams, kudos/comment lists.
+- **Sync:** `npm run strava:auth` once, then `npm run strava:import` (resumable,
+  waits out the 100-per-15-minute limit; `--no-wait` in the nightly job).
+  `/admin/training/sync` → **Sync now** drives `functions/api/strava-sync.js`
+  one step per request (Workers' 50-subrequest cap). Both write through
+  `src/lib/stravaSync.js`; `toSummaryRow` / `toDetailRow` in `src/lib/strava.js`
+  are the only shapes a sync writes.
+- **Privacy:** the owner token ignores Strava's privacy zones, so raw GPS and the
+  private note live in owner-only `strava_activity_private`. The public row has
+  only `route_polyline`, trimmed 400 m around start and finish. RLS shows a row
+  only when `visible and not private and visibility = 'everyone'`.
+- **Owned columns:** `visible`, `sport_id` (links a `/sports` race; its page
+  then shows the splits) and tags (`entity_type = 'activity'`), edited at
+  `/admin/training`. The resource has `noCreate` — rows come only from the sync.
+- **Numbers:** `src/lib/training.js` (filters, totals, heatmap, streaks,
+  `stravaMonthStats`), which `/training`, `/now`'s Strava group (via
+  `mergeMonthRecords`) and the `/ask` source share; `/stats` and the card read
+  `activityCount` / `activityKm` / `activityHours` / `trainingDays` from
+  `computeSiteStats`.
+- **Not in ContentContext:** the page pages through light columns
+  (`listActivities`), loads polylines only for the Routes tab.
+- **`/ask`:** one chunk per month (`scripts/ask-sources/training.mjs`).
+  `ASK_SKIP_TRAINING=1` removes them — Strava's terms bar training AI models on
+  its data, and this is the closest use.
+- **After content moves:** `npm run og:fallbacks -- --only=training`.
 
 ---
 

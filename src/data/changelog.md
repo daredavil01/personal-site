@@ -13,6 +13,20 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v25.0.0] — 2026-11-03
+
+### Added
+- **/training — every Strava activity** (`src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/`): a new page fed by Strava's API. Four views over one URL-state filter (search, sport, year, tags, races only, sort): a paged log, a year calendar with streaks, stats & best efforts (totals per sport and year, the fastest 1K–marathon per year, gear mileage) and every route drawn as a line. `/training/:id` shows the numbers, splits, laps, best efforts, segments and the route, with "View on Strava" and "Powered by Strava".
+- **Strava import** (`supabase/migrations/0038_training.sql`, `src/lib/strava.js`, `src/lib/stravaSync.js`, `scripts/strava-auth.mjs`, `scripts/strava-import.mjs`): summary and detail of every activity, gear, Strava's totals and HR zones — no photos, no per-second streams. `npm run strava:auth` does the one-time OAuth; `npm run strava:import` backfills, resumes, and waits out the 100-per-15-minute limit. The rotating refresh token lives in a service-role-only `strava_auth` row.
+- **Strava sync button** (`functions/api/strava-sync.js`, `src/pages/admin/TrainingSync.js`): `/admin/training/sync` drives list → athlete → detail steps within the Worker's subrequest cap, and lists activities that match a `/sports` race for one-press linking. `/admin/training` edits visibility, the race link and tags (`noCreate` resources hide "New").
+- **Races show their splits** (`src/components/Training/RaceActivity.js`): a race page with a linked activity shows its pace, heart rate and per-km splits.
+- **Training everywhere else**: `/now` and newsletter issues compute the "Strava" stat group from the month's activities unless one was typed (`stravaMonthStats`, `mergeMonthRecords`); `/stats` gains `activityCount` / `activityKm` / `activityHours` / `activityDays` (`STATS_VERSION` 2); `/tags` lists tagged activities; `/ask` gets one chunk per month (`scripts/ask-sources/training.mjs`, off with `ASK_SKIP_TRAINING=1`); the Blueprint's Archives room gains a Training alcove.
+- **Training share card** (`public/og/training.png`, `src/lib/og/layouts/figures.js`): the last 26 weeks as a day grid beside the activity, distance and time counts; a detail page uses the same card, since activities carry no photo. Crawlers get the activity's facts from `src/lib/seo/entities.js` (`activity` kind).
+- **Nightly Strava step** (`.github/workflows/ask-refresh.yml`, `scripts/refresh.mjs`): `strava:import --no-wait` before `ask:index`; skipped when `STRAVA_CLIENT_ID` is not set.
+
+### Changed
+- **Privacy by table, not by column**: raw GPS, start/end points and the private note are in owner-only `strava_activity_private`, because the owner's token ignores Strava's privacy zones; the public row carries only a route with 400 m cut around both ends, and RLS shows only `visible`, non-private, `everyone` activities.
+
 ## [v24.2.1] — 2026-11-02
 
 ### Fixed

@@ -75,6 +75,8 @@ export const ACCENTS = {
   "writing-ledger": COLORS.amber,
   blueprint: COLORS.red,
   logbook: COLORS.orange,
+  training: COLORS.orange,
+  activity: COLORS.orange,
 };
 
 export const FONTS = {

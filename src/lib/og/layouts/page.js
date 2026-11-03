@@ -13,7 +13,7 @@ import {
 import {
   spineStack, ridgeline, lostTrail, dotMatrix, progressBar, swatchCloud, radialSpokes,
   connectedCurve, slideFan, screenAndPhone, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
-  commitGraph, monthCalendar, envelope, floorPlan, constellation,
+  commitGraph, monthCalendar, envelope, floorPlan, constellation, dayGrid,
 } from "./figures.js";
 
 const col = (gap, ...children) => h("div", { style: { display: "flex", flexDirection: "column", gap } }, children);
@@ -80,6 +80,11 @@ const FIGURES = {
   }), CARD.width, 200, { bottom: 90, opacity: 0.8 }),
 
   presentations: (m) => inset(slideFan({ width: 480, height: 320, accent: m.accent }), 480, 320, { right: 50, bottom: 120, opacity: 0.85 }),
+
+  // Nothing synced yet: no grid at all, never an empty placeholder.
+  training: (m) => (m.figure && m.figure.days && m.figure.days.length
+    ? inset(dayGrid(m.figure.days, { width: 460, accent: m.accent }), 460, Math.round((460 / Math.ceil(m.figure.days.length / 7)) * 7), { right: 64, bottom: 250 })
+    : null),
 
   videos: (m) => inset(screenAndPhone({ width: 500, height: 300, accent: m.accent }), 500, 300, { right: 52, bottom: 130 }),
 
@@ -214,7 +219,7 @@ export const pageCard = (model) => {
   const bleed = typeof figure === "function" ? figure(model) : null;
   // Leave room for whichever side the figure occupies so text never collides
   // with it. The full-bleed portraits are the exception: text sits over them.
-  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "videos", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger", "logbook"]
+  const textWidth = ["home", "newsletter", "books", "sports", "tags", "mindmap", "presentations", "videos", "training", "changelog", "changelog-graph", "blueprint", "stats", "instagram", "projects", "resume", "ask", "ask-share", "100-days-to-offload", "writing-ledger", "logbook"]
     .includes(model.slug) ? 620 : CARD.width - 128;
 
   return Frame({

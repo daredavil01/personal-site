@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
 import MonthSection from "../components/Now/MonthSection";
 import { useNowMeta, useNowMonths, useProjects } from "../context/ContentContext";
 import { monthSlug } from "../lib/api/now";
 import { mergeMonthRecords } from "../lib/nowAutofill";
+import { listMonthActivities } from "../lib/api/training";
 
 const Now = () => {
   const { data: nowMeta } = useNowMeta();
@@ -15,9 +16,28 @@ const Now = () => {
   // Projects dated this month join it on their own, no admin pull needed.
   // Idempotent: a project already typed or pulled into the month is not repeated.
   const stored = nowData.find((m) => m.isCurrent);
+  const slug = stored ? monthSlug(stored.month, stored.year) : null;
+
+  // The month's Strava numbers, unless the month has them typed in. A failed
+  // read (0038 not applied yet) just leaves the group out.
+  const [activities, setActivities] = useState(null);
+  useEffect(() => {
+    if (!slug) return undefined;
+    let live = true;
+    listMonthActivities(slug).then((d) => live && setActivities(d)).catch(() => live && setActivities(null));
+    return () => { live = false; };
+  }, [slug]);
+
   const current = useMemo(() => (stored
-    ? { ...stored, sections: mergeMonthRecords({ projects }, monthSlug(stored.month, stored.year), stored.sections || {}) }
-    : null), [stored, projects]);
+    ? {
+      ...stored,
+      sections: mergeMonthRecords(
+        { projects, ...(activities ? { activities } : {}) },
+        slug,
+        stored.sections || {},
+      ),
+    }
+    : null), [stored, projects, activities, slug]);
   const lastUpdated = current ? `${current.month} ${current.year}` : "";
 
   return (

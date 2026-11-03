@@ -36,7 +36,9 @@
     "videos:slides": "node --no-warnings scripts/videos-film/slides.mjs",
     "newsletter:draft": "node scripts/newsletter-draft.mjs",
     "indexnow": "node scripts/indexnow.mjs",
-    "backup": "node scripts/backup-r2.mjs"
+    "backup": "node scripts/backup-r2.mjs",
+    "strava:auth": "node scripts/strava-auth.mjs",
+    "strava:import": "node scripts/strava-import.mjs"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.87",

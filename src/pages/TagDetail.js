@@ -17,6 +17,7 @@ const GROUPS = [
   { type: "project", label: "Projects", href: (id) => `/projects/${id}` },
   { type: "presentation", label: "Presentations", href: (id) => `/presentations/${id}` },
   { type: "video", label: "Videos", href: (id) => `/videos/${id}` },
+  { type: "activity", label: "Training", href: (id) => `/training/${id}` },
   { type: "microblog", label: "Micro-posts", href: (id) => `/micro-blog/${id}` },
   { type: "instagram", label: "Instagram", href: () => "/instagram" },
 ];

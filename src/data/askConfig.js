@@ -48,6 +48,8 @@ export const ENTITY_TYPES = {
   writing: { label: "Essay", list: "/writing-ledger", path: () => null },
   stats: { label: "Stats", list: "/stats", path: () => "/stats" },
   tag: { label: "Tag", list: "/tags", path: () => null },
+  // One chunk per month of Strava activities (scripts/ask-sources/training.mjs).
+  training: { label: "Training", list: "/training", path: () => null },
   site: { label: "Site page", list: null, path: () => null },
 };
 
@@ -78,6 +80,7 @@ export const ENTITY_PLURALS = {
   changelog: "changelog versions",
   resume: "résumé entries",
   writing: "essays",
+  training: "training months",
   stats: "stats",
   tag: "tags",
   site: "site pages",

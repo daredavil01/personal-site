@@ -12,6 +12,7 @@ import MicroblogManager from "./MicroblogManager";
 import TagManager from "./TagManager";
 import ChangelogSync from "./ChangelogSync";
 import YoutubeSync from "./YoutubeSync";
+import TrainingSync from "./TrainingSync";
 import SocialKit from "./SocialKit";
 import NowMetaEditor from "./NowMetaEditor";
 import AskSettingsEditor from "./AskSettingsEditor";
@@ -55,6 +56,7 @@ const AdminRoutes = ({ session }) => {
         {/* Two segments, so the :resourceKey route below never sees it. */}
         <Route path="changelog/sync" element={<ChangelogSync />} />
         <Route path="videos/sync" element={<YoutubeSync />} />
+        <Route path="training/sync" element={<TrainingSync />} />
         <Route path="now/months" element={<NowMonthEditor />} />
         <Route path="now/meta" element={<NowMetaEditor />} />
         <Route path="ask/settings" element={<AskSettingsEditor />} />
