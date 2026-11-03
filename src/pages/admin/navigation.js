@@ -56,7 +56,7 @@ export const NAV_GROUPS = [
       {
         to: "/admin/training", label: "Training", icon: Activity, resource: "training", noCreate: true, end: true,
       },
-      { to: "/admin/training/sync", label: "Strava sync", icon: RefreshCw },
+      { to: "/admin/training/races", label: "Link races", icon: Footprints },
       { to: "/admin/blogs", label: "100 Days", icon: FileText, resource: "blogs" },
       { to: "/admin/instagram", label: "Instagram", icon: Camera, resource: "instagram" },
       { to: "/admin/microblog", label: "Micro Blog", icon: Rss },

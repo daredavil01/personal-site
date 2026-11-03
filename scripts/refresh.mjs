@@ -7,8 +7,9 @@
  *   npm run refresh -- --dry-run        forwarded; steps without one are skipped
  *
  * Steps: changelog (push buffer, per-version notes, major summaries),
- * repo (commit graph), blogs (word counts), strava (activities; skipped
- * without STRAVA_CLIENT_ID), ask (index + docs), logbook,
+ * repo (commit graph), blogs (word counts), strava (re-reads the Strava
+ * export in knowledge_base/strava-export/; skipped without one), ask (index +
+ * docs), logbook,
  * indexnow (tell Bing about URLs changed in the last 3 days).
  * `npm run ask:gaps` is left out: it spends model tokens on a report.
  * Stops at the first failure. Each script still runs alone:

@@ -2,9 +2,9 @@ import { supabase } from "../supabaseClient";
 import createResource from "./_crud";
 import { activityUrl } from "../strava";
 
-// Strava activities (0038_training.sql). Rows arrive from the sync
-// (/admin/training/sync, `npm run strava:import`); the /admin form edits only
-// the site-owned columns — visible, the /sports race link and tags.
+// Strava activities (0038_training.sql). Rows arrive from a Strava bulk export
+// (`npm run strava:import`); the /admin form edits only the site-owned
+// columns — visible, the /sports race link and tags.
 //
 // Not in ContentContext: a training log runs to thousands of rows. The list
 // page reads the light columns once (listActivities), the route view reads
@@ -67,6 +67,8 @@ export const fromActivityRow = (r) => ({
   laps: r.laps || [],
   bestEfforts: r.best_efforts || [],
   segmentEfforts: r.segment_efforts || [],
+  // Every other activities.csv column (weather, training load, steps, …).
+  extra: r.extra || {},
   visible: r.visible !== false,
   sportId: r.sport_id ?? null,
   syncedAt: r.synced_at,
@@ -149,12 +151,6 @@ export async function getActivityForRace(sportId) {
 
 export async function getGear() {
   const { data, error } = await supabase.from("strava_gear").select("*").order("distance", { ascending: false });
-  if (error) throw error;
-  return data;
-}
-
-export async function getAthlete() {
-  const { data, error } = await supabase.from("strava_athlete").select("stats,zones,synced_at").eq("id", 1).maybeSingle();
   if (error) throw error;
   return data;
 }

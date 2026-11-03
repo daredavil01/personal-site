@@ -12,7 +12,8 @@ import {
 } from "../lib/strava";
 
 // /training/:id — one Strava activity: the numbers, splits per km, laps, best
-// efforts, segments and the (end-trimmed) route. A private or hidden activity
+// efforts and the (end-trimmed) route, all from the export's GPS file, plus
+// every other activities.csv column under "More from Strava". A private or hidden activity
 // is refused by RLS, so it reads as "not found" to everyone but the owner.
 
 const toolLink = "inline-flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-stone-400 hover:text-secondary transition-colors no-underline";
@@ -205,6 +206,20 @@ const TrainingPost = () => {
             e.pr_rank ? `PR #${e.pr_rank}` : null,
           ])}
         />
+
+        {Object.keys(a.extra).length > 0 && (
+          <section className="flex flex-col gap-3">
+            <h2 className="font-headline text-2xl text-stone-900 dark:text-stone-100 mb-0">More from Strava</h2>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-0">
+              {Object.entries(a.extra).map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 border-b border-stone-100 dark:border-stone-800 py-1">
+                  <dt className="font-label text-[10px] uppercase tracking-widest text-stone-400">{k}</dt>
+                  <dd className="text-sm text-stone-700 dark:text-stone-300 tabular-nums text-right mb-0 break-words min-w-0">{String(v)}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
 
         <p className="font-label text-[10px] uppercase tracking-widest mb-0">
           <a href="https://www.strava.com" target="_blank" rel="noopener noreferrer" className="text-[#FC4C02] no-underline font-bold">

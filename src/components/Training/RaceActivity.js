@@ -5,7 +5,7 @@ import { getActivityForRace } from "../../lib/api/training";
 import { formatDuration, formatEffortSpeed, formatDistance } from "../../lib/strava";
 
 // On a /sports race page: the Strava activity linked to it (sport_id, set at
-// /admin/training/sync), as a few numbers and the per-km splits. Renders
+// /admin/training/races), as a few numbers and the per-km splits. Renders
 // nothing when there is no link, or when the activity is not public.
 
 const RaceActivity = ({ sportId }) => {

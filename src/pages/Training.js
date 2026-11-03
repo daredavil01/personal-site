@@ -12,8 +12,8 @@ import {
 } from "../lib/training";
 import { formatDistance } from "../lib/strava";
 
-// /training — every public Strava activity, synced by `npm run strava:import`
-// and /admin/training/sync. Four views over one filtered list: the log, a
+// /training — every public Strava activity, imported from a Strava bulk export
+// by `npm run strava:import`. Four views over one filtered list: the log, a
 // year calendar, stats & best efforts, and the routes. Filters and the view
 // (`tab`, not `view` — useViewMode owns that) are URL state.
 
@@ -191,7 +191,7 @@ const Training = () => {
           <a href="https://www.strava.com" target="_blank" rel="noopener noreferrer" className="text-[#FC4C02] no-underline font-bold">
             Powered by Strava
           </a>
-          {" · Private and followers-only activities are never shown; route ends are trimmed."}
+          {" · Route starts and finishes are trimmed for privacy."}
         </p>
       </div>
     </PageShell>

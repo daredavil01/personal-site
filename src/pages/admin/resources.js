@@ -416,8 +416,8 @@ const resources = [
     ],
   },
   {
-    // Strava activities. Every column but these three is Strava's and is
-    // rewritten by /admin/training/sync, so the form edits only the site's own.
+    // Strava activities. Every column but these three comes from the export
+    // and is rewritten by `npm run strava:import`, so the form edits only the site's own.
     key: "training",
     label: "Training",
     singular: "activity",
@@ -459,10 +459,10 @@ const resources = [
     ],
     fields: [
       {
-        name: "visible", label: "Visible on the site", type: "boolean", default: true, hint: "Off hides it from /training, tags and counts. Private Strava activities are hidden whatever this says",
+        name: "visible", label: "Visible on the site", type: "boolean", default: true, hint: "Off hides it from /training, tags and counts. Turn it off for anything private — the export does not say which activities are",
       },
       {
-        name: "sportId", label: "Race (sports row id)", type: "number", min: 1, hint: "Links this activity to a /sports race, whose page then shows its splits. Strava sync suggests matches",
+        name: "sportId", label: "Race (sports row id)", type: "number", min: 1, hint: "Links this activity to a /sports race, whose page then shows its splits. Link races suggests matches",
       },
       {
         name: "tags", label: "Tags", type: "tags", suggest: true, span: "full", hint: "Topical tags, shared with /tags",

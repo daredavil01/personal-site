@@ -1,137 +1,198 @@
 #!/usr/bin/env node
 /**
- * Strava → Supabase: every activity (summary + detail), the athlete's totals
- * and zones, and the gear. No photos, no streams. See docs/strava.md.
+ * Strava bulk export → Supabase /training tables. No Strava API: since June
+ * 2026 that needs a paid subscription. See docs/strava.md.
  *
- *   npm run strava:import                    backfill / catch up (resumable)
- *   npm run strava:import -- --since=7d      list only activities from the last 7 days
- *   npm run strava:import -- --since=2025-01-01
- *   npm run strava:import -- --details-only  skip the list, fill pending details
- *   npm run strava:import -- --no-details    list + athlete only
- *   npm run strava:import -- --no-wait       stop at the 15-minute limit instead of waiting
- *   npm run strava:import -- --dry-run       print the plan, call nothing
+ * 1. strava.com → Settings → My Account → "Download or Delete Your Account"
+ *    → "Request your archive". Strava emails a link (it can take hours).
+ *    Set Strava's display language to English first: the CSV's dates and
+ *    headers follow it.
+ * 2. Unzip it into knowledge_base/strava-export/ (gitignored), so that
+ *    knowledge_base/strava-export/activities.csv exists.
+ * 3. npm run strava:import
  *
- * Strava allows 100 reads per 15 minutes and 1,000 a day. The list costs one
- * call per 200 activities; each detail is one call. The script stops cleanly
- * at the daily cap and picks up where it left off on the next run (rows with no
- * detail yet are filled first). At the 15-minute cap it waits for the next
- * quarter hour unless --no-wait, so a first backfill of ~1,000 activities is
- * one long run (about 2.5 hours) or a few nights of the nightly workflow.
+ *   -- --dry-run         parse everything, print what would be written, write nothing
+ *   -- --csv-only        skip the GPS files (fast; keeps routes/splits already stored)
+ *   -- --dir=<path>      a different export folder
+ *   -- --tz=<IANA zone>  the zone the activity days are counted in (default
+ *                        Asia/Kolkata; the CSV's times are UTC with no zone)
  *
- * Needs .env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, STRAVA_CLIENT_ID,
- * STRAVA_CLIENT_SECRET, and a token from `node scripts/strava-auth.mjs`
- * (or STRAVA_REFRESH_TOKEN).
+ * Idempotent: an upsert on Strava's activity id. Re-run it on each new export.
+ * The site's own columns (visible, race link, tags) are never sent, so they
+ * survive. Needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.
+ * With no export folder it says so and exits 0, so `npm run refresh` can run it.
  */
 
-import { loadEnv } from "./lib/stravaEnv.mjs";
+import fs from "node:fs";
+import path from "node:path";
+import zlib from "node:zlib";
+import { fileURLToPath } from "node:url";
+import { createClient } from "@supabase/supabase-js";
+import FitParser from "fit-file-parser";
 import {
-  DETAIL_BATCH, countPendingDetails, getAccessToken, latestStartEpoch, syncAthlete,
-  syncDetails, syncListPage,
-} from "../src/lib/stravaSync.js";
+  activityFromCsv, csvObjects, detailFromTrack, gearFromCsv, rankBestEfforts,
+  trackFromFit, trackFromGpx, trackFromTcx,
+} from "../src/lib/stravaExport.js";
+import { sportFamily } from "../src/lib/training.js";
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
-const option = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
+const option = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split("=").slice(1).join("=");
 
 const dry = flag("dry-run");
-const detailsOnly = flag("details-only");
-const noDetails = flag("no-details");
-const since = option("since");
-const noWait = flag("no-wait");
+const csvOnly = flag("csv-only");
+const dir = path.resolve(ROOT, option("dir") || "knowledge_base/strava-export");
+const timeZone = option("tz") || process.env.STRAVA_TZ || "Asia/Kolkata";
+const BATCH = 200;
 
-/** Strava's 15-minute windows reset at :00, :15, :30 and :45. */
-const sleepToQuarter = () => {
-  const ms = 15 * 60 * 1000 - (Date.now() % (15 * 60 * 1000)) + 5000;
-  console.log(`15-minute budget spent; waiting ${Math.round(ms / 60000)} min…`);
-  return new Promise((r) => { setTimeout(r, ms); });
+function loadEnv() {
+  const envPath = path.join(ROOT, ".env");
+  if (!fs.existsSync(envPath)) return;
+  fs.readFileSync(envPath, "utf8").split(/\r?\n/).forEach((line) => {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+  });
+}
+
+const readCsv = (name) => {
+  const file = path.join(dir, name);
+  return fs.existsSync(file) ? csvObjects(fs.readFileSync(file, "utf8")) : [];
 };
 
-function sinceEpoch(value) {
-  if (!value) return null;
-  const days = /^(\d+)d$/.exec(value);
-  if (days) return Math.floor(Date.now() / 1000) - Number(days[1]) * 86400;
-  const t = Date.parse(value);
-  if (!Number.isFinite(t)) {
-    console.error(`--since must be Nd or a date, got ${value}`);
+const fitParser = new FitParser({
+  force: true, speedUnit: "m/s", lengthUnit: "m", elapsedRecordField: true, mode: "list",
+});
+
+/** The activity's original file → a track, or a reason it could not be read. */
+async function readTrack(relative) {
+  const file = path.join(dir, relative);
+  if (!fs.existsSync(file)) return { track: null, problem: "file missing" };
+  try {
+    let buf = fs.readFileSync(file);
+    if (file.endsWith(".gz")) buf = zlib.gunzipSync(buf);
+    const ext = file.replace(/\.gz$/, "").split(".").pop().toLowerCase();
+    if (ext === "fit") {
+      const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+      return { track: trackFromFit(await fitParser.parseAsync(ab)) };
+    }
+    if (ext === "gpx") return { track: trackFromGpx(buf.toString("utf8")) };
+    if (ext === "tcx") return { track: trackFromTcx(buf.toString("utf8").trim()) };
+    return { track: null, problem: `unknown file type .${ext}` };
+  } catch (err) {
+    return { track: null, problem: err.message || String(err) };
+  }
+}
+
+const EMPTY_DETAIL = {
+  route_polyline: null, splits_metric: null, splits_standard: null, laps: null, best_efforts: null,
+};
+const EMPTY_GPS = {
+  summary_polyline: null, polyline: null, start_latlng: null, end_latlng: null,
+};
+
+async function main() {
+  if (!fs.existsSync(path.join(dir, "activities.csv"))) {
+    console.log(`No Strava export at ${path.relative(ROOT, dir)}/activities.csv; skipped.`);
+    console.log("Request your archive on strava.com and unzip it there (docs/strava.md).");
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const shoes = gearFromCsv(readCsv("shoes.csv"), "shoe", { now });
+  const bikes = gearFromCsv(readCsv("bikes.csv"), "bike", { now });
+  const gearKinds = Object.fromEntries([...shoes, ...bikes].map((g) => [g.name.toLowerCase(), g.kind]));
+
+  const csv = readCsv("activities.csv");
+  const headers = Object.keys(csv[0] || {});
+  const parsed = csv.map((r) => activityFromCsv(r, { timeZone, gearKinds, now })).filter(Boolean);
+  console.log(`${parsed.length} activities in activities.csv (${headers.length} columns), days counted in ${timeZone}.`);
+  const undated = parsed.filter((p) => !p.row.start_date).length;
+  if (undated) {
+    console.warn(`  ! ${undated} activities have a date this script cannot read — is Strava's language English?`);
+  }
+  if (!headers.some((h) => /visib|^(activity )?private$/i.test(h))) {
+    console.log("  No visibility column in the export: every activity is public until hidden at /admin/training.");
+  }
+
+  const rows = [];
+  const privateRows = [];
+  const problems = [];
+  let withTrack = 0;
+  for (let i = 0; i < parsed.length; i += 1) {
+    const { row, privateRow, file } = parsed[i];
+    if (!csvOnly) {
+      // Every row carries every detail key (one upsert shape); a manual
+      // activity, or one whose file cannot be read, gets nulls.
+      let detail = { ...EMPTY_DETAIL };
+      let gps = { ...EMPTY_GPS };
+      if (file) {
+        // eslint-disable-next-line no-await-in-loop
+        const { track, problem } = await readTrack(file);
+        if (track && track.points.length > 1) {
+          ({ detail, gps } = detailFromTrack(track, { isRun: sportFamily(row.sport_type) === "run", now }));
+          withTrack += 1;
+        } else {
+          problems.push(`${row.id} ${file}: ${problem || "no track points"}`);
+        }
+      }
+      Object.assign(row, detail, { detail_synced_at: now });
+      Object.assign(privateRow, gps);
+    }
+    rows.push(row);
+    privateRows.push(privateRow);
+    if ((i + 1) % 100 === 0) process.stdout.write(`  read ${i + 1}/${parsed.length}\r`);
+  }
+  if (!csvOnly) {
+    rankBestEfforts(rows);
+    console.log(`GPS files read for ${withTrack} of ${parsed.length} activities.`);
+  }
+  problems.slice(0, 10).forEach((p) => console.warn(`  ! ${p}`));
+  if (problems.length > 10) console.warn(`  ! …and ${problems.length - 10} more without a usable file`);
+
+  // Gear mileage: the export does not carry it, so it is summed here.
+  const gear = [...shoes, ...bikes].map((g) => ({
+    ...g,
+    distance: rows.filter((r) => r.gear_id === g.id).reduce((s, r) => s + (r.distance || 0), 0),
+  }));
+
+  const byYear = {};
+  rows.forEach((r) => {
+    const y = (r.date || "????").slice(0, 4);
+    byYear[y] = (byYear[y] || 0) + 1;
+  });
+  console.log(`By year: ${Object.entries(byYear).sort().map(([y, n]) => `${y} ${n}`).join(", ")}`);
+  console.log(`Gear: ${shoes.length} shoes, ${bikes.length} bikes.`);
+
+  if (dry) {
+    console.log("Dry run: nothing written.");
+    return;
+  }
+
+  loadEnv();
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.error("Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY in .env.");
     process.exit(1);
   }
-  return Math.floor(t / 1000);
-}
-
-const env = loadEnv();
-
-// Unconfigured is a skip, not a failure: `npm run refresh` and the nightly
-// workflow run this step whether or not Strava has been set up.
-if (!env.STRAVA_CLIENT_ID || !env.STRAVA_CLIENT_SECRET) {
-  console.log("Strava is not configured (STRAVA_CLIENT_ID / STRAVA_CLIENT_SECRET); skipped.");
-  process.exit(0);
-}
-
-if (dry) {
-  console.log("Plan (dry run, nothing called):");
-  if (!detailsOnly) {
-    console.log(`  list   GET /athlete/activities per_page=200${since ? ` after=${since}` : " (all pages)"}`);
-    console.log("  athlete GET /athlete, /athletes/{id}/stats, /athlete/zones, /gear/{id}×n");
-  }
-  if (!noDetails) console.log(`  detail GET /activities/{id} for pending rows, ${DETAIL_BATCH} per batch until the budget is spent`);
-  try {
-    const pending = await countPendingDetails(env);
-    console.log(`  rows without detail now: ${pending ?? "unknown"}`);
-  } catch (err) {
-    console.log(`  could not read pending count: ${err.message}`);
-  }
-  process.exit(0);
-}
-
-const token = await getAccessToken(env);
-const describe = (l) => (l ? `budget left: ${l.left15}/15min, ${l.leftDay}/day` : "");
-
-if (!detailsOnly) {
-  // With no --since, an empty table lists everything; a filled one lists from
-  // a week before its newest activity (edits to old ones are caught by a full
-  // run: --since=all).
-  let after = null;
-  if (since && since !== "all") after = sinceEpoch(since);
-  else if (!since) {
-    const latest = await latestStartEpoch(env);
-    after = latest ? latest - 7 * 86400 : null;
-  }
-  let page = 1;
-  let listed = 0;
-  while (page) {
-    // eslint-disable-next-line no-await-in-loop
-    const res = await syncListPage(env, { page, after, token });
-    listed += res.count;
-    console.log(`list page ${page}: ${res.count} activities. ${describe(res.limits)}`);
-    page = res.next;
-    if (res.limits && (res.limits.left15 <= 2 || res.limits.leftDay <= 2)) {
-      console.log("Rate limit reached during the list; run again later to continue.");
-      process.exit(0);
-    }
-  }
-  console.log(`Listed ${listed} activities.`);
-  const athlete = await syncAthlete(env, { token });
-  console.log(`Athlete ${athlete.athleteId}: ${athlete.gear} gear, zones ${athlete.zones ? "stored" : "unavailable"}.`);
-}
-
-if (!noDetails) {
-  let total = 0;
-  for (;;) {
-    // eslint-disable-next-line no-await-in-loop
-    const res = await syncDetails(env, { token });
-    total += res.fetched;
-    console.log(`details: +${res.fetched} (total ${total}). ${describe(res.limits)}`);
-    if (res.stopped === "rate_limit") {
-      if (noWait || !res.limits || res.limits.leftDay <= 1) {
-        console.log("Rate limit reached; the rest is picked up by the next run.");
-        break;
-      }
+  const supabase = createClient(url, key, { auth: { persistSession: false } });
+  const upsert = async (table, list, onConflict) => {
+    for (let i = 0; i < list.length; i += BATCH) {
       // eslint-disable-next-line no-await-in-loop
-      await sleepToQuarter();
-      continue; // eslint-disable-line no-continue
+      const { error } = await supabase.from(table).upsert(list.slice(i, i + BATCH), { onConflict });
+      if (error) throw new Error(`${table}: ${error.message}`);
     }
-    if (res.fetched < DETAIL_BATCH) break;
-  }
-  const pending = await countPendingDetails(env).catch(() => null);
-  if (pending != null) console.log(`${pending} activities still without detail.`);
+  };
+
+  await upsert("strava_gear", gear, "id");
+  await upsert("strava_activities", rows, "id");
+  await upsert("strava_activity_private", privateRows, "activity_id");
+  console.log(`Wrote ${rows.length} activities and ${gear.length} gear.`);
+  console.log("Next: npm run og:fallbacks -- --only=training, then npm run ask:index.");
 }
+
+main().catch((err) => {
+  console.error(err.message || err);
+  process.exit(1);
+});
