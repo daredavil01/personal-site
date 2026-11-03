@@ -128,6 +128,9 @@ is no export folder.
 
 ## Where it shows up
 
+- `/training` — **the film**: 60 seconds, vertical, narrated, beside the title in
+  both layouts (`TrainingFilm.js`). Rendered with Remotion from the live table —
+  see "The film" below.
 - `/training` — a **Facts** tab / "By the numbers" chapter: every fact the log
   supports and every variable with its coverage (`src/lib/trainingFacts.js`).
 - `/training` — in the atlas, an animated story (route replay, a spiral of
@@ -149,6 +152,35 @@ is no export folder.
   `activityHours`, `activityDays`, `trainingDays` from `computeSiteStats`.
 - `/tags/:name` — activities can be tagged at `/admin/training`.
 - `/ask` — one chunk per month (`scripts/ask-sources/training.mjs`).
+
+## The film
+
+`npm run training:film -- --publish` renders the page's 60-second vertical film
+with [Remotion](https://www.remotion.dev) (free for individuals; a company of
+more than three people needs its company licence) and writes the web copy to
+`public/video/the-training-story.{mp4,jpg,vtt,json}`, which is committed.
+`src/components/Training/film.test.js` fails the build if one is missing, the
+MP4 passes 6 MB or the chapters stop fitting a minute.
+
+- **Data** (`scripts/training-film/data.mjs`): the public columns only, reduced
+  with the page's own modules through Vite's SSR loader — `totals`, `factsOf`,
+  `inventory`, `streaks`, `storyOf`/`pickSlots`/`terrainOf` for the longest day.
+  Routes are the trimmed `route_polyline`, framed on home ground like the atlas.
+- **Story** (`render.mjs` `script()`): eight scenes — the pulse, every activity,
+  light painting, the streak, a day replayed with the group of ten, five facts,
+  the two layouts (phone screenshots from `capture.mjs`), and the address. Each
+  line is spoken first (`scripts/blueprint-film/voice.mjs`: Aura with Cloudflare
+  keys, else Piper with `PIPER_VOICE`), measured, and the scenes are sized
+  around the lines to fill exactly 60 s. Numbers are spoken as words; the
+  burned-in captions and the `.vtt` show the figures.
+- **Music** (`score.mjs`): synthesised to the scene cuts, a hit on every fact;
+  it ducks under the voice in the composition.
+- **Picture** (`remotion/`): every motion is a function of the frame
+  (`interpolate`, `spring`). Figures use the page's poses
+  (`src/components/Training/poses.js`).
+- Flags: `--stills` (one frame per scene), `--frame=12.5,30`, `--capture`
+  (re-shoot the page). Working files go to gitignored `knowledge_base/training-film/`.
+- The numbers are baked in when it renders: re-run it after an import.
 
 ## Strava's terms
 

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import PropTypes from "prop-types";
+import TrainingFilm from "../TrainingFilm";
 import Odometer from "./Odometer";
 import { SampleRibbon, useInView } from "../shared";
 import { howFar, totals, yearsOf } from "../../../lib/training";
@@ -67,7 +68,8 @@ const AtlasHero = ({ rows, demo }) => {
       <svg viewBox="0 0 800 100" preserveAspectRatio="none" className="absolute inset-x-0 top-[38%] w-full h-24 opacity-60 pointer-events-none" aria-hidden="true">
         <path d={beats} fill="none" stroke="var(--tr-accent)" strokeWidth="2" pathLength="1" className="tr-pulse-line" vectorEffect="non-scaling-stroke" />
       </svg>
-      <div className="relative flex flex-col gap-8">
+      <div className="relative grid md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_240px] gap-10 items-start">
+      <div className="flex flex-col gap-8 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="tr-kicker mb-0" style={{ color: "var(--tr-accent)" }}>{`Strava · ${span}`}</p>
           {demo && <SampleRibbon dark />}
@@ -116,6 +118,8 @@ const AtlasHero = ({ rows, demo }) => {
           <span className="material-symbols-outlined text-base animate-bounce" aria-hidden="true">south</span>
           Scroll to replay
         </p>
+      </div>
+      <TrainingFilm dark />
       </div>
     </section>
   );

@@ -610,6 +610,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
 | Training (Strava): export import / helpers / admin | `scripts/strava-import.mjs`, `src/lib/stravaExport.js`, `src/lib/strava.js`, `src/pages/admin/TrainingRaces.js` |
+| Training film (Remotion): data / render / picture | `scripts/training-film/`, `public/video/the-training-story.*`, `src/components/Training/TrainingFilm.js` |
 | Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`atlas/`, `classic/`), `src/lib/training.js`, `src/lib/trainingDemo.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
 | Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
@@ -1060,6 +1061,14 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
   every kept variable with coverage. Deep facts (zones, drift, steps, peaks)
   come from `extra._stats`, written at import by `deepStatsOf`; `extra` is in
   `LIST_COLUMNS` for this. Add a new kept field to `VARIABLES` too.
+- **The film** (`TrainingFilm.js` in both headers): a 60-second vertical,
+  narrated film rendered with **Remotion** from the live table —
+  `npm run training:film -- --publish` (`scripts/training-film/`: `data.mjs`
+  reads through the page's own modules, `render.mjs` speaks each scene's line
+  and sizes the scenes around it, `score.mjs` the music, `remotion/` the
+  picture). Writes `public/video/the-training-story.{mp4,jpg,vtt,json}`
+  (committed; `film.test.js` holds the MP4 under 6 MB). Numbers are baked in:
+  re-render after an import. Details in `docs/strava.md`.
 - **Sample data:** while the table is empty, or with `?demo=1`, everything runs
   on the seeded log in `src/lib/trainingDemo.js` (ids ≥ `DEMO_ID_BASE`,
   `trainingDemoId.js`, which `/training/:id` also reads) and says "Sample data".
@@ -1068,7 +1077,7 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
 - **`/ask`:** one chunk per month (`scripts/ask-sources/training.mjs`).
   `ASK_SKIP_TRAINING=1` removes them — Strava's terms bar training AI models on
   its data, and this is the closest use.
-- **After an import:** `npm run og:fallbacks -- --only=training`, `npm run ask:index`.
+- **After an import:** `npm run og:fallbacks -- --only=training`, `npm run ask:index`, `npm run training:film -- --publish`.
 
 ---
 

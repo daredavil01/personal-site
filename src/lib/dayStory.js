@@ -177,7 +177,10 @@ export const GROUP = 10;
  */
 export function pickSlots(beats, pxOf, { count = GROUP, gap = 64 } = {}) {
   // When more fit than the group has people, the moments win over pace figures.
-  const kept = fitBeats(beats, pxOf, gap).sort((a, b) => a.priority - b.priority || a.i - b.i).slice(0, count);
+  // Pace figures are not candidates here: on a wide line they would all fit and
+  // the first few kilometres' would crowd out the spread chosen below.
+  const kept = fitBeats(beats.filter((b) => b.kind !== "pace"), pxOf, gap)
+    .sort((a, b) => a.priority - b.priority || a.i - b.i).slice(0, count);
   const spare = beats.filter((b) => b.kind === "pace" && !kept.includes(b));
   while (kept.length < count && spare.length) {
     let best = 0;

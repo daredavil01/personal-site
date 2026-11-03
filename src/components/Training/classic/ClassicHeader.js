@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import CountUp from "../../Stats/CountUp";
 import { SampleRibbon } from "../shared";
+import TrainingFilm from "../TrainingFilm";
 import {
   streaks, totals, totalsByMonth, yearsOf,
 } from "../../../lib/training";
@@ -57,6 +58,8 @@ const ClassicHeader = ({ rows, demo }) => {
         </p>
         {demo && <SampleRibbon />}
       </div>
+      <div className="grid md:grid-cols-[minmax(0,1fr)_200px] gap-6 items-start">
+      <div className="flex flex-col gap-6 min-w-0">
       <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6 items-end">
         <div>
           <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-none tracking-tight mb-5">
@@ -71,7 +74,7 @@ const ClassicHeader = ({ rows, demo }) => {
           <Spark months={months} />
         </div>
       </div>
-      <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-0">
+      <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-0">
         {tiles.map((x) => (
           <div key={x.k} className="group rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/60 p-4 hover:border-secondary/40 hover:-translate-y-0.5 transition-all">
             <dt className="flex items-center gap-1.5 font-label text-[10px] uppercase tracking-widest text-stone-400 mb-1">
@@ -85,6 +88,9 @@ const ClassicHeader = ({ rows, demo }) => {
           </div>
         ))}
       </dl>
+      </div>
+      <TrainingFilm />
+      </div>
     </header>
   );
 };
