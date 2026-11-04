@@ -16,6 +16,11 @@ import {
   DEFAULT_ASK_SETTINGS, EMBEDDING_DIMS, EMBEDDING_MODEL, ENTITY_TYPES as ASK_TYPES,
 } from "../../data/askConfig";
 import { PAGE_SLUGS } from "../../lib/og/model";
+import { ABOUT_SECTIONS } from "../../lib/aboutModel";
+import { POSITION_GROUPS } from "../../lib/resumeModel";
+import { DAILY_COUNT, MOODS } from "../../lib/microblogInsights";
+import { READING_WPM, WORDS_PER_NOVEL, WORDS_PER_PAGE } from "../../lib/writingLedger";
+import { VARIABLES as TRAINING_VARIABLES } from "../../lib/trainingFacts";
 
 export const fmt = (n) => (Number.isFinite(Number(n)) && Number(n) > 0
   ? Number(n).toLocaleString("en-IN")
@@ -65,7 +70,11 @@ const archiveRows = (ctx) => COLLECTIONS
 
 const tiers = DEFAULT_ASK_SETTINGS.tiers || [];
 
-// `plan` is the room's rectangle on a 960×600 plan; `door` is where its door
+// The plan the rooms tile, in plan units. SitePlan draws this outline and the
+// test holds the rooms to it.
+export const PLAN = { w: 960, h: 800 };
+
+// `plan` is the room's rectangle on the PLAN; `door` is where its door
 // sits (`h` on a horizontal wall, `v` on a vertical one); `furniture` names
 // the glyph SitePlan draws inside it.
 export const FEATURES = [
@@ -283,7 +292,7 @@ export const FEATURES = [
     name: "Foyer",
     path: "/",
     pathLabel: "Go to the front door",
-    plan: { x: 240, y: 400, w: 280, h: 200 },
+    plan: { x: 190, y: 600, w: 240, h: 200 },
     door: null,
     furniture: "rug",
     area: () => "main entrance",
@@ -344,6 +353,136 @@ export const FEATURES = [
       pages: "MindMap.js, InteractiveMe.js",
       data: "usePanZoom, ContentContext lists",
       db: "books, sports, treks, projects, blogs",
+    },
+  },
+  {
+    id: "training",
+    no: "112",
+    name: "Training",
+    path: "/training",
+    pathLabel: "Open the training log",
+    plan: { x: 240, y: 400, w: 280, h: 200 },
+    door: { x: 300, y: 600, dir: "h" },
+    furniture: "track",
+    area: (ctx) => (fmt(s(ctx).activityKm) ? `${fmt(s(ctx).activityKm)} km logged` : null),
+    blurb: "Every run, ride and session from a Strava export, read as a log, a calendar, records and a story of each day.",
+    specs: [
+      "Filled from a Strava bulk export, not the API: npm run strava:import upserts on Strava's id and skips a second copy that starts within a minute.",
+      "Raw GPS stays in an owner-only table. The public route is trimmed 400 m around its start and finish.",
+      "Two layouts over one data hook: an atlas story whose chapters animate once, or tabs for the overview, log, calendar, facts, records and routes.",
+      "The day story draws an activity's terrain line on its own clock, with the route map walked in step.",
+      () => `${TRAINING_VARIABLES.length} kept variables, each listed with how many activities carry it. Splits, laps and best efforts are computed from the track.`,
+      "A 60-second narrated film, rendered with Remotion from the live table.",
+    ],
+    layers: {
+      shell: "TrainingAtlas (story) or TrainingClassic (tabs)",
+      pages: "Training.js, TrainingPost.js (/training/:id)",
+      data: "training.js, trainingFacts.js, dayStory.js",
+      db: "strava_activities; raw GPS owner-only",
+      jobs: "npm run strava:import, training:film",
+    },
+  },
+  {
+    id: "about",
+    no: "113",
+    name: "About",
+    path: "/about",
+    pathLabel: "Read the about page",
+    plan: { x: 0, y: 600, w: 190, h: 200 },
+    door: { x: 190, y: 680, dir: "v" },
+    furniture: "stopwatch",
+    area: () => "10 s to 10 min",
+    blurb: "One page read at the depth you have time for, from a single line to the long version, with a dated log of what happened lately.",
+    specs: [
+      "?read=10s, 1m, 5m or 10m. Each depth is a superset of the last, and a stopwatch dial shows how far in you are.",
+      () => `The words are ${ABOUT_SECTIONS.length} sections of one markdown file, about.md, parsed by the same model the npm run about command uses.`,
+      "Every principle names the projects behind it, and npm run about check fails when one stops matching.",
+      "The Latest log merges hand-written lines with what the tables say happened: a certification, a role, a race, a fort, a shipped project.",
+      "No number is typed into about.md. Counts come from /api/stats and are left out when missing.",
+    ],
+    layers: {
+      shell: "PageShell, with a stopwatch rail",
+      pages: "About.js → AboutPage.js",
+      data: "aboutModel.js: tiers, timeline, buildUpdates",
+      db: "projects and resume_* rows as evidence",
+      jobs: "npm run about: update, set, check, bios",
+    },
+  },
+  {
+    id: "resume",
+    no: "114",
+    name: "Resume",
+    path: "/resume",
+    pathLabel: "Open the resume",
+    plan: { x: 430, y: 600, w: 190, h: 200 },
+    door: { x: 430, y: 680, dir: "v" },
+    furniture: "sheet",
+    area: () => "1 A4 page",
+    blurb: "A recruiter-first sheet computed from the tables, which prints on one A4 page.",
+    specs: [
+      () => `Roles fall into ${POSITION_GROUPS.length} groups (${POSITION_GROUPS.map((g) => g.label.toLowerCase()).join(", ")}), each with its duration.`,
+      "Skills carry their evidence: how many projects use each one, plus the stack the projects ship with that the list does not name.",
+      "Paper gets its own layout. onePageResume() picks from the data and the sheet scales itself down, never up, until it fits one page.",
+      "Copy as plain text for application forms that only take text.",
+      "Edited at /admin/resume or with npm run resume, which checks dates with the page's own parser.",
+    ],
+    layers: {
+      shell: "PageShell; owner pencils when signed in",
+      pages: "ResumeDocument.js, ResumePrint.js",
+      data: "resumeModel.js: onePageResume, evidence",
+      db: "resume_positions, _degrees, _certifications, _skills",
+      jobs: "npm run resume: add, edit, export, import",
+    },
+  },
+  {
+    id: "ledger",
+    no: "115",
+    name: "Writing Ledger",
+    path: "/writing-ledger",
+    pathLabel: "Open the ledger",
+    plan: { x: 620, y: 600, w: 170, h: 200 },
+    door: { x: 620, y: 680, dir: "v" },
+    furniture: "ledger",
+    area: () => "Substack + WordPress",
+    blurb: "Every essay on Substack and WordPress, counted word by word and bound as a ledger.",
+    specs: [
+      "Reads one committed file, writing-ledger.json, written by npm run blogs:wordcount. Only new or edited posts are downloaded.",
+      "Every derived number (the shelf, the ink calendar, milestones, records, merged topics) comes from writingLedger.js. Month- and year-to-date are worked out for today.",
+      () => `Reading time at ${READING_WPM} words a minute, a page at ${WORDS_PER_PAGE} words, a novel at ${WORDS_PER_NOVEL.toLocaleString("en-IN")}.`,
+      "A page inside the site shell. The old standalone /writing-ledger.html answers with a 301.",
+    ],
+    layers: {
+      shell: "PageShell: one ledger, either shell",
+      pages: "WritingLedger.js, components/WritingLedger/",
+      data: "writingLedger.js, writingPeriod.js",
+      edge: "_middleware.js 301s /writing-ledger.html",
+      jobs: "npm run blogs:wordcount, nightly",
+    },
+  },
+  {
+    id: "micro",
+    no: "116",
+    name: "Micro-blog",
+    path: "/micro-blog",
+    pathLabel: "Read the micro-blog",
+    plan: { x: 790, y: 600, w: 170, h: 200 },
+    door: { x: 790, y: 680, dir: "v" },
+    furniture: "stars",
+    area: (ctx) => (fmt(ctx && ctx.micro && ctx.micro.total) ? `${fmt(ctx.micro.total)} posts` : null),
+    blurb: "Short posts read three ways: an overview told in the first person, every post searchable, and the numbers.",
+    specs: [
+      "The Overview and Stats tabs read one committed file, microblog-insights.json. The Posts tab searches and pages in Postgres.",
+      "Posting times come from the posts' own signatures, never from a time written in the prose.",
+      "A map from the /ask embeddings: a seeded UMAP layout, clustered into regions named by the tags they over-use.",
+      () => `Tone is ${MOODS.length} moods (${MOODS.map((m) => m.label.toLowerCase()).join(", ")}), each defined by the posts tagged with it. Not a sentiment model, and the page says so.`,
+      () => `Today's ${DAILY_COUNT} are seeded by the date, one post per year, and fetched by id, so no post text lives in the file.`,
+    ],
+    layers: {
+      shell: "Atlas adds the night palette",
+      pages: "MicroBlog.js: Overview, Posts, Stats",
+      data: "microblogInsights.js: every number shown",
+      db: "microblog, search_tsv, content_chunks",
+      jobs: "npm run microblog:insights, nightly",
     },
   },
 ];

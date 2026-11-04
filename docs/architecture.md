@@ -99,28 +99,12 @@ personal-site/
 
 ## Routing
 
-All routes are lazy-loaded via `React.lazy` + `Suspense` in `App.js`:
-
-| Route | Page |
-|---|---|
-| `/` | Index |
-| `/about` | About |
-| `/resume` | Resume |
-| `/projects` | Projects |
-| `/stats` | Stats |
-| `/contact` | Contact |
-| `/books` | Books |
-| `/sports` | Sports |
-| `/treks` | Treks |
-| `/instagram` | Instagram |
-| `/now` | Now |
-| `/challenges` | Challenges |
-| `/100-days-to-offload` | OneHundredDays |
-| `/changelog` | Changelog |
-| `/interactive-me` | InteractiveMe |
-| `/mindmap` | MindMap |
-| `/admin/*` | Admin (protected) |
-| `*` | NotFound |
+All routes are lazy-loaded via `React.lazy` + `Suspense` in `App.js`. The
+full route → component → share-card map is generated into
+[routes.md](routes.md) by `npm run docs:build`; it used to be copied here by
+hand and fell behind (no `/training`, `/writing-ledger`, `/micro-blog`,
+`/blueprint`…), so read that one. Every route is also declared in
+`src/data/routeManifest.js`, which a test holds to `App.js`.
 
 ---
 

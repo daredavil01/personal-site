@@ -94,13 +94,15 @@ const Riser = ({ feature }) => {
 // Floor mode: every room that touches the chosen floor, as a clickable list.
 const Occupants = ({ floor, onSelect }) => {
   const rooms = FEATURES.filter((f) => f.layers[floor.id]);
+  const step = Math.min(40, Math.floor((H - 60) / Math.max(rooms.length, 1)));
   return (
     <g className="bp-fade-in">
       <text x={CALLOUT_X} y={18} className="bp-svg-label bp-fill-red" fontSize="11">
         {`${floor.label}: ${rooms.length} rooms stand here`}
       </text>
       {rooms.map((f, i) => {
-        const y = 44 + i * 40;
+        // Tighter rows when a floor holds many rooms, so the list stays on the sheet.
+        const y = 44 + i * step;
         return (
           <g
             key={f.id}
@@ -111,7 +113,7 @@ const Occupants = ({ floor, onSelect }) => {
             onClick={() => onSelect(f.id)}
             onKeyDown={activate(() => onSelect(f.id))}
           >
-            <rect className="bp-hit-shape" x={CALLOUT_X - 8} y={y - 14} width={W - CALLOUT_X} height="36" />
+            <rect className="bp-hit-shape" x={CALLOUT_X - 8} y={y - 14} width={W - CALLOUT_X} height={step - 4} />
             <text x={CALLOUT_X} y={y} className="bp-svg-label bp-fill-ink" fontSize="10">
               {`${f.no} ${f.name}`}
             </text>

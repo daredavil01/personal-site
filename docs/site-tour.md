@@ -1,5 +1,12 @@
 # Get Started Site Tour
 
+> **Retired.** The react-joyride tour described below was removed in the
+> Wanderer's Atlas redesign (`docs/wanderers-atlas-redesign-plan.md`, item 13):
+> `TourContext`, `TourGuide`, `TourMount` and `src/data/tourSteps.js` no longer
+> exist, and `react-joyride` is not a dependency. The Atlas guide
+> (`GuideAvatar`, in the HUD and `FloatingToggle.js`) took its place. Kept as a
+> record of how it worked; do not follow the recipes below.
+
 A guided, content-aware walkthrough launched from a floating **Get Started**
 button (above the light/dark toggle, on every page). Each page has its **own
 tour** tailored to that page's content — the homepage walks the whole menu bar

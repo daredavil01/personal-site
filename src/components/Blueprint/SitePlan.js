@@ -1,19 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { COLLECTIONS, FEATURES, fmt, resolve } from "./features";
+import { COLLECTIONS, FEATURES, PLAN, fmt, resolve } from "./features";
 
 // Sheet A-01: the site drawn as a floor plan. Each feature is a room, its
 // "floor area" is a live count, and clicking one redlines it and opens its
-// specification. Coordinates are a 960×600 plan inside a margin that holds the
+// specification. Coordinates are the PLAN (960×800) inside a margin that holds the
 // column/row grid bubbles, the way a real general-arrangement drawing is set out.
 
 const M = 56; // margin around the plan for grid bubbles and the entrance
-const W = 960;
-const H = 600;
+const W = PLAN.w;
+const H = PLAN.h;
 const DOOR = 30;
 
 const COLUMN_GRID = [0, 260, 520, 740, 960];
-const ROW_GRID = [0, 190, 400, 600];
+const ROW_GRID = [0, 190, 400, 600, 800];
 
 const activate = (fn) => (e) => {
   if (e.key === "Enter" || e.key === " ") {
@@ -160,6 +160,67 @@ const Furniture = ({ kind, cx, cy }) => {
           <rect x="-11" y="-11" width="22" height="22" {...line} transform="rotate(45)" />
           <circle cx="-38" r="8" {...line} />
           <circle cx="38" r="8" {...line} />
+        </g>
+      );
+    case "track":
+      // A running track: two lanes round a field, the start line across them.
+      return (
+        <g transform={`translate(${cx},${cy})`}>
+          <rect x="-58" y="-30" width="116" height="60" rx="30" {...line} />
+          <rect x="-46" y="-18" width="92" height="36" rx="18" {...line} strokeDasharray="3 3" />
+          <line x1="-10" y1="18" x2="-10" y2="30" className="bp-stroke" strokeWidth="1.6" />
+          <line x1="-46" y1="0" x2="46" y2="0" {...line} />
+        </g>
+      );
+    case "stopwatch":
+      // A stopwatch with its four reading depths marked on the dial.
+      return (
+        <g transform={`translate(${cx},${cy})`}>
+          <circle r="30" {...line} />
+          <rect x="-5" y="-40" width="10" height="7" {...line} />
+          {[40, 130, 220, 310].map((a) => (
+            <line key={a} x1="0" y1="-30" x2="0" y2="-23" {...line} transform={`rotate(${a})`} />
+          ))}
+          <line x1="0" y1="0" x2="15" y2="-17" className="bp-stroke" strokeWidth="1.6" />
+          <circle r="2.5" className="bp-fill-soft" />
+        </g>
+      );
+    case "sheet":
+      // An A4 page: a heading bar, ruled lines, a fold in the corner.
+      return (
+        <g transform={`translate(${cx},${cy})`}>
+          <path d="M-24,-34 H14 L24,-24 V34 H-24 Z" {...line} />
+          <polyline points="14,-34 14,-24 24,-24" {...line} />
+          <rect x="-16" y="-26" width="22" height="6" className="bp-fill-soft" />
+          {[-12, -4, 4, 12, 20].map((y) => (
+            <line key={y} x1="-16" y1={y} x2={y % 8 ? 16 : 8} y2={y} {...line} />
+          ))}
+        </g>
+      );
+    case "ledger":
+      // An open ledger: two pages, ruled columns, a figure in the margin.
+      return (
+        <g transform={`translate(${cx},${cy})`}>
+          <path d="M0,-24 C-14,-30 -34,-30 -48,-24 V28 C-34,22 -14,22 0,28 Z" {...line} />
+          <path d="M0,-24 C14,-30 34,-30 48,-24 V28 C34,22 14,22 0,28 Z" {...line} />
+          {[-12, -2, 8].map((y) => (
+            <g key={y}>
+              <line x1="-40" y1={y} x2="-8" y2={y} {...line} />
+              <line x1="8" y1={y} x2="40" y2={y} {...line} />
+            </g>
+          ))}
+          <line x1="28" y1="-18" x2="28" y2="20" {...line} strokeDasharray="2 3" />
+        </g>
+      );
+    case "stars":
+      // A night sky: a few posts as stars, joined into a constellation.
+      return (
+        <g transform={`translate(${cx},${cy})`}>
+          <polyline points="-44,14 -22,-12 0,4 20,-22 44,-6" {...line} strokeDasharray="3 3" />
+          {[[-44, 14], [-22, -12], [0, 4], [20, -22], [44, -6]].map(([x, y]) => (
+            <circle key={`${x}${y}`} cx={x} cy={y} r="3.5" className="bp-fill-soft" />
+          ))}
+          <path d="M30,22 a10,10 0 1 1 -10,-12 a8,8 0 1 0 10,12 z" {...line} />
         </g>
       );
     default:

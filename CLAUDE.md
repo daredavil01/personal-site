@@ -645,7 +645,10 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   plan rectangle, specs and the file it touches on each floor of the section.
   **When a feature ships or moves, update its room.** `features.test.js` fails
   if a room links to a route that does not exist or the rooms stop tiling the
-  plan.
+  plan (`PLAN`, 960×800 in four rows; the Foyer owns the stretch of the bottom
+  wall the entrance is cut into). Sixteen rooms, including Training, About,
+  Resume, the Writing Ledger and the Micro-blog, each reading its numbers from
+  the module that defines them.
 - **No typed-in numbers.** Code facts are read from the modules that define
   them (regions, quests, card slugs, the ask ladder); content counts come from
   `useSiteStats` and are omitted, never zeroed, when missing.
@@ -667,6 +670,10 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   `-- --stills` writes posters and subtitles only, `-- --frame=<seg>@<s>[@layout]`
   one frame, `-- --only=<name>` one cut, `-- --layout=square|vertical` one shape.
   Like the cards, the numbers are baked in: re-run it after content moves.
+  **The published film predates the fourth row of rooms** and was left as it
+  is on purpose; `scripts/blueprint-film/scenes/plan.mjs` still frames a
+  960×600 plan (`W0`/`H0`, the column grid, the entrance), so read `PLAN`
+  there before the next re-render or the bottom row falls outside the frame.
 - **Audio description:** `-- --describe` adds a narrator to the full film
   (`the-blueprint-described[-vertical].mp4`, plus the narration as `.srt`/`.vtt`):
   the lines live beside the captions in `scripts/blueprint-film/film.mjs`, are

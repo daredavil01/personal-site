@@ -300,13 +300,35 @@ a "More" dropdown).
   search + platform + tag filters, and a detail modal with share-image
   export.
 - **`/micro-blog` — Micro-Blog Archive** (`src/pages/MicroBlog.js`)
-  1,631+ short posts (a rescued Tumblr archive plus new manual posts).
-  **Server-side full-text search** (Postgres tsvector, debounced input),
-  tag-facet cloud (top 40, multi-select, with counts), source and type
-  filters, Newest/Oldest/**Shuffle** sort, "Load more" pagination (24 per
-  page), and a Stats tab (totals, date range, type/source breakdowns, top
-  tags). **Every filter mirrors into the URL**, so any filtered view is
-  shareable.
+  1,600+ short posts (a rescued Tumblr archive plus new manual posts), in
+  three tabs (`?tab=overview|posts|stats`). **Overview** opens on a night
+  sky and "today's ten" (seeded by the date, one post per year, both
+  languages), then story chapters told in the first person — when the posts
+  are written (from their own `#…::time` signatures), a map of meaning laid
+  out from the `/ask` embeddings, tone as five moods defined by tagged posts
+  (stated on the page as not a sentiment model), languages and exportable
+  4:5 year cards. **Posts** is the search: **server-side full-text search**
+  (Postgres tsvector), tag facets, filters, pinboard or list, every filter
+  mirrored into the URL. **Stats** is a per-year dashboard. Overview and
+  Stats read the committed `public/data/microblog-insights.json`
+  (`npm run microblog:insights`); every number comes from
+  `src/lib/microblogInsights.js`.
+- **`/writing-ledger` — Writing Ledger** (`src/pages/WritingLedger.js`)
+  Every essay on Substack and WordPress, English and Marathi, counted word
+  by word: a cover with month- and year-to-date, a shelf, an
+  ink calendar, the long arc, topics, rhythm (length, weekday, mix),
+  records, the freshest posts and the full ledger table. Reads the
+  committed `public/data/writing-ledger.json` (`npm run blogs:wordcount`);
+  every derived number comes from `src/lib/writingLedger.js`. A page inside
+  the site shell — the old `/writing-ledger.html` 301s here.
+- **`/training` — Training Log** (`src/pages/Training.js`) Every run,
+  ride and session from a **Strava bulk export** (`npm run strava:import`,
+  not the API). Two layouts over one data hook: an atlas story whose
+  chapters animate once, or classic tabs (Overview, Log, Calendar, Facts,
+  Stats & PRs, Routes). `/training/:id` tells one activity as a day story —
+  its terrain line drawn on its own clock with the route walked in step.
+  Raw GPS stays owner-only; public routes are trimmed 400 m at each end.
+  A 60-second narrated film sits in the header. See `docs/strava.md`.
 - **`/instagram` — Instagram Archive** (`src/pages/Instagram.js`)
   Posts preserved from a deleted Instagram account, each with a photo
   carousel (`react-slideshow-image`).
@@ -354,12 +376,18 @@ a "More" dropdown).
   bubbles; click to zoom-focus and burst-animate that category's children
   (staggered), click a child for a detail panel. Full pan/zoom (pointer,
   pinch, wheel) via the shared `usePanZoom` hook.
+- **`/blueprint`** (`src/pages/Blueprint.js`) The site drawn as
+  architectural sheets: a site plan with every feature as a room (Training,
+  About, Resume, the Writing Ledger and the Micro-blog included), a section
+  tracing a room through the stack, the `/ask` circuit, an unfurl bench,
+  the shell switch, a live tag loom and a film of the sheets. Rooms are
+  data in `src/components/Blueprint/features.js`.
 
 ### Detail pages
 
 Every archive has permalink detail routes (`/books/:id`, `/sports/:id`,
 `/treks/:id`, `/projects/:id`, `/100-days-to-offload/:id`,
-`/micro-blog/:id`) with back-links, share/copy actions, share-image
+`/micro-blog/:id`, `/training/:id`) with back-links, share/copy actions, share-image
 export, and **per-item social-share meta** (see §6).
 
 ---

@@ -24,6 +24,7 @@ Scraped from `src/App.js` by `npm run docs:build`.
 | `/micro-blog` | MicroBlog | `/og/micro-blog.png` |
 | `/micro-blog/:id` | MicroBlogPost | the row's photo, else `/og/micro-blog.png` |
 | `/logbook` | Logbook | `/og/logbook.png` |
+| `/writing-ledger` | WritingLedger | `/og/writing-ledger.png` |
 | `/treks/:id` | TrekPost | the row's photo, else `/og/treks.png` |
 | `/sports/:id` | SportPost | the row's photo, else `/og/sports.png` |
 | `/books/:id` | BookPost | the row's photo, else `/og/books.png` |

@@ -1,7 +1,7 @@
 import { ROUTE_MANIFEST } from "../../data/routeManifest";
 import { DEFAULT_ASK_SETTINGS } from "../../data/askConfig";
 import {
-  COLLECTIONS, FEATURES, LAYERS, fmt, resolve,
+  COLLECTIONS, FEATURES, LAYERS, PLAN, fmt, resolve,
 } from "./features";
 import { circuitSequence } from "./AskCircuit";
 
@@ -14,6 +14,14 @@ describe("the rooms on the /blueprint plan", () => {
       expect({ room: f.id, route: ROUTES.has(f.path.split("?")[0]) }).toEqual({ room: f.id, route: true });
     });
     COLLECTIONS.forEach((c) => expect(ROUTES.has(c.path)).toBe(true));
+  });
+
+  // The main entrance is cut into the outer wall between x 330 and 400, so
+  // the room that owns that stretch of the bottom wall has to be the foyer.
+  it("open the main entrance into the foyer", () => {
+    const foyer = FEATURES.find((f) => f.id === "home").plan;
+    expect(foyer.y + foyer.h).toBe(PLAN.h);
+    expect(foyer.x < 330 && foyer.x + foyer.w > 400).toBe(true);
   });
 
   it("have unique ids and room numbers", () => {
@@ -31,9 +39,13 @@ describe("the rooms on the /blueprint plan", () => {
 
   // The plan is drawn from these rectangles, so a gap or an overlap would be
   // visible as a hole or a double wall.
-  it("tile the 960×600 plan exactly", () => {
+  it("tile the plan exactly", () => {
     const area = FEATURES.reduce((sum, { plan }) => sum + plan.w * plan.h, 0);
-    expect(area).toBe(960 * 600);
+    expect(area).toBe(PLAN.w * PLAN.h);
+    FEATURES.forEach(({ id, plan }) => {
+      const inside = plan.x >= 0 && plan.y >= 0 && plan.x + plan.w <= PLAN.w && plan.y + plan.h <= PLAN.h;
+      expect({ id, inside }).toEqual({ id, inside: true });
+    });
     FEATURES.forEach((a, i) => FEATURES.slice(i + 1).forEach((b) => {
       const overlap = a.plan.x < b.plan.x + b.plan.w && b.plan.x < a.plan.x + a.plan.w
         && a.plan.y < b.plan.y + b.plan.h && b.plan.y < a.plan.y + a.plan.h;
@@ -54,6 +66,9 @@ describe("the rooms on the /blueprint plan", () => {
     const archives = FEATURES.find((f) => f.id === "archives");
     expect(resolve(archives.area, null)).toBeNull();
     expect(resolve(archives.area, { stats: { booksCount: 51 }, micro: { total: 1668 } })).toBe("1,719 rows");
+    ["training", "micro"].forEach((id) => {
+      expect(resolve(FEATURES.find((f) => f.id === id).area, null)).toBeNull();
+    });
     expect(fmt(0)).toBeNull();
     expect(fmt(undefined)).toBeNull();
   });
