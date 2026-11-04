@@ -169,7 +169,7 @@ describe("sitemap", () => {
 
   it("lists pages only, never an individual entity", () => {
     const entries = sitemapEntries(inventory);
-    expect(entries.map((e) => e.path).sort()).toEqual([...indexableFixedRoutes(), "/writing-ledger"].sort());
+    expect(entries.map((e) => e.path).sort()).toEqual(indexableFixedRoutes().sort());
     expect(entries).toContainEqual({ path: "/writing-ledger", lastmod: null });
   });
 

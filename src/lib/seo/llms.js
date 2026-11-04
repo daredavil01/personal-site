@@ -15,11 +15,10 @@ import { KINDS } from "./entities";
 import { indexableFixedRoutes } from "./sitemap";
 import { clip } from "./text";
 
-// Pages served from public/ that the nav links to but PAGE_META cannot describe.
-const STATIC_DESCRIPTIONS = {
-  "/writing-ledger":
-    "Every blog post published across Substack and WordPress since 2020, counted word by word and rolled up by month, year and platform.",
-};
+// Pages served from public/ that the nav links to but PAGE_META cannot
+// describe. Empty since the Writing Ledger became a React route; kept so a
+// future static page has somewhere to go.
+const STATIC_DESCRIPTIONS = {};
 
 const abs = (path) => `${SITE_URL}${path === "/" ? "" : path}`;
 

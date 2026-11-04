@@ -1,8 +1,8 @@
 // Month-to-date and year-to-date for the Writing Ledger, bucketed in IST to
 // match how the posts themselves are dated.
 //
-// Computed at READ time by the /ask worker (and, as an inline copy, by
-// public/writing-ledger.html), not only when `npm run blogs:wordcount` runs:
+// Computed at READ time by the /ask worker and the /writing-ledger page
+// (src/pages/WritingLedger.js), not only when `npm run blogs:wordcount` runs:
 // the JSON on disk is as of the day it was generated, and "this month so far"
 // is wrong the next morning. That also lets the nightly job skip committing a
 // file whose only change is the date.

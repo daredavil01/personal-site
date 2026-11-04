@@ -172,7 +172,7 @@ async function main() {
   const render = await createRenderer();
   const { payload, from } = await loadStats();
   const photos = offline ? {} : await loadCardPhotos();
-  // Committed by `npm run blogs:wordcount`, and what public/writing-ledger.html
+  // Committed by `npm run blogs:wordcount`, and what the /writing-ledger page
   // itself fetches, so the card and the page count the same words.
   let ledger = null;
   try {

@@ -237,6 +237,13 @@ export async function onRequest(context) {
   // Accept: */* which does not contain "text/html" and would cause the
   // middleware to bail before injecting any metadata.
   const lastSegment = url.pathname.split("/").pop();
+
+  // The Writing Ledger was a static public/writing-ledger.html until it became
+  // a React route; old links and shares still carry the .html.
+  if (/^\/writing-ledger\.html?$/i.test(url.pathname) && isRead(request)) {
+    return Response.redirect(new URL(`/writing-ledger${url.search}`, url).toString(), 301);
+  }
+
   if (lastSegment.includes(".")) {
     const res = await next();
     // Pages answers a missing file with the SPA shell as 200 text/html, so an
@@ -247,13 +254,6 @@ export async function onRequest(context) {
       return new Response(res.body, { status: 404, headers: res.headers });
     }
     return res;
-  }
-
-  // Pages 308s "/writing-ledger.html" to "/writing-ledger" (no dot), which no
-  // React route claims, so it was served as a 404 with the SPA's meta pasted
-  // over the ledger's own. It is a static page that authors its own tags.
-  if (url.pathname === "/writing-ledger") {
-    return next();
   }
 
   // "/world" was the noindexed preview route during the atlas dark build. The

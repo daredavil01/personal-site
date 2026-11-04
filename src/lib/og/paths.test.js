@@ -80,7 +80,7 @@ describe("every generated card is committed", () => {
   // NOT 404: Cloudflare Pages answers an unknown path with the SPA shell, so a
   // card that was never generated unfurls as `200 text/html` and every platform
   // silently shows no image. routeManifest.test.js covers the slugs a route
-  // names; this covers the rest (writing-ledger has no React route at all).
+  // names; this covers the rest (the ones no route names).
   it("has a PNG on disk for every slug the generator writes", () => {
     PAGE_SLUGS.forEach((slug) => {
       const file = path.join(ROOT, "public", "og", `${slug}.png`);

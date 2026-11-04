@@ -1,13 +1,40 @@
 # The Writing Ledger — Refreshing Blog Word-Count Data
 
-The Writing Ledger (`/writing-ledger.html`) is a self-contained infographic of
-every blog post published on Substack and WordPress: total words, monthly and
-yearly trends, month/year-to-date, top posts, tag and length breakdowns.
+The Writing Ledger (`/writing-ledger`) reads every blog post published on
+Substack and WordPress as an accountant's ledger bound like a magazine. It is a
+React route inside the site's shell (header, sidebar and footer, or the atlas
+`writer` region), at `src/pages/WritingLedger.js`. Until v26 it was a standalone
+`public/writing-ledger.html`; the middleware now 301s that old URL.
 
-The page is hand-maintained HTML in `public/`. It holds no data of its own: on
-load it fetches `/data/writing-ledger.json` and renders from that. Month-to-date
-and year-to-date are recomputed in the browser for today's date, so they are
-correct even on days the JSON was not regenerated.
+It holds no data of its own: on load it fetches `/data/writing-ledger.json`.
+Month-to-date and year-to-date are recomputed in the browser for today's date
+(`src/lib/writingPeriod.js`), so they are correct even on days the JSON was not
+regenerated. Everything else the page derives lives in `src/lib/writingLedger.js`
+(pure, tested in `writingLedger.test.js`).
+
+## The page, folio by folio
+
+| Folio | What it draws | Component |
+|---|---|---|
+| Cover | Odometer total, reading-time / pages / novels / words-a-day equivalents, account lines with dot leaders, this month and this year as progress bars | `Cover.js` |
+| I · The shelf | Every post as a book spine: height = √words, colour = platform, a saffron band = Marathi | `Shelf.js` |
+| II · The ink calendar | Every day since the first post, a year per row, a blot per post day sized by words | `InkCalendar.js` |
+| III · The long arc | Running total with 25k-word milestones and the longest silence shaded; year tiles; every calendar month (gaps included), stacked by platform | `LongArc.js` |
+| IV · Recurring themes | Squarified treemap of topics by words, and a topic × year dot matrix. A tile filters the full ledger | `Topics.js` |
+| V · Rhythm | Weekday rose, length ruler (each post a tick), platform / language / format mix | `Rhythm.js` |
+| VI · Records | Longest and shortest essay, busiest month and day, longest streak, longest silence, biggest year, top topic | `Records.js` |
+| VII · Fresh ink | The five newest posts with their cover images | `FreshInk.js` |
+| VIII · The full ledger | Search, platform / year / language / topic filters, sortable, a word bar per row | `LedgerTable.js` |
+
+Design notes, and where they came from: big-number lead and dot-leader
+"account" lines after Nicholas Felton's annual reports; the day calendar after
+Simon Willison's and Jim Nielsen's blog calendars; overview first, then zoom in
+(the EU data-visualisation guide's narrative patterns). Tags are merged across
+spellings (`Data Privacy` = `data_privacy`) and the `100_days_to_offload`
+challenge tag is not counted as a topic. Language is the post's own label, or
+Marathi when the title is in Devanagari, else English. Colours are tokens in
+`ledger.css`: Substack rust, WordPress ink blue, English indigo and Marathi
+saffron (the Logbook's pair), the site redline for peaks and records.
 
 ## Refreshing
 
@@ -50,7 +77,7 @@ They are not the same methodology, so cross-platform comparisons are approximate
 
 ## Who Reads the JSON
 
-- `public/writing-ledger.html` — the page itself.
+- `src/pages/WritingLedger.js` — the page itself, through `src/lib/writingLedger.js`.
 - `functions/api/ask.js` — the `/ask` facts card (`writing`), cached for an hour.
 - `scripts/ask-sources/stats.mjs` — the ledger totals as a searchable chunk.
 
@@ -67,9 +94,8 @@ The console summary lists problems found, never fixed:
 
 ## Verifying
 
-Serve the site (`npm run dev`) and open `/writing-ledger.html`. The headline
-number and the "as of" date should reflect today. Opening the file straight
-from disk no longer works — browsers block `fetch` on `file://`.
+Serve the site (`npm run dev`) and open `/writing-ledger`. The odometer total
+and the "This month" day count should reflect today.
 
 ## Troubleshooting
 

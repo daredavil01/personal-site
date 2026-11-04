@@ -179,9 +179,8 @@ on the client. `pageMeta.js` has to hard-code `SITE_URL`, so without this a Page
 **preview** advertises production's card; and a missing `/og/*.png` does not 404,
 it gets the SPA shell as `200 text/html`, so the unfurl silently shows no image.
 `canonical` and `og:url` stay on `SITE_URL`, and a row's own photo is never
-rewritten. `public/writing-ledger.html` authors its tags by hand and so cannot re-host;
-Pages serves it at `/writing-ledger` (308 from `.html`), which the middleware
-passes through untouched — link to that URL, not the `.html`.
+rewritten. (The Writing Ledger was the one static page that could not re-host;
+it is a React route now, and the middleware 301s the old `/writing-ledger.html`.)
 
 `og:image` is **PNG at 1200×630**; SVG is rejected by WhatsApp, Facebook,
 LinkedIn, X, Slack and iMessage. `og:image:width`/`height` are declared **only**
@@ -423,9 +422,12 @@ Full reference: `docs/newsletter.md`.
   computed in the browser if the endpoint is unreachable), and the `/ask` facts
   card and the `stats` source read the same snapshot. Never recompute a stat
   inside a component — add it to `computeSiteStats`.
-- **Writing Ledger:** `public/writing-ledger.html` fetches
-  `public/data/writing-ledger.json`; month/year-to-date are recomputed at read
-  time (`src/lib/writingPeriod.js`). See `docs/writing-ledger.md`.
+- **Writing Ledger:** `/writing-ledger` (`src/pages/WritingLedger.js`, inside the
+  site shell) fetches `public/data/writing-ledger.json`; every derived number
+  (shelf, ink calendar, milestones, records, merged topics) comes from
+  `src/lib/writingLedger.js` (tested), month/year-to-date from
+  `src/lib/writingPeriod.js`. Components in `src/components/WritingLedger/`,
+  tokens in `ledger.css`. See `docs/writing-ledger.md`.
 - **Answers** may only link to, or show, URLs the archive supplied:
   `sanitiseAnswer` (`src/lib/askFormat.js`) runs in the worker and in the UI.
   Links and images are **separate** allow-lists — a retrieved item's photo is not
@@ -622,7 +624,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | /stats numbers + hourly snapshot | `src/lib/siteStats.js`, `functions/api/stats.js` |
 | Answer link/image rules | `src/lib/askFormat.js` |
 | Automatic eval rubric + ladder + endpoint | `src/lib/askJudge.js`, `src/lib/askJudgeTiers.js`, `functions/api/ask-eval.js` |
-| Writing Ledger data | `public/data/writing-ledger.json` (`npm run blogs:wordcount`) |
+| Writing Ledger data / model / page | `public/data/writing-ledger.json` (`npm run blogs:wordcount`), `src/lib/writingLedger.js`, `src/pages/WritingLedger.js`, `src/components/WritingLedger/` |
 | Logbook data / analysis / page | `public/data/logbook.json` (`npm run logbook`), `src/lib/logbook.js`, `src/pages/Logbook.js`, `src/components/Logbook/` |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |

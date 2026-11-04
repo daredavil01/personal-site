@@ -87,7 +87,7 @@ Three options were on the table:
 |---|---|---|---|
 | Data | Exact | Retyped by a model — can drift or invent | Exact |
 | Design | One design | A new design every month | One design |
-| Share meta / crawlers | Automatic | Hand-written tags, like `writing-ledger.html` | Automatic |
+| Share meta / crawlers | Automatic | Hand-written tags | Automatic |
 | `/ask` indexing | Automatic | None | Automatic |
 | Re-runnable | Yes | Produces a different page each run | Yes |
 | The letter | You type it | Model writes it | Model drafts it from facts; you edit |

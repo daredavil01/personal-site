@@ -13,6 +13,19 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v26.0.0] — 2026-11-04
+
+### Changed
+- **The Writing Ledger, redesigned** (`src/pages/WritingLedger.js`, `src/components/WritingLedger/`): the standalone `public/writing-ledger.html` is now a React route inside the site's header, sidebar and footer (or the atlas `writer` region), bound as an accountant's ledger: ruled paper with a red margin rule, a rolling odometer of every word written, reading-time / pages / novels / words-a-day equivalents, dot-leader account lines, and this month and this year as progress bars against last month and last year. Eight folios follow: a shelf of every post as a book spine, an ink calendar of every day since 2020, the long arc (running total with 25k milestones and the longest silence shaded, year tiles, every calendar month stacked by platform), recurring themes as a treemap plus a topic × year matrix, a weekday rose and length ruler, a record book of torn receipts, the newest posts with their covers, and the full searchable ledger with a topic filter fed by the treemap.
+- **Routing** (`src/App.js`, `src/data/routeManifest.js`, `src/data/pageMeta.js`, `src/data/routes.js`): `/writing-ledger` is a manifest route with its own meta and the existing `writing-ledger` card, so it re-hosts its card on previews like every other page. The nav link is internal now. `STATIC_PAGES` (sitemap) and `STATIC_DESCRIPTIONS` (llms.txt) are empty.
+- **Middleware** (`functions/_middleware.js`): the old `/writing-ledger.html` 301s to `/writing-ledger`; the static pass-through is gone.
+- **Docs** (`docs/writing-ledger.md`, `docs/og-cards.md`, `CLAUDE.md`, `AGENTS.md`): the page, folio by folio, and the static-page exceptions removed.
+
+### Added
+- **Ledger model** (`src/lib/writingLedger.js`, `src/lib/writingLedger.test.js`): every derived number in one pure module — month series with gaps, milestones, monthly streaks, longest silence, busiest day, tags merged across spellings, a squarified treemap, a Monday-first year grid, reading equivalents.
+
+---
+
 ## [v25.0.1] — 2026-11-03
 
 ### Fixed

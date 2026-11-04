@@ -516,11 +516,13 @@ describe("dotted paths", () => {
     expect((await run("/humans.txt")).status).toBe(404);
   });
 
-  it("passes a real .html page through", async () => {
-    expect((await run("/writing-ledger.html")).status).not.toBe(404);
+  it("redirects the old static Writing Ledger to its route", async () => {
+    const res = await run("/writing-ledger.html");
+    expect(res.status).toBe(301);
+    expect(res.location).toBe("https://sankettambare.in/writing-ledger");
   });
 });
 
-it("serves the static Writing Ledger untouched at its extensionless URL", async () => {
-  expect((await run("/writing-ledger")).status).not.toBe(404);
+it("serves the Writing Ledger as a route", async () => {
+  expect((await run("/writing-ledger")).status).toBe(200);
 });

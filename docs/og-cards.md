@@ -76,9 +76,8 @@ touch:
 - **`canonical` and `og:url`**, which stay on `SITE_URL` so a preview never
   advertises itself as the canonical home of a page.
 
-`public/writing-ledger.html` is the exception: it is a static file with no way
-to know its host, so its card URL stays production's and it is the one page
-whose image cannot be checked from a preview.
+The Writing Ledger used to be the exception, as a static file with no way to
+know its host. It is a React route now and re-hosts like every other page.
 
 ## PNG, not SVG
 
@@ -236,9 +235,6 @@ decides whether a layout works.
 - Platforms cache an unfurl. Existing shares keep the old image until each
   re-scrapes, and **WhatsApp's cache cannot be purged** — treat the first share
   of any link as final.
-- `public/writing-ledger.html` carries literal meta tags of its own: the
-  middleware early-returns on any path whose last segment contains a dot, so it
-  never sees that page.
 - `/admin/*` and `/world` have no card on purpose, listed in `OG_EXEMPT_PATHS`.
 
 ## Development status
@@ -312,7 +308,6 @@ Owner: `claude` (written in this repo) · `local` (needs your machine).
    Post Inspector both accept a Pages preview URL. For WhatsApp, X, Slack and
    iMessage the only ground truth is sending yourself the link, and the first
    share is the one that sticks, so use a throwaway path first.
-   `public/writing-ledger.html` is the one page that still needs production.
 5. Sanity-check the image itself resolves, not just the tag:
    ```bash
    curl -sI <preview-url>/og/home.png | head -2   # expect image/png, NOT text/html

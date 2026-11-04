@@ -257,7 +257,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Instagram sets** (${c.instagram ?? "?"}) — /instagram (no detail page).
 - **Now** — /now. Current entry: ${facts?.now_current?.month || "?"} ${facts?.now_current?.year || ""}.
 - **Résumé** — /resume. Positions, degrees, certifications and skills.
-- **Stats** — /stats and /writing-ledger.html. Every figure on those pages.
+- **Stats** — /stats and /writing-ledger. Every figure on those pages.
 - **Tags, site pages, contact** — what each tag and page is, and how to reach him.
 
 ${statsSection(statsPayload)}## Tags

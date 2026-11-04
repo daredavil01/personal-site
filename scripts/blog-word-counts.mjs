@@ -37,7 +37,7 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // The ledger report — no post text — served at /data/writing-ledger.json and read
-// by /writing-ledger.html and the /ask worker. Committed.
+// by the /writing-ledger page and the /ask worker. Committed.
 const LEDGER_FILE = path.join(ROOT, "public", "data", "writing-ledger.json");
 // Full post text for the /ask index (scripts/ask-sources/writing.mjs). Gitignored.
 // Doubles as a cache: a Substack body is downloaded again only when the post's
@@ -384,7 +384,7 @@ function buildReport(posts, tracked) {
   const busiestYear = [...byYear].sort((a, b) => b.words - a.words)[0] || null;
 
   // --- month-to-date / year-to-date ---------------------------------------
-  // Shared with /writing-ledger.html and the /ask worker, which recompute it at
+  // Shared with the /writing-ledger page and the /ask worker, which recompute it at
   // read time so the numbers stay right on days this file was not regenerated.
   const period = currentPeriod(sorted);
 

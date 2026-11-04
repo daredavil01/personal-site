@@ -140,6 +140,15 @@ export const PAGE_META = {
     ogSlug: "logbook",
     type: "website",
   },
+  "/writing-ledger": {
+    title: "The Writing Ledger",
+    description:
+      "Every blog post published across Substack and WordPress since 2020, counted word by word: a shelf of every post, an ink calendar of every day, the long arc of words, recurring themes, records and the full searchable ledger.",
+    image: `${SITE_URL}/og/writing-ledger.png`,
+    imageAlt: "Six years of published words, counted month by month",
+    ogSlug: "writing-ledger",
+    type: "website",
+  },
   "/micro-blog": {
     title: "Micro Blog",
     description:

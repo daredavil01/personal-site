@@ -15,7 +15,8 @@ import { newestUpdate } from "./inventory";
 import { escXml } from "./text";
 
 // Static pages served straight out of public/, which the manifest cannot see.
-export const STATIC_PAGES = ["/writing-ledger"];
+// Empty since the Writing Ledger became a React route (it is in the manifest).
+export const STATIC_PAGES = [];
 
 const isLiteral = (path) => !path.includes(":") && !path.includes("*");
 
