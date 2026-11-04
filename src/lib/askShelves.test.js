@@ -56,7 +56,7 @@ describe("shelfQuestions", () => {
   });
 
   it("a kind with no roster and no category offers nothing", () => {
-    expect(shelfQuestions("stats", SHELVES, POOL)).toEqual([]);
+    expect(shelfQuestions("tag", SHELVES, POOL)).toEqual([]);
   });
 });
 

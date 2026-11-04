@@ -306,7 +306,8 @@ Natural-language chat over the whole content store.
   inside it survives the layout change. Local dev
   needs `npm run dev:ask` beside `npm run dev` — Vite proxies `/api` to it.
 - **Starter chips** come from `ask_settings.question_pool` (jsonb `[{q, c}]`,
-  edited at `/admin/ask/settings`), sampled by `src/lib/askQuestions.js`: one
+  edited at `/admin/ask/settings`; seeded by `0020` and `0041`, ~176 across 13
+  categories, guarded by `askQuestionPool.test.js`), sampled by `src/lib/askQuestions.js`: one
   question from each of four random categories per page load, four chips on
   `/ask` and three in the launcher. Stratified rather than shuffled, because a
   flat draw keeps offering four book questions at once. `GET /api/ask` appends

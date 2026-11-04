@@ -83,7 +83,7 @@ export default function useAskConversation({
   // second copy of it would be a second thing to keep in step.
   const matches = pending ? [] : matchQuestions(info?.questionPool, draft);
 
-  // One draw per page load, from a pool of ~30 across six subjects. A returning
+  // One draw per page load, one question per subject from the pool. A returning
   // visitor gets a different set, and never all about the same thing.
   const drawStarters = (i) => {
     if (givenStarters?.length) {

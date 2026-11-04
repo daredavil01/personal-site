@@ -11,6 +11,17 @@ Versioning follows the semver-style rules in CLAUDE.md: major for new
 pages/refactors/redesigns, minor for features and content additions (at most one
 minor version per calendar week), patch for fixes and tweaks.
 
+## [v31.1.0] — 2026-11-04
+
+### Added
+- **147 more starter questions for /ask** (`supabase/migrations/0041_ask_question_pool_more.sql`): written against the facts snapshot and the Writing Ledger, each about something the archive actually holds — a named book, race, fort, project, deck, video, essay or tag, a count, or a comparison across years (Satara Hill 2024–2026, Tata Ultra 2025 vs 2026, Sinhagad across treks and runs), ten of them in Marathi. Seven new categories join the six from 0020 — training, short posts, videos, decks, newsletter, life, numbers — so the starter draw spans thirteen subjects. The migration appends and skips any question already in the pool, so edits made at /admin/ask/settings survive and a second run does nothing.
+- **Pool guard** (`src/lib/askQuestionPool.test.js`): every seeded question unique and chip-length, every category one the page can label, every shelf's category given at least three questions.
+
+### Changed
+- **Shelf questions** (`src/lib/askShelves.js`): videos, decks, photo sets, newsletter issues, stats, training and short posts each map to their own category now, so every shelf on /ask opens questions of its own instead of only the six old subjects.
+
+---
+
 ## [v31.0.0] — 2026-11-04
 
 ### Changed

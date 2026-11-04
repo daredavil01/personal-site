@@ -14,18 +14,22 @@ import { validPool } from "./askQuestions";
 const HIDDEN = new Set(["page", "site", "tag", "changelog"]);
 
 // Which question-pool category speaks for each kind. The pool is admin-edited
-// and carries six categories; a kind with none here offers only its titles.
-const POOL_CATEGORY = {
+// (seeded by 0020 and 0041); a kind with none here offers only its titles.
+export const POOL_CATEGORY = {
   book: "reading",
   sport: "running",
-  training: "running",
+  training: "training",
   trek: "treks",
   project: "work",
   resume: "work",
-  presentation: "work",
+  presentation: "talks",
+  video: "videos",
+  instagram: "life",
+  now: "newsletter",
+  stats: "numbers",
   blog: "writing",
   writing: "writing",
-  microblog: "writing",
+  microblog: "micro",
 };
 
 // How to turn a roster title into a question the archive answers well.
@@ -103,12 +107,19 @@ export function categoryOf(question, pool) {
   return hit?.c || null;
 }
 
-const CATEGORY_LABELS = {
+export const CATEGORY_LABELS = {
   reading: "Reading",
   running: "Running",
+  training: "Training",
   treks: "Treks",
   work: "Work",
   writing: "Writing",
+  micro: "Short posts",
+  videos: "Videos",
+  talks: "Decks",
+  newsletter: "Newsletter",
+  life: "Life",
+  numbers: "Numbers",
   site: "This site",
 };
 
