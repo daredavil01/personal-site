@@ -1,0 +1,26 @@
+{
+ "duration": 30,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "How long?",
+   "start": 0
+  },
+  {
+   "title": "In 10 seconds",
+   "start": 4
+  },
+  {
+   "title": "Five chapters",
+   "start": 8.5
+  },
+  {
+   "title": "How I work",
+   "start": 20
+  },
+  {
+   "title": "The end",
+   "start": 26
+  }
+ ]
+}

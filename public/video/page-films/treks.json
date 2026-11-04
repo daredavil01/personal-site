@@ -1,0 +1,26 @@
+{
+ "duration": 30,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "Opening",
+   "start": 0
+  },
+  {
+   "title": "Postcards",
+   "start": 4
+  },
+  {
+   "title": "How hard?",
+   "start": 15
+  },
+  {
+   "title": "The longest",
+   "start": 20.5
+  },
+  {
+   "title": "The end",
+   "start": 26
+  }
+ ]
+}

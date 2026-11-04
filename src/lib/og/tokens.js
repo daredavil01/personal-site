@@ -74,6 +74,7 @@ export const ACCENTS = {
   notfound: COLORS.textFaint,
   "writing-ledger": COLORS.amber,
   blueprint: COLORS.red,
+  films: COLORS.amber,
   logbook: COLORS.orange,
   training: COLORS.orange,
   activity: COLORS.orange,

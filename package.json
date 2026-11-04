@@ -35,6 +35,7 @@
     "og:fallbacks": "node scripts/og-preview.mjs --fallbacks",
     "blueprint:film": "node scripts/generate-blueprint-film.mjs",
     "trailer": "node --no-warnings scripts/trailer/render.mjs",
+    "page:films": "node --no-warnings scripts/page-films/render.mjs",
     "videos:film": "node --no-warnings scripts/videos-film/render.mjs",
     "training:film": "node --no-warnings scripts/training-film/render.mjs",
     "videos:slides": "node --no-warnings scripts/videos-film/slides.mjs",

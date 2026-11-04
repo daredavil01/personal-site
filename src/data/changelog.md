@@ -13,6 +13,21 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v30.0.0] — 2026-11-04
+
+### Added
+- **Films page** (`src/pages/Films.js`, `/films`): every feature film on the site in one place — the seven 30-second page films and the trailer, Blueprint, Logbook, Projects, Training and Videos films — with a main player, the chosen film's story, page, length, shape, sound, captions and how it was made, and its chapters as buttons that jump the film. `?film=` is shareable; every page film links to it. Listed in the nav under Play, with its own share card (`filmStrip` in `src/lib/og/layouts/figures.js`, `public/og/films.png`).
+- **Film catalogue** (`src/data/featureFilms.js`, `src/pages/films.test.js`): one row per film; the test reads each MP4's header so the length the page prints is the file's own.
+
+### Changed
+- **Page films rebuilt with Remotion** (`scripts/page-films/`): one script (`script.js`) now drives picture, captions and sound — variable scene lengths that follow the content, a different slide-in per scene and per card, burned-in word-by-word captions (and the same chunks as `.vtt`), chapter files, and a sound effect synthesised on every cue (panned whooshes, rising counter ticks, key clicks, shutters, stamps, a countdown, a riser and chime) over each film's score. The frame-seeking `film.html` renderer is gone.
+
+## [v29.1.0] — 2026-11-04
+
+### Added
+- **Page films** (`scripts/page-films/`, `src/components/common/PageFilm.js`): a 30-second vertical film for each of /about, /resume, /writing-ledger, /micro-blog, /presentations, /sports and /treks, embedded under each page's header with its storyline beside it. One page (`film.html`) draws any moment of any of the seven; `npm run page:films` renders them frame by frame from the live tables (through `raceLog`, `trekLog`, `resumeModel`, `aboutModel`, `/api/stats` and the committed Ledger / Micro-blog JSON), scores each with its own synthesised music, and `-- --publish` writes the committed web copies, posters and captions to `public/video/page-films/`. Storylines in `docs/page-films.md`.
+- **Film registry and guard** (`src/data/pageFilms.js`, `src/components/common/pageFilms.test.js`): slug, poster, storyline and alt text per film; the build fails if a file is missing, a video passes 4 MB or a poster 300 KB.
+
 ## [v29.0.2] — 2026-11-04
 
 ### Fixed

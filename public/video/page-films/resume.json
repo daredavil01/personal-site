@@ -1,0 +1,30 @@
+{
+ "duration": 30,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "The sheet",
+   "start": 0
+  },
+  {
+   "title": "Experience",
+   "start": 4
+  },
+  {
+   "title": "In numbers",
+   "start": 12
+  },
+  {
+   "title": "Skills · top 8 of 30",
+   "start": 17
+  },
+  {
+   "title": "Certified",
+   "start": 21.5
+  },
+  {
+   "title": "The end",
+   "start": 26
+  }
+ ]
+}
