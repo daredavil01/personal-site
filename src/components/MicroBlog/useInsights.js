@@ -47,4 +47,8 @@ export const insightsShape = PropTypes.shape({
   hashtags: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number]))),
   serial: PropTypes.shape({ count: PropTypes.number, max: PropTypes.number }),
   moments: PropTypes.arrayOf(obj),
+  yearQuotes: PropTypes.objectOf(obj),
+  byLang: PropTypes.shape({ en: obj, mr: obj }),
+  moods: obj,
+  map: obj,
 });

@@ -9,6 +9,7 @@ import PostsTab from "../components/MicroBlog/PostsTab";
 import StatsTab from "../components/MicroBlog/StatsTab";
 import PostModal from "../components/MicroBlog/PostModal";
 import useInsights from "../components/MicroBlog/useInsights";
+import { getMicroblogPostsByIds } from "../lib/api/microblog";
 import "../components/MicroBlog/microblog.css";
 
 // /micro-blog in three tabs:
@@ -57,6 +58,11 @@ const MicroBlog = () => {
       tabsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [setSearchParams]);
+
+  // The topic map and its regions name posts by id; fetch the row to open it.
+  const openById = useCallback((id) => {
+    getMicroblogPostsByIds([id]).then(([post]) => { if (post) setSelected(post); }).catch(() => {});
+  }, []);
 
   const goPosts = useCallback((params) => navigate("posts", params), [navigate]);
   const goStats = useCallback((y) => navigate("stats", { year: y }), [navigate]);
@@ -111,7 +117,7 @@ const MicroBlog = () => {
           {needsDoc && !doc && !error && <LoadingBlock label="Reading the archive…" />}
           {needsDoc && error && <ErrorBlock />}
           {tab === "overview" && doc && (
-            <OverviewTab doc={doc} onOpen={setSelected} goPosts={goPosts} goStats={goStats} tagColors={tagColors} />
+            <OverviewTab doc={doc} onOpen={setSelected} onOpenId={openById} goPosts={goPosts} goStats={goStats} tagColors={tagColors} />
           )}
           {tab === "posts" && <PostsTab onOpen={setSelected} tagColors={tagColors} />}
           {tab === "stats" && doc && (

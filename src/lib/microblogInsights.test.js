@@ -1,8 +1,10 @@
 import fs from "fs";
 import path from "path";
+import { seededRandom } from "./generativeArt";
 import {
-  DAILY_COUNT, buildInsights, cleanPost, dailyPicks, hashtagsOf, languageOf, monthSeries,
-  parsePost, runsOf, scopeOf, serialOf, signedTime, storyLines, summarise, yearTable,
+  DAILY_COUNT, assignMoods, buildInsights, buildMap, cleanPost, dailyPicks, hashtagsOf, kmeans,
+  languageOf, monthSeries, moodSeries, nameRegions, parsePost, regionName, runsOf, scopeOf,
+  serialOf, signedTime, storyLines, summarise, yearTable,
 } from "./microblogInsights";
 
 describe("signedTime", () => {
@@ -34,6 +36,7 @@ describe("serialOf and cleanPost", () => {
     expect(cleanPost("#1182 It’s 2am #the_mysteries #08:01:2021::02:12:am https://x.y/z"))
       .toBe("It’s 2am the mysteries");
     expect(cleanPost("#९५३ जुन्या रूढींना #२६:१२:२०२०::२:१०:pm")).toBe("जुन्या रूढींना");
+    expect(cleanPost("Creativity ✨\n#1472 ✨\nIt's amazing")).toBe("Creativity ✨\n✨\nIt's amazing");
   });
 
   it("collects written hashtags but not the am/pm debris", () => {
@@ -130,9 +133,16 @@ describe("buildInsights", () => {
 
   it("writes the story's sentences from the numbers", () => {
     const lines = storyLines(doc);
-    expect(lines.clock).toMatch(/^100% of the timed posts/);
-    expect(lines.years).toBe("2020 was the loudest year, with 40 posts. 2018 was the quietest, with 20.");
-    expect(lines.language).toMatch(/^Marathi was \d+% of the posts in 2018/);
+    expect(lines.clock).toMatch(/^I write after dark: 100% of my timed posts/);
+    expect(lines.years).toBe("2020 was my loudest year, with 40 posts. 2018 was my quietest, with 20.");
+    expect(lines.language).toMatch(/^Marathi was \d+% of my posts in 2018/);
+    expect(lines.languages).toBe("My posts run about the same length in either language: 11 words in Marathi, 12 in English.");
+    // No vectors were passed, so the meaning chapters have nothing to say.
+    expect(lines.mood).toBeNull();
+    expect(lines.map).toBeNull();
+    expect(doc.moods).toBeNull();
+    expect(doc.map).toBeNull();
+    expect(Object.keys(doc.yearQuotes)).toEqual(["2018", "2019", "2020"]);
   });
 
   it("drops a typo'd running number from the series", () => {
@@ -173,7 +183,7 @@ describe("the committed file", () => {
   const doc = JSON.parse(text);
 
   it("stays inside its budget", () => {
-    expect(Buffer.byteLength(text)).toBeLessThan(120 * 1024);
+    expect(Buffer.byteLength(text)).toBeLessThan(150 * 1024);
   });
 
   it("has every year, a pool to pick from and quotes kept short", () => {
@@ -181,5 +191,102 @@ describe("the committed file", () => {
     doc.years.forEach((y) => expect(doc.perYear[y].posts).toBeGreaterThan(0));
     expect(doc.pool.length).toBeGreaterThanOrEqual(DAILY_COUNT);
     doc.moments.forEach((m) => expect(m.quote.split(/\s+/).length).toBeLessThanOrEqual(33));
+  });
+});
+
+// Posts whose vectors point along one of three axes, with a little noise:
+// the tagged posts define each tone, the untagged ones should follow them.
+const vecFor = (axis, rand) => {
+  const v = [0, 0, 0, 0].map(() => (rand() - 0.5) * 0.3);
+  v[axis] += 1;
+  const n = Math.hypot(...v);
+  return v.map((x) => x / n);
+};
+const meaningArchive = () => {
+  const rand = seededRandom(7);
+  const posts = [];
+  const vectors = new Map();
+  const axes = [["calmness"], ["love"], ["desperate me"]];
+  let id = 1;
+  for (let i = 0; i < 90; i += 1) {
+    const axis = i % 3;
+    const tagged = i < 60;
+    const y = String(2018 + (i % 3));
+    posts.push(parsePost(row(id, `${y}-0${(i % 9) + 1}-10`, `post ${id} about something real and quiet`, { tag_names: tagged ? axes[axis] : [] })));
+    vectors.set(id, vecFor(axis, rand));
+    id += 1;
+  }
+  return { posts, vectors };
+};
+
+describe("assignMoods", () => {
+  const { posts, vectors } = meaningArchive();
+  const res = assignMoods(posts, vectors, undefined, 12);
+
+  it("keeps only the tones with enough tagged posts", () => {
+    expect(res.moods.map((m) => m.id)).toEqual(["calm", "warm", "restless"]);
+  });
+
+  it("puts untagged posts with the tone they sit closest to", () => {
+    const untagged = posts.filter((p) => !p.tags.length);
+    const right = untagged.filter((p, i) => res.byId.get(p.id) === ["calm", "warm", "restless"][(60 + i) % 3]);
+    expect(right.length).toBe(untagged.length);
+    expect(res.agreement).toBe(1);
+  });
+
+  it("counts by quarter and year", () => {
+    const s = moodSeries(posts, res.byId, res.moods);
+    expect(s.totals.reduce((a, b) => a + b, 0)).toBe(90);
+    expect(Object.keys(s.years)).toEqual(["2018", "2019", "2020"]);
+    expect(s.quarters[0].key).toBe("2018-Q1");
+  });
+
+  it("says nothing when fewer than two tones have seeds", () => {
+    expect(assignMoods(posts.slice(0, 10), vectors).moods).toEqual([]);
+  });
+});
+
+describe("kmeans and the map", () => {
+  it("separates obvious clusters, the same way every time", () => {
+    const pts = [];
+    [[0, 0], [100, 0], [50, 100]].forEach(([x, y]) => {
+      for (let i = 0; i < 10; i += 1) pts.push([x + (i % 3), y + (i % 4)]);
+    });
+    const a = kmeans(pts, 3, seededRandom(1));
+    expect(kmeans(pts, 3, seededRandom(1)).assign).toEqual(a.assign);
+    [0, 10, 20].forEach((start) => {
+      expect(new Set(a.assign.slice(start, start + 10)).size).toBe(1);
+    });
+    expect(new Set(a.assign).size).toBe(3);
+  });
+
+  it("names a region by the tags it over-uses, skipping the broad ones", () => {
+    const posts = [
+      ...Array.from({ length: 8 }, () => ({ tags: ["travel", "life"] })),
+      ...Array.from({ length: 8 }, () => ({ tags: ["love", "life"] })),
+    ];
+    const assign = posts.map((_, i) => (i < 8 ? 0 : 1));
+    expect(nameRegions(posts, assign, 2)).toEqual([["travel"], ["love"]]);
+  });
+
+  it("lays every placed post out with its region, language, year and tone", () => {
+    const { posts, vectors } = meaningArchive();
+    const moods = assignMoods(posts, vectors, undefined, 12);
+    const layout = new Map(posts.map((p) => [p.id, [vectors.get(p.id)[0] * 10, vectors.get(p.id)[1] * 10]]));
+    const map = buildMap(posts, layout, ["2018", "2019", "2020"], { k: 3, moodIds: moods.byId, moods: moods.moods });
+    expect(map.points.length).toBe(90 * 7);
+    expect(map.regions.map((r) => r.posts).reduce((a, b) => a + b, 0)).toBe(90);
+    expect(map.regions[0].posts).toBeGreaterThanOrEqual(map.regions[2].posts);
+    map.regions.forEach((r) => expect(regionName(r)).toBeTruthy());
+    for (let i = 0; i < map.points.length; i += 7) {
+      expect(map.points[i + 1]).toBeGreaterThanOrEqual(0);
+      expect(map.points[i + 1]).toBeLessThanOrEqual(1000);
+      expect(map.points[i + 6]).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("leaves the map out when too few posts have a place", () => {
+    const { posts } = meaningArchive();
+    expect(buildMap(posts, new Map([[1, [0, 0]]]), ["2018"])).toBeNull();
   });
 });

@@ -1182,7 +1182,22 @@ archive with server-side full-text search.
   script; only a time in a `#…`/`::` signature counts, never one in prose),
   language by share of letters, a typo'd running number is dropped from the
   series. Components only pick a scope (`scopeOf`) — never recompute a number.
-  Story sentences come from `storyLines()`; a chapter without data is omitted.
+  Story sentences come from `storyLines()`, **in first person** ("I write
+  after dark…"); the Overview's chapters are a list, and one without data is
+  omitted and the rest renumbered.
+- **Meaning, from the `/ask` vectors (no model calls):** the script averages
+  each post's `content_chunks` embeddings, lays them out with a seeded UMAP
+  (`umap-js`, devDependency) and `buildMap` clusters the layout with k-means
+  into regions named by the tags they over-use (`REGION_SKIP` drops the broad
+  ones; `regionWords` names a region with no distinctive tag). **Tone** is
+  `assignMoods`: five `MOODS`, each *defined by posts tagged with it*
+  (#calmness, #love, #desperate me…), every other post takes the nearest
+  (leave-one-out, z-scored); `agreement` is the method's self-check and the
+  page states it. Not a sentiment model — say so wherever it is shown. Run
+  after `ask:index` so new posts have vectors; unindexed posts are left off.
+- **Year cards** (`YearCards.js`): 4:5, fixed colours (they are exported as
+  PNG via `useImageExport`), at most three numbers, and the quote is trimmed
+  in code (`fitQuote`) because html-to-image drops a CSS line-clamp's ellipsis.
 - **Today's ten** (`dailyPicks`): seeded by the local date, one post per year,
   at least three per language, from the file's `pool` (`[id, year, isMr,
   score]`, own words only); the rows are fetched by id

@@ -7,8 +7,15 @@
  * The table is public under RLS, so this reads with the service-role key when
  * .env has one and the committed publishable key (wrangler.toml) otherwise.
  * What ships is derived: counts, the posting clock, tag lives, phrases, four
- * quoted moments and the id pool the daily ten are drawn from. Post text stays
- * in Supabase; the page fetches the ten by id.
+ * quoted moments, a quote per year and the id pool the daily ten are drawn
+ * from. Post text stays in Supabase; the page fetches the ten by id.
+ *
+ * Meaning comes from the vectors /ask already stores in content_chunks (one
+ * mean vector per post): the tone of each post (assignMoods — nearest to the
+ * posts I tagged #calmness, #love, …) and the topic map (a seeded UMAP layout
+ * here, then k-means regions named by their tags in buildMap). Posts not yet
+ * indexed are left off the map, never placed at the origin. Run after
+ * `npm run ask:index` for the newest posts to appear.
  *
  * Usage: npm run microblog:insights [-- --dry-run]
  */
@@ -17,14 +24,18 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
+import { UMAP } from "umap-js";
 import { loadEnv } from "./build-docs.mjs";
 import { writeJsonIfChanged } from "./lib/dataFile.mjs";
 import { buildInsights } from "../src/lib/microblogInsights.js";
+import { seededRandom } from "../src/lib/generativeArt.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "public/data/microblog-insights.json");
 const DRY_RUN = process.argv.includes("--dry-run");
 const PAGE = 1000;
+const VEC_PAGE = 250; // a 1024-d vector is ~12 KB of text
+const SEED = 1677;
 
 function client() {
   loadEnv();
@@ -56,15 +67,61 @@ async function loadRows(supabase) {
   return rows;
 }
 
-const rows = await loadRows(client());
+/** Map post id → unit mean vector over its chunks. Empty when the index is unreadable. */
+async function loadVectors(supabase) {
+  const sums = new Map();
+  for (let from = 0; ; from += VEC_PAGE) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await supabase
+      .from("content_chunks")
+      .select("entity_id, embedding")
+      .eq("entity_type", "microblog")
+      .not("embedding", "is", null)
+      .order("id", { ascending: true })
+      .range(from, from + VEC_PAGE - 1);
+    if (error) {
+      console.warn(`  content_chunks unreadable (${error.message}): no moods or map this run`);
+      return new Map();
+    }
+    (data || []).forEach(({ entity_id: id, embedding }) => {
+      const v = Array.isArray(embedding) ? embedding : JSON.parse(embedding);
+      const s = sums.get(id);
+      if (s) for (let i = 0; i < v.length; i += 1) s[i] += v[i];
+      else sums.set(id, v.slice());
+    });
+    if (!data || data.length < VEC_PAGE) break;
+  }
+  const out = new Map();
+  sums.forEach((v, id) => {
+    const n = Math.hypot(...v) || 1;
+    out.set(Number(id), v.map((x) => x / n));
+  });
+  return out;
+}
+
+const supabase = client();
+const rows = await loadRows(supabase);
 if (!rows.length) {
   console.error("No micro-posts came back — refusing to write an empty file.");
   process.exit(1);
 }
-const doc = buildInsights(rows);
+const vectors = await loadVectors(supabase);
+let layout = null;
+if (vectors.size >= 50) {
+  const ids = [...vectors.keys()].sort((a, b) => a - b);
+  const umap = new UMAP({
+    nComponents: 2, nNeighbors: 15, minDist: 0.15, random: seededRandom(SEED),
+  });
+  const xy = umap.fit(ids.map((id) => vectors.get(id)));
+  layout = new Map(ids.map((id, i) => [id, xy[i]]));
+}
+console.log(`  ${vectors.size} posts with vectors${layout ? ", map laid out" : ""}`);
+const doc = buildInsights(rows, { vectors, layout });
 const text = `${JSON.stringify(doc)}\n`;
 const { all } = doc;
 console.log(`  ${all.posts} posts, ${doc.years.length} years, ${all.timed} timed, pool ${doc.pool.length}`);
+if (doc.moods) console.log(`  moods: ${doc.moods.list.map((m, i) => `${m.id} ${doc.moods.totals[i]}`).join(", ")} · agreement ${doc.moods.agreement}`);
+if (doc.map) console.log(`  map: ${doc.map.regions.map((r) => `${r.posts} [${r.tags.join(", ")}]`).join(" · ")}`);
 console.log(`  ${(Buffer.byteLength(text) / 1024).toFixed(1)} KB`);
 if (DRY_RUN) {
   console.log("  dry run: nothing written");

@@ -21,6 +21,21 @@
   --mb-star-day: #93c5fd;
   --mb-on-night: #e0e7ff;
   --mb-on-night-muted: #a5b4fc;
+  /* Topic-map regions: a categorical set, largest region first. */
+  --mb-r0: #4f46e5;
+  --mb-r1: #0d9488;
+  --mb-r2: #d97706;
+  --mb-r3: #e11d48;
+  --mb-r4: #7c3aed;
+  --mb-r5: #0284c7;
+  --mb-r6: #65a30d;
+  --mb-r7: #a16207;
+  /* Tones (MOODS in src/lib/microblogInsights.js). */
+  --mb-mood-calm: #0d9488;
+  --mb-mood-reflective: #6366f1;
+  --mb-mood-striving: #d97706;
+  --mb-mood-warm: #e11d48;
+  --mb-mood-restless: #64748b;
   color: var(--mb-ink);
 }
 
@@ -39,6 +54,19 @@
   --mb-none: #57534e;
   --mb-night: #0b1027;
   --mb-night-2: #161d45;
+  --mb-r0: #818cf8;
+  --mb-r1: #2dd4bf;
+  --mb-r2: #fbbf24;
+  --mb-r3: #fb7185;
+  --mb-r4: #a78bfa;
+  --mb-r5: #38bdf8;
+  --mb-r6: #a3e635;
+  --mb-r7: #facc15;
+  --mb-mood-calm: #2dd4bf;
+  --mb-mood-reflective: #818cf8;
+  --mb-mood-striving: #fbbf24;
+  --mb-mood-warm: #fb7185;
+  --mb-mood-restless: #94a3b8;
 }
 
 .mb-card {
@@ -235,3 +263,57 @@
 .mb-lang-dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; display: inline-block; }
 .mb-lang-dot.is-mr { border-radius: 1px; transform: rotate(45deg); background: var(--mb-mr); }
 .mb-lang-dot.is-en { background: var(--mb-en); }
+
+/* ── Topic map ─────────────────────────────────────────────────────────── */
+.mb-map { position: relative; border-radius: 1rem; background: var(--mb-paper); border: 1px solid var(--mb-line); overflow: hidden; }
+.mb-atlas .mb-map { background: var(--mb-night); border-color: transparent; }
+.mb-map-dot { transition: opacity 0.25s; }
+.mb-map-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--mb-ink);
+  paint-order: stroke;
+  stroke: var(--mb-paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.mb-atlas .mb-map-label { fill: var(--mb-on-night); stroke: var(--mb-night); }
+.mb-map-tip {
+  position: absolute;
+  pointer-events: none;
+  max-width: 16rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.6rem;
+  background: var(--mb-ink);
+  color: var(--mb-card);
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, calc(-100% - 12px));
+}
+
+/* ── Year cards (exported as PNGs: fixed colours, not theme tokens) ───── */
+.mb-yearcards {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 17.5rem;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1rem;
+}
+.mb-yearcards > * { scroll-snap-align: start; }
+.mb-yearcard {
+  aspect-ratio: 4 / 5;
+  width: 17.5rem;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: radial-gradient(120% 80% at 80% 0%, #232b5c 0%, #10153a 70%);
+  color: #e0e7ff;
+  overflow: hidden;
+  font-family: Inter, system-ui, sans-serif;
+}

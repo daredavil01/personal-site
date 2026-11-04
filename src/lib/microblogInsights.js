@@ -61,7 +61,7 @@ const SIGNATURE_STRIP = /#?\s*[\d०-९]{1,2}\s*[:_]\s*[\d०-९\s]{1,3}[:_]\s
 export function cleanPost(text) {
   return String(text || "")
     .replace(SIGNATURE_STRIP, " ")
-    .replace(/^\s*#[\d०-९]{1,5}(?![\d०-९:_])/, " ")
+    .replace(/#[\d०-९]{1,5}(?![\d०-९:_/])/g, " ")
     .replace(/https?:\/\/\S+/g, " ")
     .replace(/#([\p{L}\p{M}\p{N}_]+)/gu, (_, w) => ` ${w.replace(/_/g, " ")} `)
     .replace(/[ \t]+/g, " ")
@@ -148,6 +148,7 @@ export function runsOf(dates) {
 
 // eslint-disable-next-line no-param-reassign -- a counter's whole job
 const inc = (o, k, n = 1) => { o[k] = (o[k] || 0) + n; };
+export const pct = (part, whole) => (whole ? Math.round((part / whole) * 100) : null);
 const topOf = (counts, n) => Object.entries(counts).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)).slice(0, n);
 
 /** Everything the Stats tab draws for one scope (the whole archive or one year). */
@@ -333,7 +334,9 @@ export function recurringPhrases(posts, lang, { sizes = [4, 3, 2], minPosts = 6,
 
 /** The first `max` words of a post's clean text, as one line. */
 export function quoteOf(clean, max = MAX_QUOTE_WORDS) {
-  const flat = String(clean || "").replace(/\s*\n\s*/g, " / ").trim();
+  // Lines with no words (an emoji alone, a number) are left out of a quote.
+  const flat = String(clean || "").split("\n").filter((l) => wordsOf(l).length).join(" / ")
+    .trim();
   const ws = flat.split(/\s+/);
   return ws.length <= max ? flat : `${ws.slice(0, max).join(" ")}…`;
 }
@@ -347,10 +350,251 @@ export function pickScore(p) {
     + (p.serial ? 0.05 : 0) + (p.hasImage ? 0.1 : 0)) * 1000) / 1000;
 }
 
+// ── Meaning: moods and the map (from the /ask embeddings) ───────────────────
+
+// Five tones, each defined by the posts I tagged with it — not by a sentiment
+// model. Every post with a vector is given the tone whose tagged posts it sits
+// closest to. A tone with too few tagged posts is left out.
+export const MOODS = [
+  { id: "calm", label: "Calm", tags: ["calmness", "स्थितप्रज्ञ"] },
+  { id: "reflective", label: "Reflective", tags: ["philosophy", "psychology"] },
+  { id: "striving", label: "Striving", tags: ["personaldevelopment", "choices"] },
+  { id: "warm", label: "Warm", tags: ["love"] },
+  { id: "restless", label: "Restless", tags: ["desperate me"] },
+];
+export const MIN_MOOD_SEEDS = 12;
+// Tags too broad, or about the language/account rather than a subject, to name a region.
+export const REGION_SKIP = new Set(["life", "marathi", "sanky", "latepost", "daredavil01", "self-reflection"]);
+
+const dot = (a, b) => {
+  let d = 0;
+  for (let i = 0; i < a.length; i += 1) d += a[i] * b[i];
+  return d;
+};
+const unit = (v) => {
+  const n = Math.sqrt(dot(v, v)) || 1;
+  return v.map((x) => x / n);
+};
+const quarterOf = (date) => `${date.slice(0, 4)}-Q${Math.floor((Number(date.slice(5, 7)) - 1) / 3) + 1}`;
+
+/**
+ * Each post's tone. `vectors` is a Map of post id → unit vector. Centroids are
+ * leave-one-out for the tagged posts themselves (a post is not compared with a
+ * centroid it helped make), and similarities are z-scored per tone so a tight
+ * cluster does not win every post. `agreement` is the share of tagged posts
+ * that land back in their own tone — the method's own check.
+ * @returns {{ moods, byId: Map<number, string>, agreement: number|null }}
+ */
+export function assignMoods(posts, vectors, moods = MOODS, minSeeds = MIN_MOOD_SEEDS) {
+  const withVec = posts.filter((p) => vectors.has(p.id));
+  const seeds = moods.map((m) => withVec.filter((p) => p.tags.some((t) => m.tags.includes(String(t).toLowerCase()))))
+    .map((list, i) => ({ mood: moods[i], list }))
+    .filter(({ list }) => list.length >= minSeeds);
+  if (seeds.length < 2) return { moods: [], byId: new Map(), agreement: null };
+  const dim = vectors.get(withVec[0].id).length;
+  const sums = seeds.map(({ list }) => list.reduce((acc, p) => {
+    const v = vectors.get(p.id);
+    for (let i = 0; i < dim; i += 1) acc[i] += v[i];
+    return acc;
+  }, new Array(dim).fill(0)));
+  const isSeed = seeds.map(({ list }) => new Set(list.map((p) => p.id)));
+
+  const sims = withVec.map((p) => {
+    const v = vectors.get(p.id);
+    return seeds.map((_, m) => {
+      const c = isSeed[m].has(p.id) ? sums[m].map((x, i) => x - v[i]) : sums[m];
+      return dot(v, unit(c));
+    });
+  });
+  const stats = seeds.map((_, m) => {
+    const col = sims.map((r) => r[m]);
+    const mean = col.reduce((a, b) => a + b, 0) / col.length;
+    const sd = Math.sqrt(col.reduce((a, b) => a + (b - mean) ** 2, 0) / col.length) || 1;
+    return { mean, sd };
+  });
+  const byId = new Map();
+  withVec.forEach((p, i) => {
+    let best = 0;
+    let bestZ = -Infinity;
+    sims[i].forEach((sim, m) => {
+      const z = (sim - stats[m].mean) / stats[m].sd;
+      if (z > bestZ) { bestZ = z; best = m; }
+    });
+    byId.set(p.id, seeds[best].mood.id);
+  });
+  let hits = 0;
+  let total = 0;
+  seeds.forEach(({ mood, list }) => list.forEach((p) => {
+    total += 1;
+    if (byId.get(p.id) === mood.id) hits += 1;
+  }));
+  return {
+    moods: seeds.map(({ mood, list }) => ({ id: mood.id, label: mood.label, tags: mood.tags, seeds: list.length })),
+    byId,
+    agreement: total ? Math.round((hits / total) * 100) / 100 : null,
+  };
+}
+
+/** Tone counts per quarter and per year, in the order of `moods`. */
+export function moodSeries(posts, byId, moods) {
+  const ids = moods.map((m) => m.id);
+  const quarters = {};
+  const years = {};
+  const totals = new Array(ids.length).fill(0);
+  posts.forEach((p) => {
+    const m = byId.get(p.id);
+    if (!m) return;
+    const i = ids.indexOf(m);
+    const q = quarterOf(p.date);
+    if (!quarters[q]) quarters[q] = new Array(ids.length).fill(0);
+    if (!years[p.year]) years[p.year] = new Array(ids.length).fill(0);
+    quarters[q][i] += 1;
+    years[p.year][i] += 1;
+    totals[i] += 1;
+  });
+  return {
+    quarters: Object.keys(quarters).sort().map((key) => ({ key, counts: quarters[key] })),
+    years,
+    totals,
+  };
+}
+
+/** Seeded k-means++ over 2D points. Returns each point's cluster and the centres. */
+export function kmeans(points, k, rand) {
+  if (points.length <= k) return { assign: points.map((_, i) => i), centres: points.map((p) => [...p]) };
+  const d2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
+  const centres = [points[Math.floor(rand() * points.length)]];
+  while (centres.length < k) {
+    const w = points.map((p) => Math.min(...centres.map((c) => d2(p, c))));
+    let r = rand() * w.reduce((a, b) => a + b, 0);
+    const idx = w.findIndex((x) => { r -= x; return r <= 0; });
+    centres.push(points[idx < 0 ? points.length - 1 : idx]);
+  }
+  const nearestOf = (cs) => points.map((p) => cs.reduce((best, c, i) => (d2(p, c) < d2(p, cs[best]) ? i : best), 0));
+  const meansOf = (cs, assign) => cs.map((c, i) => {
+    const mine = points.filter((_, j) => assign[j] === i);
+    return mine.length ? [mine.reduce((a, p) => a + p[0], 0) / mine.length, mine.reduce((a, p) => a + p[1], 0) / mine.length] : c;
+  });
+  let cs = centres.map((c) => [...c]);
+  let assign = nearestOf(cs);
+  for (let it = 0; it < 60; it += 1) {
+    cs = meansOf(cs, assign);
+    const next = nearestOf(cs);
+    const prev = assign;
+    if (next.every((a, i) => a === prev[i])) break;
+    assign = next;
+  }
+  return { assign, centres: cs };
+}
+
+/**
+ * Names for each region: the tags unusually common in it (lift over the whole
+ * archive, weighted by how many of its posts carry them), never a tag in
+ * REGION_SKIP. A region with no distinctive tag gets an empty list.
+ */
+export function nameRegions(posts, assign, k, { top = 2, minCount = 4 } = {}) {
+  const overall = {};
+  posts.forEach((p) => p.tags.forEach((t) => inc(overall, String(t).toLowerCase())));
+  return Array.from({ length: k }, (unused, r) => {
+    const mine = posts.filter((p, i) => assign[i] === r);
+    const counts = {};
+    mine.forEach((p) => p.tags.forEach((t) => inc(counts, String(t).toLowerCase())));
+    return Object.entries(counts)
+      .filter(([t, c]) => c >= minCount && !REGION_SKIP.has(t))
+      .map(([t, c]) => [t, c * Math.log(((c / mine.length) / (overall[t] / posts.length)) || 1)])
+      .filter(([, score]) => score > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, top)
+      .map(([t]) => t);
+  });
+}
+
+/** For each region, the words it uses far more than the archive does (a name when no tag is distinctive). */
+export function regionWords(posts, assign, k, { top = 3, minPosts = 6 } = {}) {
+  const wordSets = posts.map((p) => (p.lang ? new Set(wordsOf(p.clean).map(norm).filter((w) => isContent(w, p.lang))) : new Set()));
+  const overall = {};
+  wordSets.forEach((ws) => ws.forEach((w) => inc(overall, w)));
+  return Array.from({ length: k }, (unused, r) => {
+    const idx = posts.map((p, i) => i).filter((i) => assign[i] === r);
+    const counts = {};
+    idx.forEach((i) => wordSets[i].forEach((w) => inc(counts, w)));
+    return Object.entries(counts)
+      .filter(([, c]) => c >= minPosts)
+      .map(([w, c]) => [w, c * Math.log((c / idx.length) / (overall[w] / posts.length))])
+      .filter(([, score]) => score > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, top)
+      .map(([w]) => w);
+  });
+}
+
+/** The short name drawn on the map itself: the lead tag, else two words. */
+export const regionShortName = (r) => {
+  if (r.tags && r.tags.length) return `#${r.tags[0]}`;
+  if (r.words && r.words.length) return r.words.slice(0, 2).join(" · ");
+  return `Region ${r.id + 1}`;
+};
+
+/** A region's name: its tags, else its words, else its number. */
+export const regionName = (r) => {
+  if (r.tags && r.tags.length) return r.tags.map((t) => `#${t}`).join(" · ");
+  if (r.words && r.words.length) return r.words.join(" · ");
+  return `Region ${r.id + 1}`;
+};
+
+/**
+ * The topic map: `layout` is Map id → [x, y] (UMAP, computed by the build
+ * script). Points are rescaled to 0–1000 and stored flat as
+ * [id, x, y, region, lang (0 en, 1 mr, 2 none), year index, mood index | -1].
+ */
+export function buildMap(posts, layout, years, { k = 7, seed = 1677, moodIds = new Map(), moods = [] } = {}) {
+  const placed = posts.filter((p) => layout.has(p.id));
+  if (placed.length < k * 5) return null;
+  const raw = placed.map((p) => layout.get(p.id));
+  const xs = raw.map((r) => r[0]);
+  const ys = raw.map((r) => r[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const pts = raw.map(([x, y]) => [Math.round(((x - x0) / (x1 - x0 || 1)) * 1000), Math.round(((y - y0) / (y1 - y0 || 1)) * 1000)]);
+  const { assign, centres } = kmeans(pts, k, seededRandom(seed));
+  const names = nameRegions(placed, assign, k);
+  const words = regionWords(placed, assign, k);
+  const regions = centres.map((c, r) => {
+    const members = placed.map((p, i) => [p, i]).filter(([, i]) => assign[i] === r);
+    const exemplar = members
+      .filter(([p]) => p.words >= 10 && (!p.kind || p.kind === "own"))
+      .sort(([, a], [, b]) => (pts[a][0] - c[0]) ** 2 + (pts[a][1] - c[1]) ** 2 - ((pts[b][0] - c[0]) ** 2 + (pts[b][1] - c[1]) ** 2))[0];
+    return {
+      id: r,
+      tags: names[r],
+      words: words[r],
+      posts: members.length,
+      marathi: pct(members.filter(([p]) => p.lang === "mr").length, members.length),
+      x: Math.round(c[0]),
+      y: Math.round(c[1]),
+      exemplar: exemplar ? { id: exemplar[0].id, date: exemplar[0].date, quote: quoteOf(exemplar[0].clean, 22) } : null,
+    };
+  });
+  // Biggest region first, renumbered so region 0 is always the largest.
+  const order = regions.map((r) => r.id).sort((a, b) => regions[b].posts - regions[a].posts);
+  const renum = new Map(order.map((old, i) => [old, i]));
+  const moodIndex = new Map(moods.map((m, i) => [m.id, i]));
+  return {
+    regions: order.map((old, i) => ({ ...regions[old], id: i })),
+    points: placed.flatMap((p, i) => [
+      p.id, pts[i][0], pts[i][1], renum.get(assign[i]),
+      { en: 0, mr: 1 }[p.lang] ?? 2,
+      years.indexOf(p.year),
+      moodIds.has(p.id) ? moodIndex.get(moodIds.get(p.id)) : -1,
+    ]),
+  };
+}
+
 // ── Building the file ───────────────────────────────────────────────────────
 
 /** Every row of the table → the committed insights document. */
-export function buildInsights(rows, { generatedAt = new Date().toISOString(), poolSize = 360 } = {}) {
+export function buildInsights(rows, {
+  generatedAt = new Date().toISOString(), poolSize = 360, vectors = null, layout = null,
+} = {}) {
   const posts = rows.map(parsePost).filter((p) => p.date).sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
   const years = [...new Set(posts.map((p) => p.year))].sort();
   const byId = new Map(posts.map((p) => [p.id, p]));
@@ -376,6 +620,26 @@ export function buildInsights(rows, { generatedAt = new Date().toISOString(), po
     .sort((a, b) => b.hour * 60 + b.minute - (a.hour * 60 + a.minute))[0];
 
   // The pool the daily ten are drawn from: own words, scored, a spread of years.
+  // One quote per year for the year cards: the year's best-scored post that is short enough to quote whole.
+  const yearQuotes = {};
+  years.forEach((y) => {
+    const best = posts.filter((p) => p.year === y && p.words >= 8 && p.words <= 60)
+      .map((p) => ({ p, s: pickScore(p) })).filter(({ s }) => s > 0)
+      .sort((a, b) => b.s - a.s || b.p.id - a.p.id)[0];
+    if (best) yearQuotes[y] = { id: best.p.id, date: best.p.date, lang: best.p.lang, quote: quoteOf(best.p.clean, 28) };
+  });
+
+  // English and Marathi, each summarised on its own.
+  const byLang = {
+    en: summarise(posts.filter((p) => p.lang === "en")),
+    mr: summarise(posts.filter((p) => p.lang === "mr")),
+  };
+
+  // Meaning: only when the build script handed over the /ask vectors.
+  const mood = vectors ? assignMoods(posts, vectors) : { moods: [], byId: new Map(), agreement: null };
+  const moods = mood.moods.length ? { list: mood.moods, agreement: mood.agreement, ...moodSeries(posts, mood.byId, mood.moods) } : null;
+  const map = layout ? buildMap(posts, layout, years, { moodIds: mood.byId, moods: mood.moods }) : null;
+
   const pool = posts
     .map((p) => ({ p, s: pickScore(p) }))
     .filter(({ s }) => s > 0.3)
@@ -408,6 +672,10 @@ export function buildInsights(rows, { generatedAt = new Date().toISOString(), po
         .flatMap((p) => [dayNum(p.date) - dayNum(posts[0].date), p.hour * 60 + p.minute]),
     },
     pool,
+    yearQuotes,
+    byLang,
+    moods,
+    map,
   };
 }
 
@@ -415,8 +683,6 @@ export function buildInsights(rows, { generatedAt = new Date().toISOString(), po
 
 /** The summary for "all" or one year, or null. */
 export const scopeOf = (doc, year) => (!doc ? null : (year && doc.perYear[year]) || doc.all);
-
-export const pct = (part, whole) => (whole ? Math.round((part / whole) * 100) : null);
 
 export const hourLabel = (h) => {
   if (h == null) return "";
@@ -522,12 +788,14 @@ export function dailyPicks(pool, day, count = DAILY_COUNT) {
 }
 
 /**
- * The Overview's sentences, written from the numbers. Each returns null when
- * the data cannot support it, and the chapter is then left out.
+ * The Overview's sentences, written from the numbers in my own voice. Each
+ * returns null when the data cannot support it, and the chapter is then left
+ * out.
  */
 export function storyLines(doc) {
   if (!doc) return {};
   const { all, perYear, years } = doc;
+  const n = (x) => Number(x).toLocaleString("en-IN");
   const yearRows = years.map((y) => [y, perYear[y].posts]);
   const peak = [...yearRows].sort((a, b) => b[1] - a[1])[0];
   const quiet = [...yearRows].sort((a, b) => a[1] - b[1])[0];
@@ -535,18 +803,60 @@ export function storyLines(doc) {
   const firstY = years[0];
   const lastY = years[years.length - 1];
   const nightShare = pct(all.night, all.timed);
+  const { en, mr } = doc.byLang || {};
+
+  let languages = null;
+  if (en && mr && en.posts >= 10 && mr.posts >= 10 && en.medianWords != null && mr.medianWords != null) {
+    const longer = mr.medianWords > en.medianWords ? "Marathi" : "English";
+    languages = Math.abs(mr.medianWords - en.medianWords) < 0.2 * Math.max(mr.medianWords, en.medianWords)
+      ? `My posts run about the same length in either language: ${mr.medianWords} words in Marathi, ${en.medianWords} in English.`
+      : `I write longer in ${longer}: a typical Marathi post runs ${mr.medianWords} words, an English one ${en.medianWords}.`;
+    const enNight = en.timed >= 20 ? pct(en.night, en.timed) : null;
+    const mrNight = mr.timed >= 20 ? pct(mr.night, mr.timed) : null;
+    if (enNight != null && mrNight != null && Math.abs(enNight - mrNight) >= 5) {
+      languages += ` ${mrNight > enNight ? "Marathi" : "English"} is more often the night language (${Math.max(enNight, mrNight)}% after dark, against ${Math.min(enNight, mrNight)}%).`;
+    }
+  }
+
+  let mood = null;
+  if (doc.moods && doc.moods.list.length >= 2) {
+    const { list, years: my } = doc.moods;
+    const shareOf = (y, id) => {
+      const c = my[y];
+      const tot = c ? c.reduce((a, b) => a + b, 0) : 0;
+      return tot >= 20 ? c[list.findIndex((m) => m.id === id)] / tot : null;
+    };
+    const extreme = (id) => years.map((y) => [y, shareOf(y, id)]).filter(([, v]) => v != null).sort((a, b) => b[1] - a[1])[0];
+    const calm = list.some((m) => m.id === "calm") ? extreme("calm") : null;
+    const restless = list.some((m) => m.id === "restless") ? extreme("restless") : null;
+    const top = list[doc.moods.totals.indexOf(Math.max(...doc.moods.totals))];
+    mood = `Most of what I post reads ${top.label.toLowerCase()}.`;
+    if (calm) mood += ` My calmest year was ${calm[0]}`;
+    if (calm && restless) mood += `; my most restless, ${restless[0]}.`;
+    else if (calm) mood += ".";
+  }
+
+  let map = null;
+  if (doc.map && doc.map.regions.length) {
+    const big = doc.map.regions[0];
+    map = `Placed by meaning, my posts settle into ${doc.map.regions.length} neighbourhoods. The largest, ${regionName(big)}, holds ${n(big.posts)} of them.`;
+  }
+
   return {
     clock: all.timed >= 30 && nightShare != null
-      ? `${nightShare}% of the timed posts were written between 9 pm and 3 am. The busiest hour is ${hourLabel(all.peakHour)}.`
+      ? `I write after dark: ${nightShare}% of my timed posts went up between 9 pm and 3 am, and my busiest hour is ${hourLabel(all.peakHour)}.`
       : null,
     years: peak && quiet && peak[0] !== quiet[0]
-      ? `${peak[0]} was the loudest year, with ${peak[1].toLocaleString("en-IN")} posts. ${quiet[0]} was the quietest, with ${quiet[1].toLocaleString("en-IN")}.`
+      ? `${peak[0]} was my loudest year, with ${n(peak[1])} posts. ${quiet[0]} was my quietest, with ${n(quiet[1])}.`
       : null,
     language: years.length > 1 && share(firstY, "mr") != null && share(lastY, "mr") != null
-      ? `Marathi was ${share(firstY, "mr")}% of the posts in ${firstY} and ${share(lastY, "mr")}% in ${lastY}.`
+      ? `Marathi was ${share(firstY, "mr")}% of my posts in ${firstY} and ${share(lastY, "mr")}% in ${lastY}.`
       : null,
+    languages,
+    mood,
+    map,
     silence: all.gap && all.gap.days >= 14
-      ? `The longest silence lasted ${all.gap.days.toLocaleString("en-IN")} days. The longest run of daily posts lasted ${all.streak ? all.streak.days : 1}.`
+      ? `My longest silence lasted ${n(all.gap.days)} days. My longest run of daily posts lasted ${all.streak ? all.streak.days : 1}.`
       : null,
   };
 }
