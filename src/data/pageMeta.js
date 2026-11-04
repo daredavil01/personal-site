@@ -71,7 +71,7 @@ export const PAGE_META = {
   "/films": {
     title: "Films",
     description:
-      "Every film about this site in one place: a 30-second film for each of seven pages — About, Resume, the Writing Ledger, the micro-blog, Presentations, Sports and Treks — and the longer tours, each with its story, chapters and how it was made.",
+      "Every film about this site in one place: a short film for each of eleven pages — About, Resume, the Writing Ledger, the micro-blog, Presentations, Sports, Treks, the Newsletter, 100 Days To Offload, Now and Ask — and the longer tours, each with its story, chapters and how it was made.",
     image: `${SITE_URL}/og/films.png`,
     imageAlt: "A strip of vertical film frames with play buttons",
     ogSlug: "films",

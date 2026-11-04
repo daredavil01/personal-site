@@ -11,6 +11,17 @@ Versioning follows the semver-style rules in CLAUDE.md: major for new
 pages/refactors/redesigns, minor for features and content additions (at most one
 minor version per calendar week), patch for fixes and tweaks.
 
+## [v30.1.0] — 2026-11-04
+
+### Added
+- **Four 45-second page films** (`scripts/page-films/`, `public/video/page-films/{newsletter,100-days-to-offload,now,ask}.*`): vertical Remotion films for /newsletter ("A log is not a memory"), /100-days-to-offload ("One hundred posts, one year"), /now ("This month, so far") and /ask ("It shows its sources"), read from the live tables, with burned-in word-by-word captions, a synthesised score and a sound effect on every cue. Embedded under each page's header in both shells and listed on /films with their chapters and details.
+- **Classic and atlas scene** (`scripts/page-films/remotion/scenesMore.jsx`): each of the four films shows its own page on two phones, classic then atlas, scrolling while a switch flips between them — real phone screenshots of the live site in each shell, captured once by `render.mjs` (`--recapture` to redo).
+- **New scene types** (`scenesMore.jsx`, `scenes.jsx`): an envelope that gathers a month's rows and seals, a ring of a hundred marks, the challenge trail with a waypoint per post, a tearing calendar with a live light, starter-question chips, and a real /ask exchange (asked once and cached) with sources first and the answer streaming; plus issue, title and section cards and a model-ladder list.
+
+### Changed
+- **Page films length** (`scripts/page-films/script.js`, `remotion/index.jsx`, `score.mjs`): a film's length is now per film (`FILM_SECONDS`, 30 by default) via Remotion's `calculateMetadata`; the score's arc is measured from the film's ends and a 45-second film drops its drums for one bar mid-way.
+- **Page film registry and player** (`src/data/pageFilms.js`, `src/components/common/PageFilm.js`, `src/data/featureFilms.js`, `src/pages/Films.js`): rows carry `seconds`; the player label and /films read it. /films meta description names all eleven pages.
+
 ---
 
 ## [v30.0.0] — 2026-11-04

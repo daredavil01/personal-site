@@ -1,4 +1,4 @@
-// The seven page films as scripts: what each scene shows, how long it runs,
+// The page films as scripts: what each scene shows, how long it runs,
 // how it slides in, what the captions say and when, and every sound cue.
 //
 // One pure module, read by both halves of the render, so picture and sound
@@ -10,13 +10,18 @@
 //
 // Timing is in frames at 30 fps. Scene lengths are seconds in each film's
 // list and vary with what the scene has to show (five chapters get longer
-// than one number); each film is scaled to exactly 30 seconds. Every item
+// than one number); each film is scaled to exactly its length — 30 seconds
+// for the first seven, 45 for /newsletter, /100-days-to-offload, /now and
+// /ask (FILM_SECONDS). Every item
 // inside a scene carries its own `at` frame, and the sfx cues are derived
 // from those same frames.
 
 export const FPS = 30;
 export const SECONDS = 30;
 export const TOTAL = FPS * SECONDS;
+// Films that run longer than the default 30 seconds.
+export const FILM_SECONDS = { newsletter: 45, offload: 45, now: 45, ask: 45 };
+export const filmFrames = (key) => FPS * (FILM_SECONDS[key] || SECONDS);
 // Scenes overlap by this many frames: the next one slides in over the last.
 export const OVERLAP = 12;
 
@@ -34,6 +39,14 @@ const evenly = (list, want) => (list.length <= want ? list
   : Array.from({ length: want }, (_, i) => list[Math.round((i / (want - 1)) * (list.length - 1))]));
 const toSecs = (t) => String(t || "").split(":").map(Number).reduce((a, v) => a * 60 + v, 0);
 const maxOf = (xs) => Math.max(1, ...xs);
+// The first sentence of a text, cut at a word under `max` characters.
+const firstSentence = (text, max = 150) => {
+  const t = String(text || "").replace(/\s+/g, " ").trim();
+  const one = (t.match(/^.+?[.!?](?=\s|$)/) || [t])[0];
+  if (one.length <= max) return one;
+  return `${one.slice(0, max).replace(/\s+\S*$/, "")}…`;
+};
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 // --- themes ---------------------------------------------------------------------------
 export const THEMES = {
@@ -43,6 +56,10 @@ export const THEMES = {
   microblog: { bg: "#070b1f", fg: "#ece9ff", accent: "#f5a524", muted: "#8f8bb3", soft: "rgba(255,255,255,.1)", head: "serif", grain: 0.05, dark: true, indigo: "#8b9cff" },
   presentations: { bg: "#0c0a09", fg: "#fafaf9", accent: "#fbbf24", muted: "#a8a29e", soft: "rgba(255,255,255,.1)", head: "sans", grain: 0.06, dark: true },
   sports: { bg: "#0a0a0a", fg: "#ffffff", accent: "#ff5a1f", muted: "#a3a3a3", soft: "rgba(255,255,255,.1)", head: "display", grain: 0.07, dark: true },
+  newsletter: { bg: "#f6efe3", fg: "#1c1917", accent: "#b22200", muted: "#78716c", soft: "rgba(28,25,23,.12)", head: "serif", grain: 0.08, dark: false, kraft: "#e8d5ad", kraftDark: "#c9ae7c" },
+  offload: { bg: "#f1ead8", fg: "#2b2118", accent: "#c2410c", muted: "#857563", soft: "rgba(43,33,24,.12)", head: "sans", grain: 0.08, dark: false, indigo: "#3b4a8f", sepia: "#8b5e34" },
+  now: { bg: "#0b1220", fg: "#f8fafc", accent: "#22c55e", muted: "#94a3b8", soft: "rgba(255,255,255,.1)", head: "sans", grain: 0.05, dark: true, paper: "#ffffff", ink: "#0b1220", kraft: "#e8d5ad", kraftDark: "#c9ae7c" },
+  ask: { bg: "#0d0b1a", fg: "#f5f3ff", accent: "#a78bfa", muted: "#9b97b8", soft: "rgba(255,255,255,.1)", head: "sans", grain: 0.05, dark: true, cyan: "#22d3ee" },
   treks: { bg: "#0f1f17", fg: "#f2f5ef", accent: "#d4a24c", muted: "#9fb3a3", soft: "rgba(255,255,255,.1)", head: "serif", grain: 0.07, dark: true, moss: "#6f8f72", levels: { Easy: "#8fbf8f", Medium: "#d4a24c", Hard: "#e0603a" } },
 };
 
@@ -207,6 +224,114 @@ const FILMS = {
         say: `Some take two hours. One took ${L ? L.hours : "all night"}.` },
     ].filter(Boolean);
   },
+
+  newsletter: (D) => {
+    const L = D.latest;
+    const issues = D.issues.slice(0, 10);
+    return [
+      { type: "count", art: "envelope", secs: 4.5, enter: "zoom", value: D.count, label: "letters, one a month", sub: `since ${D.since}`,
+        say: `${D.count} letters. One for every month since ${D.since}.` },
+      L && { type: "gather", secs: 8, enter: "left", kicker: L.label, head: "The month, gathered", items: L.items, stats: L.stats,
+        say: `First the month gathers itself: every race, trek, book and post from the archive. ${L.stats.map((x) => `${x.value} ${x.label}`).join(", ")}. Nothing retyped.` },
+      L?.letter && { type: "typed", name: "Written by hand", secs: 6.5, enter: "wipe", kicker: `${L.label} · the letter`, title: L.headline, text: L.letter,
+        say: `Then I write the letter: ${L.headline}.` },
+      { type: "cards", style: "issue", secs: 0.9 * issues.length, enter: "right",
+        items: issues.map((x, i) => ({ kicker: x.label, title: x.headline, photo: x.card, stats: x.stats.map((t) => `${t.value} ${t.label}`).join(" · "), index: `${String(i + 1).padStart(2, "0")} / ${String(D.count).padStart(2, "0")}` })),
+        say: `Every issue, newest first: ${issues.slice(0, 3).map((x) => x.headline).join(". ")}.` },
+      D.shots && { type: "shells", secs: 7.5, enter: "zoom", head: "Two ways to read it", shots: D.shots,
+        say: "The same page in two shells: classic, clean and quick, or the atlas, a town square on the map." },
+      { type: "list", style: "numbered", secs: 5, enter: "left", head: "Write back",
+        items: [
+          { label: "♥", title: `React to any section · ${D.reactions.length} ways` },
+          { label: "?", title: "Vote on next month's question" },
+          { label: "★", title: "Rate the letter" },
+          { label: "→", title: "Ask the archive about it" },
+        ],
+        say: "And you can write back: react, vote, rate the letter, or ask the archive about anything in it." },
+      { type: "end", secs: 4.5, enter: "iris", envelope: true, kicker: `${plural(D.count, "letter")} · one a month`, lines: ["A log is not a memory.", "A letter is."],
+        say: "A log is not a memory. A letter is." },
+    ].filter(Boolean);
+  },
+
+  offload: (D) => {
+    const pick = evenly(D.posts, 8);
+    const months = D.months.slice(0, Math.max(1, D.monthNow + 1));
+    const busy = months.reduce((a, n, i) => (n > months[a] ? i : a), 0);
+    const delta = D.count - D.expected;
+    const pace = delta >= 0 ? `${delta} ahead of pace` : `${-delta} behind pace`;
+    const first = D.posts[0];
+    const last = D.posts[D.posts.length - 1];
+    return [
+      { type: "goal", secs: 5, enter: "zoom", value: D.count, goal: D.goal, kicker: "Can I publish 100 posts in a year?", label: `posts of ${D.goal}`, sub: `${D.year} · day ${D.day}`,
+        say: `Can I publish a hundred posts in one year? ${D.count} so far.` },
+      { type: "trail", secs: 7, enter: "up", head: "The trail", posts: D.posts.map((p) => ({ t: p.t })), latest: last?.title, count: D.count,
+        say: `Every post is a waypoint on the trail, from ${day(first?.date)} to ${day(last?.date)}.` },
+      { type: "bars", secs: 5, enter: "left", head: "Month by month", note: `${MONTH[busy]}: ${D.months[busy]} posts`, short: true,
+        items: months.map((n, i) => ({ label: MON[i].slice(0, 1), value: n, hi: i === busy })),
+        say: `Month by month. The busiest, ${MONTH[busy]}: ${D.months[busy]} posts.` },
+      { type: "cards", style: "title", secs: 0.85 * pick.length, enter: "right",
+        items: pick.map((p) => ({ kicker: `${day(p.date)} · ${p.platform || ""}`, title: p.title, index: `#${D.posts.indexOf(p) + 1}`, mr: p.language === "Marathi" })),
+        say: `${pick.slice(0, 3).map((p) => p.title.replace(/[!?.]+$/, "")).join(". ")}…` },
+      D.tags.length > 2 && { type: "hbars", secs: 5, enter: "down", head: "What it is about", items: D.tags.slice(0, 5).map((t, i) => ({ label: `#${t.tag}`, value: t.n, hi: i === 0 })),
+        say: `Mostly ${D.tags.slice(0, 3).map((t) => t.tag).join(", ")}.${D.langs.mr ? ` ${D.langs.mr} of them in Marathi.` : ""}` },
+      { type: "dots", secs: 5, enter: "left", head: "The pace", fromDate: `1 Jan ${D.year}`, toDate: day(last?.date),
+        items: D.posts.map((p) => ({ t: p.t })), big: pace, sub: `${D.count} posts by day ${D.day}; the pace says ${D.expected}`,
+        say: `${D.count} posts by day ${D.day}. The pace says ${D.expected}: ${pace}.` },
+      D.shots && { type: "shells", secs: 7, enter: "zoom", head: "Two ways in", shots: D.shots,
+        say: "The same trail in two shells: classic, or the atlas, a writer's desk on the map." },
+      { type: "end", secs: 4.5, enter: "iris", kicker: `#100DaysToOffload · ${D.year}`, lines: [`${D.count} down.`, `${Math.max(0, D.goal - D.count)} to go.`],
+        say: `${D.count} down. ${Math.max(0, D.goal - D.count)} to go.` },
+    ].filter(Boolean);
+  },
+
+  now: (D) => {
+    const secs = D.sections.slice(0, 5);
+    const tiles = D.sections.slice(0, 4).map((x) => ({ value: x.n, label: x.label }));
+    return [
+      { type: "pulse", secs: 5, enter: "zoom", month: D.month, prev: D.prev, year: D.year,
+        say: `Now. What I'm running, reading, writing and building in ${D.month} ${D.year}.` },
+      D.story && { type: "typed", name: "Why a now page", secs: 6, enter: "up", kicker: D.inspired ? `Inspired by ${D.inspired}` : "Why a now page", text: D.story,
+        say: D.story },
+      D.rituals.length > 0 && { type: "list", style: "paper", secs: 5.5, enter: "wipe", head: "Daily rituals",
+        items: D.rituals.slice(0, 4).map((r, i) => ({ label: String(i + 1).padStart(2, "0"), title: r.label, sub: r.description })),
+        say: `Every day: ${D.rituals.map((r) => r.description.replace(/\.$/, "")).join(". ")}.` },
+      tiles.length > 0 && { type: "tiles", secs: 5, enter: "zoom", head: `${D.month}, so far`, items: tiles,
+        say: `${D.month} so far: ${tiles.map((t) => `${t.value} ${t.label.toLowerCase()}`).join(", ")}.` },
+      secs.length > 0 && { type: "cards", style: "section", secs: 1.7 * secs.length, enter: "right",
+        items: secs.map((x, i) => ({ kicker: `${x.label} · ${x.n}`, title: x.titles[0], lines: x.titles.slice(1, 3), glyph: x.glyph, index: `${i + 1}/${secs.length}` })),
+        say: secs.map((x) => `${x.label}: ${x.titles[0].replace(/https?:\/\/\S+/g, "").replace(/[^\p{L}\p{M}\p{N}\s,'’.-]/gu, "").split(/\s+/).filter(Boolean).slice(0, 6).join(" ")}.`).join(" ") },
+      D.shots && { type: "shells", secs: 7, enter: "zoom", head: "Two ways in", shots: D.shots,
+        say: "The same month in two shells: classic, or the atlas, the hometown square." },
+      { type: "end", secs: 5, enter: "iris", envelope: true, kicker: "Past months live in the newsletter", lines: ["This month, so far.", "Next month, a letter."],
+        say: "This month, so far. When it ends, it becomes a letter." },
+    ].filter(Boolean);
+  },
+
+  ask: (D) => {
+    const kinds = [
+      has(D.counts.books) && { value: D.counts.books, label: "books" },
+      has(D.counts.blogs) && { value: D.counts.blogs, label: "essays" },
+      has(D.counts.sports) && { value: D.counts.sports, label: "races" },
+      has(D.counts.microblog) && { value: D.counts.microblog, label: "short posts" },
+    ].filter(Boolean);
+    return [
+      { type: "count", art: "chunks", secs: 4.5, enter: "zoom", value: D.chunks, label: "passages, indexed", sub: `from ${fmt(D.things)} things on this site`,
+        say: `Everything on this site, ${fmt(D.things)} things, read into ${fmt(D.chunks)} passages.` },
+      kinds.length > 1 && { type: "tiles", secs: 4.5, enter: "up", head: "What it has read", items: kinds,
+        say: `${kinds.map((k) => `${fmt(k.value)} ${k.label}`).join(", ")}.` },
+      { type: "chips", secs: 5.5, enter: "left", head: "Ask anything", items: D.questions, pick: D.pick,
+        say: "Ask anything. In English, or in Marathi." },
+      D.answer && { type: "chat", secs: 13, enter: "up", question: D.question, sources: D.sources, answer: D.answer, tier: D.tier,
+        say: `${D.question} It looks first, then answers, and shows every page the answer came from.` },
+      D.tiers.length > 0 && { type: "list", style: "rungs", secs: 6, enter: "wipe", head: "If one model is busy",
+        items: [...D.tiers.map((t, i) => ({ label: `Rung ${i + 1} · ${t.provider}`, title: t.model })), { label: "Last rung", title: "Search only, no model", sub: "the sources still come back" }],
+        say: "If one model is busy, the next one answers. If they all are, it still searches." },
+      D.shots && { type: "shells", secs: 7, enter: "zoom", head: "Two ways in", shots: D.shots,
+        say: "The same archive in two shells: classic, or the atlas. And it follows you on every page." },
+      { type: "end", secs: 4.5, enter: "iris", kicker: `${fmt(D.chunks)} passages · English and मराठी`, lines: ["Ask it anything.", "It shows its sources."],
+        say: "Ask it anything. It shows its sources." },
+    ].filter(Boolean);
+  },
 };
 
 // --- resolve: frames, item timings, captions, sound cues ----------------------------------
@@ -214,6 +339,26 @@ const FILMS = {
 const PAN = { left: -0.7, right: 0.7, up: 0, down: 0, zoom: 0, wipe: -0.4, tilt: 0.4, iris: 0 };
 
 function resolveItems(s) {
+  if (s.type === "chat") {
+    // Type the question, send it, sources first, then the answer streams.
+    const qcpf = 1.4;
+    const q0 = 8;
+    const send = q0 + Math.ceil(s.question.length / qcpf) + 6;
+    const src0 = send + 14;
+    const srcGap = 7;
+    const a0 = src0 + s.sources.length * srcGap + 8;
+    const a1 = Math.round(s.dur * 0.9);
+    s.timing = {
+      q0, qcpf, send, src0, srcGap, a0, a1, acpf: s.answer.length / Math.max(20, a1 - a0),
+    };
+    return;
+  }
+  if (s.type === "chips" || s.type === "gather") {
+    const n = s.items.length;
+    const span = s.dur * (s.type === "chips" ? 0.45 : 0.4);
+    s.items = s.items.map((it, i) => ({ ...it, at: Math.round(8 + (i / Math.max(1, n - 1)) * span) }));
+    return;
+  }
   // Items enter in the first ~65% of the scene; cards split the scene evenly.
   const n = (s.items || []).length;
   if (s.type === "cards") {
@@ -283,7 +428,7 @@ function sfxFor(s) {
     }
     case "cards":
       items.forEach((it, i) => {
-        if (i > 0) out.push({ at: at(it.at), kind: s.style === "fullbleed" || s.style === "postcard" ? "shutter" : "swish", pan: PAN[it.enter] || 0 });
+        if (i > 0) out.push({ at: at(it.at), kind: ["fullbleed", "postcard", "issue"].includes(s.style) ? "shutter" : "swish", pan: PAN[it.enter] || 0 });
         if (it.badge) out.push({ at: at(it.at + 6), kind: "stamp", gain: 0.5 });
       });
       break;
@@ -331,6 +476,51 @@ function sfxFor(s) {
     case "stopwatch":
       for (let f = 6; f < s.dur - 6; f += 15) out.push({ at: at(f), kind: "tick", pitch: 0.2, gain: 0.6 });
       break;
+    case "goal": {
+      const b = Math.round(s.dur * 0.6);
+      for (let f = 14; f < b; f += 3) out.push({ at: at(f), kind: "tick", pitch: (f - 14) / (b - 14), gain: 0.5 });
+      out.push({ at: at(b), kind: "ding" });
+      out.push({ at: at(b + 10), kind: "stamp", gain: 0.5 });
+      break;
+    }
+    case "trail":
+      s.posts.forEach((p, i) => { if (i % 3 === 0) out.push({ at: at(10 + Math.round(p.t * s.dur * 0.7)), kind: "pop", pitch: p.t, gain: 0.32, pan: Math.sin(p.t * Math.PI * 3.2) * 0.6 }); });
+      out.push({ at: at(Math.round(s.dur * 0.78)), kind: "stamp", gain: 0.5 });
+      break;
+    case "gather": {
+      items.forEach((it, i) => out.push({ at: at(it.at), kind: "swish", pan: i % 2 ? 0.6 : -0.6, pitch: i / Math.max(1, items.length), gain: 0.55 }));
+      const drop = Math.round(s.dur * 0.55);
+      out.push({ at: at(drop), kind: "whoosh", pan: 0 });
+      out.push({ at: at(Math.round(s.dur * 0.7)), kind: "snap" });
+      out.push({ at: at(Math.round(s.dur * 0.75)), kind: "stamp" });
+      (s.stats || []).forEach((_, k) => out.push({ at: at(Math.round(s.dur * 0.78) + k * 8), kind: "pop", pitch: 0.4 + k * 0.2 }));
+      break;
+    }
+    case "shells": {
+      const p1 = Math.round(s.dur * 0.32);
+      for (let f = 16; f < s.dur - 10; f += 9) out.push({ at: at(f), kind: "tick", pitch: 0.1, gain: 0.18 });
+      out.push({ at: at(p1), kind: "whoosh", pan: 0.7 });
+      out.push({ at: at(Math.round(s.dur * 0.62)), kind: "snap" });
+      out.push({ at: at(Math.round(s.dur * 0.62) + 3), kind: "ding", pitch: 0.5 });
+      break;
+    }
+    case "chips":
+      items.forEach((it, i) => out.push({ at: at(it.at), kind: "pop", pitch: (i % 5) / 5, gain: 0.35, pan: i % 2 ? 0.4 : -0.4 }));
+      out.push({ at: at(Math.round(s.dur * 0.62)), kind: "ding", pitch: 0.3 });
+      break;
+    case "chat": {
+      const T = s.timing;
+      for (let c = 0; c < s.question.length; c += 2) if (s.question[c] !== " ") out.push({ at: at(T.q0 + Math.round(c / T.qcpf)), kind: "key", pitch: ((c * 7) % 5) / 5 });
+      out.push({ at: at(T.send), kind: "whoosh", pan: 0.3 });
+      s.sources.forEach((_, i) => out.push({ at: at(T.src0 + i * T.srcGap), kind: "pop", pitch: 0.3 + i * 0.12, gain: 0.45 }));
+      for (let f = T.a0; f < T.a1; f += 4) out.push({ at: at(f), kind: "tick", pitch: 0.6 + ((f * 7) % 5) / 12, gain: 0.16 });
+      out.push({ at: at(T.a1), kind: "ding", pitch: 0.4 });
+      break;
+    }
+    case "pulse":
+      for (let f = 30; f < s.dur - 6; f += 18) out.push({ at: at(f), kind: "beep", pitch: 0.6, gain: 0.25 });
+      out.push({ at: at(Math.round(s.dur * 0.3)), kind: "swish", pitch: 0.2 });
+      break;
     case "end":
       out.push({ at: at(-20), kind: "riser" });
       out.push({ at: at(18), kind: "chime" });
@@ -342,9 +532,15 @@ function sfxFor(s) {
 }
 
 // A scene's name in the chapter list the /films page and the players show.
-const CARD_NAMES = { chapter: "Five chapters", screen: "The decks", fullbleed: "Race day", postcard: "Postcards" };
-const TYPE_NAMES = { count: "Opening", countdown: "On your marks", stopwatch: "How long?", sheet: "The sheet", split: "Two languages", wall: "The wall", end: "The end" };
+const CARD_NAMES = {
+  chapter: "Five chapters", screen: "The decks", fullbleed: "Race day", postcard: "Postcards", issue: "Every issue", title: "The posts", section: "This month",
+};
+const TYPE_NAMES = {
+  count: "Opening", countdown: "On your marks", stopwatch: "How long?", sheet: "The sheet", split: "Two languages", wall: "The wall", end: "The end",
+  shells: "Classic and atlas", goal: "The goal", pulse: "Now", chips: "Ask anything", chat: "An answer", gather: "The month, gathered",
+};
 function chapterOf(s) {
+  if (s.name) return s.name;
   if (s.type === "cards") return CARD_NAMES[s.style] || "Cards";
   if (s.type === "typed") return s.quote ? "The first post" : "In 10 seconds";
   if (s.type === "clock") return s.mode === "fill" ? "The longest" : "The clock";
@@ -353,12 +549,13 @@ function chapterOf(s) {
 
 /** The whole film: scenes with frames, captions and sound cues. */
 export function buildFilm(key, data) {
+  const total = filmFrames(key);
   const list = FILMS[key](data);
   const sum = list.reduce((a, s) => a + s.secs, 0);
   let from = 0;
   const scenes = list.map((s, i) => {
     const last = i === list.length - 1;
-    const dur = last ? TOTAL - from : Math.round((s.secs / sum) * TOTAL);
+    const dur = last ? total - from : Math.round((s.secs / sum) * total);
     const out = { ...s, from, dur, id: `${s.type}-${i}`, last };
     from += dur;
     resolveItems(out);
@@ -366,9 +563,9 @@ export function buildFilm(key, data) {
   });
   scenes.forEach((s) => { s.chapter = chapterOf(s); });
   const captions = scenes.flatMap((s) => chunkCaption(s.say, s.from, s.dur));
-  const sfx = scenes.flatMap(sfxFor).filter((e) => e.at >= 0 && e.at < TOTAL).sort((a, b) => a.at - b.at);
+  const sfx = scenes.flatMap(sfxFor).filter((e) => e.at >= 0 && e.at < total).sort((a, b) => a.at - b.at);
   const hits = scenes.filter((s) => s.enter === "zoom" || s.enter === "iris").map((s) => s.from / FPS);
-  return { key, theme: THEMES[key], scenes, captions, sfx, hits, frames: TOTAL };
+  return { key, theme: THEMES[key], scenes, captions, sfx, hits, frames: total };
 }
 
 export const FILM_KEYS = Object.keys(FILMS);

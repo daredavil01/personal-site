@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { PAGE_FILM_DIR, pageFilm } from "../../data/pageFilms";
+import { PAGE_FILM_DIR, filmSeconds, pageFilm } from "../../data/pageFilms";
 
-// The 30-second vertical film about a page, with its storyline beside it.
+// The 30- or 45-second vertical film about a page, with its storyline beside it.
 // One row in src/data/pageFilms.js per film; the files are
 // public/video/page-films/<slug>.{mp4,jpg,vtt}, rendered by
 // `npm run page:films` and committed. preload="none": the page costs a poster
@@ -31,7 +31,7 @@ const PageFilm = ({ film, className }) => {
       </video>
       <figcaption className="min-w-0 max-w-md">
         <span className="block font-label text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400 dark:text-stone-500 mb-2">
-          The film · 30 s · sound on
+          {`The film · ${filmSeconds(f)} s · sound on`}
         </span>
         <span className="block font-headline text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 leading-tight mb-2">
           {f.title}

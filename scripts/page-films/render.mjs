@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 /**
- * Renders the seven 30-second vertical page films with Remotion (1080×1920,
- * 30 fps, H.264 + AAC): /about, /resume, /writing-ledger, /micro-blog,
- * /presentations, /sports and /treks.
+ * Renders the vertical page films with Remotion (1080×1920, 30 fps, H.264 +
+ * AAC): seven of 30 seconds — /about, /resume, /writing-ledger, /micro-blog,
+ * /presentations, /sports, /treks — and four of 45 — /newsletter,
+ * /100-days-to-offload, /now and /ask, each of which shows its page in both
+ * shells, classic and atlas, from phone screenshots of the live site.
  *
  *   npm run page:films                          # all seven masters
  *   npm run page:films -- --only=sports,treks   # some of them (key or slug)
  *   npm run page:films -- --only=about --frame=5,12.5   # PNG stills, for review
  *   npm run page:films -- --publish             # web copies for the pages
- *   npm run page:films -- --recapture           # re-shoot the deck screenshots
+ *   npm run page:films -- --recapture           # re-shoot the deck and page screenshots
  *
  * 1. data.mjs reads what each film says from the live tables (and fetches the
  *    race / fort photos and deck screenshots once into knowledge_base/).
@@ -42,6 +44,10 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WORK = path.join(OUT, ".work");
 const PUB = path.join(WORK, "public");
 const SHOTS = path.join(OUT, "cache", "decks");
+const PAGES = path.join(OUT, "cache", "pages");
+const SITE = process.env.FILM_SITE || "https://sankettambare.in";
+const PAGE_W = 390;
+const PAGE_H = 2400; // css px of each page kept, for the phone to scroll through
 const WEB = path.join(ROOT, "public", "video", "page-films");
 const CHROME = process.env.CHROME_PATH || (fs.existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : null);
 const FONTS = [
@@ -83,6 +89,42 @@ async function deckShots(decks) {
     await browser.close();
   }
   return decks.map((d) => (fs.existsSync(file(d)) ? pathToFileURL(file(d)).href : null));
+}
+
+// --- each page in both shells, at phone size (once; --recapture to redo) -----------
+
+let pageBrowser = null;
+async function pageShots(route) {
+  fs.mkdirSync(PAGES, { recursive: true });
+  const out = {};
+  for (const mode of ["classic", "atlas"]) { // eslint-disable-line no-restricted-syntax
+    const name = `${route.replace(/^\//, "").replace(/\W+/g, "-")}-${mode}`;
+    const file = path.join(PAGES, `${name}.jpg`);
+    const meta = path.join(PAGES, `${name}.json`);
+    if (flag("recapture") || !fs.existsSync(file) || !fs.existsSync(meta)) {
+      if (!pageBrowser) pageBrowser = await (await loadPlaywright()).launch(CHROME ? { executablePath: CHROME } : {}); // eslint-disable-line no-await-in-loop
+      const page = await pageBrowser.newPage({ viewport: { width: PAGE_W, height: 844 }, deviceScaleFactor: 1.5 }); // eslint-disable-line no-await-in-loop
+      try {
+        await page.goto(`${SITE}${route}?view=${mode}`, { waitUntil: "networkidle", timeout: 60000 }); // eslint-disable-line no-await-in-loop
+      } catch (_) { /* a long-polling page still renders */ }
+      await page.waitForTimeout(2500); // eslint-disable-line no-await-in-loop
+      // The atlas greets a first visit with passport toasts; a film shows the page, not the welcome.
+      await page.evaluate(() => { // eslint-disable-line no-await-in-loop
+        document.querySelectorAll("body *").forEach((el) => {
+          const cs = getComputedStyle(el);
+          if (cs.position === "fixed" && /stamped|Got it|passport/i.test(el.textContent || "")) el.remove();
+        });
+      });
+      const full = await page.evaluate(() => document.documentElement.scrollHeight); // eslint-disable-line no-await-in-loop
+      const height = Math.min(PAGE_H, full);
+      fs.writeFileSync(file, await page.screenshot({ type: "jpeg", quality: 78, fullPage: true, clip: { x: 0, y: 0, width: PAGE_W, height } })); // eslint-disable-line no-await-in-loop
+      fs.writeFileSync(meta, JSON.stringify({ route, mode, ratio: height / PAGE_W, at: new Date().toISOString() }));
+      await page.close(); // eslint-disable-line no-await-in-loop
+      console.info(`  page ${route} (${mode})`);
+    }
+    out[mode] = { file: pathToFileURL(file).href, ratio: JSON.parse(fs.readFileSync(meta, "utf8")).ratio };
+  }
+  return out;
 }
 
 // Remotion serves files from its public dir: copy each file:// asset in and
@@ -138,7 +180,8 @@ async function main() {
   fs.mkdirSync(PUB, { recursive: true });
   FONTS.forEach((f) => fs.copyFileSync(path.join(ROOT, "scripts", "og-fonts", f), path.join(PUB, f)));
   run(["-y", "-f", "lavfi", "-i", "color=c=gray:s=512x512", "-vf", "noise=alls=90:allf=u", "-frames:v", "1", path.join(PUB, "grain.png")]);
-  const all = stage(await gather(films.map((f) => f.key), { deckShots }));
+  const all = stage(await gather(films.map((f) => f.key), { deckShots, pageShots }));
+  if (pageBrowser) await pageBrowser.close();
 
   console.info("Bundling the composition…");
   const serveUrl = await bundle({ entryPoint: path.join(HERE, "remotion", "index.jsx"), publicDir: PUB, onProgress: () => {} });

@@ -1,5 +1,5 @@
-// Every feature film on the site, for the /films page: the seven 30-second
-// page films (src/data/pageFilms.js) and the six longer films that came
+// Every feature film on the site, for the /films page: the eleven page
+// films (seven of 30 seconds, four of 45; src/data/pageFilms.js) and the six longer films that came
 // before them. Import-free apart from the page-film registry, which is
 // import-free too.
 //
@@ -9,7 +9,7 @@
 // and fails if they disagree. `shape` is "vertical" (9:16) or "square".
 
 // eslint-disable-next-line import/extensions -- Node (the OG card generator) imports this file too
-import { PAGE_FILMS, PAGE_FILM_DIR } from "./pageFilms.js";
+import { PAGE_FILMS, PAGE_FILM_DIR, filmSeconds } from "./pageFilms.js";
 
 const PAGE_FILM_MADE = "Remotion, rendered from the live tables; a synthesised score with a sound effect on every cue; captions burned in, word by word";
 
@@ -110,7 +110,7 @@ export const FEATURE_FILMS = [
     route: f.route,
     page: f.label,
     base: `${PAGE_FILM_DIR}/${f.slug}`,
-    seconds: 30,
+    seconds: filmSeconds(f),
     shape: "vertical",
     captions: true,
     chapters: true,

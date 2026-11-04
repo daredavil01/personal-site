@@ -85,9 +85,11 @@ steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
 `blueprint:film` (renders video into `knowledge_base/`, nothing to commit),
 `videos:film` and `videos:slides` (the /videos film and its six slides; re-render,
 `-- --publish` and re-run the slides after the channel moves).
-`page:films` (the seven 30-second Remotion page films — /about, /resume,
-/writing-ledger, /micro-blog, /presentations, /sports, /treks; re-render and
-`-- --publish` after content moves, see `docs/page-films.md`). Every film,
+`page:films` (the Remotion page films: seven of 30 seconds — /about, /resume,
+/writing-ledger, /micro-blog, /presentations, /sports, /treks — and four of 45,
+each showing its page in classic and atlas — /newsletter, /100-days-to-offload,
+/now, /ask; re-render and `-- --publish` after content moves, see
+`docs/page-films.md`). Every film,
 these and the longer ones, is listed on `/films` from `src/data/featureFilms.js`;
 a new film needs a row there.
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
@@ -622,7 +624,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`atlas/`, `classic/`), `src/lib/training.js`, `src/lib/trainingDemo.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
 | Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
-| Page films (about, resume, ledger, micro-blog, decks, sports, treks) | `scripts/page-films/` (`script.js` drives picture, captions, sound), `src/data/pageFilms.js`, `src/components/common/PageFilm.js`, `public/video/page-films/`, `docs/page-films.md` |
+| Page films (about, resume, ledger, micro-blog, decks, sports, treks; newsletter, 100 days, now, ask) | `scripts/page-films/` (`script.js` drives picture, captions, sound), `src/data/pageFilms.js`, `src/components/common/PageFilm.js`, `public/video/page-films/`, `docs/page-films.md` |
 | Films page (every feature film + details) | `src/pages/Films.js`, `src/data/featureFilms.js` |
 | Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
 | Second brain endpoint | `functions/api/ask.js` |

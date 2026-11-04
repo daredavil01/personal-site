@@ -2,9 +2,10 @@
 // library, nothing to license. Every film runs at 120 BPM, so a beat is 0.5 s
 // and a bar is 2 s, and the cuts in film.html land on bars. What changes per
 // film is the MOOD below: key, progression, which instruments play and how
-// hard the drums hit. The shape is the same 30-second arc for all seven:
-// 0–4 s intro (pad alone), 4 s the groove enters, 24–26 s a one-bar lift,
-// 26–30 s the outro rings out on the tonic.
+// hard the drums hit. The shape is the same arc for every film, measured from
+// its ends: 0–4 s intro (pad alone), 4 s the groove enters, a one-bar lift
+// 6–4 s before the end, then the outro rings out on the tonic. A 45-second
+// film also drops its drums for one bar in the middle and comes back in.
 
 export const RATE = 44100;
 const BPM = 120;
@@ -28,6 +29,14 @@ export const MOODS = {
   // Sports: race day. G minor driving four-on-the-floor.
   sports: { chords: [[55, 58, 62], [51, 55, 58], [58, 62, 65], [53, 57, 60]], drums: 1, arp: "drive", pluck: 0.55, bassOct: -24, swing: 0 },
   // Treks: monsoon on the Sahyadri. D Dorian, i–IV, wide and slow.
+  // Newsletter: a letter by lamplight. B♭ major, I–vi–IV–V, brushed and warm.
+  newsletter: { chords: [[58, 62, 65], [55, 58, 62], [51, 55, 58], [53, 57, 60]], drums: 0.5, arp: "broken", pluck: 0.55, bassOct: -24, swing: 0.07 },
+  // 100 Days: a long walk, one step a day. A major, I–V–vi–IV, steady pulse.
+  offload: { chords: [[57, 61, 64], [52, 56, 59], [54, 57, 61], [50, 54, 57]], drums: 0.75, arp: "up", pluck: 0.5, bassOct: -24, swing: 0.03 },
+  // Now: the live light. E major, I–IV–vi–V, bright and current.
+  now: { chords: [[52, 56, 59], [57, 61, 64], [61, 64, 68], [59, 63, 66]], drums: 0.85, arp: "pulse", pluck: 0.5, bassOct: -24, swing: 0 },
+  // Ask: thinking out loud. C minor, i–VI–III–VII, curious, a little electric.
+  ask: { chords: [[48, 51, 55], [56, 60, 63], [51, 55, 58], [58, 62, 65]], drums: 0.65, arp: "stars", pluck: 0.5, bassOct: -12, swing: 0 },
   treks: { chords: [[50, 53, 57], [55, 59, 62], [50, 53, 57], [48, 52, 55]], drums: 0.7, arp: "broken", pluck: 0.5, bassOct: -24, swing: 0.04 },
 };
 
@@ -50,8 +59,12 @@ export function renderScore(name, duration, hits = []) {
   const L = new Float32Array(n);
   const R = new Float32Array(n);
   const add = (i, l, r = l) => { if (i >= 0 && i < n) { L[i] += l; R[i] += r; } };
-  const groove = (t) => t >= 4 && t < 26;
-  const lift = (t) => t >= 24 && t < 26;
+  const outro = duration - 4;
+  // One bar of air in the middle of a long film: drums out, pad and bass stay.
+  const gap = duration > 36 ? Math.floor(duration / 2 / BAR) * BAR : -1;
+  const groove = (t) => t >= 4 && t < outro;
+  const drumsIn = (t) => groove(t) && !(t >= gap && t < gap + BAR);
+  const lift = (t) => t >= outro - 2 && t < outro;
   const chordAt = (t) => M.chords[Math.floor(t / BAR) % M.chords.length];
 
   // --- pad: three detuned partial stacks per chord tone, slow swell --------------
@@ -88,7 +101,7 @@ export function renderScore(name, duration, hits = []) {
   for (let b = 0; b * BEAT < duration; b += 1) {
     const at = b * BEAT;
     if (groove(at)) bassNote(at, chordAt(at)[0] + M.bassOct, BEAT * 0.95, 0.16);
-    else if (at >= 26 && at < duration - 1 && b % 4 === 0) bassNote(at, M.chords[0][0] + M.bassOct, BAR, 0.14);
+    else if (at >= outro && at < duration - 1 && b % 4 === 0) bassNote(at, M.chords[0][0] + M.bassOct, BAR, 0.14);
   }
 
   // --- pluck arpeggio ---------------------------------------------------------------
@@ -156,15 +169,16 @@ export function renderScore(name, duration, hits = []) {
   const D = M.drums;
   for (let b = 0; b * BEAT < duration; b += 1) {
     const at = b * BEAT;
-    if (!groove(at)) continue;
+    if (!drumsIn(at)) continue;
     const beat = b % 4;
     if (D >= 0.9 || beat === 0 || (D >= 0.6 && beat === 2)) kick(at, D);
     if (beat === 1 || beat === 3) snare(at, D * 0.45);
     hat(at + BEAT / 2, D, D >= 0.9 && beat === 3);
     if (D >= 0.7) hat(at, D * 0.6);
   }
-  // The lift: a snare roll across bar 12 (24–26 s).
-  for (let k = 0; k < 16; k += 1) snare(24 + k * BEAT / 4, D * 0.18 * (0.4 + k / 16));
+  // The lift: a snare roll across the bar before the outro (and into the gap's return).
+  for (let k = 0; k < 16; k += 1) snare(outro - 2 + k * BEAT / 4, D * 0.18 * (0.4 + k / 16));
+  if (gap > 0) for (let k = 0; k < 8; k += 1) snare(gap + BAR / 2 + k * BEAT / 4, D * 0.14 * (0.3 + k / 8));
 
   // --- hits: a low boom and a reversed-noise swell into each one ---------------------
   hits.forEach((at) => {

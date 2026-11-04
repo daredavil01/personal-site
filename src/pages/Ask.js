@@ -2,6 +2,7 @@ import React from "react";
 import PageShell from "../atlas/PageShell";
 import AskChat from "../components/Ask/AskChat";
 import { PAGE_META } from "../data/pageMeta";
+import PageFilm from "../components/common/PageFilm";
 
 const meta = PAGE_META["/ask"] || {};
 
@@ -23,6 +24,8 @@ const Ask = () => (
       <div className="min-h-[55vh] flex">
         <AskChat />
       </div>
+
+      <PageFilm film="ask" />
 
       <footer className="text-[12px] text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-800 pt-4">
         Runs on free tiers with a hard daily cap, so it can run out of answers

@@ -1,0 +1,34 @@
+{
+ "duration": 45,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "Opening",
+   "start": 0
+  },
+  {
+   "title": "The month, gathered",
+   "start": 4.5
+  },
+  {
+   "title": "Written by hand",
+   "start": 12.5
+  },
+  {
+   "title": "Every issue",
+   "start": 19
+  },
+  {
+   "title": "Classic and atlas",
+   "start": 28
+  },
+  {
+   "title": "Write back",
+   "start": 35.5
+  },
+  {
+   "title": "The end",
+   "start": 40.5
+  }
+ ]
+}

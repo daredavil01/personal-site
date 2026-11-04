@@ -6,6 +6,7 @@ import { useNowMeta, useNowMonths, useProjects } from "../context/ContentContext
 import { monthSlug } from "../lib/api/now";
 import { mergeMonthRecords } from "../lib/nowAutofill";
 import { listMonthActivities } from "../lib/api/training";
+import PageFilm from "../components/common/PageFilm";
 
 const Now = () => {
   const { data: nowMeta } = useNowMeta();
@@ -66,6 +67,8 @@ const Now = () => {
             )}
           </div>
         </section>
+
+        <PageFilm film="now" />
 
         {/* Daily Rituals */}
         {nowMeta?.dailyRituals?.length > 0 && (

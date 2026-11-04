@@ -5,6 +5,7 @@ import { useBlogs } from '../context/ContentContext';
 import ShareImageButton from '../components/share/ShareImageButton';
 import ExpeditionTrail from '../components/OneHundredDays/ExpeditionTrail';
 import ClassicProgress from '../components/OneHundredDays/ClassicProgress';
+import PageFilm from '../components/common/PageFilm';
 
 const YEAR = 2026;
 const GOAL = 100;
@@ -207,6 +208,8 @@ const OneHundredDays = () => {
             <span className="inline-block w-[2px] h-[1em] bg-secondary ml-1 animate-pulse align-text-bottom" />
           </p>
         </header>
+
+        <PageFilm film="offload" />
 
         {/* Progress band — the Expedition Trail by default, ?view=classic for the ring */}
         <section className="bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl p-6 md:p-8">

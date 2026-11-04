@@ -6,6 +6,9 @@ import {
   Counter, DEVA, DISPLAY, H, Photo, SANS, SERIF, SlideIn, Typed, W, back, clamp, ease, enterStyle,
   fmt, headStyle, label, lerp, prog, src,
 } from "./kit";
+import {
+  Chat, Chips, ChunkGrid, Envelope, Gather, Goal, Pulse, Shells, Trail,
+} from "./scenesMore";
 
 // One component per scene type in ../script.js. Each reads its own timings
 // (`s.items[i].at`, the count and sweep windows) from the script, the same
@@ -77,6 +80,12 @@ const Count = ({ s, th }) => {
           ))}
         </svg>
       )}
+      {s.art === "envelope" && (
+        <div style={abs({ left: 0, top: 0, width: W, height: H, transform: `translateY(${(1 - prog(f, 0, 22, back)) * -300}px)` })}>
+          <Envelope th={th} left={250} top={330} w={580} flap={prog(f, 4, 26, Easing.inOut(Easing.cubic))} seal={prog(f, 26, 38, back)} />
+        </div>
+      )}
+      {s.art === "chunks" && <ChunkGrid th={th} k={prog(f, 4, s.dur * 0.85, Easing.inOut(Easing.cubic))} />}
       {s.art === "pen" && (
         <svg width={1000} height={260} style={abs({ left: 40, top: 430 })}>
           <path d="M20 180 C 140 60, 220 240, 340 140 S 540 40, 640 150 S 860 230, 980 90" fill="none" stroke={th.fg} strokeWidth="10" strokeLinecap="round" strokeDasharray="1400" strokeDashoffset={1400 * (1 - prog(f, 0, 45, Easing.inOut(Easing.cubic)))} />
@@ -127,7 +136,8 @@ const TypedScene = ({ s, th }) => {
     <AbsoluteFill>
       {s.quote && <div style={abs({ left: 70, top: 320, fontFamily: SERIF, fontSize: 320, color: th.indigo || th.accent, opacity: prog(f, 0, 18) * 0.45, transform: `scale(${lerp(1.4, 1, prog(f, 0, 24))})` })}>“</div>}
       <SlideIn at={2} variant="left" style={{ left: 110, top: 470, ...label(th, { color: th.accent }) }}>{s.kicker}</SlideIn>
-      <Typed text={s.text} at={8} cpf={cpf} caret={th.accent} style={abs({ left: 110, right: 110, top: 560, fontFamily: SERIF, fontSize: s.quote ? 92 : 80, lineHeight: 1.16, color: th.fg })} />
+      {s.title && <SlideIn at={4} variant="up" style={{ left: 110, right: 110, top: 540, ...headStyle(th, 96, { color: th.accent }) }}>{s.title}</SlideIn>}
+      <Typed text={s.text} at={s.title ? 16 : 8} cpf={cpf} caret={th.accent} style={abs({ left: 110, right: 110, top: s.title ? 820 : 560, fontFamily: /[ऀ-ॿ]/.test(s.text) ? DEVA : SERIF, fontSize: s.quote ? 92 : s.title ? 60 : s.text.length > 110 ? 64 : 80, lineHeight: 1.22, color: th.fg })} />
     </AbsoluteFill>
   );
 };
@@ -137,6 +147,8 @@ const GLYPH = {
   run: (c) => <><path d="M10 150 C 70 150, 70 50, 130 50 S 190 150, 250 150" fill="none" stroke={c} strokeWidth="14" strokeLinecap="round" /><circle cx="130" cy="50" r="18" fill={c} /></>,
   peak: (c) => <><path d="M0 180 L80 70 L120 120 L170 30 L260 180 Z" fill="none" stroke={c} strokeWidth="14" strokeLinejoin="round" /><path d="M170 30 L170 0 L205 12 L170 24" fill={c} /></>,
   book: (c) => <path d="M130 50 C 90 30, 40 30, 10 45 L10 170 C 40 155, 90 155, 130 175 C 170 155, 220 155, 250 170 L250 45 C 220 30, 170 30, 130 50 Z M130 50 L130 175" fill="none" stroke={c} strokeWidth="12" strokeLinejoin="round" />,
+  pen: (c) => <><path d="M40 170 L60 110 L190 -10 L230 30 L100 150 Z" fill="none" stroke={c} strokeWidth="12" strokeLinejoin="round" /><path d="M20 190 C 90 170, 160 200, 250 180" fill="none" stroke={c} strokeWidth="10" strokeLinecap="round" /></>,
+  gear: (c) => <><circle cx="130" cy="100" r="44" fill="none" stroke={c} strokeWidth="14" />{[0, 45, 90, 135, 180, 225, 270, 315].map((a) => <rect key={a} x="122" y="10" width="16" height="34" rx="4" fill={c} transform={`rotate(${a} 130 100)`} />)}</>,
   globe: (c) => <><circle cx="130" cy="100" r="80" fill="none" stroke={c} strokeWidth="14" /><path d="M50 100 H210 M130 20 C 90 60, 90 140, 130 180 C 170 140, 170 60, 130 20" fill="none" stroke={c} strokeWidth="10" /></>,
 };
 
@@ -183,6 +195,44 @@ const Card = ({
           <div style={label(th, { fontSize: 24 })}>{it.kicker}</div>
           <div style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 66, color: th.fg, marginTop: 14, lineHeight: 1.08, letterSpacing: -1 }}>{it.title}</div>
         </SlideIn>
+      </AbsoluteFill>
+    );
+  }
+  if (s.style === "issue") {
+    return (
+      <AbsoluteFill style={{ ...enter, background: th.bg }}>
+        <div style={abs({ left: 80, top: 330, ...label(th) })}>{it.kicker}</div>
+        <div style={abs({ right: 80, top: 330, fontFamily: SANS, fontWeight: 700, fontSize: 30, color: th.muted })}>{it.index}</div>
+        <div style={abs({ left: 60, top: 400, width: 960, height: 504, borderRadius: 18, overflow: "hidden", background: th.kraft, boxShadow: "0 40px 80px rgba(60,40,10,.3)", transform: `scale(${lerp(1, 1.04, drift)}) rotate(${(i % 2 ? 1 : -1) * lerp(4, 1, k)}deg)` })}>
+          {it.photo && <Img src={src(it.photo)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+        </div>
+        <SlideIn at={it.at + 4} variant="up" style={{ left: 80, right: 80, top: 990 }}>
+          <div style={{ ...headStyle(th, 78), ...clampLines(2) }}>{it.title}</div>
+          {it.stats && <div style={{ marginTop: 22, fontFamily: SANS, fontWeight: 700, fontSize: 36, color: th.accent }}>{it.stats}</div>}
+        </SlideIn>
+      </AbsoluteFill>
+    );
+  }
+  if (s.style === "title") {
+    return (
+      <AbsoluteFill style={{ ...enter, background: th.bg }}>
+        <div style={abs({ left: 70, top: 260, fontFamily: SANS, fontWeight: 700, fontSize: 340, letterSpacing: -14, lineHeight: 1, color: th.accent, opacity: 0.16 + 0.1 * prog(local, 0, 10), transform: `translateX(${(1 - k) * -120}px)` })}>{it.index}</div>
+        <SlideIn at={it.at + 2} variant="left" style={{ left: 100, top: 720, ...label(th, { color: th.muted }) }}>{it.kicker}</SlideIn>
+        <div style={abs({ left: 100, top: 780, width: 120, height: 8, background: th.accent, transformOrigin: "0 0", transform: `scaleX(${prog(local, 4, 14)})` })} />
+        <SlideIn at={it.at + 4} variant={i % 2 ? "right" : "up"} style={{ left: 100, right: 90, top: 830, fontFamily: it.mr ? DEVA : SERIF, fontWeight: 700, fontSize: it.title.length > 60 ? 70 : 88, lineHeight: 1.12, color: th.fg, ...clampLines(5) }}>{it.title}</SlideIn>
+      </AbsoluteFill>
+    );
+  }
+  if (s.style === "section") {
+    const g = GLYPH[it.glyph] ? it.glyph : "globe";
+    return (
+      <AbsoluteFill style={{ ...enter, background: th.bg }}>
+        <SlideIn at={it.at + 2} variant="left" style={{ left: 110, top: 360, ...label(th) }}>{it.kicker}</SlideIn>
+        <div style={abs({ right: 110, top: 360, fontFamily: SANS, fontWeight: 700, fontSize: 30, color: th.muted })}>{it.index}</div>
+        <svg width={260} height={200} style={abs({ left: 110, top: 440, opacity: prog(local, 0, 10), transform: `translateX(${(1 - prog(local, 0, 16)) * -80}px)` })}>{GLYPH[g](th.accent)}</svg>
+        <div style={abs({ left: 110, right: 90, top: 690, fontFamily: /[ऀ-ॿ]/.test(it.title) ? DEVA : DISPLAY, fontWeight: 700, fontSize: it.title.length > 40 ? 72 : 92, lineHeight: 1.12, color: th.fg, ...clampLines(3), opacity: prog(local, 3, 12), transform: `translateY(${(1 - prog(local, 3, 16, back)) * 60}px)` })}>{it.title}</div>
+        <div style={abs({ left: 110, top: 1060, width: 860, height: 4, background: th.soft, transformOrigin: "0 0", transform: `scaleX(${prog(local, 6, 24)})` })} />
+        {(it.lines || []).map((l, j) => <SlideIn key={`${l}${j}`} at={it.at + 14 + j * 8} variant="right" style={{ left: 110, right: 100, top: 1100 + j * 100, fontFamily: /[ऀ-ॿ]/.test(l) ? DEVA : SANS, fontWeight: 700, fontSize: 42, color: th.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{l}</SlideIn>)}
       </AbsoluteFill>
     );
   }
@@ -250,7 +300,7 @@ const List = ({ s, th }) => {
   const gap = Math.min(s.style === "clock" ? 330 : 190, 1100 / n);
   return (
     <AbsoluteFill>
-      <Head th={th} text={s.head} size={s.style === "dots" ? 76 : 104} />
+      <Head th={th} text={s.head} size={s.style === "dots" ? 76 : s.style === "rungs" ? 80 : 104} />
       {s.style === "ledger" && <div style={abs({ left: 150, top: 430, width: 3, height: 1080, background: th.accent, opacity: 0.5, transformOrigin: "0 0", transform: `scaleY(${prog(f, 4, 30)})` })} />}
       {s.items.map((it, i) => {
         const top = 440 + i * gap;
@@ -290,6 +340,20 @@ const List = ({ s, th }) => {
               <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 42, color: th.ink, marginTop: 6, lineHeight: 1.12 }}>{it.title}</div>
               <div style={{ fontFamily: SANS, fontSize: 30, color: "#64748b", marginTop: 8 }}>{it.sub}</div>
             </SlideIn>
+          );
+        }
+        if (s.style === "rungs") {
+          const last = i === n - 1;
+          const y = 430 + i * Math.min(250, 1080 / n);
+          return (
+            <React.Fragment key={it.title}>
+              {i > 0 && <div style={abs({ left: 150, top: y - Math.min(250, 1080 / n) + 140, width: 6, height: Math.min(250, 1080 / n) - 150, background: th.muted, opacity: 0.5 * prog(f, it.at - 4, it.at) })} />}
+              <SlideIn at={it.at} variant={i % 2 ? "right" : "left"} style={{ left: 90, right: 90, top: y, padding: "22px 34px", borderRadius: 24, border: `3px solid ${last ? th.soft : th.accent}`, background: last ? "transparent" : "rgba(167,139,250,.08)" }}>
+                <div style={label(th, { fontSize: 22, color: last ? th.muted : th.cyan || th.accent })}>{it.label}</div>
+                <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 42, color: th.fg, marginTop: 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.title}</div>
+                {it.sub && <div style={{ fontFamily: SANS, fontSize: 30, color: th.muted, marginTop: 6 }}>{it.sub}</div>}
+              </SlideIn>
+            </React.Fragment>
           );
         }
         if (s.style === "ledger") {
@@ -366,7 +430,7 @@ const Tiles = ({ s, th }) => (
     <Head th={th} text={s.head} size={92} />
     {s.items.map((it, i) => (
       <SlideIn key={it.label} at={it.at} variant="pop" style={{ left: 90 + (i % 2) * 470, top: 450 + Math.floor(i / 2) * 470, width: 430, height: 420, padding: "56px 44px", borderRadius: 36, background: i === 0 ? th.accent : "rgba(255,255,255,.07)" }}>
-        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 180, letterSpacing: -6, lineHeight: 1, color: "#fff" }}><Counter value={it.value} from={it.at} to={it.at + 30} suffix={it.suffix || ""} /></div>
+        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: it.value >= 1000 ? 124 : 180, letterSpacing: -6, lineHeight: 1, color: "#fff" }}><Counter value={it.value} from={it.at} to={it.at + 30} suffix={it.suffix || ""} /></div>
         <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 32, color: "#bfdbfe", marginTop: 18, textTransform: "uppercase", letterSpacing: "0.12em" }}>{it.label}</div>
       </SlideIn>
     ))}
@@ -633,10 +697,15 @@ const Countdown = ({ s, th }) => {
 
 const End = ({ s, th }) => {
   const f = useCurrentFrame();
-  const top = s.photo && s.round ? 1000 : s.shot ? 900 : s.sheet ? 1180 : 640;
+  const top = s.photo && s.round ? 1000 : s.shot ? 900 : s.sheet ? 1180 : s.envelope ? 930 : 640;
   return (
     <AbsoluteFill>
       {s.stars && <Stars sky={s.sky} mr={s.mr} dim={0.5} />}
+      {s.envelope && (
+        <div style={abs({ left: 0, top: 0, width: W, height: H, transform: `translateY(${(1 - prog(f, 0, 20, back)) * 200}px) rotate(${(1 - prog(f, 0, 20)) * -6}deg)` })}>
+          <Envelope th={th} left={270} top={360} w={540} flap={1} seal={prog(f, 20, 32, back)} />
+        </div>
+      )}
       {s.ridge && <Ridges th={th} />}
       {s.photo && !s.round && <Photo file={s.photo} k={prog(f, 0, s.dur, Easing.linear)} seed={2} style={{ left: 0, top: 0, width: W, height: H }} filter="grayscale(1) brightness(.42) contrast(1.2)" />}
       {s.photo && s.round && (
@@ -687,6 +756,7 @@ const End = ({ s, th }) => {
 export const SCENES = {
   count: Count, stopwatch: Stopwatch, typed: TypedScene, cards: Cards, list: List, sheet: Sheet, timeline: Timeline, tiles: Tiles,
   bars: Bars, hbars: HBars, calendar: Calendar, clock: Clock, split: Split, wall: Wall, dots: Dots, peaks: Peaks, countdown: Countdown, end: End,
+  shells: Shells, goal: Goal, trail: Trail, gather: Gather, chips: Chips, chat: Chat, pulse: Pulse,
 };
 
 export { ease };

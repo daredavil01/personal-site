@@ -1,8 +1,10 @@
 # Page films
 
-Seven 30-second vertical films, rendered with Remotion (1080×1920 masters, 720×1280 on the page), one
-for each of `/about`, `/resume`, `/writing-ledger`, `/micro-blog`,
-`/presentations`, `/sports` and `/treks`. Each sits under its page's header in
+Eleven vertical films, rendered with Remotion (1080×1920 masters, 720×1280 on
+the page): seven of 30 seconds, for `/about`, `/resume`, `/writing-ledger`,
+`/micro-blog`, `/presentations`, `/sports` and `/treks`, and four of 45 seconds,
+for `/newsletter`, `/100-days-to-offload`, `/now` and `/ask`. Each 45-second
+film has a **Classic and atlas** scene that shows its page in both shells. Each sits under its page's header in
 `PageFilm` (`src/components/common/PageFilm.js`) with its storyline beside it.
 
 Every film is listed with its details on **`/films`** (`src/pages/Films.js`),
@@ -21,11 +23,11 @@ Training, Videos); the catalogue is `src/data/featureFilms.js`.
 | Guards | `src/components/common/pageFilms.test.js`, `src/pages/films.test.js` |
 
 ```bash
-npm run page:films                            # render all seven masters → knowledge_base/page-films/ (~2 min each)
+npm run page:films                            # render all eleven masters → knowledge_base/page-films/ (~2 min each)
 npm run page:films -- --only=sports,treks     # some of them (film key or slug)
 npm run page:films -- --only=about --frame=5,12.5   # PNG stills, for review
 npm run page:films -- --publish               # web copies into public/video/page-films/
-npm run page:films -- --recapture             # re-shoot the deck screenshots
+npm run page:films -- --recapture             # re-shoot the deck and page screenshots
 ```
 
 **The numbers are baked in.** Like the share cards and the other films, a film
@@ -43,7 +45,9 @@ committed JSON. A beat whose number is missing is left out, never shown as 0.
 
 - **Scenes with variable lengths.** Each scene's seconds are a weight that
   grows with its content (five chapters at 2.3 s each, twelve decks at 0.85 s,
-  eight races at 1 s); the film is scaled to exactly 30 s.
+  eight races at 1 s); the film is scaled to exactly its length
+  (`FILM_SECONDS` in `script.js`: 45 for the four newer films, else 30;
+  `remotion/index.jsx` reads it through `calculateMetadata`).
 - **Slide-ins, varied.** Every scene enters with one of `left`, `right`, `up`,
   `down`, `zoom`, `wipe`, `tilt`, `iris` (`enterStyle` in `remotion/kit.jsx`),
   sliding over the last by 12 frames; cards inside a scene rotate through
@@ -153,3 +157,67 @@ The page reads at four depths, so the film is a stopwatch.
 | 15–21 | **How hard?** Easy, medium and hard as three snow-capped peaks sized by count; how many have their story written up. |
 | 21–26 | **The longest:** its photo, a 24-hour dial filling to its hours. |
 | 26–30 | "Some take two hours. One took N." over the ridge, with the hours on the trail. |
+
+## The 45-second films
+
+Four films run 45 seconds: the extra fifteen pay for a **Classic and atlas**
+scene (`shells`), where the page itself appears on two phones, classic and then
+the atlas sliding in beside it, both scrolling while a switch flips between
+them. The phones are real screenshots of the live site at 390 px wide
+(`?view=classic` and `?view=atlas`), taken once by `render.mjs` into
+`knowledge_base/page-films/cache/pages/` — the atlas's first-visit passport
+toasts are removed before the shot. `FILM_SITE` points it at another origin
+(a Pages preview); `--recapture` re-shoots them after the page changes.
+
+The score keeps its arc but measures it from the ends of the film, and a
+45-second one drops its drums for one bar in the middle, so the second half
+comes back in rather than running on.
+
+### /newsletter — "A log is not a memory"
+
+| s | Beat |
+|---|---|
+| 0–4.5 | An envelope drops in, its flap closes and a red wax seal stamps it; the letter count, "one a month", and the first month. |
+| 4.5–12.5 | **The month, gathered:** the latest issue's races, treks, books and posts fly in from either side as paper slips, drop into the envelope, it seals, and the issue's three numbers (`issueStats`) pop up. |
+| 12.5–19 | **Written by hand:** the issue's headline, then the letter's opening sentences typed out. |
+| 19–28 | **Every issue**, newest first: each share card with its headline, numbers and index. |
+| 28–35.5 | **Classic and atlas.** |
+| 35.5–40.5 | **Write back:** react, vote, rate, ask. |
+| 40.5–45 | The sealed envelope: "A log is not a memory. A letter is." |
+
+### /100-days-to-offload — "One hundred posts, one year"
+
+| s | Beat |
+|---|---|
+| 0–5 | "Can I publish 100 posts in a year?" typed; a ring of a hundred marks lights one per post. |
+| 5–12 | **The trail** draws itself down the year, a red waypoint for every post, a flag at the tip. |
+| 12–17 | **Month by month**, the busiest named. |
+| 17–24 | **The posts:** eight titles across the year as big type, with their number, date and platform. |
+| 24–28.5 | **What it is about:** the top tags. |
+| 28.5–33.5 | **The pace:** every post on the year's line, and how far ahead of or behind an even pace it is (the page's own sum: day of year / 365 × 100). |
+| 33.5–40.5 | **Classic and atlas.** |
+| 40.5–45 | "N down. M to go." |
+
+### /now — "This month, so far"
+
+| s | Beat |
+|---|---|
+| 0–5.5 | Last month's page tears off a calendar to show this one; "Now." and a pulsing live light. |
+| 5.5–12 | **Why a now page:** the first sentence of the page's own story, credited to who inspired it. |
+| 12–17.5 | **Daily rituals** as cards. |
+| 17.5–23 | **The month so far** in tiles, one per section. |
+| 23–32 | **This month:** each section with its first items. |
+| 32–39.5 | **Classic and atlas.** |
+| 39.5–45 | An envelope: "This month, so far. Next month, a letter." |
+
+### /ask — "It shows its sources"
+
+| s | Beat |
+|---|---|
+| 0–4.5 | A grid fills: the site read into passages (`content_chunks`), from N things (`site_facts().counts`). |
+| 4.5–9 | **What it has read:** books, essays, races, short posts. |
+| 9–14.5 | **Ask anything:** starter questions from `ask_settings.question_pool`, English and Marathi, float in; one is picked. |
+| 14.5–27.5 | **An answer:** that question typed and sent, the sources arrive first, then the answer streams in, with the rung that answered. It is a **real exchange**: `data.mjs` asks `/api/ask` once (`FILM_ASK` picks the question, default "What has running taught him?") and caches the reply, so a re-render does not spend another answer. |
+| 27.5–33.5 | **If one model is busy:** the ladder from `ask_settings.tiers`, down to search only. |
+| 33.5–40.5 | **Classic and atlas.** |
+| 40.5–45 | "Ask it anything. It shows its sources." |

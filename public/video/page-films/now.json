@@ -1,0 +1,34 @@
+{
+ "duration": 45,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "Now",
+   "start": 0
+  },
+  {
+   "title": "Why a now page",
+   "start": 5.4
+  },
+  {
+   "title": "Daily rituals",
+   "start": 11.8
+  },
+  {
+   "title": "October, so far",
+   "start": 17.7
+  },
+  {
+   "title": "This month",
+   "start": 23.1
+  },
+  {
+   "title": "Classic and atlas",
+   "start": 32.2
+  },
+  {
+   "title": "The end",
+   "start": 39.7
+  }
+ ]
+}

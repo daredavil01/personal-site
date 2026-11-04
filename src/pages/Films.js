@@ -5,8 +5,8 @@ import PageShell from "../atlas/PageShell";
 import { useQueryState } from "../components/common/LogKit";
 import { FEATURE_FILMS, filmLength } from "../data/featureFilms";
 
-// /films — every feature film on the site in one place: the seven 30-second
-// page films and the six longer ones. A main player shows the chosen film
+// /films — every feature film on the site in one place: the eleven page
+// films (30 or 45 seconds) and the six longer ones. A main player shows the chosen film
 // (`?film=`, merged into the URL so it can be shared) with its details — the
 // story, the page it belongs to, length, shape, sound, how it was made — and
 // its chapters as buttons that jump the film to them. Chapters come from the
@@ -155,7 +155,7 @@ const Films = () => {
             <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-none tracking-tight mb-0">Films.</h1>
           </div>
           <p className="lg:col-span-2 text-lg text-stone-500 dark:text-stone-400 font-body leading-relaxed mb-0">
-            {`Every film about this site, in one place: ${FEATURE_FILMS.length} films, about ${minutes} minutes in all. A 30-second film for each of ${PAGE_SERIES.length} pages, and the longer tours. Pick one to play it and read how it was made.`}
+            {`Every film about this site, in one place: ${FEATURE_FILMS.length} films, about ${minutes} minutes in all. A short film for each of ${PAGE_SERIES.length} pages, and the longer tours. Pick one to play it and read how it was made.`}
           </p>
         </header>
 
@@ -164,9 +164,9 @@ const Films = () => {
         </div>
 
         <section aria-labelledby="films-pages">
-          <h2 id="films-pages" className="font-headline text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">Page films · 30 seconds each</h2>
-          <p className="font-body text-stone-500 dark:text-stone-400 mb-4">One per page, rendered with Remotion from the live tables, with captions and a sound on every cut.</p>
-          <ul className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 list-none p-0 m-0">
+          <h2 id="films-pages" className="font-headline text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">Page films · 30 or 45 seconds</h2>
+          <p className="font-body text-stone-500 dark:text-stone-400 mb-4">One per page, rendered with Remotion from the live tables, with captions and a sound on every cut. The 45-second ones also show their page in both shells, classic and atlas.</p>
+          <ul className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 list-none p-0 m-0">
             {PAGE_SERIES.map((f) => <Tile key={f.key} film={f} active={f.key === film.key} onPick={pick} />)}
           </ul>
         </section>

@@ -1,0 +1,38 @@
+{
+ "duration": 45,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "The goal",
+   "start": 0
+  },
+  {
+   "title": "The trail",
+   "start": 5
+  },
+  {
+   "title": "Month by month",
+   "start": 11.9
+  },
+  {
+   "title": "The posts",
+   "start": 16.9
+  },
+  {
+   "title": "What it is about",
+   "start": 23.7
+  },
+  {
+   "title": "The pace",
+   "start": 28.6
+  },
+  {
+   "title": "Classic and atlas",
+   "start": 33.6
+  },
+  {
+   "title": "The end",
+   "start": 40.6
+  }
+ ]
+}

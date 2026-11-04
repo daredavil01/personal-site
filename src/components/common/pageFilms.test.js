@@ -1,4 +1,4 @@
-// The seven page films point at committed files in public/video/page-films/.
+// The eleven page films point at committed files in public/video/page-films/.
 // Like the /projects and /videos film guards, this fails the build if one is
 // missing or a web encode outgrows its budget — a phone that presses play
 // downloads all of it — or the captions stop being a WebVTT file.
@@ -12,8 +12,9 @@ const ROOT = path.resolve(__dirname, "..", "..", "..");
 const file = (slug, ext) => path.join(ROOT, "public", `${PAGE_FILM_DIR}/${slug}.${ext}`);
 
 describe("the page films", () => {
-  it("are seven, each for a route that exists", () => {
-    expect(PAGE_FILMS).toHaveLength(7);
+  it("are eleven, each for a route that exists, seven of 30 s and four of 45 s", () => {
+    expect(PAGE_FILMS).toHaveLength(11);
+    expect(PAGE_FILMS.filter((f) => f.seconds === 45).map((f) => f.route).sort()).toEqual(["/100-days-to-offload", "/ask", "/newsletter", "/now"]);
     const paths = new Set(ROUTE_MANIFEST.map((r) => r.path));
     PAGE_FILMS.forEach((f) => expect({ film: f.key, route: paths.has(f.route) }).toEqual({ film: f.key, route: true }));
   });

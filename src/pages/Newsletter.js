@@ -5,6 +5,7 @@ import PageShell from "../atlas/PageShell";
 import { issueModel } from "../lib/newsletterIssue";
 import { EmptyBlock, LoadingBlock } from "../components/common/AsyncStates";
 import { SUBSTACK_URL, useIssues } from "../components/Newsletter/issueHooks";
+import PageFilm from "../components/common/PageFilm";
 
 // /newsletter — what the monthly letter is, why it exists, and every issue.
 
@@ -109,6 +110,8 @@ const Newsletter = () => {
             </Link>
           </div>
         </section>
+
+        <PageFilm film="newsletter" />
 
         <section aria-label="How it works" className="grid grid-cols-1 @2xl:grid-cols-3 gap-4">
           {WHY.map((w) => (

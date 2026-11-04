@@ -20,6 +20,7 @@ import { enrichRaces, raceSummary, perYear as racesPerYear, distanceName, format
 import { enrichTreks, trekSummary, perYear as treksPerYear, trekTitle } from "../../src/lib/trekLog.js";
 import { groupPositions, professionalMonths, sortCertifications, parseDaterange } from "../../src/lib/resumeModel.js";
 import { parseAbout } from "../../src/lib/aboutModel.js";
+import { REACTIONS, issueSections, issueStats, itemTitle, slugLabel } from "../../src/lib/newsletterIssue.js";
 
 export const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
 export const OUT = path.join(ROOT, "knowledge_base", "page-films");
@@ -32,10 +33,9 @@ const STORAGE = `${SUPABASE_URL}/storage/v1/object/public/media`;
 const fileUrl = (p) => pathToFileURL(p).href;
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), "utf8"));
 
-async function rest(table, select = "*") {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${encodeURIComponent(select)}`, {
-    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
-  });
+const HEADERS = { apikey: KEY, Authorization: `Bearer ${KEY}` };
+async function rest(table, select = "*", query = "") {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${encodeURIComponent(select)}${query}`, { headers: HEADERS });
   if (!res.ok) throw new Error(`${table}: HTTP ${res.status}`);
   return res.json();
 }
@@ -233,8 +233,146 @@ async function treks() {
   };
 }
 
+// --- the four 45-second films --------------------------------------------------------
+
+const SITE = process.env.FILM_SITE || "https://sankettambare.in";
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const firstSentences = (text, max) => {
+  const parts = String(text || "").replace(/[#*_>`]/g, "").replace(/\s+/g, " ").trim().match(/[^.!?]+[.!?]+(?=\s|$)/g) || [];
+  let out = "";
+  for (const p of parts) { // eslint-disable-line no-restricted-syntax
+    if ((out + p).length > max) break;
+    out += p;
+  }
+  return out.trim() || null;
+};
+
+async function newsletter(pageShots) {
+  const rows = (await rest("now_months", "*", "&published_at=not.is.null&order=year.desc"))
+    .filter((r) => r.slug && !r.is_current).sort((a, b) => b.slug.localeCompare(a.slug));
+  const cards = await mapLimit(rows, 3, (r) => photo(r.card_url));
+  const latest = rows[0];
+  const items = latest ? issueSections(latest.sections).flatMap((sec) => sec.items.slice(0, 2).map((it) => ({ section: sec.label, title: itemTitle(sec.key, it) })))
+    .filter((it) => it.title).slice(0, 8) : [];
+  return {
+    count: rows.length,
+    since: slugLabel(rows[rows.length - 1]?.slug),
+    issues: rows.map((r, i) => ({ slug: r.slug, label: slugLabel(r.slug), headline: r.headline || slugLabel(r.slug), card: cards[i], stats: issueStats(r.sections || {}) })),
+    latest: latest ? {
+      label: slugLabel(latest.slug), headline: latest.headline, letter: firstSentences(latest.note, 170), items, stats: issueStats(latest.sections || {}),
+    } : null,
+    reactions: REACTIONS.map((r) => r.label),
+    shots: await pageShots("/newsletter"),
+  };
+}
+
+const CHALLENGE = "100_days_to_offload";
+async function offload(pageShots) {
+  const rows = (await rest("blogs", "id,blog_title,blog_date,blog_platform,language,tag_names", "&order=blog_date.asc"))
+    .filter((b) => b.blog_date);
+  const year = Number(rows[rows.length - 1]?.blog_date.slice(0, 4)) || new Date().getFullYear();
+  const start = Date.UTC(year, 0, 1);
+  const now = new Date();
+  const day = Math.min(365, Math.max(1, Math.floor((now - new Date(year, 0, 1)) / 864e5) + 1));
+  const months = Array(12).fill(0);
+  const tags = {};
+  rows.forEach((b) => {
+    if (Number(b.blog_date.slice(0, 4)) === year) months[Number(b.blog_date.slice(5, 7)) - 1] += 1;
+    (b.tag_names || []).filter((t) => t.toLowerCase() !== CHALLENGE).forEach((t) => { tags[t] = (tags[t] || 0) + 1; });
+  });
+  return {
+    count: rows.length, // the page counts every row, as this does
+    goal: 100,
+    year,
+    day,
+    monthNow: now.getFullYear() === year ? now.getMonth() : 11,
+    expected: Math.round((day / 365) * 100),
+    posts: rows.map((b) => ({
+      title: b.blog_title.trim(), date: b.blog_date, platform: b.blog_platform, language: b.language,
+      t: Math.min(1, Math.max(0, (Date.parse(b.blog_date) - start) / (365 * 864e5))),
+    })),
+    months,
+    tags: Object.entries(tags).sort((a, b) => b[1] - a[1]).map(([tag, n]) => ({ tag, n })),
+    langs: { en: rows.filter((b) => b.language !== "Marathi").length, mr: rows.filter((b) => b.language === "Marathi").length },
+    shots: await pageShots("/100-days-to-offload"),
+  };
+}
+
+const NOW_GLYPH = { running: "run", events: "peak", books: "book", blogs: "pen", micro: "pen", projects: "code", certificates: "gear", website: "globe", misc: "globe" };
+async function now(pageShots) {
+  const [cur] = await rest("now_months", "*", "&is_current=eq.true");
+  const [meta] = await rest("now_meta");
+  if (!cur) throw new Error("now: no current month");
+  const mi = MONTHS.indexOf(cur.month);
+  return {
+    month: cur.month,
+    year: cur.year,
+    prev: mi >= 0 ? MONTHS[(mi + 11) % 12] : null,
+    inspired: meta?.inspired_by?.name || null,
+    story: firstSentences(meta?.intro_story, 150),
+    rituals: (meta?.daily_rituals || []).map((r) => ({ label: r.label, description: r.description })),
+    sections: issueSections(cur.sections || {}).map((sec) => ({
+      key: sec.key, label: sec.label, n: sec.items.length, glyph: NOW_GLYPH[sec.key], titles: sec.items.map((it) => itemTitle(sec.key, it)).filter(Boolean).slice(0, 3),
+    })),
+    shots: await pageShots("/now"),
+  };
+}
+
+// One real exchange with /api/ask, asked once and cached: a film should show
+// the archive answering, not a mock-up of it. FILM_ASK picks the question.
+const ASK_QUESTION = process.env.FILM_ASK || "What has running taught him?";
+async function askOnce(question) {
+  const file = path.join(CACHE, `ask-${crypto.createHash("sha1").update(question).digest("hex").slice(0, 12)}.json`);
+  if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf8"));
+  const res = await fetch(`${SITE}/api/ask`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: question }) });
+  if (!res.ok) { console.warn(`  /api/ask answered ${res.status}; the film leaves the exchange out`); return null; }
+  const d = await res.json();
+  fs.mkdirSync(CACHE, { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(d));
+  return d;
+}
+
+async function ask(pageShots) {
+  const [facts, [settings], chunks] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/rpc/site_facts`, { method: "POST", headers: { ...HEADERS, "Content-Type": "application/json" }, body: "{}" }).then((r) => r.json()),
+    rest("ask_settings", "question_pool,tiers"),
+    fetch(`${SUPABASE_URL}/rest/v1/content_chunks?select=id&limit=1`, { headers: { ...HEADERS, Prefer: "count=exact" } })
+      .then((r) => Number((r.headers.get("content-range") || "").split("/")[1]) || null),
+  ]);
+  const counts = { ...(facts?.counts || {}) };
+  delete counts.tags;
+  const pool = (settings?.question_pool || []).filter((x) => x?.q);
+  // One per category, Marathi ones kept, the film's own question among them.
+  const byCat = {};
+  pool.forEach((x) => { (byCat[x.c] = byCat[x.c] || []).push(x.q); });
+  const questions = [];
+  Object.values(byCat).forEach((qs) => {
+    const en = qs.find((q) => !/[ऀ-ॿ]/.test(q) && q !== ASK_QUESTION);
+    const mr = qs.find((q) => /[ऀ-ॿ]/.test(q));
+    if (en) questions.push(en);
+    if (mr && questions.filter((q) => /[ऀ-ॿ]/.test(q)).length < 2) questions.push(mr);
+  });
+  const chips = [...questions.slice(0, 7), ASK_QUESTION].sort((a, b) => (a.length % 5) - (b.length % 5));
+  const reply = await askOnce(ASK_QUESTION);
+  const answer = reply?.answer ? firstSentences(reply.answer.replace(/\[(.+?)\]\(.+?\)/g, "$1").replace(/\s*\[\d+\]/g, ""), 300) : null;
+  return {
+    chunks,
+    counts,
+    things: Object.values(counts).reduce((a, b) => a + (Number(b) || 0), 0),
+    questions: chips.map((q) => ({ q, mr: /[ऀ-ॿ]/.test(q) })),
+    pick: chips.indexOf(ASK_QUESTION),
+    question: ASK_QUESTION,
+    answer,
+    tier: reply?.tier || null,
+    sources: (reply?.sources || []).filter((x) => x.title && !["tag", "stats"].includes(x.entity_type)).slice(0, 5)
+      .map((x) => ({ type: x.entity_type, title: x.title.trim(), date: x.date })),
+    tiers: (settings?.tiers || []).filter((t) => t.enabled !== false).map((t) => ({ name: t.name, model: String(t.model).replace(/^@cf\/[^/]+\//, ""), provider: t.provider === "gemini" ? "Gemini" : "Workers AI" })),
+    shots: await pageShots("/ask"),
+  };
+}
+
 /** Every film's data, or just the ones named. */
-export async function gather(names, { deckShots }) {
+export async function gather(names, { deckShots, pageShots }) {
   const { payload, from } = await getStatsPayload();
   console.info(`Stats from ${from}.`);
   const s = payload.stats;
@@ -246,6 +384,10 @@ export async function gather(names, { deckShots }) {
     presentations: () => presentations(deckShots),
     sports: () => sports(s),
     treks: () => treks(),
+    newsletter: () => newsletter(pageShots),
+    offload: () => offload(pageShots),
+    now: () => now(pageShots),
+    ask: () => ask(pageShots),
   };
   const out = {};
   for (const n of names) { // eslint-disable-line no-restricted-syntax
