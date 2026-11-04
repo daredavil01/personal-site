@@ -608,8 +608,11 @@ moves. Pure models: `src/lib/aboutModel.js` and `src/lib/resumeModel.js`
   in three lengths, an /ask chat seeded from about.md). Each tier is a superset
   of the last; the stopwatch dial and the rail show how deep you are.
 - **Words live in `src/data/about.md`** (`# 10 seconds`, `# Updates`,
-  `# 5 minutes` with `## Chapter`s, `# 10 minutes`, `# How I work`, `# Facts`,
-  `# I like`, `# Podcasts`, `# Short bio`, `# Ask me`); the page imports it
+  `# 5 minutes` with `## Chapter`s, `# 10 minutes`, `# How I work`, `# Hobbies`,
+  `# Facts`, `# I like`, `# Podcasts`, `# Off the printed resume`, `# Short bio`,
+  `# Ask me`). Hobbies get their live count when the word matches a record
+  (reading → books, writing → posts, coding → projects; `hobbiesWithEvidence`);
+  "Off the printed resume" lists project titles kept off the one-page PDF only; the page imports it
   through `src/data/aboutContent.js` (`?raw`) and /ask indexes it as a page.
   Edit with **`npm run about`** (`scripts/about.mjs`, same parser as the page):
   `update "…" [--career] [--url=…]` adds a dated line to the Latest log,
@@ -633,9 +636,11 @@ moves. Pure models: `src/lib/aboutModel.js` and `src/lib/resumeModel.js`
   text** for ATS forms (`resumeText`).
 - **Print / save PDF is always one A4 page.** Paper gets its own layout,
   `src/components/Resume/ResumePrint.js`, not the screen sheet (which runs to
-  three pages): `onePageResume()` picks what fits (two bullets per job, one for
-  research, campus roles folded into a line, four projects, six skills a group,
-  six newest certifications), and the component scales itself down (never up,
+  three pages): `onePageResume()` picks from the site's own data (up to three
+  bullets per job, two for research, campus roles folded into a line, four
+  projects, each with a brief, eight skills a group plus the stack the projects
+  ship with, every certification, Beyond work from the live stats), and the
+  component scales itself down (never up,
   floor 0.72) on `beforeprint` until it measures under the page. It is
   portalled under `<body>` so print CSS can `display: none` everything else —
   `visibility: hidden` keeps the site's height and prints blank pages — and

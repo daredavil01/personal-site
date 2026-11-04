@@ -9,9 +9,11 @@ import { useProjects, useResume, useSports, useTreks } from "../../context/Conte
 import useSiteStats from "../Stats/useSiteStats";
 import {
   groupPositions, professionalMonths, projectEvidence, skillsWithEvidence, groupSkills,
-  stackBeyondSkills, sortCertifications, splitSkillLine, skillsInText, resumeText, onePageResume,
+  stackBeyondSkills, sortCertifications, splitSkillLine, skillsInText, resumeText, onePageResume, leadHighlight,
 } from "../../lib/resumeModel";
-import { buildUpdates, parseUpdates } from "../../lib/aboutModel";
+import {
+  buildUpdates, parseUpdates, parseAbout, hobbiesWithEvidence,
+} from "../../lib/aboutModel";
 import { IDENTITY, LOCATION_LABEL } from "../../data/identity";
 import contact from "../../data/contact";
 import { SITE_URL } from "../../data/pageMeta";
@@ -28,20 +30,15 @@ import "./resume.css";
 // src/lib/resumeModel.js. Edit at /admin/resume or with `npm run resume`.
 
 const NOTES = parseUpdates(aboutMd);
+// Hobbies are words in about.md (`npm run about -- set "Hobbies" …`); their
+// counts are the live stats.
+const { hobbies: HOBBIES, printSkip: PRINT_SKIP } = parseAbout(aboutMd);
 
 const contactOf = (label) => contact.find((c) => c.label === label) || {};
 const fmtDate = (iso) => {
   if (!iso) return null;
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-};
-
-// Some highlights were pasted as one run-on line ("…first The government's…").
-// A long one is cut at its first sentence-like break; a normal one is kept.
-const firstHighlight = (h) => {
-  const text = String(h);
-  if (text.length <= 150) return text;
-  return text.split(/(?<=[a-z)])\s+(?=[A-Z][a-z])/)[0];
 };
 
 const Dots = ({ n }) => (
@@ -158,11 +155,23 @@ const ResumeDocument = () => {
   // Paper gets its own one-page layout (ResumePrint), not this sheet.
   const onePage = onePageResume({
     groups: model.groups,
-    selected: evidence.selected,
+    // Featured projects first, then the rest, so a skipped one has a
+    // replacement.
+    selected: [...evidence.selected, ...evidence.byYear.flatMap((r) => r.items)],
+    skip: PRINT_SKIP,
     skillGroups: model.overview,
     certifications: model.certs,
     degrees: resume?.degrees || [],
+    stack: model.beyond,
   });
+  // Hobbies with their evidence, and beyond work (the outdoors) from the live
+  // stats; books and posts are counted under the hobbies, not twice. A number
+  // with no value is left out.
+  const hobbies = hobbiesWithEvidence(HOBBIES, s);
+  const beyondWork = [
+    s.totalRaces ? `${s.totalRaces} races, 10K to a 50K ultra` : null,
+    s.totalTreks ? `${s.totalTreks} Sahyadri forts` : null,
+  ].filter(Boolean);
 
   if (error) return <div className="rs-root"><ErrorBlock /></div>;
 
@@ -289,7 +298,7 @@ const ResumeDocument = () => {
                         {p.subtitle && <p>{p.subtitle}</p>}
                         <div className="rs-project-hl">
                           {p.org && (<><b>For</b><span>{p.org}</span></>)}
-                          {(p.highlights || [])[0] && (<><b>Did</b><span>{firstHighlight(p.highlights[0])}</span></>)}
+                          {(p.highlights || [])[0] && (<><b>Did</b><span>{leadHighlight(p.highlights[0])}</span></>)}
                         </div>
                         {(p.techStack || []).length > 0 && <span className="rs-project-stack">{p.techStack.slice(0, 5).join(" · ")}</span>}
                       </Link>
@@ -397,13 +406,25 @@ const ResumeDocument = () => {
               )}
 
               <section>
+                {hobbies.length > 0 && (
+                  <>
+                    <SectionHead title="Hobbies" />
+                    <ul className="rs-hobbies">
+                      {hobbies.map((h) => {
+                        const body = (
+                          <>
+                            <span className="rs-hobby-name">{h.name}</span>
+                            {h.count && <span className="rs-hobby-n"><b>{h.count}</b>{` ${h.unit} ${h.detail}`}</span>}
+                          </>
+                        );
+                        return <li key={h.name}>{h.to ? <Link to={h.to}>{body}</Link> : <span>{body}</span>}</li>;
+                      })}
+                    </ul>
+                  </>
+                )}
                 <SectionHead title="Beyond work" />
                 <p className="rs-beyond">
-                  {[
-                    s.totalRaces ? `${s.totalRaces} races from 10K to a 50K ultra` : null,
-                    s.totalTreks ? `${s.totalTreks} Sahyadri forts` : null,
-                    s.booksCount ? `${s.booksCount} books in English and Marathi` : null,
-                  ].filter(Boolean).join(" · ")}
+                  {beyondWork.join(" · ")}
                   {" "}
                   <Link to="/about?read=5m" className="rs-print-hide">
                     More about me
@@ -431,6 +452,8 @@ const ResumeDocument = () => {
           contact={contactText.map((c) => c.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}
           summary={summary}
           page={onePage}
+          beyond={beyondWork}
+          hobbies={hobbies}
           updated={fmtDate(model.updated)}
         />
       )}

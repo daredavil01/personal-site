@@ -58,6 +58,12 @@ If you are interested in things across domains, we will probably get along. Let 
 - Besides code I design (Photoshop, Illustrator) and edit video.
 - From tree plantations in college to Nirman, I try to stay part of social work.
 
+# Hobbies
+
+- Reading
+- Writing
+- Vibe coding
+
 # I like
 
 - Reading
@@ -77,6 +83,10 @@ If you are interested in things across domains, we will probably get along. Let 
 - [Hidden Brain](https://www.npr.org/series/423302056/hidden-brain)
 - [Future Tense](https://open.spotify.com/show/7EJKUeiYSkiSaUoZel9gTC?si=5c97eb76b63a433a)
 - [Urdunama](https://open.spotify.com/show/6zRRY9ssHgiH2Rm0IUrd5x?si=41ebc2024b3d4595)
+
+# Off the printed resume
+
+- Museum of Failures
 
 # Short bio
 

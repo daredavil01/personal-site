@@ -1,7 +1,7 @@
 import {
   parseLooseDate, parseDaterange, monthsBetween, durationLabel, groupPositions,
   professionalMonths, sortCertifications, skillAliases, skillsWithEvidence,
-  stackBeyondSkills, splitSkillLine, skillsInText, projectEvidence, groupSkills, resumeText, onePageResume,
+  stackBeyondSkills, splitSkillLine, skillsInText, projectEvidence, groupSkills, resumeText, onePageResume, leadHighlight,
 } from "./resumeModel";
 
 const NOW = new Date(2026, 10, 4); // 4 Nov 2026
@@ -138,6 +138,12 @@ it("files each skill once in the overview", () => {
   expect(all.flatMap((g) => g.skills.map((s) => s.title))).toEqual(["Python", "Pandas"]);
 });
 
+it("cuts a run-on highlight at its first sentence", () => {
+  const glued = `${"x ".repeat(80)}first The next part`;
+  expect(leadHighlight(glued)).toBe(`${"x ".repeat(80)}first`);
+  expect(leadHighlight("Short and whole. Kept As is")).toBe("Short and whole. Kept As is");
+});
+
 describe("onePageResume", () => {
   const groups = groupPositions(POSITIONS.map((p, i) => ({
     ...p, id: i + 1, points: ["one", "two", "three", "Skills: React · Python"],
@@ -148,20 +154,27 @@ describe("onePageResume", () => {
     certifications: sortCertifications([{ name: "Old", issuedDate: "2019" }, ...Array.from({ length: 7 }, (_, i) => ({ name: `C${i}`, issuedDate: `May 202${i % 6}` }))]),
     degrees: [{ degree: "B", school: "S", year: 2021 }, { degree: "G", school: "T", year: 2024 }],
   });
-  it("keeps two bullets per job, one for research, none for campus", () => {
+  it("keeps three bullets per job, two for research, none for campus", () => {
     expect(page.roles.map((r) => [r.company, r.bullets.length])).toEqual([
-      ["Bridgenext", 2], ["Emtec Inc.", 2], ["Takshashila", 1],
+      ["Bridgenext", 3], ["Emtec Inc.", 3], ["Takshashila", 2],
     ]);
     expect(page.leadership).toEqual([
       { title: "Social Media Manager", org: "VivekVahini", years: "2018–21" },
       { title: "Team Lead", org: "RIT MEDIA CELL", years: "2017–19" },
     ]);
   });
-  it("trims projects, certifications and degrees", () => {
+  it("leaves skipped projects off the page and fills the slot", () => {
+    const sel = [1, 2, 3, 4, 5, 6, 7].map((id) => ({ id, title: `P${id}` }));
+    const out = onePageResume({ selected: sel, skip: [" p2 "] });
+    expect(out.projects.map((p) => p.id)).toEqual([1, 3, 4, 5]);
+  });
+  it("keeps every certification and four projects", () => {
     expect(page.projects.map((p) => p.id)).toEqual([1, 2, 3, 4]);
     expect(page.projects[0].stack).toHaveLength(4);
-    expect(page.certifications).toHaveLength(6);
-    expect(page.moreCertifications).toBe(2);
+    expect(page.certifications).toHaveLength(8);
+    expect(page.moreCertifications).toBe(0);
+    const capped = onePageResume({ certifications: [{ name: "a" }, { name: "b" }] }, { certs: 1 });
+    expect(capped.moreCertifications).toBe(1);
     expect(page.degrees.map((d) => d.degree)).toEqual(["G", "B"]);
   });
 });

@@ -21,7 +21,7 @@ const PAGE_H_PX = ((297 - 20) / 25.4) * 96;
 const MIN_SCALE = 0.72;
 
 const ResumePrint = ({
-  name, headline, location, contact, summary, page, updated,
+  name, headline, location, contact, summary, page, updated, beyond = [], hobbies = [],
 }) => {
   const ref = useRef(null);
   const [host, setHost] = useState(null);
@@ -107,6 +107,7 @@ const ResumePrint = ({
                     <span>{[p.org, p.year].filter(Boolean).join(" · ")}</span>
                   </div>
                   {p.subtitle && <p>{p.subtitle}</p>}
+                  {p.highlight && <p className="rp-did">{p.highlight}</p>}
                   {p.stack.length > 0 && <p className="rp-stack">{p.stack.join(" · ")}</p>}
                 </div>
               ))}
@@ -133,6 +134,12 @@ const ResumePrint = ({
                   {g.names.join(", ")}
                 </p>
               ))}
+              {page.stack.length > 0 && (
+                <p className="rp-skill">
+                  <b>Shipping with lately</b>
+                  {page.stack.join(", ")}
+                </p>
+              )}
             </section>
           )}
 
@@ -143,7 +150,7 @@ const ResumePrint = ({
                 {page.certifications.map((c) => (
                   <li key={c.name}>
                     <b>{c.name}</b>
-                    <span>{[c.source, c.year].filter(Boolean).join(" · ")}</span>
+                    <span>{` ${[c.source, c.year].filter(Boolean).join(" · ")}`}</span>
                   </li>
                 ))}
               </ul>
@@ -154,13 +161,36 @@ const ResumePrint = ({
           {page.degrees.length > 0 && (
             <section>
               <h2>Education</h2>
-              <ul className="rp-list">
+              <ul className="rp-list rp-edu">
                 {page.degrees.map((d) => (
                   <li key={d.degree}>
                     <b>{d.degree}</b>
                     <span>{`${d.school} · ${d.year}`}</span>
                   </li>
                 ))}
+              </ul>
+            </section>
+          )}
+
+          {hobbies.length > 0 && (
+            <section>
+              <h2>Hobbies</h2>
+              <ul className="rp-list rp-hobbies">
+                {hobbies.map((h) => (
+                  <li key={h.name}>
+                    <b>{h.name}</b>
+                    {h.count ? ` — ${h.count} ${h.unit} ${h.detail}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {beyond.length > 0 && (
+            <section>
+              <h2>Beyond work</h2>
+              <ul className="rp-list rp-beyond">
+                {beyond.map((b) => <li key={b}>{b}</li>)}
               </ul>
             </section>
           )}

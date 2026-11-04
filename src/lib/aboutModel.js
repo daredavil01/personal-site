@@ -90,9 +90,11 @@ export const ABOUT_SECTIONS = [
   { key: "5-minutes", kind: "chapters", note: "`## Chapter` blocks, one paragraph each." },
   { key: "10-minutes", kind: "paragraphs", note: "The long story, in paragraphs." },
   { key: "how-i-work", kind: "principles", note: "`- **Title.** Body [evidence: regex]`" },
+  { key: "hobbies", kind: "list", note: "One per line; /resume adds each one's live count when it knows the word." },
   { key: "facts", kind: "list" },
   { key: "i-like", kind: "list" },
   { key: "podcasts", kind: "links" },
+  { key: "off-the-printed-resume", kind: "list", note: "Project titles left off the one-page PDF; the website still shows them." },
   { key: "short-bio", kind: "text", note: "40–60 words, third person." },
   { key: "ask-me", kind: "list", note: "Questions the archive answers well." },
 ];
@@ -106,6 +108,8 @@ export function parseAbout(md) {
     long: paragraphs(sections["10-minutes"]),
     principles: listItems(sections["how-i-work"]).map(parsePrinciple),
     facts: listItems(sections.facts),
+    hobbies: listItems(sections.hobbies),
+    printSkip: listItems(sections["off-the-printed-resume"]),
     likes: listItems(sections["i-like"]),
     podcasts: listItems(sections.podcasts).map(parseLink),
     shortBio: paragraphs(sections["short-bio"]).join(" "),
@@ -355,4 +359,35 @@ export function removeUpdate(md, needle) {
   const n = String(needle || "").toLowerCase();
   const kept = current.split(/\r?\n/).filter((l) => l.trim() && !l.toLowerCase().includes(n));
   return { md: setSection(md, "Updates", kept.join("\n")), removed: current.split(/\r?\n/).filter((l) => l.trim()).length - kept.length };
+}
+
+// --- Hobbies -------------------------------------------------------------------
+
+/**
+ * Each hobby with the site's evidence for it, when the word is one the site
+ * keeps a record of: reading → books, writing → posts, coding → projects.
+ * A hobby with no matching record, or a count with no value, is kept as a
+ * plain name — never given a 0. `stats` is the /api/stats `stats` object.
+ */
+export function hobbiesWithEvidence(hobbies = [], stats = {}) {
+  const has = (n) => n != null && n > 0;
+  return hobbies.map((name) => {
+    const n = String(name).toLowerCase();
+    if (/read/.test(n) && has(stats.booksCount)) {
+      return {
+        name, count: stats.booksCount, unit: "books", detail: "in English and Marathi", to: "/books",
+      };
+    }
+    if (/writ|blog/.test(n) && has(stats.offloadCount)) {
+      return {
+        name, count: stats.offloadCount, unit: "posts", detail: "for 100 Days to Offload", to: "/writing-ledger",
+      };
+    }
+    if (/cod|build|program/.test(n) && has(stats.projectCount)) {
+      return {
+        name, count: stats.projectCount, unit: "projects", detail: "shipped", to: "/projects",
+      };
+    }
+    return { name };
+  });
 }

@@ -350,17 +350,29 @@ const yearsOf = (p) => {
   return `${s}–${String(e).slice(-2)}`;
 };
 
+// Some project highlights were pasted as one run-on line ("…first The
+// government's…"). A long one is cut at its first sentence-like break; a
+// normal one is kept whole.
+export function leadHighlight(h) {
+  const text = String(h || "");
+  if (text.length <= 150) return text;
+  return text.split(/(?<=[a-z)])\s+(?=[A-Z][a-z])/)[0];
+}
+
 /**
- * What fits on one A4 page, picked from the full model: every professional
- * role with its two strongest bullets, research with one, campus leadership
- * folded into a single line, four selected projects, the skills overview
- * (six per group), the six newest certifications and the degrees. The print
- * layout then scales itself to the page, so this only has to be close.
+ * What goes on the one A4 page, picked from the site's own data: every
+ * professional role with up to three bullets, research with two, campus
+ * leadership folded into one line, four selected projects, each with a brief
+ * (what it is, and what it did),
+ * the skills overview (eight per group) plus the stack the projects ship
+ * with, every certification and the degrees. The print layout scales itself
+ * to the page, so this only has to be close — and fills the sheet rather
+ * than leaving a fifth of it blank.
  */
 export function onePageResume({
-  groups = [], selected = [], skillGroups = [], certifications = [], degrees = [],
+  groups = [], selected = [], skillGroups = [], certifications = [], degrees = [], stack = [], skip = [],
 } = {}, {
-  bullets = 2, researchBullets = 1, projects = 4, skillsPerGroup = 6, skillGroupsMax = 5, certs = 6,
+  bullets = 3, researchBullets = 2, projects = 4, skillsPerGroup = 8, skillGroupsMax = 6, certs = Infinity, stackMax = 8,
 } = {}) {
   const roles = [];
   let leadership = [];
@@ -386,14 +398,20 @@ export function onePageResume({
   return {
     roles,
     leadership,
-    projects: selected.slice(0, projects).map((p) => ({
-      id: p.id,
-      title: p.title,
-      subtitle: p.subtitle || "",
-      year: p.date ? String(p.date).slice(0, 4) : "",
-      org: p.org || "",
-      stack: (p.techStack || []).slice(0, 4),
-    })),
+    // `skip` titles (about.md's "Off the printed resume") stay on the web
+    // page; the next selected project takes the slot on paper.
+    projects: selected
+      .filter((p) => !skip.some((t) => String(t).trim().toLowerCase() === String(p.title || "").trim().toLowerCase()))
+      .slice(0, projects).map((p) => ({
+        id: p.id,
+        title: p.title,
+        subtitle: p.subtitle || "",
+        year: p.date ? String(p.date).slice(0, 4) : "",
+        org: p.org || "",
+        highlight: leadHighlight((p.highlights || [])[0]),
+        stack: (p.techStack || []).slice(0, 4),
+      })),
+    stack: stack.slice(0, stackMax).map((x) => (typeof x === "string" ? x : x.name)),
     skills: skillGroups.slice(0, skillGroupsMax).map((g) => ({
       category: g.category,
       names: g.skills.slice(0, skillsPerGroup).map((s) => s.title),

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import aboutMd from "../../data/aboutContent";
 import {
-  parseAbout, principlesWithEvidence, buildTimeline, timelineByYear, buildUpdates, wordCount, readingSeconds,
+  parseAbout, principlesWithEvidence, buildTimeline, timelineByYear, buildUpdates, wordCount, readingSeconds, hobbiesWithEvidence,
 } from "../../lib/aboutModel";
 import { professionalMonths, projectEvidence, parseDaterange } from "../../lib/resumeModel";
 import {
@@ -484,6 +484,16 @@ const AboutPage = () => {
               </div>
             )}
             <div className="ab-panel">
+              {ABOUT.hobbies.length > 0 && (
+                <>
+                  <h3>Hobbies</h3>
+                  <div className="ab-chips" style={{ marginBottom: "1.1rem" }}>
+                    {hobbiesWithEvidence(ABOUT.hobbies, s).map((h) => (h.to ? (
+                      <Link key={h.name} to={h.to}>{h.count ? `${h.name} · ${h.count} ${h.unit}` : h.name}</Link>
+                    ) : <span key={h.name}>{h.name}</span>))}
+                  </div>
+                </>
+              )}
               <h3>What I like</h3>
               <div className="ab-chips">{ABOUT.likes.map((l) => <span key={l}>{l}</span>)}</div>
               {ABOUT.podcasts.length > 0 && (

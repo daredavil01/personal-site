@@ -4,6 +4,7 @@ import {
   parseAbout, splitSections, parsePrinciple, principlesWithEvidence, buildTimeline,
   timelineByYear, tierReport, wordCount, ABOUT_SECTIONS,
   parseUpdateLine, parseUpdates, addUpdate, removeUpdate, setSection, getSection, buildUpdates,
+  hobbiesWithEvidence,
 } from "./aboutModel";
 
 const MD = fs.readFileSync(path.join(__dirname, "..", "data", "about.md"), "utf8");
@@ -108,4 +109,20 @@ it("caps a kind in the log", () => {
   const projects = [1, 2, 3].map((i) => ({ id: i, title: `P${i}`, date: `2026-10-0${i}` }));
   const out = buildUpdates({ projects, certifications: [{ name: "C", issuedDate: "Sep 2026" }] }, { perKind: { build: 1 } });
   expect(out.map((u) => u.text)).toEqual(["Shipped P3", "Certified: C"]);
+});
+
+it("gives each hobby the site's evidence for it, and never a zero", () => {
+  expect(hobbiesWithEvidence(["Reading", "Writing", "Vibe coding", "Chess"], {
+    booksCount: 52, offloadCount: 0, projectCount: 25,
+  })).toEqual([
+    {
+      name: "Reading", count: 52, unit: "books", detail: "in English and Marathi", to: "/books",
+    },
+    { name: "Writing" },
+    {
+      name: "Vibe coding", count: 25, unit: "projects", detail: "shipped", to: "/projects",
+    },
+    { name: "Chess" },
+  ]);
+  expect(parseAbout(MD).hobbies).toEqual(["Reading", "Writing", "Vibe coding"]);
 });
