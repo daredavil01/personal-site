@@ -340,3 +340,68 @@ export function resumeText({
   }
   return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
+
+const yearsOf = (p) => {
+  const s = p.start ? p.start.y : null;
+  if (!s) return p.daterange || "";
+  if (p.current) return `${s}–now`;
+  const e = p.end ? p.end.y : null;
+  if (!e || e === s) return String(s);
+  return `${s}–${String(e).slice(-2)}`;
+};
+
+/**
+ * What fits on one A4 page, picked from the full model: every professional
+ * role with its two strongest bullets, research with one, campus leadership
+ * folded into a single line, four selected projects, the skills overview
+ * (six per group), the six newest certifications and the degrees. The print
+ * layout then scales itself to the page, so this only has to be close.
+ */
+export function onePageResume({
+  groups = [], selected = [], skillGroups = [], certifications = [], degrees = [],
+} = {}, {
+  bullets = 2, researchBullets = 1, projects = 4, skillsPerGroup = 6, skillGroupsMax = 5, certs = 6,
+} = {}) {
+  const roles = [];
+  let leadership = [];
+  groups.forEach((g) => {
+    if (g.key === "campus") {
+      leadership = g.items.map((p) => ({ title: p.position, org: p.company, years: yearsOf(p) }));
+      return;
+    }
+    g.items.forEach((p) => {
+      const { bullets: all } = splitSkillLine(p.points || []);
+      roles.push({
+        id: p.id,
+        group: g.key,
+        position: p.position,
+        company: p.company,
+        daterange: p.daterange,
+        duration: p.duration,
+        current: !!p.current,
+        bullets: all.slice(0, g.key === "research" ? researchBullets : bullets),
+      });
+    });
+  });
+  return {
+    roles,
+    leadership,
+    projects: selected.slice(0, projects).map((p) => ({
+      id: p.id,
+      title: p.title,
+      subtitle: p.subtitle || "",
+      year: p.date ? String(p.date).slice(0, 4) : "",
+      org: p.org || "",
+      stack: (p.techStack || []).slice(0, 4),
+    })),
+    skills: skillGroups.slice(0, skillGroupsMax).map((g) => ({
+      category: g.category,
+      names: g.skills.slice(0, skillsPerGroup).map((s) => s.title),
+    })),
+    certifications: certifications.slice(0, certs).map((c) => ({
+      name: c.name, source: c.source, year: c.year || (c.issuedDate || ""),
+    })),
+    moreCertifications: Math.max(0, certifications.length - certs),
+    degrees: [...degrees].sort((a, b) => b.year - a.year).map((d) => ({ degree: d.degree, school: d.school, year: d.year })),
+  };
+}

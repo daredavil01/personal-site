@@ -220,28 +220,63 @@
 .rs-owner { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
 .rs-loading { padding: 3rem 1rem; text-align: center; font: 500 0.9rem/1.5 var(--rs-sans); color: var(--rs-muted); }
 
-/* ---------- print: the sheet alone, on A4 ---------- */
+/* ---------- the one-page print layout (ResumePrint.js) ----------
+ * Off-screen on screen (measured, never seen), the only thing on paper.
+ * Sized in px at the A4 content width so the measurement matches print;
+ * --rp-scale is set by the component so the whole page fits one sheet. */
+
+.rp {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: var(--rp-width, 718px);
+  visibility: hidden;
+  pointer-events: none;
+  color: #111;
+  background: #fff;
+  font: 400 12px/1.42 "Inter", system-ui, sans-serif;
+  font-size: calc(12px * var(--rp-scale, 1));
+}
+.rp * { box-sizing: border-box; }
+.rp p, .rp h1, .rp h2, .rp ul { margin: 0; padding: 0; }
+.rp-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5em; padding-bottom: 0.7em; border-bottom: 2px solid #111; }
+.rp-head h1 { font: 900 2.6em/1 "Noto Serif", Georgia, serif; letter-spacing: -0.02em; }
+.rp-title { margin-top: 0.35em !important; font-weight: 600; color: #9c1d00; }
+.rp-contact { display: flex; flex-direction: column; align-items: flex-end; gap: 0.1em; font: 500 0.92em/1.35 ui-monospace, Menlo, monospace; color: #333; text-align: right; }
+.rp-summary { margin: 0.75em 0 0.9em !important; font: 400 1.06em/1.5 "Noto Serif", Georgia, serif; color: #222; }
+.rp-cols { display: grid; grid-template-columns: 1.65fr 1fr; gap: 1.6em; }
+.rp section + section { margin-top: 0.85em; }
+.rp h2 { font: 800 0.8em/1 "Plus Jakarta Sans", sans-serif; letter-spacing: 0.2em; text-transform: uppercase; color: #9c1d00; padding-bottom: 0.35em; margin-bottom: 0.5em !important; border-bottom: 1px solid #ccc; }
+.rp-role + .rp-role, .rp-project + .rp-project { margin-top: 0.55em; }
+.rp-role-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.8em; }
+.rp-role-top b { font-weight: 700; color: #111; }
+.rp-role-top span { flex: none; font: 500 0.88em/1.3 ui-monospace, Menlo, monospace; color: #555; }
+.rp ul:not(.rp-list) { margin-top: 0.2em; padding-left: 1.1em; list-style: disc; }
+.rp ul:not(.rp-list) li { margin-top: 0.1em; color: #222; }
+.rp-project p { color: #333; }
+.rp-stack { font: 500 0.86em/1.35 ui-monospace, Menlo, monospace; color: #666 !important; }
+.rp-line { color: #222; }
+.rp-skill + .rp-skill { margin-top: 0.35em; }
+.rp-skill b { display: block; font: 700 0.78em/1.3 "Plus Jakarta Sans", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
+.rp-list { list-style: none; display: flex; flex-direction: column; gap: 0.35em; }
+.rp-list b { display: block; font-weight: 600; color: #111; }
+.rp-list span { color: #555; font-size: 0.92em; }
+.rp-more { margin-top: 0.35em !important; color: #666; font-style: italic; }
+.rp-foot { margin-top: 0.9em !important; padding-top: 0.45em; border-top: 1px solid #ccc; font: 500 0.85em/1.3 ui-monospace, Menlo, monospace; color: #666; }
+
 @media print {
-  @page { size: A4; margin: 12mm; }
-  body * { visibility: hidden !important; }
-  .rs-sheet, .rs-sheet * { visibility: visible !important; }
-  .rs-sheet { position: absolute; left: 0; top: 0; width: 100%; border: 0; box-shadow: none; border-radius: 0; }
-  .rs-sheet::before { display: none; }
-  .rs-root { --rs-card: #fff; --rs-ink: #000; --rs-ink-2: #222; --rs-muted: #555; --rs-hi: #9c1d00; --rs-rule: #ccc; --rs-hair: #eee; color: #000; }
-  .rs-aside { background: #fff !important; }
-  .rs-body { grid-template-columns: 1.7fr 1fr !important; }
-  .rs-head { grid-template-columns: 1fr auto !important; padding: 0 0 0.6rem !important; }
-  .rs-summary, .rs-main, .rs-aside { padding: 0.7rem 0.4rem !important; }
-  .rs-project { break-inside: avoid; transform: none !important; }
-  .rs-role { break-inside: avoid; }
-  .rs-filter, .rs-more, [data-owner-only], .latest-more { display: none !important; }
-  .rs-print-hide { display: none !important; }
-  /* Paper is for the essentials: the live log and the long project list stay on screen. */
-  .rs-root .latest, .rs-also { display: none !important; }
-  .rs-root { font-size: 90%; }
-  .rs-summary > p { font-size: 0.92rem; line-height: 1.5; }
-  .rs-points li { font-size: 0.8rem; line-height: 1.45; }
-  .rs-project p, .rs-project-hl { font-size: 0.74rem; }
-  .rs-main { gap: 1.2rem !important; }
-  a { text-decoration: none !important; }
+  @page { size: A4; margin: 10mm; }
+  /* Only the portal prints: every other child of <body> leaves the flow.
+     Scoped with :has() because Vite keeps this stylesheet after navigating
+     away, and other pages must still print themselves. */
+  body:has(> .rp-portal) { background: #fff !important; height: auto !important; min-height: 0 !important; }
+  body:has(> .rp-portal) > *:not(.rp-portal) { display: none !important; }
+  .rp {
+    position: static;
+    visibility: visible;
+    width: 100%;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .rp-portal { break-inside: avoid; }
 }

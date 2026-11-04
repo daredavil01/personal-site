@@ -629,8 +629,18 @@ moves. Pure models: `src/lib/aboutModel.js` and `src/lib/resumeModel.js`
   durations, selected projects (featured) as case-study cards, skills with
   dots and "×N projects" evidence from `tech_stack`, "Shipping with lately"
   (stack the projects use that the skills list does not name), certifications
-  newest first whatever their date format, education, a print stylesheet (A4,
-  shell hidden) and **Copy as plain text** for ATS forms (`resumeText`).
+  newest first whatever their date format, education, and **Copy as plain
+  text** for ATS forms (`resumeText`).
+- **Print / save PDF is always one A4 page.** Paper gets its own layout,
+  `src/components/Resume/ResumePrint.js`, not the screen sheet (which runs to
+  three pages): `onePageResume()` picks what fits (two bullets per job, one for
+  research, campus roles folded into a line, four projects, six skills a group,
+  six newest certifications), and the component scales itself down (never up,
+  floor 0.72) on `beforeprint` until it measures under the page. It is
+  portalled under `<body>` so print CSS can `display: none` everything else —
+  `visibility: hidden` keeps the site's height and prints blank pages — and
+  that rule is scoped with `body:has(> .rp-portal)` because Vite keeps the
+  stylesheet loaded after you leave /resume.
 - **Edit the resume** at `/admin/resume` or with **`npm run resume`**
   (`scripts/resume.mjs`): `list`, `add <section> --field=…`, `edit <section>
   <id> --field=…`, `bullet <id> "…"`, `remove <section> <id> --yes`, `export`

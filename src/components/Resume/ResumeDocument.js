@@ -9,7 +9,7 @@ import { useProjects, useResume, useSports, useTreks } from "../../context/Conte
 import useSiteStats from "../Stats/useSiteStats";
 import {
   groupPositions, professionalMonths, projectEvidence, skillsWithEvidence, groupSkills,
-  stackBeyondSkills, sortCertifications, splitSkillLine, skillsInText, resumeText,
+  stackBeyondSkills, sortCertifications, splitSkillLine, skillsInText, resumeText, onePageResume,
 } from "../../lib/resumeModel";
 import { buildUpdates, parseUpdates } from "../../lib/aboutModel";
 import { IDENTITY, LOCATION_LABEL } from "../../data/identity";
@@ -20,6 +20,7 @@ import {
   CopyButton, OwnerLink, CommandHint, useIsOwner,
 } from "../common/OwnerTools";
 import { ErrorBlock } from "../common/AsyncStates";
+import ResumePrint from "./ResumePrint";
 import "./resume.css";
 
 // /resume — every row is from the four resume tables plus the projects table;
@@ -154,6 +155,15 @@ const ResumeDocument = () => {
     degrees: resume?.degrees || [],
   });
 
+  // Paper gets its own one-page layout (ResumePrint), not this sheet.
+  const onePage = onePageResume({
+    groups: model.groups,
+    selected: evidence.selected,
+    skillGroups: model.overview,
+    certifications: model.certs,
+    degrees: resume?.degrees || [],
+  });
+
   if (error) return <div className="rs-root"><ErrorBlock /></div>;
 
   return (
@@ -163,7 +173,7 @@ const ResumeDocument = () => {
         <div className="rs-toolbar-r">
           <button type="button" className="rs-tool rs-tool--primary" onClick={() => window.print()}>
             <Printer size={14} aria-hidden="true" />
-            Print / save PDF
+            Print / save PDF (1 page)
           </button>
           <CopyButton text={plain} label="Copy as plain text" done="Copied — paste into any form" className="rs-tool" />
           <Link to="/about" className="rs-tool">
@@ -412,6 +422,18 @@ const ResumeDocument = () => {
           </div>
         )}
       </article>
+
+      {!loading && (
+        <ResumePrint
+          name={IDENTITY.name}
+          headline={headline}
+          location={LOCATION_LABEL}
+          contact={contactText.map((c) => c.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}
+          summary={summary}
+          page={onePage}
+          updated={fmtDate(model.updated)}
+        />
+      )}
     </div>
   );
 };

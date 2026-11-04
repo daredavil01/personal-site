@@ -1,7 +1,7 @@
 import {
   parseLooseDate, parseDaterange, monthsBetween, durationLabel, groupPositions,
   professionalMonths, sortCertifications, skillAliases, skillsWithEvidence,
-  stackBeyondSkills, splitSkillLine, skillsInText, projectEvidence, groupSkills, resumeText,
+  stackBeyondSkills, splitSkillLine, skillsInText, projectEvidence, groupSkills, resumeText, onePageResume,
 } from "./resumeModel";
 
 const NOW = new Date(2026, 10, 4); // 4 Nov 2026
@@ -136,4 +136,32 @@ it("files each skill once in the overview", () => {
   ], []);
   const all = groupSkills(ev, { primaryOnly: true });
   expect(all.flatMap((g) => g.skills.map((s) => s.title))).toEqual(["Python", "Pandas"]);
+});
+
+describe("onePageResume", () => {
+  const groups = groupPositions(POSITIONS.map((p, i) => ({
+    ...p, id: i + 1, points: ["one", "two", "three", "Skills: React · Python"],
+  })), NOW);
+  const page = onePageResume({
+    groups,
+    selected: [1, 2, 3, 4, 5].map((id) => ({ id, title: `P${id}`, date: "2026-01-01", techStack: ["a", "b", "c", "d", "e"] })),
+    certifications: sortCertifications([{ name: "Old", issuedDate: "2019" }, ...Array.from({ length: 7 }, (_, i) => ({ name: `C${i}`, issuedDate: `May 202${i % 6}` }))]),
+    degrees: [{ degree: "B", school: "S", year: 2021 }, { degree: "G", school: "T", year: 2024 }],
+  });
+  it("keeps two bullets per job, one for research, none for campus", () => {
+    expect(page.roles.map((r) => [r.company, r.bullets.length])).toEqual([
+      ["Bridgenext", 2], ["Emtec Inc.", 2], ["Takshashila", 1],
+    ]);
+    expect(page.leadership).toEqual([
+      { title: "Social Media Manager", org: "VivekVahini", years: "2018–21" },
+      { title: "Team Lead", org: "RIT MEDIA CELL", years: "2017–19" },
+    ]);
+  });
+  it("trims projects, certifications and degrees", () => {
+    expect(page.projects.map((p) => p.id)).toEqual([1, 2, 3, 4]);
+    expect(page.projects[0].stack).toHaveLength(4);
+    expect(page.certifications).toHaveLength(6);
+    expect(page.moreCertifications).toBe(2);
+    expect(page.degrees.map((d) => d.degree)).toEqual(["G", "B"]);
+  });
 });

@@ -13,6 +13,13 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v27.0.1] — 2026-11-04
+
+### Fixed
+- **Resume prints on one page** (`src/components/Resume/ResumePrint.js`, `src/lib/resumeModel.js`, `resume.css`): "Print / save PDF" printed the screen sheet across three A4 pages. Paper now gets a dedicated one-page layout — header with contact details, summary, experience (two bullets per job, one for the fellowship, campus roles in one line), four selected projects, skills by group, the six newest certifications and education — chosen by `onePageResume()` (tested) and scaled down on `beforeprint` until it fits. It is portalled under `<body>` so printing hides the rest of the site without leaving blank pages, and the rule is scoped so other pages still print normally after a visit to /resume. The button now says "(1 page)", and Ctrl+P gives the same page.
+
+---
+
 ## [v27.0.0] — 2026-11-04
 
 ### Changed
