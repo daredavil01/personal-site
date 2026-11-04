@@ -30,13 +30,15 @@ export function deckFacets(decks) {
 }
 
 export function filterDecks(decks, {
-  q = "", year = "", tags = [], sort = "date", dir = "desc",
+  q = "", year = "", tags = [], length = "", sort = "date", dir = "desc",
 } = {}) {
   const needle = q.trim().toLowerCase();
   const picked = tags.map(lower);
 
   const result = decks.filter((d) => {
     if (year && (projectYear(d.date) ?? UNDATED) !== year) return false;
+    // `length` is set by deckStats.enrichDecks (short / medium / long).
+    if (length && d.length !== length) return false;
     const owned = (d.tags ?? []).map(lower);
     if (picked.length && !picked.some((t) => owned.includes(t))) return false;
     if (needle && ![d.title, d.description, ...owned].join(" ").toLowerCase().includes(needle)) return false;
@@ -47,6 +49,13 @@ export function filterDecks(decks, {
   const byTitle = (a, b) => String(a.title ?? "").localeCompare(String(b.title ?? ""));
   return result.sort((a, b) => {
     if (sort === "title") return sign * byTitle(a, b);
+    if (sort === "slides") {
+      // Decks with no stated count sink in both directions.
+      if (a.slides == null && b.slides == null) return byTitle(a, b);
+      if (a.slides == null) return 1;
+      if (b.slides == null) return -1;
+      return sign * (a.slides - b.slides) || byTitle(a, b);
+    }
     // Undated sinks in both directions — missing, not oldest.
     const at = projectTime(a.date);
     const bt = projectTime(b.date);

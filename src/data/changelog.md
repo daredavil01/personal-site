@@ -13,6 +13,21 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v29.0.0] — 2026-11-04
+
+### Changed
+- **/sports redesigned as a race log** (`src/pages/Sports.js`, `src/components/Sports/`): three tabs (Overview, Races, Records) over one year/distance filter. Overview draws the personal-best progression per distance (every finish, faster at the top, with the best-so-far staircase), a race calendar (every race as a dot in its month), "same race, different year" for events run more than once, and derived facts: days since the last race, fastest pace, PBs broken, typical and longest gap, racing season, longest race, busiest year, home course. Races is cards or a sortable table with pace and the gap to the PB on every row; Records has one card per distance with its PB ladder, how long it has stood and how far it came, plus what the half PB predicts elsewhere by Riegel's formula, labelled as an estimate.
+- **/treks redesigned as a summit register** (`src/pages/Treks.js`, `src/components/Treks/`): Overview and Log tabs over year, season (Sahyadri monsoon / winter / summer) and difficulty filters. Every trek is a peak on a ridgeline (height is hours on the trail, colour is difficulty, a flag marks a place reached for the first time); then the trekking year with the monsoon shaded, difficulty by year, return visits ("Katraj To Sinhgad" and "Sinhagad" are one place), and derived facts. Log is photo cards or a sortable table.
+- **/presentations redesigned as a deck shelf** (`src/pages/Presentations.js`): the newest deck up front, a gallery with live previews or a light list with no iframes, length filter, a sort by slide count, collapsible topic chips, "Surprise me", and a Stats tab with cadence per month, length mix, top topics and derived facts. Slide counts are read from each description ("A 12-slide deck", "Thirty-nine illustrated slides"); decks that state none are left out of totals and the page says how many were counted.
+- **Tabs no longer use `?view=`** on /sports and /treks, which belongs to `useViewMode`; they use `?tab=`, every filter is URL state merged into the query string, and the old `?view=statistics|interactive|default` links still land on a tab.
+
+### Added
+- **Derived-stat modules** (`src/lib/raceLog.js`, `src/lib/trekLog.js`, `src/lib/deckStats.js`, tested): every number the three pages show, computed once; a value with no data is null and omitted, never 0. `filterDecks` (`src/lib/deckFilters.js`) gains `length` and a `slides` sort.
+- **LogKit** (`src/components/common/LogKit.js`): shared URL state, keyboard-navigable tabs, filter chips with counts, a search box focused with "/", glanceable KPI tiles, insight cards, a 12-month strip, ranked bars, "Share view" (copies the link with filters) and an empty state with a "Clear filters" way out. The filter bar sticks under the site header on desktop.
+
+### Removed
+- The old Sports and Treks tab components (`SportsDefault`, `SportsInteractive`, `SportsStatistics`, `TopSummaryCards`, `Sports/utils.js`, `TreksDefault`, `TreksStatistics`, `TreksTimeline`).
+
 ## [v28.1.0] — 2026-11-04
 
 ### Added
