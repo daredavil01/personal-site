@@ -20,7 +20,7 @@ answering rules live with the prompt, and are not repeated here.
 - **Instagram sets** (11) — /instagram (no detail page).
 - **Now** — /now. Current entry: October 2026.
 - **Résumé** — /resume. Positions, degrees, certifications and skills.
-- **Stats** — /stats and /writing-ledger.html. Every figure on those pages.
+- **Stats** — /stats and /writing-ledger. Every figure on those pages.
 - **Tags, site pages, contact** — what each tag and page is, and how to reach him.
 
 ## Headline stats (the numbers on /stats, refreshed hourly)
@@ -31,7 +31,7 @@ answering rules live with the prompt, and are not repeated here.
 - 100 Days To Offload: 79 of 100 posts.
 - Micro posts: 1677; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 6 organisations, 25 projects, 13 certifications (latest: AWS Fundamentals Specialization).
+- Work: 7 organisations, 25 projects, 13 certifications (latest: AWS Fundamentals Specialization).
 - Based in Pune, MH.
 
 ## Tags
