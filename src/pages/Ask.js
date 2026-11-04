@@ -1,33 +1,24 @@
 import React from "react";
 import PageShell from "../atlas/PageShell";
-import AskChat from "../components/Ask/AskChat";
+import AskStudio from "../components/Ask/studio/AskStudio";
 import { PAGE_META } from "../data/pageMeta";
 import PageFilm from "../components/common/PageFilm";
 
 const meta = PAGE_META["/ask"] || {};
 
-// The full-page surface. AskLauncher renders the same AskChat in a corner
-// panel, so this file is only the frame around it.
+// The full-page surface. AskStudio draws the conversation as a search page and
+// then a reading layout; AskLauncher draws the same conversation in a corner
+// panel, through AskChat. Both run on useAskConversation.
 const Ask = () => (
   <PageShell region="person" title={meta.title} description={meta.description} image={meta.image}>
-    <article className="flex flex-col gap-6 max-w-3xl">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl md:text-3xl font-semibold">Ask the archive</h1>
-        <p className="text-[15px] text-stone-600 dark:text-stone-300 mb-0">
-          A second brain over everything on this site — books, races, treks,
-          projects, the 100 Days ledger and years of short posts. It searches the
-          same database the pages render from, so every answer comes with the
-          pages it came from.
-        </p>
-      </header>
-
-      <div className="min-h-[55vh] flex">
-        <AskChat />
+    <article className="flex flex-col gap-10">
+      <div className="ask-frame">
+        <AskStudio />
       </div>
 
       <PageFilm film="ask" />
 
-      <footer className="text-[12px] text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-800 pt-4">
+      <footer className="max-w-3xl text-[12px] text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-800 pt-4">
         Runs on free tiers with a hard daily cap, so it can run out of answers
         before the day does. Short posts are old, unedited and sometimes
         reblogged — treat them as passing thoughts, not positions.

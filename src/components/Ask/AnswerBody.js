@@ -33,15 +33,56 @@ function linkCitations(text, sources) {
 
 const chip = "inline-flex items-baseline gap-1 rounded-md px-1.5 py-px font-medium no-underline transition-colors";
 
-const makeLink = (sources) => {
+// The card a citation marker opens on hover or focus, so a reader can see
+// what [2] is without leaving the sentence. Spans only: it sits inside a <p>.
+const CitePreview = ({ source }) => (
+  <span role="tooltip" className="ask-cite-card">
+    {source.image && (
+      <img src={source.image} alt="" loading="lazy" decoding="async" className="ask-cite-card__img" />
+    )}
+    <span className="ask-cite-card__title">{source.title || "Untitled"}</span>
+    <span className="ask-cite-card__meta">
+      {entityLabel(source.entity_type)}
+      {source.date ? ` · ${source.date}` : ""}
+      {source.domain ? ` · ${source.domain} ↗` : ""}
+    </span>
+  </span>
+);
+
+CitePreview.propTypes = {
+  source: PropTypes.shape({
+    image: PropTypes.string,
+    title: PropTypes.string,
+    entity_type: PropTypes.string,
+    date: PropTypes.string,
+    domain: PropTypes.string,
+  }).isRequired,
+};
+
+// `previews` turns the markers into hover cards. Only the /ask page asks for
+// it: the launcher is a 420px scrolling panel, and a card near its edge would
+// widen it into a sideways scroll.
+const makeLink = (sources, previews) => {
   const AnswerLink = ({ href, children }) => {
     const url = normaliseUrl(href);
     const isCitation = /^\d{1,2}$/.test(String(children));
     if (isCitation) {
       const cls = "mx-0.5 rounded bg-stone-200 dark:bg-stone-800 px-1 text-[11px] no-underline";
+      const source = previews ? sources[Number(children) - 1] : null;
+      const inner = (
+        <>
+          {children}
+          {source && <CitePreview source={source} />}
+        </>
+      );
+      const props = {
+        className: `${cls}${source ? " ask-cite" : ""}`,
+        // Read by the /ask page to light up the matching source card.
+        "data-cite": String(children),
+      };
       return isExternal(url)
-        ? <a href={url} target="_blank" rel="noreferrer" className={cls}>{children}</a>
-        : <Link to={url} className={cls}>{children}</Link>;
+        ? <a href={url} target="_blank" rel="noreferrer" {...props}>{inner}</a>
+        : <Link to={url} {...props}>{inner}</Link>;
     }
 
     if (isExternal(url)) {
@@ -154,7 +195,9 @@ MarkdownImage.defaultProps = { src: "", alt: "", sources: [] };
 // worker already sanitised against them; this pass repeats the check in the
 // browser, so without the same list a roster link would survive the worker and
 // then be stripped here.
-const AnswerBody = ({ text, sources, linkable }) => {
+const AnswerBody = ({
+  text, sources, linkable, previews,
+}) => {
   const options = useMemo(() => ({
     forceBlock: true,
     // Raw HTML renders as text. A shared conversation is stored from what the
@@ -166,12 +209,12 @@ const AnswerBody = ({ text, sources, linkable }) => {
       h2: { component: "strong" },
       h3: { component: "strong" },
       img: { component: MarkdownImage, props: { sources } },
-      a: { component: makeLink(sources) },
+      a: { component: makeLink(sources, previews) },
       ul: { props: { className: "list-disc pl-5 my-1" } },
       ol: { props: { className: "list-decimal pl-5 my-1" } },
       p: { props: { className: "mb-2 last:mb-0 leading-relaxed" } },
     },
-  }), [sources]);
+  }), [sources, previews]);
 
   if (!text) return null;
   return (
@@ -185,8 +228,11 @@ AnswerBody.propTypes = {
   text: PropTypes.string,
   sources: PropTypes.arrayOf(PropTypes.shape({ url: PropTypes.string, image: PropTypes.string })),
   linkable: PropTypes.arrayOf(PropTypes.string),
+  previews: PropTypes.bool,
 };
 
-AnswerBody.defaultProps = { text: "", sources: [], linkable: [] };
+AnswerBody.defaultProps = {
+  text: "", sources: [], linkable: [], previews: false,
+};
 
 export default AnswerBody;

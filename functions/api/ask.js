@@ -908,6 +908,22 @@ function rosterQuestions(facts) {
   return out;
 }
 
+const SHELF_NEWEST = 4;
+
+function shelvesOf(facts) {
+  const index = facts?.index_by_type;
+  if (!index || typeof index !== "object") return null;
+  const newest = {};
+  Object.entries(facts.roster || {}).forEach(([type, rows]) => {
+    const picked = (Array.isArray(rows) ? rows : [])
+      .filter((r) => r?.t)
+      .slice(0, SHELF_NEWEST)
+      .map((r) => ({ t: r.t, u: r.u || null }));
+    if (picked.length) newest[type] = picked;
+  });
+  return { index, newest };
+}
+
 // A GET is handy for a health check and for the UI to read its own limits
 // before the first question (starter chips, character counter).
 export async function onRequestGet(context) {
@@ -933,6 +949,10 @@ export async function onRequestGet(context) {
     // same flag before it spends anything — this only hides a control that
     // would be refused.
     voiceInput: aiFeatureOn(settings, "voice_input"),
+    // What the /ask page draws as its shelves: passages indexed per kind, and
+    // the newest few titles of each roster to offer as questions. A few hundred
+    // bytes; omitted rather than zeroed when the facts are unreadable.
+    shelves: shelvesOf(facts),
     turnstileSiteKey: context.env.TURNSTILE_SITE_KEY || null,
     note: settings.enabled ? null : settings.disabled_note,
   });

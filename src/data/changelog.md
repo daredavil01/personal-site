@@ -11,6 +11,19 @@ Versioning follows the semver-style rules in CLAUDE.md: major for new
 pages/refactors/redesigns, minor for features and content additions (at most one
 minor version per calendar week), patch for fixes and tweaks.
 
+## [v31.0.0] — 2026-11-04
+
+### Changed
+- **The /ask page, redesigned** (`src/components/Ask/studio/`, `src/pages/Ask.js`): a search page before the first question and a reading layout after it. The start is one large box whose placeholder types out real questions from the pool (`/` focuses it from anywhere), six starter cards from different subjects with their category, Shuffle and **Surprise me** (a question not yet asked this thread). The thread sets each question as a numbered heading, shows what retrieval is actually doing while it works (searching → read N sources → writing, from the stream's own events), puts follow-ups under "Keep pulling the thread", and docks the composer beneath it. Inspired by Perplexity-style citation previews and the "starter prompts as a capability menu" empty-state pattern.
+- **Conversation state extracted** (`src/components/Ask/useAskConversation.js`, `AskChat.js`, `SourceCard.js`, `askUi.js`): the launcher chat and the new page draw the same hook, so there is still one implementation of streaming, quota, Turnstile, voice and sharing. The launcher looks and behaves as before.
+
+### Added
+- **What it has read** (`studio/Shelves.js`, `src/lib/askShelves.js`): a tile per kind of content sized by its indexed passages, with its newest title. Pressing one leans the search towards it (a re-rank preference, said so on the page) and opens the questions it answers best — the newest titles as questions, then the pool's questions for that subject. `GET /api/ask` now sends `shelves` (`index_by_type` plus the four newest roster titles per kind); omitted, never zeroed, when the facts are unreadable.
+- **Citation hover cards and a source rail** (`AnswerBody.js` `previews`, `studio/SourceRail.js`): on /ask an `[n]` shows its source's title, kind, date and picture on hover or focus; on wide pages a sticky rail lists the questions so far as jump links and the sources of the answer in view, and hovering a card lights its marker in the answer (and the reverse). The rail switches on the page's own width (a container query), because the classic shell's sidebar makes a viewport breakpoint wrong.
+- **Tests** (`src/lib/askShelves.test.js`): shelf ordering and shares, hidden scaffolding kinds, question building, Surprise me never repeating.
+
+---
+
 ## [v30.1.0] — 2026-11-04
 
 ### Added

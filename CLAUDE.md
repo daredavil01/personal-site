@@ -288,8 +288,22 @@ Natural-language chat over the whole content store.
 - **Config + caps:** the `ask_settings` singleton, edited at `/admin/ask/settings`,
   read by the worker with a 60-second cache. Quotas are counted in `ask_usage`
   through the `ask_quota()` RPC and fail closed.
-- **UI:** `src/pages/Ask.js` (`/ask`) and `src/components/Ask/AskLauncher.js`
-  (site-wide, mounted in `Main.js`), both rendering `AskChat.js`. Local dev
+- **UI:** one conversation, two drawings. `src/components/Ask/useAskConversation.js`
+  is the whole state machine (thread, streaming, quota, Turnstile, voice,
+  sharing) with no markup. `AskChat.js` draws it for `AskLauncher.js`
+  (site-wide, mounted in `Main.js`) and for chats pinned to a page;
+  `src/components/Ask/studio/AskStudio.js` draws it as the `/ask` page
+  (`src/pages/Ask.js`): a search-style start (typewriter box, `/` to focus,
+  six starter cards, Surprise me, and **shelves** — passages per kind from
+  `GET /api/ask`'s `shelves`, modelled by `src/lib/askShelves.js`, each a
+  re-rank preference plus its questions), then a reading layout with each
+  question as a heading, a live retrieval progress line, `[n]` hover cards
+  (`AnswerBody`'s `previews`, page-only because the launcher panel would
+  scroll sideways) and a source rail cross-highlighted with the markers. The
+  rail switches on a container query (`.ask-frame`), not the viewport — the
+  classic shell's sidebar makes viewport breakpoints lie. The composer is one
+  element for the page's life (hero box, then dock) so the Turnstile widget
+  inside it survives the layout change. Local dev
   needs `npm run dev:ask` beside `npm run dev` — Vite proxies `/api` to it.
 - **Starter chips** come from `ask_settings.question_pool` (jsonb `[{q, c}]`,
   edited at `/admin/ask/settings`), sampled by `src/lib/askQuestions.js`: one

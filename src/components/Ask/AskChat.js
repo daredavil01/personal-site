@@ -1,97 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import { Link, useSearchParams } from "react-router-dom";
-import { askQuestionStream, getAskInfo } from "../../lib/api/ask";
-import { entityLabel } from "../../data/askConfig";
-import { colorForTag } from "../../lib/generativeArt";
+import { Link } from "react-router-dom";
 import { useTagColors } from "../../context/ContentContext";
-import useTurnstile from "./useTurnstile";
-import useVoiceCapture from "./useVoiceCapture";
 import AnswerBody, { MediaStrip } from "./AnswerBody";
-import { hasInlineImage, isExternal } from "../../lib/askFormat";
+import { hasInlineImage } from "../../lib/askFormat";
 import AnswerActions from "./AnswerActions";
-import { clearThread, loadThread, saveThread } from "./askStorage";
-import { matchQuestions, pickQuestions } from "../../lib/askQuestions";
-import useShareThread from "./useShareThread";
+import SourceCard from "./SourceCard";
+import useAskConversation from "./useAskConversation";
+import { SHARE_LABELS, TYPE_FILTERS } from "./askUi";
 
-// The one chat component. /ask renders it full-page; AskLauncher renders the
-// same thing in a corner panel, so there is exactly one implementation of the
-// conversation to keep working.
-
-// Prefers one kind of content. The values are entity_type values in
-// content_chunks. They no longer scope the search itself: the worker searches
-// everything and re-ranks with these, then says so quietly when a chip found
-// nothing and had to be ignored. A chip that hard-filtered the query returned
-// eight books for "which forts has he trekked?".
-const TYPE_FILTERS = [
-  { id: "book", label: "Books" },
-  { id: "microblog", label: "Micro posts" },
-  { id: "blog", label: "Blog" },
-  { id: "project", label: "Projects" },
-  { id: "sport", label: "Races" },
-  { id: "trek", label: "Treks" },
-  { id: "writing", label: "Essays" },
-  { id: "resume", label: "Résumé" },
-  { id: "stats", label: "Stats" },
-];
-
-const SourceCard = ({ source, index, colors }) => {
-  const accent = colorForTag(
-    source.tags?.[0] || source.entity_type,
-    source.tags?.[0] ? colors.get(source.tags[0]) : null,
-  );
-  const className = "group flex items-start gap-3 rounded-xl border border-stone-200 dark:border-stone-800 px-3 py-2 hover:border-stone-400 dark:hover:border-stone-600 transition-colors";
-  const body = (
-    <>
-      {source.image ? (
-        <img
-          src={source.image}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          className="h-10 w-10 shrink-0 rounded-md object-cover"
-          onError={(e) => { e.currentTarget.style.display = "none"; }}
-        />
-      ) : (
-        <span
-          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-          style={{ backgroundColor: accent }}
-        >
-          {index}
-        </span>
-      )}
-      <span className="min-w-0">
-        <span className="block text-[13px] font-medium truncate group-hover:underline">
-          {source.image ? `${index}. ` : ""}
-          {source.title || "Untitled"}
-        </span>
-        <span className="block text-[11px] text-stone-500 dark:text-stone-400 truncate">
-          {entityLabel(source.entity_type)}
-          {source.date ? ` · ${source.date}` : ""}
-          {source.domain ? ` · ${source.domain} ↗` : ""}
-        </span>
-      </span>
-    </>
-  );
-  // Essays with no ledger row link out to Substack or WordPress.
-  return isExternal(source.url) ? (
-    <a href={source.url} target="_blank" rel="noreferrer" className={className}>{body}</a>
-  ) : (
-    <Link to={source.url || "/"} className={className}>{body}</Link>
-  );
-};
-
-SourceCard.propTypes = {
-  source: PropTypes.shape({
-    entity_type: PropTypes.string,
-    title: PropTypes.string,
-    url: PropTypes.string,
-    date: PropTypes.string,
-    tags: PropTypes.arrayOf(PropTypes.string),
-  }).isRequired,
-  index: PropTypes.number.isRequired,
-  colors: PropTypes.instanceOf(Map).isRequired,
-};
+// The corner launcher's chat, and the chat a page pins to itself. The
+// conversation lives in useAskConversation; /ask draws the same one as
+// AskStudio, so there is still exactly one implementation to keep working.
 
 const Bubble = ({
   turn, question, colors, onFollowup, onRetry, onFeedback, onShareThread, shareStatus,
@@ -233,288 +153,22 @@ Bubble.defaultProps = {
   question: "", onRetry: null, onFeedback: null, onShareThread: null, shareStatus: null,
 };
 
-const VERIFY_FAILED = "Could not confirm this browser is not a bot — the check expired or was blocked by an extension.";
-
-// What the share control says while it is working. "Link copied" rather than
-// "Shared", because on desktop that is literally what happened.
-const SHARE_LABELS = {
-  sharing: "Sharing…",
-  copied: "Link copied",
-  shared: "Shared",
-  manual: "Copy this link",
-  error: "Could not share",
-};
-
-// The launcher panel is 420px (AskLauncher.js), the /ask page is full width.
-// What to say under an answer that did not run at full strength. Degraded is
-// the louder of the two, so it wins when both are true.
-function noteFor(done) {
-  if (done?.degraded) return "Answered from search alone — no model was available.";
-  if (done?.keywordOnly) return "Matched on words only — the meaning search was unavailable.";
-  return null;
-}
-
 const CHIP_COUNT = { page: 4, compact: 3 };
 
-// `focus` pins one page into every question (a newsletter issue asking about
-// itself); such a thread is about that page only, so it is neither restored
-// from nor saved over the site-wide thread. `starters` replaces the drawn chips.
+// The launcher panel and the chats pinned to a page (a newsletter issue). The
+// /ask page draws the same conversation as AskStudio.
 const AskChat = ({ compact, focus, starters: givenStarters }) => {
-  const [turns, setTurns] = useState(() => (focus ? [] : loadThread()));
-  const [draft, setDraft] = useState("");
-  // Whisper's detected language for the current draft, when it was spoken.
-  // Cleared the moment the draft is typed over: it describes this text only.
-  const [spokenLanguage, setSpokenLanguage] = useState(null);
-  const [pending, setPending] = useState(false);
-  const [info, setInfo] = useState(null);
-  const [blocked, setBlocked] = useState(null);
-  const [types, setTypes] = useState([]);
-  // Drawn once per mount, never in render: sampling inline would reshuffle the
-  // chips on every keystroke, under the reader's cursor.
-  const [starters, setStarters] = useState([]);
-  const endRef = useRef(null);
-  const abortRef = useRef(null);
-  const sendRef = useRef(null);
   const colors = useTagColors();
-  const turnstile = useTurnstile(
-    info?.turnstileSiteKey,
-    info?.turnstileRequired,
-  );
-  const voice = useVoiceCapture({
-    onTranscript: (text, language) => {
-      // Into the box, never into a question. The visitor edits and presses
-      // Ask — a misheard sentence must cost a keystroke, not an answer.
-      setDraft((prev) => (prev ? `${prev} ${text}` : text));
-      setSpokenLanguage(language);
-    },
-    getTurnstileToken: () => (info?.turnstileRequired ? turnstile.take() : undefined),
+  const {
+    turns, draft, setDraft, pending, info, blocked, types, toggleType,
+    starters, drawStarters, matches, send, stop, retry, askFollowup,
+    setFeedback, reset, shareable, doShare, shareThread, turnstile, voice,
+    endRef, max, questionFor,
+  } = useAskConversation({
+    focus,
+    starters: givenStarters,
+    chipCount: compact ? CHIP_COUNT.compact : CHIP_COUNT.page,
   });
-  const [searchParams, setSearchParams] = useSearchParams();
-  const shareThread = useShareThread();
-
-  // Autocomplete over the same pool the chips are drawn from. Derived in
-  // render rather than held in state: it is a function of the draft, and a
-  // second copy of it would be a second thing to keep in step.
-  const matches = pending ? [] : matchQuestions(info?.questionPool, draft);
-
-  // One draw per page load, from a pool of ~30 across six subjects. A returning
-  // visitor gets a different four, and never four about the same thing.
-  const drawStarters = (i) => {
-    const count = compact ? CHIP_COUNT.compact : CHIP_COUNT.page;
-    if (givenStarters?.length) {
-      setStarters(givenStarters.slice(0, count));
-      return;
-    }
-    const drawn = pickQuestions(i?.questionPool, count);
-    // An empty or unseeded pool falls back to the fixed list rather than to
-    // nothing — a blank empty state reads as a broken page.
-    setStarters(drawn.length ? drawn : (i?.suggestedQuestions || []).slice(0, count));
-  };
-
-  useEffect(() => {
-    getAskInfo()
-      .then((i) => {
-        setInfo(i);
-        drawStarters(i);
-        if (!i.enabled) setBlocked(i.note || "The second brain is off right now.");
-      })
-      .catch(() => {
-        setInfo({ maxMessageChars: 500, suggestedQuestions: [] });
-        // A page's own starters (focus) do not depend on the endpoint's pool.
-        drawStarters({});
-      });
-    // Intentionally mount-only: re-running this would redraw the chips while
-    // someone is reading them.
-  }, []);
-
-  // Follows the conversation, never an empty chat: this effect also runs on
-  // mount, and a chat embedded at the foot of a page (a newsletter issue) would
-  // otherwise drag the window to the bottom before anyone has read the top.
-  useEffect(() => {
-    if (!turns.length) return;
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [turns, pending]);
-
-  // The thread outlives a reload for a day. Saved on every change so a crash
-  // mid-answer still leaves the question behind.
-  useEffect(() => {
-    if (turns.length && !focus) saveThread(turns);
-  }, [turns, focus]);
-
-  // Updates the assistant turn being streamed — always the last one.
-  const patchLast = (patch) => setTurns((prev) => {
-    const next = [...prev];
-    const last = next[next.length - 1];
-    if (!last || last.role !== "assistant") return prev;
-    next[next.length - 1] = { ...last, ...patch(last) };
-    return next;
-  });
-
-  const stop = () => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-  };
-
-  // `scope` overrides the chips for this one question — `setTypes` does not
-  // reach the `types` this closure captured, so a follow-up has to say so here.
-  const send = async (text, { replaceFailed = false, scope } = {}) => {
-    const askTypes = scope ?? types;
-    const message = (text ?? draft).trim();
-    if (!message || pending || blocked) return;
-    setDraft("");
-    setSpokenLanguage(null);
-    // A retry replaces the failed question/answer pair rather than stacking a copy.
-    const base = replaceFailed ? turns.slice(0, -2) : turns;
-    const history = base.map((t) => ({ role: t.role, content: t.content }));
-    setTurns([
-      ...base,
-      { role: "user", content: message },
-      { role: "assistant", content: "", sources: [], streaming: true },
-    ]);
-    // The stored snapshot is of the thread as it was; another turn makes it
-    // stale, so the next Share creates a new one rather than re-sending a link
-    // to half the conversation.
-    shareThread.reset();
-    setPending(true);
-
-    // Chips, follow-ups and ?q= links can fire before the widget has solved;
-    // wait for a token instead of sending none and taking a 403.
-    let turnstileToken;
-    if (info?.turnstileRequired) {
-      turnstileToken = await turnstile.take();
-      if (!turnstileToken) {
-        patchLast(() => ({
-          streaming: false,
-          content: VERIFY_FAILED,
-          retry: message,
-        }));
-        setPending(false);
-        return;
-      }
-    }
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const done = await askQuestionStream({
-        message,
-        history,
-        types: askTypes,
-        spokenLanguage,
-        focus,
-        turnstileToken,
-        signal: controller.signal,
-        onSources: (event) => patchLast(() => ({
-          sources: event.sources || [],
-          browse: event.browse || [],
-          linkable: event.linkable || [],
-          widened: !!event.widened,
-          scope: event.scope || "",
-        })),
-        onDelta: (chunk) => patchLast((last) => ({ content: last.content + chunk })),
-      });
-      patchLast((last) => ({
-        streaming: false,
-        followups: done.followups || [],
-        // Honest about degradation rather than silently answering worse.
-        // keywordOnly means the embedding call failed, so only the half of
-        // retrieval that matches words ran, not the half that matches meaning.
-        // The worker has always sent it and the admin log has always shown it;
-        // the person relying on the answer was the only one not told.
-        note: noteFor(done),
-        // The worker re-sends the finished answer cleaned (links and images
-        // checked against the sources); prefer it over the raw streamed text.
-        content: done.answer ?? last.content,
-        media: done.media || [],
-        messageId: done.messageId || null,
-        linkable: done.linkable || last.linkable || [],
-        widened: done.widened ?? last.widened ?? false,
-        scope: done.scope || last.scope || "",
-      }));
-    } catch (err) {
-      if (err.name === "AbortError") {
-        patchLast((last) => ({
-          streaming: false,
-          content: last.content || "Stopped.",
-          note: last.content ? "Stopped." : null,
-        }));
-      } else if (err.status === 403) {
-        turnstile.refresh();
-        patchLast(() => ({
-          streaming: false,
-          content: VERIFY_FAILED,
-          retry: message,
-        }));
-      } else {
-        if (err.status === 429 || err.status === 503) setBlocked(err.message);
-        patchLast(() => ({ streaming: false, content: err.message }));
-      }
-    } finally {
-      abortRef.current = null;
-      setPending(false);
-    }
-  };
-  sendRef.current = send;
-
-  // Follow-ups name things the last answer already showed. Leaving a chip on
-  // would scope the search away from exactly what was just offered.
-  const askFollowup = (question) => {
-    setTypes([]);
-    send(question, { scope: [] });
-  };
-
-  const retry = (message) => {
-    turnstile.refresh();
-    send(message, { replaceFailed: true });
-  };
-
-  // Kept on the turn itself, so a reload restores the reader's verdict.
-  const setFeedback = (index, feedback) => setTurns((prev) => prev.map(
-    (t, j) => (j === index ? { ...t, feedback } : t),
-  ));
-
-  // ?q= makes a question shareable: the link lands pre-asked rather than
-  // replaying a cached answer, so it always reflects the archive as it is now.
-  useEffect(() => {
-    const q = searchParams.get("q");
-    // A focused chat leaves ?q= to the site-wide one, which owns shared links.
-    if (!q || focus || turns.length || !info) return;
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete("q");
-        return next;
-      },
-      { replace: true },
-    );
-    sendRef.current(q);
-    // Intentionally keyed on `info` alone — this fires once, when the
-    // endpoint's limits are known, and must not re-fire as the thread grows.
-  }, [info]);
-
-  const reset = () => {
-    stop();
-    if (!focus) clearThread();
-    setTurns([]);
-    setBlocked(null);
-    // The chips used to survive a clear, so the next question was silently
-    // scoped by a filter the reader thought they had just dismissed.
-    setTypes([]);
-    shareThread.reset();
-  };
-
-  const toggleType = (id) => setTypes((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]),);
-
-  const max = info?.maxMessageChars || 500;
-  const shareable = turns.some((t) => t.role === "assistant" && !t.streaming && t.content);
-  const doShare = () => shareThread.share({
-    turns,
-    types,
-    turnstileToken: undefined,
-  });
-  // The question each answer belongs to, for its copy / permalink / share row.
-  const questionFor = (i) => turns[i - 1]?.content || "";
 
   return (
     <div className="flex flex-col gap-4 h-full min-h-0">
@@ -543,7 +197,7 @@ const AskChat = ({ compact, focus, starters: givenStarters }) => {
               {starters.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => drawStarters(info)}
+                  onClick={drawStarters}
                   className="text-[12px] text-stone-500 dark:text-stone-400 hover:underline px-1"
                 >
                   Try others ↻
@@ -659,7 +313,7 @@ const AskChat = ({ compact, focus, starters: givenStarters }) => {
               maxLength={max}
               placeholder="Ask something…"
               aria-label="Ask the archive a question"
-              onChange={(e) => { setDraft(e.target.value); setSpokenLanguage(null); }}
+              onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
