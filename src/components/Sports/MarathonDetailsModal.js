@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import ImageSlider from '../Instagram/ImageSlider';
+import PhotoViewer from '../common/PhotoViewer';
 import ShareImageButton from '../share/ShareImageButton';
 
 const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
@@ -91,9 +91,7 @@ const MarathonDetailsModal = ({ isOpen, onClose, raceDetails }) => {
           {raceDetails.slideImages && raceDetails.slideImages.length > 0 && (
             <div className="w-full">
               <span className="font-label text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-4 block">Event Documentation</span>
-              <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 aspect-square md:aspect-[4/3]">
-                <ImageSlider data={raceDetails.slideImages} />
-              </div>
+              <PhotoViewer images={raceDetails.slideImages} title={raceDetails.title} maxVh={55} />
             </div>
           )}
         </div>

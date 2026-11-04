@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import CardPhoto from "../common/CardPhoto";
 import { LevelBadge, levelStyle } from "./TrekFigures";
 import { SEASONS, formatTrekDay, formatTrekHours } from "../../lib/trekLog";
 
@@ -21,7 +22,7 @@ export const TrekCards = ({ treks, onOpen }) => (
         >
           <div className="relative aspect-[4/3] bg-stone-100 dark:bg-stone-800 overflow-hidden">
             {photo ? (
-              <img src={photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <CardPhoto src={photo} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="material-symbols-outlined text-5xl text-stone-300 dark:text-stone-600" aria-hidden="true">landscape</span>

@@ -8,7 +8,7 @@ import { useTreks } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
-import ImageSlider from "../components/Instagram/ImageSlider";
+import PhotoViewer from "../components/common/PhotoViewer";
 import TagLinks from "../components/common/TagLinks";
 
 const difficultyClass = (level) => {
@@ -130,9 +130,7 @@ const TrekPost = () => {
               <span className="font-label text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-4 block">
                 Trek Photos ({trek.slideImages.length})
               </span>
-              <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 aspect-square md:aspect-[4/3]">
-                <ImageSlider data={trek.slideImages} />
-              </div>
+              <PhotoViewer images={trek.slideImages} title={trek.fort_name} />
             </div>
           )}
 

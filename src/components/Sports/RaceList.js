@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import CardPhoto from "../common/CardPhoto";
 import {
   distanceName, formatDelta, formatDuration, formatPace, formatRaceDay,
 } from "../../lib/raceLog";
@@ -30,7 +31,7 @@ export const RaceCards = ({ races, onOpen }) => (
         >
           <div className="relative aspect-[16/9] bg-stone-100 dark:bg-stone-800 overflow-hidden">
             {photo ? (
-              <img src={photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <CardPhoto src={photo} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="material-symbols-outlined text-5xl text-stone-300 dark:text-stone-600" aria-hidden="true">directions_run</span>

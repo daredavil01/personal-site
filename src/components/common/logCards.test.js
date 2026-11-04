@@ -17,7 +17,7 @@ it("race and trek cards show the first photo's url", () => {
     id: 1, fort_name: "Tikona", date: "17-02-2019", trek_time: "1 Hrs", endurance_level: "Easy", slideImages: IMG,
   }]);
   const a = render(<RaceCards races={races} onOpen={() => {}} />);
-  expect(a.container.querySelector("img").getAttribute("src")).toBe(IMG[0].url);
+  expect(a.container.querySelector("img.object-contain").getAttribute("src")).toBe(IMG[0].url);
   const b = render(<TrekCards treks={treks} onOpen={() => {}} />);
-  expect(b.container.querySelector("img").getAttribute("src")).toBe(IMG[0].url);
+  expect(b.container.querySelector("img.object-contain").getAttribute("src")).toBe(IMG[0].url);
 });

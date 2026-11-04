@@ -8,7 +8,7 @@ import { useSports } from "../context/ContentContext";
 import { useWorld } from "../atlas/world/WorldContext";
 import { LoadingBlock } from "../components/common/AsyncStates";
 import ShareImageButton from "../components/share/ShareImageButton";
-import ImageSlider from "../components/Instagram/ImageSlider";
+import PhotoViewer from "../components/common/PhotoViewer";
 import TagLinks from "../components/common/TagLinks";
 import RaceActivity from "../components/Training/RaceActivity";
 
@@ -134,9 +134,7 @@ const SportPost = () => {
               <span className="font-label text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-4 block">
                 Event Documentation
               </span>
-              <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 aspect-square md:aspect-[4/3]">
-                <ImageSlider data={race.slideImages} />
-              </div>
+              <PhotoViewer images={race.slideImages} title={race.title} />
             </div>
           )}
 

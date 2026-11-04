@@ -13,6 +13,12 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v29.0.2] — 2026-11-04
+
+### Fixed
+- **Race and trek photos are no longer cropped** (`src/components/common/PhotoViewer.js`): the quick-look sheets on /sports and /treks and the `/sports/:id` and `/treks/:id` pages drew 600 px (300 px on phones) slides inside a fixed 4:3 / square box, cutting most photos off. A new viewer reads each photo's natural width and height when it loads and sizes its frame to that aspect ratio, capped at a share of the screen height (55% in the sheets, 62% on the pages) and narrowed to keep the ratio when a tall photo hits the cap. It adds arrows, swipe, ←/→ keys, a counter, thumbnails and a "Full size" link, and pre-loads the neighbouring photos so the frame resizes before they show.
+- **Card photos shown whole** (`src/components/common/CardPhoto.js`): race and trek cards contain the photo over a blurred copy of itself instead of cropping it with `object-cover`.
+
 ## [v29.0.1] — 2026-11-04
 
 ### Fixed
