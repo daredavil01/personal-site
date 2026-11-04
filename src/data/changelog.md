@@ -13,6 +13,24 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v27.0.0] — 2026-11-04
+
+### Changed
+- **/about, redesigned as "How long have you got?"** (`src/components/About/AboutPage.js`, `about.css`): one page read at 10 seconds, 1 minute, 5 minutes or 10 minutes (`?read=`), each tier a superset of the last on a stopwatch rail with a dial that fills as you go deeper. The line and a Latest log; the gist with live numbers and Work / Latest build / Latest race cards; five chapters (engineer, runner, trekker, reader and writer, citizen) each with up to three live numbers, plus a year-by-year timeline built from the resume, races, treks and featured projects; the long version with "How I work" principles linked to the projects that show them, facts, likes, podcasts, a press kit of bios in three lengths with copy buttons, and an /ask chat seeded with questions from about.md. Replaces `AboutDocument.js`.
+- **/resume, redesigned as a recruiter-first sheet** (`src/components/Resume/ResumeDocument.js`, `resume.css`): a summary sentence and KPIs computed from the tables (years professional, projects shipped and live, organisations built for, certifications), roles newest first grouped into professional / fellowship & research / leadership & community with durations and the skills each names, selected projects as case-study cards plus an "also built" list by year, skills with level dots and how many projects use each, "shipping with lately" counted from project stacks, certifications newest first, education, beyond work, a "last updated" stamp, an A4 print stylesheet and "Copy as plain text" for ATS forms. Replaces the four bento section components.
+- **`src/data/about.md` restructured** into the sections the page reads (10 seconds, Updates, 5 minutes chapters, 10 minutes, How I work with `[evidence: …]`, Facts, I like, Podcasts, Short bio, Ask me); /ask still indexes it as the About page.
+- **Footer** (`src/components/Template/Footer.js`): the sign-off now reads "intentionality Build with ❤️".
+
+### Added
+- **Latest log** (`src/components/common/LatestLog.js`, `latest.css`): a dated feed on both pages merging hand-written lines from about.md with what the tables say happened — certifications, roles, shipped projects, races, forts — so a row saved in /admin appears with no page edit.
+- **Owner tools** (`src/components/common/OwnerTools.js`): with a Supabase session, both pages show pencils and plus buttons into /admin, and an update composer that produces the exact `npm run about` command. `ResourceManager` now opens `?edit=<id>` deep links.
+- **`npm run about`** (`scripts/about.mjs`): `update`, `updates`, `unupdate`, `show`, `set`, `check` (sections, reading-time budgets, principle evidence) and `bios`.
+- **`npm run resume`** (`scripts/resume.mjs`): `list`, `add`, `edit`, `bullet`, `remove`, `export` to YAML and `import` (upsert, optional `--prune`) for the four resume tables, with dates validated by the page's parser.
+- **Models** (`src/lib/aboutModel.js`, `src/lib/resumeModel.js`, tested): loose date and date-range parsing, durations, position grouping, overlap-free professional months, skill aliases and project evidence, stack beyond the skills list, plain-text resume, about.md parsing and editing, principle evidence, timeline and updates.
+- **`updatedAt`** on resume rows (`src/lib/api/resume.js`), read-only, for the "last updated" stamp.
+
+---
+
 ## [v26.0.0] — 2026-11-04
 
 ### Changed

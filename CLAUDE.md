@@ -628,6 +628,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Logbook data / analysis / page | `public/data/logbook.json` (`npm run logbook`), `src/lib/logbook.js`, `src/pages/Logbook.js`, `src/components/Logbook/` |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |
+| About / resume models, pages, CLIs | `src/lib/aboutModel.js`, `src/lib/resumeModel.js`, `src/components/About/`, `src/components/Resume/`, `scripts/about.mjs`, `scripts/resume.mjs` |
 | Site blueprint (/blueprint) | `src/pages/Blueprint.js`, `src/components/Blueprint/` |
 | Page components | `src/pages/` |
 | Reusable components | `src/components/` |
@@ -681,6 +682,54 @@ bench, the shell switch and a live tag loom. It lives in the Workshop region.
   `FilmPlayer.js` reads the chapters from the JSON (`preload="none"`, so the
   page costs a poster until someone presses play), and `film.test.js` fails
   the build if any of the four is missing or the chapters disagree.
+
+## About and Resume (/about, /resume)
+
+**Updating either page is a one-line command or an /admin form — the design
+assumes it.** Both pages carry a dated **Latest** log, owner-only edit controls
+when you are signed in, and nothing that has to be re-designed when content
+moves. Pure models: `src/lib/aboutModel.js` and `src/lib/resumeModel.js`
+(tested).
+
+- **/about is read at four depths** (`?read=10s|1m|5m|10m`, default `1m`): the
+  line, the gist, the story (five chapters + a year-by-year timeline), the long
+  version (principles with project evidence, facts, likes, a press kit of bios
+  in three lengths, an /ask chat seeded from about.md). Each tier is a superset
+  of the last; the stopwatch dial and the rail show how deep you are.
+- **Words live in `src/data/about.md`** (`# 10 seconds`, `# Updates`,
+  `# 5 minutes` with `## Chapter`s, `# 10 minutes`, `# How I work`, `# Facts`,
+  `# I like`, `# Podcasts`, `# Short bio`, `# Ask me`); the page imports it
+  through `src/data/aboutContent.js` (`?raw`) and /ask indexes it as a page.
+  Edit with **`npm run about`** (`scripts/about.mjs`, same parser as the page):
+  `update "…" [--career] [--url=…]` adds a dated line to the Latest log,
+  `set "<section>" --file=x.md` replaces a section, `check` verifies sections,
+  reading-time budgets and that every principle still has projects behind it
+  (`[evidence: regex]` on the principle line, matched against project text),
+  `bios` prints the three bios. Numbers are never typed into about.md — the
+  page reads `/api/stats` and the tables, and omits what has no value.
+- **The Latest log** (`src/components/common/LatestLog.js`) is `buildUpdates()`:
+  the hand-written `# Updates` lines plus whatever the tables say happened —
+  a certification, a role, a shipped project, a race, a fort — the moment it is
+  saved. `#career` lines and career kinds also show on /resume; `perKind` caps a
+  noisy kind.
+- **/resume** (`src/components/Resume/ResumeDocument.js`) is a printable,
+  recruiter-first sheet: a summary sentence and KPIs computed from the tables,
+  roles grouped work / research / leadership (by `classifyPosition`) with
+  durations, selected projects (featured) as case-study cards, skills with
+  dots and "×N projects" evidence from `tech_stack`, "Shipping with lately"
+  (stack the projects use that the skills list does not name), certifications
+  newest first whatever their date format, education, a print stylesheet (A4,
+  shell hidden) and **Copy as plain text** for ATS forms (`resumeText`).
+- **Edit the resume** at `/admin/resume` or with **`npm run resume`**
+  (`scripts/resume.mjs`): `list`, `add <section> --field=…`, `edit <section>
+  <id> --field=…`, `bullet <id> "…"`, `remove <section> <id> --yes`, `export`
+  (YAML to `knowledge_base/resume.yaml`) and `import <file> [--prune]`.
+  Sections: `experience`, `education`, `certifications`, `skills`. Writes need
+  `SUPABASE_SERVICE_ROLE_KEY`; dates are validated with the page's own parser.
+- **Owner controls** (`src/components/common/OwnerTools.js`) render only with a
+  Supabase session: pencils deep-link to `/admin/resume/<section>?edit=<id>`
+  (handled by `ResourceManager`), plus buttons open `?new=1`, and repo content
+  shows the exact command to copy. They are conveniences; RLS is the lock.
 
 ## Homepage Sections
 

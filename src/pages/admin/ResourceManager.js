@@ -123,6 +123,18 @@ const ResourceManager = ({ resource }) => {
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, openForm, resource.noCreate]);
 
+  // ?edit=<id> opens that row's form once the list has loaded — the public
+  // /about and /resume pages link their owner-only "Edit" pencils here.
+  useEffect(() => {
+    const id = searchParams.get("edit");
+    if (!id || !rows) return;
+    const row = rows.find((r) => String(r.id) === id);
+    if (row) openForm(row);
+    const next = new URLSearchParams(searchParams);
+    next.delete("edit");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, openForm, rows]);
+
   const onField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
 
   const save = async (e) => {

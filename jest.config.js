@@ -9,7 +9,7 @@ const config = {
     // so the content layer resolves to empty data under jsdom.
     '^.+/supabaseClient$': '<rootDir>/src/lib/supabaseClient.jest-stub.js',
     '^.+\\.css$': 'babel-jest',
-    '^.+\\.md(\\?url)?$': 'markdown-to-jsx',
+    '^.+\\.md(\\?url|\\?raw)?$': 'markdown-to-jsx',
   },
 };
 

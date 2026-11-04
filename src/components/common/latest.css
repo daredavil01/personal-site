@@ -1,0 +1,96 @@
+/* Shared by /about and /resume: the Latest log (LatestLog.js) and the
+ * owner-only editing tools (OwnerTools.js). Colours fall back through each
+ * page's own tokens, so the log takes the look of the page it sits on. */
+
+
+.latest {
+  --l-ink: var(--ab-ink, var(--rs-ink, #1c1a17));
+  --l-muted: var(--ab-muted, var(--rs-muted, #857d71));
+  --l-rule: var(--ab-rule, var(--rs-rule, rgba(0, 0, 0, 0.12)));
+  --l-hi: var(--ab-hi, var(--rs-hi, #b22200));
+  --l-card: var(--ab-card, var(--rs-card, #fff));
+  --l-wash: var(--ab-hi-wash, var(--rs-hi-wash, rgba(178, 34, 0, 0.07)));
+  border: 1px solid var(--l-rule);
+  border-radius: 1rem;
+  background: var(--l-card);
+  padding: 0.9rem 1rem 0.7rem;
+  container-type: inline-size;
+}
+.latest-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; }
+.latest-heading { display: flex; align-items: center; gap: 0.5rem; font: 700 0.62rem/1 "Plus Jakarta Sans", sans-serif; letter-spacing: 0.24em; text-transform: uppercase; color: var(--l-hi); margin: 0; }
+.latest-pulse { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--l-hi); box-shadow: 0 0 0 0 var(--l-hi); animation: latest-pulse 2.4s infinite; }
+@keyframes latest-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--l-hi) 50%, transparent); }
+  70% { box-shadow: 0 0 0 0.45rem transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) { .latest-pulse { animation: none; } }
+.latest-list { list-style: none; margin: 0; padding: 0; }
+.latest-list li + li { border-top: 1px solid color-mix(in srgb, var(--l-rule) 60%, transparent); }
+.latest-row { display: grid; grid-template-columns: 1.9rem minmax(0, 1fr) auto; gap: 0.7rem; align-items: center; padding: 0.6rem 0.2rem; color: var(--l-ink); border-radius: 0.6rem; }
+.latest a { border-bottom: 0; text-decoration: none; }
+a.latest-row:hover { background: var(--l-wash); }
+/* Narrow (the resume's aside): the date moves under the title. */
+@container (max-width: 24rem) {
+  .latest-row { grid-template-columns: 1.9rem minmax(0, 1fr); }
+  .latest-meta { grid-column: 2; flex-direction: row; align-items: center; gap: 0.5rem; justify-content: flex-start; }
+}
+.latest-icon { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 0.6rem; background: var(--l-wash); color: var(--l-hi); }
+.latest-text { min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.latest-title { font: 600 0.88rem/1.35 "Plus Jakarta Sans", sans-serif; overflow-wrap: anywhere; }
+.latest-detail { font: 500 0.74rem/1.35 "Plus Jakarta Sans", sans-serif; color: var(--l-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.latest-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; text-align: right; }
+.latest-kind { font: 700 0.55rem/1 "Plus Jakarta Sans", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--l-muted); }
+.latest-meta time { font: 600 0.72rem/1 ui-monospace, Menlo, monospace; color: var(--l-ink); white-space: nowrap; }
+.latest-more { margin: 0.35rem 0 0.1rem; border: 0; background: none; padding: 0.3rem 0.2rem; font: 700 0.72rem/1 "Plus Jakarta Sans", sans-serif; color: var(--l-hi); cursor: pointer; }
+
+.owner-link, .owner-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  border: 1px dashed currentColor;
+  font: 700 0.66rem/1 "Plus Jakarta Sans", sans-serif;
+  color: #4f46e5 !important;
+  background: rgba(79, 70, 229, 0.06);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dark .owner-link, .dark .owner-copy { color: #a5b4fc !important; background: rgba(165, 180, 252, 0.08); }
+.owner-link:hover, .owner-copy:hover { background: rgba(79, 70, 229, 0.14); }
+.owner-cmd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px dashed rgba(79, 70, 229, 0.5);
+  background: rgba(79, 70, 229, 0.05);
+  color: #4f46e5;
+}
+.dark .owner-cmd { color: #a5b4fc; border-color: rgba(165, 180, 252, 0.4); }
+.owner-cmd code { flex: 1 1 14rem; min-width: 0; font: 600 0.74rem/1.5 ui-monospace, Menlo, monospace; overflow-wrap: anywhere; color: inherit; background: none; }
+.owner-cmd-note { flex-basis: 100%; font: 500 0.7rem/1.45 "Plus Jakarta Sans", sans-serif; opacity: 0.85; }
+.owner-composer { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.7rem; }
+.owner-composer-row { display: flex; flex-direction: column; gap: 0.3rem; font: 700 0.62rem/1 "Plus Jakarta Sans", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #4f46e5; }
+.dark .owner-composer-row { color: #a5b4fc; }
+.owner-composer-row input {
+  font: 500 0.9rem/1.3 "Plus Jakarta Sans", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(79, 70, 229, 0.35);
+  background: transparent;
+  color: inherit;
+}
+.dark .owner-composer-row input { color: #f2ece2; }
+.owner-composer-check { display: flex; align-items: center; gap: 0.4rem; font: 600 0.75rem/1 "Plus Jakarta Sans", sans-serif; color: #4f46e5; }
+.dark .owner-composer-check { color: #a5b4fc; }
+.owner-bar { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+
+@media print {
+  [data-owner-only] { display: none !important; }
+}

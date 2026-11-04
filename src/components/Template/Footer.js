@@ -79,7 +79,8 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-stone-200/60 dark:border-stone-800/60">
           <div className="font-label text-xs uppercase tracking-widest text-stone-600 dark:text-stone-400">
-            {`© ${new Date().getFullYear()} sanket tambare. Built with intentionality.`}
+            {`© ${new Date().getFullYear()} sanket tambare. intentionality Build with `}
+            <span role="img" aria-label="love">❤️</span>
           </div>
           <div className="flex flex-wrap justify-center gap-8">
             {SOCIALS.map(({ label, href }) => (

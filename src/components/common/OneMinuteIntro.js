@@ -1,7 +1,7 @@
 import React from "react";
 
 // Shared "In 1 Minute" intro blurb. Rendered on both the home page
-// (src/pages/Index.js) and the About page (src/components/About/AboutDocument.js)
+// (src/pages/Index.js) and the About page (src/components/About/AboutPage.js)
 // so the two never drift out of sync. Pass `className` to style the <p> per context.
 const OneMinuteIntro = ({ className = "" }) => (
   <p className={className}>

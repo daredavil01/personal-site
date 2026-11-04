@@ -316,16 +316,22 @@ a "More" dropdown).
 - **`/projects` — Curated Works** (`src/components/Projects/ProjectGallery.js`)
   Editorial asymmetric grid — every 6th item becomes a large case-study
   feature; grayscale→color image hover.
-- **`/resume`** (`src/pages/Resume.js`) Bento grid of skills (with
-  competency levels), experience, education, and certifications — all
-  database-driven across four tables.
+- **`/resume`** (`src/components/Resume/ResumeDocument.js`) A printable,
+  recruiter-first resume sheet: a six-second summary with computed numbers,
+  experience grouped into work / research / leadership with durations, selected
+  projects as problem → outcome case studies, skills backed by the projects
+  that use them, certifications newest first, and a Latest log. Edited at
+  `/admin/resume` or with `npm run resume`.
 - **`/stats` — "Metrics of Intent"** (`src/pages/Stats.js`) A ~14-card
   **bento dashboard** computed live from every collection: genre and
   language splits, reading velocity, books-per-year bar chart, 100-Days
   progress, endurance PBs, trek log, blog intelligence, and a site-wide
   tag cloud spanning books, blogs, and the micro-blog facets.
-- **`/about`** (`src/components/About/AboutDocument.js`) Document-style
-  bio with animated count-up stats, drawing on live content counts.
+- **`/about`** (`src/components/About/AboutPage.js`) "How long have you
+  got?" — one page read at 10 seconds, 1 minute, 5 minutes or 10 minutes
+  (`?read=`), a stopwatch rail through the tiers, a Latest log, a timeline,
+  principles with project evidence and a press kit of bios. Words in
+  `src/data/about.md`, edited with `npm run about`.
 - **`/now`** (`src/pages/Now.js`) A month-by-month "what I'm doing now"
   page: pulsing last-updated pill, **Daily Rituals** grid, and a
   horizontally scrollable month-pill timeline; each month renders typed

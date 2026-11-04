@@ -16,6 +16,8 @@ export const positions = createResource({
     daterange: r.daterange,
     points: r.points ?? [],
     sortOrder: r.sort_order,
+    // Read-only: /resume's "Last updated" line. toRow never sends it.
+    updatedAt: r.updated_at,
   }),
   toRow: (v) => ({
     company: v.company,
@@ -37,6 +39,8 @@ export const degrees = createResource({
     link: r.link,
     year: r.year,
     sortOrder: r.sort_order,
+    // Read-only: /resume's "Last updated" line. toRow never sends it.
+    updatedAt: r.updated_at,
   }),
   toRow: (v) => ({
     school: v.school,
@@ -57,6 +61,8 @@ export const certifications = createResource({
     source: r.source,
     issuedDate: r.issued_date,
     sortOrder: r.sort_order,
+    // Read-only: /resume's "Last updated" line. toRow never sends it.
+    updatedAt: r.updated_at,
   }),
   toRow: (v) => ({
     name: v.name,
@@ -76,6 +82,8 @@ export const skills = createResource({
     competency: r.competency,
     category: r.category ?? [],
     sortOrder: r.sort_order,
+    // Read-only: /resume's "Last updated" line. toRow never sends it.
+    updatedAt: r.updated_at,
   }),
   toRow: (v) => ({
     title: v.title,

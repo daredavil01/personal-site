@@ -1,10 +1,10 @@
 import React from "react";
 import PageShell from "../atlas/PageShell";
-import AboutDocument from "../components/About/AboutDocument";
+import AboutPage from "../components/About/AboutPage";
 
 const About = () => (
   <PageShell region="person">
-    <AboutDocument />
+    <AboutPage />
   </PageShell>
 );
 

@@ -19,6 +19,8 @@
     "test:scripts": "node --test scripts/lib/registry.test.mjs scripts/lib/indexnow.test.mjs scripts/lib/dataFile.test.mjs",
     "analyze": "npm run build && source-map-explorer build/assets/*.js",
     "microblog:import": "node scripts/import-tumblr-microblog.mjs",
+    "about": "node scripts/about.mjs",
+    "resume": "node scripts/resume.mjs",
     "repo:sync": "node scripts/sync-repo-history.mjs",
     "ask:gaps": "node scripts/archive-gaps.mjs",
     "blogs:wordcount": "node scripts/blog-word-counts.mjs",
