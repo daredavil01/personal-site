@@ -22,6 +22,7 @@ import {
 } from "../common/OwnerTools";
 import { IDENTITY } from "../../data/identity";
 import "./about.css";
+import PageFilm from "../common/PageFilm";
 
 const AskChat = lazy(() => import("../Ask/AskChat"));
 
@@ -338,6 +339,8 @@ const AboutPage = () => {
           <p className="ab-depth-note">{`Showing about ${approx} of reading. Pick more any time; the page grows, nothing reloads.`}</p>
         </div>
       </header>
+
+      <PageFilm film="about" className="my-8" />
 
       {/* ---------------- 10 seconds ---------------- */}
       <Tier depth={DEPTHS[0]} title="The line">

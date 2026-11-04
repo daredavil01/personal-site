@@ -85,6 +85,9 @@ steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
 `blueprint:film` (renders video into `knowledge_base/`, nothing to commit),
 `videos:film` and `videos:slides` (the /videos film and its six slides; re-render,
 `-- --publish` and re-run the slides after the channel moves).
+`page:films` (the seven 30-second page films — /about, /resume, /writing-ledger,
+/micro-blog, /presentations, /sports, /treks; re-render and `-- --publish` after
+content moves, see `docs/page-films.md`).
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
 have no npm entry — run them with `node`.
 
@@ -617,6 +620,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`atlas/`, `classic/`), `src/lib/training.js`, `src/lib/trainingDemo.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
 | Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
+| Page films (about, resume, ledger, micro-blog, decks, sports, treks) | `scripts/page-films/`, `src/data/pageFilms.js`, `src/components/common/PageFilm.js`, `public/video/page-films/`, `docs/page-films.md` |
 | Social kit templates / page / docs | `src/lib/socialPrompts.js`, `src/pages/admin/SocialKit.js`, `docs/social-kit.md` |
 | Second brain endpoint | `functions/api/ask.js` |
 | Ask shared config / model ladder | `src/data/askConfig.js`, `src/lib/askTiers.js` |

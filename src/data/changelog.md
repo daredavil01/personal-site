@@ -13,6 +13,12 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v29.1.0] — 2026-11-04
+
+### Added
+- **Page films** (`scripts/page-films/`, `src/components/common/PageFilm.js`): a 30-second vertical film for each of /about, /resume, /writing-ledger, /micro-blog, /presentations, /sports and /treks, embedded under each page's header with its storyline beside it. One page (`film.html`) draws any moment of any of the seven; `npm run page:films` renders them frame by frame from the live tables (through `raceLog`, `trekLog`, `resumeModel`, `aboutModel`, `/api/stats` and the committed Ledger / Micro-blog JSON), scores each with its own synthesised music, and `-- --publish` writes the committed web copies, posters and captions to `public/video/page-films/`. Storylines in `docs/page-films.md`.
+- **Film registry and guard** (`src/data/pageFilms.js`, `src/components/common/pageFilms.test.js`): slug, poster, storyline and alt text per film; the build fails if a file is missing, a video passes 4 MB or a poster 300 KB.
+
 ## [v29.0.2] — 2026-11-04
 
 ### Fixed

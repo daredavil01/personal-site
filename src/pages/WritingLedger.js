@@ -13,6 +13,7 @@ import FreshInk from "../components/WritingLedger/FreshInk";
 import LedgerTable from "../components/WritingLedger/LedgerTable";
 import { Folio, fmt, prefersReducedMotion } from "../components/WritingLedger/shared";
 import "../components/WritingLedger/ledger.css";
+import PageFilm from "../components/common/PageFilm";
 
 // /writing-ledger — every essay published on Substack and WordPress, counted
 // word by word, inside the site's own shell. It used to be a standalone page
@@ -59,6 +60,8 @@ const WritingLedger = () => {
     body = (
       <>
         <Cover m={m} period={period} />
+
+        <PageFilm film="ledger" className="my-10" />
 
         <Folio
           no="I"

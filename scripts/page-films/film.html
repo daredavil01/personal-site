@@ -1,0 +1,1417 @@
+<!doctype html>
+<!--
+  The seven page films, as one page that draws any moment of any of them:
+  film.html?film=<name>&data=<data.js>. renderAt(t) sets every element from
+  the time alone, so frames render in any order, on any number of tabs, and
+  come out the same every time. scripts/page-films/render.mjs seeks it frame
+  by frame and screenshots each one.
+
+  Every film is 30 s, 1080×1920, cut on the 2-second bars of the 120 BPM
+  score (score.mjs). The words each scene puts on screen are its `say`, which
+  render.mjs writes out as the captions track. Numbers come from
+  window.FILM (written by render.mjs from the live tables); nothing is typed.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;800;900&family=JetBrains+Mono:wght@500;700&family=Tiro+Devanagari+Marathi&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body { font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; background: var(--bg); color: var(--fg); }
+  #stage { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+  .scene { position: absolute; inset: 0; display: none; transform-origin: 540px 960px; }
+  .a { position: absolute; }
+  .ctr { left: 0; right: 0; text-align: center; }
+  .anton { font-family: Anton, sans-serif; text-transform: uppercase; line-height: .92; letter-spacing: 1px; }
+  .serif { font-family: "Instrument Serif", serif; line-height: 1.02; }
+  .it { font-style: italic; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .deva { font-family: "Tiro Devanagari Marathi", serif; }
+  .lbl { font: 800 26px Inter; letter-spacing: .3em; text-transform: uppercase; }
+  .ch { display: inline-block; white-space: pre; }
+  .photo { position: absolute; overflow: hidden; background: #222; }
+  .photo img { position: absolute; left: 50%; top: 50%; min-width: 100%; min-height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+  .tint { position: absolute; inset: 0; mix-blend-mode: multiply; }
+  .card { position: absolute; border-radius: 28px; overflow: hidden; }
+  #grain { position: absolute; inset: -200px; opacity: var(--grain, .06); mix-blend-mode: overlay; pointer-events: none; }
+  #vig { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 75% at 50% 50%, transparent 55%, var(--vig, rgba(0,0,0,.45)) 100%); pointer-events: none; }
+  #flash { position: absolute; inset: 0; background: var(--flash, #fff); opacity: 0; pointer-events: none; }
+  #hud { position: absolute; inset: 0; pointer-events: none; }
+  #prog { position: absolute; left: 60px; right: 60px; top: 70px; height: 6px; border-radius: 3px; background: var(--rail); overflow: hidden; }
+  #prog i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+  #tag { position: absolute; left: 60px; top: 104px; font: 800 24px Inter; letter-spacing: .28em; text-transform: uppercase; color: var(--muted); }
+  #tag b { color: var(--accent); }
+  #url { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; font: 600 34px "JetBrains Mono"; color: var(--fg); letter-spacing: .02em; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="grain"></div>
+<div id="vig"></div>
+<div id="hud"><div id="prog"><i></i></div><div id="tag"></div><div id="url"></div></div>
+<div id="flash"></div>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const s = document.createElement("script");
+  s.src = params.get("data") || "data.js";
+  s.onload = () => boot(params.get("film")).catch((e) => { window.__error = String(e && e.stack || e); });
+  s.onerror = () => { window.__error = "data.js failed to load"; };
+  document.head.appendChild(s);
+})();
+
+// ---------------------------------------------------------------- maths
+const W = 1080, H = 1920, DUR = 30;
+const cl = (x) => Math.max(0, Math.min(1, x));
+const P = (t, a, b) => cl((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const Ez = {
+  out: (x) => 1 - (1 - x) ** 3,
+  in: (x) => x * x * x,
+  io: (x) => (x < .5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2),
+  expo: (x) => (x >= 1 ? 1 : 1 - 2 ** (-10 * x)),
+  back: (x) => { const c = 1.7, c3 = c + 1; return 1 + c3 * (x - 1) ** 3 + c * (x - 1) ** 2; },
+  elastic: (x) => (x <= 0 ? 0 : x >= 1 ? 1 : 2 ** (-10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI / 3)) + 1),
+};
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let r = Math.imul(a ^ (a >>> 15), 1 | a); r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r; return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+const fmt = (n) => Math.round(n).toLocaleString("en-IN");
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const day = (iso) => { if (!iso) return ""; const [y, m, d] = iso.split("-").map(Number); return `${d} ${MON[m - 1]} ${y}`; };
+const monthYear = (iso) => { if (!iso) return ""; const [y, m] = iso.split("-").map(Number); return `${MONTH[m - 1]} ${y}`; };
+const plural = (n, w, p = `${w}s`) => `${fmt(n)} ${n === 1 ? w : p}`;
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const has = (v) => v !== null && v !== undefined && v !== "" && !(typeof v === "number" && !Number.isFinite(v));
+
+// ---------------------------------------------------------------- dom kit
+function el(parent, cls, html = "", css = "") {
+  const d = document.createElement("div");
+  d.className = cls;
+  if (html) d.innerHTML = html;
+  if (css) d.style.cssText += css;
+  parent.appendChild(d);
+  return d;
+}
+function svg(parent, w, h, inner, css = "") {
+  const d = el(parent, "a", `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`, css);
+  return d;
+}
+// opacity + translate + scale in one call.
+function S(node, o = 1, x = 0, y = 0, sc = 1, rot = 0) {
+  node.style.opacity = o;
+  node.style.transform = `translate(${x}px, ${y}px) scale(${sc})${rot ? ` rotate(${rot}deg)` : ""}`;
+}
+// Split text into per-character spans for kinetic type.
+function letters(node, text) {
+  node.innerHTML = [...text].map((c) => `<span class="ch">${esc(c)}</span>`).join("");
+  return [...node.children];
+}
+function rise(spans, lt, at, stagger = .03, dist = 60) {
+  spans.forEach((s, i) => {
+    const k = Ez.back(P(lt, at + i * stagger, at + i * stagger + .45));
+    s.style.opacity = cl(k * 1.4);
+    s.style.transform = `translateY(${(1 - k) * dist}px)`;
+  });
+}
+function type(node, text, lt, at, cps = 40) {
+  const n = Math.floor(Math.max(0, lt - at) * cps);
+  node.textContent = text.slice(0, n);
+  return n >= text.length;
+}
+function photo(parent, src, x, y, w, h, css = "") {
+  const d = el(parent, "photo", src ? `<img src="${src}">` : "", `left:${x}px;top:${y}px;width:${w}px;height:${h}px;${css}`);
+  return d;
+}
+// A slow push into a photo (Ken Burns), seeded so each photo drifts its own way.
+function burns(ph, k, seed = 1) {
+  const img = ph.querySelector("img");
+  if (!img) return;
+  const r = rng(seed);
+  const dx = (r() - .5) * 40, dy = (r() - .5) * 40;
+  img.style.transform = `translate(calc(-50% + ${dx * k}px), calc(-50% + ${dy * k}px)) scale(${1.04 + .1 * k})`;
+}
+// In/out window for a scene of length d: 0 → 1 → 0.
+const inout = (lt, d, fi = .35, fo = .35) => Math.min(P(lt, 0, fi), 1 - P(lt, d - fo, d));
+
+// ---------------------------------------------------------------- grain
+function makeGrain(seed) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const g = c.getContext("2d");
+  const img = g.createImageData(256, 256);
+  const r = rng(seed);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = Math.floor(r() * 255);
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return c.toDataURL();
+}
+
+// ---------------------------------------------------------------- films
+// Each film: { theme, route, label, scenes: [{ a, b, say, build(root) → (lt, d, t) => void }], flashes: [t] }
+const FILMS = {};
+
+// ================================================================= ABOUT
+// "How long do you have?" — the page reads at four depths, so the film is a
+// stopwatch: the ten-second line, the five chapters as five people in one,
+// the six rules, and a face at the end.
+FILMS.about = (D) => {
+  const ink = "#1c1917", red = "#b22200", muted = "#78716c", paper = "#f3ede2";
+  const chapterFacts = {
+    "The engineer": [has(D.projects) && `${D.projects} projects shipped`, "Data pipelines by day"],
+    "The runner": [has(D.races) && `${D.races} races`, has(D.km) && `${fmt(D.km)} km on race day`],
+    "The trekker": [has(D.treks) && `${D.treks} Sahyadri forts`, "Some take two hours. One took twenty-two."],
+    "The reader and writer": [has(D.books) && `${D.books} books, ${D.booksMarathi} in Marathi`, has(D.essays) && `${D.essays} essays · ${fmt(D.micro)} short posts`],
+    "The citizen": ["Technology policy, studied in public", "Tools that work in Marathi"],
+  };
+  const glyph = {
+    "The engineer": `<path d="M70 40 L20 100 L70 160 M190 40 L240 100 L190 160 M150 30 L110 170" fill="none" stroke="${red}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>`,
+    "The runner": `<path d="M10 150 C 70 150, 70 50, 130 50 S 190 150, 250 150" fill="none" stroke="${red}" stroke-width="14" stroke-linecap="round"/><circle cx="130" cy="50" r="18" fill="${red}"/>`,
+    "The trekker": `<path d="M0 180 L80 70 L120 120 L170 30 L260 180 Z" fill="none" stroke="${red}" stroke-width="14" stroke-linejoin="round"/><path d="M170 30 L170 0 L205 12 L170 24" fill="${red}"/>`,
+    "The reader and writer": `<path d="M130 50 C 90 30, 40 30, 10 45 L10 170 C 40 155, 90 155, 130 175 C 170 155, 220 155, 250 170 L250 45 C 220 30, 170 30, 130 50 Z M130 50 L130 175" fill="none" stroke="${red}" stroke-width="12" stroke-linejoin="round"/>`,
+    "The citizen": `<circle cx="130" cy="100" r="80" fill="none" stroke="${red}" stroke-width="14"/><path d="M50 100 H210 M130 20 C 90 60, 90 140, 130 180 C 170 140, 170 60, 130 20" fill="none" stroke="${red}" stroke-width="10"/>`,
+  };
+  const chapters = D.chapters.filter((c) => chapterFacts[c]);
+  const per = 12 / Math.max(1, chapters.length);
+  const scenes = [];
+
+  // 0–4 — the stopwatch
+  scenes.push({
+    a: 0, b: 4.2, say: "How long do you have? Ten seconds, a minute, five minutes, or ten.",
+    build(root) {
+      const dial = svg(root, 760, 760, `
+        <circle cx="380" cy="380" r="330" fill="none" stroke="${ink}" stroke-opacity=".12" stroke-width="28"/>
+        <circle id="arc" cx="380" cy="380" r="330" fill="none" stroke="${red}" stroke-width="28" stroke-linecap="round" transform="rotate(-90 380 380)" stroke-dasharray="2073" stroke-dashoffset="2073"/>
+        ${Array.from({ length: 60 }, (_, i) => `<line x1="380" y1="${i % 5 ? 70 : 58}" x2="380" y2="92" stroke="${ink}" stroke-opacity="${i % 5 ? .25 : .7}" stroke-width="${i % 5 ? 3 : 6}" transform="rotate(${i * 6} 380 380)"/>`).join("")}
+        <line id="hand" x1="380" y1="380" x2="380" y2="120" stroke="${ink}" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="380" cy="380" r="22" fill="${ink}"/>`, "left:160px;top:520px;");
+      const arc = dial.querySelector("#arc"), hand = dial.querySelector("#hand");
+      const q = el(root, "a ctr serif it", "How long do you have?", `top:1330px;font-size:96px;color:${ink};`);
+      const opts = ["10 seconds", "1 minute", "5 minutes", "10 minutes"].map((o, i) =>
+        el(root, "a lbl", o, `top:${(i < 2 ? 330 : 1480)}px;${i % 2 ? "right" : "left"}:110px;color:${i ? muted : red};font-size:30px;`));
+      return (lt) => {
+        const k = Ez.io(P(lt, .2, 4));
+        arc.setAttribute("stroke-dashoffset", String(2073 * (1 - k * .25)));
+        hand.setAttribute("transform", `rotate(${k * 90} 380 380)`);
+        S(dial, 1, 0, 0, lerp(.85, 1, Ez.back(P(lt, 0, .8))));
+        S(q, P(lt, .5, 1.1), 0, (1 - Ez.out(P(lt, .5, 1.2))) * 40);
+        opts.forEach((o, i) => S(o, P(lt, 1.2 + i * .45, 1.6 + i * .45), 0, (1 - Ez.out(P(lt, 1.2 + i * .45, 1.8 + i * .45))) * 20));
+      };
+    },
+  });
+
+  // 4–8 — ten seconds
+  scenes.push({
+    a: 4, b: 8.2, say: D.line,
+    build(root) {
+      const lab = el(root, "a lbl", "In 10 seconds", `left:110px;top:520px;color:${red};`);
+      const line = el(root, "a serif", "", `left:110px;right:110px;top:600px;font-size:84px;color:${ink};line-height:1.12;`);
+      const caret = el(root, "a", "", `width:6px;height:80px;background:${red};`);
+      const meas = el(root, "a serif", "", `left:110px;right:110px;top:600px;font-size:84px;line-height:1.12;visibility:hidden;`);
+      return (lt) => {
+        S(lab, P(lt, 0, .3));
+        type(line, D.line, lt, .25, 46);
+        meas.innerHTML = `${esc(line.textContent)}<span id="c">|</span>`;
+        const c = meas.querySelector("#c");
+        caret.style.left = `${110 + c.offsetLeft}px`;
+        caret.style.top = `${600 + c.offsetTop + 10}px`;
+        caret.style.opacity = Math.floor(lt * 3) % 2 ? .2 : 1;
+      };
+    },
+  });
+
+  // 8–20 — the five chapters
+  chapters.forEach((c, i) => {
+    const facts = chapterFacts[c].filter(Boolean);
+    scenes.push({
+      a: 8 + i * per, b: 8 + (i + 1) * per + .15, say: `${c}. ${facts.join(". ")}.`,
+      build(root) {
+        const num = el(root, "a lbl", `Chapter ${i + 1} of ${chapters.length}`, `left:110px;top:470px;color:${muted};`);
+        const g = svg(root, 260, 200, glyph[c], "left:110px;top:560px;");
+        const title = el(root, "a serif", "", `left:100px;right:80px;top:820px;font-size:150px;color:${ink};`);
+        const spans = letters(title, c);
+        const rows = facts.map((f, j) => el(root, "a", esc(f), `left:110px;right:100px;top:${1140 + j * 92}px;font:600 50px Inter;color:${j ? muted : red};`));
+        const rule = el(root, "a", "", `left:110px;top:1100px;height:4px;width:860px;background:${ink};transform-origin:0 0;`);
+        return (lt, d) => {
+          const o = inout(lt, d, .25, .25);
+          root.style.opacity = o;
+          S(num, P(lt, 0, .3));
+          S(g, 1, (1 - Ez.out(P(lt, 0, .5))) * -80, 0, 1);
+          g.style.opacity = P(lt, 0, .4);
+          rise(spans, lt, .05, .018, 90);
+          rule.style.transform = `scaleX(${Ez.out(P(lt, .2, .9))})`;
+          rows.forEach((r, j) => S(r, P(lt, .45 + j * .3, .8 + j * .3), (1 - Ez.out(P(lt, .45 + j * .3, 1 + j * .3))) * 60));
+          root.style.transform = `translateX(${(1 - Ez.out(P(lt, 0, .35))) * 120 - Ez.in(P(lt, d - .3, d)) * 120}px)`;
+        };
+      },
+    });
+  });
+
+  // 20–26 — how I work
+  scenes.push({
+    a: 20, b: 26.2, say: `How I work: ${D.principles.join(". ")}.`,
+    build(root) {
+      const head = el(root, "a serif it", "How I work", `left:110px;top:400px;font-size:120px;color:${ink};`);
+      const rows = D.principles.slice(0, 6).map((p, i) => {
+        const r = el(root, "a", `<span style="display:inline-block;width:64px;font:700 34px 'JetBrains Mono';color:${red}">0${i + 1}</span>${esc(p)}`,
+          `left:110px;right:90px;top:${600 + i * 150}px;font:600 46px Inter;color:${ink};padding-bottom:26px;border-bottom:3px solid rgba(28,25,23,.14);`);
+        return r;
+      });
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        S(head, P(lt, 0, .4), 0, (1 - Ez.out(P(lt, 0, .6))) * 40);
+        rows.forEach((r, i) => S(r, P(lt, .4 + i * .7, .7 + i * .7), (1 - Ez.back(P(lt, .4 + i * .7, 1 + i * .7))) * 120));
+      };
+    },
+  });
+
+  // 26–30 — the face
+  scenes.push({
+    a: 26, b: 30, say: "Read me in ten seconds, or ten minutes. sankettambare.in/about",
+    build(root) {
+      const ring = svg(root, 620, 620, `<circle cx="310" cy="310" r="290" fill="none" stroke="${ink}" stroke-opacity=".12" stroke-width="16"/>
+        <circle id="r" cx="310" cy="310" r="290" fill="none" stroke="${red}" stroke-width="16" stroke-linecap="round" transform="rotate(-90 310 310)" stroke-dasharray="1822" stroke-dashoffset="1822"/>`, "left:230px;top:330px;");
+      const r = ring.querySelector("#r");
+      const ph = photo(root, D.me, 270, 370, 540, 540, "border-radius:50%;");
+      const a1 = el(root, "a ctr serif", "Read me in ten seconds", `top:1060px;font-size:96px;color:${ink};`);
+      const a2 = el(root, "a ctr serif it", "— or ten minutes.", `top:1170px;font-size:96px;color:${red};`);
+      return (lt) => {
+        r.setAttribute("stroke-dashoffset", String(1822 * (1 - Ez.io(P(lt, 0, 2.6)))));
+        S(ph, P(lt, 0, .5), 0, 0, lerp(.9, 1, Ez.out(P(lt, 0, 1))));
+        burns(ph, P(lt, 0, 4), 3);
+        S(a1, P(lt, .5, 1), 0, (1 - Ez.out(P(lt, .5, 1.1))) * 30);
+        S(a2, P(lt, 1.1, 1.6), 0, (1 - Ez.out(P(lt, 1.1, 1.7))) * 30);
+      };
+    },
+  });
+
+  return {
+    theme: { bg: paper, fg: ink, accent: red, muted, rail: "rgba(28,25,23,.12)", grain: .07, vig: "rgba(120,90,50,.18)" },
+    route: "/about", label: "About", scenes, flashes: [],
+  };
+};
+
+// ================================================================= RESUME
+// "One page." A sheet of A4 builds itself: the name, the career as a
+// timeline, the numbers, the skills, the certificates, then it prints.
+FILMS.resume = (D) => {
+  const bg = "#0f172a", paper = "#ffffff", ink = "#0f172a", blue = "#2563eb", muted = "#64748b";
+  const GROUP = { work: blue, research: "#7c3aed", campus: "#94a3b8", leadership: "#94a3b8" };
+  const scenes = [];
+  const roles = D.roles;
+
+  // 0–4 — the sheet
+  scenes.push({
+    a: 0, b: 4.2, say: `Sanket Tambare. ${D.current || "Software engineer"}.`,
+    build(root) {
+      const sheet = el(root, "a", "", `left:140px;top:300px;width:800px;height:1132px;background:${paper};border-radius:10px;box-shadow:0 60px 120px rgba(0,0,0,.5);`);
+      const name = el(sheet, "a", "", `left:70px;top:90px;font:900 84px Inter;color:${ink};letter-spacing:-2px;`);
+      const role = el(sheet, "a", "", `left:72px;top:200px;right:60px;font:600 36px Inter;color:${blue};`);
+      const rule = el(sheet, "a", "", `left:70px;top:310px;width:660px;height:4px;background:${ink};transform-origin:0 0;`);
+      const lines = Array.from({ length: 14 }, (_, i) => el(sheet, "a", "", `left:70px;top:${360 + i * 50}px;height:16px;border-radius:8px;width:${[600, 520, 640, 380, 600, 560, 300, 620, 500, 640, 420, 580, 520, 360][i]}px;background:#e2e8f0;transform-origin:0 0;`));
+      return (lt) => {
+        S(sheet, 1, 0, (1 - Ez.back(P(lt, 0, .8))) * 900, 1, (1 - Ez.out(P(lt, 0, .8))) * -6);
+        type(name, "Sanket Tambare", lt, .6, 26);
+        type(role, D.current || "", lt, 1.4, 40);
+        rule.style.transform = `scaleX(${Ez.out(P(lt, 1.2, 1.8))})`;
+        lines.forEach((l, i) => { l.style.transform = `scaleX(${Ez.out(P(lt, 1.8 + i * .07, 2.4 + i * .07))})`; });
+        root.style.transform = `scale(${lerp(1, 1.8, Ez.in(P(lt, 3.6, 4.2)))})`;
+        root.style.opacity = 1 - P(lt, 3.9, 4.2);
+      };
+    },
+  });
+
+  // 4–13 — the career, one role per beat
+  const first = roles[0]?.start, last = new Date().getFullYear();
+  scenes.push({
+    a: 4, b: 13.2, say: `The career: ${roles.map((r) => `${r.position}, ${r.company}, from ${r.start}`).join("; ")}.`,
+    build(root) {
+      const head = el(root, "a lbl", "Experience", `left:90px;top:220px;color:${blue};`);
+      const axis = el(root, "a", "", `left:200px;top:320px;width:4px;height:1400px;background:rgba(255,255,255,.18);transform-origin:0 0;`);
+      const yTop = 330, span = 1360;
+      const yOf = (y) => yTop + ((y - first) / Math.max(1, last - first)) * span;
+      const years = [];
+      for (let y = first; y <= last; y += 1) years.push(el(root, "a mono", String(y), `left:60px;top:${yOf(y) - 18}px;font-size:30px;color:#94a3b8;`));
+      // Roles that share a start year step down so neither hides the other.
+      const used = {};
+      const cards = roles.map((r, i) => {
+        const n = used[r.start] = (used[r.start] || 0) + 1;
+        const y = yOf(r.start) + (n - 1) * 120 - 36;
+        const c = el(root, "a", `<div style="font:800 40px Inter;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.company)}</div>
+          <div style="font:500 30px Inter;color:#cbd5e1;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.position)}${r.duration ? ` · ${esc(r.duration)}` : ""}</div>`,
+          `left:250px;right:60px;top:${y}px;padding:18px 26px;border-left:8px solid ${GROUP[r.group] || blue};background:rgba(255,255,255,.06);border-radius:0 18px 18px 0;`);
+        const dot = el(root, "a", "", `left:186px;top:${yOf(r.start) - 16}px;width:32px;height:32px;border-radius:50%;background:${GROUP[r.group] || blue};box-shadow:0 0 0 8px ${bg};`);
+        return [c, dot, i];
+      });
+      const legend = el(root, "a", ["work", "research", "campus"].filter((g) => roles.some((r) => r.group === g)).map((g) => `<span style="display:inline-flex;align-items:center;gap:12px;margin-right:36px"><i style="width:22px;height:22px;border-radius:50%;background:${GROUP[g]};display:inline-block"></i>${g}</span>`).join(""),
+        `left:90px;bottom:120px;font:700 28px Inter;color:#cbd5e1;text-transform:uppercase;letter-spacing:.14em;`);
+      const step = 8 / Math.max(1, roles.length);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        S(head, P(lt, 0, .3));
+        axis.style.transform = `scaleY(${Ez.io(P(lt, 0, 8.4))})`;
+        years.forEach((y, i) => { y.style.opacity = P(lt, (i / years.length) * 8.4, (i / years.length) * 8.4 + .3); });
+        cards.forEach(([c, dot, i]) => {
+          const at = .3 + i * step;
+          S(c, P(lt, at, at + .3), (1 - Ez.back(P(lt, at, at + .55))) * 140);
+          S(dot, P(lt, at, at + .2), 0, 0, Ez.back(P(lt, at, at + .4)));
+          if (roles[i].current) dot.style.boxShadow = `0 0 0 8px ${bg}, 0 0 0 ${8 + 10 * (0.5 + 0.5 * Math.sin(lt * 6))}px rgba(37,99,235,.35)`;
+        });
+        S(legend, P(lt, 1, 1.5));
+      };
+    },
+  });
+
+  // 13–18 — the numbers
+  const kpis = [
+    has(D.years) && [`${D.years}+`, "years in industry"],
+    has(D.projects) && [D.projects, "projects shipped"],
+    has(D.certs?.length) && [D.certs.length, "certifications"],
+    has(D.degrees?.length) && [D.degrees.length, D.degrees.length === 1 ? "degree" : "degrees"],
+  ].filter(Boolean);
+  scenes.push({
+    a: 13, b: 18.2, say: kpis.map(([n, l]) => `${n} ${l}`).join(". ") + ".",
+    build(root) {
+      const tiles = kpis.map(([n, l], i) => {
+        const x = 90 + (i % 2) * 470, y = 520 + Math.floor(i / 2) * 470;
+        const t = el(root, "a", `<div class="v" style="font:900 190px Inter;letter-spacing:-6px;line-height:1;color:#fff"></div><div style="font:700 32px Inter;color:#bfdbfe;margin-top:18px;text-transform:uppercase;letter-spacing:.12em">${esc(l)}</div>`,
+          `left:${x}px;top:${y}px;width:430px;height:420px;padding:56px 44px;border-radius:36px;background:${i === 0 ? blue : "rgba(255,255,255,.07)"};`);
+        return [t, t.querySelector(".v"), n];
+      });
+      const head = el(root, "a ctr", "In numbers", `top:330px;font:900 92px Inter;color:#fff;letter-spacing:-2px;`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .3), 0, (1 - Ez.out(P(lt, 0, .5))) * 30);
+        tiles.forEach(([t, v, n], i) => {
+          const at = .25 + i * .35;
+          S(t, P(lt, at, at + .2), 0, 0, lerp(.6, 1, Ez.back(P(lt, at, at + .5))));
+          const num = parseInt(n, 10);
+          const k = Ez.out(P(lt, at, at + 1.2));
+          v.textContent = String(n).endsWith("+") ? `${Math.round(num * k)}+` : String(Math.round(num * k));
+        });
+      };
+    },
+  });
+
+  // 18–22 — skills
+  scenes.push({
+    a: 18, b: 22.2, say: `Strongest skills: ${D.skills.map((s) => s.title).join(", ")}.`,
+    build(root) {
+      const head = el(root, "a", `Skills <span style="color:#94a3b8;font-weight:600">· top ${D.skills.length} of ${D.skillCount}</span>`, `left:90px;top:330px;font:900 72px Inter;color:#fff;letter-spacing:-1px;`);
+      const rows = D.skills.map((s, i) => {
+        const r = el(root, "a", `<div style="font:700 42px Inter;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:560px">${esc(s.title)}</div>
+          <div class="dots" style="position:absolute;right:0;top:6px;display:flex;gap:16px">${Array.from({ length: 5 }, () => `<i style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:block"></i>`).join("")}</div>`,
+          `left:90px;right:90px;top:${490 + i * 132}px;height:60px;`);
+        return [r, [...r.querySelectorAll("i")], s.level];
+      });
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .3));
+        rows.forEach(([r, dots, lv], i) => {
+          const at = .2 + i * .22;
+          S(r, P(lt, at, at + .2), (1 - Ez.out(P(lt, at, at + .4))) * 80);
+          dots.forEach((dt, j) => {
+            const on = j < lv && lt > at + .25 + j * .1;
+            dt.style.background = on ? blue : "rgba(255,255,255,.14)";
+            dt.style.transform = `scale(${on ? lerp(1.5, 1, P(lt, at + .25 + j * .1, at + .45 + j * .1)) : 1})`;
+          });
+        });
+      };
+    },
+  });
+
+  // 22–26 — certificates, newest first
+  const certs = D.certs.slice(0, 5);
+  scenes.push({
+    a: 22, b: 26.2, say: `${D.certs.length} certifications, newest first: ${certs.slice(0, 3).map((c) => `${c.name}, ${c.source}`).join("; ")}.`,
+    build(root) {
+      const head = el(root, "a", "Certified", `left:90px;top:330px;font:900 92px Inter;color:#fff;letter-spacing:-2px;`);
+      const cards = certs.map((c, i) => el(root, "a", `<div style="font:700 26px 'JetBrains Mono';color:${blue}">${c.year || ""}</div>
+        <div style="font:800 44px Inter;color:${ink};margin-top:8px;line-height:1.1">${esc(c.name)}</div>
+        <div style="font:600 30px Inter;color:${muted};margin-top:10px">${esc(c.source)}</div>`,
+        `left:90px;right:90px;top:${480 + i * 256}px;padding:26px 36px;background:${paper};border-radius:22px;box-shadow:0 24px 48px rgba(0,0,0,.35);`));
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .3));
+        cards.forEach((c, i) => {
+          const at = .2 + i * .4;
+          S(c, P(lt, at, at + .15), 0, (1 - Ez.back(P(lt, at, at + .5))) * 160, 1, (1 - Ez.out(P(lt, at, at + .5))) * (i % 2 ? 6 : -6));
+        });
+      };
+    },
+  });
+
+  // 26–30 — print
+  scenes.push({
+    a: 26, b: 30, say: "One page. Always current. Print it, or copy it as plain text. sankettambare.in/resume",
+    build(root) {
+      const sheet = el(root, "a", `<div style="position:absolute;left:44px;top:50px;font:900 44px Inter;color:${ink}">Sanket Tambare</div>
+        ${Array.from({ length: 16 }, (_, i) => `<div style="position:absolute;left:44px;top:${130 + i * 34}px;height:12px;border-radius:6px;width:${[420, 360, 460, 300, 440, 380, 220, 450, 340, 460, 280, 400, 380, 240, 420, 300][i]}px;background:${i % 5 === 0 ? blue : "#e2e8f0"}"></div>`).join("")}`,
+        `left:290px;top:420px;width:500px;height:707px;background:${paper};border-radius:8px;box-shadow:0 40px 90px rgba(0,0,0,.5);`);
+      const a4 = el(root, "a ctr mono", "A4 · 1 page", `top:1170px;font-size:34px;color:#94a3b8;`);
+      const h1 = el(root, "a ctr", "One page.", `top:1260px;font:900 120px Inter;color:#fff;letter-spacing:-3px;`);
+      const h2 = el(root, "a ctr", "Always current.", `top:1390px;font:900 120px Inter;color:${blue};letter-spacing:-3px;`);
+      return (lt) => {
+        S(sheet, P(lt, 0, .3), 0, (1 - Ez.out(P(lt, 0, .8))) * -200, 1);
+        S(a4, P(lt, .6, 1));
+        S(h1, P(lt, .5, .9), 0, (1 - Ez.out(P(lt, .5, 1))) * 40);
+        S(h2, P(lt, 1, 1.4), 0, (1 - Ez.out(P(lt, 1, 1.5))) * 40);
+      };
+    },
+  });
+
+  return {
+    theme: { bg, fg: "#ffffff", accent: blue, muted: "#94a3b8", rail: "rgba(255,255,255,.14)", grain: .05, vig: "rgba(0,0,0,.5)" },
+    route: "/resume", label: "Resume", scenes, flashes: [13, 26],
+  };
+};
+
+// ================================================================= LEDGER
+// "Every word, counted." Ink on paper: the total written by a pen, the long
+// arc of the years, a calendar of ink blots, the rhythm of the week, records.
+FILMS.ledger = (D) => {
+  const paper = "#f4eee2", ink = "#1d3a6b", sepia = "#8b5e34", red = "#b22200", muted = "#7a6f62";
+  const T = D.totals;
+  const scenes = [];
+
+  // 0–4 — the pen
+  scenes.push({
+    a: 0, b: 4.2, say: `${fmt(T.words)} words, written since ${monthYear(T.firstPost)}.`,
+    build(root) {
+      const stroke = svg(root, 1000, 260, `<path id="p" d="M20 180 C 140 60, 220 240, 340 140 S 540 40, 640 150 S 860 230, 980 90" fill="none" stroke="${ink}" stroke-width="10" stroke-linecap="round" stroke-dasharray="1400" stroke-dashoffset="1400"/>`, "left:40px;top:500px;");
+      const p = stroke.querySelector("#p");
+      const big = el(root, "a ctr mono", "", `top:820px;font-size:170px;font-weight:700;color:${ink};letter-spacing:-6px;`);
+      const cap = el(root, "a ctr serif it", "words, in ink", `top:1040px;font-size:92px;color:${sepia};`);
+      const since = el(root, "a ctr lbl", `since ${monthYear(T.firstPost)}`, `top:1190px;color:${muted};`);
+      return (lt) => {
+        p.setAttribute("stroke-dashoffset", String(1400 * (1 - Ez.io(P(lt, 0, 1.6)))));
+        big.textContent = fmt(T.words * Ez.out(P(lt, .6, 2.6)));
+        big.style.filter = `blur(${(1 - P(lt, .6, 1.2)) * 8}px)`;
+        S(big, P(lt, .6, 1));
+        S(cap, P(lt, 1.4, 1.9), 0, (1 - Ez.out(P(lt, 1.4, 2))) * 30);
+        S(since, P(lt, 2, 2.4));
+        root.style.opacity = 1 - P(lt, 3.9, 4.2);
+      };
+    },
+  });
+
+  // 4–10 — the long arc
+  const yrs = D.byYear, maxW = Math.max(...yrs.map((y) => y.words));
+  const peak = yrs.reduce((a, y) => (y.words > a.words ? y : a), yrs[0]);
+  scenes.push({
+    a: 4, b: 10.2, say: `Year by year. ${peak.year} alone: ${peak.posts} posts, ${fmt(peak.words)} words.`,
+    build(root) {
+      const head = el(root, "a serif", "The long arc", `left:90px;top:300px;font-size:120px;color:${ink};`);
+      const base = 1500, h = 900, bw = 900 / yrs.length;
+      const bars = yrs.map((y, i) => {
+        const b = el(root, "a", "", `left:${90 + i * bw + 14}px;width:${bw - 28}px;top:${base}px;height:0;background:${y === peak ? red : ink};border-radius:10px 10px 0 0;`);
+        const lab = el(root, "a mono", y.year, `left:${90 + i * bw}px;width:${bw}px;top:${base + 20}px;text-align:center;font-size:30px;color:${muted};`);
+        const val = el(root, "a mono", "", `left:${90 + i * bw - 20}px;width:${bw + 40}px;text-align:center;font-size:28px;font-weight:700;color:${y === peak ? red : ink};`);
+        return [b, lab, val, y];
+      });
+      const note = el(root, "a", "", `left:90px;right:90px;top:470px;font:600 46px Inter;color:${red};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .4));
+        bars.forEach(([b, lab, val, y], i) => {
+          const k = Ez.out(P(lt, .3 + i * .35, 1.1 + i * .35));
+          const hh = Math.max(8, (y.words / maxW) * h * k);
+          b.style.top = `${base - hh}px`;
+          b.style.height = `${hh}px`;
+          lab.style.opacity = P(lt, .3 + i * .35, .6 + i * .35);
+          val.style.top = `${base - hh - 44}px`;
+          val.textContent = k > 0 ? fmt(y.words * k) : "";
+        });
+        note.textContent = lt > 3.4 ? `${peak.year}: ${peak.posts} posts, ${fmt(peak.words)} words` : "";
+        S(note, P(lt, 3.4, 3.8), (1 - Ez.out(P(lt, 3.4, 3.9))) * 40);
+      };
+    },
+  });
+
+  // 10–16 — the ink calendar
+  const months = D.months;
+  const byKey = Object.fromEntries(months.map((m) => [m.month, m]));
+  const y0 = Number(T.firstPost.slice(0, 4)), y1 = Number(T.latestPost.slice(0, 4));
+  const maxM = Math.max(...months.map((m) => m.words));
+  scenes.push({
+    a: 10, b: 16.2, say: `The ink calendar: ${T.activeMonths} months with ink in them. The busiest, ${T.busiestMonth.label}: ${T.busiestMonth.posts} posts.`,
+    build(root) {
+      const head = el(root, "a serif", "Every month, a blot", `left:90px;top:300px;font-size:104px;color:${ink};`);
+      const sub = el(root, "a", "as large as its words", `left:94px;top:420px;font:600 40px Inter;color:${muted};`);
+      const cell = 72, gx = 190, gy = 560;
+      const mlab = el(root, "a mono", MON.map((m, i) => `<span style="position:absolute;left:${i * cell}px;width:${cell}px;text-align:center">${m[0]}</span>`).join(""), `left:${gx}px;top:${gy - 50}px;width:${cell * 12}px;font-size:26px;color:${muted};`);
+      const cells = [];
+      for (let y = y0; y <= y1; y += 1) {
+        const row = y - y0;
+        el(root, "a mono", String(y), `left:60px;top:${gy + row * (cell + 40) + 18}px;font-size:30px;color:${muted};`);
+        for (let m = 0; m < 12; m += 1) {
+          const key = `${y}-${String(m + 1).padStart(2, "0")}`;
+          const rec = byKey[key];
+          const dot = el(root, "a", "", `left:${gx + m * cell + cell / 2}px;top:${gy + row * (cell + 40) + cell / 2}px;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:rgba(29,58,107,.14);`);
+          const blot = rec ? el(root, "a", "", `left:${gx + m * cell + cell / 2}px;top:${gy + row * (cell + 40) + cell / 2}px;border-radius:46% 54% 50% 50%;background:${key === T.busiestMonth.month ? red : ink};`) : null;
+          cells.push({ blot, dot, size: rec ? 18 + Math.sqrt(rec.words / maxM) * 86 : 0, order: row * 12 + m });
+        }
+      }
+      const total = (y1 - y0 + 1) * 12;
+      const call = el(root, "a", `<b style="color:${red}">${esc(T.busiestMonth.label)}</b> · ${T.busiestMonth.posts} posts · ${fmt(T.busiestMonth.words)} words`, `left:90px;right:90px;top:${gy + (y1 - y0 + 1) * (cell + 40) + 30}px;font:600 44px Inter;color:${ink};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .4));
+        S(sub, P(lt, .2, .6));
+        S(mlab, P(lt, .2, .6));
+        cells.forEach((c) => {
+          const at = .4 + (c.order / total) * 3.6;
+          if (!c.blot) { c.dot.style.opacity = P(lt, at - .3, at); return; }
+          const k = Ez.elastic(P(lt, at, at + .7));
+          c.blot.style.width = c.blot.style.height = `${c.size * k}px`;
+          c.blot.style.margin = `${-c.size * k / 2}px 0 0 ${-c.size * k / 2}px`;
+          c.blot.style.opacity = .9;
+          c.dot.style.opacity = 0;
+        });
+        S(call, P(lt, 4.4, 4.8), 0, (1 - Ez.out(P(lt, 4.4, 5))) * 30);
+      };
+    },
+  });
+
+  // 16–21 — rhythm: the week and the length of an essay
+  const wk = D.week, maxD = Math.max(...wk.map((w) => w.posts));
+  const topDay = wk.reduce((a, w) => (w.posts > a.posts ? w : a), wk[0]);
+  const lens = D.lengths, maxL = Math.max(...lens.map((l) => l.posts));
+  const topLen = lens.reduce((a, l) => (l.posts > a.posts ? l : a), lens[0]);
+  scenes.push({
+    a: 16, b: 21.2, say: `${topDay.day} is writing day: ${topDay.posts} posts. Most essays run ${topLen.label} words.`,
+    build(root) {
+      const h1 = el(root, "a serif", `${topDay.day}s`, `left:90px;top:300px;font-size:150px;color:${red};`);
+      const h1b = el(root, "a", `are for writing · ${topDay.posts} posts`, `left:96px;top:460px;font:600 44px Inter;color:${ink};`);
+      const wbars = wk.map((w, i) => {
+        const b = el(root, "a", `<div class="f" style="position:absolute;left:0;bottom:0;right:0;border-radius:12px;background:${w === topDay ? red : ink}"></div>`, `left:${110 + i * 126}px;top:560px;width:84px;height:330px;`);
+        el(root, "a mono", w.day.slice(0, 3), `left:${100 + i * 126}px;width:104px;text-align:center;top:905px;font-size:28px;color:${muted};`);
+        return [b.querySelector(".f"), w.posts / maxD];
+      });
+      const h2 = el(root, "a serif it", "How long?", `left:90px;top:1020px;font-size:104px;color:${ink};`);
+      const shelf = lens.map((l, i) => {
+        const r = el(root, "a", `<div class="b" style="position:absolute;left:250px;top:8px;height:52px;border-radius:8px;background:${l === topLen ? red : sepia}"></div><span class="mono" style="font-size:30px;color:${muted}">${esc(l.label)}</span><span class="n mono" style="position:absolute;font-size:30px;font-weight:700;top:14px;color:${ink}"></span>`,
+          `left:90px;width:900px;top:${1170 + i * 86}px;height:70px;`);
+        return [r.querySelector(".b"), r.querySelector(".n"), l];
+      });
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(h1, P(lt, 0, .3), (1 - Ez.out(P(lt, 0, .5))) * -60);
+        S(h1b, P(lt, .2, .5));
+        wbars.forEach(([f, k], i) => { f.style.height = `${330 * k * Ez.back(P(lt, .3 + i * .1, .9 + i * .1))}px`; });
+        S(h2, P(lt, 2, 2.4));
+        shelf.forEach(([b, n, l], i) => {
+          const k = Ez.out(P(lt, 2.3 + i * .15, 3 + i * .15));
+          const w = Math.max(6, (l.posts / maxL) * 560 * k);
+          b.style.width = `${w}px`;
+          n.style.left = `${270 + w}px`;
+          n.textContent = k > .05 ? String(Math.round(l.posts * k)) : "";
+        });
+      };
+    },
+  });
+
+  // 21–26 — the records, ruled like a ledger
+  const recs = [
+    T.longestPost && ["Longest", T.longestPost.title, `${fmt(T.longestPost.words)} words`],
+    T.busiestYear && ["Busiest year", T.busiestYear.year, `${T.busiestYear.posts} posts`],
+    D.topics[0] && ["Most-written topic", D.topics[0].tag, `${D.topics[0].posts} posts`],
+    D.latest && ["Latest", D.latest.title, day(D.latest.date)],
+  ].filter(Boolean);
+  scenes.push({
+    a: 21, b: 26.2, say: recs.map(([k, v, n]) => `${k}: ${v}, ${n}`).join(". ") + ".",
+    build(root) {
+      const head = el(root, "a serif", "Records", `left:90px;top:300px;font-size:130px;color:${ink};`);
+      const margin = el(root, "a", "", `left:150px;top:480px;width:3px;height:1200px;background:${red};opacity:.5;transform-origin:0 0;`);
+      const rows = recs.map(([k, v, n], i) => el(root, "a", `<div class="lbl" style="font-size:24px;color:${red}">${esc(k)}</div>
+        <div class="serif" style="font-size:72px;color:${ink};margin-top:10px">${esc(v)}</div>
+        <div class="mono" style="font-size:34px;color:${sepia};margin-top:8px">${esc(n)}</div>`,
+        `left:190px;right:80px;top:${520 + i * 290}px;padding-bottom:30px;border-bottom:3px solid rgba(29,58,107,.18);`));
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .4));
+        margin.style.transform = `scaleY(${Ez.out(P(lt, .1, 1))})`;
+        rows.forEach((r, i) => S(r, P(lt, .4 + i * .8, .8 + i * .8), (1 - Ez.out(P(lt, .4 + i * .8, 1 + i * .8))) * 60));
+      };
+    },
+  });
+
+  // 26–30 — the end
+  scenes.push({
+    a: 26, b: 30, say: `${T.posts} posts. ${D.platforms.length} platforms. Every word, counted. sankettambare.in/writing-ledger`,
+    build(root) {
+      const a1 = el(root, "a ctr mono", `${T.posts} posts · ${D.platforms.map((p) => p.platform).join(" · ")}`, `top:620px;font-size:40px;color:${sepia};`);
+      const a2 = el(root, "a ctr serif", "Every word,", `top:720px;font-size:170px;color:${ink};`);
+      const a3 = el(root, "a ctr serif it", "counted.", `top:900px;font-size:170px;color:${red};`);
+      const under = svg(root, 700, 60, `<path id="u" d="M10 40 C 200 10, 500 60, 690 22" fill="none" stroke="${red}" stroke-width="9" stroke-linecap="round" stroke-dasharray="760" stroke-dashoffset="760"/>`, "left:190px;top:1090px;");
+      const u = under.querySelector("#u");
+      return (lt) => {
+        S(a1, P(lt, 0, .4));
+        S(a2, P(lt, .2, .6), 0, (1 - Ez.out(P(lt, .2, .8))) * 40);
+        S(a3, P(lt, .7, 1.1), 0, (1 - Ez.out(P(lt, .7, 1.3))) * 40);
+        u.setAttribute("stroke-dashoffset", String(760 * (1 - Ez.io(P(lt, 1.2, 2)))));
+      };
+    },
+  });
+
+  return {
+    theme: { bg: paper, fg: ink, accent: red, muted, rail: "rgba(29,58,107,.14)", grain: .09, vig: "rgba(139,94,52,.2)" },
+    route: "/writing-ledger", label: "Writing Ledger", scenes, flashes: [],
+  };
+};
+
+// ================================================================= MICRO-BLOG
+// "After dark." Every short post a star; the hour they were written; two
+// languages; the years; the very first post.
+FILMS.microblog = (D) => {
+  const night = "#070b1f", indigo = "#8b9cff", saffron = "#f5a524", fg = "#ece9ff", muted = "#8f8bb3";
+  const A = D.all;
+  const scenes = [];
+  const hourLabel = (h) => (h === 0 ? "midnight" : h < 12 ? `${h} am` : h === 12 ? "noon" : `${h - 12} pm`);
+
+  // A star field from the committed sky (x = day index, y = post id), drawn once.
+  function starField(root, seed, count) {
+    const c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    c.className = "a";
+    c.style.cssText = "left:0;top:0;";
+    root.appendChild(c);
+    const r = rng(seed);
+    const pts = [];
+    const sky = D.sky;
+    const n = Math.min(count, sky.length / 2);
+    const maxX = Math.max(...sky.filter((_, i) => i % 2 === 0)) || 1;
+    const maxY = Math.max(...sky.filter((_, i) => i % 2 === 1)) || 1;
+    for (let i = 0; i < n; i += 1) {
+      pts.push({ x: 40 + (sky[i * 2] / maxX) * (W - 80) + (r() - .5) * 30, y: 220 + (sky[i * 2 + 1] / maxY) * (H - 440) + (r() - .5) * 30, s: .8 + r() * 2.6, tw: r() * 6.28, mr: r() < A.langs.mr / A.posts });
+    }
+    return (k, t, dim = 1) => {
+      const g = c.getContext("2d");
+      g.clearRect(0, 0, W, H);
+      const shown = Math.floor(pts.length * k);
+      for (let i = 0; i < shown; i += 1) {
+        const p = pts[i];
+        const a = (.55 + .45 * Math.sin(t * 2 + p.tw)) * dim;
+        g.fillStyle = p.mr ? `rgba(245,165,36,${a})` : `rgba(200,206,255,${a})`;
+        g.beginPath();
+        g.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+        g.fill();
+      }
+    };
+  }
+
+  // 0–5 — the sky fills
+  scenes.push({
+    a: 0, b: 5.2, say: `${fmt(A.posts)} short posts since ${monthYear(A.first)}. Every one a star.`,
+    build(root) {
+      const draw = starField(root, 7, 2400);
+      const big = el(root, "a ctr", "", `top:760px;font:900 230px Inter;color:${fg};letter-spacing:-8px;text-shadow:0 0 60px rgba(139,156,255,.5);`);
+      const cap = el(root, "a ctr serif it", "short posts", `top:1000px;font-size:100px;color:${indigo};`);
+      const since = el(root, "a ctr lbl", `since ${monthYear(A.first)}`, `top:1140px;color:${muted};`);
+      return (lt, d, t) => {
+        draw(Ez.io(P(lt, 0, 3.6)), t);
+        big.textContent = fmt(A.posts * Ez.out(P(lt, .3, 3)));
+        S(big, P(lt, .3, .8), 0, 0, lerp(.9, 1, Ez.out(P(lt, .3, 1.5))));
+        S(cap, P(lt, 1.2, 1.7));
+        S(since, P(lt, 1.8, 2.2));
+        root.style.opacity = 1 - P(lt, 4.9, 5.2);
+      };
+    },
+  });
+
+  // 5–11 — the clock
+  const maxH = Math.max(...A.hours);
+  scenes.push({
+    a: 5, b: 11.2, say: `Most are written late. Peak hour: ${hourLabel(A.peakHour)}. ${fmt(A.night)} of them after dark.`,
+    build(root) {
+      const R0 = 160, R1 = 360;
+      const wedges = A.hours.map((v, h) => {
+        const a0 = (h / 24) * Math.PI * 2 - Math.PI / 2, a1 = ((h + 1) / 24) * Math.PI * 2 - Math.PI / 2;
+        return { v, h, a0, a1 };
+      });
+      const clock = svg(root, 900, 900, `
+        <circle cx="450" cy="450" r="${R0 - 10}" fill="none" stroke="${muted}" stroke-opacity=".35" stroke-width="2"/>
+        <g id="w"></g>
+        ${[0, 6, 12, 18].map((h) => { const a = (h / 24) * Math.PI * 2 - Math.PI / 2; return `<text x="${450 + Math.cos(a) * (R1 + 40)}" y="${450 + Math.sin(a) * (R1 + 40) + 12}" text-anchor="middle" font-family="JetBrains Mono" font-size="30" fill="${muted}">${String(h).padStart(2, "0")}</text>`; }).join("")}
+        <line id="hand" x1="450" y1="450" x2="450" y2="${450 - R1 - 10}" stroke="${saffron}" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="450" cy="450" r="14" fill="${saffron}"/>`, "left:90px;top:360px;");
+      const g = clock.querySelector("#w"), hand = clock.querySelector("#hand");
+      const head = el(root, "a ctr", "", `top:1340px;font:900 120px Inter;color:${fg};letter-spacing:-3px;`);
+      const sub = el(root, "a ctr", `${fmt(A.night)} posts written after dark`, `top:1490px;font:600 48px Inter;color:${indigo};`);
+      const moon = svg(root, 140, 140, `<path d="M90 10 A 62 62 0 1 0 130 100 A 50 50 0 1 1 90 10 Z" fill="${saffron}"/>`, "left:860px;top:230px;");
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        const k = Ez.out(P(lt, .2, 2.4));
+        g.innerHTML = wedges.map((w) => {
+          const r = R0 + (w.v / maxH) * (R1 - R0) * k;
+          const p = (a, rr) => `${450 + Math.cos(a) * rr},${450 + Math.sin(a) * rr}`;
+          const late = w.h >= 20 || w.h <= 3;
+          return `<path d="M${p(w.a0 + .02, R0)} L${p(w.a0 + .02, r)} A ${r} ${r} 0 0 1 ${p(w.a1 - .02, r)} L${p(w.a1 - .02, R0)} A ${R0} ${R0} 0 0 0 ${p(w.a0 + .02, R0)} Z" fill="${late ? indigo : "#3a3f73"}"/>`;
+        }).join("");
+        const ang = lerp(0, (A.peakHour + .5) * 15, Ez.io(P(lt, 1.6, 3.4)));
+        hand.setAttribute("transform", `rotate(${ang} 450 450)`);
+        head.textContent = lt > 3.2 ? `Peak hour: ${hourLabel(A.peakHour)}` : "";
+        S(head, P(lt, 3.2, 3.6), 0, (1 - Ez.out(P(lt, 3.2, 3.8))) * 30);
+        S(sub, P(lt, 3.8, 4.2));
+        S(moon, P(lt, 3.4, 3.9), 0, (1 - Ez.out(P(lt, 3.4, 4))) * 40);
+      };
+    },
+  });
+
+  // 11–16 — two languages
+  scenes.push({
+    a: 11, b: 16.2, say: `Two languages. ${fmt(A.langs.en)} in English, ${fmt(A.langs.mr)} in Marathi. ${[...D.phrasesEn.slice(0, 2), ...D.phrasesMr.slice(0, 2)].join(", ")}.`,
+    build(root) {
+      const en = el(root, "a", `<div style="font:900 150px Inter;letter-spacing:-5px;color:${fg}" class="n"></div><div class="lbl" style="color:${indigo}">English</div>`, "left:110px;top:380px;");
+      const mr = el(root, "a", `<div style="font:900 150px Inter;letter-spacing:-5px;color:${fg};text-align:right" class="n"></div><div class="lbl deva" style="color:${saffron};text-align:right;letter-spacing:.05em;font-size:44px">मराठी</div>`, "right:110px;top:380px;");
+      const total = A.langs.en + A.langs.mr;
+      const bar = el(root, "a", `<i style="position:absolute;left:0;top:0;bottom:0;background:${indigo};border-radius:14px 0 0 14px"></i><i style="position:absolute;right:0;top:0;bottom:0;background:${saffron};border-radius:0 14px 14px 0"></i>`, "left:110px;right:110px;top:660px;height:28px;");
+      const [bi, bm] = bar.querySelectorAll("i");
+      const words = [
+        ...D.phrasesEn.map((p) => [p, indigo, false]),
+        ...D.phrasesMr.map((p) => [p, saffron, true]),
+      ];
+      const r = rng(11);
+      const chips = words.map(([w, c, mrw], i) => {
+        const x = 90 + (i % 2) * 460 + r() * 60, y = 820 + Math.floor(i / 2) * 150 + r() * 30;
+        return [el(root, `a ${mrw ? "deva" : "serif it"}`, esc(w), `left:${x}px;top:${y}px;font-size:${mrw ? 66 : 76}px;color:${c};white-space:nowrap;`), i];
+      });
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        S(en, P(lt, 0, .4), (1 - Ez.out(P(lt, 0, .6))) * -80);
+        S(mr, P(lt, .2, .6), (1 - Ez.out(P(lt, .2, .8))) * 80);
+        en.querySelector(".n").textContent = fmt(A.langs.en * Ez.out(P(lt, 0, 1.4)));
+        mr.querySelector(".n").textContent = fmt(A.langs.mr * Ez.out(P(lt, .2, 1.6)));
+        const k = Ez.out(P(lt, .4, 1.4));
+        bi.style.width = `${(A.langs.en / total) * 860 * k - 6}px`;
+        bm.style.width = `${(A.langs.mr / total) * 860 * k - 6}px`;
+        chips.forEach(([c, i]) => S(c, P(lt, 1.4 + i * .25, 1.8 + i * .25), 0, Math.sin(lt * 1.3 + i) * 8 + (1 - Ez.out(P(lt, 1.4 + i * .25, 2 + i * .25))) * 40));
+      };
+    },
+  });
+
+  // 16–21 — the years as a night skyline
+  const ys = D.years, maxY = Math.max(...ys.map((y) => y.posts));
+  const loud = ys.reduce((a, y) => (y.posts > a.posts ? y : a), ys[0]);
+  scenes.push({
+    a: 16, b: 21.2, say: `Year by year. ${loud.year} was the loudest: ${loud.posts} posts.`,
+    build(root) {
+      const head = el(root, "a", "Year by year", `left:90px;top:330px;font:900 92px Inter;color:${fg};letter-spacing:-2px;`);
+      const base = 1500, bw = 900 / ys.length;
+      const bars = ys.map((y, i) => {
+        const b = el(root, "a", "", `left:${90 + i * bw + 10}px;width:${bw - 20}px;top:${base}px;background:linear-gradient(${y === loud ? saffron : indigo}, rgba(139,156,255,.15));border-radius:12px 12px 0 0;`);
+        el(root, "a mono", `’${y.year.slice(2)}`, `left:${90 + i * bw}px;width:${bw}px;text-align:center;top:${base + 18}px;font-size:30px;color:${muted};`);
+        const v = el(root, "a mono", "", `left:${90 + i * bw - 20}px;width:${bw + 40}px;text-align:center;font-size:28px;font-weight:700;color:${y === loud ? saffron : fg};`);
+        return [b, v, y];
+      });
+      const note = el(root, "a", `${loud.year}: the loudest year`, `left:90px;top:450px;font:600 50px Inter;color:${saffron};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        S(head, P(lt, 0, .4));
+        bars.forEach(([b, v, y], i) => {
+          const k = Ez.out(P(lt, .3 + i * .22, 1.1 + i * .22));
+          const hh = Math.max(6, (y.posts / maxY) * 860 * k);
+          b.style.top = `${base - hh}px`;
+          b.style.height = `${hh}px`;
+          v.style.top = `${base - hh - 42}px`;
+          v.textContent = k > .05 ? String(Math.round(y.posts * k)) : "";
+        });
+        S(note, P(lt, 3, 3.4), (1 - Ez.out(P(lt, 3, 3.5))) * 40);
+      };
+    },
+  });
+
+  // 21–26 — the first post
+  scenes.push({
+    a: 21, b: 26.2, say: D.first ? `The first post, ${day(D.first.date)}: ${D.first.quote}` : "",
+    build(root) {
+      if (!D.first) return () => {};
+      const lab = el(root, "a lbl", `The first post · ${day(D.first.date)}`, `left:110px;top:520px;color:${saffron};`);
+      const q = el(root, "a serif", "", `left:110px;right:110px;top:620px;font-size:92px;color:${fg};line-height:1.12;`);
+      const mark = el(root, "a serif", "“", `left:70px;top:430px;font-size:300px;color:${indigo};opacity:.4;`);
+      const text = D.first.quote.replace(/\s+—.*$/, "");
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        S(lab, P(lt, 0, .3));
+        S(mark, P(lt, 0, .6) * .4, 0, 0, lerp(1.4, 1, Ez.out(P(lt, 0, .8))));
+        type(q, text, lt, .3, 30);
+      };
+    },
+  });
+
+  // 26–30 — the end
+  scenes.push({
+    a: 26, b: 30, say: "Written after dark. Read any time. sankettambare.in/micro-blog",
+    build(root) {
+      const draw = starField(root, 7, 2400);
+      const a1 = el(root, "a ctr serif", "Written after dark.", `top:760px;font-size:120px;color:${fg};`);
+      const a2 = el(root, "a ctr serif it", "Read any time.", `top:900px;font-size:120px;color:${saffron};`);
+      const moods = el(root, "a ctr", D.moods.map((m) => `<span style="display:inline-block;margin:0 10px 16px;padding:10px 24px;border-radius:999px;border:2px solid rgba(139,156,255,.5);color:${indigo}">${esc(m)}</span>`).join(""), `top:1090px;font:700 30px Inter;letter-spacing:.08em;padding:0 80px;`);
+      return (lt, d, t) => {
+        draw(1, t, .55);
+        S(a1, P(lt, 0, .5), 0, (1 - Ez.out(P(lt, 0, .7))) * 30);
+        S(a2, P(lt, .5, 1), 0, (1 - Ez.out(P(lt, .5, 1.2))) * 30);
+        S(moods, P(lt, 1.2, 1.7));
+      };
+    },
+  });
+
+  return {
+    theme: { bg: night, fg, accent: saffron, muted, rail: "rgba(255,255,255,.12)", grain: .05, vig: "rgba(0,0,0,.6)" },
+    route: "/micro-blog", label: "Micro-blog", scenes, flashes: [],
+  };
+};
+
+// ================================================================= PRESENTATIONS
+// "The lights go down." A projector clicks on and the decks fly past on the
+// screen; then the whole wall; then the calendar they were made on.
+FILMS.presentations = (D) => {
+  const dark = "#0c0a09", amber = "#fbbf24", fg = "#fafaf9", muted = "#a8a29e";
+  const decks = D.decks;
+  const scenes = [];
+  const screen = { x: 60, y: 560, w: 960, h: 540 };
+  const shotHtml = (d) => (d.shot ? `<img src="${d.shot}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;font:800 48px Inter;color:${fg};background:#292524">${esc(d.title)}</div>`);
+
+  // 0–4 — the projector
+  scenes.push({
+    a: 0, b: 4.2, say: `${D.count} decks, made for the web.`,
+    build(root) {
+      const beam = el(root, "a", "", `left:0;top:0;width:${W}px;height:${H}px;background:conic-gradient(from 170deg at 540px 1750px, transparent 0deg, rgba(251,191,36,.0) 4deg, rgba(251,191,36,.16) 10deg, rgba(251,191,36,.16) 20deg, rgba(251,191,36,0) 26deg, transparent 360deg);transform-origin:540px 1750px;`);
+      const scr = el(root, "a", shotHtml(decks[0]), `left:${screen.x}px;top:${screen.y}px;width:${screen.w}px;height:${screen.h}px;border-radius:14px;overflow:hidden;box-shadow:0 0 120px rgba(251,191,36,.25);background:#1c1917;`);
+      const big = el(root, "a ctr", "", `top:1180px;font:900 260px Inter;color:${fg};letter-spacing:-10px;line-height:1;`);
+      const cap = el(root, "a ctr lbl", "decks, made for the web", `top:1460px;color:${amber};`);
+      return (lt) => {
+        const on = lt > .5;
+        beam.style.opacity = on ? .7 + .3 * Math.sin(lt * 40) * (1 - P(lt, .5, 1)) : 0;
+        scr.style.opacity = on ? lerp(.2, 1, P(lt, .5, 1)) : 0;
+        scr.style.filter = `brightness(${on ? lerp(2.2, 1, P(lt, .5, 1.2)) : 0})`;
+        big.textContent = String(Math.round(D.count * Ez.out(P(lt, 1, 2.4))));
+        S(big, P(lt, 1, 1.3), 0, (1 - Ez.out(P(lt, 1, 1.6))) * 60);
+        S(cap, P(lt, 1.6, 2));
+      };
+    },
+  });
+
+  // 4–14 — the carousel
+  const pick = decks.slice(0, Math.min(12, decks.length));
+  const per = 10 / pick.length;
+  scenes.push({
+    a: 4, b: 14.2, say: `Newest first: ${pick.slice(0, 6).map((d) => d.title).join(". ")}.`,
+    build(root) {
+      const beam = el(root, "a", "", `left:0;top:0;width:${W}px;height:${H}px;background:conic-gradient(from 170deg at 540px 1750px, transparent 0deg, rgba(251,191,36,.16) 10deg, rgba(251,191,36,.16) 20deg, transparent 26deg);opacity:.6;`);
+      const frames = pick.map((d) => el(root, "a", shotHtml(d), `left:${screen.x}px;top:${screen.y}px;width:${screen.w}px;height:${screen.h}px;border-radius:14px;overflow:hidden;background:#1c1917;box-shadow:0 30px 80px rgba(0,0,0,.6);`));
+      const titles = pick.map((d) => el(root, "a", `<div class="lbl" style="color:${amber};font-size:24px">${d.date ? esc(day(d.date)) : esc(d.host)}</div><div style="font:800 64px Inter;color:${fg};margin-top:14px;line-height:1.08;letter-spacing:-1px">${esc(d.title)}</div>`, "left:80px;right:80px;top:1170px;"));
+      const idx = el(root, "a mono", "", `left:80px;top:470px;font-size:34px;color:${muted};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .2, .3);
+        const cur = Math.min(pick.length - 1, Math.floor(lt / per));
+        frames.forEach((f, i) => {
+          const local = lt - i * per;
+          const inK = Ez.out(P(local, 0, .35)), outK = Ez.in(P(local, per - .2, per + .15));
+          const vis = i === cur || (i === cur + 1 && local > -0.2);
+          f.style.display = vis || (i === cur - 1 && local < per + .15) ? "block" : "none";
+          S(f, 1, (1 - inK) * 1100 - outK * 1100, 0, lerp(.92, 1, inK) - outK * .08, (1 - inK) * 6);
+        });
+        titles.forEach((tl, i) => {
+          const local = lt - i * per;
+          tl.style.display = i === cur ? "block" : "none";
+          S(tl, P(local, .1, .35), 0, (1 - Ez.out(P(local, .1, .45))) * 40);
+        });
+        idx.textContent = `${String(cur + 1).padStart(2, "0")} / ${String(D.count).padStart(2, "0")}`;
+      };
+    },
+  });
+
+  // 14–20 — the wall
+  scenes.push({
+    a: 14, b: 20.2, say: D.slides ? `All ${D.count} on one wall. At least ${fmt(D.slides)} slides between them.` : `All ${D.count} on one wall.`,
+    build(root) {
+      const cols = 3, tw = 300, th = 169, gap = 20;
+      const rows = Math.ceil(decks.length / cols);
+      const gridH = rows * (th + gap);
+      const ox = (W - (cols * tw + (cols - 1) * gap)) / 2, oy = 400;
+      const tiles = decks.map((d, i) => el(root, "a", shotHtml(d), `left:${ox + (i % cols) * (tw + gap)}px;top:${oy + Math.floor(i / cols) * (th + gap)}px;width:${tw}px;height:${th}px;border-radius:10px;overflow:hidden;background:#1c1917;font-size:0;`));
+      tiles.forEach((t) => { const x = t.querySelector("div"); if (x) x.style.fontSize = "22px"; });
+      const shade = el(root, "a", "", `left:0;right:0;top:${H - 700}px;height:700px;background:linear-gradient(transparent, ${dark} 55%);`);
+      const big = el(root, "a ctr", "", `top:${H - 520}px;font:900 150px Inter;color:${fg};letter-spacing:-5px;`);
+      const cap = el(root, "a ctr lbl", D.slides ? `slides, at least · across ${D.slidesCounted} decks that count them` : "decks on one wall", `top:${H - 340}px;color:${amber};font-size:24px;`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        const scroll = Ez.io(P(lt, .4, d)) * Math.max(0, gridH - 900);
+        tiles.forEach((t, i) => {
+          const at = (i / decks.length) * 1.6;
+          S(t, P(lt, at, at + .25), 0, -scroll + (1 - Ez.out(P(lt, at, at + .5))) * 80, lerp(.7, 1, Ez.back(P(lt, at, at + .5))));
+        });
+        S(shade, 1);
+        big.textContent = D.slides ? fmt(D.slides * Ez.out(P(lt, 1.8, 3.6))) : String(D.count);
+        S(big, P(lt, 1.8, 2.2));
+        S(cap, P(lt, 2.4, 2.8));
+      };
+    },
+  });
+
+  // 20–26 — the calendar
+  const dated = decks.filter((d) => d.date).sort((a, b) => a.date.localeCompare(b.date));
+  const t0 = dated.length ? Date.parse(dated[0].date) : 0, t1 = dated.length ? Date.parse(dated[dated.length - 1].date) : 1;
+  const weeks = Math.max(1, (t1 - t0) / (7 * 864e5));
+  const rate = dated.length / weeks;
+  scenes.push({
+    a: 20, b: 26.2, say: dated.length > 1 ? `${dated.length} dated decks since ${day(D.since)}: about ${rate >= 1 ? `${rate.toFixed(1)} a week` : `one every ${Math.round(1 / rate)} weeks`}.` : "",
+    build(root) {
+      if (dated.length < 2) return () => {};
+      const head = el(root, "a", "The pace", `left:90px;top:360px;font:900 110px Inter;color:${fg};letter-spacing:-3px;`);
+      const line = el(root, "a", "", `left:120px;top:900px;width:840px;height:4px;background:${muted};transform-origin:0 0;`);
+      const dots = dated.map((d, i) => {
+        const x = 120 + ((Date.parse(d.date) - t0) / Math.max(1, t1 - t0)) * 840;
+        const lift = (i % 4) * 46;
+        return [el(root, "a", "", `left:${x - 14}px;top:${900 - 14 - lift}px;width:28px;height:28px;border-radius:50%;background:${amber};box-shadow:0 0 30px rgba(251,191,36,.6);`), i];
+      });
+      const a = el(root, "a mono", day(D.since), `left:110px;top:950px;font-size:30px;color:${muted};`);
+      const b = el(root, "a mono", day(D.latest), `right:110px;top:950px;font-size:30px;color:${muted};`);
+      const big = el(root, "a ctr", rate >= 1 ? `${rate.toFixed(1)} a week` : `1 every ${Math.round(1 / rate)} weeks`, `top:1120px;font:900 140px Inter;color:${amber};letter-spacing:-4px;`);
+      const cap = el(root, "a ctr", `${dated.length} dated decks in ${Math.round(weeks)} weeks`, `top:1300px;font:600 46px Inter;color:${fg};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .25, .3);
+        S(head, P(lt, 0, .4));
+        line.style.transform = `scaleX(${Ez.io(P(lt, .2, 2.2))})`;
+        dots.forEach(([dt, i]) => { const at = .3 + (i / dated.length) * 2; S(dt, P(lt, at, at + .1), 0, 0, Ez.back(P(lt, at, at + .4))); });
+        S(a, P(lt, .3, .6)); S(b, P(lt, 2, 2.3));
+        S(big, P(lt, 2.6, 3), 0, (1 - Ez.out(P(lt, 2.6, 3.2))) * 40);
+        S(cap, P(lt, 3.1, 3.5));
+      };
+    },
+  });
+
+  // 26–30 — the end
+  scenes.push({
+    a: 26, b: 30, say: "Every deck runs live, right in the page. sankettambare.in/presentations",
+    build(root) {
+      const scr = el(root, "a", shotHtml(decks[0]), `left:${screen.x + 160}px;top:420px;width:${screen.w - 320}px;height:${(screen.w - 320) * 9 / 16}px;border-radius:12px;overflow:hidden;box-shadow:0 0 100px rgba(251,191,36,.3);`);
+      const live = el(root, "a", `<i style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#ef4444;margin-right:14px;vertical-align:middle"></i>LIVE`, `left:${screen.x + 190}px;top:450px;font:800 28px Inter;color:#fff;letter-spacing:.2em;background:rgba(0,0,0,.6);padding:10px 18px;border-radius:10px;`);
+      const a1 = el(root, "a ctr", "Every deck runs live,", `top:960px;font:900 92px Inter;color:${fg};letter-spacing:-3px;`);
+      const a2 = el(root, "a ctr", "right in the page.", `top:1070px;font:900 92px Inter;color:${amber};letter-spacing:-3px;`);
+      return (lt) => {
+        S(scr, P(lt, 0, .4), 0, 0, lerp(.9, 1, Ez.out(P(lt, 0, .8))));
+        live.style.opacity = P(lt, .5, .7) * (Math.floor(lt * 2) % 2 ? .5 : 1);
+        S(a1, P(lt, .4, .8), 0, (1 - Ez.out(P(lt, .4, 1))) * 30);
+        S(a2, P(lt, .9, 1.3), 0, (1 - Ez.out(P(lt, .9, 1.5))) * 30);
+      };
+    },
+  });
+
+  return {
+    theme: { bg: dark, fg, accent: amber, muted, rail: "rgba(255,255,255,.12)", grain: .06, vig: "rgba(0,0,0,.6)" },
+    route: "/presentations", label: "Presentations", scenes, flashes: [4],
+  };
+};
+
+// ================================================================= SPORTS
+// "Every finish line." A start gun, the bibs, the distance ladder, three
+// stopwatches stopping on the personal bests, the years.
+FILMS.sports = (D) => {
+  const black = "#0a0a0a", orange = "#ff5a1f", fg = "#ffffff", muted = "#a3a3a3";
+  const scenes = [];
+  const races = D.races;
+
+  // 0–3 — the start
+  scenes.push({
+    a: 0, b: 3.1, say: "On your marks. Three, two, one.",
+    build(root) {
+      const n = el(root, "a ctr anton", "", `top:620px;font-size:620px;color:${fg};line-height:1;`);
+      const ring = el(root, "a", "", `left:540px;top:960px;border:16px solid ${orange};border-radius:50%;`);
+      return (lt) => {
+        const i = Math.min(3, Math.floor(lt / .7));
+        const local = lt - i * .7;
+        n.textContent = i < 3 ? String(3 - i) : "GO";
+        n.style.color = i < 3 ? fg : orange;
+        S(n, 1, 0, 0, lerp(1.6, 1, Ez.out(P(local, 0, .3))));
+        const r = 120 + Ez.out(P(local, 0, .7)) * 700;
+        ring.style.width = ring.style.height = `${r}px`;
+        ring.style.margin = `${-r / 2}px 0 0 ${-r / 2}px`;
+        ring.style.opacity = 1 - P(local, 0, .7);
+      };
+    },
+  });
+
+  // 3–11 — the bibs: photo cuts, one race per half bar
+  const showRaces = races.filter((r) => r.photo);
+  const pick = (() => {
+    const want = 8;
+    if (showRaces.length <= want) return showRaces;
+    return Array.from({ length: want }, (_, i) => showRaces[Math.round((i / (want - 1)) * (showRaces.length - 1))]);
+  })();
+  const per = 8 / Math.max(1, pick.length);
+  scenes.push({
+    a: 3, b: 11.1, say: `${D.count} races since ${monthYear(D.first)}: ${pick.map((r) => r.title).slice(0, 5).join(", ")}…`,
+    build(root) {
+      const cards = pick.map((r, i) => {
+        const c = el(root, "a", "", `left:0;top:0;width:${W}px;height:${H}px;`);
+        const ph = photo(c, r.photo, 0, 0, W, H, "filter:grayscale(1) contrast(1.15) brightness(.9);");
+        el(c, "a", "", `inset:0;left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(180deg, rgba(255,90,31,.35), rgba(10,10,10,.2) 40%, rgba(10,10,10,.92) 78%);mix-blend-mode:normal;`);
+        const bib = r.bib ? el(c, "a", `<div style="font:800 26px Inter;letter-spacing:.3em;color:#555">BIB</div><div class="anton" style="font-size:150px;color:${black};line-height:1">${esc(r.bib)}</div>`, `left:90px;top:300px;background:#fff;padding:22px 40px 18px;border-radius:12px;transform-origin:0 0;box-shadow:0 30px 60px rgba(0,0,0,.4);`) : null;
+        const t = el(c, "a", `<div class="lbl" style="color:${orange}">${esc(day(r.date))} · ${esc(r.city || "")}</div>
+          <div class="anton" style="font-size:110px;color:#fff;margin-top:16px">${esc(r.title)}</div>
+          <div style="display:flex;gap:30px;margin-top:24px;font:800 52px 'JetBrains Mono';color:#fff"><span style="color:${orange}">${esc(r.km ? `${Math.round(r.km * 10) / 10} km` : "")}</span><span>${esc(r.time || "")}</span></div>`,
+          `left:80px;right:80px;top:1250px;`);
+        return { c, ph, bib, t, i };
+      });
+      return (lt) => {
+        const cur = Math.min(pick.length - 1, Math.floor(lt / per));
+        cards.forEach(({ c, ph, bib, t, i }) => {
+          const local = lt - i * per;
+          c.style.display = i === cur ? "block" : "none";
+          if (i !== cur) return;
+          burns(ph, P(local, 0, per), i + 5);
+          if (bib) S(bib, P(local, .05, .15), 0, 0, lerp(1.4, 1, Ez.out(P(local, .05, .3))), lerp(-8, -3, P(local, 0, per)));
+          S(t, P(local, .1, .25), (1 - Ez.expo(P(local, .1, .4))) * 200);
+        });
+      };
+    },
+  });
+
+  // 11–16 — the distance ladder
+  const dists = D.distances, maxN = Math.max(...dists.map((d) => d.n));
+  scenes.push({
+    a: 11, b: 16.1, say: `From 10K to a 50K ultra: ${dists.map((d) => `${d.n} × ${d.name}`).join(", ")}.`,
+    build(root) {
+      const head = el(root, "a anton", "10K → 50K", `left:80px;top:320px;font-size:200px;color:${fg};`);
+      const rows = dists.map((d, i) => {
+        const r = el(root, "a", `<div class="anton" style="font-size:64px;color:${fg}">${esc(d.name)}</div>
+          <div class="trk" style="position:absolute;left:0;top:84px;height:70px;border-radius:35px;background:${i === dists.length - 1 ? orange : "#262626"};overflow:hidden"><div class="lanes" style="position:absolute;inset:0;background:repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.08) 46px 50px)"></div></div>
+          <div class="n anton" style="position:absolute;top:84px;font-size:70px;line-height:70px;color:${orange}"></div>`,
+          `left:80px;width:920px;top:${600 + i * 220}px;height:170px;`);
+        return [r, r.querySelector(".trk"), r.querySelector(".n"), d];
+      });
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .2, .3);
+        S(head, P(lt, 0, .3), (1 - Ez.expo(P(lt, 0, .4))) * -200);
+        rows.forEach(([r, trk, n, dd], i) => {
+          const at = .3 + i * .35;
+          S(r, P(lt, at, at + .2));
+          const w = 90 + (dd.n / maxN) * 660 * Ez.expo(P(lt, at, at + .8));
+          trk.style.width = `${w}px`;
+          n.style.left = `${w + 24}px`;
+          n.textContent = `×${Math.round(dd.n * Ez.out(P(lt, at, at + .8)))}`;
+        });
+      };
+    },
+  });
+
+  // 16–22 — the personal bests, three stopwatches
+  const toSecs = (t) => t.split(":").map(Number).reduce((a, v) => a * 60 + v, 0);
+  const clock = (s) => { const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = Math.floor(s % 60); return `${h}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`; };
+  const pbs = [
+    D.pbTenK && ["10K", D.pbTenK],
+    D.pbHalf && ["Half marathon", D.pbHalf],
+    D.pbMarathon && ["Marathon", D.pbMarathon],
+  ].filter(Boolean);
+  scenes.push({
+    a: 16, b: 22.1, say: `Personal bests: ${pbs.map(([n, p]) => `${n} ${p.time}, ${p.title}`).join("; ")}.`,
+    build(root) {
+      const head = el(root, "a anton", "Personal bests", `left:80px;top:320px;font-size:120px;color:${fg};`);
+      const rows = pbs.map(([name, p], i) => {
+        const r = el(root, "a", `<div class="lbl" style="color:${orange}">${esc(name)}</div>
+          <div class="v mono" style="font-size:150px;font-weight:700;color:${fg};letter-spacing:-4px;line-height:1.05"></div>
+          <div style="font:600 34px Inter;color:${muted}">${esc(p.title)} · ${esc(p.date)}</div>`,
+          `left:80px;right:80px;top:${540 + i * 360}px;padding-bottom:30px;border-bottom:4px solid #262626;`);
+        return [r, r.querySelector(".v"), toSecs(p.time), name];
+      });
+      const sub2 = el(root, "a anton", "SUB-2", `right:80px;top:${540 + 360 + 70}px;font-size:90px;color:${black};background:${orange};padding:8px 26px;border-radius:12px;transform-origin:100% 50%;`);
+      const half = pbs.find(([n]) => n === "Half marathon");
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .2, .3);
+        S(head, P(lt, 0, .3));
+        rows.forEach(([r, v, secs], i) => {
+          const at = .3 + i * 1.6;
+          S(r, P(lt, at, at + .2), (1 - Ez.expo(P(lt, at, at + .4))) * 160);
+          const k = Ez.out(P(lt, at + .1, at + 1.3));
+          v.textContent = clock(secs * k);
+          v.style.color = k >= 1 ? orange : fg;
+        });
+        const subOk = half && toSecs(half[1].time) < 7200;
+        sub2.style.display = subOk ? "block" : "none";
+        if (subOk) S(sub2, P(lt, 3.3, 3.4), 0, 0, lerp(2, 1, Ez.back(P(lt, 3.3, 3.7))), -6);
+      };
+    },
+  });
+
+  // 22–26 — the years
+  const py = D.perYear, maxR = Math.max(...py.map((y) => y.count));
+  scenes.push({
+    a: 22, b: 26.1, say: `Year by year: ${py.map((y) => `${y.year}, ${y.count} races, ${y.km} km`).join("; ")}.`,
+    build(root) {
+      const head = el(root, "a anton", "Year by year", `left:80px;top:320px;font-size:120px;color:${fg};`);
+      const base = 1450, bw = 920 / py.length;
+      const cols = py.map((y, i) => {
+        const b = el(root, "a", "", `left:${80 + i * bw + 16}px;width:${bw - 32}px;top:${base}px;background:${i === py.length - 1 ? orange : "#e5e5e5"};border-radius:14px 14px 0 0;`);
+        el(root, "a anton", String(y.year), `left:${80 + i * bw}px;width:${bw}px;text-align:center;top:${base + 24}px;font-size:56px;color:${muted};`);
+        const n = el(root, "a", `<div class="anton" style="font-size:96px;color:${fg}">${y.count}</div><div class="mono" style="font-size:28px;color:${muted}">${y.km} km</div>`, `left:${80 + i * bw}px;width:${bw}px;text-align:center;`);
+        return [b, n, y];
+      });
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .2, .3);
+        S(head, P(lt, 0, .3));
+        cols.forEach(([b, n, y], i) => {
+          const k = Ez.back(P(lt, .3 + i * .3, 1 + i * .3));
+          const hh = Math.max(10, (y.count / maxR) * 720 * k);
+          b.style.top = `${base - hh}px`;
+          b.style.height = `${hh}px`;
+          n.style.top = `${base - hh - 160}px`;
+          n.style.opacity = P(lt, .5 + i * .3, .8 + i * .3);
+        });
+      };
+    },
+  });
+
+  // 26–30 — the end
+  const finale = races.filter((r) => r.photo).slice(-1)[0];
+  scenes.push({
+    a: 26, b: 30, say: `${D.count} races. ${fmt(D.km)} kilometres. Every finish line. sankettambare.in/sports`,
+    build(root) {
+      const ph = finale ? photo(root, finale.photo, 0, 0, W, H, "filter:grayscale(1) brightness(.45) contrast(1.2);") : null;
+      const tape = el(root, "a", "", `left:-40px;width:1160px;top:1010px;height:26px;background:${orange};transform-origin:50% 50%;`);
+      const a1 = el(root, "a ctr anton", `${D.count} races`, `top:560px;font-size:180px;color:${fg};`);
+      const a2 = el(root, "a ctr anton", `${fmt(D.km)} km`, `top:750px;font-size:180px;color:${orange};`);
+      const a3 = el(root, "a ctr anton", "Every finish line.", `top:1100px;font-size:120px;color:${fg};`);
+      return (lt) => {
+        if (ph) burns(ph, P(lt, 0, 4), 2);
+        S(a1, P(lt, 0, .2), 0, 0, lerp(1.4, 1, Ez.expo(P(lt, 0, .4))));
+        S(a2, P(lt, .4, .6), 0, 0, lerp(1.4, 1, Ez.expo(P(lt, .4, .8))));
+        const brk = P(lt, 1.2, 1.6);
+        tape.style.opacity = 1;
+        tape.style.clipPath = brk > 0 ? `polygon(0 0, ${50 - brk * 50}% 0, ${50 - brk * 50}% 100%, 0 100%, 0 0, 100% 0, 100% 100%, ${50 + brk * 50}% 100%, ${50 + brk * 50}% 0, 100% 0)` : "none";
+        tape.style.transform = `scaleX(${Ez.out(P(lt, 0, .6))}) rotate(${-2 + brk * 2}deg)`;
+        S(a3, P(lt, 1.4, 1.8), 0, (1 - Ez.out(P(lt, 1.4, 2))) * 40);
+      };
+    },
+  });
+
+  return {
+    theme: { bg: black, fg, accent: orange, muted, rail: "rgba(255,255,255,.14)", grain: .07, vig: "rgba(0,0,0,.55)", flash: orange },
+    route: "/sports", label: "Race log", scenes, flashes: [2.1, 3, 11, 16, 26],
+  };
+};
+
+// ================================================================= TREKS
+// "Some take two hours. One took twenty-two." A ridge of the Sahyadri draws
+// itself, the forts arrive as postcards in the order they were climbed, the
+// difficulty becomes three peaks, and the longest night gets its own clock.
+FILMS.treks = (D) => {
+  const forest = "#0f1f17", mist = "#e3ebe4", ochre = "#d4a24c", moss = "#6f8f72", fg = "#f2f5ef", muted = "#9fb3a3";
+  const LEVEL = { Easy: "#8fbf8f", Medium: ochre, Hard: "#e0603a" };
+  const scenes = [];
+  const ridge = (w, h, seed, amp = .5) => {
+    const r = rng(seed);
+    let d = `M0 ${h}`;
+    for (let x = 0; x <= w; x += 40) {
+      const y = h * (1 - amp) + Math.sin(x / 140 + seed) * h * .14 + Math.sin(x / 47) * h * .05 + (r() - .5) * h * .08;
+      d += ` L${x} ${y.toFixed(1)}`;
+    }
+    return `${d} L${w} ${h} Z`;
+  };
+
+  // 0–4 — the ridge
+  scenes.push({
+    a: 0, b: 4.2, say: `${D.count} forts of the Sahyadri, climbed over ${D.years} years.`,
+    build(root) {
+      const sky = el(root, "a", "", `left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(${forest}, #1d3527 60%, #2c4a36);`);
+      const layers = [0, 1, 2].map((i) => svg(root, W, 900, `<path d="${ridge(W, 900, 3 + i * 7, .55 - i * .12)}" fill="${["#3d5e47", "#2a4433", "#152a1e"][i]}"/>`, `left:0;top:${1020 + i * 120}px;`));
+      const contour = svg(root, W, 700, Array.from({ length: 9 }, (_, i) => `<path class="c" d="M-20 ${120 + i * 60} C 260 ${40 + i * 60}, 520 ${200 + i * 60}, 1100 ${90 + i * 60}" fill="none" stroke="${mist}" stroke-opacity=".12" stroke-width="2" stroke-dasharray="1300" stroke-dashoffset="1300"/>`).join(""), "left:0;top:250px;");
+      const cs = [...contour.querySelectorAll(".c")];
+      const big = el(root, "a ctr", "", `top:470px;font:900 300px Inter;color:${fg};letter-spacing:-12px;line-height:1;`);
+      const cap = el(root, "a ctr serif it", "forts of the Sahyadri", `top:780px;font-size:96px;color:${ochre};`);
+      return (lt) => {
+        cs.forEach((c, i) => c.setAttribute("stroke-dashoffset", String(1300 * (1 - Ez.io(P(lt, i * .1, 1.6 + i * .1))))));
+        layers.forEach((l, i) => S(l, 1, 0, (1 - Ez.out(P(lt, i * .25, 1.4 + i * .25))) * 400 - lt * (6 - i * 2)));
+        big.textContent = String(Math.round(D.count * Ez.out(P(lt, .6, 2.2))));
+        S(big, P(lt, .6, 1), 0, (1 - Ez.out(P(lt, .6, 1.4))) * 60);
+        S(cap, P(lt, 1.5, 2));
+        S(sky, 1);
+      };
+    },
+  });
+
+  // 4–15 — postcards in the order they were climbed
+  const withPhoto = D.treks.filter((t) => t.photo);
+  const want = 10;
+  const pick = withPhoto.length <= want ? withPhoto : Array.from({ length: want }, (_, i) => withPhoto[Math.round((i / (want - 1)) * (withPhoto.length - 1))]);
+  const per = 11 / Math.max(1, pick.length);
+  scenes.push({
+    a: 4, b: 15.2, say: `In the order they were climbed: ${pick.map((t) => t.name).join(", ")}.`,
+    build(root) {
+      const cards = pick.map((t, i) => {
+        const c = el(root, "a", "", `left:110px;top:330px;width:860px;height:1180px;background:#f4efe3;border-radius:10px;box-shadow:0 50px 100px rgba(0,0,0,.55);padding:34px;transform-origin:50% 120%;`);
+        const ph = photo(c, t.photo, 34, 34, 792, 900, "border-radius:4px;filter:saturate(.8) contrast(1.05);");
+        el(c, "a", `<div style="display:flex;justify-content:space-between;align-items:center"><span class="lbl" style="color:${moss};font-size:24px">${esc(day(t.date))}</span><span style="font:800 24px Inter;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:${LEVEL[t.level] || moss};padding:8px 16px;border-radius:8px">${esc(t.level || "")}</span></div>
+          <div class="serif" style="font-size:84px;color:#1f2a22;margin-top:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.name)}</div>`,
+          "left:34px;right:34px;top:960px;");
+        const stamp = el(c, "a mono", `${String(D.treks.indexOf(t) + 1).padStart(2, "0")}/${D.count}`, `right:60px;top:60px;font-size:36px;font-weight:700;color:#fff;background:rgba(15,31,23,.7);padding:8px 16px;border-radius:8px;`);
+        return { c, ph, i, stamp };
+      });
+      const year = el(root, "a mono", "", `left:110px;top:1580px;font-size:120px;font-weight:700;color:${ochre};`);
+      return (lt) => {
+        const cur = Math.min(pick.length - 1, Math.floor(lt / per));
+        cards.forEach(({ c, ph, i }) => {
+          const local = lt - i * per;
+          const show = i === cur || i === cur - 1;
+          c.style.display = show ? "block" : "none";
+          if (!show) return;
+          const inK = Ez.out(P(local, 0, .45));
+          const r0 = (i % 2 ? 1 : -1) * 4;
+          if (i === cur) {
+            S(c, 1, (1 - inK) * (i % 2 ? 900 : -900), (1 - inK) * 120, 1, lerp(r0 * 4, r0, inK));
+            c.style.zIndex = 2;
+          } else {
+            const outK = Ez.in(P(lt - cur * per, 0, .45));
+            S(c, 1 - outK * .4, 0, outK * 40, 1 - outK * .06, r0);
+            c.style.zIndex = 1;
+          }
+          burns(ph, P(local, 0, per + .5), i + 9);
+        });
+        year.textContent = String(pick[cur].year);
+      };
+    },
+  });
+
+  // 15–21 — difficulty as three peaks
+  const lv = D.levels, maxLv = Math.max(lv.Easy, lv.Medium, lv.Hard);
+  scenes.push({
+    a: 15, b: 21.2, say: `${lv.Easy} easy, ${lv.Medium} medium, ${lv.Hard} hard. ${D.written} of them written up.`,
+    build(root) {
+      const head = el(root, "a serif", "How hard?", `left:90px;top:320px;font-size:140px;color:${fg};`);
+      const base = 1400;
+      const peaks = ["Easy", "Medium", "Hard"].map((k, i) => {
+        const cx = 210 + i * 330;
+        const p = svg(root, 420, 900, `<path class="m" d="M0 900 L210 900 L420 900 Z" fill="${LEVEL[k]}"/><path class="s" d="M210 900 L210 900 L210 900 Z" fill="#fff" opacity=".85"/>`, `left:${cx - 210}px;top:${base - 900}px;`);
+        const lab = el(root, "a", `<div class="anton" style="font-size:110px;color:${fg};text-align:center" class="n">${lv[k]}</div><div class="lbl" style="text-align:center;color:${LEVEL[k]}">${k}</div>`, `left:${cx - 160}px;width:320px;top:${base + 30}px;`);
+        return [p.querySelector(".m"), p.querySelector(".s"), lab, lv[k], i];
+      });
+      const note = el(root, "a", `${D.written} forts have their own story written up`, `left:90px;right:90px;top:1700px;font:600 42px Inter;color:${muted};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        S(head, P(lt, 0, .4));
+        peaks.forEach(([m, s, lab, n, i]) => {
+          const k = Ez.back(P(lt, .3 + i * .45, 1.3 + i * .45));
+          const h = 160 + (n / maxLv) * 700 * k;
+          m.setAttribute("d", `M0 900 L210 ${900 - h} L420 900 Z`);
+          const sh = h * .22;
+          s.setAttribute("d", `M210 ${900 - h} L${210 - sh * 1} ${900 - h + sh} L210 ${900 - h + sh * .7} L${210 + sh * 1} ${900 - h + sh} Z`);
+          S(lab, P(lt, .6 + i * .45, 1 + i * .45));
+        });
+        S(note, P(lt, 3, 3.4));
+      };
+    },
+  });
+
+  // 21–26 — the longest
+  const L = D.longest;
+  scenes.push({
+    a: 21, b: 26.2, say: L ? `The longest: ${L.name}, ${L.hours} hours on foot.` : "",
+    build(root) {
+      if (!L) return () => {};
+      const ph = photo(root, L.photo, 0, 0, W, H, "filter:saturate(.7) brightness(.42);");
+      el(root, "a", "", `left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(transparent 45%, rgba(15,31,23,.92) 75%);`);
+      const dial = svg(root, 560, 560, `<circle cx="280" cy="280" r="250" fill="rgba(15,31,23,.6)" stroke="${mist}" stroke-opacity=".3" stroke-width="6"/>
+        ${Array.from({ length: 24 }, (_, i) => `<line x1="280" y1="44" x2="280" y2="${i % 6 ? 64 : 84}" stroke="${mist}" stroke-width="${i % 6 ? 3 : 6}" transform="rotate(${i * 15} 280 280)"/>`).join("")}
+        <path id="sw" fill="${ochre}" opacity=".85"/>
+        <line id="h" x1="280" y1="280" x2="280" y2="70" stroke="#fff" stroke-width="8" stroke-linecap="round"/>`, "left:90px;top:230px;transform-origin:0 0;");
+      dial.firstChild.style.transform = "scale(.6)"; dial.firstChild.style.transformOrigin = "0 0";
+      const sw = dial.querySelector("#sw"), hand = dial.querySelector("#h");
+      const hrs = el(root, "a ctr mono", "", `top:1180px;font-size:180px;font-weight:700;color:#fff;letter-spacing:-6px;`);
+      const lab = el(root, "a ctr lbl", "hours on foot", `top:1390px;color:${ochre};`);
+      const name = el(root, "a ctr serif", esc(L.name), `top:1470px;font-size:100px;color:#fff;`);
+      const when = el(root, "a ctr mono", day(L.date), `top:1600px;font-size:34px;color:${mist};`);
+      return (lt, d) => {
+        root.style.opacity = inout(lt, d, .3, .3);
+        burns(ph, P(lt, 0, d), 4);
+        const k = Ez.io(P(lt, .3, 3.2));
+        const hh = L.hours * k;
+        const ang = (hh / 24) * 360;
+        const rad = ((ang - 90) * Math.PI) / 180;
+        sw.setAttribute("d", ang > 0 ? `M280 280 L280 30 A250 250 0 ${ang > 180 ? 1 : 0} 1 ${280 + Math.cos(rad) * 250} ${280 + Math.sin(rad) * 250} Z` : "");
+        hand.setAttribute("transform", `rotate(${ang} 280 280)`);
+        hrs.textContent = `${Math.floor(hh)}h`;
+        S(lab, P(lt, .5, .9));
+        S(name, P(lt, 2.4, 2.8), 0, (1 - Ez.out(P(lt, 2.4, 3))) * 30);
+        S(when, P(lt, 2.8, 3.2));
+      };
+    },
+  });
+
+  // 26–30 — the end
+  scenes.push({
+    a: 26, b: 30, say: `Some take two hours. One took ${L ? L.hours : "a whole night"}. ${D.hours} hours on the trail. sankettambare.in/treks`,
+    build(root) {
+      el(root, "a", "", `left:0;top:0;width:${W}px;height:${H}px;background:linear-gradient(${forest}, #1d3527);`);
+      const lay = svg(root, W, 700, `<path d="${ridge(W, 700, 21, .6)}" fill="#152a1e"/>`, "left:0;top:1220px;");
+      const a1 = el(root, "a ctr serif", "Some take two hours.", `top:600px;font-size:104px;color:${fg};`);
+      const a2 = el(root, "a ctr serif it", L ? `One took ${L.hours}.` : "", `top:730px;font-size:104px;color:${ochre};`);
+      const a3 = el(root, "a ctr mono", `${D.hours} hours on the trail · ${D.count} forts · ${D.years} years`, `top:930px;font-size:36px;color:${muted};`);
+      return (lt) => {
+        S(lay, 1, 0, (1 - Ez.out(P(lt, 0, 1))) * 200);
+        S(a1, P(lt, .1, .5), 0, (1 - Ez.out(P(lt, .1, .7))) * 30);
+        S(a2, P(lt, .8, 1.2), 0, (1 - Ez.out(P(lt, .8, 1.4))) * 30);
+        S(a3, P(lt, 1.4, 1.8));
+      };
+    },
+  });
+
+  return {
+    theme: { bg: forest, fg, accent: ochre, muted, rail: "rgba(255,255,255,.14)", grain: .07, vig: "rgba(0,0,0,.5)" },
+    route: "/treks", label: "Treks", scenes, flashes: [],
+  };
+};
+
+// ---------------------------------------------------------------- boot
+let FILM = null;
+async function boot(name) {
+  const make = FILMS[name];
+  if (!make) throw new Error(`unknown film ${name}`);
+  FILM = make(window.FILM[name]);
+  const th = FILM.theme;
+  const root = document.documentElement.style;
+  root.setProperty("--bg", th.bg); root.setProperty("--fg", th.fg); root.setProperty("--accent", th.accent);
+  root.setProperty("--muted", th.muted); root.setProperty("--rail", th.rail); root.setProperty("--grain", th.grain);
+  root.setProperty("--vig", th.vig); root.setProperty("--flash", th.flash || "#fff");
+  document.getElementById("grain").style.backgroundImage = `url(${makeGrain(5)})`;
+  document.getElementById("tag").innerHTML = `sankettambare.in · <b>${esc(FILM.label)}</b>`;
+  const stage = document.getElementById("stage");
+  FILM.scenes.forEach((s) => {
+    s.root = el(stage, "scene");
+    s.draw = s.build(s.root);
+  });
+  window.FLASHES = FILM.flashes;
+  window.CUES = FILM.scenes.filter((s) => s.say).map((s) => [Math.max(0, s.a), Math.min(DUR, s.b), s.say]);
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((im) => (im.complete ? (im.decode ? im.decode().catch(() => {}) : null) : new Promise((r) => { im.onload = im.onerror = r; }))));
+  window.renderAt = renderAt;
+  window.__ready = true;
+}
+
+function renderAt(t) {
+  FILM.scenes.forEach((s) => {
+    const on = t >= s.a && t < s.b;
+    s.root.style.display = on ? "block" : "none";
+    if (on) s.draw(t - s.a, s.b - s.a, t);
+  });
+  document.querySelector("#prog i").style.width = `${(t / DUR) * 100}%`;
+  const end = P(t, 26.4, 27);
+  const url = document.getElementById("url");
+  url.textContent = `sankettambare.in${FILM.route}`;
+  url.style.opacity = end;
+  url.style.transform = `translateY(${(1 - Ez.out(end)) * 30}px)`;
+  document.getElementById("tag").style.opacity = P(t, .2, .8) * (1 - P(t, 26, 26.4));
+  const fl = FILM.flashes.reduce((m, at) => Math.max(m, t >= at ? 1 - P(t, at, at + .25) : 0), 0);
+  document.getElementById("flash").style.opacity = fl * .55;
+  document.getElementById("grain").style.transform = `translate(${(Math.floor(t * 24) * 37) % 200 - 100}px, ${(Math.floor(t * 24) * 53) % 200 - 100}px)`;
+}
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@ import {
   SEASONS, enrichTreks, filterTreks, formatTrekHours, monthCounts, perYear,
   returnVisits, trekFacets, trekSummary,
 } from "../lib/trekLog";
+import PageFilm from "../components/common/PageFilm";
 
 // /treks — the summit register. Overview (the ridgeline, the trekking year,
 // difficulty by year, return visits, derived facts) and Log (cards or a
@@ -79,6 +80,8 @@ const TreksPage = () => {
               : "Treks across the Sahyadri's forts, ghats and waterfalls."}
           </p>
         </header>
+
+        <PageFilm film="treks" />
 
         {loading && <LoadingBlock label="Loading treks…" />}
         {error && <ErrorBlock />}

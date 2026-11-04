@@ -11,6 +11,7 @@ import PostModal from "../components/MicroBlog/PostModal";
 import useInsights from "../components/MicroBlog/useInsights";
 import { getMicroblogPostsByIds } from "../lib/api/microblog";
 import "../components/MicroBlog/microblog.css";
+import PageFilm from "../components/common/PageFilm";
 
 // /micro-blog in three tabs:
 //   Overview — today's ten, then the whole archive read as a story
@@ -90,6 +91,8 @@ const MicroBlog = () => {
             Years of short posts, quotes and photo captions in English and Marathi, kept, searchable and read here as data.
           </p>
         </header>
+
+        <PageFilm film="microblog" />
 
         <div ref={tabsRef} className="sticky top-[4.5rem] z-20 scroll-mt-24">
           {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- focus sits on the active tab (roving tabindex) */}

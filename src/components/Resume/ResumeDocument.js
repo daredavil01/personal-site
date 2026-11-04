@@ -24,6 +24,7 @@ import {
 import { ErrorBlock } from "../common/AsyncStates";
 import ResumePrint from "./ResumePrint";
 import "./resume.css";
+import PageFilm from "../common/PageFilm";
 
 // /resume — every row is from the four resume tables plus the projects table;
 // the summary numbers, durations, groupings and skill evidence are computed by
@@ -192,6 +193,8 @@ const ResumeDocument = () => {
           {isOwner && <OwnerLink to="/admin/resume/experience" label="Edit resume" />}
         </div>
       </div>
+
+      <PageFilm film="resume" className="rs-print-hide my-6" />
 
       <article className="rs-sheet" aria-busy={loading}>
         <header className="rs-head">

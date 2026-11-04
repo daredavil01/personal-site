@@ -14,6 +14,7 @@ import { deckFacets, filterDecks, UNDATED } from "../lib/deckFilters";
 import {
   deckSummary, enrichDecks, monthLabel, readMinutes,
 } from "../lib/deckStats";
+import PageFilm from "../components/common/PageFilm";
 
 // /presentations — the deck shelf. The newest deck up front, then every deck
 // as a live gallery or a light list (no iframes), filtered by search, year,
@@ -196,6 +197,8 @@ const Presentations = () => {
             Talks, dossiers and data stories, built as HTML decks. Open one to click through it here, or switch to the list for a quick scan.
           </p>
         </header>
+
+        <PageFilm film="presentations" />
 
         {loading && <LoadingBlock label="Loading presentations…" />}
         {error && <ErrorBlock />}

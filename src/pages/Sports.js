@@ -16,6 +16,7 @@ import {
   MONTHS, distanceName, enrichRaces, filterRaces, formatDuration, formatHours, formatPace,
   monthCounts, perYear, personalBests, raceFacets, raceSummary, repeatEvents,
 } from "../lib/raceLog";
+import PageFilm from "../components/common/PageFilm";
 
 // /sports — the race log. Three tabs over one filtered set: Overview (the
 // PB trajectory, the calendar, repeat events and derived facts), Races (cards
@@ -79,6 +80,8 @@ const SportsPage = () => {
               : "Road races, hill halves and ultras — timed, compared and ranked. Tap any race, dot or record to open it."}
           </p>
         </header>
+
+        <PageFilm film="sports" />
 
         {loading && <LoadingBlock label="Loading races…" />}
         {error && <ErrorBlock />}
