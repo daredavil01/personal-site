@@ -50,6 +50,7 @@ const TreksPage = lazy(() => import("./pages/Treks"));
 const InteractiveMePage = lazy(() => import("./pages/InteractiveMe"));
 const MindMap = lazy(() => import("./pages/MindMap"));
 const Blueprint = lazy(() => import("./pages/Blueprint"));
+const Films = lazy(() => import("./pages/Films"));
 const Logbook = lazy(() => import("./pages/Logbook"));
 const WritingLedger = lazy(() => import("./pages/WritingLedger"));
 const TagsHub = lazy(() => import("./pages/TagsHub"));
@@ -125,6 +126,7 @@ const App = () => (
               <Route path="/interactive-me" element={<InteractiveMePage />} />
               <Route path="/mindmap" element={<MindMap />} />
               <Route path="/blueprint" element={<Blueprint />} />
+              <Route path="/films" element={<Films />} />
               <Route path="/tags" element={<TagsHub />} />
               <Route path="/tags/:name" element={<TagDetail />} />
               <Route path="/admin/*" element={<AdminApp />} />

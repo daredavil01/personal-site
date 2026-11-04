@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { PAGE_FILM_DIR, pageFilm } from "../../data/pageFilms";
 
 // The 30-second vertical film about a page, with its storyline beside it.
@@ -38,6 +39,9 @@ const PageFilm = ({ film, className }) => {
         <span className="block font-body text-sm sm:text-base text-stone-500 dark:text-stone-400 leading-relaxed">
           {f.story}
         </span>
+        <Link to={`/films?film=${f.key}`} className="inline-block mt-3 font-label text-[11px] uppercase tracking-[0.18em] font-bold text-secondary hover:underline">
+          Every film, with details →
+        </Link>
       </figcaption>
     </figure>
   );

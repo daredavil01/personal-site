@@ -294,6 +294,40 @@ export const screenAndPhone = ({ width = 500, height = 320, accent = COLORS.red 
   ].join("");
 };
 
+// --- /films -----------------------------------------------------------------
+
+// A strip of vertical frames, sprocket holes above and below, the middle
+// frame lit with a play button: films, before any text is readable.
+export const filmStrip = ({ width = 560, height = 300, accent = COLORS.red, frames = 5 } = {}) => {
+  const hole = 14;
+  const fw = (width - 20) / frames;
+  const innerW = fw - 18;
+  const innerH = Math.min(innerW * (16 / 9), height - 2 * (hole * 2 + 12));
+  const y = (height - innerH) / 2;
+  const mid = Math.floor(frames / 2);
+  const holes = [];
+  for (let x = 16; x < width - 10; x += 30) {
+    holes.push(`<rect x="${x}" y="10" width="${hole}" height="${hole}" rx="3" fill="${COLORS.ink}"/>`);
+    holes.push(`<rect x="${x}" y="${height - 10 - hole}" width="${hole}" height="${hole}" rx="3" fill="${COLORS.ink}"/>`);
+  }
+  const cells = Array.from({ length: frames }, (_, i) => {
+    const x = 10 + i * fw + 9;
+    const lit = i === mid;
+    const cx = x + innerW / 2;
+    const cy = y + innerH / 2;
+    const r = innerW * 0.22;
+    const play = lit ? `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${COLORS.text}"/><polygon points="${(cx - r * 0.35).toFixed(1)},${(cy - r * 0.5).toFixed(1)} ${(cx - r * 0.35).toFixed(1)},${(cy + r * 0.5).toFixed(1)} ${(cx + r * 0.55).toFixed(1)},${cy.toFixed(1)}" fill="${accent}"/>` : "";
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${innerW.toFixed(1)}" height="${innerH.toFixed(1)}" rx="8" fill="${lit ? accent : COLORS.panel}" opacity="${lit ? 1 : 0.85 - Math.abs(i - mid) * 0.15}"/>${play}`;
+  }).join("");
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<rect x="0" y="0" width="${width}" height="${height}" rx="16" fill="${COLORS.panel}" opacity="0.55"/>`,
+    holes.join(""),
+    cells,
+    `</svg>`,
+  ].join("");
+};
+
 // --- /stats -----------------------------------------------------------------
 
 // A small bar series. Four of these tile into the "sparkline wall".

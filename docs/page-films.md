@@ -1,22 +1,27 @@
 # Page films
 
-Seven 30-second vertical films (1080×1920 masters, 720×1280 on the page), one
+Seven 30-second vertical films, rendered with Remotion (1080×1920 masters, 720×1280 on the page), one
 for each of `/about`, `/resume`, `/writing-ledger`, `/micro-blog`,
 `/presentations`, `/sports` and `/treks`. Each sits under its page's header in
 `PageFilm` (`src/components/common/PageFilm.js`) with its storyline beside it.
 
+Every film is listed with its details on **`/films`** (`src/pages/Films.js`),
+beside the six longer films (the trailer, Blueprint, Logbook, Projects,
+Training, Videos); the catalogue is `src/data/featureFilms.js`.
+
 | Piece | Where |
 |---|---|
 | Registry (slug, poster second, title, storyline, alt text) | `src/data/pageFilms.js` |
-| The picture: one page that draws any moment of any film | `scripts/page-films/film.html` |
+| **The script**: scenes, lengths, slide-ins, captions, sound cues | `scripts/page-films/script.js` |
+| The picture (Remotion composition + one component per scene type) | `scripts/page-films/remotion/` |
 | What each film says, read from the live tables | `scripts/page-films/data.mjs` |
-| The music, synthesised per film | `scripts/page-films/score.mjs` |
+| Music and the synthesised sound effects | `scripts/page-films/score.mjs` |
 | Render, mix, publish | `scripts/page-films/render.mjs` (`npm run page:films`) |
-| Committed web copies | `public/video/page-films/<slug>.{mp4,jpg,vtt}` |
-| Guard (files present, under 4 MB, poster under 300 KB) | `src/components/common/pageFilms.test.js` |
+| Committed web copies | `public/video/page-films/<slug>.{mp4,jpg,vtt,json}` |
+| Guards | `src/components/common/pageFilms.test.js`, `src/pages/films.test.js` |
 
 ```bash
-npm run page:films                            # render all seven masters → knowledge_base/page-films/
+npm run page:films                            # render all seven masters → knowledge_base/page-films/ (~2 min each)
 npm run page:films -- --only=sports,treks     # some of them (film key or slug)
 npm run page:films -- --only=about --frame=5,12.5   # PNG stills, for review
 npm run page:films -- --publish               # web copies into public/video/page-films/
@@ -31,25 +36,45 @@ own modules (`raceLog`, `trekLog`, `resumeModel`, `aboutModel`), the site-wide
 counts from `/api/stats`, and the Ledger / Micro-blog films from their
 committed JSON. A beat whose number is missing is left out, never shown as 0.
 
+## One script drives picture, captions and sound
+
+`script.js` is plain JavaScript that both Remotion (webpack) and Node import.
+`buildFilm(key, data)` returns the whole plan:
+
+- **Scenes with variable lengths.** Each scene's seconds are a weight that
+  grows with its content (five chapters at 2.3 s each, twelve decks at 0.85 s,
+  eight races at 1 s); the film is scaled to exactly 30 s.
+- **Slide-ins, varied.** Every scene enters with one of `left`, `right`, `up`,
+  `down`, `zoom`, `wipe`, `tilt`, `iris` (`enterStyle` in `remotion/kit.jsx`),
+  sliding over the last by 12 frames; cards inside a scene rotate through
+  directions, and list rows alternate sides.
+- **Captions, burned in.** `say` is split into chunks of up to seven words,
+  each word timed by its length; the composition draws the chunk in a pill with
+  the current word lit in the film's accent, and `--publish` writes the same
+  chunks to the `.vtt`.
+- **Sound cues, from the same frames.** `sfxFor` turns each scene into cues: a
+  whoosh panned the way the scene slides (a boom for zoom and iris), ticks that
+  climb in pitch while a number counts, a key click per typed letter and a bell
+  at the end of the line, a camera shutter per photo, a stamp on bib numbers and
+  call-outs, pops for dots and tiles, drips for ink blots, a beep–beep–beep–gun
+  countdown, a riser into the end card and a chime on it. `mixSfx` in
+  `score.mjs` synthesises each one where it lands, over the film's own score.
+- **Chapters**: each scene's name and start, written to `<slug>.json` for the
+  players and `/films`.
+
 ## Craft, shared by all seven
 
-- **30 seconds, 120 BPM, cut on the bar.** A bar is 2 s, so every scene starts
-  on one. The arc is the same for all: a 4-second hook, three or four beats of
-  evidence, a 4-second end card with the page's address.
+- **30 seconds, a 4-second hook, an end card with the page's address.**
 - **One look per page, taken from the page.** Paper and redline for About,
   navy and blue for the Resume sheet, ink on cream for the Ledger, the night
   palette (English indigo, Marathi saffron) for the Micro-blog, a dark
   auditorium for Presentations, black and race orange for Sports, monsoon
-  green and ochre for Treks.
-- **Sound:** a score synthesised per film (`MOODS` in `score.mjs`: key,
-  progression, drum weight), the site's own SFX sprite on the cuts. Mixed to
-  −14 LUFS.
-- **Captions** are the words each scene puts on screen (`say` in film.html),
-  written to the `.vtt` — the films have no narration, so the track is the
-  storyline itself and doubles as the audio description.
-- **Phone first:** headline type at 90 px and up on a 1080-wide frame, nothing
-  essential in the top 200 px (the progress rail) or the bottom 160 px (the
-  address).
+  green and ochre for Treks. Fonts are the site's own (Noto Serif, Inter, Plus
+  Jakarta Sans, Noto Sans Devanagari) from `scripts/og-fonts/`.
+- **Phone first:** headlines fitted to one line (`fit`), the picture in
+  220–1500 px, captions in 1540–1720 px, the address at the bottom.
+- **Grain** is a pre-made noise tile jumped every other frame; a full-frame SVG
+  turbulence filter looked the same and cost several times the render.
 
 ## The storylines
 

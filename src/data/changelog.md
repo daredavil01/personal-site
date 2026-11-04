@@ -13,6 +13,15 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v30.0.0] — 2026-11-04
+
+### Added
+- **Films page** (`src/pages/Films.js`, `/films`): every feature film on the site in one place — the seven 30-second page films and the trailer, Blueprint, Logbook, Projects, Training and Videos films — with a main player, the chosen film's story, page, length, shape, sound, captions and how it was made, and its chapters as buttons that jump the film. `?film=` is shareable; every page film links to it. Listed in the nav under Play, with its own share card (`filmStrip` in `src/lib/og/layouts/figures.js`, `public/og/films.png`).
+- **Film catalogue** (`src/data/featureFilms.js`, `src/pages/films.test.js`): one row per film; the test reads each MP4's header so the length the page prints is the file's own.
+
+### Changed
+- **Page films rebuilt with Remotion** (`scripts/page-films/`): one script (`script.js`) now drives picture, captions and sound — variable scene lengths that follow the content, a different slide-in per scene and per card, burned-in word-by-word captions (and the same chunks as `.vtt`), chapter files, and a sound effect synthesised on every cue (panned whooshes, rising counter ticks, key clicks, shutters, stamps, a countdown, a riser and chime) over each film's score. The frame-seeking `film.html` renderer is gone.
+
 ## [v29.1.0] — 2026-11-04
 
 ### Added

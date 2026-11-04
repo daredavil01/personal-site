@@ -187,6 +187,73 @@ export function renderScore(name, duration, hits = []) {
   return [L, R];
 }
 
+// --- dynamic sound effects ---------------------------------------------------------
+// Every cue in script.js's `sfx` list, synthesised where it lands: a whoosh
+// panned the way its scene slides in, ticks that climb in pitch while a
+// number counts up, a key click per typed letter, a shutter per photo, a pop
+// per item, a stamp on each call-out. `pitch` (0–1) and `gain` vary each one,
+// so no two cues in a film sound alike.
+
+const SYNTH = {
+  whoosh: { len: 0.55, fn: (t, p, r) => r() * Math.sin(Math.PI * (t / 0.55)) ** 2 * 0.5, band: [0.04, 0.35] },
+  swish: { len: 0.28, fn: (t, p, r) => r() * Math.sin(Math.PI * (t / 0.28)) ** 2 * 0.35, band: [0.08, 0.55] },
+  boom: { len: 1.2, fn: (t) => Math.sin(2 * Math.PI * (36 + 40 * Math.exp(-t * 7)) * t) * Math.exp(-t * 3) * 0.8 },
+  beep: { len: 0.18, fn: (t, p) => Math.sin(2 * Math.PI * 880 * t) * Math.min(1, t * 300) * Math.exp(-t * 10) * 0.35 },
+  gun: { len: 0.6, fn: (t, p, r) => (r() * Math.exp(-t * 14) * 0.9 + Math.sin(2 * Math.PI * 60 * t) * Math.exp(-t * 6) * 0.6) },
+  tick: { len: 0.04, fn: (t, p, r) => (r() * 0.5 + Math.sin(2 * Math.PI * (1800 + p * 1600) * t)) * Math.exp(-t * 160) * 0.35 },
+  ding: { len: 0.9, fn: (t, p) => (Math.sin(2 * Math.PI * (1318 + p * 400) * t) + 0.4 * Math.sin(2 * Math.PI * (2636 + p * 800) * t)) * Math.min(1, t * 500) * Math.exp(-t * 5) * 0.22 },
+  pop: { len: 0.12, fn: (t, p) => Math.sin(2 * Math.PI * (380 + p * 700) * t * (1 + 2.5 * Math.exp(-t * 40))) * Math.min(1, t * 900) * Math.exp(-t * 30) * 0.4 },
+  key: { len: 0.05, fn: (t, p, r) => (r() * 0.6 + Math.sin(2 * Math.PI * (2400 + p * 900) * t) * 0.5) * Math.exp(-t * 120) * 0.3 },
+  bell: { len: 1.2, fn: (t) => (Math.sin(2 * Math.PI * 1760 * t) + 0.5 * Math.sin(2 * Math.PI * 2640 * t)) * Math.exp(-t * 3.2) * 0.16 },
+  shutter: { len: 0.16, fn: (t, p, r) => r() * (Math.exp(-t * 90) + (t > 0.07 ? Math.exp(-(t - 0.07) * 110) : 0)) * 0.55 },
+  stamp: { len: 0.35, fn: (t, p, r) => (Math.sin(2 * Math.PI * (90 + 60 * Math.exp(-t * 30)) * t) * 0.8 + r() * 0.4 * Math.exp(-t * 40)) * Math.exp(-t * 11) },
+  rise: { len: 0.32, fn: (t, p) => Math.sin(2 * Math.PI * (220 + p * 500) * t * (1 + t * 2)) * Math.sin(Math.PI * t / 0.32) * 0.16 },
+  drip: { len: 0.14, fn: (t, p) => Math.sin(2 * Math.PI * (600 + p * 900) * t * (1 + 6 * t)) * Math.exp(-t * 26) * 0.22 },
+  riser: { len: 0.7, fn: (t, p, r) => r() * (t / 0.7) ** 3 * 0.25, band: [0.02, 0.5] },
+  chime: { len: 1.8, fn: (t) => [1, 1.5, 2].reduce((a, k, i) => a + Math.sin(2 * Math.PI * 784 * k * t) * (t > i * 0.09 ? Math.exp(-(t - i * 0.09) * 2.6) : 0), 0) * 0.12 },
+  snap: { len: 0.2, fn: (t, p, r) => r() * Math.exp(-t * 60) * 0.7 },
+};
+
+/** Mix the film's cues into a stereo buffer. `events` are script.js sfx (frames). */
+export function mixSfx([L, R], events, fps = 30) {
+  const n = L.length;
+  events.forEach((e, k) => {
+    const def = SYNTH[e.kind];
+    if (!def) return;
+    let sd = (k + 1) * 7919;
+    const r = () => { sd = (sd * 1103515245 + 12345) & 0x7fffffff; return (sd / 0x3fffffff) - 1; }; // eslint-disable-line no-bitwise
+    const s0 = Math.round((e.at / fps) * RATE);
+    const p = e.pitch || 0;
+    const g = e.gain ?? 1;
+    const pan = Math.max(-1, Math.min(1, e.pan || 0));
+    let lp = 0;
+    let hp = 0;
+    for (let i = 0; i < def.len * RATE; i += 1) {
+      const t = i / RATE;
+      let v = def.fn(t, p, r);
+      if (def.band) {
+        // A sweeping band-pass: noise that moves, the way a whoosh does.
+        const k2 = def.band[0] + (def.band[1] - def.band[0]) * Math.sin(Math.PI * Math.min(1, t / def.len));
+        lp += k2 * (v - lp);
+        hp = lp - hp * 0.6;
+        v = hp;
+      }
+      // A slide pans across as it plays.
+      const move = pan * (2 * (t / def.len) - 1);
+      const idx = s0 + i;
+      if (idx >= 0 && idx < n) {
+        L[idx] += v * g * (1 - move) * 0.7;
+        R[idx] += v * g * (1 + move) * 0.7;
+      }
+    }
+  });
+  for (let i = 0; i < n; i += 1) {
+    L[i] = Math.tanh(L[i]);
+    R[i] = Math.tanh(R[i]);
+  }
+  return [L, R];
+}
+
 export function toWav([L, R]) {
   const n = L.length;
   const buf = Buffer.alloc(44 + n * 4);

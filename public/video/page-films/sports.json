@@ -1,0 +1,30 @@
+{
+ "duration": 30,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "On your marks",
+   "start": 0
+  },
+  {
+   "title": "Race day",
+   "start": 3
+  },
+  {
+   "title": "10K → 50K",
+   "start": 11
+  },
+  {
+   "title": "Personal bests",
+   "start": 16
+  },
+  {
+   "title": "Year by year",
+   "start": 22
+  },
+  {
+   "title": "The end",
+   "start": 26
+  }
+ ]
+}

@@ -18,8 +18,8 @@ describe("the page films", () => {
     PAGE_FILMS.forEach((f) => expect({ film: f.key, route: paths.has(f.route) }).toEqual({ film: f.key, route: true }));
   });
 
-  it.each(PAGE_FILMS.map((f) => [f.slug]))("%s has its video, poster and captions committed", (slug) => {
-    ["mp4", "jpg", "vtt"].forEach((ext) => {
+  it.each(PAGE_FILMS.map((f) => [f.slug]))("%s has its video, poster, captions and chapters committed", (slug) => {
+    ["mp4", "jpg", "vtt", "json"].forEach((ext) => {
       expect({ ext, exists: fs.existsSync(file(slug, ext)) }).toEqual({ ext, exists: true });
     });
     const { size } = fs.statSync(file(slug, "mp4"));

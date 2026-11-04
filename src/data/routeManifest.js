@@ -162,6 +162,7 @@ export const ROUTE_MANIFEST = [
   },
   { path: "/mindmap", component: "MindMap", og: { strategy: "page", slug: "mindmap" }, indexable: true },
   { path: "/blueprint", component: "Blueprint", og: { strategy: "page", slug: "blueprint" }, indexable: true },
+  { path: "/films", component: "Films", og: { strategy: "page", slug: "films" }, indexable: true },
   { path: "/logbook", component: "Logbook", og: { strategy: "page", slug: "logbook" }, indexable: true },
   {
     path: "/writing-ledger",

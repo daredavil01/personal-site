@@ -10,6 +10,7 @@
 // under Node instead.)
 
 import { accentFor } from "./tokens.js";
+import { FEATURE_FILMS } from "../../data/featureFilms.js";
 
 const num = (value) => {
   const n = Number(value);
@@ -114,6 +115,13 @@ export function pageModel(slug, payload, {
       eyebrow: "Commit graph",
       title: "What each release cost",
       lede: "Every version, the commits behind it, and the lines it moved.",
+    },
+    films: {
+      eyebrow: "Films",
+      title: "Every page, in thirty seconds",
+      // The counts are the film catalogue's, not the site stats, so they ride
+      // in the lede: a card with no stats payload still shows no stat tiles.
+      lede: `${FEATURE_FILMS.length} films · ${FEATURE_FILMS.filter((f) => f.series === "page").length} page films · ${Math.round(FEATURE_FILMS.reduce((a, f) => a + f.seconds, 0) / 60)} minutes`,
     },
     blueprint: {
       eyebrow: "The Blueprint",
@@ -315,7 +323,7 @@ export const PAGE_SLUGS = [
   "home", "about", "ask", "books", "challenges", "changelog", "changelog-graph", "contact", "instagram",
   "interactive-me", "micro-blog", "mindmap", "now", "100-days-to-offload", "presentations",
   "projects", "resume", "sports", "stats", "tags", "treks", "writing-ledger", "notfound",
-  "ask-share", "newsletter", "blueprint", "logbook", "videos", "training",
+  "ask-share", "newsletter", "blueprint", "logbook", "videos", "training", "films",
 ];
 
 // One issue's card, from issueModel() (src/lib/newsletterIssue.js). Rendered by

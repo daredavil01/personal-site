@@ -71,6 +71,7 @@ const routes = [
       { label: "Blueprint", path: "/blueprint" },
       { label: "Instagram", path: "/instagram" },
       { label: "Videos", path: "/videos" },
+      { label: "Films", path: "/films" },
       { label: "Stats", path: "/stats" },
     ],
   },

@@ -12,6 +12,7 @@ export const PAGE_FILM_DIR = "/video/page-films";
 export const PAGE_FILMS = [
   {
     key: "about",
+    label: "About",
     story: "A stopwatch asks how long you have. Ten seconds gets the one line; then the five people in one — engineer, runner, trekker, reader and writer, citizen — each with a live number, the six rules I work by, and a face at the end.",
     slug: "about",
     route: "/about",
@@ -21,6 +22,7 @@ export const PAGE_FILMS = [
   },
   {
     key: "resume",
+    label: "Resume",
     story: "A blank A4 sheet types my name. The career draws itself as a timeline from college to now, the numbers count up, the strongest skills fill their dots, certificates stack newest first — and it all fits on one page.",
     slug: "resume",
     route: "/resume",
@@ -30,6 +32,7 @@ export const PAGE_FILMS = [
   },
   {
     key: "ledger",
+    label: "Writing Ledger",
     story: "A pen draws the total. The years rise as ink, a quiet start and then the year it all poured out; every month becomes a blot as big as its words; then the week's rhythm, how long an essay runs, and the records.",
     slug: "writing-ledger",
     route: "/writing-ledger",
@@ -39,6 +42,7 @@ export const PAGE_FILMS = [
   },
   {
     key: "microblog",
+    label: "Micro-blog",
     story: "Every short post is a star. A 24-hour clock shows when they get written — late — then English and Marathi side by side, the years as a skyline, and the very first post, typed out again.",
     slug: "micro-blog",
     route: "/micro-blog",
@@ -48,6 +52,7 @@ export const PAGE_FILMS = [
   },
   {
     key: "presentations",
+    label: "Presentations",
     story: "A projector clicks on and the decks fly past, newest first. Then every one of them on one wall, how many slides they hold between them, and how often a new one appears.",
     slug: "presentations",
     route: "/presentations",
@@ -57,15 +62,17 @@ export const PAGE_FILMS = [
   },
   {
     key: "sports",
+    label: "Race log",
     story: "A countdown, then race day: photos with bib numbers and finishing times in the order they were run. The distance ladder from 10K to a 50K ultra, three stopwatches stopping on the personal bests, and the years.",
     slug: "sports",
     route: "/sports",
-    poster: 17.6,
+    poster: 21.6,
     title: "Every finish line",
     alt: "Thirty-second film of the race log: a countdown, race-day photos with bib numbers and finishing times, the distance ladder from 10K to a 50K ultra, three stopwatches stopping on the personal bests, and the years",
   },
   {
     key: "treks",
+    label: "Treks",
     story: "A Sahyadri ridge draws itself. The forts arrive as postcards in the order they were climbed, the difficulty becomes three peaks, and the longest trek gets a clock of its own.",
     slug: "treks",
     route: "/treks",

@@ -1,0 +1,30 @@
+{
+ "duration": 30,
+ "sound": "Synthesised score and sound effects; captions burned in",
+ "chapters": [
+  {
+   "title": "Opening",
+   "start": 0
+  },
+  {
+   "title": "The clock",
+   "start": 4.5
+  },
+  {
+   "title": "Two languages",
+   "start": 10
+  },
+  {
+   "title": "Year by year",
+   "start": 15
+  },
+  {
+   "title": "The first post",
+   "start": 20
+  },
+  {
+   "title": "The end",
+   "start": 26
+  }
+ ]
+}
