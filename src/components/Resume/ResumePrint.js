@@ -107,7 +107,9 @@ const ResumePrint = ({
                     <span>{[p.org, p.year].filter(Boolean).join(" · ")}</span>
                   </div>
                   {p.subtitle && <p>{p.subtitle}</p>}
-                  {p.highlight && <p className="rp-did">{p.highlight}</p>}
+                  {p.lines.length > 0 && (
+                    <ul className="rp-did">{p.lines.map((l) => <li key={l}>{l}</li>)}</ul>
+                  )}
                   {p.stack.length > 0 && <p className="rp-stack">{p.stack.join(" · ")}</p>}
                 </div>
               ))}

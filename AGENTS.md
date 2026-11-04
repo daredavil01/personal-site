@@ -638,7 +638,8 @@ moves. Pure models: `src/lib/aboutModel.js` and `src/lib/resumeModel.js`
   `src/components/Resume/ResumePrint.js`, not the screen sheet (which runs to
   three pages): `onePageResume()` picks from the site's own data (up to three
   bullets per job, two for research, campus roles folded into a line, four
-  projects, each with a brief, eight skills a group plus the stack the projects
+  projects, each with 2–3 lines from `projectLines()` (its highlights, run-ons
+  split into sentences, the outcome filling in), eight skills a group plus the stack the projects
   ship with, every certification, Beyond work from the live stats), and the
   component scales itself down (never up,
   floor 0.72) on `beforeprint` until it measures under the page. It is

@@ -1,7 +1,7 @@
 import {
   parseLooseDate, parseDaterange, monthsBetween, durationLabel, groupPositions,
   professionalMonths, sortCertifications, skillAliases, skillsWithEvidence,
-  stackBeyondSkills, splitSkillLine, skillsInText, projectEvidence, groupSkills, resumeText, onePageResume, leadHighlight,
+  stackBeyondSkills, splitSkillLine, skillsInText, projectEvidence, groupSkills, resumeText, onePageResume, projectLines,
 } from "./resumeModel";
 
 const NOW = new Date(2026, 10, 4); // 4 Nov 2026
@@ -138,10 +138,28 @@ it("files each skill once in the overview", () => {
   expect(all.flatMap((g) => g.skills.map((s) => s.title))).toEqual(["Python", "Pandas"]);
 });
 
-it("cuts a run-on highlight at its first sentence", () => {
-  const glued = `${"x ".repeat(80)}first The next part`;
-  expect(leadHighlight(glued)).toBe(`${"x ".repeat(80)}first`);
-  expect(leadHighlight("Short and whole. Kept As is")).toBe("Short and whole. Kept As is");
+describe("projectLines", () => {
+  it("takes up to three highlights", () => {
+    expect(projectLines({ highlights: ["a", "b", "c", "d"] })).toEqual(["a", "b", "c"]);
+  });
+  it("splits a run-on highlight into its sentences", () => {
+    const glued = `Counts days read, never days in a row${" and more".repeat(12)} Nothing leaves the browser at all Share cards drawn on the device`;
+    const out = projectLines({ highlights: [glued] });
+    expect(out).toHaveLength(3);
+    expect(out[1]).toBe("Nothing leaves the browser at all");
+  });
+  it("keeps a capitalised name inside its sentence", () => {
+    const glued = `Nothing leaves the browser, enforced by a strict Content Security Policy, with${" more".repeat(14)} Every quote checked`;
+    expect(projectLines({ highlights: [glued] })).toEqual([
+      `Nothing leaves the browser, enforced by a strict Content Security Policy, with${" more".repeat(14)}`,
+      "Every quote checked",
+    ]);
+  });
+  it("fills from the outcome when highlights run short, and clips long lines", () => {
+    expect(projectLines({ highlights: ["Only one"], outcome: "Live at x.in. Used daily." })).toEqual(["Only one", "Live at x.in.", "Used daily."]);
+    expect(projectLines({ highlights: ["word ".repeat(60)] })[0].endsWith("…")).toBe(true);
+    expect(projectLines({})).toEqual([]);
+  });
 });
 
 describe("onePageResume", () => {

@@ -9,7 +9,7 @@ import { useProjects, useResume, useSports, useTreks } from "../../context/Conte
 import useSiteStats from "../Stats/useSiteStats";
 import {
   groupPositions, professionalMonths, projectEvidence, skillsWithEvidence, groupSkills,
-  stackBeyondSkills, sortCertifications, splitSkillLine, skillsInText, resumeText, onePageResume, leadHighlight,
+  stackBeyondSkills, sortCertifications, splitSkillLine, skillsInText, resumeText, onePageResume, projectLines,
 } from "../../lib/resumeModel";
 import {
   buildUpdates, parseUpdates, parseAbout, hobbiesWithEvidence,
@@ -298,7 +298,12 @@ const ResumeDocument = () => {
                         {p.subtitle && <p>{p.subtitle}</p>}
                         <div className="rs-project-hl">
                           {p.org && (<><b>For</b><span>{p.org}</span></>)}
-                          {(p.highlights || [])[0] && (<><b>Did</b><span>{leadHighlight(p.highlights[0])}</span></>)}
+                          {projectLines(p).map((l, i) => (
+                            <React.Fragment key={l}>
+                              <b>{i === 0 ? "Did" : ""}</b>
+                              <span>{l}</span>
+                            </React.Fragment>
+                          ))}
                         </div>
                         {(p.techStack || []).length > 0 && <span className="rs-project-stack">{p.techStack.slice(0, 5).join(" · ")}</span>}
                       </Link>

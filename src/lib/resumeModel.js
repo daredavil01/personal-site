@@ -350,20 +350,42 @@ const yearsOf = (p) => {
   return `${s}–${String(e).slice(-2)}`;
 };
 
-// Some project highlights were pasted as one run-on line ("…first The
-// government's…"). A long one is cut at its first sentence-like break; a
-// normal one is kept whole.
-export function leadHighlight(h) {
-  const text = String(h || "");
-  if (text.length <= 150) return text;
-  return text.split(/(?<=[a-z)])\s+(?=[A-Z][a-z])/)[0];
+// A sentence boundary inside a run-on highlight: a lowercase end, then a
+// capitalised word followed by a lowercase one ("open Nothing leaves"). The
+// second condition keeps names whole: "a strict Content Security Policy".
+const RUN_ON = /(?<=[a-z0-9)%])\s+(?=[A-Z][a-z]+\s+[a-z0-9(])/;
+const clipLine = (s, max = 170) => {
+  const t = String(s).replace(/\s+/g, " ").trim().replace(/^[-•]\s*/, "");
+  if (t.length <= max) return t;
+  return `${t.slice(0, max).replace(/\s+\S*$/, "")}…`;
+};
+
+/**
+ * Two or three short lines about a project, from its own highlights. A
+ * highlight saved as one run-on line ("…stay open Nothing leaves…") is split
+ * into its sentences first; when there are still fewer than `min`, sentences
+ * of the outcome fill in. Nothing is written that the row does not say.
+ */
+export function projectLines(p, { max = 3, min = 2 } = {}) {
+  const parts = (p.highlights || []).flatMap((h) => {
+    const text = String(h || "").trim();
+    return text.length > 150 ? text.split(RUN_ON) : [text];
+  });
+  const lines = parts.map((x) => clipLine(x)).filter(Boolean);
+  if (lines.length < min && p.outcome) {
+    String(p.outcome).split(/\n+|(?<=[.!?])\s+(?=[A-Z])/)
+      .map((x) => clipLine(x))
+      .filter((x) => x && !lines.includes(x))
+      .forEach((x) => lines.push(x));
+  }
+  return lines.slice(0, max);
 }
 
 /**
  * What goes on the one A4 page, picked from the site's own data: every
  * professional role with up to three bullets, research with two, campus
  * leadership folded into one line, four selected projects, each with a brief
- * (what it is, and what it did),
+ * (what it is, then two or three lines of what it did),
  * the skills overview (eight per group) plus the stack the projects ship
  * with, every certification and the degrees. The print layout scales itself
  * to the page, so this only has to be close — and fills the sheet rather
@@ -372,7 +394,7 @@ export function leadHighlight(h) {
 export function onePageResume({
   groups = [], selected = [], skillGroups = [], certifications = [], degrees = [], stack = [], skip = [],
 } = {}, {
-  bullets = 3, researchBullets = 2, projects = 4, skillsPerGroup = 8, skillGroupsMax = 6, certs = Infinity, stackMax = 8,
+  bullets = 3, researchBullets = 2, projects = 4, skillsPerGroup = 8, skillGroupsMax = 6, certs = Infinity, stackMax = 8, projectLineCount = 3,
 } = {}) {
   const roles = [];
   let leadership = [];
@@ -408,7 +430,7 @@ export function onePageResume({
         subtitle: p.subtitle || "",
         year: p.date ? String(p.date).slice(0, 4) : "",
         org: p.org || "",
-        highlight: leadHighlight((p.highlights || [])[0]),
+        lines: projectLines(p, { max: projectLineCount }),
         stack: (p.techStack || []).slice(0, 4),
       })),
     stack: stack.slice(0, stackMax).map((x) => (typeof x === "string" ? x : x.name)),

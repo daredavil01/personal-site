@@ -260,8 +260,9 @@
 .rp ul:not(.rp-list) { margin-top: 0.2em; padding-left: 1.1em; list-style: disc; }
 .rp ul:not(.rp-list) li { margin-top: 0.1em; color: #222; }
 .rp-project p { color: #333; }
-.rp-did { color: #222 !important; }
-.rp-did::before { content: "→ "; color: #9c1d00; font-weight: 700; }
+.rp ul.rp-did { list-style: none; padding-left: 0; margin-top: 0.15em; }
+.rp ul.rp-did li { color: #222; padding-left: 1.1em; text-indent: -1.1em; margin-top: 0.05em; }
+.rp ul.rp-did li::before { content: "→ "; color: #9c1d00; font-weight: 700; }
 .rp-stack { font: 500 0.86em/1.35 ui-monospace, Menlo, monospace; color: #666 !important; }
 .rp-line { color: #222; }
 .rp-skill + .rp-skill { margin-top: 0.35em; }
