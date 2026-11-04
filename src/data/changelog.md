@@ -13,6 +13,18 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v28.0.0] — 2026-11-04
+
+### Changed
+- **Micro Blog redesign: Overview, Posts and Stats** (`src/pages/MicroBlog.js`, `src/components/MicroBlog/`): /micro-blog now opens on an **Overview**. It starts with a night sky where each timed post is a dot, placed by date and by the time it was signed (51% fall between 9 pm and 3 am). Next come **today's ten**, and then the whole archive read in eight chapters: the 24-hour clock, the shape of the years, English against Marathi, each tag's life with the tags arriving and fading, recurring phrases in both languages, streaks and silences, four moments, and emoji and running numbers. Each chapter's sentence is written from the numbers, and a chapter with no data is left out. Each chapter links to the posts behind it. **Posts** keeps search, the month river, On This Day, pinboard and list, plus removable filter chips. **Stats** has a year switch (`?year=`) over KPI tiles, posts per month, a weekday × hour heatmap, format/language/kind/source shares, a calendar of every day, top tags, the length histogram, emoji, records and a year-by-year table. Both shells draw the same tabs: the atlas at night with chapters that rise into view, classic on paper and still. `?tab=list` still opens Posts.
+- **Posts tab merges its URL state** (`src/components/MicroBlog/PostsTab.js`): typing in the filters used to rewrite the whole query string, which dropped `?view=`. Filters now merge into the existing params.
+
+### Added
+- **Micro-blog insights** (`src/lib/microblogInsights.js`, `scripts/build-microblog-insights.mjs`, `public/data/microblog-insights.json`): `npm run microblog:insights` reads every post and writes a ~50 KB file: summaries for the whole archive and for each year, the posting clock parsed from the posts' own signatures (`#25:09:2021::11:37:pm`, in either script), languages by share of letters, tag lives, phrases, streaks and silences, quoted moments, and the pool the daily ten come from. No model calls, and it reads with the public key when there is no service key. Tested in `microblogInsights.test.js`, including a size budget. It is the `microblog` step of `npm run refresh` and runs in the nightly workflow.
+- **Today's ten** (`dailyPicks()`): one post from each year, at least three in each language, weighted towards longer posts in the archive's own words. Seeded by the date, so every reader sees the same ten today and a new ten tomorrow. The ten are fetched by id (`getMicroblogPostsByIds`).
+
+---
+
 ## [v27.0.1] — 2026-11-04
 
 ### Fixed

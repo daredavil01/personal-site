@@ -1,607 +1,123 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import PageShell from "../atlas/PageShell";
-import {
-  searchMicroblog, getMicroblogTagFacets, getMicroblogStats, getMicroblogActivity, getMicroblogMonthTags,
-} from "../lib/api/microblog";
+import useViewMode from "../atlas/useViewMode";
 import { useTagColors } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
-import PostCard from "../components/MicroBlog/PostCard";
-import PinboardCard from "../components/MicroBlog/PinboardCard";
-import MonthRiver from "../components/MicroBlog/MonthRiver";
-import OnThisDay from "../components/MicroBlog/OnThisDay";
+import OverviewTab from "../components/MicroBlog/OverviewTab";
+import PostsTab from "../components/MicroBlog/PostsTab";
+import StatsTab from "../components/MicroBlog/StatsTab";
 import PostModal from "../components/MicroBlog/PostModal";
+import useInsights from "../components/MicroBlog/useInsights";
+import "../components/MicroBlog/microblog.css";
 
-const PAGE_SIZE = 24;
+// /micro-blog in three tabs:
+//   Overview — today's ten, then the whole archive read as a story
+//   Posts    — every post, searched and paged in Postgres
+//   Stats    — the derived numbers, for every year or one
+// Overview and Stats read public/data/microblog-insights.json
+// (npm run microblog:insights); Posts queries Supabase directly.
+// Both shells draw the same tabs: the atlas at night, with chapters that rise
+// into view; classic on paper, still. `?tab=` is the tab (`list` is the old
+// name for Posts), `?year=` the Stats scope, and `view` is never touched.
 
-const SOURCES = [
-  { value: "", label: "All sources" },
-  { value: "tumblr", label: "Tumblr" },
-  { value: "manual", label: "Manual" },
+const TABS = [
+  { id: "overview", label: "Overview", icon: "auto_stories" },
+  { id: "posts", label: "Posts", icon: "notes" },
+  { id: "stats", label: "Stats", icon: "monitoring" },
 ];
-
-const TYPES = [
-  { value: "", label: "All types" },
-  { value: "text", label: "Text" },
-  { value: "quote", label: "Quote" },
-  { value: "photo", label: "Photo" },
-];
-
-// post_kind (0025) — what a post IS, where TYPES is the Tumblr export's format
-// label. "All kinds" includes the posts no classifier has reached yet.
-const KINDS = [
-  { value: "", label: "All kinds" },
-  { value: "own", label: "His own" },
-  { value: "quote", label: "Quotes" },
-  { value: "reblog", label: "Reblogs" },
-  { value: "link", label: "Links" },
-];
-
-const SORTS = [
-  { value: "date_desc", label: "Newest" },
-  { value: "date_asc", label: "Oldest" },
-  { value: "random", label: "Shuffle" },
-];
-
-const selectClass = "h-11 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg px-3 font-label text-xs uppercase tracking-wider text-stone-600 dark:text-stone-300 outline-none cursor-pointer hover:border-secondary transition-colors";
-
-// Public pages use div[role="button"] — a leftover of the retired legacy CSS.
-const keyActivate = (fn) => (e) => {
-  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
+const tabOf = (raw) => {
+  if (raw === "list") return "posts";
+  return TABS.some((t) => t.id === raw) ? raw : "overview";
 };
-
-// Lowercased because tag names are stored lowercase — keeps old ?tags=Life links working.
-const parseTags = (raw) => (raw ? raw.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean) : []);
-
-const shuffleArray = (arr) => {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
-
-const TYPE_COLORS = {
-  text: "bg-blue-400",
-  quote: "bg-violet-400",
-  photo: "bg-amber-400",
-};
+// Keys that belong to a tab; switching tabs drops the others' keys.
+const POST_KEYS = ["q", "tags", "source", "type", "kind", "month", "sort", "layout"];
 
 const MicroBlog = () => {
+  const mode = useViewMode();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [tab, setTab] = useState(() => searchParams.get("tab") || "list");
-  // The pinboard is the default; ?layout=list keeps the classic list. (`view`
-  // is off-limits — useViewMode reserves it for the atlas/classic shell
-  // switch.)
-  const [view, setView] = useState(() => (searchParams.get("layout") === "list" ? "list" : "wall"));
-
-  // List filters — initialise from URL so links are shareable/bookmarkable.
-  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") || "");
-  const [searchTerm, setSearchTerm] = useState(() => searchParams.get("q") || "");
-  const [activeTags, setActiveTags] = useState(() => parseTags(searchParams.get("tags")));
-  const [source, setSource] = useState(() => searchParams.get("source") || "");
-  const [type, setType] = useState(() => searchParams.get("type") || "");
-  const [kind, setKind] = useState(() => searchParams.get("kind") || "");
-  const [month, setMonth] = useState(() => searchParams.get("month") || "");
-  const [sort, setSort] = useState(() => searchParams.get("sort") || "date_desc");
-
-  // The river strip's data: posts-per-month across the whole archive, plus
-  // each month's tags (for bar tints). Tag colors are fetched once here and
-  // shared by every card and bar.
-  const [activity, setActivity] = useState(null);
-  const [monthTags, setMonthTags] = useState(null);
+  const tab = tabOf(searchParams.get("tab"));
+  const year = searchParams.get("year") || "";
   const tagColors = useTagColors();
-  useEffect(() => {
-    getMicroblogActivity().then(setActivity).catch(() => setActivity(null));
-    getMicroblogMonthTags().then(setMonthTags).catch(() => setMonthTags(null));
-  }, []);
-
-  const [rows, setRows] = useState([]);
-  const [count, setCount] = useState(0);
-  const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(null);
-
-  const [facets, setFacets] = useState([]);
+  const { doc, error } = useInsights();
   const [selected, setSelected] = useState(null);
+  const tabsRef = useRef(null);
 
-  // Stats tab
-  const [stats, setStats] = useState(null);
-  const [statsLoaded, setStatsLoaded] = useState(false);
-  const [statsLoading, setStatsLoading] = useState(false);
-  const [statsError, setStatsError] = useState(null);
-
-  const activeTagsKey = activeTags.join("|");
-
-  // Debounce the search box → searchTerm.
-  useEffect(() => {
-    const t = setTimeout(() => setSearchTerm(searchInput.trim()), 300);
-    return () => clearTimeout(t);
-  }, [searchInput]);
-
-  // Mirror active filters into the URL (replace so typing doesn't spam history).
-  useEffect(() => {
-    const next = {};
-    if (tab !== "list") next.tab = tab;
-    next.layout = view; // always recorded, so shared links keep the chosen view
-    if (searchTerm) next.q = searchTerm;
-    if (activeTags.length) next.tags = activeTags.join(",");
-    if (source) next.source = source;
-    if (type) next.type = type;
-    if (kind) next.kind = kind;
-    if (month) next.month = month;
-    if (sort !== "date_desc") next.sort = sort;
-    setSearchParams(next, { replace: true });
-  }, [tab, view, searchTerm, activeTagsKey, source, type, kind, month, sort, setSearchParams]);
-
-  // Tag facets load once (used by both tabs).
-  useEffect(() => {
-    getMicroblogTagFacets().then(setFacets).catch(() => setFacets([]));
-  }, []);
-
-  // Load stats the first time the stats tab is opened.
-  useEffect(() => {
-    if (tab !== "stats" || statsLoaded) return;
-    setStatsLoaded(true);
-    setStatsLoading(true);
-    setStatsError(null);
-    getMicroblogStats()
-      .then(setStats)
-      .catch((e) => setStatsError(e))
-      .finally(() => setStatsLoading(false));
-  }, [tab, statsLoaded]);
-
-  // Fresh search whenever a filter or sort changes.
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError(null);
-    const apiSort = sort === "random" ? "date_desc" : sort;
-    searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, kind, month, page: 0, pageSize: PAGE_SIZE, sort: apiSort,
-    })
-      .then(({ rows: r, count: c }) => {
-        if (!active) return;
-        setRows(sort === "random" ? shuffleArray(r) : r);
-        setCount(c);
-        setPage(0);
-      })
-      .catch((e) => { if (active) setError(e); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [searchTerm, activeTagsKey, source, type, kind, month, sort]);
-
-  const loadMore = () => {
-    const next = page + 1;
-    setLoadingMore(true);
-    const apiSort = sort === "random" ? "date_desc" : sort;
-    searchMicroblog({
-      query: searchTerm, tags: activeTags, source, type, kind, month, page: next, pageSize: PAGE_SIZE, sort: apiSort,
-    })
-      .then(({ rows: r }) => {
-        setRows((prev) => [...prev, ...(sort === "random" ? shuffleArray(r) : r)]);
-        setPage(next);
-      })
-      .catch(() => {})
-      .finally(() => setLoadingMore(false));
-  };
-
-  const handleSortClick = (v) => {
-    if (v === "random" && sort === "random") {
-      // Re-shuffle already-loaded rows without a network round-trip.
-      setRows((prev) => shuffleArray([...prev]));
-    } else {
-      setSort(v);
+  const navigate = useCallback((nextTab, params = {}, { replace = false } = {}) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      ["tab", "year", ...POST_KEYS].forEach((k) => {
+        if (nextTab !== tabOf(prev.get("tab")) || k in params) next.delete(k);
+      });
+      if (nextTab !== "overview") next.set("tab", nextTab);
+      Object.entries(params).forEach(([k, v]) => { if (v) next.set(k, v); });
+      return next;
+    }, { replace });
+    if (tabsRef.current && tabsRef.current.getBoundingClientRect().top < 0) {
+      tabsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  }, [setSearchParams]);
+
+  const goPosts = useCallback((params) => navigate("posts", params), [navigate]);
+  const goStats = useCallback((y) => navigate("stats", { year: y }), [navigate]);
+  const setYear = useCallback((y) => navigate("stats", { year: y }, { replace: true }), [navigate]);
+
+  const onTabKey = (e) => {
+    const i = TABS.findIndex((t) => t.id === tab);
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const next = TABS[(i + step + TABS.length) % TABS.length];
+    navigate(next.id);
+    document.getElementById(`mb-tab-${next.id}`)?.focus();
   };
 
-  const toggleTag = (tag) => setActiveTags((prev) => (
-    prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-  ));
+  const needsDoc = tab !== "posts";
 
-  const hasFilters = searchTerm || activeTags.length > 0 || source || type || kind || month;
-
-  // How many *axes* are in play. The search box is excluded: it still narrows
-  // while tags / source / type / month widen.
-  const axisCount = [activeTags.length ? "tags" : "", source, type, kind, month].filter(Boolean).length;
-  const clearFilters = () => {
-    setSearchInput("");
-    setSearchTerm("");
-    setActiveTags([]);
-    setSource("");
-    setType("");
-    setKind("");
-    setMonth("");
-  };
-
-  const hasMore = rows.length < count;
-  const topTags = useMemo(() => facets.slice(0, 40), [facets]);
-
-  // ── Stats panel ─────────────────────────────────────────────────────────────
-  const renderStats = () => {
-    if (statsLoading) return <LoadingBlock label="Loading stats…" />;
-    if (statsError) return <ErrorBlock />;
-    if (!stats) return null;
-
-    const {
-      total, minDate, maxDate, byType, bySource,
-    } = stats;
-    const topTagList = facets.slice(0, 15);
-    const maxTagCount = topTagList[0]?.count ?? 1;
-
-    const yearCounts = (activity?.monthCounts ?? []).reduce((acc, { key, count: c }) => {
-      const year = key.slice(0, 4);
-      acc.set(year, (acc.get(year) || 0) + c);
-      return acc;
-    }, new Map());
-    const years = [...yearCounts.entries()];
-    const maxYearCount = Math.max(...years.map(([, c]) => c), 1);
-
-    return (
-      <div className="flex flex-col gap-10">
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: "Total Posts", value: total.toLocaleString() },
-            { label: "Unique Tags", value: facets.length.toLocaleString() },
-            { label: "Since", value: minDate ?? "—" },
-            { label: "Latest", value: maxDate ?? "—" },
-          ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-xl p-5"
-            >
-              <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-1.5">
-                {label}
-              </p>
-              <p className="font-headline text-2xl font-black text-stone-900 dark:text-stone-100 mb-0">
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Posts per year */}
-        {years.length > 0 && (
-          <div>
-            <div className="flex items-baseline justify-between mb-4">
-              <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
-                Posts per year
-              </p>
-              {activity?.longestStreak > 1 && (
-                <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-0">
-                  Longest daily streak: <span className="text-secondary font-bold">{activity.longestStreak} days</span>
-                </p>
-              )}
-            </div>
-            <div className="flex items-end gap-2 h-28 overflow-x-auto pb-1">
-              {years.map(([year, c]) => (
-                <div key={year} className="flex flex-col items-center justify-end gap-1 h-full flex-1 min-w-[34px]">
-                  <span className="font-mono text-[10px] text-stone-500 dark:text-stone-400">{c.toLocaleString()}</span>
-                  <div
-                    className="w-full max-w-[30px] rounded-t-md bg-secondary/70"
-                    style={{ height: `${Math.max(4, (c / maxYearCount) * 72)}px` }}
-                  />
-                  <span className="font-mono text-[9px] text-stone-400 dark:text-stone-500">{year}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Post type breakdown */}
-        <div>
-          <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-4">
-            Post types
-          </p>
-          <div className="flex flex-col gap-3">
-            {Object.entries(byType).map(([t, c]) => (
-              <div key={t} className="flex items-center gap-3">
-                <span className="font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400 w-12 shrink-0">
-                  {t}
-                </span>
-                <div className="flex-1 h-2 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${TYPE_COLORS[t] ?? "bg-secondary"}`}
-                    style={{ width: `${total > 0 ? ((c / total) * 100).toFixed(1) : 0}%` }}
-                  />
-                </div>
-                <span className="font-mono text-xs text-stone-500 dark:text-stone-400 w-14 text-right shrink-0">
-                  {c.toLocaleString()}
-                </span>
-                <span className="font-mono text-[10px] text-stone-400 dark:text-stone-600 w-9 text-right shrink-0">
-                  {total > 0 ? `${((c / total) * 100).toFixed(0)}%` : "—"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Source breakdown */}
-        <div>
-          <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-4">
-            Sources
-          </p>
-          <div className="flex flex-col gap-3">
-            {Object.entries(bySource).map(([s, c]) => (
-              <div key={s} className="flex items-center gap-3">
-                <span className="font-label text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400 w-16 shrink-0">
-                  {s}
-                </span>
-                <div className="flex-1 h-2 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-secondary"
-                    style={{ width: `${total > 0 ? (((c ?? 0) / total) * 100).toFixed(1) : 0}%` }}
-                  />
-                </div>
-                <span className="font-mono text-xs text-stone-500 dark:text-stone-400 w-14 text-right shrink-0">
-                  {(c ?? 0).toLocaleString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top 15 tags */}
-        <div>
-          <p className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-4">
-            Top 15 tags
-          </p>
-          <div className="flex flex-col gap-2">
-            {topTagList.map(({ tag, count: c }, i) => (
-              <div key={tag} className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-stone-300 dark:text-stone-700 w-5 text-right shrink-0">
-                  {i + 1}
-                </span>
-                <span className="font-label text-xs text-stone-600 dark:text-stone-300 w-32 truncate shrink-0">
-                  #{tag}
-                </span>
-                <div className="flex-1 h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-secondary/60"
-                    style={{ width: `${((c / maxTagCount) * 100).toFixed(1)}%` }}
-                  />
-                </div>
-                <span className="font-mono text-xs text-stone-400 dark:text-stone-500 w-10 text-right shrink-0">
-                  {c}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <PageShell
-      region="writer"
-      title="Micro Blog"
-    >
-      <div className="flex flex-col gap-8 w-full max-w-4xl" id="micro-blog">
-        {/* Hero */}
-        <header>
-          <span className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4 block">
-            Archive
-          </span>
-          <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-[0.9] tracking-tighter mb-4">
-            Micro Blog.
-          </h1>
-          <p className="font-body text-stone-500 dark:text-stone-400 leading-relaxed mb-0 max-w-2xl">
-            Years of short posts, quotes, and captures — preserved and made fully searchable.
-            Imported from Tumblr; more sources to come.
+    <PageShell region="writer" title="Micro Blog">
+      <div className={`mb-root mb-${mode} flex flex-col gap-8 w-full max-w-5xl`} id="micro-blog">
+        <header className="flex flex-col gap-4">
+          <span className="font-label text-xs uppercase tracking-[0.3em] mb-accent font-bold">Archive</span>
+          <h1 className="font-headline text-5xl md:text-7xl font-black leading-[0.9] tracking-tighter mb-0">Micro Blog.</h1>
+          <p className="font-body mb-muted leading-relaxed mb-0 max-w-2xl">
+            Years of short posts, quotes and photo captions in English and Marathi, kept, searchable and read here as data.
           </p>
         </header>
 
-        {/* Tabs */}
-        <div className="flex border-b border-stone-100 dark:border-stone-800">
-          {[{ value: "list", label: "Posts" }, { value: "stats", label: "Stats" }].map(({ value: v, label }) => (
-            <div
-              key={v}
-              role="button"
-              tabIndex={0}
-              onClick={() => setTab(v)}
-              onKeyDown={keyActivate(() => setTab(v))}
-              className={`px-5 py-2.5 font-label text-xs uppercase tracking-widest font-bold border-b-2 -mb-px cursor-pointer transition-colors ${
-                tab === v
-                  ? "border-secondary text-secondary"
-                  : "border-transparent text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300"
-              }`}
-            >
-              {label}
-            </div>
-          ))}
+        <div ref={tabsRef} className="sticky top-[4.5rem] z-20 scroll-mt-24">
+          {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- focus sits on the active tab (roving tabindex) */}
+          <div className="mb-tabs" role="tablist" aria-label="Micro Blog" onKeyDown={onTabKey}>
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                id={`mb-tab-${t.id}`}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                aria-controls="mb-panel"
+                tabIndex={tab === t.id ? 0 : -1}
+                className="mb-tab"
+                onClick={() => navigate(t.id)}
+              >
+                <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Stats panel */}
-        {tab === "stats" && renderStats()}
-
-        {/* List panel */}
-        {tab === "list" && (
-          <>
-            {/* Today's date in an earlier year, and what it rhymes with.
-                Hidden while a filter is on — it answers a question nobody
-                narrowing the archive is asking. */}
-            {!hasFilters && (
-              <div className="mb-4">
-                <OnThisDay />
-              </div>
-            )}
-
-            {/* Search + filters */}
-            <section>
-              <input
-                type="search"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search posts…"
-                className="w-full mb-3 px-4 py-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-body text-sm text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-secondary transition-colors"
-              />
-
-              {/* The river — the archive's pulse, one bar per month, click to filter */}
-              {activity && activity.monthCounts.length > 0 && (
-                <div className="mb-4 px-1">
-                  <MonthRiver
-                    months={activity.monthCounts}
-                    activeMonth={month || null}
-                    onSelect={(key) => setMonth(key || "")}
-                    monthTags={monthTags}
-                    tagColors={tagColors}
-                  />
-                </div>
-              )}
-
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <select className={selectClass} value={source} onChange={(e) => setSource(e.target.value)}>
-                  {SOURCES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
-                <select className={selectClass} value={type} onChange={(e) => setType(e.target.value)}>
-                  {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-                <select className={selectClass} value={kind} onChange={(e) => setKind(e.target.value)}>
-                  {KINDS.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
-                </select>
-
-                <div className="flex items-center gap-3 ml-auto">
-                  {/* List ↔ Pinboard view toggle */}
-                  <div className="flex gap-1">
-                    {[{ value: "list", label: "List" }, { value: "wall", label: "Pinboard" }].map(({ value: v, label }) => (
-                      <div
-                        key={v}
-                        role="button"
-                        tabIndex={0}
-                        aria-pressed={view === v}
-                        onClick={() => setView(v)}
-                        onKeyDown={keyActivate(() => setView(v))}
-                        className={`px-2.5 py-1 rounded-lg font-label text-[10px] uppercase tracking-wider cursor-pointer transition-colors ${
-                          view === v
-                            ? "bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900"
-                            : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary"
-                        }`}
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-1">
-                    {SORTS.map(({ value: v, label }) => (
-                      <div
-                        key={v}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleSortClick(v)}
-                        onKeyDown={keyActivate(() => handleSortClick(v))}
-                        title={v === "random" && sort === "random" ? "Click to reshuffle" : undefined}
-                        className={`px-2.5 py-1 rounded-lg font-label text-[10px] uppercase tracking-wider cursor-pointer transition-colors ${
-                          sort === v
-                            ? "bg-secondary text-white"
-                            : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary"
-                        }`}
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                  <span className="font-label text-[10px] uppercase tracking-widest text-stone-400 dark:text-stone-500">
-                    {rows.length} of {count}
-                  </span>
-                </div>
-              </div>
-
-              {topTags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {topTags.map(({ tag, count: c }) => (
-                    <div
-                      key={tag}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => toggleTag(tag)}
-                      onKeyDown={keyActivate(() => toggleTag(tag))}
-                      className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-label border cursor-pointer transition-all ${
-                        activeTags.includes(tag)
-                          ? "bg-secondary text-white border-secondary"
-                          : "bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-100 dark:border-stone-700 hover:border-secondary hover:text-secondary"
-                      }`}
-                    >
-                      #{tag} {c}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {hasFilters && (
-                <div className="flex flex-wrap items-center gap-4">
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={clearFilters}
-                    onKeyDown={keyActivate(clearFilters)}
-                    className="inline-flex items-center gap-1 font-label text-xs font-bold text-secondary cursor-pointer hover:underline"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                    Clear all filters
-                  </div>
-                  {/* Tags, source, type and month union rather than intersect, so
-                      each one adds posts. Said out loud because it is the
-                      opposite of what a filter row usually does. */}
-                  {axisCount > 1 && (
-                    <p className="mb-0 font-body text-xs text-stone-400 dark:text-stone-500">
-                      Showing posts matching any of your filters.
-                    </p>
-                  )}
-                </div>
-              )}
-            </section>
-
-            {/* Results */}
-            <section>
-              {error && <ErrorBlock />}
-              {!error && loading && rows.length === 0 && <LoadingBlock label="Loading posts…" />}
-              {!error && !loading && rows.length === 0 && (
-                <p className="text-stone-500 dark:text-stone-400 font-body italic text-center py-12 mb-0">
-                  No posts match these filters.
-                </p>
-              )}
-              {!error && rows.length > 0 && (
-                view === "wall" ? (
-                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 px-1 pt-2">
-                    {rows.map((post) => (
-                      <PinboardCard key={post.id} post={post} onOpen={setSelected} tagColors={tagColors} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {rows.map((post) => (
-                      <PostCard key={post.id} post={post} onOpen={setSelected} />
-                    ))}
-                  </div>
-                )
-              )}
-
-              {!error && hasMore && (
-                <div className="flex justify-center mt-8">
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={loadingMore ? undefined : loadMore}
-                    onKeyDown={keyActivate(() => !loadingMore && loadMore())}
-                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-label text-xs uppercase tracking-widest font-bold border transition-all ${
-                      loadingMore
-                        ? "bg-stone-100 dark:bg-stone-800 text-stone-400 border-stone-100 dark:border-stone-800 cursor-default"
-                        : "bg-white dark:bg-stone-900 text-secondary border-secondary/40 hover:bg-secondary hover:text-white cursor-pointer"
-                    }`}
-                  >
-                    {loadingMore ? "Loading…" : "Load more"}
-                  </div>
-                </div>
-              )}
-            </section>
-          </>
-        )}
+        <div id="mb-panel" role="tabpanel" aria-labelledby={`mb-tab-${tab}`}>
+          {needsDoc && !doc && !error && <LoadingBlock label="Reading the archive…" />}
+          {needsDoc && error && <ErrorBlock />}
+          {tab === "overview" && doc && (
+            <OverviewTab doc={doc} onOpen={setSelected} goPosts={goPosts} goStats={goStats} tagColors={tagColors} />
+          )}
+          {tab === "posts" && <PostsTab onOpen={setSelected} tagColors={tagColors} />}
+          {tab === "stats" && doc && (
+            <StatsTab doc={doc} year={doc.perYear[year] ? year : ""} setYear={setYear} goPosts={goPosts} tagColors={tagColors} />
+          )}
+        </div>
       </div>
 
       <PostModal post={selected} onClose={() => setSelected(null)} />

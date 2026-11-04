@@ -9,7 +9,7 @@
  * Steps: changelog (push buffer, per-version notes, major summaries),
  * repo (commit graph), blogs (word counts), strava (re-reads the Strava
  * export in knowledge_base/strava-export/; skipped without one), ask (index +
- * docs), logbook,
+ * docs), logbook, microblog (/micro-blog's Overview and Stats data),
  * indexnow (tell Bing about URLs changed in the last 3 days).
  * `npm run ask:gaps` is left out: it spends model tokens on a report.
  * Stops at the first failure. Each script still runs alone:
@@ -34,6 +34,7 @@ const STEPS = {
   strava: [["strava-import.mjs", true]], // before ask: the training source reads it
   ask: [["build-content-index.mjs", true]], // also runs docs:build
   logbook: [["build-logbook.mjs", true]], // after ask: the map reads its embeddings
+  microblog: [["build-microblog-insights.mjs", true]],
   indexnow: [["indexnow.mjs", true]], // reads the live sitemap, so it is last
 };
 

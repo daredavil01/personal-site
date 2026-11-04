@@ -5,10 +5,12 @@
 #   2. ask:index       — re-indexes every source; only new text is embedded.
 #   3. logbook         — rebuilds public/data/logbook.json (/logbook) from the
 #      text cache and the embeddings step 2 just wrote.
-#   4. Commits public/data/writing-ledger.json and public/data/logbook.json
-#      when their contents changed — not when only the generation date moved —
+#   4. microblog:insights — rebuilds public/data/microblog-insights.json
+#      (/micro-blog's Overview and Stats) from the microblog table.
+#   5. Commits public/data/writing-ledger.json, public/data/logbook.json and
+#      public/data/microblog-insights.json when their contents changed — not when only the generation date moved —
 #      which triggers a Pages deploy.
-#   5. indexnow        — submits URLs whose live sitemap lastmod moved in the
+#   6. indexnow        — submits URLs whose live sitemap lastmod moved in the
 #      last 3 days to IndexNow (Bing, and through it ChatGPT search and
 #      Copilot). No secret: the key is public at /indexnow-key.txt.
 #
@@ -81,6 +83,10 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: npm run logbook
 
+      - name: Rebuild the micro-blog insights
+        if: ${{ !inputs.dry_run }}
+        run: npm run microblog:insights
+
       - name: Commit the ledger and Logbook data if they changed
         if: ${{ !cancelled() && !inputs.dry_run }}
         run: |
@@ -94,7 +100,7 @@ jobs:
               VOLATILE.forEach((k) => delete j[k]);
               return JSON.stringify(j);
             };
-            const changed = ["public/data/writing-ledger.json", "public/data/logbook.json"].filter((file) => {
+            const changed = ["public/data/writing-ledger.json", "public/data/logbook.json", "public/data/microblog-insights.json"].filter((file) => {
               if (!fs.existsSync(file)) return false;
               let before = "";
               try { before = execSync(`git show HEAD:${file}`, { encoding: "utf8", maxBuffer: 1e8 }); } catch (_) {}
@@ -111,7 +117,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add $files
-          git commit -m "chore(ledger): refresh writing ledger and logbook data"
+          git commit -m "chore(ledger): refresh writing ledger, logbook and micro-blog data"
           git push
 
       - name: Tell IndexNow what changed

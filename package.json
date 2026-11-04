@@ -25,6 +25,7 @@
     "ask:gaps": "node scripts/archive-gaps.mjs",
     "blogs:wordcount": "node scripts/blog-word-counts.mjs",
     "logbook": "node scripts/build-logbook.mjs",
+    "microblog:insights": "node scripts/build-microblog-insights.mjs",
     "docs:build": "node scripts/build-docs.mjs",
     "changelog": "node scripts/refresh.mjs changelog",
     "refresh": "node scripts/refresh.mjs",

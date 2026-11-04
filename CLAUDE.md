@@ -76,7 +76,8 @@ metadata (lowercase `name`, `display_name`, `color`, `category`,
 
 `npm run refresh` runs, in order: `changelog` (push, notes, majors), `repo`
 (commit graph), `blogs` (word counts), `ask` (index + docs), `logbook`
-(`/logbook` data), `indexnow` (tell Bing what changed). Name steps to run
+(`/logbook` data), `microblog` (`/micro-blog` insights), `indexnow` (tell Bing
+what changed). Name steps to run
 some (`npm run refresh -- changelog ask`); `-- --dry-run` is forwarded, and a
 step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
@@ -625,6 +626,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Answer link/image rules | `src/lib/askFormat.js` |
 | Automatic eval rubric + ladder + endpoint | `src/lib/askJudge.js`, `src/lib/askJudgeTiers.js`, `functions/api/ask-eval.js` |
 | Writing Ledger data / model / page | `public/data/writing-ledger.json` (`npm run blogs:wordcount`), `src/lib/writingLedger.js`, `src/pages/WritingLedger.js`, `src/components/WritingLedger/` |
+| Micro-blog insights / analysis / tabs | `public/data/microblog-insights.json` (`npm run microblog:insights`), `src/lib/microblogInsights.js`, `src/pages/MicroBlog.js`, `src/components/MicroBlog/` |
 | Logbook data / analysis / page | `public/data/logbook.json` (`npm run logbook`), `src/lib/logbook.js`, `src/pages/Logbook.js`, `src/components/Logbook/` |
 | Nightly ask + ledger refresh | `.github/workflows/ask-refresh.yml` |
 | Generated + hand-written docs | `docs/` |
@@ -1161,7 +1163,30 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
 ### Micro-Blog Page
 
 **Table:** the Supabase `microblog` table. This page is a bulk-imported social
-archive with server-side full-text search; there is no generated JS data file.
+archive with server-side full-text search.
+
+- **Three tabs** (`src/pages/MicroBlog.js`, `?tab=overview|posts|stats`; the
+  old `?tab=list` opens Posts): **Overview** (the night sky, today's ten, then
+  eight story chapters), **Posts** (search, river, filters, pinboard/list —
+  `PostsTab.js`, filters *merged* into the URL so `view` survives) and
+  **Stats** (`?year=` scope, dashboard — `StatsTab.js`). Both shells draw the
+  same tabs; `.mb-atlas` adds the night palette and the scroll reveals. Tokens
+  in `src/components/MicroBlog/microblog.css` (English indigo, Marathi saffron).
+- **Overview and Stats read a committed file:** `public/data/microblog-insights.json`,
+  built by `npm run microblog:insights` (`scripts/build-microblog-insights.mjs`)
+  from every row. No model calls; the table is public, so it reads with the
+  publishable key when `.env` has no service key. It is the `microblog` step of
+  `npm run refresh` and runs nightly. **All analysis lives in
+  `src/lib/microblogInsights.js`** (tested, with a 120 KB budget): the posting
+  time comes from the posts' own signatures (`#25:09:2021::11:37:pm`, either
+  script; only a time in a `#…`/`::` signature counts, never one in prose),
+  language by share of letters, a typo'd running number is dropped from the
+  series. Components only pick a scope (`scopeOf`) — never recompute a number.
+  Story sentences come from `storyLines()`; a chapter without data is omitted.
+- **Today's ten** (`dailyPicks`): seeded by the local date, one post per year,
+  at least three per language, from the file's `pool` (`[id, year, isMr,
+  score]`, own words only); the rows are fetched by id
+  (`getMicroblogPostsByIds`), so post text never lives in the file.
 
 - **Schema:** `supabase/migrations/0002_microblog.sql` (`microblog` table +
   `search_tsv` GIN index + RLS). Tags live in the central tag tables (0003);

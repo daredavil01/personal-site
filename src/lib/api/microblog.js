@@ -112,6 +112,19 @@ export async function getMicroblogPost(id) {
   return fromRow(data);
 }
 
+/**
+ * Several posts by id, in the order asked — the Overview's daily ten. Ids that
+ * no longer exist (or are hidden) are simply missing from the result.
+ */
+export async function getMicroblogPostsByIds(ids) {
+  const list = (ids || []).map(Number).filter(Number.isFinite);
+  if (!list.length) return [];
+  const { data, error } = await supabase.from("microblog").select(COLUMNS).in("id", list);
+  if (error) throw error;
+  const byId = new Map((data ?? []).map((r) => [r.id, fromRow(r)]));
+  return list.map((id) => byId.get(id)).filter(Boolean);
+}
+
 /** Lightweight total post count (no rows shipped) for summary widgets. */
 export async function getMicroblogCount() {
   const { count, error } = await supabase
