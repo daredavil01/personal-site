@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v29.0.1] — 2026-11-04
+
+### Fixed
+- **Race and trek card photos** (`src/components/Sports/RaceList.js`, `src/components/Treks/TrekList.js`): the cards put the whole `{url, caption}` image object into `<img src>`, so every photo on the Races and Log tabs rendered as a broken image. They now use its `url`; `src/components/common/logCards.test.js` holds both cards to it.
+
 ## [v29.0.0] — 2026-11-04
 
 ### Changed

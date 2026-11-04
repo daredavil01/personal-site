@@ -11,7 +11,7 @@ const seasonName = (id) => SEASONS.find((s) => s.id === id)?.name ?? "";
 export const TrekCards = ({ treks, onOpen }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
     {treks.map((t) => {
-      const photo = t.slideImages?.[0];
+      const photo = t.slideImages?.[0]?.url;
       return (
         <button
           key={t.id}

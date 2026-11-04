@@ -20,7 +20,7 @@ const gapText = (r) => (r.isBest || r.gapToBest == null ? "" : `${formatDelta(r.
 export const RaceCards = ({ races, onOpen }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
     {races.map((r) => {
-      const photo = r.slideImages?.[0];
+      const photo = r.slideImages?.[0]?.url;
       return (
         <button
           key={r.id}
