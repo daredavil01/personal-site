@@ -33,3 +33,5 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ### Fixed
 - **Race photos** (`src/components/Sports/BibWall.js`, `src/components/Sports/StartLine.js`): photographs are anchored to the top and never covered by the bib or a full-height gradient, so faces are no longer cropped out of the cards.
+- **Training log rows** (`src/components/Training/figures/ActivityLog.js`): every row said "no map", even for runs that have a route, because the list never loads routes. The placeholder is gone; a thumbnail shows only for rows that carry one.
+- **Tall plates** (`src/components/Arena/Arena.js`): a plate taller than the screen (the Log) could stay invisible on a phone because it waited for a share of itself to be in view. It now appears as soon as any part is.

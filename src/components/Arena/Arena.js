@@ -187,7 +187,9 @@ LensTabs.propTypes = {
 export const Plate = ({
   kicker, title, sub, action, children, night, className, delay, id,
 }) => {
-  const [ref, seen] = useSeen(0.08);
+  // Threshold 0: a plate can be far taller than the screen (the Log), and a
+  // share of it might never fit in view.
+  const [ref, seen] = useSeen(0);
   return (
     <section
       ref={ref}

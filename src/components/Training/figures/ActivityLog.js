@@ -70,18 +70,17 @@ const ActivityLog = ({ rows }) => {
                   <li key={r.id}>
                     <Link
                       to={`/training/${r.id}`}
-                      className="group relative grid grid-cols-[2.75rem_1fr_auto] md:grid-cols-[2.75rem_3.5rem_1fr_auto] items-center gap-3 md:gap-4 py-3 px-2 rounded-xl no-underline hover:bg-stone-50 dark:hover:bg-stone-900/60 transition-colors"
+                      className={`group relative grid grid-cols-[2.75rem_1fr_auto] ${r.route ? "md:grid-cols-[2.75rem_3.5rem_1fr_auto]" : ""} items-center gap-3 md:gap-4 py-3 px-2 rounded-xl no-underline hover:bg-stone-50 dark:hover:bg-stone-900/60 transition-colors`}
                     >
                       <span className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-sm" style={{ background: famColor(f) }} aria-hidden="true">
                         <span className="material-symbols-outlined text-xl">{FAMILY_ICONS[f]}</span>
                       </span>
-                      <span className="hidden md:block w-14 h-14 text-stone-400 group-hover:text-[color:var(--tr-accent)] transition-colors" aria-hidden="true">
-                        {r.route ? <RouteShape polyline={r.route} className="w-full h-full" strokeWidth={1.5} /> : (
-                          <span className="w-full h-full rounded-lg border border-dashed border-stone-200 dark:border-stone-700 flex items-center justify-center font-label text-[9px] uppercase text-stone-300 dark:text-stone-600">
-                            {r.trainer ? "indoor" : "no map"}
-                          </span>
-                        )}
-                      </span>
+                      {/* The list rows carry no polyline (it is most of a row's weight), so the thumbnail shows only for rows that do: the sample log. */}
+                      {r.route && (
+                        <span className="hidden md:block w-14 h-14 text-stone-400 group-hover:text-[color:var(--tr-accent)] transition-colors" aria-hidden="true">
+                          <RouteShape polyline={r.route} className="w-full h-full" strokeWidth={1.5} />
+                        </span>
+                      )}
                       <span className="min-w-0">
                         <span className="flex items-center gap-2 min-w-0">
                           <span className="font-body font-medium text-stone-900 dark:text-stone-100 truncate group-hover:text-secondary transition-colors">{r.name}</span>
