@@ -1,63 +1,69 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { Fig, Plate } from "../Arena/Arena";
 import { getActivityForRace } from "../../lib/api/training";
-import { formatDuration, formatEffortSpeed, formatDistance } from "../../lib/strava";
+import {
+  formatDistance, formatDuration, formatEffortSpeed, isPaceSport,
+} from "../../lib/strava";
+import SplitChart from "./SplitChart";
 
-// On a /sports race page: the Strava activity linked to it (sport_id, set at
-// /admin/training/races), as a few numbers and the per-km splits. Renders
-// nothing when there is no link, or when the activity is not public.
+// On a /sports race page: the watch's record of that race — the session
+// linked to it (sport_id, set at /admin/training/races) or, failing that, the
+// run of the same day and distance. The splits kilometre by kilometre, then
+// what the watch measured: heart, steps, cadence, climb. Renders nothing when
+// there is no such session, or when it is not public.
 
-const RaceActivity = ({ sportId }) => {
+const int = (n) => Math.round(n).toLocaleString("en-GB");
+
+const RaceActivity = ({ sportId, date, km }) => {
   const [a, setA] = useState(null);
 
   useEffect(() => {
     let live = true;
-    getActivityForRace(sportId).then((d) => live && setA(d)).catch(() => live && setA(null));
+    setA(null);
+    getActivityForRace(sportId, { date, km }).then((d) => live && setA(d)).catch(() => live && setA(null));
     return () => { live = false; };
-  }, [sportId]);
+  }, [sportId, date, km]);
 
   if (!a) return null;
-  const facts = [
-    formatDistance(a.distance),
-    formatDuration(a.movingTime),
-    formatEffortSpeed(a.sport, a.averageSpeed),
-    a.averageHeartrate ? `${Math.round(a.averageHeartrate)} bpm` : null,
-    a.elevationGain ? `${Math.round(a.elevationGain)} m climb` : null,
-  ].filter(Boolean);
-  const maxSplit = Math.max(0, ...a.splits.map((s) => s.moving_time || 0));
-
+  // eslint-disable-next-line no-underscore-dangle
+  const stats = a.extra?._stats || {};
+  const half = stats.negSplit;
   return (
-    <div className="px-8 pt-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-        <span className="font-label text-[10px] text-stone-400 uppercase tracking-widest">From Strava</span>
-        <Link to={`/training/${a.id}`} className="font-label text-[10px] uppercase tracking-widest text-secondary no-underline">
-          Full activity →
+    <Plate
+      night
+      kicker="From the watch"
+      title="The race, kilometre by kilometre"
+      sub={`${a.name}${a.deviceName ? `, recorded on a ${a.deviceName}` : ""}. Chip time and watch time differ by the walk to the start line.`}
+      action={(
+        <Link to={`/training/${a.id}`} className="ar-chip no-underline" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.3)" }}>
+          The full session
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">arrow_forward</span>
         </Link>
-      </div>
-      <p className="font-body text-sm text-stone-600 dark:text-stone-300 mb-4">{facts.join(" · ")}</p>
-      {a.splits.length > 1 && (
-        <ol className="flex flex-col gap-1 pl-0 mb-0 list-none" aria-label="Splits per kilometre">
-          {a.splits.map((s) => (
-            <li key={s.split} className="flex items-center gap-2 text-xs tabular-nums">
-              <span className="w-6 text-right text-stone-400">{s.split}</span>
-              <span className="flex-1 h-2 rounded bg-stone-100 dark:bg-stone-800 overflow-hidden">
-                <span
-                  className="block h-full bg-secondary/70"
-                  style={{ width: `${maxSplit ? Math.round(((s.moving_time || 0) / maxSplit) * 100) : 0}%` }}
-                />
-              </span>
-              <span className="w-20 text-stone-600 dark:text-stone-300">{formatEffortSpeed(a.sport, s.average_speed)}</span>
-            </li>
-          ))}
-        </ol>
       )}
-    </div>
+    >
+      <SplitChart splits={a.splits} sport={a.sport} night />
+      <div className="ar-figs ar-figs-4 mt-7">
+        <Fig label="Watch distance" value={formatDistance(a.distance)} note={`${formatDuration(a.movingTime)} moving`} />
+        <Fig label={isPaceSport(a.sport) ? "Average pace" : "Average speed"} value={formatEffortSpeed(a.sport, a.averageSpeed)} note={half != null && half !== 0 ? `second half ${Math.abs(half)} s/km ${half < 0 ? "quicker" : "slower"}` : null} />
+        <Fig label="Heart rate" value={a.averageHeartrate ? `${Math.round(a.averageHeartrate)} bpm` : null} note={a.maxHeartrate ? `peaked at ${Math.round(a.maxHeartrate)}` : null} />
+        <Fig label="Steps" value={stats.steps ? int(stats.steps) : null} note={a.averageCadence ? `${Math.round(a.averageCadence * 2)} a minute` : null} />
+        <Fig label="Climbed" value={a.elevationGain ? `${int(a.elevationGain)} m` : null} />
+        <Fig label="Energy" value={a.calories ? `${int(a.calories)} kcal` : null} />
+        <Fig label="Heart drift" value={stats.drift != null ? `${stats.drift > 0 ? "+" : ""}${stats.drift}%` : null} note="second half against the first, pace held equal" />
+        <Fig label="Temperature" value={stats.tMax != null ? `${stats.tMin}–${stats.tMax} °C` : null} note="at the wrist" />
+      </div>
+    </Plate>
   );
 };
 
 RaceActivity.propTypes = {
   sportId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  /** The race day, "YYYY-MM-DD", and the course in km: used when no session is linked by hand. */
+  date: PropTypes.string,
+  km: PropTypes.number,
 };
+RaceActivity.defaultProps = { date: null, km: null };
 
 export default RaceActivity;

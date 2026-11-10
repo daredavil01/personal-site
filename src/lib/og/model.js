@@ -197,8 +197,8 @@ export function pageModel(slug, payload, {
       ].filter(Boolean),
     },
     training: {
-      eyebrow: "Training",
-      title: "Every run, logged",
+      eyebrow: "Training log",
+      title: "Every session, one dot",
       stats: [
         stat(s.activityCount, "Activities"),
         stat(s.activityKm == null ? null : `${compact(s.activityKm)} km`, "Distance"),
@@ -227,8 +227,8 @@ export function pageModel(slug, payload, {
       chips: (s.topSkills || []).slice(0, 4),
     },
     sports: {
-      eyebrow: "Physical Endurance",
-      title: "Every kilometre, logged",
+      eyebrow: "Race log",
+      title: "Every finish line",
       stats: [
         stat(s.bestTenKTime || "—", "10K PB"),
         stat(s.bestHmTime || "—", "Half PB"),

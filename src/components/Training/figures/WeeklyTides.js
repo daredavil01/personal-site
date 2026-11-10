@@ -56,7 +56,7 @@ const WeeklyTides = ({ rows }) => {
 
   return (
     <section ref={ref} className="tr-night px-4 py-8 md:px-10 md:py-10" aria-labelledby="tr-tide-title">
-      <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>Chapter four</p>
+      <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>Week by week</p>
       <h2 id="tr-tide-title" className="font-headline text-3xl md:text-5xl mb-1" style={{ color: "var(--tr-ink)" }}>Tides</h2>
       <p className="text-sm mb-5 max-w-lg" style={{ color: "var(--tr-muted)" }}>
         {`Kilometres per week, one wave per year. ${peak ? `The highest swell: ${Math.round(peak.distance / 1000)} km in the week of ${new Date(`${peak.week}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}.` : ""}`}

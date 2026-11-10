@@ -327,3 +327,42 @@ export function raceSummary(races, today = new Date()) {
     pbCount: races.filter((r) => r.wasPB && !r.firstAtDistance).length,
   };
 }
+
+const ORDINALS = ["th", "st", "nd", "rd"];
+/** 1 → "1st", 22 → "22nd", 13 → "13th". */
+export const ordinal = (n) => `${n}${ORDINALS[(n % 100 > 10 && n % 100 < 14) || n % 10 > 3 ? 0 : n % 10]}`;
+
+/** A race's date as "YYYY-MM-DD" (its local calendar day), or null. */
+export const raceIso = (r) => (r?.dateObj
+  ? `${r.dateObj.getFullYear()}-${pad(r.dateObj.getMonth() + 1)}-${pad(r.dateObj.getDate())}`
+  : null);
+
+/**
+ * Where one race stands among the others (enriched rows, in date order):
+ * its rank at its distance, the field it is ranked in (fastest first), the
+ * attempt before it at the same event, and its neighbours in the log.
+ * Null when the race is not in `races`.
+ */
+export function raceStanding(race, races) {
+  const i = races.findIndex((r) => r.id === race?.id);
+  if (i < 0) return null;
+  const me = races[i];
+  const field = races.filter((r) => r.distKey === me.distKey && r.secs).sort((a, b) => a.secs - b.secs);
+  const rank = me.secs ? field.findIndex((r) => r.id === me.id) + 1 : null;
+  const earlier = races.slice(0, i);
+  const before = [...earlier].reverse().find((r) => r.series && r.series === me.series && r.distKey === me.distKey && r.secs) ?? null;
+  const prevAtDistance = [...earlier].reverse().find((r) => r.distKey === me.distKey && r.secs) ?? null;
+  return {
+    ordinal: i + 1,
+    total: races.length,
+    rank: rank || null,
+    field,
+    best: field[0] ?? null,
+    sameEvent: before,
+    sameEventDelta: before && me.secs ? me.secs - before.secs : null,
+    previous: prevAtDistance,
+    previousDelta: prevAtDistance && me.secs ? me.secs - prevAtDistance.secs : null,
+    older: races[i - 1] ?? null,
+    newer: races[i + 1] ?? null,
+  };
+}

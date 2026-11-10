@@ -132,24 +132,30 @@ is no export folder.
 
 ## Where it shows up
 
-- `/training` — **the film**: 60 seconds, vertical, narrated, beside the title in
-  both layouts (`TrainingFilm.js`). Rendered with Remotion from the live table —
-  see "The film" below.
-- `/training` — a **Facts** tab / "By the numbers" chapter: every fact the log
-  supports and every variable with its coverage (`src/lib/trainingFacts.js`).
-- `/training` — in the atlas, an animated story (route replay, a spiral of
-  days, a race against past years' best efforts, weekly tides, a start-time
-  dial, the shoe rack, records, milestones, a departures board, the full log);
-  in classic, Overview / Log / Calendar / Stats & PRs / Routes tabs. Until the
-  first import (or with `?demo=1`) both show a labelled sample log from
-  `src/lib/trainingDemo.js`.
-- `/training/:id` — numbers; "the day, kilometre by kilometre" (the terrain as a
-  line with figures at the start, fastest km, longest stop, biggest climb, heart
-  peak and finish, a heart-rate ribbon and a replay — `src/lib/dayStory.js`), or a
-  session card when there are no splits; then splits, laps, best efforts, route and
-  "More from Strava".
-- `/sports/:id` — the linked activity's numbers and splits. Link races at
-  `/admin/training/races`, which suggests same-day, same-distance matches.
+- `/training` — one layout in both shells (`TrainingArena.js`): a dark stage
+  where every session is one dot (`Swarm.js`; where each dot goes is
+  `src/lib/swarmLayouts.js`) and seven lenses that re-form the dots and change
+  the plates under them — **Overview** (year against year, the totals, months
+  by sport, a day replayed, milestones, the departures board), **Calendar**
+  (streaks, the year heatmap, weekly tides), **Rhythm** (start hours, weekdays,
+  conditions), **Records** (medals, bests, the race against past years,
+  totals and fastest efforts, the shoe rack), **Engine** (steps, heart-rate
+  zones, running form month by month, strength, and every kept variable with
+  its coverage — `src/lib/trainingFacts.js`), **Routes** (light painting and
+  the route grid) and the **Log**. Until the first import (or with `?demo=1`)
+  it runs on a labelled sample log from `src/lib/trainingDemo.js`.
+- `/training` — **the film**: 60 seconds, vertical, narrated, behind the
+  stage's film button (`TrainingFilm.js`). Rendered with Remotion from the live
+  table — see "The film" below. It was rendered before the v32 redesign and
+  still shows the earlier two layouts; re-render it when convenient.
+- `/training/:id` — the route drawing itself and the headline numbers; "the
+  day, kilometre by kilometre" (`src/lib/dayStory.js`), or a session card when
+  there are no splits; the splits as bars with the heart-rate line
+  (`SplitChart.js`) and as a table; time at each heart rate; form; conditions;
+  laps, best efforts and "Everything else" from Strava.
+- `/sports/:id` — the watch's record of the race: the session linked at
+  `/admin/training/races`, or, when none is linked, the run of the same day
+  and distance (`getActivityForRace`).
 - `/now` and newsletter issues — the "Strava" stat group is computed from the
   month's activities unless one was typed in by hand.
 - `/stats` and the `/training` share card — `activityCount`, `activityKm`,

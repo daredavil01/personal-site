@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Panel } from "../common/LogKit";
+import { Plate } from "../Arena/Arena";
 import {
   formatDelta, formatDuration, formatPace, formatRaceDay, riegel,
 } from "../../lib/raceLog";
@@ -26,7 +26,7 @@ export const RecordCards = ({ bests, onOpen }) => (
           <p className="mb-0 font-body text-sm text-stone-500 dark:text-stone-400">{`${formatPace(b.best.pace)} /km`}</p>
         </header>
         <div className="p-5 pt-3 flex flex-col gap-3 flex-1">
-          <button type="button" onClick={() => onOpen(b.best)} className="text-left font-body font-bold text-stone-800 dark:text-stone-200 hover:text-secondary">
+          <button type="button" onClick={() => onOpen(b.best)} className="text-left text-sm font-body font-bold text-stone-800 dark:text-stone-200 hover:text-secondary">
             {b.best.title}
             <span className="block font-normal text-xs text-stone-400">{formatRaceDay(b.best.dateObj)}</span>
           </button>
@@ -40,7 +40,7 @@ export const RecordCards = ({ bests, onOpen }) => (
             <ol className="mt-auto m-0 p-0 list-none border-t border-stone-100 dark:border-stone-800 pt-3 flex flex-col gap-1.5" aria-label={`${b.name} personal-best ladder`}>
               {b.history.slice().reverse().map((h) => (
                 <li key={h.id} className="flex items-center justify-between gap-2 text-xs">
-                  <button type="button" onClick={() => onOpen(h)} className="text-left text-stone-600 dark:text-stone-300 hover:text-secondary truncate">
+                  <button type="button" onClick={() => onOpen(h)} className="text-left text-xs text-stone-600 dark:text-stone-300 hover:text-secondary truncate">
                     <span className="inline-block w-10 text-stone-400 tabular-nums">{h.year}</span>
                     {h.title}
                   </button>
@@ -74,9 +74,10 @@ export const Equivalents = ({ bests }) => {
     };
   });
   return (
-    <Panel
+    <Plate
+      kicker="Riegel's formula"
       title={`What the ${base.name.toLowerCase()} PB predicts`}
-      subtitle={`Riegel's formula (T₂ = T₁ × (D₂/D₁)^1.06) turns ${formatDuration(base.best.secs)} into an equivalent at each distance. An estimate, not a promise: it ignores hills, heat and the wall.`}
+      sub={`Riegel's formula (T₂ = T₁ × (D₂/D₁)^1.06) turns ${formatDuration(base.best.secs)} into an equivalent at each distance. An estimate, not a promise: it ignores hills, heat and the wall.`}
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[420px] text-sm">
@@ -102,7 +103,7 @@ export const Equivalents = ({ bests }) => {
           </tbody>
         </table>
       </div>
-    </Panel>
+    </Plate>
   );
 };
 

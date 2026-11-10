@@ -323,3 +323,70 @@ export function factsOf(rows, { today = new Date().toISOString().slice(0, 10) } 
 
   return groups.filter((g) => g.facts.length);
 }
+
+// ---------------------------------------------------------------------------
+// The Engine lens (v27): steps, and how the running form has moved month by
+// month. Pure, like everything above; a series too short to mean anything is
+// left out.
+// ---------------------------------------------------------------------------
+
+/** Steps: the total, the biggest single session, the share per sport family and a monthly series. */
+export function stepStats(rows) {
+  const list = (rows || []).filter((r) => r.date && st(r)?.steps > 0);
+  if (!list.length) return null;
+  const total = list.reduce((s, r) => s + st(r).steps, 0);
+  const biggest = maxRow(list, (r) => st(r).steps);
+  const byFamily = {};
+  const byMonth = {};
+  const days = new Set();
+  list.forEach((r) => {
+    const f = sportFamily(r.sport);
+    byFamily[f] = (byFamily[f] || 0) + st(r).steps;
+    byMonth[r.date.slice(0, 7)] = (byMonth[r.date.slice(0, 7)] || 0) + st(r).steps;
+    days.add(r.date);
+  });
+  const months = Object.entries(byMonth).sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([month, steps]) => ({ month, steps }));
+  return {
+    total,
+    sessions: list.length,
+    perDay: total / days.size,
+    days: days.size,
+    biggest: { row: biggest, steps: st(biggest).steps },
+    families: Object.entries(byFamily).sort((a, b) => b[1] - a[1]).map(([family, steps]) => ({ family, steps, share: steps / total })),
+    months,
+    bestMonth: months.reduce((a, b) => (!a || b.steps > a.steps ? b : a), null),
+  };
+}
+
+const TRENDS = [
+  ["pace", "Pace", "/km", (r) => (r.averageSpeed > 0 ? 1000 / r.averageSpeed : null), (v) => `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, "0")}`, true],
+  ["hr", "Heart rate", "bpm", (r) => pos(r.averageHeartrate), (v) => `${Math.round(v)}`, true],
+  ["cadence", "Cadence", "spm", (r) => (pos(r.averageCadence) ? r.averageCadence * 2 : null), (v) => `${Math.round(v)}`, false],
+  ["stride", "Stride", "m", (r) => (pos(ex(r, "Average Step Length (mm)")) ? Number(ex(r, "Average Step Length (mm)")) / 1000 : null), (v) => v.toFixed(2), false],
+  ["contact", "Ground contact", "ms", (r) => pos(ex(r, "Average Ground Contact Time (ms)")), (v) => `${Math.round(v)}`, true],
+  ["bounce", "Bounce", "cm", (r) => (pos(ex(r, "Average Vertical Oscillation (mm)")) ? Number(ex(r, "Average Vertical Oscillation (mm)")) / 10 : null), (v) => v.toFixed(1), true],
+];
+
+/**
+ * Running form by month: [{ key, label, unit, lowerIsBetter, series: [{ month, value }],
+ * first, last, text: { first, last } }]. Runs of 1 km+ only; a metric needs three months.
+ */
+export function formTrends(rows) {
+  const runs = (rows || []).filter((r) => r.date && sportFamily(r.sport) === "run" && (r.distance || 0) > 1000);
+  return TRENDS.map(([key, label, unit, get, format, lowerIsBetter]) => {
+    const byMonth = {};
+    runs.forEach((r) => {
+      const v = get(r);
+      if (v == null || !Number.isFinite(v)) return;
+      const m = r.date.slice(0, 7);
+      (byMonth[m] = byMonth[m] || []).push(v);
+    });
+    const series = Object.entries(byMonth).sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([month, vals]) => ({ month, value: avgOf(vals) }));
+    if (series.length < 3) return null;
+    const first = series[0].value;
+    const last = series[series.length - 1].value;
+    return {
+      key, label, unit, lowerIsBetter, series, first, last, text: { first: format(first), last: format(last) },
+    };
+  }).filter(Boolean);
+}

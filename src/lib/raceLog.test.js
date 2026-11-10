@@ -110,3 +110,33 @@ describe("derived stats", () => {
     expect(riegel(null, 10, 20)).toBeNull();
   });
 });
+
+describe("raceStanding", () => {
+  // eslint-disable-next-line global-require
+  const { enrichRaces: enrich, ordinal, raceIso, raceStanding } = require("./raceLog");
+  const races = enrich([
+    { id: 1, title: "Hill Half 2024", date: "March 3, 2024", distance: "21 Kms", time: "2:40:00" },
+    { id: 2, title: "City 10K 2024", date: "April 7, 2024", distance: "10 Kms", time: "1:00:00" },
+    { id: 3, title: "Lake Half 2025", date: "February 2, 2025", distance: "21 Kms", time: "2:10:00" },
+    { id: 4, title: "Hill Half 2025", date: "March 2, 2025", distance: "21 Kms", time: "2:20:00" },
+  ]);
+
+  it("ranks a race at its distance and finds the attempt before it", () => {
+    const s = raceStanding(races[3], races);
+    expect(s.rank).toBe(2);
+    expect(s.field.map((r) => r.id)).toEqual([3, 4, 1]);
+    expect(s.sameEvent.id).toBe(1);
+    expect(s.sameEventDelta).toBe(-1200);
+    expect(s.previous.id).toBe(3);
+    expect(s.previousDelta).toBe(600);
+    expect(s.older.id).toBe(3);
+    expect(s.newer).toBeNull();
+    expect(s.ordinal).toBe(4);
+  });
+
+  it("returns null for a race that is not in the log, and formats ordinals and dates", () => {
+    expect(raceStanding({ id: 99 }, races)).toBeNull();
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 22].map(ordinal)).toEqual(["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd"]);
+    expect(raceIso(races[0])).toBe("2024-03-03");
+  });
+});

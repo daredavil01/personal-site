@@ -145,7 +145,7 @@ const NightMap = ({ routes }) => {
     <section ref={ref} className="tr-night px-4 py-8 md:px-10 md:py-10" aria-labelledby="tr-map-title">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
         <div>
-          <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>Chapter one</p>
+          <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>Light painting</p>
           <h2 id="tr-map-title" className="font-headline text-3xl md:text-5xl mb-1" style={{ color: "var(--tr-ink)" }}>Light painting</h2>
           <p className="text-sm mb-0 max-w-lg" style={{ color: "var(--tr-muted)" }}>
             Every route, one after another, as trails of light. The bright streets are the ones I keep coming back to.

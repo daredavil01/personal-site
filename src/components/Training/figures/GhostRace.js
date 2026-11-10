@@ -72,7 +72,7 @@ const GhostRace = ({ efforts }) => {
     <section ref={ref} className="tr-night px-4 py-8 md:px-10 md:py-10" aria-labelledby="tr-race-title">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
         <div>
-          <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>Chapter three</p>
+          <p className="tr-kicker mb-2" style={{ color: "var(--tr-accent)" }}>Same start gun</p>
           <h2 id="tr-race-title" className="font-headline text-3xl md:text-5xl mb-1" style={{ color: "var(--tr-ink)" }}>Race your past selves</h2>
           <p className="text-sm mb-0 max-w-lg" style={{ color: "var(--tr-muted)" }}>
             Each lane is my fastest effort of that year. Same start gun, different years.

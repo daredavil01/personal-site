@@ -77,3 +77,30 @@ test("facts: grouped, linked, never zero", () => {
   groups.forEach((gr) => gr.facts.forEach((x) => expect(String(x.value)).not.toMatch(/^0( |$)/)));
   expect(factsOf([])).toEqual([]);
 });
+
+describe("the Engine lens", () => {
+  // eslint-disable-next-line global-require
+  const { formTrends, stepStats } = require("./trainingFacts");
+  const run = (date, steps, cadence, speed) => ({
+    id: date, date, sport: "Run", distance: 8000, averageSpeed: speed, averageCadence: cadence, extra: { _stats: { steps } },
+  });
+  const log = [run("2026-01-05", 9000, 78, 2.5), run("2026-01-20", 11000, 80, 2.6), run("2026-02-03", 10000, 80, 2.7), run("2026-03-09", 12000, 82, 2.8)];
+
+  it("adds up steps and finds the biggest session and month", () => {
+    const s = stepStats(log);
+    expect(s.total).toBe(42000);
+    expect(s.biggest.steps).toBe(12000);
+    expect(s.bestMonth).toEqual({ month: "2026-01", steps: 20000 });
+    expect(s.families[0]).toMatchObject({ family: "run", share: 1 });
+    expect(stepStats([{ date: "2026-01-01", sport: "Run", extra: {} }])).toBeNull();
+  });
+
+  it("averages form by month and needs three months", () => {
+    const t = formTrends(log);
+    const cadence = t.find((x) => x.key === "cadence");
+    expect(cadence.series.map((p) => p.value)).toEqual([158, 160, 164]);
+    expect(cadence.text).toEqual({ first: "158", last: "164" });
+    expect(t.find((x) => x.key === "stride")).toBeUndefined();
+    expect(formTrends(log.slice(0, 3))).toEqual([]);
+  });
+});

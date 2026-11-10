@@ -369,15 +369,15 @@ export const FEATURES = [
     specs: [
       "Filled from a Strava bulk export, not the API: npm run strava:import upserts on Strava's id and skips a second copy that starts within a minute.",
       "Raw GPS stays in an owner-only table. The public route is trimmed 400 m around its start and finish.",
-      "Two layouts over one data hook: an atlas story whose chapters animate once, or tabs for the overview, log, calendar, facts, records and routes.",
+      "One stage in both shells: every session is a dot on a canvas, and seven lenses (overview, calendar, rhythm, records, engine, routes, log) re-form the dots.",
       "The day story draws an activity's terrain line on its own clock, with the route map walked in step.",
       () => `${TRAINING_VARIABLES.length} kept variables, each listed with how many activities carry it. Splits, laps and best efforts are computed from the track.`,
       "A 60-second narrated film, rendered with Remotion from the live table.",
     ],
     layers: {
-      shell: "TrainingAtlas (story) or TrainingClassic (tabs)",
+      shell: "TrainingArena: the swarm and seven lenses",
       pages: "Training.js, TrainingPost.js (/training/:id)",
-      data: "training.js, trainingFacts.js, dayStory.js",
+      data: "training.js, swarmLayouts.js, trainingFacts.js, dayStory.js",
       db: "strava_activities; raw GPS owner-only",
       jobs: "npm run strava:import, training:film",
     },

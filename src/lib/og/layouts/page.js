@@ -12,8 +12,8 @@ import {
 } from "../primitives.js";
 import {
   spineStack, ridgeline, lostTrail, dotMatrix, progressBar, swatchCloud, radialSpokes,
-  connectedCurve, slideFan, screenAndPhone, sparkBars, distanceDial, timelineRail, chatBubbles, versionStack,
-  commitGraph, monthCalendar, envelope, floorPlan, constellation, dayGrid, filmStrip,
+  connectedCurve, slideFan, screenAndPhone, sparkBars, timelineRail, chatBubbles, versionStack,
+  commitGraph, monthCalendar, envelope, floorPlan, constellation, weekSwarm, startLanes, filmStrip,
 } from "./figures.js";
 
 const col = (gap, ...children) => h("div", { style: { display: "flex", flexDirection: "column", gap } }, children);
@@ -61,7 +61,7 @@ const FIGURES = {
     width: CARD.width, height: 210, accent: m.accent,
   }), CARD.width, 210, { bottom: 84, opacity: 0.85 }),
 
-  sports: (m) => inset(distanceDial({ size: 280, accent: m.accent }), 280, 280, { right: 72, bottom: 150 }),
+  sports: (m) => inset(startLanes({ width: 440, height: 270, accent: m.accent }), 440, 270, { right: 60, bottom: 196 }),
 
   "100-days-to-offload": (m) => inset(dotMatrix((m.figure && m.figure.filled) || 0, {
     total: 100, width: 520, columns: 20, accent: m.accent,
@@ -83,7 +83,7 @@ const FIGURES = {
 
   // Nothing synced yet: no grid at all, never an empty placeholder.
   training: (m) => (m.figure && m.figure.days && m.figure.days.length
-    ? inset(dayGrid(m.figure.days, { width: 460, accent: m.accent }), 460, Math.round((460 / Math.ceil(m.figure.days.length / 7)) * 7), { right: 64, bottom: 250 })
+    ? inset(weekSwarm(m.figure.days, { width: 500, height: 240, accent: m.accent }), 500, 240, { right: 60, bottom: 236 })
     : null),
 
   videos: (m) => inset(screenAndPhone({ width: 500, height: 300, accent: m.accent }), 500, 300, { right: 52, bottom: 130 }),

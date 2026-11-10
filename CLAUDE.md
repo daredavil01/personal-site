@@ -636,7 +636,9 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
 | Training (Strava): export import / helpers / admin | `scripts/strava-import.mjs`, `src/lib/stravaExport.js`, `src/lib/strava.js`, `src/pages/admin/TrainingRaces.js` |
 | Training film (Remotion): data / render / picture | `scripts/training-film/`, `public/video/the-training-story.*`, `src/components/Training/TrainingFilm.js` |
-| Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`atlas/`, `classic/`), `src/lib/training.js`, `src/lib/trainingDemo.js` |
+| Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`TrainingArena.js`, `Swarm.js`, `TrainingLenses.js`, `figures/`), `src/lib/swarmLayouts.js`, `src/lib/training.js`, `src/lib/trainingDemo.js` |
+| Arena (shared design kit for /training and /sports) | `src/components/Arena/Arena.js`, `src/components/Arena/arena.css` |
+| Sports: pages + race maths | `src/pages/Sports.js`, `src/pages/SportPost.js`, `src/components/Sports/` (`StartLine.js`, `BibWall.js`), `src/lib/raceLog.js` |
 | Videos: pages + filters | `src/pages/Videos.js`, `src/pages/VideoPost.js`, `src/components/Videos/`, `src/lib/videoFilters.js` |
 | Videos film + slides: capture / picture / render | `scripts/videos-film/`, `public/video/the-videos-story.*`, `public/video/the-videos-story-slides/` |
 | Page films (about, resume, ledger, micro-blog, decks, sports, treks; newsletter, 100 days, now, ask) | `scripts/page-films/` (`script.js` drives picture, captions, sound), `src/data/pageFilms.js`, `src/components/common/PageFilm.js`, `public/video/page-films/`, `docs/page-films.md` |
@@ -967,6 +969,20 @@ Add photos via the form's **Images** (`slideImages`) field — full-size files a
 fine, they're compressed in the browser on the way to the `media` bucket
 (`sports` folder).
 
+- **Public page:** `src/pages/Sports.js` (one layout in both shells, the Arena
+  kit). A dark stage with **the start line** (`StartLine.js`: every finish at
+  one distance replayed from the same gun at its own even pace, with a
+  photo-finish strip), then three lenses — Overview, Races (**the bib wall**,
+  `BibWall.js`, or a table), Records — over URL state (`tab`, `year`, `dist`,
+  `q`, `sort`, `dir`, `layout`; merged, never `view`). Every number is
+  `src/lib/raceLog.js`. Race photos are shown **whole and top-anchored**
+  (`object-top`): never crop a face or put the bib over the photo.
+- **`/sports/:id`** (`SportPost.js`): the photo, bib and finish time; where
+  the race stands among the others at its distance (`raceStanding`); and the
+  watch's record of the day (`RaceActivity.js`) — the session linked by
+  `sport_id`, else the run of the same day and distance
+  (`getActivityForRace`, the `matchRace` tolerance).
+
 ---
 
 ### Treks Page
@@ -1141,27 +1157,38 @@ since June 2026). Full inventory and steps: `docs/strava.md`.
   `computeSiteStats`.
 - **Not in ContentContext:** the page pages through light columns
   (`listActivities`) and loads polylines only for the routes views.
-- **Two layouts, one data hook:** `useViewMode()` picks the atlas story
-  (`components/Training/atlas/TrainingAtlas.js`, lazy — chapters animate once
-  on first view via `useInView`, then are the reader's to drive) or the classic
-  tabs (`classic/TrainingClassic.js`: Overview, Log, Calendar, Stats & PRs,
-  Routes). Both read `useTrainingData()` and the URL filters
-  (`useTrainingFilters`; `tab`, never `view`). Sport colours are the
-  `--tr-<family>` tokens in `training.css` — a validated categorical set with
-  separate dark steps; text never wears them.
+- **One layout in both shells** (`components/Training/TrainingArena.js`, v32):
+  a dark stage where **every session is one dot** (`Swarm.js`, a canvas) and
+  seven lenses — Overview, Calendar, Rhythm, Records, Engine, Routes, Log —
+  that re-form the dots and swap the plates under them (`TrainingLenses.js`).
+  The lens is the `tab` URL param (`overview|calendar|rhythm|stats|facts|routes|log`,
+  the old tab ids, so earlier links land), the sport chips are `sport`; both
+  merge through `useTrainingFilters` (never `view`). **Where a dot goes is
+  `src/lib/swarmLayouts.js`** (pure, tested: one formation per lens, the same
+  index in each so a dot can travel); the canvas only tweens. Filters dim dots,
+  never remove them. Sessions that were a `/sports` race (linked, or
+  `matchRace`) wear a gold ring. Kept figures live in
+  `components/Training/figures/`. Sport colours on paper are the
+  `--tr-<family>` tokens in `training.css`; on the stage, `STAGE_COLORS` in
+  `Swarm.js`. Text never wears them.
+- **Arena** (`src/components/Arena/`, `arena.css`) is the design language
+  `/training`, `/sports` and both detail pages share: the always-dark stage,
+  Barlow Condensed numbers (loaded by `ArenaFonts` on these pages only),
+  `Readout`, `LensTabs`, `Plate`, `Fig`, `FilmButton`. Layouts switch on the
+  `arena` container query, not the viewport.
 - **The day story** (`DayStory.js`, model in `src/lib/dayStory.js`, tested):
   an activity as its terrain line drawing itself on the activity's clock, a
   group of ten walking at the tip, one staying at each moment
   (`pickSlots`), the route map walked in step. On `/training/:id`, in the
-  Overview and atlas via `DayPicker`, and under a picked calendar day.
+  Overview lens via `DayPicker`, and under a picked calendar day.
   Sessions without splits get `SessionStory` (heart rate + sets). It reads
   `profile` (`0040`: thinned streams, never a position, plus strength sets).
-- **Facts** (classic tab, atlas "By the numbers"; `src/lib/trainingFacts.js`,
+- **Facts** (the Engine lens, and a group in most others; `src/lib/trainingFacts.js`,
   tested): every fact the log supports plus `VARIABLES`, the inventory of
   every kept variable with coverage. Deep facts (zones, drift, steps, peaks)
   come from `extra._stats`, written at import by `deepStatsOf`; `extra` is in
   `LIST_COLUMNS` for this. Add a new kept field to `VARIABLES` too.
-- **The film** (`TrainingFilm.js` in both headers): a 60-second vertical,
+- **The film** (`TrainingFilm.js`, behind the stage's film button): a 60-second vertical,
   narrated film rendered with **Remotion** from the live table —
   `npm run training:film -- --publish` (`scripts/training-film/`: `data.mjs`
   reads through the page's own modules, `render.mjs` speaks each scene's line

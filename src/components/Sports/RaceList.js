@@ -1,12 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import CardPhoto from "../common/CardPhoto";
 import {
   distanceName, formatDelta, formatDuration, formatPace, formatRaceDay,
 } from "../../lib/raceLog";
 
-// The Races tab: the same filtered, sorted list as photo cards or a dense,
-// sortable table. Both open the quick-look sheet; the table header sorts.
+// The Races lens as a dense, sortable table (the bib wall is BibWall.js).
+// A row opens the race; the table header sorts.
 
 const PbBadge = ({ race }) => {
   if (race.isBest) return <span className="px-2 py-0.5 rounded-full bg-secondary text-white font-label text-[10px] font-black uppercase tracking-wider">PB</span>;
@@ -17,64 +16,6 @@ const PbBadge = ({ race }) => {
 PbBadge.propTypes = { race: PropTypes.shape({}).isRequired };
 
 const gapText = (r) => (r.isBest || r.gapToBest == null ? "" : `${formatDelta(r.gapToBest)} off PB`);
-
-export const RaceCards = ({ races, onOpen }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-    {races.map((r) => {
-      const photo = r.slideImages?.[0]?.url;
-      return (
-        <button
-          key={r.id}
-          type="button"
-          onClick={() => onOpen(r)}
-          className="group text-left flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 hover:border-secondary hover:shadow-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-        >
-          <div className="relative aspect-[16/9] bg-stone-100 dark:bg-stone-800 overflow-hidden">
-            {photo ? (
-              <CardPhoto src={photo} />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="material-symbols-outlined text-5xl text-stone-300 dark:text-stone-600" aria-hidden="true">directions_run</span>
-              </div>
-            )}
-            <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 dark:bg-stone-900/90 font-label text-[10px] font-black uppercase tracking-wider text-stone-800 dark:text-stone-100">
-              {distanceName(r.distKey)}
-            </span>
-            <span className="absolute top-3 right-3"><PbBadge race={r} /></span>
-          </div>
-          <div className="p-5 flex flex-col gap-3 flex-1">
-            <div>
-              <h3 className="font-headline text-lg font-bold text-stone-900 dark:text-stone-100 group-hover:text-secondary transition-colors mb-1 leading-snug">{r.title}</h3>
-              <p className="mb-0 font-body text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">location_on</span>
-                {`${r.place} · ${formatRaceDay(r.dateObj)}`}
-              </p>
-            </div>
-            <dl className="grid grid-cols-3 gap-2 mt-auto pt-3 border-t border-stone-100 dark:border-stone-800">
-              <div>
-                <dt className="font-label text-[9px] uppercase tracking-widest text-stone-400">Time</dt>
-                <dd className="m-0 font-headline text-base font-black tabular-nums text-stone-900 dark:text-stone-100">{formatDuration(r.secs) || r.time}</dd>
-              </div>
-              <div>
-                <dt className="font-label text-[9px] uppercase tracking-widest text-stone-400">Pace</dt>
-                <dd className="m-0 font-headline text-base font-black tabular-nums text-stone-900 dark:text-stone-100">{r.pace ? `${formatPace(r.pace)}` : "—"}</dd>
-              </div>
-              <div>
-                <dt className="font-label text-[9px] uppercase tracking-widest text-stone-400">vs PB</dt>
-                <dd className={`m-0 font-headline text-base font-black tabular-nums ${r.isBest ? "text-secondary" : "text-stone-500 dark:text-stone-400"}`}>{r.isBest ? "Best" : formatDelta(r.gapToBest) || "—"}</dd>
-              </div>
-            </dl>
-          </div>
-        </button>
-      );
-    })}
-  </div>
-);
-
-RaceCards.propTypes = {
-  races: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onOpen: PropTypes.func.isRequired,
-};
 
 const sortIcon = (on, dir) => {
   if (!on) return "unfold_more";
@@ -93,6 +34,7 @@ const COLUMNS = [
   { id: "pace", label: "Pace /km" },
 ];
 
+// eslint-disable-next-line import/prefer-default-export -- named, like the other log tables
 export const RaceTable = ({
   races, onOpen, sort, dir, onSort,
 }) => (

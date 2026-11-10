@@ -45,7 +45,7 @@ const ShoeRack = ({ gear }) => {
   if (!shoes.length && !bikes.length && !retired.length) return null;
   return (
     <section ref={ref} className="rounded-3xl px-4 py-8 md:px-10 md:py-10 bg-[#f6efe6] dark:bg-stone-900 border border-[#e8dccb] dark:border-stone-800" aria-labelledby="tr-gear-title">
-      <p className="tr-kicker mb-2 text-[#b22200]">Chapter six</p>
+      <p className="tr-kicker mb-2 text-[#b22200]">The shoe rack</p>
       <h2 id="tr-gear-title" className="font-headline text-3xl md:text-5xl mb-1 text-stone-900 dark:text-stone-100">The shoe rack</h2>
       <p className="text-sm mb-6 max-w-lg text-stone-600 dark:text-stone-400">
         Kilometres worn into every pair. The dashed line is the 800 km most shoes retire at.

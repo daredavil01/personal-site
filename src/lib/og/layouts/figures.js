@@ -123,26 +123,66 @@ export const dotMatrix = (filled, { total = 100, width = 620, columns = 20, acce
 
 // --- /training ----------------------------------------------------------------
 
-// The last 26 weeks as a calendar of squares, Monday-first columns, each day
-// shaded by its kilometres relative to the busiest day. `days` is km per day,
-// oldest first (computeSiteStats' trainingDays). Empty days still draw, faint,
-// so the grid reads as a calendar even in a quiet stretch.
-export const dayGrid = (days, { width = 560, accent = COLORS.orange } = {}) => {
+// The last 26 weeks as the /training swarm draws them: one dot per active day,
+// stacked on its week, sized by the square root of its kilometres (a session
+// with no distance still gets the smallest dot). `days` is km per day, oldest
+// first, Monday-first weeks (computeSiteStats' trainingDays). The newest dot
+// wears a ring.
+export const weekSwarm = (days, { width = 520, height = 250, accent = COLORS.orange } = {}) => {
   const list = Array.isArray(days) ? days : [];
   const weeks = Math.max(1, Math.ceil(list.length / 7));
   const step = width / weeks;
-  const size = step * 0.78;
-  const max = Math.max(0, ...list);
-  const cells = list.map((km, i) => {
-    const x = Math.floor(i / 7) * step;
-    const y = (i % 7) * step;
-    const level = km > 0 && max > 0 ? Math.min(4, Math.max(1, Math.ceil((km / max) * 4))) : 0;
-    const fill = level ? accent : COLORS.panelEdge;
-    const opacity = level ? [0, 0.35, 0.55, 0.78, 1][level] : 0.5;
-    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${size.toFixed(1)}" height="${size.toFixed(1)}" rx="${(size * 0.18).toFixed(1)}" fill="${fill}" opacity="${opacity}"/>`;
+  const base = height - 6;
+  const rise = Math.min(step * 1.55, (height - 16) / 7);
+  let last = null;
+  const dots = [];
+  for (let w = 0; w < weeks; w += 1) {
+    let k = 0;
+    for (let d = 0; d < 7; d += 1) {
+      const km = list[w * 7 + d];
+      if (!(km > 0)) continue; // eslint-disable-line no-continue
+      const r = Math.min(step * 0.46, 3.2 + Math.sqrt(km) * 1.25);
+      const x = (w + 0.5) * step;
+      const y = base - (k + 0.5) * rise - 4;
+      dots.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${accent}" opacity="${(0.5 + Math.min(0.5, km / 24)).toFixed(2)}"/>`);
+      last = { x, y, r };
+      k += 1;
+    }
+  }
+  const ring = last ? `<circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="${(last.r + 6).toFixed(1)}" fill="none" stroke="${COLORS.text}" stroke-width="2.5"/>` : "";
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<line x1="0" y1="${base}" x2="${width}" y2="${base}" stroke="${COLORS.panelEdge}" stroke-width="3" stroke-linecap="round"/>`,
+    dots.join(""),
+    ring,
+    `</svg>`,
+  ].join("");
+};
+
+// --- /sports ------------------------------------------------------------------
+
+// The start line: lanes run toward a chequered finish, one of them home. A
+// shape, not data — which race is in which lane is the page's job.
+export const startLanes = ({ width = 460, height = 280, accent = COLORS.red, lanes = 7 } = {}) => {
+  const finish = width - 26;
+  const gap = height / lanes;
+  const reach = [0.62, 0.74, 0.58, 1, 0.81, 0.69, 0.77, 0.66, 0.72];
+  const rows = Array.from({ length: lanes }, (_, i) => {
+    const y = (i + 0.5) * gap;
+    const home = reach[i % reach.length] >= 1;
+    const x = 8 + reach[i % reach.length] * (finish - 8);
+    const color = home ? COLORS.text : accent;
+    return [
+      `<line x1="8" y1="${y.toFixed(1)}" x2="${finish}" y2="${y.toFixed(1)}" stroke="${COLORS.panelEdge}" stroke-width="2" opacity="0.6"/>`,
+      `<line x1="8" y1="${y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${color}" stroke-width="${home ? 6 : 5}" stroke-linecap="round" opacity="${home ? 1 : 0.75}"/>`,
+      `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${home ? 12 : 10}" fill="${color}"/>`,
+    ].join("");
   }).join("");
-  const height = 7 * step;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height.toFixed(0)}" viewBox="0 0 ${width} ${height.toFixed(0)}">${cells}</svg>`;
+  const size = 9;
+  const flag = Array.from({ length: Math.ceil(height / size) }, (_, i) => (
+    `<rect x="${finish + (i % 2 ? size : 0)}" y="${i * size}" width="${size}" height="${size}" fill="${COLORS.text}" opacity="0.9"/>`
+  )).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${rows}${flag}</svg>`;
 };
 
 export const progressBar = (pct, { width = 900, height = 48, accent = COLORS.orange } = {}) => {
@@ -341,24 +381,6 @@ export const sparkBars = (values, { width = 240, height = 90, accent = COLORS.cy
     return `<rect x="${(i * slot + slot * 0.15).toFixed(1)}" y="${(height - hh).toFixed(1)}" width="${(slot * 0.7).toFixed(1)}" height="${hh.toFixed(1)}" rx="2" fill="${accent}" opacity="0.9"/>`;
   }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${bars}</svg>`;
-};
-
-// --- /sports ----------------------------------------------------------------
-
-// A distance dial: concentric arcs for 10K / 21K / 42K.
-export const distanceDial = ({ size = 300, accent = COLORS.red } = {}) => {
-  const c = size / 2;
-  const rings = [0.92, 0.66, 0.4].map((scale, i) => {
-    const r = c * scale - 6;
-    const circumference = 2 * Math.PI * r;
-    const fraction = [0.82, 0.62, 0.42][i];
-    return [
-      `<circle cx="${c}" cy="${c}" r="${r.toFixed(1)}" fill="none" stroke="${COLORS.panelEdge}" stroke-width="12" opacity="0.5"/>`,
-      `<circle cx="${c}" cy="${c}" r="${r.toFixed(1)}" fill="none" stroke="${accent}" stroke-width="12" stroke-linecap="round"`,
-      ` stroke-dasharray="${(circumference * fraction).toFixed(1)} ${circumference.toFixed(1)}" transform="rotate(-90 ${c} ${c})" opacity="${0.55 + i * 0.2}"/>`,
-    ].join("");
-  }).join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${rings}</svg>`;
 };
 
 // --- /resume ----------------------------------------------------------------

@@ -143,16 +143,41 @@ export async function getActivity(id) {
   return data ? fromActivityRow(data) : null;
 }
 
-/** The activity linked to a /sports race, if any. */
-export async function getActivityForRace(sportId) {
-  const { data, error } = await supabase
+/**
+ * The activity that is a /sports race: the one linked by hand (sport_id, set
+ * at /admin/training/races) or, failing that, the run on the race day (±1)
+ * whose distance is within 5 % + 0.5 km of the course — the same tolerance as
+ * matchRace in src/lib/strava.js. Null when nothing public fits.
+ */
+export async function getActivityForRace(sportId, { date = null, km = null } = {}) {
+  const linked = await supabase
     .from("strava_activities")
     .select("*")
     .eq("sport_id", sportId)
     .order("start_date", { ascending: true })
     .limit(1);
+  if (linked.error) throw linked.error;
+  if (linked.data?.[0]) return fromActivityRow(linked.data[0]);
+  if (!date || !km) return null;
+  const t = Date.parse(`${date}T00:00:00Z`);
+  if (!Number.isFinite(t)) return null;
+  const day = (ms) => new Date(ms).toISOString().slice(0, 10);
+  const slack = km * 0.05 + 0.5;
+  const { data, error } = await supabase
+    .from("strava_activities")
+    .select("*")
+    .gte("date", day(t - 86400000))
+    .lte("date", day(t + 86400000))
+    .gte("distance", (km - slack) * 1000)
+    .lte("distance", (km + slack) * 1000)
+    .limit(5);
   if (error) throw error;
-  return data?.[0] ? fromActivityRow(data[0]) : null;
+  if (!data?.length) return null;
+  const best = [...data].sort((a, b) => (
+    (a.date === date ? 0 : 1) - (b.date === date ? 0 : 1)
+    || Math.abs(a.distance / 1000 - km) - Math.abs(b.distance / 1000 - km)
+  ))[0];
+  return fromActivityRow(best);
 }
 
 export async function getGear() {
