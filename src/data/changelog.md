@@ -13,6 +13,19 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v33.0.0] — 2026-11-11
+
+### Changed
+- **Books, redesigned as the Reading Room** (`src/pages/Books.js`, `src/components/Books/`): the page is rebuilt around one object per book, its spine. Every spine is data: its width is the page count, its binding colour the subject, the mark at its foot the language (circle English, diamond Marathi), a red ribbon means a review exists and a paper tab means a line was kept. Reaching for a spine tips it out of the row in 3D and shows its cover; clicking lays the book open. The shelf re-arranges itself by year read, subject, language, decade written, thickness or A–Z, each spine travelling to its new place, and can be turned face-out as a wall of covers. Filters dim the books they rule out instead of removing them.
+- **Five lenses** over one filter state: Shelf, Borrower's slip (each reading year as a date-due slip, stamped with the day only when the day is known), Numbers, Marginalia (the kept lines) and Catalogue (the table). The lens is `?tab=`, with the old `?view=` tab links still landing; `?shelf=` holds the arrangement and `?show=covers` the wall.
+- **Numbers** (`src/components/Books/Numbers.js`): four figures drawn from the books themselves — how long each book waited between being written and being read, each year's reading as the pile it would make (one slab per book, as thick as it is long), the shelf by subject (a bar lights that subject on the shelf) and the two languages with the thickest, slimmest and oldest books.
+- **The open book** (`src/components/Books/BookSpread.js`): the quick-look sheet and `/books/:id` are now one component — cover on its binding cloth to the left, library card to the right — so they cannot drift. In the sheet, ← → walk along the shelf; the detail page links to its neighbours.
+- **Hero** with the last book finished, live readouts (books, pages, the height of the stack, Marathi, reviewed) and "Pull one for me", which tips a random spine out and opens it.
+
+### Added
+- **Shelf model** (`src/lib/bookShelf.js`, tested): spine geometry, binding cloth per subject (a test holds every cloth to 4.5:1 under the spine ink and requires one for every category Postgres accepts), the six arrangements and every number the page states.
+- **Type** (`src/components/Books/BooksFonts.js`): Fraunces and Tiro Devanagari Marathi, loaded on the books pages only.
+
 ## [v32.1.3] — 2026-11-11
 
 ### Changed

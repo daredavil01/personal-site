@@ -975,6 +975,22 @@ bullet-point activities for this month?"
 
 No images.
 
+- **Public page — the Reading Room:** `src/pages/Books.js` (one layout in both
+  shells; tokens in `src/components/Books/books.css`, switched on the `bk`
+  container query, Fraunces + Tiro Devanagari Marathi via `BooksFonts`).
+  **A book is one object, its spine, and the spine is data**
+  (`src/lib/bookShelf.js`, pure and tested): width = `page_count`, cloth =
+  category (`CLOTH` needs an entry for every `BOOK_CATEGORIES` value, at 4.5:1
+  under `SPINE_INK`), foot mark = language, ribbon = `blog_link`, tab = `quote`.
+  `Shelf.js` re-arranges the same spines (`arrangeShelf`, FLIP on offsets) and
+  filters dim, never remove. Five lenses on `?tab=`
+  (`shelf|timeline|stats|lines|table` — the old `?view=` ids, still honoured;
+  `view` itself belongs to the shell), plus `?shelf=` (arrangement) and
+  `?show=covers`; all merged with the `useBookFilters` params. Numbers come
+  from `libraryFacts` — never recompute one in a component.
+- **`BookSpread.js` is both the quick-look sheet and `/books/:id`.** Change the
+  book's detail layout there, once.
+
 ---
 
 ### Sports Page
