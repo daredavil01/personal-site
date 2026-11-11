@@ -16,6 +16,9 @@ import {
   DEFAULT_ASK_SETTINGS, EMBEDDING_DIMS, EMBEDDING_MODEL, ENTITY_TYPES as ASK_TYPES,
 } from "../../data/askConfig";
 import { PAGE_SLUGS } from "../../lib/og/model";
+import { THEMES as SHARE_THEMES } from "../share/themes";
+import { PAIRINGS as SHARE_PAIRINGS } from "../share/typography";
+import { LAYOUTS as SHARE_LAYOUTS, ASPECTS as SHARE_ASPECTS } from "../share/shareDesign";
 import { ABOUT_SECTIONS } from "../../lib/aboutModel";
 import { POSITION_GROUPS } from "../../lib/resumeModel";
 import { DAILY_COUNT, MOODS } from "../../lib/microblogInsights";
@@ -275,11 +278,11 @@ export const FEATURES = [
       "A detail page advertises the row's own photo when it has one.",
       "One import-free module, pageMeta.js, feeds both the browser's tags and the edge's, so the two cannot drift.",
       "For crawlers that never run JavaScript, the edge also writes each page as plain HTML and a JSON-LD graph naming one Person, and answers a missing page with a real 404.",
-      "A share-image editor turns a book, race, trek, post or answer into a portrait, square or story image.",
+      () => `A share studio turns any book, race, trek, post, answer or newsletter into an image: ${SHARE_THEMES.length} themes, ${SHARE_LAYOUTS.length} layouts, ${SHARE_PAIRINGS.length} font pairings and ${SHARE_ASPECTS.length} shapes, with the text editable and suggestions made on the device.`,
     ],
     layers: {
       shell: "PageMeta.js writes tags with Helmet",
-      pages: "ShareImageModal on every item",
+      pages: "ShareImageModal → ShareStudio on every item",
       data: "pageMeta.js + identity.js, shared with the edge",
       edge: "_middleware.js: tags, JSON-LD, crawler HTML, 404s",
       db: "a row's own photo, from Storage",

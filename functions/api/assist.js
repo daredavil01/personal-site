@@ -29,6 +29,11 @@
 //          starts with `jev` rungs, those run first as classification: one
 //          calibrated yes/no per tag (src/lib/assistTags.js). Jev writes no
 //          prose, so draft and alt skip those rungs.
+//   share_design  up to four looks for the public share studio's "Ask AI"
+//          button (src/lib/shareSuggest.js): picked from the studio's own
+//          catalogue and filtered back against it. Owner-only like the rest —
+//          visitors get the studio's on-device suggestions. Jev rungs at the
+//          head of the ladder answer it as one calibrated yes/no per preset.
 //   alt    one sentence describing an uploaded image. Gemini rungs only: the
 //          Workers AI rungs of this ladder are text models, and askTiers maps a
 //          multimodal part list down to its text, so they would confidently
@@ -39,6 +44,9 @@ import { json, restHeaders, rpc } from "../../src/lib/askServer";
 import { runTiers } from "../../src/lib/askTiers";
 import { runJevRung, usableRungs } from "../../src/lib/askJudgeTiers";
 import { pickTags, tagQuestions, tagState } from "../../src/lib/assistTags";
+import {
+  SHARE_SYSTEM, buildSharePrompt, parseShareSuggestions, pickShareFromJev, shareQuestions, shareState,
+} from "../../src/lib/shareSuggest";
 
 // Trust boundary: the caller is the owner, but a form can still hold a pasted
 // essay, and the prompt is billed by length. Clamp rather than reject.
@@ -251,6 +259,11 @@ const TASKS = {
     system: TAGS_SYSTEM,
     offNote: "Tag suggestions are switched off. Turn them on under AI features in Ask · Settings.",
   },
+  share_design: {
+    feature: "share_suggest",
+    system: SHARE_SYSTEM,
+    offNote: "Share-image suggestions are switched off. Turn them on under AI features in Ask · Settings.",
+  },
   alt: {
     feature: "image_alt",
     system: ALT_SYSTEM,
@@ -283,6 +296,19 @@ function parseJson(text) {
   }
 }
 
+/** The share studio's request, clamped: it is the owner, but text is billed by length. */
+function shareInput(body) {
+  return {
+    kind: clamp(body.kind, 40),
+    title: clamp(body.title, 300),
+    text: clamp(body.text, MAX_FIELD_CHARS),
+    lang: body.lang === "mr" ? "mr" : "en",
+    hasImage: !!body.hasImage,
+    tags: Array.isArray(body.tags) ? body.tags.slice(0, 12).map((t) => clamp(t, 40)) : [],
+    stats: Array.isArray(body.stats) ? body.stats.slice(0, 4).map((x) => ({ label: clamp(x?.label, 30), value: clamp(x?.value, 30) })) : [],
+  };
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -311,7 +337,7 @@ export async function onRequestPost(context) {
   const done = (response, fields) => {
     context.waitUntil(writeLog(env, {
       task: body.task,
-      resource: clamp(body.resource, 60) || null,
+      resource: clamp(body.resource || body.kind, 60) || null,
       field: clamp(body.field, 60) || null,
       latency_ms: Date.now() - started,
       prompt_chars: promptChars,
@@ -335,6 +361,8 @@ export async function onRequestPost(context) {
   try {
     if (body.task === "alt") {
       parts = buildAltParts(body);
+    } else if (body.task === "share_design") {
+      parts = [{ text: buildSharePrompt(shareInput(body)) }];
     } else if (body.task === "tags") {
       tags = await loadTags(env);
       vocabulary = tags.map((t) => t.name);
@@ -363,13 +391,14 @@ export async function onRequestPost(context) {
   // metered (TypeSafe) rung runs only when auto_eval_allow_metered is on — the
   // same switch the judge obeys. Jev rungs below a language-model rung are
   // skipped: that rung's own ladder is the fallback from there.
-  if (body.task === "tags") {
+  if (body.task === "tags" || body.task === "share_design") {
     const firstLm = ladder.findIndex((t) => !isJev(t));
     const lead = firstLm < 0 ? ladder : ladder.slice(0, firstLm);
     const rungs = usableRungs(lead, env, { allowMetered: !!settings.auto_eval_allow_metered });
     if (rungs.length) {
-      const { spec, names } = tagQuestions(tags);
-      const state = tagState(body.resource, body.values);
+      const share = body.task === "share_design" ? shareInput(body) : null;
+      const { spec, names } = share ? shareQuestions() : tagQuestions(tags);
+      const state = share ? shareState(share) : tagState(body.resource, body.values);
       for (let i = 0; i < rungs.length; i += 1) {
         const rung = rungs[i].tier;
         const name = rung.name || "jev";
@@ -378,6 +407,13 @@ export async function onRequestPost(context) {
           const out = await runJevRung({
             tier: rung, state, spec, env,
           });
+          if (share) {
+            const designs = pickShareFromJev(out.answers, names, share);
+            if (!designs.length) throw new Error("no preset cleared the bar");
+            return done(json({ designs, tier: name }), {
+              status: "ok", tier: name, failed_rungs: jevErrors, output: { designs: designs.map((d) => d.design) },
+            });
+          }
           const picked = pickTags(out.answers, names, body.values?.[body.field]);
           return done(json({ ...picked, tier: name }), {
             status: "ok", tier: name, failed_rungs: jevErrors, output: picked,
@@ -421,6 +457,14 @@ export async function onRequestPost(context) {
     const maybe = knownOnly(parsed.maybe, vocabulary, [...(body.values?.[body.field] || []), ...suggested]);
     return done(json({ suggested, maybe, tier }), {
       status: "ok", tier, failed_rungs: failed, output: { suggested, maybe },
+    });
+  }
+
+  if (body.task === "share_design") {
+    const designs = parseShareSuggestions(parseJson(answer), shareInput(body));
+    if (!designs.length) return failure(`${tier} returned no usable design.`);
+    return done(json({ designs, tier }), {
+      status: "ok", tier, failed_rungs: failed, output: { designs: designs.map((d) => ({ ...d.design, why: d.why })) },
     });
   }
 

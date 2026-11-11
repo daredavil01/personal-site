@@ -27,6 +27,7 @@ const TASKS = [
   { key: "tags", label: "Tag suggestions", feature: "tag_suggest" },
   { key: "draft", label: "Field drafts", feature: "draft_fields" },
   { key: "alt", label: "Image alt text", feature: "image_alt" },
+  { key: "share_design", label: "Share-image designs", feature: "share_suggest" },
 ];
 const FEATURES = TASKS.map((t) => AI_FEATURES.find((f) => f.key === t.feature)).filter(Boolean);
 const STATUS_TONE = { ok: "success", error: "danger", disabled: "warning" };

@@ -537,6 +537,27 @@ Full reference: `docs/newsletter.md`.
   source and `npm run logbook` keep what they have (`keep: true` in
   `scripts/lib/registry.mjs`) instead of deleting the essays' chunks.
 
+## Share studio ("Share as image")
+
+Every entry's "Share as image" (`ShareImageButton` / `ShareImageModal`, API
+`{kind, item, onClose}`) opens `src/components/share/ShareStudio.js`, lazily and
+portalled to `<body>`. The card is `ShareCard(model, design, edits)`: `model`
+from the per-kind adapters in `shareCardConfig.js` (the only type-aware code),
+`design` every studio choice, `edits` the text as changed on the image (never
+saved back).
+
+- **Data, not classes:** themes (`themes.js`, tokens applied inline,
+  `themes.test.js` holds ink at 4.5:1), font pairings (`typography.js`, `scripts`
+  gates Marathi), layouts/aspects/options (`shareDesign.js`, pure) and presets
+  plus the on-device ranker (`presets.js`). All import-free of React because
+  `/api/assist` bundles them. A new theme or pairing is one object.
+- **Layouts** (`layouts.js`) size type as `calc(px * var(--k))`; `FitBox.js`
+  measures and shrinks to the frame, clamping only as a last resort. Photos
+  default to **Full** (whole photo, card width, capped on fixed frames).
+- **AI is owner-only:** task `share_design` on `/api/assist`, switch
+  `share_suggest`, prompt/parser in `src/lib/shareSuggest.js` — every id is
+  filtered back to the catalogue. Visitors get `localSuggestions()`.
+
 ## Admin AI assist (/admin/ai)
 
 Draft, Suggest tags and alt text (`functions/api/assist.js`) run on

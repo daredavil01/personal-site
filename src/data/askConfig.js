@@ -284,6 +284,11 @@ export const AI_FEATURES = [
     label: "Image alt text",
     hint: "Describes an image as it is uploaded in /admin.",
   },
+  {
+    key: "share_suggest",
+    label: "Share-image design suggestions",
+    hint: "The Ask AI button in the share studio. Shown only when you are signed in; visitors get on-device picks.",
+  },
 ];
 
 /**

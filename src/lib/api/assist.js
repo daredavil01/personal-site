@@ -124,3 +124,21 @@ export async function pruneAssistLog(days = 90) {
   const { error } = await supabase.from("assist_log").delete().lt("created_at", before);
   if (error) throw error;
 }
+
+/**
+ * Up to four looks for the share studio, as
+ * `[{ id, label, why, design, excerpt }]` — every id already checked against the
+ * studio's own catalogue by the endpoint. Owner-only; `tier` says which rung
+ * answered.
+ */
+export async function suggestShareDesigns({
+  kind, title, text, lang, hasImage, tags, stats,
+}) {
+  const body = await call(
+    {
+      task: "share_design", kind, title, text, lang, hasImage, tags, stats,
+    },
+    "Signed out — sign in again to ask for designs.",
+  );
+  return { designs: body.designs || [], tier: body.tier || null };
+}

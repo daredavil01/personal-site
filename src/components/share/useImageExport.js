@@ -35,8 +35,9 @@ const triggerDownload = (dataUrl, fileName) => {
 };
 
 // Hook wrapping html-to-image plus the Web Share API. `exportNode` snapshots a
-// DOM node to a 2x PNG and either downloads it or hands it to the native share
-// sheet (falling back to a download where file sharing is unsupported).
+// DOM node to a 2x PNG and downloads it, hands it to the native share sheet
+// (falling back to a download where file sharing is unsupported), or — mode
+// "copy" — puts it on the clipboard where ClipboardItem exists.
 const useImageExport = () => {
   const [status, setStatus] = useState("idle"); // idle | working | done | error
 
@@ -56,7 +57,12 @@ const useImageExport = () => {
     setStatus("working");
     try {
       const dataUrl = await render(node, backgroundColor);
-      if (mode === "share") {
+      if (mode === "copy") {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        // eslint-disable-next-line no-undef
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      } else if (mode === "share") {
         const res = await fetch(dataUrl);
         const blob = await res.blob();
         const file = new File([blob], fileName, { type: "image/png" });

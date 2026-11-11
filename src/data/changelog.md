@@ -13,6 +13,21 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v32.1.0] — 2026-11-11
+
+### Added
+- **Share studio** (`src/components/share/ShareStudio.js`): "Share as image" rebuilt from scratch for every entry that has it — micro-posts, books, blogs, races, treks, Instagram posts, /ask answers, newsletter issues and sections. A live preview with six tabs (Ideas, Text, Theme, Type, Layout, Details), a bottom sheet on phones, swipe or ← → through themes, Shuffle, and Download / Share / Copy. The last look is remembered per kind. Loaded as its own chunk and portalled to `<body>`, so no page pays for it until it opens and no host's CSS can reach the card.
+- **39 themes in eight families** (`src/components/share/themes.js`): core, paper and ink, editorial, mesh gradients, print textures (risograph misregistration, halftone, film grain, photocopy), Indian craft (Warli, Kolam, Paithani, Monsoon, Holi, Saffron, Chai), night, minimal — plus a ninth family of two built from the post itself (its photo's colour, its first tag's colour) and a custom accent. Tokens are data; a test holds every theme's text to 4.5:1 contrast.
+- **Ten layouts** (`src/components/share/layouts.js`): Editorial, Pull quote, Poster, Polaroid, Note, Column with a drop cap, Minimal, Ticket (race/trek stub with the time and distance in big numbers), Index card (books) and Letter (newsletter). Text fits its frame by measurement (`FitBox.js`), so long Marathi posts never break the card.
+- **26 font pairings** (`src/components/share/typography.js`), eleven of them setting Marathi; a Marathi post can only take those. Size, line height, letter spacing, case, weight and quote marks; alignment left/centre/right/justify, top/middle/bottom; frames, margins and six shapes (4:5, 1:1, 9:16, 1.91:1, 16:9, Fit).
+- **Photos at full size**: by default the post's photo spans the card's width at its own proportions, never cropped (capped only so the words fit on a fixed frame; uncapped on Fit). Where a frame is a different shape, a blurred copy of the photo fills it instead of bars.
+- **Edit the words on the image**: change the title or text, pick one or more sentences as the quote, highlight a phrase (marker, underline or accent ink). Nothing is written back.
+- **Ideas for this post** (`src/components/share/presets.js`): 22 named looks ranked on the device from the post's language, length, photo, numbers, tags and — for micro-posts — the hour in its signature.
+- **AI picks for the owner** (`src/lib/shareSuggest.js`, `functions/api/assist.js` task `share_design`, switch `share_suggest`, `supabase/migrations/0042_assist_share_design.sql`): signed in, "Ask AI" returns four looks with a reason each, from Jev (one yes/no per preset) or Gemini → Workers AI, filtered back to ids the studio can draw.
+
+### Changed
+- **Share card** (`src/components/share/ShareCard.js`, `shareCardConfig.js`): now a thin renderer over theme + layout + pairing; adapters add `stats`, `author`, `date` and `lang`. Bare links are dropped from the card's text (the footer carries the address). `shareFonts.js` is replaced by `typography.js`.
+
 ## [v32.0.0] — 2026-11-10
 
 ### Added

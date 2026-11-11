@@ -5,16 +5,21 @@ import React, { useState } from "react";
 // error) the element removes itself rather than showing a broken image — the
 // rest of the card still exports cleanly. `crossOrigin` is set so html-to-image
 // can inline the pixels without tainting the canvas.
-const BrandMark = ({ src, alt, className }) => {
-  const [failed, setFailed] = useState(false);
-  if (failed) return null;
+const BrandMark = ({
+  src, alt, className, style,
+}) => {
+  // Keyed on the src: switching theme swaps logo files, and one missing file
+  // must not hide the next one.
+  const [failedSrc, setFailedSrc] = useState(null);
+  if (failedSrc === src) return null;
   return (
     <img
       src={src}
       alt={alt}
       crossOrigin="anonymous"
       className={className}
-      onError={() => setFailed(true)}
+      style={style}
+      onError={() => setFailedSrc(src)}
     />
   );
 };

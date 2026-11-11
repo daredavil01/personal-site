@@ -4,8 +4,13 @@
 //
 // ShareModel = {
 //   kind, eyebrow, title, subtitle?, metaRows:[{ icon?, label, isDate? }],
-//   body?, quote?, tags?:string[], imageUrl?:string|null, footerNote?, footerUrl
+//   body?, quote?, tags?:string[], imageUrl?:string|null, footerNote?, footerUrl,
+//   author?, stats?:[{ label, value }], date?, lang
 // }
+//
+// `stats` feeds the Ticket layout's big numbers, `author` the attribution under
+// a pull quote, `date` the Note/Letter datelines and `lang` ("en" | "mr")
+// decides which font pairings can set the post.
 //
 // Rows flagged `isDate: true` are the item's timestamp — ShareCard hides them
 // when the user turns "Timestamp" off in the editor.
@@ -13,6 +18,8 @@
 import { SITE_URL } from "../../data/pageMeta";
 import { stripMarkdownImages } from "../../lib/askFormat";
 import { sourceLabels } from "../MicroBlog/constants";
+import { isMarathi } from "../../lib/logbook";
+import { IDENTITY } from "../../data/identity";
 
 // Domain shown on the exported card's footer (without protocol).
 export const SITE_DOMAIN = SITE_URL.replace(/^https?:\/\//, "");
@@ -58,6 +65,8 @@ const book = (item) => ({
   ].filter(Boolean),
   body: clean(item.description),
   tags: item.tags || [],
+  author: clean(item.author),
+  stats: item.year ? [{ label: "Read", value: String(item.year) }] : [],
   imageUrl: null,
   footerUrl: `${SITE_DOMAIN}/books/${item.id}`,
 });
@@ -100,6 +109,12 @@ const sport = (item) => ({
   ].filter(Boolean),
   body: clean(item.description),
   tags: [],
+  stats: [
+    item.distance ? { label: "Distance", value: clean(item.distance) } : null,
+    item.time ? { label: "Finish", value: clean(item.time) } : null,
+    item.bibNumber ? { label: "Bib", value: clean(item.bibNumber) } : null,
+  ].filter(Boolean),
+  date: clean(item.date),
   imageUrl: firstImage(item.slideImages),
   footerUrl: `${SITE_DOMAIN}/sports/${item.id}`,
 });
@@ -116,6 +131,11 @@ const trek = (item) => ({
   ].filter(Boolean),
   body: "",
   tags: [],
+  stats: [
+    item.trek_time ? { label: "Duration", value: clean(item.trek_time) } : null,
+    item.endurance_level ? { label: "Endurance", value: clean(item.endurance_level) } : null,
+  ].filter(Boolean),
+  date: clean(item.date),
   imageUrl: firstImage(item.slideImages),
   footerUrl: `${SITE_DOMAIN}/treks/${item.id}`,
 });
@@ -189,7 +209,22 @@ export const KIND_LABELS = {
   "newsletter-section": "Newsletter section",
 };
 
-export const toShareModel = (kind, item) => (ADAPTERS[kind] && item ? ADAPTERS[kind](item) : null);
+// Facts every adapter would otherwise repeat: the date from the dated meta row,
+// the author (the site's owner unless the item names one, as a book does) and
+// the language, by share of letters.
+const finish = (model) => {
+  const dateRow = (model.metaRows || []).find((row) => row.isDate);
+  const lang = isMarathi(`${model.title || ""} ${model.body || ""}`) ? "mr" : "en";
+  return {
+    stats: [],
+    ...model,
+    date: model.date || (dateRow ? dateRow.label : ""),
+    author: model.author || (lang === "mr" ? IDENTITY.nameMr : IDENTITY.name),
+    lang,
+  };
+};
+
+export const toShareModel = (kind, item) => (ADAPTERS[kind] && item ? finish(ADAPTERS[kind](item)) : null);
 
 export const hasImage = (kind, item) => {
   const model = toShareModel(kind, item);

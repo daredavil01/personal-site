@@ -83,6 +83,7 @@ edit; a form button fills an input that is only persisted on Save.
 | A1 | Tag suggestions on save | `tag_suggest` | Jev (one yes/no per tag), Gemini JSON fallback | request (owner-only) | **built**; Jev since 2026-10-22 |
 | C1 | Micro-blog bulk auto-tagging | — | Claude (Claude Code session) | one-off | **done** 2026-09-29 — 816 posts gained tags; script removed |
 | A3 | Image alt text | `image_alt` | Gemini vision | request (owner-only) | **built** for `slideImages` |
+| A6 | Share-image design suggestions | `share_suggest` | Jev (one yes/no per preset), Gemini JSON fallback | request (owner-only) | **built** 2026-11-11 — the share studio's "Ask AI"; visitors get on-device picks |
 | C3 | Micro-blog near-duplicates | — | none (embeddings) | one-off | **removed** |
 | E1 | `/ask`-powered 404 | — | none (embeddings) | request | **built** |
 | E2 | Semantic "on this day" | — | none (embeddings) | request | **built** on `/microblog` |
