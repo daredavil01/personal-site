@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v32.1.3] — 2026-11-11
+
+### Changed
+- **Build runtime** (`.nvmrc`, `package.json`, `.github/workflows/`): Cloudflare Pages and every GitHub workflow move from Node 24 (now in LTS maintenance) to Node 26, the Active LTS. Verified on 26.13.0: clean `npm ci`, build, lint, the Jest suite and the script tests.
+
 ## [v32.1.2] — 2026-11-11
 
 ### Changed

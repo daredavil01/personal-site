@@ -7,7 +7,7 @@
     "url": "https://github.com/daredavil01/personal-site.git"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "scripts": {
     "build": "rimraf ./build && vite build",
