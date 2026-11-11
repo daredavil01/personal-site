@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v32.1.2] — 2026-11-11
+
+### Changed
+- **Build runtime** (`.nvmrc`, `package.json`, `.github/workflows/`): Cloudflare Pages and every GitHub workflow now run on Node 24 (the current LTS) instead of the end-of-life Node 20 on Pages and 22 in CI, and `engines` says so. `wrangler`, `miniflare` and the AI SDK require Node 22 or newer, which is what filled every deploy log with `EBADENGINE` warnings.
+
 ## [v32.1.1] — 2026-11-11
 
 ### Fixed
