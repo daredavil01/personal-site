@@ -38,6 +38,7 @@
     "page:films": "node --no-warnings scripts/page-films/render.mjs",
     "videos:film": "node --no-warnings scripts/videos-film/render.mjs",
     "training:film": "node --no-warnings scripts/training-film/render.mjs",
+    "books:film": "node --no-warnings scripts/books-film/render.mjs",
     "videos:slides": "node --no-warnings scripts/videos-film/slides.mjs",
     "newsletter:draft": "node scripts/newsletter-draft.mjs",
     "indexnow": "node scripts/indexnow.mjs",

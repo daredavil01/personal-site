@@ -83,6 +83,7 @@ step with no dry run (`blogs`) is skipped. `scripts/refresh.mjs` lists the
 steps. Not in it: `ask:gaps` (spends model tokens on a report), `og:fallbacks`
 (run after content moves, then commit the PNGs), `newsletter:draft` (monthly),
 `blueprint:film` (renders video into `knowledge_base/`, nothing to commit),
+`books:film` (the /books launch film; re-render after books are added),
 `videos:film` and `videos:slides` (the /videos film and its six slides; re-render,
 `-- --publish` and re-run the slides after the channel moves).
 `page:films` (the Remotion page films: seven of 30 seconds — /about, /resume,
@@ -656,6 +657,7 @@ Uploads are grouped by type folder (`sports`, `treks`, etc.).
 | Substack RSS proxy | `functions/rss-feed.js` (Cloudflare Pages Function) |
 | Videos: sync endpoint / helpers / admin | `functions/api/youtube-sync.js`, `src/lib/youtube.js`, `src/pages/admin/YoutubeSync.js` |
 | Training (Strava): export import / helpers / admin | `scripts/strava-import.mjs`, `src/lib/stravaExport.js`, `src/lib/strava.js`, `src/pages/admin/TrainingRaces.js` |
+| Books film (Remotion): capture / voice / render / picture | `scripts/books-film/`, `public/video/the-books-story.*`, `src/components/Books/BooksFilm.js`, `docs/books-film.md` |
 | Training film (Remotion): data / render / picture | `scripts/training-film/`, `public/video/the-training-story.*`, `src/components/Training/TrainingFilm.js` |
 | Training: pages + numbers + sample log | `src/pages/Training.js`, `src/pages/TrainingPost.js`, `src/components/Training/` (`TrainingArena.js`, `Swarm.js`, `TrainingLenses.js`, `figures/`), `src/lib/swarmLayouts.js`, `src/lib/training.js`, `src/lib/trainingDemo.js` |
 | Arena (shared design kit for /training and /sports) | `src/components/Arena/Arena.js`, `src/components/Arena/arena.css` |
@@ -990,6 +992,14 @@ No images.
   from `libraryFacts` — never recompute one in a component.
 - **`BookSpread.js` is both the quick-look sheet and `/books/:id`.** Change the
   book's detail layout there, once.
+- **The launch film** (`BooksFilm.js`, under the hero): 60 s, vertical,
+  narrated in an Indian English voice (edge-tts `en-IN-NeerjaExpressiveNeural`,
+  `pip install edge-tts`) over a synthesised lo-fi beat, rendered with Remotion
+  by `npm run books:film -- --publish` (`scripts/books-film/`, see
+  `docs/books-film.md`) into `public/video/the-books-story.*` (committed;
+  `film.test.js` holds the MP4 under 4 MB). It records every view of the page
+  with Playwright (`-- --capture` re-shoots), so re-render after the page
+  changes visibly or books are added.
 
 ---
 

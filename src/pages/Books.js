@@ -7,6 +7,7 @@ import { useBooks } from "../context/ContentContext";
 import { LoadingBlock, ErrorBlock } from "../components/common/AsyncStates";
 import useBookFilters from "../components/Books/useBookFilters";
 import BooksFonts from "../components/Books/BooksFonts";
+import BooksFilm from "../components/Books/BooksFilm";
 import ShelfControls from "../components/Books/ShelfControls";
 import Shelf from "../components/Books/Shelf";
 import BorrowerSlip from "../components/Books/BorrowerSlip";
@@ -173,6 +174,8 @@ const Books = () => {
             </button>
           )}
         </header>
+
+        <BooksFilm />
 
         {loading && <LoadingBlock label="Loading books…" />}
         {error && <ErrorBlock />}

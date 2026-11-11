@@ -125,6 +125,32 @@
   .bk-desk { flex-direction: column; align-items: flex-start; }
 }
 
+/* ── The film: the page in 60 seconds ──────────────────────────────────── */
+
+.bk-film {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: center;
+  padding: 22px; border-radius: 18px;
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(220, 184, 102, 0.22), transparent 60%),
+    var(--bk-paper-2);
+  border: 1px solid var(--bk-rule);
+}
+@container bk (min-width: 640px) {
+  .bk-film { grid-template-columns: 240px minmax(0, 1fr); gap: 36px; padding: 28px; }
+}
+.bk-film__video {
+  display: block; width: 100%; max-width: 240px; height: auto; margin: 0 auto;
+  border-radius: 16px; background: #120c08;
+  box-shadow: 0 24px 50px rgba(42, 36, 32, 0.35), 0 0 0 1px rgba(220, 184, 102, 0.35);
+}
+.bk-film__title {
+  font-family: var(--bk-serif); font-weight: 600;
+  font-size: clamp(1.8rem, 5cqi, 2.6rem); line-height: 1.02; letter-spacing: -0.02em;
+  margin: 12px 0 14px; color: var(--bk-ink);
+}
+.bk-film__title em { font-style: italic; font-weight: 400; color: var(--bk-red); }
+.bk-film__chapters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+
 /* A book as an object: cover, shaded hinge, a block of pages behind it. */
 .bk-stage { perspective: 900px; flex: none; }
 .bk-object {

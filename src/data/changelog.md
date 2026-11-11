@@ -13,6 +13,13 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v33.1.0] — 2026-11-11
+
+### Added
+- **The Reading Room film** (`src/components/Books/BooksFilm.js`, `public/video/the-books-story.{mp4,jpg,vtt,json}`): a 60-second vertical launch film for the redesigned /books, under the hero with its storyline and chapter chips (`preload="none"`, so the page costs a poster until someone presses play). The story is the modern, digital bookshelf: every book drops onto the shelf, the library is weighed and measured, one spine is held up to the lamp and its marks named as they are said, then the page itself recorded on a phone — spines tipping out, all six arrangements, filters dimming, the wall of covers, "Pull one for me", the four other lenses, and the atlas and dark shells. 3.3 MB at 720×1280.
+- **Film pipeline** (`scripts/books-film/`, `npm run books:film`): `capture.mjs` records every view of the live page with Playwright at phone size and notes each tap; `data.mjs` reads the table through `src/lib/bookShelf.js`, so a spine in the film has the page's width, height and cloth; `voice.py` narrates in an Indian English voice (Microsoft's en-IN Neerja via edge-tts) and returns each word's time, so the burned-in captions light every word as it is said; `score.mjs` synthesises a 90 BPM lo-fi beat with a tanpura drone, a plucked string, a bayan and vinyl crackle; Remotion draws it (`remotion/`), with Fraunces and Tiro Devanagari Marathi vendored under `scripts/books-film/fonts/` (OFL).
+- **Guard** (`src/components/Books/film.test.js`): the four files are committed, the MP4 stays under 4 MB, captions and chapters describe a one-minute film. The film is also listed on `/films` (`src/data/featureFilms.js`).
+
 ## [v33.0.0] — 2026-11-11
 
 ### Changed

@@ -1,5 +1,5 @@
 // Every feature film on the site, for the /films page: the eleven page
-// films (seven of 30 seconds, four of 45; src/data/pageFilms.js) and the six longer films that came
+// films (seven of 30 seconds, four of 45; src/data/pageFilms.js) and the seven longer films that came
 // before them. Import-free apart from the page-film registry, which is
 // import-free too.
 //
@@ -88,6 +88,21 @@ export const FEATURE_FILMS = [
     made: "Remotion, rendered from the Strava log (scripts/training-film/); narration by Aura 2 on Workers AI",
     story: "A watch, every activity piled up, a light painting of the routes, the streak, one day replayed, the numbers, and the two ways into the page.",
     alt: "This page in 60 seconds: a narrated film",
+  },
+  {
+    key: "books",
+    title: "The Reading Room",
+    route: "/books",
+    page: "Books",
+    base: "/video/the-books-story",
+    seconds: 60,
+    shape: "vertical",
+    captions: true,
+    chapters: true,
+    sound: "Narrated in an Indian English voice over a lo-fi beat with tanpura and a plucked string",
+    made: "Remotion, rendered from the books table and screen recordings of the page at phone size (scripts/books-film/); narration by Microsoft's en-IN Neerja voice; the beat synthesised in code",
+    story: "Every book drops onto the shelf, the library is weighed and measured, one spine is held up to the lamp, then the page on a phone: spines tipping out, six arrangements, filters dimming, a wall of covers, a book pulled at random, the five lenses, by day and after dark.",
+    alt: "The Reading Room in 60 seconds: a narrated film of the books page",
   },
   {
     key: "videos",

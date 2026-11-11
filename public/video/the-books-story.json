@@ -1,0 +1,50 @@
+{
+  "duration": 60,
+  "narrator": "Microsoft neural voice en-IN-NeerjaExpressiveNeural (edge-tts)",
+  "chapters": [
+    {
+      "t": 0,
+      "title": "The shelf"
+    },
+    {
+      "t": 5.9,
+      "title": "The library"
+    },
+    {
+      "t": 11.2,
+      "title": "A spine is data"
+    },
+    {
+      "t": 18.4,
+      "title": "Take one down"
+    },
+    {
+      "t": 22.8,
+      "title": "Six ways"
+    },
+    {
+      "t": 28,
+      "title": "Filters dim"
+    },
+    {
+      "t": 33.1,
+      "title": "Face out"
+    },
+    {
+      "t": 36.5,
+      "title": "Pull one"
+    },
+    {
+      "t": 41.2,
+      "title": "Five lenses"
+    },
+    {
+      "t": 47.2,
+      "title": "Day and night"
+    },
+    {
+      "t": 52.5,
+      "title": "Come in"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { useQueryState } from "../components/common/LogKit";
 import { FEATURE_FILMS, filmLength } from "../data/featureFilms";
 
 // /films — every feature film on the site in one place: the eleven page
-// films (30 or 45 seconds) and the six longer ones. A main player shows the chosen film
+// films (30 or 45 seconds) and the seven longer ones. A main player shows the chosen film
 // (`?film=`, merged into the URL so it can be shared) with its details — the
 // story, the page it belongs to, length, shape, sound, how it was made — and
 // its chapters as buttons that jump the film to them. Chapters come from the

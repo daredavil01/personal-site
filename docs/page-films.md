@@ -8,7 +8,7 @@ film has a **Classic and atlas** scene that shows its page in both shells. Each 
 `PageFilm` (`src/components/common/PageFilm.js`) with its storyline beside it.
 
 Every film is listed with its details on **`/films`** (`src/pages/Films.js`),
-beside the six longer films (the trailer, Blueprint, Logbook, Projects,
+beside the seven longer films (the trailer, Blueprint, Logbook, Projects, Books,
 Training, Videos); the catalogue is `src/data/featureFilms.js`.
 
 | Piece | Where |
