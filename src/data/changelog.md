@@ -13,6 +13,11 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v32.1.1] — 2026-11-11
+
+### Fixed
+- **Deploy** (`package-lock.json`): Cloudflare's `npm ci` refused to install because the lockfile no longer listed `@emnapi/runtime` and `@emnapi/core`, which `package.json`'s dependency tree now needs. Regenerated with npm 10 (the build image's), checked with a clean `npm ci`, build and test run.
+
 ## [v32.1.0] — 2026-11-11
 
 ### Added
