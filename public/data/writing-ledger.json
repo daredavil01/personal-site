@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-12T14:59:06.791Z",
+  "generatedAt": "2026-11-12T17:53:35.943Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 126,
-    "words": 126082,
+    "posts": 127,
+    "words": 127118,
     "averageWords": 1001,
-    "trackedPosts": 83,
+    "trackedPosts": 84,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-11-11",
+    "latestPost": "2026-11-12",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,8 +26,8 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 83,
-      "words": 93144
+      "posts": 84,
+      "words": 94180
     },
     "activeMonths": 36
   },
@@ -36,37 +36,37 @@
     "monthToDate": {
       "month": "2026-11",
       "label": "November 2026",
-      "posts": 4,
-      "words": 4226,
+      "posts": 5,
+      "words": 5262,
       "daysElapsed": 12,
-      "wordsPerDay": 352,
+      "wordsPerDay": 439,
       "previousMonth": {
         "month": "2026-10",
         "posts": 13,
         "words": 15500
       },
-      "changeVsPreviousMonth": -72.7
+      "changeVsPreviousMonth": -66.1
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 83,
-      "words": 93144,
+      "posts": 84,
+      "words": 94180,
       "daysElapsed": 316,
-      "wordsPerDay": 295,
+      "wordsPerDay": 298,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
         "throughDate": "2025-11-12"
       },
-      "changeVsPriorYear": 682.4
+      "changeVsPriorYear": 691.1
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 97,
-      "words": 100256,
+      "posts": 98,
+      "words": 101292,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 83,
-      "words": 93144
+      "posts": 84,
+      "words": 94180
     }
   ],
   "byMonth": [
@@ -327,8 +327,8 @@
     {
       "month": "2026-11",
       "label": "November 2026",
-      "posts": 4,
-      "words": 4226
+      "posts": 5,
+      "words": 5262
     }
   ],
   "cumulative": [
@@ -545,8 +545,8 @@
     {
       "month": "2026-11",
       "label": "November 2026",
-      "words": 126082,
-      "posts": 126
+      "words": 127118,
+      "posts": 127
     }
   ],
   "byDayOfWeek": [
@@ -572,8 +572,8 @@
     },
     {
       "day": "Thursday",
-      "posts": 19,
-      "words": 22410
+      "posts": 20,
+      "words": 23446
     },
     {
       "day": "Friday",
@@ -589,8 +589,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 71,
-      "words": 81082
+      "posts": 72,
+      "words": 82118
     },
     {
       "section": "Uncategorised",
@@ -606,8 +606,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 68,
-      "words": 75729
+      "posts": 69,
+      "words": 76765
     },
     {
       "tag": "digital-wellbeing",
@@ -616,13 +616,13 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 27,
-      "words": 29966
+      "posts": 28,
+      "words": 31002
     },
     {
       "tag": "life",
-      "posts": 14,
-      "words": 19415
+      "posts": 15,
+      "words": 20451
     },
     {
       "tag": "ai",
@@ -650,14 +650,14 @@
       "words": 11373
     },
     {
+      "tag": "artificial-intelligence",
+      "posts": 10,
+      "words": 11222
+    },
+    {
       "tag": "youth-flourishing",
       "posts": 9,
       "words": 11207
-    },
-    {
-      "tag": "artificial-intelligence",
-      "posts": 9,
-      "words": 10186
     },
     {
       "tag": "flourishing",
@@ -700,9 +700,19 @@
       "words": 4135
     },
     {
+      "tag": "ethics-morals",
+      "posts": 4,
+      "words": 3876
+    },
+    {
       "tag": "nmdc-hyderabad-marathon",
       "posts": 2,
       "words": 3376
+    },
+    {
+      "tag": "bharatekkhoj",
+      "posts": 3,
+      "words": 3188
     },
     {
       "tag": "Privacy",
@@ -715,6 +725,11 @@
       "words": 3130
     },
     {
+      "tag": "mythicaltale",
+      "posts": 3,
+      "words": 3053
+    },
+    {
       "tag": "Data Privacy",
       "posts": 3,
       "words": 3027
@@ -725,24 +740,9 @@
       "words": 2949
     },
     {
-      "tag": "ethics-morals",
-      "posts": 3,
-      "words": 2840
-    },
-    {
       "tag": "chroniclesofwanderingmind",
       "posts": 3,
       "words": 2365
-    },
-    {
-      "tag": "bharatekkhoj",
-      "posts": 2,
-      "words": 2152
-    },
-    {
-      "tag": "mythicaltale",
-      "posts": 2,
-      "words": 2017
     },
     {
       "tag": "Trekking",
@@ -1110,7 +1110,7 @@
     },
     {
       "label": "1,000–1,499",
-      "posts": 53
+      "posts": 54
     },
     {
       "label": "1,500–1,999",
@@ -1229,6 +1229,32 @@
     }
   ],
   "posts": [
+    {
+      "title": "The Sea of Tranquility",
+      "date": "2026-11-12",
+      "publishedAt": "2026-11-12T17:46:25.562Z",
+      "url": "https://sankettambare.substack.com/p/the-sea-of-tranquility-trilogy-part-3",
+      "platform": "Substack",
+      "words": 1036,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "ethics-morals",
+        "mythicaltale",
+        "self-reflection",
+        "life",
+        "100_days_to_offload",
+        "bharatekkhoj",
+        "artificial-intelligence"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!s7As!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5f31de5e-5ffa-403d-b4ac-7152ba0574d8_1448x1086.png",
+      "trackedInBlogsTable": true,
+      "blogId": 84,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "Breaking the unseen barriers!",
       "date": "2026-11-11",

@@ -26,7 +26,7 @@
   },
   "counts": {
     "tags": 141,
-    "blogs": 83,
+    "blogs": 84,
     "books": 52,
     "treks": 20,
     "sports": 26,
@@ -42,9 +42,9 @@
       "u": "/now"
     },
     "blog": {
-      "d": "2026-11-11",
-      "t": "Breaking the unseen barriers!",
-      "u": "/100-days-to-offload/83"
+      "d": "2026-11-12",
+      "t": "The Sea of Tranquility",
+      "u": "/100-days-to-offload/84"
     },
     "writing": {
       "d": "2025-12-31",
@@ -53,8 +53,8 @@
     },
     "microblog": {
       "d": "2026-11-11",
-      "t": "#1775 The ultras...!",
-      "u": "/micro-blog/1680"
+      "t": "#१४७४ मन...!",
+      "u": "/micro-blog/1679"
     }
   },
   "resume": {
@@ -1061,7 +1061,7 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 488
+      "total": 489
     },
     {
       "name": "self-reflection",
@@ -1097,7 +1097,7 @@
     },
     {
       "name": "digital wellbeing",
-      "total": 122
+      "total": 123
     },
     {
       "name": "travel",
@@ -1186,11 +1186,11 @@
     "year": 2026,
     "month": "November"
   },
-  "generated_at": "2026-11-12T14:48:41.767231+00:00",
+  "generated_at": "2026-11-12T17:53:58.865735+00:00",
   "index_by_type": {
     "now": 15,
     "tag": 141,
-    "blog": 83,
+    "blog": 84,
     "book": 52,
     "page": 1,
     "site": 29,
@@ -1202,7 +1202,7 @@
     "project": 26,
     "writing": 43,
     "training": 29,
-    "changelog": 141,
+    "changelog": 142,
     "instagram": 11,
     "microblog": 1680,
     "presentation": 24

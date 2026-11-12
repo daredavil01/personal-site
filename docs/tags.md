@@ -6,7 +6,7 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 488 | Mind & Life |
+| `life` | 489 | Mind & Life |
 | `self-reflection` | 478 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
 | `social media` | 151 | Digital Life |
@@ -15,7 +15,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `sanky` | 135 | Personal |
 | `philosophy` | 131 | Society & Ideas |
 | `calmness` | 128 | Mind & Life |
-| `digital wellbeing` | 122 | Digital Life |
+| `digital wellbeing` | 123 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
 | `latepost` | 109 | Writing & Blogging |
 | `digital detox` | 82 | Digital Life |
@@ -39,7 +39,7 @@ Names are lowercase and URI-encoded rather than slugified.
 | `भटकंती` | 30 | Travel & Outdoors |
 | `konkan` | 29 | Travel & Outdoors |
 | `digital manipulation` | 28 | Digital Life |
-| `स्थितप्रज्ञ` | 27 | Mind & Life |
+| `स्थितप्रज्ञ` | 28 | Mind & Life |
 | `book review` | 24 | Books & Reading |
 | `claude code` | 24 | Technology & Data |
 | `mydesigns` | 24 | Arts & Culture |
@@ -49,8 +49,8 @@ Names are lowercase and URI-encoded rather than slugified.
 | `scientific temperament` | 19 | Society & Ideas |
 | `history` | 18 | Society & Ideas |
 | `data privacy` | 16 | Digital Life |
+| `fiction` | 16 | Books & Reading |
 | `information age` | 16 | Digital Life |
-| `fiction` | 15 | Books & Reading |
 | `youtube` | 14 | Digital Life |
 | `biography` | 13 | Books & Reading |
 | `digital technology` | 13 | Digital Life |
@@ -69,14 +69,15 @@ Names are lowercase and URI-encoded rather than slugified.
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
 | `newsletter` | 6 | Writing & Blogging |
+| `the matrix` | 6 | Digital Life |
 | `accessibility` | 5 | — |
 | `data journalism` | 5 | Technology & Data |
 | `digitalnomad` | 5 | Digital Life |
-| `the matrix` | 5 | Digital Life |
 | `the_trip` | 5 | Travel & Outdoors |
 | `three.js` | 5 | Technology & Data |
 | `vibe-coding` | 5 | Technology & Data |
 | `bharatekkhoj` | 4 | Travel & Outdoors |
+| `storytelling` | 4 | — |
 | `civic tech` | 3 | — |
 | `design` | 3 | — |
 | `digital-wellbeing` | 3 | — |
@@ -85,7 +86,6 @@ Names are lowercase and URI-encoded rather than slugified.
 | `nda marathon` | 3 | Running & Fitness |
 | `personal-site` | 3 | — |
 | `roadtrip🏍️` | 3 | Travel & Outdoors |
-| `storytelling` | 3 | — |
 | `traditionallook😍` | 3 | Arts & Culture |
 | `astro` | 2 | — |
 | `bankot fort` | 2 | Travel & Outdoors |
