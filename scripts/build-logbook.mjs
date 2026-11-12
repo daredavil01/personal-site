@@ -24,7 +24,7 @@ import { splitProse, syntheticId } from "./lib/chunking.mjs";
 import { writeJsonIfChanged } from "./lib/dataFile.mjs";
 import { seededRandom } from "../src/lib/generativeArt.js";
 import {
-  MIN_POST_WORDS, cleanText, cosine, isMarathi, openingOf, pairLetters, phrases,
+  cleanText, cosine, isMarathi, openingOf, pairLetters, phrases,
   pickLines, punctuationOf, splitSentences, topWords, wordsOf,
 } from "../src/lib/logbook.js";
 
@@ -129,7 +129,10 @@ async function main() {
   }
 
   const posts = raw
-    .filter((p) => p.text && p.words >= MIN_POST_WORDS)
+    // Every post with text, however short, so the Logbook counts what the
+    // Writing Ledger counts (the podcast show notes and the launch placeholder
+    // included). A word floor here used to leave ten posts off.
+    .filter((p) => p.text)
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.url < b.url ? -1 : 1))
     .map((p) => {
       const tracked = Number.isFinite(p.blogId);

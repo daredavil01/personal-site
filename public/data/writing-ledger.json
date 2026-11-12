@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-12T01:59:01.616Z",
+  "generatedAt": "2026-11-12T14:59:06.791Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
     "blogsTable": "https://xjqbvvurlmbslikiukdm.supabase.co/rest/v1/blogs"
   },
   "totals": {
-    "posts": 122,
-    "words": 121856,
-    "averageWords": 999,
-    "trackedPosts": 79,
+    "posts": 126,
+    "words": 126082,
+    "averageWords": 1001,
+    "trackedPosts": 83,
     "firstPost": "2020-08-17",
-    "latestPost": "2026-10-31",
+    "latestPost": "2026-11-11",
     "longestPost": {
       "title": "The Un-Orthodox Ways of Seeing!",
       "date": "2025-10-14",
@@ -26,47 +26,47 @@
     },
     "busiestYear": {
       "year": "2026",
-      "posts": 79,
-      "words": 88918
+      "posts": 83,
+      "words": 93144
     },
-    "activeMonths": 35
+    "activeMonths": 36
   },
   "currentPeriod": {
     "asOf": "2026-11-12",
     "monthToDate": {
       "month": "2026-11",
       "label": "November 2026",
-      "posts": 0,
-      "words": 0,
+      "posts": 4,
+      "words": 4226,
       "daysElapsed": 12,
-      "wordsPerDay": 0,
+      "wordsPerDay": 352,
       "previousMonth": {
         "month": "2026-10",
         "posts": 13,
         "words": 15500
       },
-      "changeVsPreviousMonth": -100
+      "changeVsPreviousMonth": -72.7
     },
     "yearToDate": {
       "year": "2026",
-      "posts": 79,
-      "words": 88918,
+      "posts": 83,
+      "words": 93144,
       "daysElapsed": 316,
-      "wordsPerDay": 281,
+      "wordsPerDay": 295,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
         "throughDate": "2025-11-12"
       },
-      "changeVsPriorYear": 646.9
+      "changeVsPriorYear": 682.4
     }
   },
   "byPlatform": [
     {
       "platform": "Substack",
-      "posts": 93,
-      "words": 96030,
+      "posts": 97,
+      "words": 100256,
       "method": "substack_api"
     },
     {
@@ -109,8 +109,8 @@
     },
     {
       "year": "2026",
-      "posts": 79,
-      "words": 88918
+      "posts": 83,
+      "words": 93144
     }
   ],
   "byMonth": [
@@ -323,6 +323,12 @@
       "label": "October 2026",
       "posts": 13,
       "words": 15500
+    },
+    {
+      "month": "2026-11",
+      "label": "November 2026",
+      "posts": 4,
+      "words": 4226
     }
   ],
   "cumulative": [
@@ -535,28 +541,34 @@
       "label": "October 2026",
       "words": 121856,
       "posts": 122
+    },
+    {
+      "month": "2026-11",
+      "label": "November 2026",
+      "words": 126082,
+      "posts": 126
     }
   ],
   "byDayOfWeek": [
     {
       "day": "Sunday",
-      "posts": 15,
-      "words": 6538
+      "posts": 16,
+      "words": 7489
     },
     {
       "day": "Monday",
-      "posts": 19,
-      "words": 21048
+      "posts": 20,
+      "words": 22306
     },
     {
       "day": "Tuesday",
-      "posts": 27,
-      "words": 29189
+      "posts": 28,
+      "words": 30275
     },
     {
       "day": "Wednesday",
-      "posts": 18,
-      "words": 17686
+      "posts": 19,
+      "words": 18617
     },
     {
       "day": "Thursday",
@@ -577,8 +589,8 @@
   "bySection": [
     {
       "section": "100 Days To Offload!",
-      "posts": 67,
-      "words": 76856
+      "posts": 71,
+      "words": 81082
     },
     {
       "section": "Uncategorised",
@@ -594,8 +606,8 @@
   "byTag": [
     {
       "tag": "100_days_to_offload",
-      "posts": 64,
-      "words": 71503
+      "posts": 68,
+      "words": 75729
     },
     {
       "tag": "digital-wellbeing",
@@ -604,13 +616,13 @@
     },
     {
       "tag": "self-reflection",
-      "posts": 25,
-      "words": 27757
+      "posts": 27,
+      "words": 29966
     },
     {
       "tag": "life",
-      "posts": 12,
-      "words": 17071
+      "posts": 14,
+      "words": 19415
     },
     {
       "tag": "ai",
@@ -623,14 +635,14 @@
       "words": 15557
     },
     {
+      "tag": "technology",
+      "posts": 13,
+      "words": 14285
+    },
+    {
       "tag": "marathon",
       "posts": 8,
       "words": 13150
-    },
-    {
-      "tag": "technology",
-      "posts": 11,
-      "words": 12096
     },
     {
       "tag": "social-media",
@@ -638,14 +650,24 @@
       "words": 11373
     },
     {
+      "tag": "youth-flourishing",
+      "posts": 9,
+      "words": 11207
+    },
+    {
+      "tag": "artificial-intelligence",
+      "posts": 9,
+      "words": 10186
+    },
+    {
+      "tag": "flourishing",
+      "posts": 8,
+      "words": 10083
+    },
+    {
       "tag": "book-review",
       "posts": 10,
       "words": 9980
-    },
-    {
-      "tag": "youth-flourishing",
-      "posts": 8,
-      "words": 9949
     },
     {
       "tag": "running",
@@ -653,19 +675,9 @@
       "words": 9254
     },
     {
-      "tag": "flourishing",
-      "posts": 7,
-      "words": 8825
-    },
-    {
-      "tag": "artificial-intelligence",
-      "posts": 6,
-      "words": 6911
-    },
-    {
       "tag": "philosophy",
-      "posts": 4,
-      "words": 5448
+      "posts": 6,
+      "words": 7657
     },
     {
       "tag": "digital-brain",
@@ -718,9 +730,19 @@
       "words": 2840
     },
     {
+      "tag": "chroniclesofwanderingmind",
+      "posts": 3,
+      "words": 2365
+    },
+    {
       "tag": "bharatekkhoj",
       "posts": 2,
       "words": 2152
+    },
+    {
+      "tag": "mythicaltale",
+      "posts": 2,
+      "words": 2017
     },
     {
       "tag": "Trekking",
@@ -786,11 +808,6 @@
       "tag": "tarkarli",
       "posts": 1,
       "words": 1285
-    },
-    {
-      "tag": "chroniclesofwanderingmind",
-      "posts": 2,
-      "words": 1279
     },
     {
       "tag": "the-anxious-generation",
@@ -1089,11 +1106,11 @@
     },
     {
       "label": "500–999",
-      "posts": 46
+      "posts": 48
     },
     {
       "label": "1,000–1,499",
-      "posts": 51
+      "posts": 53
     },
     {
       "label": "1,500–1,999",
@@ -1212,6 +1229,102 @@
     }
   ],
   "posts": [
+    {
+      "title": "Breaking the unseen barriers!",
+      "date": "2026-11-11",
+      "publishedAt": "2026-11-11T17:49:53.366Z",
+      "url": "https://sankettambare.substack.com/p/breaking-the-unseen-barriers",
+      "platform": "Substack",
+      "words": 931,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "mythicaltale",
+        "technology",
+        "100_days_to_offload",
+        "artificial-intelligence"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!_T3Y!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F69c40356-ad1e-41d0-b737-9a4c16a6aca9_1448x1086.png",
+      "trackedInBlogsTable": true,
+      "blogId": 83,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
+    {
+      "title": "The trilogy of Digital Monk",
+      "date": "2026-11-10",
+      "publishedAt": "2026-11-10T16:49:23.304Z",
+      "url": "https://sankettambare.substack.com/p/the-trilogy-of-digital-monk-part-1",
+      "platform": "Substack",
+      "words": 1086,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "mythicaltale",
+        "life",
+        "100_days_to_offload",
+        "artificial-intelligence",
+        "chroniclesofwanderingmind"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!En1n!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F54bab933-fff9-49ab-9db6-d1751d11b14c_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 82,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
+    {
+      "title": "Re-defining your echo chamber!",
+      "date": "2026-11-09",
+      "publishedAt": "2026-11-09T16:34:47.724Z",
+      "url": "https://sankettambare.substack.com/p/re-defining-your-echo-chamber",
+      "platform": "Substack",
+      "words": 1258,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "flourishing",
+        "philosophy",
+        "self-reflection",
+        "technology",
+        "life",
+        "youth-flourishing",
+        "100_days_to_offload",
+        "artificial-intelligence"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!UsiD!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc34844fe-c5c1-4a93-b774-c943197e9816_1672x941.png",
+      "trackedInBlogsTable": true,
+      "blogId": 81,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
+    {
+      "title": "Celebrating the intentionality!",
+      "date": "2026-11-08",
+      "publishedAt": "2026-11-08T17:31:33.274Z",
+      "url": "https://sankettambare.substack.com/p/celebrating-the-intentionality",
+      "platform": "Substack",
+      "words": 951,
+      "wordsSource": "substack_api",
+      "section": "100 Days To Offload!",
+      "tags": [
+        "philosophy",
+        "self-reflection",
+        "100_days_to_offload"
+      ],
+      "audience": "everyone",
+      "type": "newsletter",
+      "image": "https://substackcdn.com/image/fetch/$s_!Wdsj!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F441e0c37-a020-42a3-9f77-9782221ffbb7_1536x1024.png",
+      "trackedInBlogsTable": true,
+      "blogId": 80,
+      "challengeId": "100_days_to_offload",
+      "language": "English"
+    },
     {
       "title": "What lies at the intersection of technology, society and policy?",
       "date": "2026-10-31",
@@ -4242,34 +4355,6 @@
       "url": "https://daredavil453624413.wordpress.com/2020/08/17/those-2-incredible-days-in-tarkarli/",
       "platform": "Wordpress",
       "note": "Published, but has no row in the Supabase `blogs` table."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 80,
-      "title": "Celebrating the intentionality!",
-      "url": "https://sankettambare.substack.com/p/celebrating-the-intentionality",
-      "note": "Row in `blogs` matches no post on either platform."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 81,
-      "title": "Re-defining your echo chamber!",
-      "url": "https://sankettambare.substack.com/p/re-defining-your-echo-chamber",
-      "note": "Row in `blogs` matches no post on either platform."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 82,
-      "title": "The trilogy of Digital Monk",
-      "url": "https://sankettambare.substack.com/p/the-trilogy-of-digital-monk-part-1",
-      "note": "Row in `blogs` matches no post on either platform."
-    },
-    {
-      "kind": "unmatched_blogs_row",
-      "blogId": 83,
-      "title": "Breaking the unseen barriers!",
-      "url": "https://sankettambare.substack.com/p/breaking-the-unseen-barriers",
-      "note": "Row in `blogs` matches no post on either platform."
     }
   ]
 }

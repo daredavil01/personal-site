@@ -96,6 +96,19 @@ a new film needs a row there.
 One-time generators (`generate-atlas-audio.mjs`, `generate-guide-audio.mjs`)
 have no npm entry — run them with `node`.
 
+**`/site-upkeep`** (the Claude skill in `.claude/skills/site-upkeep/`) is the
+whole job around `npm run refresh`: snapshot, run, fill the changelog
+summaries the model ladder failed on (`summarise-changelog.mjs` /
+`summarise-majors.mjs` `--export <dir>` writes the prompts, another model
+answers, `--import <dir>` writes them back with the script's own hash),
+re-render the cards whose numbers moved, validate, and report before/after.
+`npm run refresh:report -- snapshot <file>` / `-- diff <file>`
+(`scripts/refresh-report.mjs`) is the report and the checks — every post's
+text cached, the Logbook counting every ledger post, data files inside their
+test budgets, every version and major summarised — and exits 1 on a failure.
+The Supabase URL and publishable key are read from `wrangler.toml` when unset
+(`loadEnv` in `scripts/build-docs.mjs`), so only the secrets need setting.
+
 ## Docs (read before touching a table)
 
 `docs/` is the deep reference; this file is the summary.
@@ -1282,7 +1295,7 @@ archive with server-side full-text search.
   from every row. No model calls; the table is public, so it reads with the
   publishable key when `.env` has no service key. It is the `microblog` step of
   `npm run refresh` and runs nightly. **All analysis lives in
-  `src/lib/microblogInsights.js`** (tested, with a 120 KB budget): the posting
+  `src/lib/microblogInsights.js`** (tested, with a 150 KB budget): the posting
   time comes from the posts' own signatures (`#25:09:2021::11:37:pm`, either
   script; only a time in a `#…`/`::` signature counts, never one in prose),
   language by share of letters, a typo'd running number is dropped from the

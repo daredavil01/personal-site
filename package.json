@@ -29,6 +29,7 @@
     "docs:build": "node scripts/build-docs.mjs",
     "changelog": "node scripts/refresh.mjs changelog",
     "refresh": "node scripts/refresh.mjs",
+    "refresh:report": "node scripts/refresh-report.mjs",
     "ask:index": "node scripts/build-content-index.mjs",
     "dev:ask": "npm run build && wrangler pages dev build --port 8788",
     "og:preview": "node scripts/og-preview.mjs",

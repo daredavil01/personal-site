@@ -15,6 +15,8 @@
  *   node scripts/summarise-changelog.mjs --limit 3         newest N versions only
  *   node scripts/summarise-changelog.mjs --version v18.2.0
  *   node scripts/summarise-changelog.mjs --force           rewrite existing paragraphs
+ *   node scripts/summarise-changelog.mjs --export <dir>    write the prompts, call no model
+ *   node scripts/summarise-changelog.mjs --import <dir>    write <dir>/<version>.answer.txt
  *
  * Needs SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY in .env, and the
  * release_notes switch on under AI features in /admin/ask/settings.
@@ -26,6 +28,8 @@
  * --dry-run first, which prints exactly what would be written.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import { makeClient } from "./build-docs.mjs";
 import { askGemini, tiersForFeature } from "./lib/gemini.mjs";
 
@@ -38,6 +42,12 @@ function argValue(flag) {
 }
 
 const LIMIT = Number(argValue("--limit")) || 0;
+// Hand-off for when every rung of the ladder fails (Gemini 503s, no Workers AI
+// binding in node): --export writes each target's prompt to <dir>/<version>.prompt.txt
+// and calls no model; another model answers into <dir>/<version>.answer.txt;
+// --import reads those answers back through the same tidy() and writes them.
+const EXPORT_DIR = argValue("--export");
+const IMPORT_DIR = argValue("--import");
 const ONLY = argValue("--version");
 
 const SYSTEM = [
@@ -71,7 +81,9 @@ function tidy(text) {
 
 async function main() {
   const supabase = makeClient();
-  const tiers = await tiersForFeature(supabase, "release_notes");
+  const handOff = EXPORT_DIR || IMPORT_DIR;
+  const tiers = handOff ? null : await tiersForFeature(supabase, "release_notes");
+  if (EXPORT_DIR) fs.mkdirSync(EXPORT_DIR, { recursive: true });
 
   let query = supabase
     .from("changelog")
@@ -103,14 +115,23 @@ async function main() {
       continue;
     }
 
+    const prompt = `Version ${row.version}, released ${row.released_on}.\n\n${bullets}`;
+    if (EXPORT_DIR) {
+      fs.writeFileSync(path.join(EXPORT_DIR, `${row.version}.prompt.txt`), `${SYSTEM}\n\n---\n\n${prompt}\n`);
+      console.log(`  ${row.version}: prompt exported`);
+      continue;
+    }
+
     let paragraph;
     try {
-      // eslint-disable-next-line no-await-in-loop
-      paragraph = tidy(await askGemini({
-        tiers,
-        system: SYSTEM,
-        prompt: `Version ${row.version}, released ${row.released_on}.\n\n${bullets}`,
-      }));
+      if (IMPORT_DIR) {
+        const file = path.join(IMPORT_DIR, `${row.version}.answer.txt`);
+        if (!fs.existsSync(file)) throw new Error(`no answer at ${file}`);
+        paragraph = tidy(fs.readFileSync(file, "utf8"));
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        paragraph = tidy(await askGemini({ tiers, system: SYSTEM, prompt }));
+      }
     } catch (err) {
       console.error(`  ${row.version}: ${err.message}`);
       failed += 1;
@@ -126,6 +147,10 @@ async function main() {
     writes.push({ id: row.id, version: row.version, summary: paragraph });
   }
 
+  if (EXPORT_DIR) {
+    console.log(`\nPrompts in ${EXPORT_DIR}. Answer each as <version>.answer.txt, then run --import ${EXPORT_DIR}.`);
+    return;
+  }
   if (DRY_RUN || !writes.length) {
     console.log(`\n${writes.length} ready, ${failed} failed. Nothing written.`);
     return;

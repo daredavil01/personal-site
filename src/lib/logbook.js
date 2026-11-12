@@ -11,7 +11,6 @@
 import { hashString } from "./generativeArt.js";
 
 export const MAX_EXCERPT_WORDS = 30;
-export const MIN_POST_WORDS = 150;
 
 // The ReadAloud / PinboardCard convention, by share of letters rather than any
 // match: an English post quoting one Marathi word is still English.

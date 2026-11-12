@@ -19,6 +19,9 @@
  *   node scripts/summarise-majors.mjs                 fill majors whose input changed
  *   node scripts/summarise-majors.mjs --major 18      one major
  *   node scripts/summarise-majors.mjs --force         rewrite even if nothing changed
+ *   node scripts/summarise-majors.mjs --export <dir>  write the prompts, call no model
+ *   node scripts/summarise-majors.mjs --import <dir> [--model claude-haiku]
+ *                                                     write <dir>/v<major>.answer.json
  *
  * Needs SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY in .env, and the
  * release_notes switch on under AI features in /admin/ask/settings — the same
@@ -26,6 +29,8 @@
  */
 
 import { createHash } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { makeClient } from "./build-docs.mjs";
 import { askGemini, tiersForFeature } from "./lib/gemini.mjs";
 
@@ -38,6 +43,13 @@ function argValue(flag) {
 }
 
 const ONLY = argValue("--major") === null ? null : Number(argValue("--major"));
+// Hand-off for when every rung fails, as in summarise-changelog.mjs: --export
+// writes <dir>/v<major>.prompt.txt, another model answers <dir>/v<major>.answer.json,
+// --import parses those through parseAnswer() and stamps --model (default
+// "external") so the row says what wrote it. The hash is this script's own.
+const EXPORT_DIR = argValue("--export");
+const IMPORT_DIR = argValue("--import");
+const IMPORT_MODEL = argValue("--model") || "external";
 
 // Entry names only, not their bodies: the bodies are the engineering prose this
 // summary exists to replace, and a major's worth of them does not fit in a
@@ -101,7 +113,9 @@ function parseAnswer(raw) {
 
 async function main() {
   const supabase = makeClient();
-  const tiers = await tiersForFeature(supabase, "release_notes");
+  const handOff = EXPORT_DIR || IMPORT_DIR;
+  const tiers = handOff ? null : await tiersForFeature(supabase, "release_notes");
+  if (EXPORT_DIR) fs.mkdirSync(EXPORT_DIR, { recursive: true });
 
   const { data: rows, error } = await supabase
     .from("changelog")
@@ -144,14 +158,24 @@ async function main() {
     const versions = byMajor.get(major);
     const source = sourceFor(versions);
 
+    const prompt = `Major version ${major}. ${versions.length} release${versions.length === 1 ? "" : "s"}.\n\n${source}`;
+    if (EXPORT_DIR) {
+      fs.writeFileSync(path.join(EXPORT_DIR, `v${major}.prompt.txt`), `${SYSTEM}\n\n---\n\n${prompt}\n`);
+      console.log(`  v${major}: prompt exported`);
+      continue;
+    }
+
     let answer;
     try {
-      // eslint-disable-next-line no-await-in-loop
-      const raw = await askGemini({
-        tiers,
-        system: SYSTEM,
-        prompt: `Major version ${major}. ${versions.length} release${versions.length === 1 ? "" : "s"}.\n\n${source}`,
-      });
+      let raw;
+      if (IMPORT_DIR) {
+        const file = path.join(IMPORT_DIR, `v${major}.answer.json`);
+        if (!fs.existsSync(file)) throw new Error(`no answer at ${file}`);
+        raw = fs.readFileSync(file, "utf8");
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        raw = await askGemini({ tiers, system: SYSTEM, prompt });
+      }
       answer = parseAnswer(raw);
     } catch (err) {
       console.error(`  v${major}: ${err.message}`);
@@ -170,11 +194,15 @@ async function main() {
       summary: answer.summary,
       highlights: answer.highlights,
       source_hash: hash(source),
-      model: "gemini",
+      model: IMPORT_DIR ? IMPORT_MODEL : "gemini",
       generated_at: new Date().toISOString(),
     });
   }
 
+  if (EXPORT_DIR) {
+    console.log(`\nPrompts in ${EXPORT_DIR}. Answer each as v<major>.answer.json, then run --import ${EXPORT_DIR}.`);
+    return;
+  }
   if (DRY_RUN || !writes.length) {
     console.log(`\n${writes.length} ready, ${failed} failed. Nothing written.`);
     return;

@@ -134,19 +134,25 @@ function istParts(timestamp) {
 
 async function fetchSubstack() {
   const byId = new Map();
-  for (let offset = 0; ; offset += SUBSTACK_PAGE) {
+  // Since November 2026 the archive pages by cursor: it answers
+  // `{ posts, nextCursor }` and rejects any `offset` (even 0) with a 400. The
+  // bare-array shape it used to return is still read, in case it comes back.
+  let cursor = null;
+  for (let pageNo = 0; pageNo < 200; pageNo += 1) {
+    const query = cursor ? `&cursor=${encodeURIComponent(cursor)}` : "";
     const page = await getJson(
-      `${SUBSTACK_HOST}/api/v1/archive?sort=new&limit=${SUBSTACK_PAGE}&offset=${offset}`,
+      `${SUBSTACK_HOST}/api/v1/archive?sort=new&limit=${SUBSTACK_PAGE}${query}`,
     );
-    if (!Array.isArray(page) || page.length === 0) break;
+    const batch = Array.isArray(page) ? page : page?.posts || [];
+    if (batch.length === 0) break;
     let fresh = 0;
-    for (const post of page) {
+    for (const post of batch) {
       if (!byId.has(post.id)) fresh += 1;
       byId.set(post.id, post);
     }
-    // Substack keeps serving the tail once the archive is exhausted; a page
-    // that adds nothing new means we're done.
-    if (fresh === 0) break;
+    // A page that adds nothing new, or no cursor onward, means we're done.
+    cursor = Array.isArray(page) ? null : page.nextCursor || null;
+    if (fresh === 0 || !cursor) break;
   }
 
   return [...byId.values()].map((p) => {

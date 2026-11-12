@@ -37,12 +37,30 @@ const DOCS = path.join(ROOT, "docs");
 // --- minimal .env loader (same shape as the other scripts) -----------------
 export function loadEnv() {
   const envPath = path.join(ROOT, ".env");
-  if (!fs.existsSync(envPath)) return;
+  if (!fs.existsSync(envPath)) {
+    fillPublicVars();
+    return;
+  }
   for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
     if (m && !process.env[m[1]]) {
       process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
     }
+  }
+  fillPublicVars();
+}
+
+// The Supabase URL and publishable key are public and committed in
+// wrangler.toml [vars]. Read them from there when neither the shell nor .env
+// sets them, so a machine that holds only the secrets (a cloud session, CI)
+// still finds the project instead of stopping at "Missing SUPABASE_URL".
+function fillPublicVars() {
+  const tomlPath = path.join(ROOT, "wrangler.toml");
+  if (!fs.existsSync(tomlPath)) return;
+  const toml = fs.readFileSync(tomlPath, "utf8");
+  const fromToml = (k) => (toml.match(new RegExp(`^\\s*${k}\\s*=\\s*"([^"]+)"`, "m")) || [])[1];
+  for (const k of ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"]) {
+    if (!process.env[k] && fromToml(k)) process.env[k] = fromToml(k);
   }
 }
 
