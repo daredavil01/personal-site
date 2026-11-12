@@ -25,26 +25,26 @@
     }
   },
   "counts": {
-    "tags": 132,
-    "blogs": 79,
+    "tags": 141,
+    "blogs": 83,
     "books": 52,
     "treks": 20,
     "sports": 26,
     "videos": 24,
-    "projects": 25,
+    "projects": 26,
     "instagram": 11,
-    "microblog": 1677
+    "microblog": 1680
   },
   "latest": {
     "now": {
-      "d": "2026-10-01",
-      "t": "Newsletter — October 2026",
-      "u": "/newsletter/2026-10"
+      "d": "2026-11-01",
+      "t": "Now — November 2026",
+      "u": "/now"
     },
     "blog": {
-      "d": "2026-10-30",
-      "t": "What lies at the intersection of technology, society and policy?",
-      "u": "/100-days-to-offload/79"
+      "d": "2026-11-11",
+      "t": "Breaking the unseen barriers!",
+      "u": "/100-days-to-offload/83"
     },
     "writing": {
       "d": "2025-12-31",
@@ -52,9 +52,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-10-23",
-      "t": "#1472 Creativity ✨",
-      "u": "/micro-blog/1677"
+      "d": "2026-11-11",
+      "t": "#1775 The ultras...!",
+      "u": "/micro-blog/1680"
     }
   },
   "resume": {
@@ -439,132 +439,132 @@
     ],
     "sport": [
       {
-        "d": "2026-09-26",
+        "d": "2026-09-27",
         "t": "PR South LSoM Half Marathon ",
         "u": "/sports/26"
       },
       {
-        "d": "2026-09-05",
+        "d": "2026-09-06",
         "t": "Satara Hill Half Marathon 2026",
         "u": "/sports/25"
       },
       {
-        "d": "2026-08-29",
+        "d": "2026-08-30",
         "t": "NMDC Hyderabad Marathon 2026",
         "u": "/sports/24"
       },
       {
-        "d": "2026-08-07",
+        "d": "2026-08-08",
         "t": "Self Paced Sinhagad Half Marathon ",
         "u": "/sports/23"
       },
       {
-        "d": "2026-07-29",
+        "d": "2026-07-30",
         "t": "July Self Paced Half Marathon",
         "u": "/sports/22"
       },
       {
-        "d": "2026-06-06",
+        "d": "2026-06-07",
         "t": "Vrukshathon 2026",
         "u": "/sports/21"
       },
       {
-        "d": "2026-03-21",
+        "d": "2026-03-22",
         "t": "Nanded City LSOM 2026",
         "u": "/sports/20"
       },
       {
-        "d": "2026-02-21",
+        "d": "2026-02-22",
         "t": "Tata Ultra Marathon 2026",
         "u": "/sports/19"
       },
       {
-        "d": "2026-02-14",
+        "d": "2026-02-15",
         "t": "IPA Neerathon 2026",
         "u": "/sports/18"
       },
       {
-        "d": "2026-01-17",
+        "d": "2026-01-18",
         "t": "Tata Mumbai Marathon 2026",
         "u": "/sports/17"
       },
       {
-        "d": "2025-12-06",
+        "d": "2025-12-07",
         "t": "Pune International Marathon 2025",
         "u": "/sports/16"
       },
       {
-        "d": "2025-09-13",
+        "d": "2025-09-14",
         "t": "Satara Half Hill Marathon 2025",
         "u": "/sports/14"
       },
       {
-        "d": "2025-08-23",
+        "d": "2025-08-24",
         "t": "NMDC Hyderabad Marathon 2025",
         "u": "/sports/15"
       },
       {
-        "d": "2025-05-31",
+        "d": "2025-06-01",
         "t": "Vrukshathon 2025",
         "u": "/sports/13"
       },
       {
-        "d": "2025-02-22",
+        "d": "2025-02-23",
         "t": "Tata Ultra Marathon, Lonavala 2025",
         "u": "/sports/12"
       },
       {
-        "d": "2025-02-01",
+        "d": "2025-02-02",
         "t": "Milit Lake View HM 2025",
         "u": "/sports/11"
       },
       {
-        "d": "2025-01-18",
+        "d": "2025-01-19",
         "t": "Tata Mumbai Marathon 2025",
         "u": "/sports/10"
       },
       {
-        "d": "2024-11-16",
+        "d": "2024-11-17",
         "t": "CME Marathon 2024",
         "u": "/sports/9"
       },
       {
-        "d": "2024-10-19",
+        "d": "2024-10-20",
         "t": "Apala Pune Marathon 2024",
         "u": "/sports/8"
       },
       {
-        "d": "2024-08-31",
+        "d": "2024-09-01",
         "t": "Satara Half Hill Marathon 2024",
         "u": "/sports/7"
       },
       {
-        "d": "2024-08-25",
+        "d": "2024-08-26",
         "t": "NMDC Hyderabad Marathon 2024",
         "u": "/sports/6"
       },
       {
-        "d": "2024-06-08",
+        "d": "2024-06-09",
         "t": "Vrukshathon 2024",
         "u": "/sports/5"
       },
       {
-        "d": "2024-04-06",
+        "d": "2024-04-07",
         "t": "ANP Run 2024",
         "u": "/sports/4"
       },
       {
-        "d": "2024-03-16",
+        "d": "2024-03-17",
         "t": "AMIBOLT 2024",
         "u": "/sports/3"
       },
       {
-        "d": "2024-03-02",
+        "d": "2024-03-03",
         "t": "Pune City Marathon 2024",
         "u": "/sports/2"
       },
       {
-        "d": "2023-10-14",
+        "d": "2023-10-15",
         "t": "NDA Marathon 2023",
         "u": "/sports/1"
       }
@@ -692,6 +692,12 @@
       }
     ],
     "project": [
+      {
+        "d": "2026-11-10",
+        "t": "Portfolio v3",
+        "u": "/projects/27",
+        "x": "Website · Live"
+      },
       {
         "d": "2026-11-02",
         "t": "Museum of Failures",
@@ -902,6 +908,16 @@
     ],
     "presentation": [
       {
+        "d": "2026-11-07",
+        "t": "Portfolio in a Day — the prompt pack",
+        "u": "/presentations/24"
+      },
+      {
+        "d": "2026-11-07",
+        "t": "Portfolio in a Day — and better every day after",
+        "u": "/presentations/23"
+      },
+      {
         "d": "2026-11-03",
         "t": "Ten Set Out — building /training",
         "u": "/presentations/22"
@@ -1030,7 +1046,7 @@
   },
   "projects": {
     "by_status": {
-      "Live": 22,
+      "Live": 23,
       "Concept": 1,
       "Archived": 2
     },
@@ -1038,18 +1054,18 @@
       "Tool": 2,
       "Design": 3,
       "Web App": 9,
-      "Website": 5,
+      "Website": 6,
       "Data Story": 6
     }
   },
   "top_tags": [
     {
       "name": "life",
-      "total": 484
+      "total": 488
     },
     {
       "name": "self-reflection",
-      "total": 473
+      "total": 478
     },
     {
       "name": "marathi",
@@ -1057,11 +1073,11 @@
     },
     {
       "name": "social media",
-      "total": 150
+      "total": 151
     },
     {
       "name": "personaldevelopment",
-      "total": 141
+      "total": 145
     },
     {
       "name": "love",
@@ -1073,11 +1089,11 @@
     },
     {
       "name": "philosophy",
-      "total": 130
+      "total": 131
     },
     {
       "name": "calmness",
-      "total": 127
+      "total": 128
     },
     {
       "name": "digital wellbeing",
@@ -1093,7 +1109,7 @@
     },
     {
       "name": "digital detox",
-      "total": 81
+      "total": 82
     },
     {
       "name": "politics",
@@ -1109,11 +1125,11 @@
     },
     {
       "name": "social",
-      "total": 68
+      "total": 69
     },
     {
       "name": "ai",
-      "total": 57
+      "total": 60
     },
     {
       "name": "choices",
@@ -1125,7 +1141,7 @@
     },
     {
       "name": "मन",
-      "total": 46
+      "total": 47
     },
     {
       "name": "nightsky",
@@ -1133,11 +1149,11 @@
     },
     {
       "name": "खंडेराव",
-      "total": 43
+      "total": 44
     },
     {
       "name": "running",
-      "total": 41
+      "total": 42
     },
     {
       "name": "desperate me",
@@ -1146,7 +1162,7 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 487,
+      "text": 490,
       "photo": 953,
       "quote": 237
     },
@@ -1159,22 +1175,22 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 108
+      "2026": 111
     },
     "date_range": {
-      "max": "2026-10-23",
+      "max": "2026-11-11",
       "min": "2018-03-19"
     }
   },
   "now_current": {
     "year": 2026,
-    "month": "October"
+    "month": "November"
   },
-  "generated_at": "2026-11-04T18:19:43.41249+00:00",
+  "generated_at": "2026-11-12T14:48:41.767231+00:00",
   "index_by_type": {
-    "now": 14,
-    "tag": 132,
-    "blog": 79,
+    "now": 15,
+    "tag": 141,
+    "blog": 83,
     "book": 52,
     "page": 1,
     "site": 29,
@@ -1183,19 +1199,19 @@
     "stats": 10,
     "video": 24,
     "resume": 23,
-    "project": 25,
+    "project": 26,
     "writing": 43,
     "training": 29,
-    "changelog": 134,
+    "changelog": 141,
     "instagram": 11,
-    "microblog": 1677,
-    "presentation": 22
+    "microblog": 1680,
+    "presentation": 24
   },
   "tags_by_category": {
     "Personal": 2,
     "Mind & Life": 8,
     "Digital Life": 13,
-    "uncategorised": 34,
+    "uncategorised": 43,
     "Arts & Culture": 2,
     "Books & Reading": 9,
     "Society & Ideas": 15,

@@ -8,17 +8,17 @@ answering rules live with the prompt, and are not repeated here.
 - **Books** (52) — /books/:id. `year` is the year he READ it, not the
   publication year. `date_precision` is 'year' when the exact finish date is a guess.
   Status: read: 52. Language: English: 30, Marathi: 22.
-- **Micro posts** (1677) — /micro-blog/:id. A Tumblr archive,
-  2018-03-19 → 2026-10-23,
+- **Micro posts** (1680) — /micro-blog/:id. A Tumblr archive,
+  2018-03-19 → 2026-11-11,
   English and Marathi, short and unedited. Many are photo posts with no text.
-- **Blog posts** (79) — /100-days-to-offload/:id. Ledger rows that link out
+- **Blog posts** (83) — /100-days-to-offload/:id. Ledger rows that link out
   to Substack/WordPress. Their full text is indexed too; published essays with
   no ledger row are the **writing** type and link straight to the post.
-- **Projects** (25) — /projects/:id. Status: Live: 22, Concept: 1, Archived: 2.
+- **Projects** (26) — /projects/:id. Status: Live: 23, Concept: 1, Archived: 2.
 - **Races** (26) — /sports/:id. Distances: 10 Kms: 3, 21 Kms: 19, 35 Kms: 1, 42 Kms: 2, 50 Kms: 1.
 - **Treks** (20) — /treks/:id. Forts and hills, mostly around Pune.
 - **Instagram sets** (11) — /instagram (no detail page).
-- **Now** — /now. Current entry: October 2026.
+- **Now** — /now. Current entry: November 2026.
 - **Résumé** — /resume. Positions, degrees, certifications and skills.
 - **Stats** — /stats and /writing-ledger. Every figure on those pages.
 - **Tags, site pages, contact** — what each tag and page is, and how to reach him.
@@ -28,16 +28,16 @@ answering rules live with the prompt, and are not repeated here.
 - Reading: 52 books, ~17.2k pages, 30 English / 22 Marathi; top genres Technology, Society, Fiction.
 - Running: 26 races, 598 km. PBs: marathon 05:05:53 (Tata Mumbai Marathon 2026), half 1:59:57 (NMDC Hyderabad Marathon 2025), 10K 00:55:28 (IPA Neerathon 2026).
 - Treks: 20 (3 hard) over 5 years; latest Ghangad Fort.
-- 100 Days To Offload: 79 of 100 posts.
-- Micro posts: 1677; longest daily streak 16 days.
+- 100 Days To Offload: 83 of 100 posts.
+- Micro posts: 1680; longest daily streak 16 days.
 - Photos: 11 Instagram sets, 71 photos.
-- Work: 7 organisations, 25 projects, 13 certifications (latest: AWS Fundamentals Specialization).
+- Work: 7 organisations, 26 projects, 13 certifications (latest: AWS Fundamentals Specialization).
 - Based in Pune, MH.
 
 ## Tags
 
-132 tags, shared across every content type, always lowercase.
-Most used: life (484), self-reflection (473), marathi (273), social media (150), personaldevelopment (141), love (137), sanky (135), philosophy (130), calmness (127), digital wellbeing (122), travel (119), latepost (109), digital detox (81), politics (73), psychology (71), technology (70), social (68), ai (57), choices (54), maharashtra (52).
+141 tags, shared across every content type, always lowercase.
+Most used: life (488), self-reflection (478), marathi (273), social media (151), personaldevelopment (145), love (137), sanky (135), philosophy (131), calmness (128), digital wellbeing (122), travel (119), latepost (109), digital detox (82), politics (73), psychology (71), technology (70), social (69), ai (60), choices (54), maharashtra (52).
 Tag pages live at /tags/:name.
 
 ## What a micro post is

@@ -52,7 +52,7 @@ Constraints:
 
 The 100 Days To Offload challenge ledger — one row per published post, pointing at Substack/WordPress.
 
-Rows: **79** · indexed as `blog`
+Rows: **83** · indexed as `blog`
 
 Client-side renames: tags live on `blog_tags`, not `tags`
 
@@ -73,7 +73,7 @@ Client-side renames: tags live on `blog_tags`, not `tags`
 
 A 2013→2019 Tumblr archive, imported in bulk. Two languages, ~59% photo posts, short and unedited.
 
-Rows: **1677** · indexed as `microblog`
+Rows: **1680** · indexed as `microblog`
 
 Client-side renames: `source_id` → `sourceId`, `post_type` → `postType`, `image_url` → `imageUrl`
 
@@ -101,7 +101,7 @@ Constraints:
 
 Things built, with problem/solution/outcome prose. `visible = false` means draft and is hidden by RLS, not by React.
 
-Rows: **26** · indexed as `project`
+Rows: **27** · indexed as `project`
 
 Client-side renames: `description` → `desc`, `tech_stack` → `techStack`, `slide_images` → `slideImages`
 
@@ -138,7 +138,7 @@ Constraints:
 
 HTML slide decks hosted elsewhere and embedded by URL in an iframe. The row is metadata only; the deck text is fetched at index time.
 
-Rows: **22** · indexed as `presentation`
+Rows: **24** · indexed as `presentation`
 
 | column | type | null | default |
 |---|---|---|---|
@@ -252,7 +252,7 @@ Rows: **11** · indexed as `instagram`
 
 One row per month of the /now page. `sections` is a free-form jsonb blob.
 
-Rows: **13** · indexed as `now`
+Rows: **14** · indexed as `now`
 
 Client-side renames: `is_current` → `isCurrent`
 
@@ -276,7 +276,7 @@ Client-side renames: `is_current` → `isCurrent`
 
 The central tag vocabulary: lowercase name, display name, colour, category.
 
-Rows: **132**
+Rows: **141**
 
 Client-side renames: `display_name` → `displayName`
 
@@ -300,7 +300,7 @@ Constraints:
 
 Polymorphic join from a tag to a row in any content table.
 
-Rows: **3936**
+Rows: **3999**
 
 | column | type | null | default |
 |---|---|---|---|
@@ -317,7 +317,7 @@ Constraints:
 
 The /ask search index. Written only by `npm run ask:index` — never by hand.
 
-Rows: **3518**
+Rows: **3594**
 
 | column | type | null | default |
 |---|---|---|---|
