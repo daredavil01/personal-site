@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-30T18:44:24.860Z",
+  "generatedAt": "2026-11-12T01:59:01.616Z",
   "sources": {
     "substack": "https://sankettambare.substack.com/api/v1/archive",
     "wordpress": "https://public-api.wordpress.com/rest/v1.1/sites/daredavil453624413.wordpress.com/posts/",
@@ -32,32 +32,32 @@
     "activeMonths": 35
   },
   "currentPeriod": {
-    "asOf": "2026-10-31",
+    "asOf": "2026-11-12",
     "monthToDate": {
-      "month": "2026-10",
-      "label": "October 2026",
-      "posts": 13,
-      "words": 15500,
-      "daysElapsed": 31,
-      "wordsPerDay": 500,
+      "month": "2026-11",
+      "label": "November 2026",
+      "posts": 0,
+      "words": 0,
+      "daysElapsed": 12,
+      "wordsPerDay": 0,
       "previousMonth": {
-        "month": "2026-09",
-        "posts": 10,
-        "words": 12714
+        "month": "2026-10",
+        "posts": 13,
+        "words": 15500
       },
-      "changeVsPreviousMonth": 21.9
+      "changeVsPreviousMonth": -100
     },
     "yearToDate": {
       "year": "2026",
       "posts": 79,
       "words": 88918,
-      "daysElapsed": 304,
-      "wordsPerDay": 292,
+      "daysElapsed": 316,
+      "wordsPerDay": 281,
       "priorYearSamePeriod": {
         "year": "2025",
         "posts": 9,
         "words": 11905,
-        "throughDate": "2025-10-31"
+        "throughDate": "2025-11-12"
       },
       "changeVsPriorYear": 646.9
     }
@@ -4242,6 +4242,34 @@
       "url": "https://daredavil453624413.wordpress.com/2020/08/17/those-2-incredible-days-in-tarkarli/",
       "platform": "Wordpress",
       "note": "Published, but has no row in the Supabase `blogs` table."
+    },
+    {
+      "kind": "unmatched_blogs_row",
+      "blogId": 80,
+      "title": "Celebrating the intentionality!",
+      "url": "https://sankettambare.substack.com/p/celebrating-the-intentionality",
+      "note": "Row in `blogs` matches no post on either platform."
+    },
+    {
+      "kind": "unmatched_blogs_row",
+      "blogId": 81,
+      "title": "Re-defining your echo chamber!",
+      "url": "https://sankettambare.substack.com/p/re-defining-your-echo-chamber",
+      "note": "Row in `blogs` matches no post on either platform."
+    },
+    {
+      "kind": "unmatched_blogs_row",
+      "blogId": 82,
+      "title": "The trilogy of Digital Monk",
+      "url": "https://sankettambare.substack.com/p/the-trilogy-of-digital-monk-part-1",
+      "note": "Row in `blogs` matches no post on either platform."
+    },
+    {
+      "kind": "unmatched_blogs_row",
+      "blogId": 83,
+      "title": "Breaking the unseen barriers!",
+      "url": "https://sankettambare.substack.com/p/breaking-the-unseen-barriers",
+      "note": "Row in `blogs` matches no post on either platform."
     }
   ]
 }
