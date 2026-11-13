@@ -12,7 +12,7 @@
 
 import ROUTES from "../../data/routes";
 import { PAGE_META } from "../../data/pageMeta";
-import { IDENTITY, LOCATION_LABEL } from "../../data/identity";
+import { IDENTITY, LOCATION_LABEL, ROLE_LINE } from "../../data/identity";
 import { escHtml, tagHref } from "./text";
 
 const attrLang = (lang) => (lang && lang !== "en" ? ` lang="${escHtml(lang)}"` : "");
@@ -45,6 +45,10 @@ const itemsHtml = (items) => (items?.length
   ? `<ul>${items.map((i) => `<li>${link(i.href, i.text)}${i.note ? ` <small>${escHtml(i.note)}</small>` : ""}</li>`).join("")}</ul>`
   : "");
 
+const groupsHtml = (groups) => (groups?.length
+  ? groups.map((g) => `<section><h2>${escHtml(g.heading)}</h2>${itemsHtml(g.items)}</section>`).join("")
+  : "");
+
 const tagsHtml = (tags) => (tags?.length
   ? `<p>Tags: ${tags.map((t) => link(tagHref(t), `#${t}`)).join(", ")}</p>`
   : "");
@@ -59,6 +63,7 @@ const tagsHtml = (tags) => (tags?.length
  * @param {Array}  [page.bullets]       plain-text list
  * @param {Array}  [page.outbound]      [{ href, label }]
  * @param {Array}  [page.items]         [{ href, text, note }] — a section's rows
+ * @param {Array}  [page.groups]        [{ heading, items }] — rows under <h2>s
  * @param {Array}  [page.tags]          tag names
  * @param {string} [page.lang]          "mr" for Marathi content
  * @param {object} [page.parent]        { href, label } — back to the section
@@ -78,6 +83,7 @@ export function renderFallback(page) {
     page.bullets?.length ? `<ul>${page.bullets.map((b) => `<li>${escHtml(b)}</li>`).join("")}</ul>` : "",
     (page.outbound || []).map((o) => `<p>${link(o.href, o.label, ' rel="noopener"')}</p>`).join(""),
     itemsHtml(page.items),
+    groupsHtml(page.groups),
     tagsHtml(page.tags),
   ].join("");
 
@@ -85,22 +91,35 @@ export function renderFallback(page) {
     + `<main${attrLang(page.lang)}>${main}</main>${navHtml()}${footerHtml()}</div>`;
 }
 
-// The home page: who this is, then every section with a line on what it holds.
-// It is the page a "who is Sanket Tambare" crawl lands on, so it carries the
-// bio and the facts outright rather than a link to them.
+// The home page: who this is, then the site in the order the page itself
+// offers it — the two ways in (About, Ask), the four doors (one per nav group),
+// then the pages about the site and Contact. It is the page a "who is Sanket
+// Tambare" crawl lands on, so it carries the bio and the facts outright rather
+// than a link to them.
+const rowOf = (r) => ({ href: r.path, text: r.label, note: PAGE_META[r.path]?.description || "" });
+
 export function homeFallback() {
-  const sections = ROUTES.filter((r) => !r.index)
-    .flatMap((r) => r.subRoutes || [r])
-    .map((r) => ({ href: r.path, text: r.label, note: PAGE_META[r.path]?.description || "" }));
+  const top = ROUTES.filter((r) => !r.index);
+  const loose = top.filter((r) => !r.subRoutes?.length);
+  const groups = [
+    { heading: "Start here", items: loose.filter((r) => !r.footerOnly).map(rowOf) },
+    ...top.filter((r) => r.subRoutes?.length && !r.footerOnly)
+      .map((r) => ({ heading: r.label, items: r.subRoutes.map(rowOf) })),
+    ...top.filter((r) => r.subRoutes?.length && r.footerOnly)
+      .map((r) => ({ heading: r.label, items: r.subRoutes.map(rowOf) })),
+    { heading: "Get in touch", items: loose.filter((r) => r.footerOnly).map(rowOf) },
+  ].filter((g) => g.items.length);
+
   return renderFallback({
     heading: IDENTITY.name,
-    lede: IDENTITY.bio,
+    lede: `${ROLE_LINE} ${IDENTITY.tagline}`,
+    body: [IDENTITY.bio],
     facts: [
       ["Work", `${IDENTITY.jobTitle} at ${IDENTITY.worksFor}`],
       ["Based in", LOCATION_LABEL],
       ["Education", IDENTITY.alumniOf.map((s) => `${s.name} — ${s.detail}`).join("; ")],
       ["Interests", IDENTITY.knowsAbout.join(", ")],
     ],
-    items: sections,
+    groups,
   });
 }

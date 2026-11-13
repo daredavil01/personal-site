@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import useLatestPosts from "./useLatestPosts";
 
 const SUBSTACK_URL = "https://sankettambare.substack.com";
 
@@ -22,28 +23,11 @@ const SkeletonCard = () => (
 // full feed inside a scroll region, revealing `batchSize` posts at a time as the
 // user scrolls to the bottom (IntersectionObserver on a sentinel).
 const LatestPosts = ({ batchSize = 5 }) => {
-  const [items, setItems] = useState([]);
-  const [status, setStatus] = useState("loading"); // loading | ready | error
+  const { items, status } = useLatestPosts(); // loading | ready | error
   const [visibleCount, setVisibleCount] = useState(batchSize);
 
   const scrollRef = useRef(null);
   const sentinelRef = useRef(null);
-
-  useEffect(() => {
-    let active = true;
-    fetch("/rss-feed")
-      .then((res) => {
-        if (!res.ok) throw new Error("Feed request failed");
-        return res.json();
-      })
-      .then((data) => {
-        if (!active) return;
-        setItems(Array.isArray(data.items) ? data.items : []);
-        setStatus("ready");
-      })
-      .catch(() => { if (active) setStatus("error"); });
-    return () => { active = false; };
-  }, []);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -91,7 +75,7 @@ const LatestPosts = ({ batchSize = 5 }) => {
           >
             <div className="flex items-center gap-2 flex-wrap">
               {item.pubDate && (
-                <span className="font-mono text-[10px] text-stone-400 dark:text-stone-500">
+                <span className="font-mono text-xs text-stone-400 dark:text-stone-500">
                   {formatDate(item.pubDate)}
                 </span>
               )}
@@ -129,7 +113,7 @@ const LatestPosts = ({ batchSize = 5 }) => {
             href={SUBSTACK_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary inline-flex items-center gap-2 hover:gap-4 transition-all no-underline"
+            className="font-label text-xs uppercase tracking-[0.2em] font-bold text-secondary inline-flex items-center gap-2 hover:gap-4 transition-all no-underline"
           >
             Read more on Substack
             <span className="material-symbols-outlined text-[14px]">arrow_right_alt</span>

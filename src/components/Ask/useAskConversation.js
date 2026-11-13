@@ -251,10 +251,13 @@ export default function useAskConversation({
 
   // ?q= makes a question shareable: the link lands pre-asked rather than
   // replaying a cached answer, so it always reflects the archive as it is now.
+  // The homepage's question box arrives this way too, so a reader with a saved
+  // thread gets the question added to it rather than silently dropped; the
+  // param is removed before sending, so a reload does not ask it twice.
   useEffect(() => {
     const q = searchParams.get("q");
     // A focused chat leaves ?q= to the site-wide one, which owns shared links.
-    if (!q || focus || turns.length || !info) return;
+    if (!q || focus || !info) return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);

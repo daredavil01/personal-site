@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import routes from "../../data/routes";
 
-// The footer is the site map. The top bar was cut to five grouped entries, so
-// this is where the whole site stays visible — every route, under the same
-// headings the nav uses, from one source (data/routes.js) so the two can't
-// drift apart.
+// The footer is the site map. The top bar carries six entries, so this is where
+// the whole site stays visible — every route, under the same headings the nav
+// uses, from one source (data/routes.js) so the two can't drift apart. The
+// footer-only groups ("How this site works", Contact) appear only here and in
+// the mobile drawer.
 
 const linkClass = "font-body text-sm text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary transition-colors no-underline";
 
@@ -15,7 +16,7 @@ const socialClass = "font-label text-xs uppercase tracking-widest text-stone-500
 // Where the writing actually lives comes before where the photos do — the two
 // blog platforms are the point of the site, so Instagram's profile link gave
 // way to them. (The /instagram *page*, which archives the posts, is untouched
-// and still sits under Play.)
+// and sits under Life.)
 const SOCIALS = [
   { label: "Mail", href: "mailto:contact@sankettambare.com" },
   { label: "Substack", href: "https://sankettambare.substack.com" },
@@ -47,7 +48,7 @@ const Footer = () => {
   return (
     <footer className="w-full border-t border-stone-200/40 dark:border-stone-800/40 bg-stone-100 dark:bg-stone-900">
       <div className="max-w-7xl mx-auto px-8 py-12 flex flex-col gap-10">
-        <nav aria-label="Site map" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-8">
+        <nav aria-label="Site map" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-8">
           {groups.map((group) => (
             <div key={group.label}>
               <p className="mb-3 font-label text-xs uppercase tracking-widest text-stone-700 dark:text-stone-300 font-bold">
@@ -61,7 +62,7 @@ const Footer = () => {
             </div>
           ))}
 
-          {/* Anything with no group of its own — About today. */}
+          {/* Anything with no group of its own — About, Ask, Contact. */}
           {loose.length > 0 && (
             <div>
               <p className="mb-3 font-label text-xs uppercase tracking-widest text-stone-700 dark:text-stone-300 font-bold">

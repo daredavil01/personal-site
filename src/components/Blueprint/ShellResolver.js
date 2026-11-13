@@ -220,7 +220,7 @@ const ShellResolver = () => {
         <p className="font-body text-sm bp-ink m-0">
           {shell === "atlas"
             ? "The page sits under its region's illustrated band, with the compass, passport and return portal over it."
-            : "The page sits in the editorial frame: navigation bar, sidebar and footer."}
+            : "The page sits in the editorial frame: navigation bar and footer, with the sidebar on the homepage and /about."}
           {" "}
           The content in the middle is identical: PageShell is the only switch.
         </p>

@@ -95,10 +95,12 @@ describe('renders the app', () => {
     expect(window.location.pathname).toBe('/projects');
   });
 
-  it('can navigate to /stats', async () => {
+  // Stats is one of the pages about the site itself, so it lives in the
+  // footer's "How this site works" group rather than the top bar.
+  it('can navigate to /stats from the footer site map', async () => {
     render(<App />);
-    const nav = await findPrimaryNav();
-    const statsLink = await within(nav).findByRole('link', { name: /Stats/i }, { timeout });
+    const footer = await screen.findByRole('navigation', { name: /Site map/i }, { timeout });
+    const statsLink = await within(footer).findByRole('link', { name: /^Stats$/i }, { timeout });
     expect(statsLink).toBeInTheDocument();
     await act(async () => {
       await statsLink.click();

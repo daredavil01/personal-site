@@ -1,3 +1,5 @@
+// The globe's "feature" pins (GlobeShowcase): one per section of the site.
+// The homepage itself shows the four doors below instead of this list.
 const HOME_FEATURES = [
   {
     title: "About Me",
@@ -88,6 +90,56 @@ const HOME_FEATURES = [
     desc: "Wanna discuss technology, society, or marathons? Reach out for collaborations, discussions, or just a friendly chat.",
     path: "/contact",
     icon: "alternate_email",
+  },
+];
+
+// The homepage's four doors. Each opens onto one nav group from
+// src/data/routes.js (`group` is that group's label), so the links under a door
+// are always the nav's. `counts` read the /api/stats snapshot
+// (src/lib/siteStats.js); a count with no value is left out, never shown as 0.
+export const HOME_DOORS = [
+  {
+    title: "Writing",
+    desc: "Essays in English and Marathi, a field journal of every one, and a decade of short posts.",
+    path: "/writing-ledger",
+    icon: "edit_note",
+    group: "Writing",
+    counts: [
+      { value: (d) => d?.stats?.offloadCount, noun: "essays" },
+      { value: (d) => d?.micro?.total, noun: "micro-posts" },
+    ],
+  },
+  {
+    title: "Running & Treks",
+    desc: "Every race from 10K to a 50K ultra, the training behind them, and the Sahyadri forts on foot.",
+    path: "/sports",
+    icon: "directions_run",
+    group: "Running & Treks",
+    counts: [
+      { value: (d) => d?.stats?.totalRaces, noun: "races" },
+      { value: (d) => d?.stats?.totalTreks, noun: "treks" },
+    ],
+  },
+  {
+    title: "Work",
+    desc: "Software I have built and shipped, the talks I have given, and the one-page resume.",
+    path: "/projects",
+    icon: "terminal",
+    group: "Work",
+    counts: [
+      { value: (d) => d?.stats?.projectCount, noun: "projects" },
+      { value: (d) => d?.stats?.presentationCount, noun: "talks" },
+    ],
+  },
+  {
+    title: "About & life",
+    desc: "Who I am at four reading depths, what I am doing this month, and every book I have read.",
+    path: "/about",
+    icon: "person",
+    group: "Life",
+    counts: [
+      { value: (d) => d?.stats?.booksCount, noun: "books" },
+    ],
   },
 ];
 

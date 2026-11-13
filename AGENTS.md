@@ -660,12 +660,25 @@ moves. Pure models: `src/lib/aboutModel.js` and `src/lib/resumeModel.js`
 
 ## Homepage Sections
 
-`src/pages/Index.js` composes, in order: `LifeStats` (aggregate KPI tiles), an
-"In 1 Minute" intro, **`LatestPosts`** (live Substack RSS feed proxied by
-`functions/rss-feed.js`, scroll-to-reveal), **`MonthlyDigest`** (auto-aggregated
-monthly digest of blogs / treks / marathons / micro-posts — uses
-`src/lib/monthDigest.js` to reconcile the differing date formats), then the
-"Explore" grid. Section meta comes from `src/data/pageMeta.js`.
+`src/pages/Index.js` composes, in order: **`HomeHero`** (the name, a role line
+and tagline from `src/data/identity.js`, a question box that opens
+`/ask?q=…`, three starter chips from the `/ask` pool, and "Start here" →
+`/about`), **`NowStrip`** (the newest essay, race or trek, book and letter —
+`src/lib/homeNow.js`, tested; a kind with no data is left out),
+**`HomeDoors`** (four doors, one per nav group in `src/data/routes.js`, with
+live counts from `useSiteStats`; defined as `HOME_DOORS` in
+`src/data/homeFeatures.js`, whose default list still feeds the globe's
+feature pins), **`LatestPosts`** (live Substack RSS feed proxied by
+`functions/rss-feed.js`, shared with the Now strip through `useLatestPosts`),
+`LifeStats` (aggregate KPI tiles), `GlobeShowcase` ("My World"; a static panel
+without WebGL), **`Trailer`** (the 90-second vertical trailer,
+`public/video/the-trailer.*`, re-published by `npm run trailer -- --publish`
+after a re-render — see `scripts/trailer/render.mjs`), **`MonthlyDigest`**
+(auto-aggregated monthly digest — uses `src/lib/monthDigest.js` to reconcile
+the differing date formats), a newsletter line and the contact block. The
+crawler fallback (`homeFallback` in `src/lib/seo/fallbackHtml.js`) lists the
+site in the same order. The sidebar (`SideBar.js`) shows only on `/` and
+`/about`. Section meta comes from `src/data/pageMeta.js`.
 
 ## Changelog Rule
 

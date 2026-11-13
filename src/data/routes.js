@@ -1,10 +1,11 @@
-// The site map, and the single source for the top nav, the mobile drawer and
-// the footer.
+// The site map, and the single source for the top nav, the mobile drawer, the
+// footer, the homepage's doors and the crawler fallback.
 //
-// Five top-level entries instead of ten-plus-a-More-bin. Seventeen flat links
-// in a bar is not navigation, it is a list — nothing is findable because
-// nothing is grouped. Each group below is a verb: what was I doing when this
-// page happened.
+// Six top-level entries, each named for a part of a life rather than a kind of
+// page: who (About), a way in (Ask), and four things done — writing, running
+// and trekking, work, everything else. The pages about the site itself (the
+// Blueprint, the changelog, the stats) are real but secondary, so they live in
+// the footer instead of competing with the content for the bar.
 //
 // Conventions:
 //   subRoutes   - children, shown as a dropdown on desktop and indented in the
@@ -14,6 +15,9 @@
 //                 straight out of /public, which React Router cannot route to.
 //   footerOnly  - kept out of the top bar; still in the footer and the mobile
 //                 drawer.
+//
+// Each path appears once (llms.txt lists every page exactly once) and labels
+// are unique (they are React keys in the drawer and footer).
 
 const routes = [
   {
@@ -26,29 +30,26 @@ const routes = [
     path: "/about",
   },
   {
-    label: "Ask Me",
+    label: "Ask",
     path: "/ask",
   },
   {
     label: "Writing",
-    path: "/micro-blog",
+    path: "/writing-ledger",
     subRoutes: [
+      { label: "Writing Ledger", path: "/writing-ledger" },
+      { label: "Wanderer's Logbook", path: "/logbook" },
+      { label: "100 Days To Offload", path: "/100-days-to-offload" },
       { label: "Micro Blog", path: "/micro-blog" },
       { label: "Challenges", path: "/challenges" },
-      { label: "100 Days To Offload", path: "/100-days-to-offload" },
-      { label: "Wanderer's Logbook", path: "/logbook" },
-      { label: "Writing Ledger", path: "/writing-ledger" },
       { label: "Tags", path: "/tags" },
     ],
   },
   {
-    label: "Living",
-    path: "/now",
+    label: "Running & Treks",
+    path: "/sports",
     subRoutes: [
-      { label: "Now", path: "/now" },
-      { label: "Newsletter", path: "/newsletter" },
-      { label: "Books", path: "/books" },
-      { label: "Sports", path: "/sports" },
+      { label: "Races", path: "/sports" },
       { label: "Training", path: "/training" },
       { label: "Treks", path: "/treks" },
     ],
@@ -63,27 +64,34 @@ const routes = [
     ],
   },
   {
-    label: "Play",
-    path: "/interactive-me",
+    label: "Life",
+    path: "/now",
     subRoutes: [
-      { label: "Interactive Me", path: "/interactive-me" },
-      { label: "Mind Map", path: "/mindmap" },
-      { label: "Blueprint", path: "/blueprint" },
+      { label: "Now", path: "/now" },
+      { label: "Newsletter", path: "/newsletter" },
+      { label: "Books", path: "/books" },
       { label: "Instagram", path: "/instagram" },
       { label: "Videos", path: "/videos" },
-      { label: "Films", path: "/films" },
-      { label: "Stats", path: "/stats" },
     ],
   },
   {
-    label: "More",
-    path: "/contact",
+    label: "How this site works",
+    path: "/blueprint",
     footerOnly: true,
     subRoutes: [
-      { label: "Contact", path: "/contact" },
+      { label: "Blueprint", path: "/blueprint" },
+      { label: "Stats", path: "/stats" },
       { label: "Changelog", path: "/changelog" },
       { label: "Changelog Graph", path: "/changelog/graph" },
+      { label: "Films", path: "/films" },
+      { label: "Mind Map", path: "/mindmap" },
+      { label: "Interactive Me", path: "/interactive-me" },
     ],
+  },
+  {
+    label: "Contact",
+    path: "/contact",
+    footerOnly: true,
   },
 ];
 

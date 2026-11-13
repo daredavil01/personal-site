@@ -1,105 +1,74 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Main from "../layouts/Main";
+import HomeHero from "../components/Index/HomeHero";
+import NowStrip from "../components/Index/NowStrip";
+import HomeDoors from "../components/Index/HomeDoors";
 import LifeStats from "../components/Index/LifeStats";
 import LatestPosts from "../components/Index/LatestPosts";
 import MonthlyDigest from "../components/Index/MonthlyDigest";
-import OneMinuteIntro from "../components/common/OneMinuteIntro";
 import GlobeShowcase from "../components/Index/GlobeShowcase";
 import Trailer from "../components/Index/Trailer";
 import SectionHeader from "../components/common/SectionHeader";
-import HOME_FEATURES from "../data/homeFeatures";
+import useLatestPosts from "../components/Index/useLatestPosts";
 
+// The feed fails silent; so does its heading, rather than label an empty space.
+const LatestWriting = () => {
+  const { items, status } = useLatestPosts();
+  if (status === "error" || (status === "ready" && !items.length)) return null;
+  return (
+    <section>
+      <SectionHeader label="Latest Writing" />
+      <LatestPosts batchSize={5} />
+    </section>
+  );
+};
+
+// The classic homepage, newest-first: who this is and a question box, the most
+// recent thing of each kind, four doors into the site, then the writing feed.
+// The heavy, playful pieces (the stats tiles, the globe, the trailer) follow
+// the content instead of standing in front of it. The crawler fallback
+// (homeFallback in src/lib/seo/fallbackHtml.js) mirrors this order.
 const Index = () => (
   <Main>
     <article className="w-full flex flex-col gap-12">
-      <header className="mb-4">
-        {/* The name is the heading: it is what a search for it should find. */}
-        <p className="font-label text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-4">
-          The Digital Hub
-        </p>
-        <h1 className="font-headline text-5xl md:text-7xl font-black text-stone-900 dark:text-stone-100 leading-[0.9] tracking-tighter mb-6">
-          Sanket Tambare.
-        </h1>
-        <p className="font-body text-lg text-stone-500 dark:text-stone-400 max-w-2xl leading-relaxed">
-          Welcome to my digital garden — an intentional archive of professional
-          work, creative pursuits, and physical challenges.
-        </p>
-      </header>
+      <HomeHero />
+
+      <NowStrip />
+
+      <HomeDoors />
+
+      <LatestWriting />
+
+      <LifeStats />
 
       <GlobeShowcase />
 
       <Trailer />
-
-      <LifeStats />
-
-      <section>
-        <SectionHeader label="In 1 Minute" />
-        <OneMinuteIntro className="font-body text-lg text-stone-600 dark:text-stone-300 max-w-2xl leading-relaxed mb-6" />
-        <Link
-          to="/about"
-          className="font-label text-xs uppercase tracking-[0.2em] font-bold text-secondary inline-flex items-center gap-2 hover:gap-4 transition-all no-underline"
-        >
-          Read the full story
-          <span className="material-symbols-outlined text-[14px]">
-            arrow_right_alt
-          </span>
-        </Link>
-      </section>
-
-      <section>
-        <SectionHeader label="Latest Writing" />
-        <LatestPosts batchSize={5} />
-      </section>
 
       <section>
         <SectionHeader label="Monthly Digest" />
         <MonthlyDigest />
       </section>
 
-      <section>
-        <SectionHeader label="Explore" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {HOME_FEATURES.map((item) => (
-            <div
-              key={item.path}
-              className="p-8 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-xl hover:border-secondary dark:hover:border-secondary transition-colors group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="material-symbols-outlined text-secondary opacity-60 group-hover:opacity-100 transition-opacity">
-                    {item.icon}
-                  </span>
-                  <h3 className="font-headline text-xl font-bold uppercase tracking-widest text-stone-800 dark:text-stone-200">
-                    <Link
-                      to={item.path}
-                      className="no-underline hover:text-secondary transition-colors"
-                    >
-                      {item.title}
-                    </Link>
-                  </h3>
-                </div>
-                <p className="font-body text-stone-500 dark:text-stone-400 leading-relaxed text-sm">
-                  {item.desc}
-                </p>
-              </div>
-              <div className="mt-6">
-                <Link
-                  to={item.path}
-                  className="font-label text-xs uppercase tracking-[0.2em] font-bold text-secondary flex items-center gap-2 group-hover:gap-4 transition-all no-underline"
-                >
-                  Explore Section
-                  <span className="material-symbols-outlined text-[14px]">
-                    arrow_right_alt
-                  </span>
-                </Link>
-              </div>
-            </div>
-          ))}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 md:p-8 border border-stone-200 dark:border-stone-800 rounded-xl">
+        <div>
+          <h2 className="font-headline text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">
+            One letter a month
+          </h2>
+          <p className="font-body text-stone-500 dark:text-stone-400 mb-0">
+            The month's essays, runs, treks and books, with a note on top.
+          </p>
         </div>
+        <Link
+          to="/newsletter"
+          className="shrink-0 inline-flex items-center justify-center min-h-[44px] px-6 py-3 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-950 font-label text-xs uppercase tracking-widest font-bold hover:bg-secondary dark:hover:bg-secondary dark:hover:text-white transition-colors rounded-sm no-underline"
+        >
+          Read the newsletter
+        </Link>
       </section>
 
-      <section className="mt-4 p-12 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-2xl text-center">
+      <section className="p-12 bg-secondary/[0.03] dark:bg-secondary/[0.05] border border-secondary/10 dark:border-secondary/20 rounded-2xl text-center">
         <h2 className="font-headline text-3xl font-black mb-6 text-stone-900 dark:text-stone-100">
           Let&apos;s build the future together.
         </h2>

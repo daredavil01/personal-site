@@ -52,7 +52,7 @@ curated samples instead of a full directory, heavy features lower down.
    3. **Four doors** replacing the 15-card Explore grid: Writing, Running & Treks, Work, About, each with a live count from `useSiteStats`.
    4. `LifeStats`, then `GlobeShowcase` and `Trailer` (kept, moved down).
    5. `MonthlyDigest`, newsletter link, existing contact block.
-   Trim `src/data/homeFeatures.js` to match; update the fallback in `src/lib/seo/fallbackHtml.js` so crawlers see the same structure.
+   `src/data/homeFeatures.js` gains `HOME_DOORS`; its default list is kept because the globe's feature pins read it. Update the fallback in `src/lib/seo/fallbackHtml.js` so crawlers see the same structure.
 6. **Navigation** in `src/data/routes.js`: About · Ask · Writing · Running & Treks (Sports, Training, Treks) · Work · Life (Now, Newsletter, Books, Instagram, Videos). Move Mind Map, Blueprint, Films, Stats, Interactive Me and both Changelog pages to a footer group "How this site works". No routes are deleted, so `routeManifest.js`, share cards and the Blueprint rooms are untouched.
 7. **Sidebar.** Keep `SideBar` on `/` and `/about` only; elsewhere the content takes the full width and the footer carries the contact icons. Read its bio from `identity.js`.
 
@@ -71,7 +71,7 @@ curated samples instead of a full directory, heavy features lower down.
 
 ## Housekeeping per CLAUDE.md
 
-Status: Phase 1 shipped in v33.1.2. Each PR adds its entry to `src/data/changelog.md`. Phase 2 touches a Blueprint
+Status: Phase 1 shipped in v33.1.2, Phase 2 in v34.0.0. Each PR adds its entry to `src/data/changelog.md`. Phase 2 touches a Blueprint
 room (`src/components/Blueprint/features.js`, Foyer) and `docs/routes.md` if nav
 labels are referenced. Work on branch `claude/funny-ptolemy-sm6ola`.
 

@@ -49,6 +49,11 @@ export const IDENTITY = {
     + "and writes in English and Marathi — essays on Substack and WordPress, a monthly "
     + "newsletter, book notes and more than a thousand short posts — and hosts Dare Write's, a podcast "
     + "on books, technology and travel. This site is his archive of all of it.",
+  // The homepage's second line, under "Software Engineer at Bridgenext, Pune."
+  // Things done, not adjectives, and no counts for the same reason as `bio`.
+  tagline:
+    "I run ultramarathons, climb the Sahyadri's forts and write in English and Marathi. "
+    + "This site is the archive.",
   // Profiles that are this person. Every https link in src/data/contact.js must
   // appear here (src/data/identity.test.js); add a profile there and here.
   sameAs: [
@@ -62,6 +67,9 @@ export const IDENTITY = {
     "https://card.sankettambare.in/",
   ],
 };
+
+// "Software Engineer at Bridgenext, Pune." — the homepage's first line.
+export const ROLE_LINE = `${IDENTITY.jobTitle} at ${IDENTITY.worksFor}, ${IDENTITY.homeLocation.locality}.`;
 
 // "Pune, Maharashtra, India" — the one-line form for prose and llms.txt.
 export const LOCATION_LABEL = `${IDENTITY.homeLocation.locality}, ${IDENTITY.homeLocation.region}, India`;
