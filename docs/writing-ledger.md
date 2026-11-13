@@ -16,9 +16,9 @@ regenerated. Everything else the page derives lives in `src/lib/writingLedger.js
 
 | Folio | What it draws | Component |
 |---|---|---|
-| Cover | Odometer total, reading-time / pages / novels / words-a-day equivalents, account lines with dot leaders, this month and this year as progress bars | `Cover.js` |
+| Cover | One line on how to read the page, then three essays to start with (`featuredEssays`: newest, newest in the other language, longest), the odometer total, reading-time / pages / novels / words-a-day equivalents, account lines with dot leaders, this month (hidden while it has no words) and this year as progress bars | `Cover.js` |
 | I · The shelf | Every post as a book spine: height = √words, colour = platform, a saffron band = Marathi | `Shelf.js` |
-| II · The ink calendar | Every day since the first post, a year per row, a blot per post day sized by words | `InkCalendar.js` |
+| II · The ink calendar | Every day since the first post, a year per row, a blot per post day sized by words; under 560 px, the last three months (`recentGrid`) with "Show every year" | `InkCalendar.js` |
 | III · The long arc | Running total with 25k-word milestones and the longest silence shaded; year tiles; every calendar month (gaps included), stacked by platform | `LongArc.js` |
 | IV · Recurring themes | Squarified treemap of topics by words, and a topic × year dot matrix. A tile filters the full ledger | `Topics.js` |
 | V · Rhythm | Weekday rose, length ruler (each post a tick), platform / language / format mix | `Rhythm.js` |

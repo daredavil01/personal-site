@@ -299,10 +299,9 @@ const AboutPage = () => {
     }
   }, [params, setParams]);
 
-  // Words per tier, so the "keep reading" button can say what it costs.
+  // Words in the last tier, so its "keep reading" button can say what it
+  // costs. (The shallower tiers end at the depth picker instead.)
   const words = {
-    "1m": 150,
-    "5m": wordCount(ABOUT.chapters.map((c) => c.body).join(" ")),
     "10m": wordCount(ABOUT.long.join(" ")) + wordCount(principles.map((p) => p.body).join(" ")) + wordCount(ABOUT.facts.join(" ")),
   };
   const totalSeconds = readingSeconds(ABOUT.tenSeconds) + (depth >= 1 ? 60 : 0)
@@ -317,30 +316,20 @@ const AboutPage = () => {
   return (
     <article className="ab-root">
       {/* ---------------- hero ---------------- */}
+      {/* The first screen is the reading itself: the name, one line on how
+          the page works, then the 10-second line and the one-minute gist.
+          The depth picker waits until that has been read (v34.1.0). */}
       <header className="ab-hero">
         <Dial depthIndex={depth} />
         <div>
-          <p className="ab-kicker">{`About ${IDENTITY.name}`}</p>
-          <h1 className="ab-title">
-            How long have
-            {" "}
-            <em>you</em>
-            {" "}
-            got?
-          </h1>
-          <div className="ab-depth" role="group" aria-label="How much to read">
-            {DEPTHS.map((d, i) => (
-              <button key={d.key} type="button" aria-pressed={i === depth} onClick={() => setDepth(i)}>
-                <b>{d.label}</b>
-                <small>{d.name}</small>
-              </button>
-            ))}
-          </div>
-          <p className="ab-depth-note">{`Showing about ${approx} of reading. Pick more any time; the page grows, nothing reloads.`}</p>
+          <p className="ab-kicker">About</p>
+          <h1 className="ab-title">{IDENTITY.name}</h1>
+          <p className="ab-howto">
+            Start with the short version below. When it ends, pick how much more you want to
+            read, up to ten minutes; the page grows, nothing reloads.
+          </p>
         </div>
       </header>
-
-      <PageFilm film="about" className="my-8" />
 
       {/* ---------------- 10 seconds ---------------- */}
       <Tier depth={DEPTHS[0]} title="The line">
@@ -355,7 +344,6 @@ const AboutPage = () => {
           {isOwner && <OwnerLink to="/admin/resume/certifications?new=1" label="Add certification" kind="add" />}
         </LatestLog>
         {isOwner && <UpdateComposer />}
-        {depth === 0 && <KeepReading next={DEPTHS[1]} words={words["1m"]} onMore={() => setDepth(1)} />}
       </Tier>
 
       {/* ---------------- 1 minute ---------------- */}
@@ -395,9 +383,30 @@ const AboutPage = () => {
               </Link>
             )}
           </div>
-          {depth === 1 && <KeepReading next={DEPTHS[2]} words={words["5m"]} onMore={() => setDepth(2)} />}
         </Tier>
       )}
+
+      {/* ---------------- how deep ---------------- */}
+      <section className="ab-depth-block" aria-labelledby="ab-depth-h">
+        <h2 id="ab-depth-h" className="ab-title ab-title--sm">
+          How long have
+          {" "}
+          <em>you</em>
+          {" "}
+          got?
+        </h2>
+        <div className="ab-depth" role="group" aria-label="How much to read">
+          {DEPTHS.map((d, i) => (
+            <button key={d.key} type="button" aria-pressed={i === depth} onClick={() => setDepth(i)}>
+              <b>{d.label}</b>
+              <small>{d.name}</small>
+            </button>
+          ))}
+        </div>
+        <p className="ab-depth-note">{`Showing about ${approx} of reading. Pick more any time; the page grows, nothing reloads.`}</p>
+      </section>
+
+      <PageFilm film="about" className="my-8" />
 
       {/* ---------------- 5 minutes ---------------- */}
       {depth >= 2 && (

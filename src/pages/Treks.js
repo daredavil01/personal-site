@@ -63,6 +63,10 @@ const TreksPage = () => {
     year: "", level: "", season: "", q: "",
   });
   const allSummary = useMemo(() => trekSummary(all), [all]);
+  // The three chip rows fold behind one button so the register comes first;
+  // a link that arrives with a filter set opens them.
+  const filterCount = [state.year, state.season, state.level].filter(Boolean).length;
+  const [filtersOpen, setFiltersOpen] = useState(filterCount > 0);
 
   return (
     <PageShell region="treks">
@@ -101,11 +105,30 @@ const TreksPage = () => {
             <div className="md:sticky md:top-16 z-20 -mx-4 px-4 py-3 bg-white/90 dark:bg-stone-950/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <TabBar label="Trek register sections" tabs={TABS} active={tab} onChange={(id) => set({ tab: id === "overview" ? "" : id })} />
-                <ShareViewButton />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-expanded={filtersOpen}
+                    aria-controls="trek-filters"
+                    onClick={() => setFiltersOpen((v) => !v)}
+                    className={`inline-flex items-center gap-1.5 min-h-[40px] px-3.5 rounded-full border font-label text-xs uppercase tracking-widest font-bold transition-colors ${
+                      filtersOpen || filterCount
+                        ? "border-stone-900 dark:border-stone-100 text-stone-900 dark:text-stone-100"
+                        : "border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">tune</span>
+                    Filters
+                    {filterCount > 0 && <span className="tabular-nums text-secondary">{filterCount}</span>}
+                  </button>
+                  <ShareViewButton />
+                </div>
               </div>
-              <ChipRow label="Year" options={facets.years.map((y) => ({ value: y.name, label: y.name, count: y.count }))} value={state.year} onChange={(v) => set({ year: v })} />
-              <ChipRow label="Season" options={facets.seasons.map((s) => ({ value: s.id, label: s.name, count: s.count, title: s.blurb }))} value={state.season} onChange={(v) => set({ season: v })} />
-              <ChipRow label="Level" options={facets.levels.map((l) => ({ value: l.name, label: l.name, count: l.count }))} value={state.level} onChange={(v) => set({ level: v })} />
+              <div id="trek-filters" className={`${filtersOpen ? "flex" : "hidden"} flex-col gap-3`}>
+                <ChipRow label="Year" options={facets.years.map((y) => ({ value: y.name, label: y.name, count: y.count }))} value={state.year} onChange={(v) => set({ year: v })} />
+                <ChipRow label="Season" options={facets.seasons.map((s) => ({ value: s.id, label: s.name, count: s.count, title: s.blurb }))} value={state.season} onChange={(v) => set({ season: v })} />
+                <ChipRow label="Level" options={facets.levels.map((l) => ({ value: l.name, label: l.name, count: l.count }))} value={state.level} onChange={(v) => set({ level: v })} />
+              </div>
             </div>
 
             {tab === "overview" && (

@@ -241,6 +241,71 @@ export function yearGrid(year, posts) {
   };
 }
 
+/**
+ * The last `months` calendar months up to `today`, in yearGrid's cell shape —
+ * the ink calendar's phone view, where seven full years would be a strip of
+ * 6-pixel dots. `today` is read in local time; dates are UTC days like
+ * yearGrid's.
+ */
+export function recentGrid(posts, today = new Date(), months = 3) {
+  const end = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const first = new Date(Date.UTC(today.getFullYear(), today.getMonth() - (months - 1), 1));
+  const start = first.getTime();
+  const startDow = (first.getUTCDay() + 6) % 7; // Monday = 0
+  const from = isoOf(start);
+  const to = isoOf(end);
+  const byDate = new Map();
+  posts.forEach((p) => {
+    if (p.date >= from && p.date <= to) byDate.set(p.date, [...(byDate.get(p.date) || []), p]);
+  });
+  const cells = [];
+  for (let t = start; t <= end; t += DAY) {
+    const i = Math.round((t - start) / DAY) + startDow;
+    const date = isoOf(t);
+    const list = byDate.get(date) || [];
+    cells.push({ date, col: Math.floor(i / 7), row: i % 7, posts: list, words: list.reduce((s, p) => s + p.words, 0) });
+  }
+  const labels = [];
+  for (let k = 0; k < months; k += 1) {
+    const d = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + k, 1));
+    labels.push({
+      label: MONTHS[d.getUTCMonth()],
+      col: Math.floor((Math.round((d.getTime() - start) / DAY) + startDow) / 7),
+    });
+  }
+  const recent = [...byDate.values()].flat();
+  return {
+    year: `${MONTHS[first.getUTCMonth()]}–${MONTHS[today.getMonth()]} ${today.getFullYear()}`,
+    weeks: cells[cells.length - 1].col + 1,
+    cells,
+    months: labels,
+    posts: recent.length,
+    words: recent.reduce((s, p) => s + p.words, 0),
+  };
+}
+
+/**
+ * Three essays to start with, for a reader who came to read rather than count:
+ * the newest, the newest in the other language, and the longest. Distinct,
+ * podcasts left out (their "words" are show notes), each with a link.
+ * `posts` are normalisePosts() output, oldest first.
+ */
+export function featuredEssays(posts) {
+  const pool = posts.filter((p) => p.type !== "podcast" && p.url && String(p.title || "").trim());
+  if (!pool.length) return [];
+  const picked = [];
+  const add = (post, reason) => {
+    if (post && !picked.some((x) => x.post === post)) picked.push({ post, reason });
+  };
+  const newest = pool[pool.length - 1];
+  add(newest, "Newest");
+  const other = [...pool].reverse().find((p) => p.lang !== newest.lang);
+  if (other) add(other, `Newest in ${other.lang}`);
+  const longest = pool.reduce((a, b) => (b.words > a.words ? b : a), pool[0]);
+  add(longest, "Longest");
+  return picked;
+}
+
 /** Posts and words per day of week, Monday first. */
 export function weekdays(posts) {
   const names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];

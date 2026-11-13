@@ -592,3 +592,13 @@
 .bk-cover { container-type: inline-size; }
 .bk-cover__blank strong { font-size: clamp(10px, 11cqi, 26px); }
 .bk-cover__blank small { font-size: clamp(7px, 5.4cqi, 12px); }
+
+/* The filter panel folds behind one button at every width (v34.1.0), so the
+   shelf comes before the controls. The toggle is a chip; its caret turns. */
+.bk-controls__panel { display: flex; flex-direction: column; gap: 12px; }
+.bk-controls__panel[hidden] { display: none; }
+.bk-chip--toggle { min-height: 44px; }
+.bk-chip--toggle i { margin-left: -2px; }
+.bk-chip__caret { transition: transform 0.2s; }
+.bk-chip--toggle[aria-expanded="true"] { border-color: var(--bk-ink); color: var(--bk-ink); }
+.bk-chip--toggle[aria-expanded="true"] .bk-chip__caret { transform: rotate(180deg); }

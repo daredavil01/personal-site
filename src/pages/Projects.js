@@ -75,8 +75,8 @@ const Projects = () => {
           </h1>
           <div className="max-w-2xl">
             <p className="text-xl text-stone-500 dark:text-stone-400 font-light leading-relaxed mb-3">
-              A selection of projects that define my creative trajectory. Each piece is treated as a
-              singular exhibit, documenting the intersection of human intent and digital execution.
+              Software I have built and shipped, each with the problem it solved and what came of
+              it. Open a card for the full case study, or switch views to see them on a timeline.
             </p>
             {summary && (
               <p className="mb-0 font-label text-[11px] uppercase tracking-widest text-stone-400 dark:text-stone-500">

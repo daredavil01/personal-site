@@ -58,7 +58,7 @@ curated samples instead of a full directory, heavy features lower down.
 
 ### Phase 3: content before chrome (one PR, minor version)
 
-8. **Books / Treks desktop**: collapse filters and tag cloud behind the single Filters button already used on mobile (`BookFilters.js`, the pill rows in `src/pages/Treks.js`).
+8. **Books / Treks / Projects**: collapse filters and the tag cloud behind one Filters button at every width (`src/components/Books/ShelfControls.js` — the Reading Room redesign had removed the old mobile toggle in `BookFilters.js` — the pill rows in `src/pages/Treks.js`, the tech cloud in `src/components/Projects/ProjectFilters.js`); move the Books film below the shelf.
 9. **Writing Ledger**: three featured essays above the counter; hide the "This month" bar at 0%; on narrow containers show the last three months of the ink calendar with an expand control (`src/components/WritingLedger/`).
 10. **About**: open on the 1-minute story; move the time picker below the first screen.
 11. **One instruction line per page**, the pattern `/treks` already uses.
@@ -71,7 +71,7 @@ curated samples instead of a full directory, heavy features lower down.
 
 ## Housekeeping per CLAUDE.md
 
-Status: Phase 1 shipped in v33.1.2, Phase 2 in v34.0.0. Each PR adds its entry to `src/data/changelog.md`. Phase 2 touches a Blueprint
+Status: all three phases shipped — Phase 1 in v33.1.2, Phase 2 in v34.0.0, Phase 3 in v34.1.0. Each PR adds its entry to `src/data/changelog.md`. Phase 2 touches a Blueprint
 room (`src/components/Blueprint/features.js`, Foyer) and `docs/routes.md` if nav
 labels are referenced. Work on branch `claude/funny-ptolemy-sm6ola`.
 

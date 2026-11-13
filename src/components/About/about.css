@@ -436,3 +436,11 @@ a.ab-now-card:hover { transform: translateY(-2px); box-shadow: var(--ab-shadow);
 @media (prefers-reduced-motion: reduce) {
   .ab-dial .ab-dial-arc, .ab-dial .ab-dial-hand, .ab-now-card { transition: none; }
 }
+
+/* ---------- content first (v34.1.0) ---------- */
+/* The hero is the name and one line on how to read the page; the depth
+   picker follows the one-minute gist, aligned with the tiers' text column. */
+.ab-howto { font: 500 1.05rem/1.55 var(--ab-label); color: var(--ab-ink-2); max-width: 36rem; }
+.ab-depth-block { padding: 0 0 3rem 4.4rem; }
+.ab-title--sm { font-size: clamp(1.8rem, 5cqi, 3rem); margin-bottom: 1rem; }
+@container (max-width: 30rem) { .ab-depth-block { padding-left: 0; } }

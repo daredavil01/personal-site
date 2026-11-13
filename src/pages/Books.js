@@ -141,7 +141,7 @@ const Books = () => {
             <p className="bk-lead">
               Everything I have finished, in English and in Marathi, shelved by when I read it
               rather than when it was written. A spine is as wide as its book is long and wears
-              the colour of its subject. Take one down.
+              the colour of its subject. Tap a spine to open the book; Filters narrows the shelf.
             </p>
             {readouts.length > 0 && (
               <ul className="bk-readouts">
@@ -180,8 +180,6 @@ const Books = () => {
             </button>
           )}
         </header>
-
-        <BooksFilm />
 
         {loading && <LoadingBlock label="Loading books…" />}
         {error && <ErrorBlock />}
@@ -255,6 +253,10 @@ const Books = () => {
             )}
           </div>
         )}
+
+        {/* The launch film follows the shelf: the books are the page, the
+            film is about the page (v34.1.0). */}
+        <BooksFilm />
       </div>
 
       <BookDetailsModal

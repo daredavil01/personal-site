@@ -1,6 +1,6 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { prettyDate, yearGrid } from "../../lib/writingLedger";
+import { prettyDate, recentGrid, yearGrid } from "../../lib/writingLedger";
 import {
   Tip, fmt, openPost, platformColor, useTip, useWidth,
 } from "./shared";
@@ -9,20 +9,31 @@ import {
 // contribution-graph shape (after Simon Willison's and Jim Nielsen's blog
 // calendars). A day with a post is an ink blot sized by its words; a blank
 // year is left blank, because the silences are part of the record.
+//
+// On a phone, seven full years shrink to 6-pixel dots, so a narrow figure opens
+// on the last three months at a readable size, with every year one tap away.
 const LABEL_W = 92;
 
 const InkCalendar = ({ posts, years }) => {
   const ref = useRef(null);
   const width = useWidth(ref, 900);
   const { tip, show, hide } = useTip();
-  const grids = useMemo(() => years.map((y) => yearGrid(y, posts)), [years, posts]);
+  const [allYears, setAllYears] = useState(false);
+  const narrow = width < 560;
+  const recent = narrow && !allYears;
+  const grids = useMemo(
+    () => (recent ? [recentGrid(posts, new Date(), 3)] : years.map((y) => yearGrid(y, posts))),
+    [recent, years, posts],
+  );
   const maxWords = useMemo(() => Math.max(...posts.map((p) => p.words), 1), [posts]);
 
-  const narrow = width < 560;
   const labelW = narrow ? 0 : LABEL_W;
-  const cell = Math.max(narrow ? 6 : 8, Math.min(15, Math.floor((width - labelW) / 54)));
-  const gridW = cell * 54;
-  const rowH = cell * 7 + (narrow ? 34 : 22);
+  const columns = recent ? grids[0].weeks : 54;
+  const cell = recent
+    ? Math.max(12, Math.min(26, Math.floor(width / columns)))
+    : Math.max(narrow ? 6 : 8, Math.min(15, Math.floor((width - labelW) / 54)));
+  const gridW = cell * columns;
+  const rowH = cell * 7 + (narrow ? 34 : 22) + (recent ? 16 : 0);
   const svgW = Math.max(width, labelW + gridW);
   const H = grids.length * rowH + 16;
 
@@ -49,8 +60,8 @@ const InkCalendar = ({ posts, years }) => {
                       <text x={-labelW} y={cell * 2.6 + 30} className="wl-tick">{g.posts ? `${fmt(g.words)} w` : ""}</text>
                     </>
                   )}
-                  {gi === 0 && !narrow ? g.months.map((mo) => (
-                    <text key={mo.label} x={mo.col * cell} y={-4} className="wl-tick">{mo.label}</text>
+                  {gi === 0 && (!narrow || recent) ? g.months.map((mo) => (
+                    <text key={mo.label} x={mo.col * cell} y={recent ? cell * 7 + 14 : -4} className="wl-tick">{mo.label}</text>
                   )) : null}
                   {g.cells.map((c) => {
                     const cx = c.col * cell + cell / 2;
@@ -58,7 +69,7 @@ const InkCalendar = ({ posts, years }) => {
                     if (!c.posts.length) {
                       return <rect key={c.date} x={c.col * cell + 1} y={c.row * cell + 1} width={cell - 2} height={cell - 2} rx={1.5} fill="var(--wl-empty)" />;
                     }
-                    const r = Math.max(cell * 0.32, Math.min(cell * 0.95, (cell / 2) * Math.sqrt(c.words / maxWords) * 1.9));
+                    const r = Math.max(cell * 0.32, Math.min(cell * (recent ? 0.6 : 0.95), (cell / 2) * Math.sqrt(c.words / maxWords) * 1.9));
                     const body = (
                       <>
                         <b>{prettyDate(c.date)}</b>
@@ -90,6 +101,11 @@ const InkCalendar = ({ posts, years }) => {
         </div>
         <Tip tip={tip} />
       </div>
+      {narrow && (
+        <button type="button" className="wl-cal-more" aria-pressed={allYears} onClick={() => setAllYears((v) => !v)}>
+          {allYears ? "Just the last three months" : `Show every year (${years.length})`}
+        </button>
+      )}
     </div>
   );
 };

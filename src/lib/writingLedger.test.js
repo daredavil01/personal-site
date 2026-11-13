@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import {
   busiestDay, currentMonthStreak, languageOf, ledgerModel, longestMonthStreak, longestSilence,
-  milestones, monthSeries, normalisePosts, tagKey, topics, treemap, yearGrid,
+  featuredEssays, milestones, monthSeries, normalisePosts, recentGrid, tagKey, topics, treemap, yearGrid,
 } from "./writingLedger";
 
 const P = (date, words, extra = {}) => ({ title: `Post ${date}`, date, words, ...extra });
@@ -74,5 +74,41 @@ describe("writingLedger", () => {
     expect(m.posts).toHaveLength(data.posts.filter((p) => p.date).length);
     expect(m.series[m.series.length - 1].cumulative).toBe(m.words);
     expect(m.topics.length).toBeGreaterThan(5);
+  });
+
+  it("grids the last three months up to today for the phone view", () => {
+    const g = recentGrid(posts, new Date(2024, 2, 15), 3);
+    expect(g.cells[0].date).toBe("2024-01-01");
+    expect(g.cells[g.cells.length - 1].date).toBe("2024-03-15");
+    expect(g.cells[0].row).toBe(0); // 1 Jan 2024 was a Monday
+    expect(g.months.map((m) => m.label)).toEqual(["Jan", "Feb", "Mar"]);
+    expect(g.posts).toBe(3); // the June post is after "today"
+    expect(g.words).toBe(1700);
+    expect(g.weeks).toBe(g.cells[g.cells.length - 1].col + 1);
+  });
+
+  it("picks the newest, the newest in the other language and the longest", () => {
+    const pool = normalisePosts([
+      P("2023-05-01", 3000, { url: "u1", title: "Long one" }),
+      P("2024-02-01", 800, { url: "u2", title: "मराठी लेख" }),
+      P("2024-04-01", 600, { url: "u3", title: "Newest" }),
+      P("2024-05-01", 9000, { url: "u4", title: "Show notes", type: "podcast" }),
+      P("2024-05-02", 100, { title: "No link" }),
+    ]);
+    const picks = featuredEssays(pool);
+    expect(picks.map((x) => [x.reason, x.post.title])).toEqual([
+      ["Newest", "Newest"],
+      ["Newest in Marathi", "मराठी लेख"],
+      ["Longest", "Long one"],
+    ]);
+    expect(featuredEssays([])).toEqual([]);
+  });
+
+  it("never repeats an essay when one post is both newest and longest", () => {
+    const pool = normalisePosts([
+      P("2024-01-01", 100, { url: "a", title: "Short" }),
+      P("2024-02-01", 900, { url: "b", title: "Big and new" }),
+    ]);
+    expect(featuredEssays(pool).map((x) => x.post.title)).toEqual(["Big and new"]);
   });
 });

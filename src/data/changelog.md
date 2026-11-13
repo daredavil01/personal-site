@@ -13,6 +13,19 @@ minor version per calendar week), patch for fixes and tweaks.
 
 ---
 
+## [v34.1.0] — 2026-11-13
+
+### Added
+- **Start reading** (`src/components/WritingLedger/Cover.js`, `featuredEssays` in `src/lib/writingLedger.js`): the Writing Ledger opens on three essays — the newest, the newest in the other language and the longest — above the word counter, with one line on how to read the page. Tested.
+- **The ink calendar on a phone** (`src/components/WritingLedger/InkCalendar.js`, `recentGrid` in `src/lib/writingLedger.js`): under 560 px it draws the last three months at a readable size instead of seven years of 6-pixel dots, with "Show every year" to get the rest. Tested.
+- **One instruction line per page** (`src/pages/Books.js`, `Sports.js`, `Projects.js`, the Ledger and About covers): a sentence at the end of each lead says what to tap, the pattern `/treks` already used. The Projects lead also loses its gallery-speak.
+
+### Changed
+- **Filters fold away** (`src/components/Books/ShelfControls.js`, `src/pages/Treks.js`, `src/components/Projects/ProjectFilters.js`): the Books chip rows, the Treks year/season/level rows and the Projects tech-and-tag cloud sit behind one "Filters" button (with a count) at every width, so the content comes before the controls. Search stays out; a link that arrives with a filter set opens them. `scripts/books-film/capture.mjs` opens the panel before it taps.
+- **The Books film follows the shelf** (`src/pages/Books.js`): the first spine moves from 1,538 px to about 1,000 px down a 1440-wide page, and from 2,319 to about 1,300 on a phone.
+- **About opens on the reading** (`src/components/About/AboutPage.js`, `about.css`): the hero is the name and one line on how the page works, then the 10-second line and the one-minute gist; the depth picker ("How long have you got?") and the film follow the gist. The default depth is still one minute and `?read=` is unchanged.
+- **"This month" waits for a post** (`src/components/WritingLedger/Cover.js`): the Ledger no longer shows an empty bar at 0% in a month with nothing written yet.
+
 ## [v34.0.0] — 2026-11-13
 
 ### Added

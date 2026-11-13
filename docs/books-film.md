@@ -1,7 +1,7 @@
 # The Reading Room film
 
-A 60-second vertical launch film for the redesigned `/books`, shown under the
-page's hero (`src/components/Books/BooksFilm.js`) and listed on `/films`.
+A 60-second vertical launch film for the redesigned `/books`, shown after the
+page's shelf (`src/components/Books/BooksFilm.js`) and listed on `/films`.
 Rendered with Remotion at 1080×1920, published as a 720×1280 web encode of
 about 3 MB.
 

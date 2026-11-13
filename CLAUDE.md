@@ -1015,7 +1015,7 @@ No images.
   from `libraryFacts` — never recompute one in a component.
 - **`BookSpread.js` is both the quick-look sheet and `/books/:id`.** Change the
   book's detail layout there, once.
-- **The launch film** (`BooksFilm.js`, under the hero): 60 s, vertical,
+- **The launch film** (`BooksFilm.js`, after the shelf): 60 s, vertical,
   narrated in an Indian English voice (edge-tts `en-IN-NeerjaExpressiveNeural`,
   `pip install edge-tts`) over a synthesised lo-fi beat, rendered with Remotion
   by `npm run books:film -- --publish` (`scripts/books-film/`, see

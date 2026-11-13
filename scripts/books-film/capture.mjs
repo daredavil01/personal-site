@@ -108,6 +108,12 @@ const tap = (page, selector, text) => page.evaluate(([s, t]) => {
   el?.click();
 }, [selector, text]);
 
+// The filter chips fold behind a "Filters" button (v34.1.0); open it first.
+const openFilters = (page) => page.evaluate(() => {
+  const toggle = document.querySelector(".bk-chip--toggle[aria-expanded='false']");
+  toggle?.click();
+});
+
 async function open(page, base, query = "") {
   await page.goto(`${base}/books${query}`, { waitUntil: "networkidle", timeout: 90000 }).catch(() => {});
   await page.waitForSelector(".bk-spine, .bk-shelf", { timeout: 60000 });
@@ -176,6 +182,8 @@ const CLIPS = {
     await glideTo(page, ".bk-controls", 8, 1);
     await page.waitForTimeout(800);
     page.mark("start");
+    await openFilters(page);
+    await page.waitForTimeout(500);
     await tap(page, ".bk-chip", "Marathi");
     page.tapped();
     await page.waitForTimeout(1500);

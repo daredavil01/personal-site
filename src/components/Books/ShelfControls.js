@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { facetsShape, filtersShape } from "./shapes";
 import { clothFor } from "../../lib/bookShelf";
 
 const same = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 
-// Search and filters for every lens. The subject chips double as the shelf's
-// colour key. Axes still union (see useBookFilters): two chips light more
-// books, not fewer — said out loud below, because it is the opposite of what
-// a filter bar usually does.
+// Search and filters for every lens. Search stays out; the chip rows fold
+// behind one "Filters" button at every width, so the shelf — the content — is
+// what a visitor sees first (it opens by itself when a link arrives with a
+// filter set). The subject chips double as the shelf's colour key. Axes still
+// union (see useBookFilters): two chips light more books, not fewer — said out
+// loud below, because it is the opposite of what a filter bar usually does.
 const ShelfControls = ({
   filters, setFilter, toggleFilter, clearFilters, hasFilters, facets, resultCount, totalCount,
 }) => {
@@ -16,6 +18,7 @@ const ShelfControls = ({
     filters.category, filters.language, filters.status, filters.year, filters.rating, filters.reviewed,
     filters.tags.length ? "tags" : "",
   ].filter(Boolean).length;
+  const [open, setOpen] = useState(axisCount > 0);
 
   return (
     <div className="bk-controls">
@@ -30,65 +33,81 @@ const ShelfControls = ({
             placeholder="A title, an author, a publisher…"
           />
         </div>
-
-        {facets.languages.map(({ name, count }) => (
-          <button
-            key={name}
-            type="button"
-            className="bk-chip"
-            aria-pressed={filters.language === name}
-            onClick={() => setFilter("language", filters.language === name ? "" : name)}
-          >
-            <span className={`bk-mark${/marathi/i.test(name) ? " bk-mark--mr" : ""}`} />
-            {name}
-            <i>{count}</i>
-          </button>
-        ))}
-
         <button
           type="button"
-          className="bk-chip"
-          aria-pressed={filters.reviewed === "yes"}
-          onClick={() => setFilter("reviewed", filters.reviewed === "yes" ? "" : "yes")}
+          className="bk-chip bk-chip--toggle"
+          aria-expanded={open}
+          aria-controls="bk-filter-panel"
+          onClick={() => setOpen((v) => !v)}
         >
-          <span className="material-symbols-outlined text-[16px]" aria-hidden="true">bookmark</span>
-          Reviewed
+          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">tune</span>
+          Filters
+          {axisCount > 0 && <i>{axisCount}</i>}
+          <span className="material-symbols-outlined text-[18px] bk-chip__caret" aria-hidden="true">expand_more</span>
         </button>
-
-        <span className="bk-chip bk-chip--select" data-active={!!filters.year}>
-          <select aria-label="Filter by year read" value={filters.year} onChange={(e) => setFilter("year", e.target.value)}>
-            <option value="">Any year</option>
-            {facets.years.map((y) => <option key={y} value={y}>{`Read in ${y}`}</option>)}
-          </select>
-        </span>
       </div>
 
-      <div className="bk-controls__row" role="group" aria-label="Filter by subject">
-        {facets.categories.map(({ name, count }) => (
+      <div id="bk-filter-panel" className="bk-controls__panel" hidden={!open}>
+        <div className="bk-controls__row">
+          {facets.languages.map(({ name, count }) => (
+            <button
+              key={name}
+              type="button"
+              className="bk-chip"
+              aria-pressed={filters.language === name}
+              onClick={() => setFilter("language", filters.language === name ? "" : name)}
+            >
+              <span className={`bk-mark${/marathi/i.test(name) ? " bk-mark--mr" : ""}`} />
+              {name}
+              <i>{count}</i>
+            </button>
+          ))}
+
           <button
-            key={name}
             type="button"
             className="bk-chip"
-            aria-pressed={filters.category === name}
-            onClick={() => setFilter("category", filters.category === name ? "" : name)}
+            aria-pressed={filters.reviewed === "yes"}
+            onClick={() => setFilter("reviewed", filters.reviewed === "yes" ? "" : "yes")}
           >
-            <span className="bk-swatch" style={{ "--cloth": clothFor(name) }} />
-            {name}
-            <i>{count}</i>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">bookmark</span>
+            Reviewed
           </button>
-        ))}
-        {filters.tags.map((tag) => (
-          <button key={tag} type="button" className="bk-chip" aria-pressed="true" onClick={() => toggleFilter("tags", tag)}>
-            {`#${facets.tags.find((t) => same(t.name, tag))?.name ?? tag}`}
-            <span aria-hidden="true">×</span>
-          </button>
-        ))}
-        {filters.rating && (
-          <button type="button" className="bk-chip" aria-pressed="true" onClick={() => setFilter("rating", "")}>
-            {`${filters.rating}★ and up`}
-            <span aria-hidden="true">×</span>
-          </button>
-        )}
+
+          <span className="bk-chip bk-chip--select" data-active={!!filters.year}>
+            <select aria-label="Filter by year read" value={filters.year} onChange={(e) => setFilter("year", e.target.value)}>
+              <option value="">Any year</option>
+              {facets.years.map((y) => <option key={y} value={y}>{`Read in ${y}`}</option>)}
+            </select>
+          </span>
+        </div>
+
+        <div className="bk-controls__row" role="group" aria-label="Filter by subject">
+          {facets.categories.map(({ name, count }) => (
+            <button
+              key={name}
+              type="button"
+              className="bk-chip"
+              aria-pressed={filters.category === name}
+              onClick={() => setFilter("category", filters.category === name ? "" : name)}
+            >
+              <span className="bk-swatch" style={{ "--cloth": clothFor(name) }} />
+              {name}
+              <i>{count}</i>
+            </button>
+          ))}
+          {filters.tags.map((tag) => (
+            <button key={tag} type="button" className="bk-chip" aria-pressed="true" onClick={() => toggleFilter("tags", tag)}>
+              {`#${facets.tags.find((t) => same(t.name, tag))?.name ?? tag}`}
+              <span aria-hidden="true">×</span>
+            </button>
+          ))}
+          {filters.rating && (
+            <button type="button" className="bk-chip" aria-pressed="true" onClick={() => setFilter("rating", "")}>
+              {`${filters.rating}★ and up`}
+              <span aria-hidden="true">×</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 min-h-[24px]">

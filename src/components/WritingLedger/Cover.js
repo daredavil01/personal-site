@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { prettyDate, monthLabel } from "../../lib/writingLedger";
+import {
+  featuredEssays, prettyDate, monthLabel, readingTime,
+} from "../../lib/writingLedger";
 import { fmt, prefersReducedMotion } from "./shared";
 
 // The total as a mechanical counter: each digit is a strip 0–9 that rolls to
@@ -89,6 +91,7 @@ const Cover = ({ m, period }) => {
   const priorYearTotal = (m.byYear.find((y) => y.year === String(Number(period?.yearToDate.year) - 1)) || {}).words || 0;
   const mtd = period?.monthToDate;
   const ytd = period?.yearToDate;
+  const featured = featuredEssays(m.posts);
   const accounts = [
     ["Posts published", fmt(m.posts.length)],
     ["Average post", `${fmt(m.averageWords)} words`],
@@ -104,6 +107,26 @@ const Cover = ({ m, period }) => {
     <header className="wl-cover">
       <p className="wl-eyebrow">Writing archive · {firstYear}–{lastYear} · Substack &amp; WordPress</p>
       <h1 className="wl-title">The Writing <em>Ledger</em></h1>
+      <p className="wl-lede wl-howto">
+        Start with one of the three essays below; every number after them counts the same posts,
+        and every mark on every chart opens the essay it stands for.
+      </p>
+
+      {featured.length > 0 && (
+        <ol className="wl-start" aria-label="Three essays to start with">
+          {featured.map(({ post, reason }) => (
+            <li key={post.url}>
+              <a href={post.url} target="_blank" rel="noopener noreferrer">
+                <span className="why">{reason}</span>
+                <span className="t" lang={post.lang === "Marathi" ? "mr" : undefined}>{post.title}</span>
+                <span className="meta">
+                  {prettyDate(post.date)} · {post.platform} · {readingTime(post.words).text} read
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      )}
 
       <Odometer value={m.words} />
       <p className="wl-odo-unit">words, and counting.</p>
@@ -128,17 +151,21 @@ const Cover = ({ m, period }) => {
       </ul>
 
       {period ? (
-        <div className="wl-balance">
-          <div className="wl-bal">
-            <p className="k">This month</p>
-            <p className="asof">{mtd.label} · day {mtd.daysElapsed}</p>
-            <p className="v wl-num">{fmt(mtd.words)}<small>words · {mtd.posts} posts</small></p>
-            <Track
-              value={mtd.words}
-              of={mtd.previousMonth.words}
-              label={`towards ${monthLabel(mtd.previousMonth.month, true)}'s ${fmt(mtd.previousMonth.words)}`}
-            />
-          </div>
+        <div className={`wl-balance${mtd.words > 0 ? "" : " is-single"}`}>
+          {/* A month with nothing written yet would only show an empty bar at
+              0%, so it is left out until the first post lands. */}
+          {mtd.words > 0 && (
+            <div className="wl-bal">
+              <p className="k">This month</p>
+              <p className="asof">{mtd.label} · day {mtd.daysElapsed}</p>
+              <p className="v wl-num">{fmt(mtd.words)}<small>words · {mtd.posts} posts</small></p>
+              <Track
+                value={mtd.words}
+                of={mtd.previousMonth.words}
+                label={`towards ${monthLabel(mtd.previousMonth.month, true)}'s ${fmt(mtd.previousMonth.words)}`}
+              />
+            </div>
+          )}
           <div className="wl-bal">
             <p className="k">This year</p>
             <p className="asof">{ytd.year} · day {ytd.daysElapsed} · {fmt(ytd.wordsPerDay)} words a day</p>

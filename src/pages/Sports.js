@@ -121,7 +121,7 @@ const SportsPage = () => {
                     <p className="mb-0 text-base md:text-lg leading-relaxed ar-stage-muted max-w-xl">
                       {`${plural(total.count, "race")} and ${Math.round(total.km)} km on race day`}
                       {longest?.km ? `, from ${distanceName(facets.distances[0].key)} to a ${Math.round(longest.km)} km ultra` : ""}
-                      . Each one timed, photographed and set against the others.
+                      . Each one timed, photographed and set against the others. The start line below runs them together; open Races and tap a bib for any one.
                     </p>
                   </div>
                   {headline && <Descent best={headline} />}
