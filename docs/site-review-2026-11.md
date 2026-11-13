@@ -41,7 +41,7 @@ curated samples instead of a full directory, heavy features lower down.
 
 1. **Error boundary.** Add `src/components/common/ErrorBoundary.js` (class component, optional `fallback`). Wrap `GlobeRenderer` in `GlobeShowcase.js` and `atlas/intro/OrbitStage.js` (fallback: the existing `GlobeSkeleton` / go straight to the map), and wrap `<Routes>` in `App.js` with a fallback that renders a plain "something broke, reload" inside `Main`. Add a WebGL capability check before mounting the globe so it degrades without throwing.
 2. **Test.** A render test that makes `GlobeRenderer` throw and asserts the homepage still shows its heading.
-3. **Books guard.** Filter rows without a `title` in `BooksShelf.js`.
+3. **Books guard.** Filter rows without a `title` in `src/pages/Books.js` (the Reading Room redesign replaced `BooksShelf.js`).
 4. **Readable nav.** In `Navigation.js` and `Hamburger.js`: 10 px → 13 px, tracking 0.25em → 0.12em, 44 px minimum tap height. Raise the shared button/label style from 10 px to 12 px where it is a control (CTA links, tabs, filter pills); leave decorative eyebrows alone. Do it by pattern, not a blind replace.
 
 ### Phase 2: homepage and navigation (one PR, major version)
@@ -71,9 +71,9 @@ curated samples instead of a full directory, heavy features lower down.
 
 ## Housekeeping per CLAUDE.md
 
-Status: plan only, nothing here is implemented yet. Each PR adds its entry to `src/data/changelog.md`. Phase 2 touches a Blueprint
+Status: Phase 1 shipped in v33.1.2. Each PR adds its entry to `src/data/changelog.md`. Phase 2 touches a Blueprint
 room (`src/components/Blueprint/features.js`, Foyer) and `docs/routes.md` if nav
-labels are referenced. Work on branch `ccr-141330ac-hhkjmq`.
+labels are referenced. Work on branch `claude/funny-ptolemy-sm6ola`.
 
 ## Verification
 

@@ -102,7 +102,7 @@ const PhotoViewer = ({ images, title, maxVh }) => {
 
       <figcaption className="flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500 dark:text-stone-400">
         <span>{caption}</span>
-        <a href={photo.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-label uppercase tracking-widest text-[10px] font-bold hover:text-secondary">
+        <a href={photo.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-label uppercase tracking-widest text-xs font-bold hover:text-secondary">
           <span className="material-symbols-outlined text-[14px]" aria-hidden="true">open_in_full</span>
           Full size
         </a>

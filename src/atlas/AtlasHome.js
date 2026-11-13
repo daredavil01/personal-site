@@ -21,6 +21,7 @@ import { resolveTime } from "./theme/timeOfDay";
 import atlasEvent from "./lib/atlasEvent";
 import WorldMap from "./map/WorldMap";
 import OrbitStage from "./intro/OrbitStage";
+import { hasWebGL } from "../lib/webgl";
 
 // Lazy so GSAP (and the dive CSS) loads only when a visitor actually plays the
 // intro — never for returning visitors who land straight on the map.
@@ -43,6 +44,8 @@ const AtlasHome = () => {
   const initial = useMemo(() => {
     if (state?.toRegion) return { stage: "map", entry: "return" };
     if (world.introSeen && !state?.replayIntro) return { stage: "map", entry: "direct" };
+    // The orbit is a WebGL globe; without WebGL there is nothing to orbit.
+    if (!hasWebGL()) return { stage: "map", entry: "direct" };
     return { stage: "orbit", entry: null };
   }, []); // mount-only: the entry stage is captured once
 

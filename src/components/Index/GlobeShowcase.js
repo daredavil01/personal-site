@@ -1,5 +1,8 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import SectionHeader from "../common/SectionHeader";
+import ErrorBoundary from "../common/ErrorBoundary";
+import { hasWebGL } from "../../lib/webgl";
 import HOME_FEATURES from "../../data/homeFeatures";
 import {
   useSports,
@@ -19,6 +22,20 @@ const GlobeSkeleton = () => (
     <span className="font-label text-xs uppercase tracking-widest">
       Loading globe...
     </span>
+  </div>
+);
+
+// Drawn instead of the globe when the browser has no WebGL (or three.js throws
+// anyway). Same footprint as the skeleton, so the page below does not jump.
+const GlobeUnavailable = () => (
+  <div className="w-full h-[420px] md:h-[560px] bg-stone-100 dark:bg-stone-800 rounded-2xl flex flex-col items-center justify-center gap-3 px-6 text-center text-stone-500 dark:text-stone-400">
+    <span className="material-symbols-outlined text-4xl" aria-hidden="true">public_off</span>
+    <p className="font-body text-base max-w-sm mb-0">
+      The globe needs WebGL, which this browser has switched off. Every
+      section is linked on this page, and the{" "}
+      <Link to="/mindmap" className="text-secondary hover:underline">mind map</Link>
+      {" "}draws them all without it.
+    </p>
   </div>
 );
 
@@ -46,6 +63,8 @@ const GlobeShowcase = () => {
   const { data: projectsData } = useProjects();
 
   const [selectedItem, setSelectedItem] = useState(null);
+  // Asked only once the section scrolls into view: it costs a canvas.
+  const webgl = useMemo(() => (inView ? hasWebGL() : null), [inView]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -98,16 +117,18 @@ const GlobeShowcase = () => {
   return (
     <section ref={containerRef} className="w-full">
       <SectionHeader label="My World" />
-      {!inView ? (
-        <GlobeSkeleton />
-      ) : (
-        <React.Suspense fallback={<GlobeSkeleton />}>
-          <GlobeRenderer
-            pins={pins}
-            onPinClick={setSelectedItem}
-            paused={selectedItem !== null}
-          />
-        </React.Suspense>
+      {!inView && <GlobeSkeleton />}
+      {inView && !webgl && <GlobeUnavailable />}
+      {inView && webgl && (
+        <ErrorBoundary fallback={<GlobeUnavailable />}>
+          <React.Suspense fallback={<GlobeSkeleton />}>
+            <GlobeRenderer
+              pins={pins}
+              onPinClick={setSelectedItem}
+              paused={selectedItem !== null}
+            />
+          </React.Suspense>
+        </ErrorBoundary>
       )}
 
       {selectedItem && (

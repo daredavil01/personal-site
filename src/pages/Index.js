@@ -38,7 +38,7 @@ const Index = () => (
         <OneMinuteIntro className="font-body text-lg text-stone-600 dark:text-stone-300 max-w-2xl leading-relaxed mb-6" />
         <Link
           to="/about"
-          className="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary inline-flex items-center gap-2 hover:gap-4 transition-all no-underline"
+          className="font-label text-xs uppercase tracking-[0.2em] font-bold text-secondary inline-flex items-center gap-2 hover:gap-4 transition-all no-underline"
         >
           Read the full story
           <span className="material-symbols-outlined text-[14px]">
@@ -86,7 +86,7 @@ const Index = () => (
               <div className="mt-6">
                 <Link
                   to={item.path}
-                  className="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary flex items-center gap-2 group-hover:gap-4 transition-all no-underline"
+                  className="font-label text-xs uppercase tracking-[0.2em] font-bold text-secondary flex items-center gap-2 group-hover:gap-4 transition-all no-underline"
                 >
                   Explore Section
                   <span className="material-symbols-outlined text-[14px]">
@@ -110,7 +110,7 @@ const Index = () => (
         </p>
         <Link
           to="/contact"
-          className="inline-block px-8 py-3 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-900 hover:text-white dark:hover:bg-stone-100 dark:hover:text-stone-950 transition-all rounded-sm no-underline"
+          className="inline-block px-8 py-3 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-label text-xs uppercase tracking-widest font-bold hover:bg-stone-900 hover:text-white dark:hover:bg-stone-100 dark:hover:text-stone-950 transition-all rounded-sm no-underline"
         >
           Start a Conversation
         </Link>

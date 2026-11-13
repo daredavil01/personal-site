@@ -19,6 +19,7 @@ import PropTypes from "prop-types";
 import { DOMAINS } from "../../components/Index/globe/domains";
 import useCountUp from "../../hooks/useCountUp";
 import ATLAS_STATS from "../../data/atlasStats";
+import ErrorBoundary from "../../components/common/ErrorBoundary";
 import "./intro.css";
 
 // Lazy so react-globe.gl + three.js stay in their own chunk (never the atlas
@@ -57,9 +58,13 @@ const OrbitStage = forwardRef(({ onEnter, onSkip }, globeApiRef) => {
 
   return (
     <div className="atlas-orbit">
-      <React.Suspense fallback={<div className="atlas-orbit-globe-skeleton" />}>
-        <GlobeRenderer ref={globeApiRef} pins={ORBIT_PINS} onPinClick={noop} mode="orbit" />
-      </React.Suspense>
+      {/* If three.js throws, the title and both buttons still stand; the dive
+          already tolerates a missing globe handle. */}
+      <ErrorBoundary fallback={<div className="atlas-orbit-globe-skeleton" />}>
+        <React.Suspense fallback={<div className="atlas-orbit-globe-skeleton" />}>
+          <GlobeRenderer ref={globeApiRef} pins={ORBIT_PINS} onPinClick={noop} mode="orbit" />
+        </React.Suspense>
+      </ErrorBoundary>
 
       <div className="atlas-orbit-overlay">
         <div className="atlas-orbit-hero">

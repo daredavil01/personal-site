@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from "react";
+import PropTypes from "prop-types";
 import {
   BrowserRouter, Routes, Route, Navigate, useLocation,
 } from "react-router-dom";
@@ -7,6 +8,7 @@ import { ContentProvider } from "./context/ContentContext";
 import { WorldProvider } from "./atlas/world/WorldContext";
 import useViewMode from "./atlas/useViewMode";
 import Main from "./layouts/Main"; // fallback for lazy pages
+import ErrorBoundary from "./components/common/ErrorBoundary";
 import "./tailwind.css"; // Tailwind globals
 
 const { PUBLIC_URL } = process.env;
@@ -75,6 +77,49 @@ const AtlasFrameGate = () => {
   );
 };
 
+// What a page that throws draws instead of a white screen. Inside Main, so the
+// nav and footer still work and the reader can go somewhere else.
+const RouteError = () => (
+  <Main noindex>
+    <section className="max-w-xl py-12">
+      <h1 className="font-headline text-4xl font-black text-stone-900 dark:text-stone-100 mb-4">
+        Something broke on this page
+      </h1>
+      <p className="font-body text-lg text-stone-600 dark:text-stone-300 mb-8">
+        The rest of the site is fine. Reloading usually fixes it; if not, the
+        menu above goes everywhere else.
+      </p>
+      <div className="flex flex-wrap gap-4">
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="px-6 py-3 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-950 font-label text-xs uppercase tracking-widest font-bold rounded-sm"
+        >
+          Reload
+        </button>
+        <a
+          href="/"
+          className="px-6 py-3 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-label text-xs uppercase tracking-widest font-bold rounded-sm no-underline"
+        >
+          Go home
+        </a>
+      </div>
+    </section>
+  </Main>
+);
+
+// Keyed on the path, so leaving the broken page clears the error.
+const RouteErrorBoundary = ({ children }) => {
+  const { pathname } = useLocation();
+  return (
+    <ErrorBoundary fallback={<RouteError />} resetKeys={[pathname]}>
+      {children}
+    </ErrorBoundary>
+  );
+};
+
+RouteErrorBoundary.propTypes = { children: PropTypes.node.isRequired };
+
 // "/" is the one route whose two shells render different components rather than
 // the same content in a different wrapper: the atlas homepage is the world map,
 // the classic homepage is the editorial hub. Every other route goes through
@@ -87,55 +132,57 @@ const App = () => (
       <WorldProvider>
         <BrowserRouter basename={PUBLIC_URL}>
           <AtlasFrameGate />
-          <Suspense fallback={<Main />}>
-            <Routes>
-              <Route path="/" element={<HomeRoute />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/ask" element={<Ask />} />
-              <Route path="/ask/s/:token" element={<AskShare />} />
-              <Route path="/projects" element={<Projects />} />
-              <Route path="/stats" element={<Stats />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/resume" element={<Resume />} />
-              <Route path="/instagram" element={<Instagram />} />
-              <Route path="/sports" element={<SportsPage />} />
-              <Route path="/now" element={<Now />} />
-              <Route path="/newsletter" element={<Newsletter />} />
-              <Route path="/newsletter/:slug" element={<NewsletterIssue />} />
-              <Route path="/books" element={<Books />} />
-              <Route path="/challenges" element={<Challenges />} />
-              <Route path="/100-days-to-offload" element={<OneHundredDays />} />
-              <Route path="/micro-blog" element={<MicroBlog />} />
-              <Route path="/micro-blog/:id" element={<MicroBlogPost />} />
-              <Route path="/logbook" element={<Logbook />} />
-              <Route path="/writing-ledger" element={<WritingLedger />} />
-              <Route path="/treks/:id" element={<TrekPost />} />
-              <Route path="/sports/:id" element={<SportPost />} />
-              <Route path="/books/:id" element={<BookPost />} />
-              <Route path="/projects/:id" element={<ProjectPost />} />
-              <Route path="/presentations" element={<Presentations />} />
-              <Route path="/presentations/:id" element={<PresentationPost />} />
-              <Route path="/videos" element={<Videos />} />
-              <Route path="/videos/:id" element={<VideoPost />} />
-              <Route path="/training" element={<Training />} />
-              <Route path="/training/:id" element={<TrainingPost />} />
-              <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
-              <Route path="/changelog" element={<Changelog />} />
-              <Route path="/changelog/graph" element={<ChangelogGraph />} />
-              <Route path="/treks" element={<TreksPage />} />
-              <Route path="/interactive-me" element={<InteractiveMePage />} />
-              <Route path="/mindmap" element={<MindMap />} />
-              <Route path="/blueprint" element={<Blueprint />} />
-              <Route path="/films" element={<Films />} />
-              <Route path="/tags" element={<TagsHub />} />
-              <Route path="/tags/:name" element={<TagDetail />} />
-              <Route path="/admin/*" element={<AdminApp />} />
-              {/* The dark-build preview route. Kept so old links and bookmarks
-                still land somewhere sensible now that "/" is the atlas. */}
-              <Route path="/world" element={<Navigate to="/" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <RouteErrorBoundary>
+            <Suspense fallback={<Main />}>
+              <Routes>
+                <Route path="/" element={<HomeRoute />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/ask" element={<Ask />} />
+                <Route path="/ask/s/:token" element={<AskShare />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/resume" element={<Resume />} />
+                <Route path="/instagram" element={<Instagram />} />
+                <Route path="/sports" element={<SportsPage />} />
+                <Route path="/now" element={<Now />} />
+                <Route path="/newsletter" element={<Newsletter />} />
+                <Route path="/newsletter/:slug" element={<NewsletterIssue />} />
+                <Route path="/books" element={<Books />} />
+                <Route path="/challenges" element={<Challenges />} />
+                <Route path="/100-days-to-offload" element={<OneHundredDays />} />
+                <Route path="/micro-blog" element={<MicroBlog />} />
+                <Route path="/micro-blog/:id" element={<MicroBlogPost />} />
+                <Route path="/logbook" element={<Logbook />} />
+                <Route path="/writing-ledger" element={<WritingLedger />} />
+                <Route path="/treks/:id" element={<TrekPost />} />
+                <Route path="/sports/:id" element={<SportPost />} />
+                <Route path="/books/:id" element={<BookPost />} />
+                <Route path="/projects/:id" element={<ProjectPost />} />
+                <Route path="/presentations" element={<Presentations />} />
+                <Route path="/presentations/:id" element={<PresentationPost />} />
+                <Route path="/videos" element={<Videos />} />
+                <Route path="/videos/:id" element={<VideoPost />} />
+                <Route path="/training" element={<Training />} />
+                <Route path="/training/:id" element={<TrainingPost />} />
+                <Route path="/100-days-to-offload/:id" element={<BlogPost />} />
+                <Route path="/changelog" element={<Changelog />} />
+                <Route path="/changelog/graph" element={<ChangelogGraph />} />
+                <Route path="/treks" element={<TreksPage />} />
+                <Route path="/interactive-me" element={<InteractiveMePage />} />
+                <Route path="/mindmap" element={<MindMap />} />
+                <Route path="/blueprint" element={<Blueprint />} />
+                <Route path="/films" element={<Films />} />
+                <Route path="/tags" element={<TagsHub />} />
+                <Route path="/tags/:name" element={<TagDetail />} />
+                <Route path="/admin/*" element={<AdminApp />} />
+                {/* The dark-build preview route. Kept so old links and bookmarks
+                  still land somewhere sensible now that "/" is the atlas. */}
+                <Route path="/world" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </RouteErrorBoundary>
         </BrowserRouter>
       </WorldProvider>
     </ContentProvider>

@@ -59,7 +59,7 @@ const Hamburger = () => {
           <span className="font-headline text-white uppercase tracking-[0.2em] text-sm font-bold">Menu</span>
           <button
             onClick={() => setOpen(false)}
-            className="p-1 text-stone-400 hover:text-white transition-colors"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-400 hover:text-white transition-colors"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-xl">close</span>
@@ -94,7 +94,7 @@ const Hamburger = () => {
                           key={sub.label}
                           route={sub}
                           onNavigate={() => setOpen(false)}
-                          className={`block py-2 px-3 rounded font-label text-xs uppercase tracking-widest transition-colors ${
+                          className={`block py-3 px-3 rounded font-label text-[13px] uppercase tracking-[0.12em] transition-colors ${
                             isSubActive ? 'text-secondary' : 'text-stone-400 hover:text-white'
                           }`}
                         >
@@ -129,7 +129,7 @@ const Hamburger = () => {
             href="https://flowcv.com/resume/4wn6onnkg9"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-stone-200 rounded font-label text-[10px] uppercase tracking-widest font-bold hover:bg-stone-700 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] bg-stone-800 text-stone-200 rounded font-label text-xs uppercase tracking-widest font-bold hover:bg-stone-700 transition-all"
           >
             <span className="material-symbols-outlined text-[13px]">download</span>
             Resume PDF
@@ -145,7 +145,7 @@ const Hamburger = () => {
       {/* Hamburger button — stays inside the header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="p-2 text-stone-600 dark:text-stone-400 hover:text-secondary transition-colors"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-secondary transition-colors"
         aria-label="Toggle Menu"
       >
         <span className="material-symbols-outlined text-2xl">

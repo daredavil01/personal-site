@@ -36,7 +36,13 @@ const LENSES = [
 const isLens = (id) => LENSES.some((l) => l.id === id);
 
 const Books = () => {
-  const { data: booksData, loading, error } = useBooks();
+  const { data: rawBooks, loading, error } = useBooks();
+  // A row with no title has nothing to put on a spine — an admin draft, or a
+  // page caught mid-load. Leave it off rather than draw an empty book.
+  const booksData = useMemo(
+    () => (rawBooks ?? []).filter((b) => String(b.title ?? "").trim()),
+    [rawBooks],
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [selected, setSelected] = useState(null);
   const [pulledId, setPulledId] = useState(null);

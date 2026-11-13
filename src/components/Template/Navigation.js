@@ -46,7 +46,7 @@ const Navigation = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <nav aria-label="Primary" className="hidden md:flex items-center">
+        <nav aria-label="Primary" className="hidden lg:flex items-center">
           {mainRoutes.map((l, idx) => {
             const isActive = isCurrent(l);
             const hasSubRoutes = l.subRoutes && l.subRoutes.length > 0;
@@ -63,7 +63,7 @@ const Navigation = () => {
                 >
                   <NavLink
                     route={l}
-                    className={`px-4 py-2 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-all flex items-center gap-1 ${
+                    className={`px-4 py-2 min-h-[44px] font-label text-[13px] uppercase tracking-[0.12em] no-underline transition-all flex items-center gap-1 ${
                       isActive
                         ? "text-secondary font-bold"
                         : "text-stone-500 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
@@ -71,13 +71,13 @@ const Navigation = () => {
                   >
                     {l.label}
                     {hasSubRoutes && (
-                      <span className={`material-symbols-outlined text-[12px] transition-transform duration-300 ${openDropdown === l.label ? 'rotate-180' : ''}`}>expand_more</span>
+                      <span className={`material-symbols-outlined text-[14px] transition-transform duration-300 ${openDropdown === l.label ? 'rotate-180' : ''}`}>expand_more</span>
                     )}
                   </NavLink>
 
                   {/* Nested Dropdown */}
                   {hasSubRoutes && (
-                    <div className={`absolute top-full left-0 mt-0 w-48 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-2xl overflow-hidden transition-all duration-300 origin-top rounded-b-xl ${
+                    <div className={`absolute top-full left-0 mt-0 w-56 bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-2xl overflow-hidden transition-all duration-300 origin-top rounded-b-xl ${
                       openDropdown === l.label ? "opacity-100 scale-y-100 visible" : "opacity-0 scale-y-95 invisible"
                     }`}
                     >
@@ -88,7 +88,7 @@ const Navigation = () => {
                             <NavLink
                               key={sub.label}
                               route={sub}
-                              className={`block px-6 py-3 font-label text-[10px] uppercase tracking-[0.25em] no-underline transition-colors border-b border-stone-50 last:border-0 dark:border-stone-800/50 ${
+                              className={`block px-6 py-3 font-label text-[13px] uppercase tracking-[0.12em] no-underline transition-colors border-b border-stone-50 last:border-0 dark:border-stone-800/50 ${
                                 isSubActive
                                   ? "text-secondary bg-stone-50 dark:bg-stone-800/50"
                                   : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800/50"
@@ -110,7 +110,7 @@ const Navigation = () => {
         </nav>
 
         {/* Mobile Hamburger Wrapper */}
-        <div className="md:hidden block">
+        <div className="lg:hidden block">
             <Hamburger />
         </div>
       </div>

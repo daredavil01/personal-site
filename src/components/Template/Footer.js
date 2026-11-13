@@ -8,9 +8,9 @@ import routes from "../../data/routes";
 // headings the nav uses, from one source (data/routes.js) so the two can't
 // drift apart.
 
-const linkClass = "font-body text-xs text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary transition-colors no-underline";
+const linkClass = "font-body text-sm text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary transition-colors no-underline";
 
-const socialClass = "font-label text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary transition-colors hover:underline decoration-secondary underline-offset-4";
+const socialClass = "font-label text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 hover:text-secondary dark:hover:text-secondary transition-colors hover:underline decoration-secondary underline-offset-4";
 
 // Where the writing actually lives comes before where the photos do — the two
 // blog platforms are the point of the site, so Instagram's profile link gave
@@ -50,7 +50,7 @@ const Footer = () => {
         <nav aria-label="Site map" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-8">
           {groups.map((group) => (
             <div key={group.label}>
-              <p className="mb-3 font-label text-[10px] uppercase tracking-widest text-stone-700 dark:text-stone-300 font-bold">
+              <p className="mb-3 font-label text-xs uppercase tracking-widest text-stone-700 dark:text-stone-300 font-bold">
                 {group.label}
               </p>
               <ul className="list-none pl-0 m-0 flex flex-col gap-2">
@@ -64,7 +64,7 @@ const Footer = () => {
           {/* Anything with no group of its own — About today. */}
           {loose.length > 0 && (
             <div>
-              <p className="mb-3 font-label text-[10px] uppercase tracking-widest text-stone-700 dark:text-stone-300 font-bold">
+              <p className="mb-3 font-label text-xs uppercase tracking-widest text-stone-700 dark:text-stone-300 font-bold">
                 Site
               </p>
               <ul className="list-none pl-0 m-0 flex flex-col gap-2">

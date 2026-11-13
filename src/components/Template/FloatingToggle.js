@@ -22,7 +22,7 @@ const FloatingToggle = ({ showAtlasSwitch = true }) => {
   const mode = useViewMode();
 
   const buttonCls = "p-[11px] rounded-full bg-stone-900 dark:bg-stone-50 text-stone-50 dark:text-stone-900 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group flex items-center justify-center border border-stone-200/10";
-  const labelCls = "max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap font-label text-[10px] uppercase tracking-widest ml-0 group-hover:ml-2 font-bold opacity-0 group-hover:opacity-100";
+  const labelCls = "max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap font-label text-xs uppercase tracking-widest ml-0 group-hover:ml-2 font-bold opacity-0 group-hover:opacity-100";
 
   const enterAtlas = () => {
     atlasEvent("atlas_view_switch", { to: "atlas" });

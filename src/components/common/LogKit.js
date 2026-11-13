@@ -456,7 +456,7 @@ export const ResultLine = ({
       {shown === total ? `${total} ${noun}${total === 1 ? "" : "s"}` : `Showing ${shown} of ${total} ${noun}s`}
     </p>
     {onClear && (
-      <button type="button" onClick={onClear} className="flex items-center gap-1 text-secondary font-label text-[10px] uppercase tracking-widest font-bold hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+      <button type="button" onClick={onClear} className="flex items-center gap-1 text-secondary font-label text-xs uppercase tracking-widest font-bold hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
         <span className="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
         Clear filters
       </button>
