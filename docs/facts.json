@@ -33,7 +33,7 @@
     "videos": 24,
     "projects": 26,
     "instagram": 11,
-    "microblog": 1680
+    "microblog": 1684
   },
   "latest": {
     "now": {
@@ -52,9 +52,9 @@
       "u": "https://sankettambare.substack.com/p/2025-ayear-of-confluence-and-consistency"
     },
     "microblog": {
-      "d": "2026-11-11",
-      "t": "#१४७४ मन...!",
-      "u": "/micro-blog/1679"
+      "d": "2026-11-15",
+      "t": "#१४७८ खंडेराव उवाच!",
+      "u": "/micro-blog/1683"
     }
   },
   "resume": {
@@ -439,132 +439,132 @@
     ],
     "sport": [
       {
-        "d": "2026-09-27",
+        "d": "2026-09-26",
         "t": "PR South LSoM Half Marathon ",
         "u": "/sports/26"
       },
       {
-        "d": "2026-09-06",
+        "d": "2026-09-05",
         "t": "Satara Hill Half Marathon 2026",
         "u": "/sports/25"
       },
       {
-        "d": "2026-08-30",
+        "d": "2026-08-29",
         "t": "NMDC Hyderabad Marathon 2026",
         "u": "/sports/24"
       },
       {
-        "d": "2026-08-08",
+        "d": "2026-08-07",
         "t": "Self Paced Sinhagad Half Marathon ",
         "u": "/sports/23"
       },
       {
-        "d": "2026-07-30",
+        "d": "2026-07-29",
         "t": "July Self Paced Half Marathon",
         "u": "/sports/22"
       },
       {
-        "d": "2026-06-07",
+        "d": "2026-06-06",
         "t": "Vrukshathon 2026",
         "u": "/sports/21"
       },
       {
-        "d": "2026-03-22",
+        "d": "2026-03-21",
         "t": "Nanded City LSOM 2026",
         "u": "/sports/20"
       },
       {
-        "d": "2026-02-22",
+        "d": "2026-02-21",
         "t": "Tata Ultra Marathon 2026",
         "u": "/sports/19"
       },
       {
-        "d": "2026-02-15",
+        "d": "2026-02-14",
         "t": "IPA Neerathon 2026",
         "u": "/sports/18"
       },
       {
-        "d": "2026-01-18",
+        "d": "2026-01-17",
         "t": "Tata Mumbai Marathon 2026",
         "u": "/sports/17"
       },
       {
-        "d": "2025-12-07",
+        "d": "2025-12-06",
         "t": "Pune International Marathon 2025",
         "u": "/sports/16"
       },
       {
-        "d": "2025-09-14",
+        "d": "2025-09-13",
         "t": "Satara Half Hill Marathon 2025",
         "u": "/sports/14"
       },
       {
-        "d": "2025-08-24",
+        "d": "2025-08-23",
         "t": "NMDC Hyderabad Marathon 2025",
         "u": "/sports/15"
       },
       {
-        "d": "2025-06-01",
+        "d": "2025-05-31",
         "t": "Vrukshathon 2025",
         "u": "/sports/13"
       },
       {
-        "d": "2025-02-23",
+        "d": "2025-02-22",
         "t": "Tata Ultra Marathon, Lonavala 2025",
         "u": "/sports/12"
       },
       {
-        "d": "2025-02-02",
+        "d": "2025-02-01",
         "t": "Milit Lake View HM 2025",
         "u": "/sports/11"
       },
       {
-        "d": "2025-01-19",
+        "d": "2025-01-18",
         "t": "Tata Mumbai Marathon 2025",
         "u": "/sports/10"
       },
       {
-        "d": "2024-11-17",
+        "d": "2024-11-16",
         "t": "CME Marathon 2024",
         "u": "/sports/9"
       },
       {
-        "d": "2024-10-20",
+        "d": "2024-10-19",
         "t": "Apala Pune Marathon 2024",
         "u": "/sports/8"
       },
       {
-        "d": "2024-09-01",
+        "d": "2024-08-31",
         "t": "Satara Half Hill Marathon 2024",
         "u": "/sports/7"
       },
       {
-        "d": "2024-08-26",
+        "d": "2024-08-25",
         "t": "NMDC Hyderabad Marathon 2024",
         "u": "/sports/6"
       },
       {
-        "d": "2024-06-09",
+        "d": "2024-06-08",
         "t": "Vrukshathon 2024",
         "u": "/sports/5"
       },
       {
-        "d": "2024-04-07",
+        "d": "2024-04-06",
         "t": "ANP Run 2024",
         "u": "/sports/4"
       },
       {
-        "d": "2024-03-17",
+        "d": "2024-03-16",
         "t": "AMIBOLT 2024",
         "u": "/sports/3"
       },
       {
-        "d": "2024-03-03",
+        "d": "2024-03-02",
         "t": "Pune City Marathon 2024",
         "u": "/sports/2"
       },
       {
-        "d": "2023-10-15",
+        "d": "2023-10-14",
         "t": "NDA Marathon 2023",
         "u": "/sports/1"
       }
@@ -1061,11 +1061,11 @@
   "top_tags": [
     {
       "name": "life",
-      "total": 489
+      "total": 492
     },
     {
       "name": "self-reflection",
-      "total": 478
+      "total": 479
     },
     {
       "name": "marathi",
@@ -1077,7 +1077,7 @@
     },
     {
       "name": "personaldevelopment",
-      "total": 145
+      "total": 146
     },
     {
       "name": "love",
@@ -1089,7 +1089,7 @@
     },
     {
       "name": "philosophy",
-      "total": 131
+      "total": 132
     },
     {
       "name": "calmness",
@@ -1141,7 +1141,7 @@
     },
     {
       "name": "मन",
-      "total": 47
+      "total": 50
     },
     {
       "name": "nightsky",
@@ -1149,7 +1149,7 @@
     },
     {
       "name": "खंडेराव",
-      "total": 44
+      "total": 45
     },
     {
       "name": "running",
@@ -1162,8 +1162,8 @@
   ],
   "microblog": {
     "by_type": {
-      "text": 490,
-      "photo": 953,
+      "text": 493,
+      "photo": 954,
       "quote": 237
     },
     "by_year": {
@@ -1175,10 +1175,10 @@
       "2023": 56,
       "2024": 66,
       "2025": 58,
-      "2026": 111
+      "2026": 115
     },
     "date_range": {
-      "max": "2026-11-11",
+      "max": "2026-11-15",
       "min": "2018-03-19"
     }
   },
@@ -1186,7 +1186,7 @@
     "year": 2026,
     "month": "November"
   },
-  "generated_at": "2026-11-12T17:53:58.865735+00:00",
+  "generated_at": "2026-11-16T15:50:42.371775+00:00",
   "index_by_type": {
     "now": 15,
     "tag": 141,
@@ -1202,9 +1202,9 @@
     "project": 26,
     "writing": 43,
     "training": 29,
-    "changelog": 142,
+    "changelog": 145,
     "instagram": 11,
-    "microblog": 1680,
+    "microblog": 1684,
     "presentation": 24
   },
   "tags_by_category": {

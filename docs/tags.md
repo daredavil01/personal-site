@@ -6,14 +6,14 @@ Names are lowercase and URI-encoded rather than slugified.
 <!-- generated:tags start -->
 | tag | items | category |
 |---|---|---|
-| `life` | 489 | Mind & Life |
-| `self-reflection` | 478 | Mind & Life |
+| `life` | 492 | Mind & Life |
+| `self-reflection` | 479 | Mind & Life |
 | `marathi` | 273 | Books & Reading |
 | `social media` | 151 | Digital Life |
-| `personaldevelopment` | 145 | Mind & Life |
+| `personaldevelopment` | 146 | Mind & Life |
 | `love` | 137 | People & Feelings |
 | `sanky` | 135 | Personal |
-| `philosophy` | 131 | Society & Ideas |
+| `philosophy` | 132 | Society & Ideas |
 | `calmness` | 128 | Mind & Life |
 | `digital wellbeing` | 123 | Digital Life |
 | `travel` | 119 | Travel & Outdoors |
@@ -26,15 +26,15 @@ Names are lowercase and URI-encoded rather than slugified.
 | `ai` | 60 | Technology & Data |
 | `choices` | 54 | Mind & Life |
 | `maharashtra` | 52 | Travel & Outdoors |
-| `मन` | 47 | Mind & Life |
+| `मन` | 50 | Mind & Life |
 | `nightsky` | 45 | Travel & Outdoors |
-| `खंडेराव` | 44 | Writing & Blogging |
+| `खंडेराव` | 45 | Writing & Blogging |
 | `running` | 42 | Running & Fitness |
 | `desperate me` | 40 | People & Feelings |
 | `100_days_to_offload` | 39 | Writing & Blogging |
 | `forts` | 38 | Travel & Outdoors |
 | `nirman` | 35 | Society & Ideas |
-| `self-help` | 34 | Books & Reading |
+| `self-help` | 35 | Books & Reading |
 | `daredavil01` | 32 | Personal |
 | `भटकंती` | 30 | Travel & Outdoors |
 | `konkan` | 29 | Travel & Outdoors |
@@ -58,13 +58,13 @@ Names are lowercase and URI-encoded rather than slugified.
 | `auto-biography` | 12 | Books & Reading |
 | `learning` | 11 | — |
 | `adventure` | 10 | Travel & Outdoors |
+| `bioscope` | 9 | Mind & Life |
 | `data` | 9 | Technology & Data |
 | `ngo` | 9 | Society & Ideas |
 | `trekking` | 9 | Travel & Outdoors |
 | `non-fiction` | 8 | Books & Reading |
 | `sports` | 8 | Running & Fitness |
 | `the social dilemma` | 8 | Digital Life |
-| `bioscope` | 7 | Mind & Life |
 | `data visualization` | 7 | Technology & Data |
 | `tarkarli` | 7 | Travel & Outdoors |
 | `technology policy` | 7 | Society & Ideas |
