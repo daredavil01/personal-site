@@ -4,6 +4,7 @@ Software engineer in Pune. I build data pipelines by day, run ultras at dawn, cl
 
 # Updates
 
+- 2026-11-18 — Became an AI Ambassador for the Institute of AI (IoAI). #career
 - 2026-11-04 — Redesigned this page: read it in ten seconds, a minute, five or ten. #life
 
 # 5 minutes

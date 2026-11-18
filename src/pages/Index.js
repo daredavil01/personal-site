@@ -9,6 +9,7 @@ import LatestPosts from "../components/Index/LatestPosts";
 import MonthlyDigest from "../components/Index/MonthlyDigest";
 import GlobeShowcase from "../components/Index/GlobeShowcase";
 import Trailer from "../components/Index/Trailer";
+import IoaiAmbassador from "../components/common/IoaiAmbassador";
 import SectionHeader from "../components/common/SectionHeader";
 import useLatestPosts from "../components/Index/useLatestPosts";
 
@@ -39,6 +40,8 @@ const Index = () => (
       <HomeDoors />
 
       <LatestWriting />
+
+      <IoaiAmbassador />
 
       <LifeStats />
 

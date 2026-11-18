@@ -3,7 +3,7 @@ import React, {
 } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
-  ArrowRight, Briefcase, Hammer, Footprints, Code2, Mountain, BookOpen, PenLine, MessageCircle,
+  ArrowRight, Briefcase, Hammer, Footprints, Code2, Mountain, BookOpen, PenLine, MessageCircle, Sparkles,
 } from "lucide-react";
 import aboutMd from "../../data/aboutContent";
 import {
@@ -23,6 +23,7 @@ import {
 import { IDENTITY } from "../../data/identity";
 import "./about.css";
 import PageFilm from "../common/PageFilm";
+import IoaiAmbassador from "../common/IoaiAmbassador";
 
 const AskChat = lazy(() => import("../Ask/AskChat"));
 
@@ -339,6 +340,7 @@ const AboutPage = () => {
           <span className="ab-role"><Footprints size={13} />Ultra runner</span>
           <span className="ab-role"><Mountain size={13} />Fort trekker</span>
           <span className="ab-role"><PenLine size={13} />Writes in English &amp; मराठी</span>
+          <span className="ab-role"><Sparkles size={13} />AI Ambassador, IoAI</span>
         </div>
         <LatestLog updates={updates} initial={3}>
           {isOwner && <OwnerLink to="/admin/resume/certifications?new=1" label="Add certification" kind="add" />}
@@ -383,6 +385,7 @@ const AboutPage = () => {
               </Link>
             )}
           </div>
+          <IoaiAmbassador className="mt-6" />
         </Tier>
       )}
 
